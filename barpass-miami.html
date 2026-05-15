@@ -10,6 +10,10 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin=""></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 <style>
 /* ════════════════════════════════════════════
    BARPASS MIAMI — AI NIGHTLIFE PLATFORM
@@ -1159,9 +1163,21 @@ body.warm [style*="--gold3"]{--gold3:rgba(180,83,9,.12);--gold4:rgba(180,83,9,.0
 /* ═══════════════════════════════════════════
    MIAMI VENUE DATABASE — 50 VENUES
 ═══════════════════════════════════════════ */
+/* ── FIREBASE ── */
+var firebaseConfig = {
+  apiKey: "AIzaSyB4uz5CaLCC3nsLz3QwOJtfp1bnBUqQUlg",
+  authDomain: "barpass-app.firebaseapp.com",
+  projectId: "barpass-app",
+  storageBucket: "barpass-app.firebasestorage.app",
+  messagingSenderId: "695158513507",
+  appId: "1:695158513507:web:ed41537c88b1b606733d56",
+  measurementId: "G-077837SB1D"
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+var fbAuth = firebase.auth();
+
 function esc(s){
-  return s.replace(/'/g,"\\'").replace(/"/g,"\\\"");
-}
 
 /* ── INTERNATIONALIZATION ── */
 var LANG={
