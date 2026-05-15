@@ -1470,23 +1470,29 @@ const USERS = {
   'vip@barpass.com':{pass:'vip12345',name:'Sofia Morales',emoji:'👑',prefs:'Premium spirits, clubs'},
 };
 
-try {
-  var fillEl=document.getElementById('splash-fill');
-  var splashPct=0;
-  var splashTimer=setInterval(function(){
+var splashPct=0;
+var fillEl=null;
+var splashTimer=null;
+
+function initSplash(){
+  try{fillEl=document.getElementById('splash-fill');}catch(e){}
+  splashTimer=setInterval(function(){
     splashPct+=2;
-    if(fillEl)fillEl.style.width=splashPct+'%';
-    if(splashPct>=100){clearInterval(splashTimer);setTimeout(showAuth,200);}
-  },25);
-  setTimeout(function(){if(splashPct<100){clearInterval(splashTimer);showAuth();}},3000);
-}catch(e){setTimeout(showAuth,500);}
+    try{if(fillEl)fillEl.style.width=splashPct+'%';}catch(e){}
+    if(splashPct>=100){clearInterval(splashTimer);setTimeout(showAuth,100);}
+  },20);
+  setTimeout(function(){if(splashTimer)clearInterval(splashTimer);showAuth();},2000);
+}
 
 function skipSplash(){
-  try{
-    clearInterval(splashTimer);
-    if(fillEl)fillEl.style.width='100%';
-    showAuth();
-  }catch(e){showAuth();}
+  if(splashTimer)clearInterval(splashTimer);
+  showAuth();
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',initSplash);
+}else{
+  initSplash();
 }
 
 function showAuth(){
