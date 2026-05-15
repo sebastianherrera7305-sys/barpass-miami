@@ -5,15 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <title>BarPass Miami — AI Nightlife Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" crossorigin=""/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin=""></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" crossorigin="anonymous">
 <style>
 /* ════════════════════════════════════════════
    BARPASS MIAMI — AI NIGHTLIFE PLATFORM
@@ -102,6 +96,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes fillBar{0%{width:0%}100%{width:100%}}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.5)}}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
@@ -132,7 +127,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .splash-logo{font-family:'Instrument Serif',serif;font-size:60px;font-style:italic;background:linear-gradient(135deg,#c8880a,#f59e0b,#fbbf24,#f59e0b,#c8880a);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease infinite,rise .6s var(--ease) both;margin-bottom:6px;}
 .splash-city{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--cream4);font-weight:300;animation:rise .6s ease .2s both;}
 .splash-bar{width:180px;height:2px;border-radius:1px;background:var(--smoke3);margin-top:44px;overflow:hidden;animation:rise .4s ease .4s both;}
-.splash-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--teal));background-size:200%;animation:shimmer 1.2s ease infinite;border-radius:1px;width:0;transition:width .05s;}
+.splash-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--teal));background-size:200%;animation:shimmer 1.2s ease infinite, fillBar 2s ease-in-out forwards;border-radius:1px;width:0;}
 
 /* ── AUTH ── */
 #auth{position:fixed;inset:0;z-index:8000;background:var(--ink);display:none;flex-direction:column;}
@@ -1189,6 +1184,8 @@ function loadVenues(cb){
 setTimeout(function(){loadVenues();},500);
 
 function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
 
 /* ── INTERNATIONALIZATION ── */
 var LANG={
@@ -1466,22 +1463,23 @@ const USERS = {
   'vip@barpass.com':{pass:'vip12345',name:'Sofia Morales',emoji:'👑',prefs:'Premium spirits, clubs'},
 };
 
-let pct=0;
-const fillEl=document.getElementById('splash-fill');
-const splashT=setInterval(()=>{
-  pct+=2;fillEl.style.width=pct+'%';
-  if(pct>=100){clearInterval(splashT);setTimeout(showAuth,300);}
-},20);
+/* CSS handles the splash bar fill animation */
+function showAuth(){
+  var sp=document.getElementById('splash');
+  var au=document.getElementById('auth');
+  if(!sp||!au)return;
+  sp.style.display='none';
+  au.style.display='flex';
+  updateClock();
+  setInterval(updateClock,1000);
+}
 
 function skipSplash(){
-  clearInterval(splashT);fillEl.style.width='100%';
-  setTimeout(showAuth,200);
+  showAuth();
 }
 
-function showAuth(){
-  document.getElementById('splash').style.animation='fadeIn .3s ease reverse forwards';
-  setTimeout(()=>{document.getElementById('splash').style.display='none';document.getElementById('auth').style.display='flex';updateClock();setInterval(updateClock,1000);},300);
-}
+/* Wait for DOM then transition */
+setTimeout(showAuth, 2200);
 
 function switchAuthTab(tab){
   document.getElementById('tab-login').classList.toggle('active',tab==='login');
@@ -2562,5 +2560,10 @@ function toast(msg,type){
   clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2800);
 }
 </script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </body>
 </html>
