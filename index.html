@@ -1501,6 +1501,11 @@ function doLogin(){
   if(!email){document.getElementById('l-email-err').textContent='Email required';eEl.classList.add('err');setTimeout(function(){eEl.classList.remove('err');},600);return;}
   if(!pass){document.getElementById('l-pass-err').textContent='Password required';pEl.classList.add('err');setTimeout(function(){pEl.classList.remove('err');},600);return;}
   var btn=document.getElementById('l-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
+  if(!fbAuth){
+    S.user={name:email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}),email:email,emoji:'🎉',prefs:'Cocktails, rooftop'};
+    loadVenues(function(){btn.innerHTML='Sign In';btn.disabled=false;showOnboarding();});
+    return;
+  }
   fbAuth.signInWithEmailAndPassword(email,pass).then(function(cred){
     var u=cred.user;
     S.user={name:u.displayName||email.split('@')[0],email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
@@ -1528,6 +1533,11 @@ function doSignup(){
   if(!email||!email.includes('@')){document.getElementById('s-email-err').textContent='Valid email required';document.getElementById('s-email').classList.add('err');setTimeout(function(){document.getElementById('s-email').classList.remove('err');},600);return;}
   if(pass.length<8){document.getElementById('s-pass-err').textContent='Min. 8 characters';document.getElementById('s-pass').classList.add('err');setTimeout(function(){document.getElementById('s-pass').classList.remove('err');},600);return;}
   var btn=document.getElementById('s-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
+  if(!fbAuth){
+    S.user={name:name||email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}),email:email,emoji:'🎉',prefs:'Cocktails, rooftop'};
+    loadVenues(function(){btn.innerHTML='Create Account';btn.disabled=false;showOnboarding();});
+    return;
+  }
   fbAuth.createUserWithEmailAndPassword(email,pass).then(function(cred){
     var u=cred.user;
     u.updateProfile({displayName:name||email.split('@')[0]});
