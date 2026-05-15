@@ -10,10 +10,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin=""></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 <style>
 /* ════════════════════════════════════════════
    BARPASS MIAMI — AI NIGHTLIFE PLATFORM
@@ -84,8 +80,7 @@ body.warm .explore-stat{background:rgba(250,246,240,.95);border-color:rgba(80,50
 body.warm .explore-hud .explore-search input{color:var(--cream);}
 body.warm .wd-card{background:#f5efe7;border-color:rgba(80,50,30,.1);}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;position:fixed;width:100%;overscroll-behavior:none;-webkit-overflow-scrolling:touch;}
-body{max-width:430px;margin:0 auto;}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;}
 body{
   background:var(--ink);color:var(--cream);
   font-family:'Bricolage Grotesque',sans-serif;font-size:14px;line-height:1.5;
@@ -135,13 +130,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .splash-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--teal));background-size:200%;animation:shimmer 1.2s ease infinite;border-radius:1px;width:0;transition:width .05s;}
 
 /* ── AUTH ── */
-#auth{position:fixed;inset:0;z-index:8000;background:var(--ink);display:none;flex-direction:column;}
-.auth-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;min-height:0;padding-bottom:40px;}
-.auth-hero{padding:40px 28px 24px;flex-shrink:0;text-align:center;}
+#auth{position:fixed;inset:0;z-index:8000;background:var(--ink);display:none;flex-direction:column;overflow:hidden;}
+.auth-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.auth-hero{padding:60px 28px 40px;background:linear-gradient(180deg,rgba(245,158,11,.08) 0%,transparent 100%);flex-shrink:0;text-align:center;}
 .auth-wordmark{font-family:'Instrument Serif',serif;font-style:italic;font-size:48px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;animation:rise .5s var(--ease) both;}
 .auth-city{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold3);color:rgba(245,158,11,.5);font-weight:600;margin-bottom:8px;}
 .auth-sub{font-size:15px;color:var(--cream3);line-height:1.5;animation:rise .5s ease .1s both;}
-.auth-card{background:var(--ink2);border-radius:var(--r4) var(--r4) 0 0;padding:28px 24px;border-top:1px solid var(--border);animation:screenIn .45s var(--ease) both;position:relative;}
+.auth-card{flex:1;background:var(--ink2);border-radius:var(--r4) var(--r4) 0 0;padding:28px 24px;border-top:1px solid var(--border);display:flex;flex-direction:column;animation:screenIn .45s var(--ease) both;position:relative;overflow:hidden;}
 .auth-card::before{content:'';position:absolute;top:0;left:25%;right:25%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
 .auth-tabs{display:flex;background:var(--smoke);border-radius:var(--r);padding:3px;margin-bottom:24px;flex-shrink:0;}
 .auth-tab{flex:1;padding:8px;border-radius:10px;border:none;background:none;color:var(--cream3);font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
@@ -202,7 +197,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .ob-skip{background:none;border:none;color:var(--cream4);font-size:13px;cursor:pointer;padding:8px;font-family:inherit;}
 
 /* ── MAIN APP ── */
-#app{display:none;flex-direction:column;height:100%;position:relative;z-index:1;min-height:0;}
+#app{display:none;flex-direction:column;height:100%;position:relative;z-index:1;}
 
 /* ── HEADER ── */
 .app-header{padding:0 20px 12px;flex-shrink:0;}
@@ -238,7 +233,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .cat-chip:active{transform:scale(.94);}
 
 /* ── SCROLL AREA ── */
-.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;min-height:0;}
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 
 /* ── AI INTELLIGENCE BANNER ── */
 .ai-banner{
@@ -419,7 +414,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 /* ── SCREENS ── */
 .screen{position:fixed;inset:0;z-index:800;display:none;flex-direction:column;background:var(--ink);transform:translateY(100%);transition:transform .42s var(--ease);}
 .screen.open{display:flex;transform:translateY(0);}
-.screen .screen-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior:contain;min-height:0;}
 .screen[style*="flex"]{display:flex !important;}
 .screen-handle{width:38px;height:4px;border-radius:2px;background:var(--smoke3);margin:12px auto 0;flex-shrink:0;}
 .screen-hdr{padding:6px 20px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
@@ -1027,7 +1021,7 @@ body.warm [style*="--gold3"]{--gold3:rgba(180,83,9,.12);--gold4:rgba(180,83,9,.0
     </div>
   </div>
   <!-- Perks -->
-  <div class="screen-scroll" style="padding:0 20px 20px;">
+  <div style="flex:1;overflow-y:auto;padding:0 20px 20px;scrollbar-width:none;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;">
       <div style="padding:14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">⚡</div><div style="font-size:11px;font-weight:700;">Express Access</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Skip lines at 50+ venues</div></div>
       <div style="padding:14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">🎁</div><div style="font-size:11px;font-weight:700;">Welcome Drink</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Free cocktail on us</div></div>
@@ -1046,7 +1040,7 @@ body.warm [style*="--gold3"]{--gold3:rgba(180,83,9,.12);--gold4:rgba(180,83,9,.0
   <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
   <div style="display:flex;justify-content:flex-end;padding:2px 20px;flex-shrink:0;"><button class="screen-close" onclick="closeScreen('tonight-screen')">✕</button></div>
   <div style="padding:8px 24px 4px;flex-shrink:0;"><div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;">Tonight</div><div style="font-size:12px;color:var(--cream3);margin-top:2px;">Live · Trending · Events</div></div>
-  <div class="screen-scroll" style="padding:0 20px;">
+  <div style="flex:1;overflow-y:auto;padding:0 20px;scrollbar-width:none;">
     <div id="tonight-trending" style="display:flex;gap:10px;overflow-x:auto;padding:12px 0;scrollbar-width:none;"></div>
     <div style="font-size:13px;font-weight:700;margin:16px 0 10px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);"></span> Live Now</div>
     <div id="tonight-live" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -1060,7 +1054,7 @@ body.warm [style*="--gold3"]{--gold3:rgba(180,83,9,.12);--gold4:rgba(180,83,9,.0
   <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
   <div style="display:flex;justify-content:flex-end;padding:2px 20px;flex-shrink:0;"><button class="screen-close" onclick="closeScreen('ai-screen')">✕</button></div>
   <div style="padding:8px 24px 4px;flex-shrink:0;"><div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;">AI Concierge</div><div style="font-size:12px;color:var(--cream3);margin-top:2px;">Personalized nightlife intelligence</div></div>
-  <div class="screen-scroll" style="padding:0 20px 20px;">
+  <div style="flex:1;overflow-y:auto;padding:0 20px 20px;scrollbar-width:none;">
     <!-- Mood input -->
     <div style="margin:12px 0;background:linear-gradient(135deg,rgba(167,139,250,.06),rgba(45,212,191,.04));border:1px solid rgba(167,139,250,.15);border-radius:var(--r3);padding:18px;">
       <div style="font-size:12px;font-weight:700;color:var(--violet);margin-bottom:10px;">🧠 How are we feeling tonight?</div>
@@ -1163,36 +1157,9 @@ body.warm [style*="--gold3"]{--gold3:rgba(180,83,9,.12);--gold4:rgba(180,83,9,.0
 /* ═══════════════════════════════════════════
    MIAMI VENUE DATABASE — 50 VENUES
 ═══════════════════════════════════════════ */
-/* ── FIREBASE ── */
-var firebaseConfig = {
-  apiKey: "AIzaSyB4uz5CaLCC3nsLz3QwOJtfp1bnBUqQUlg",
-  authDomain: "barpass-app.firebaseapp.com",
-  projectId: "barpass-app",
-  storageBucket: "barpass-app.firebasestorage.app",
-  messagingSenderId: "695158513507",
-  appId: "1:695158513507:web:ed41537c88b1b606733d56",
-  measurementId: "G-077837SB1D"
-};
-var db = null, fbAuth = null;
-try {
-  firebase.initializeApp(firebaseConfig);
-  db = firebase.firestore();
-  fbAuth = firebase.auth();
-} catch(e) { console.log('Firebase init error:', e); }
-function loadVenues(cb){
-  if (!db) { if(cb)cb(VENUES); return; }
-  db.collection('venues').orderBy('id').get().then(function(snap){
-    var fbVenues=[];
-    snap.forEach(function(d){fbVenues.push(d.data());});
-    if(fbVenues.length>0){
-      VENUES.length=0;fbVenues.forEach(function(v){VENUES.push(v);});
-    }
-    if(cb)cb(VENUES);
-  }).catch(function(){if(cb)cb(VENUES);});
-}
-setTimeout(function(){loadVenues();},500);
-
 function esc(s){
+  return s.replace(/'/g,"\\'").replace(/"/g,"\\\"");
+}
 
 /* ── INTERNATIONALIZATION ── */
 var LANG={
@@ -1470,38 +1437,22 @@ const USERS = {
   'vip@barpass.com':{pass:'vip12345',name:'Sofia Morales',emoji:'👑',prefs:'Premium spirits, clubs'},
 };
 
-function showAuth(){
-  var sp=document.getElementById('splash');
-  var au=document.getElementById('auth');
-  if(sp&&au){
-    sp.style.display='none';
-    au.style.display='flex';
-    updateClock();
-    setInterval(updateClock,1000);
-    return true;
-  }
-  return false;
-}
+let pct=0;
+const fillEl=document.getElementById('splash-fill');
+const splashT=setInterval(()=>{
+  pct+=2;fillEl.style.width=pct+'%';
+  if(pct>=100){clearInterval(splashT);setTimeout(showAuth,300);}
+},20);
 
 function skipSplash(){
-  clearInterval(window._splashTimer);
-  showAuth();
+  clearInterval(splashT);fillEl.style.width='100%';
+  setTimeout(showAuth,200);
 }
 
-/* Retry loop: keeps trying every 50ms until DOM is ready */
-var _pct=0;
-var _fill=null;
-window._splashTimer=setInterval(function(){
-  _fill=document.getElementById('splash-fill');
-  if(!_fill)return;
-  clearInterval(window._splashTimer);
-  window._splashTimer=setInterval(function(){
-    _pct+=2;
-    if(_fill)_fill.style.width=Math.min(_pct,100)+'%';
-    if(_pct>=100){clearInterval(window._splashTimer);showAuth();}
-  },20);
-  setTimeout(function(){clearInterval(window._splashTimer);showAuth();},2000);
-},50);
+function showAuth(){
+  document.getElementById('splash').style.animation='fadeIn .3s ease reverse forwards';
+  setTimeout(()=>{document.getElementById('splash').style.display='none';document.getElementById('auth').style.display='flex';updateClock();setInterval(updateClock,1000);},300);
+}
 
 function switchAuthTab(tab){
   document.getElementById('tab-login').classList.toggle('active',tab==='login');
@@ -1517,58 +1468,28 @@ function socialLogin(p){
   setTimeout(()=>{btn.innerHTML=p==='Apple'?'🍎 Apple':'🔵 Google';btn.disabled=false;S.user={name:p==='Apple'?'Alex Rivera':'Alex G.',email:p.toLowerCase()+'@oauth.com',emoji:p==='Apple'?'🍎':'🔵',prefs:'Cocktails, rooftop'};showOnboarding();},1400);
 }
 function doLogin(){
-  var email=document.getElementById('l-email').value.trim();
-  var pass=document.getElementById('l-pass').value;
-  var eEl=document.getElementById('l-email'),pEl=document.getElementById('l-pass');
-  if(!email){document.getElementById('l-email-err').textContent='Email required';eEl.classList.add('err');setTimeout(function(){eEl.classList.remove('err');},600);return;}
-  if(!pass){document.getElementById('l-pass-err').textContent='Password required';pEl.classList.add('err');setTimeout(function(){pEl.classList.remove('err');},600);return;}
-  var btn=document.getElementById('l-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
-  if(!fbAuth){
-    S.user={name:email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}),email:email,emoji:'🎉',prefs:'Cocktails, rooftop'};
-    loadVenues(function(){btn.innerHTML='Sign In';btn.disabled=false;showOnboarding();});
-    return;
-  }
-  fbAuth.signInWithEmailAndPassword(email,pass).then(function(cred){
-    var u=cred.user;
-    S.user={name:u.displayName||email.split('@')[0],email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
-    loadVenues(function(){btn.innerHTML='Sign In';btn.disabled=false;showOnboarding();});
-  }).catch(function(err){
+  const email=document.getElementById('l-email').value.trim();
+  const pass=document.getElementById('l-pass').value;
+  const eEl=document.getElementById('l-email'),pEl=document.getElementById('l-pass');
+  if(!email){document.getElementById('l-email-err').textContent='Email required';eEl.classList.add('err');setTimeout(()=>eEl.classList.remove('err'),600);return;}
+  if(!pass){document.getElementById('l-pass-err').textContent='Password required';pEl.classList.add('err');setTimeout(()=>pEl.classList.remove('err'),600);return;}
+  const btn=document.getElementById('l-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
+  setTimeout(()=>{
     btn.innerHTML='Sign In';btn.disabled=false;
-    if(err.code==='auth/user-not-found'){
-      fbAuth.createUserWithEmailAndPassword(email,pass).then(function(cred){
-        var u=cred.user;
-        S.user={name:email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}),email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
-        loadVenues(function(){showOnboarding();});
-      }).catch(function(e2){
-        document.getElementById('l-pass-err').textContent=e2.message;
-      });
-    }else{
-      document.getElementById('l-pass-err').textContent=err.message;
-      pEl.classList.add('err');setTimeout(function(){pEl.classList.remove('err');},600);
-    }
-  });
+    const u=USERS[email.toLowerCase()];
+    if(u&&u.pass===pass){S.user={name:u.name,email,emoji:u.emoji,prefs:u.prefs};showOnboarding();}
+    else if(email&&pass.length>=6){S.user={name:email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,c=>c.toUpperCase()),email,emoji:'🎉',prefs:'Cocktails, rooftop'};showOnboarding();}
+    else{document.getElementById('l-pass-err').textContent='Incorrect credentials';pEl.classList.add('err');setTimeout(()=>pEl.classList.remove('err'),600);}
+  },900);
 }
 function doSignup(){
-  var name=document.getElementById('s-name').value.trim();
-  var email=document.getElementById('s-email').value.trim();
-  var pass=document.getElementById('s-pass').value;
-  if(!email||!email.includes('@')){document.getElementById('s-email-err').textContent='Valid email required';document.getElementById('s-email').classList.add('err');setTimeout(function(){document.getElementById('s-email').classList.remove('err');},600);return;}
-  if(pass.length<8){document.getElementById('s-pass-err').textContent='Min. 8 characters';document.getElementById('s-pass').classList.add('err');setTimeout(function(){document.getElementById('s-pass').classList.remove('err');},600);return;}
-  var btn=document.getElementById('s-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
-  if(!fbAuth){
-    S.user={name:name||email.split('@')[0],email:email,emoji:'🎉',prefs:'Cocktails, rooftop'};
-    loadVenues(function(){btn.innerHTML='Create Account';btn.disabled=false;showOnboarding();});
-    return;
-  }
-  fbAuth.createUserWithEmailAndPassword(email,pass).then(function(cred){
-    var u=cred.user;
-    u.updateProfile({displayName:name||email.split('@')[0]});
-    S.user={name:name||email.split('@')[0],email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
-    loadVenues(function(){btn.innerHTML='Create Account';btn.disabled=false;showOnboarding();});
-  }).catch(function(err){
-    btn.innerHTML='Create Account';btn.disabled=false;
-    document.getElementById('s-pass-err').textContent=err.message;
-  });
+  const name=document.getElementById('s-name').value.trim();
+  const email=document.getElementById('s-email').value.trim();
+  const pass=document.getElementById('s-pass').value;
+  if(!email||!email.includes('@')){document.getElementById('s-email-err').textContent='Valid email required';document.getElementById('s-email').classList.add('err');setTimeout(()=>document.getElementById('s-email').classList.remove('err'),600);return;}
+  if(pass.length<8){document.getElementById('s-pass-err').textContent='Min. 8 characters';document.getElementById('s-pass').classList.add('err');setTimeout(()=>document.getElementById('s-pass').classList.remove('err'),600);return;}
+  const btn=document.getElementById('s-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
+  setTimeout(()=>{btn.innerHTML='Create Account';btn.disabled=false;S.user={name:name||email.split('@')[0],email,emoji:'🎉',prefs:'Cocktails, rooftop'};showOnboarding();},1100);
 }
 
 let obSlide=0;
@@ -2567,7 +2488,6 @@ function filterDistrict(el,district){
 }
 function signOut(){
   closeScreen('profile-screen');
-  fbAuth.signOut();
   setTimeout(function(){
     S.user=null;S.express=false;S.cart=[];S.totalSpent=0;
     S.credit={active:false,venue:null,loaded:0,balance:0,spent:0,txs:[],id:S.credit.id};
@@ -2590,7 +2510,6 @@ function toast(msg,type){
   var t=document.getElementById('toast');
   t.textContent=msg;t.className='toast '+type+' show';
   clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2800);
-}
 }
 </script>
 </body>
