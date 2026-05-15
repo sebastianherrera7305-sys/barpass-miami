@@ -1,0 +1,10 @@
+.DS_Store
+.claude/
+*.doc
+*.docx
+*.md
+README.md
+boceto\ 3-31-26
+BarPass*.html
+!barpass-miami.html
+!index.html
