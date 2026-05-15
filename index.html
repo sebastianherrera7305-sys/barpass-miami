@@ -1472,8 +1472,9 @@ const USERS = {
 
 let pct=0;
 const fillEl=document.getElementById('splash-fill');
-const splashT=setInterval(()=>{
-  pct+=2;fillEl.style.width=pct+'%';
+setTimeout(function(){if(pct<100){pct=100;fillEl.style.width='100%';setTimeout(showAuth,300);}},2000);
+const splashT=setInterval(function(){
+  pct+=2;if(!fillEl)return;fillEl.style.width=pct+'%';
   if(pct>=100){clearInterval(splashT);setTimeout(showAuth,300);}
 },20);
 
