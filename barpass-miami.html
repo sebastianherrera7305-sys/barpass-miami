@@ -1478,8 +1478,8 @@ function skipSplash(){
   showAuth();
 }
 
-/* Wait for DOM then transition */
-setTimeout(showAuth, 2200);
+/* Splash was visible while scripts loaded. Transition now. */
+showAuth();
 
 function switchAuthTab(tab){
   document.getElementById('tab-login').classList.toggle('active',tab==='login');
