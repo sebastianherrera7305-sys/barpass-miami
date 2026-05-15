@@ -8,3 +8,6 @@ boceto\ 3-31-26
 BarPass*.html
 !barpass-miami.html
 !index.html
+service-account-key.json
+node_modules/
+.env

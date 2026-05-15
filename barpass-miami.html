@@ -1176,6 +1176,17 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var db = firebase.firestore();
 var fbAuth = firebase.auth();
+function loadVenues(cb){
+  db.collection('venues').orderBy('id').get().then(function(snap){
+    var fbVenues=[];
+    snap.forEach(function(d){fbVenues.push(d.data());});
+    if(fbVenues.length>0){
+      VENUES.length=0;fbVenues.forEach(function(v){VENUES.push(v);});
+    }
+    if(cb)cb(VENUES);
+  }).catch(function(){if(cb)cb(VENUES);});
+}
+setTimeout(function(){loadVenues();},500);
 
 function esc(s){
 
@@ -1486,28 +1497,48 @@ function socialLogin(p){
   setTimeout(()=>{btn.innerHTML=p==='Apple'?'🍎 Apple':'🔵 Google';btn.disabled=false;S.user={name:p==='Apple'?'Alex Rivera':'Alex G.',email:p.toLowerCase()+'@oauth.com',emoji:p==='Apple'?'🍎':'🔵',prefs:'Cocktails, rooftop'};showOnboarding();},1400);
 }
 function doLogin(){
-  const email=document.getElementById('l-email').value.trim();
-  const pass=document.getElementById('l-pass').value;
-  const eEl=document.getElementById('l-email'),pEl=document.getElementById('l-pass');
-  if(!email){document.getElementById('l-email-err').textContent='Email required';eEl.classList.add('err');setTimeout(()=>eEl.classList.remove('err'),600);return;}
-  if(!pass){document.getElementById('l-pass-err').textContent='Password required';pEl.classList.add('err');setTimeout(()=>pEl.classList.remove('err'),600);return;}
-  const btn=document.getElementById('l-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
-  setTimeout(()=>{
+  var email=document.getElementById('l-email').value.trim();
+  var pass=document.getElementById('l-pass').value;
+  var eEl=document.getElementById('l-email'),pEl=document.getElementById('l-pass');
+  if(!email){document.getElementById('l-email-err').textContent='Email required';eEl.classList.add('err');setTimeout(function(){eEl.classList.remove('err');},600);return;}
+  if(!pass){document.getElementById('l-pass-err').textContent='Password required';pEl.classList.add('err');setTimeout(function(){pEl.classList.remove('err');},600);return;}
+  var btn=document.getElementById('l-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
+  fbAuth.signInWithEmailAndPassword(email,pass).then(function(cred){
+    var u=cred.user;
+    S.user={name:u.displayName||email.split('@')[0],email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
+    loadVenues(function(){btn.innerHTML='Sign In';btn.disabled=false;showOnboarding();});
+  }).catch(function(err){
     btn.innerHTML='Sign In';btn.disabled=false;
-    const u=USERS[email.toLowerCase()];
-    if(u&&u.pass===pass){S.user={name:u.name,email,emoji:u.emoji,prefs:u.prefs};showOnboarding();}
-    else if(email&&pass.length>=6){S.user={name:email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,c=>c.toUpperCase()),email,emoji:'🎉',prefs:'Cocktails, rooftop'};showOnboarding();}
-    else{document.getElementById('l-pass-err').textContent='Incorrect credentials';pEl.classList.add('err');setTimeout(()=>pEl.classList.remove('err'),600);}
-  },900);
+    if(err.code==='auth/user-not-found'){
+      fbAuth.createUserWithEmailAndPassword(email,pass).then(function(cred){
+        var u=cred.user;
+        S.user={name:email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}),email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
+        loadVenues(function(){showOnboarding();});
+      }).catch(function(e2){
+        document.getElementById('l-pass-err').textContent=e2.message;
+      });
+    }else{
+      document.getElementById('l-pass-err').textContent=err.message;
+      pEl.classList.add('err');setTimeout(function(){pEl.classList.remove('err');},600);
+    }
+  });
 }
 function doSignup(){
-  const name=document.getElementById('s-name').value.trim();
-  const email=document.getElementById('s-email').value.trim();
-  const pass=document.getElementById('s-pass').value;
-  if(!email||!email.includes('@')){document.getElementById('s-email-err').textContent='Valid email required';document.getElementById('s-email').classList.add('err');setTimeout(()=>document.getElementById('s-email').classList.remove('err'),600);return;}
-  if(pass.length<8){document.getElementById('s-pass-err').textContent='Min. 8 characters';document.getElementById('s-pass').classList.add('err');setTimeout(()=>document.getElementById('s-pass').classList.remove('err'),600);return;}
-  const btn=document.getElementById('s-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
-  setTimeout(()=>{btn.innerHTML='Create Account';btn.disabled=false;S.user={name:name||email.split('@')[0],email,emoji:'🎉',prefs:'Cocktails, rooftop'};showOnboarding();},1100);
+  var name=document.getElementById('s-name').value.trim();
+  var email=document.getElementById('s-email').value.trim();
+  var pass=document.getElementById('s-pass').value;
+  if(!email||!email.includes('@')){document.getElementById('s-email-err').textContent='Valid email required';document.getElementById('s-email').classList.add('err');setTimeout(function(){document.getElementById('s-email').classList.remove('err');},600);return;}
+  if(pass.length<8){document.getElementById('s-pass-err').textContent='Min. 8 characters';document.getElementById('s-pass').classList.add('err');setTimeout(function(){document.getElementById('s-pass').classList.remove('err');},600);return;}
+  var btn=document.getElementById('s-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
+  fbAuth.createUserWithEmailAndPassword(email,pass).then(function(cred){
+    var u=cred.user;
+    u.updateProfile({displayName:name||email.split('@')[0]});
+    S.user={name:name||email.split('@')[0],email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
+    loadVenues(function(){btn.innerHTML='Create Account';btn.disabled=false;showOnboarding();});
+  }).catch(function(err){
+    btn.innerHTML='Create Account';btn.disabled=false;
+    document.getElementById('s-pass-err').textContent=err.message;
+  });
 }
 
 let obSlide=0;
@@ -2506,6 +2537,7 @@ function filterDistrict(el,district){
 }
 function signOut(){
   closeScreen('profile-screen');
+  fbAuth.signOut();
   setTimeout(function(){
     S.user=null;S.express=false;S.cart=[];S.totalSpent=0;
     S.credit={active:false,venue:null,loaded:0,balance:0,spent:0,txs:[],id:S.credit.id};
