@@ -1470,22 +1470,34 @@ const USERS = {
   'vip@barpass.com':{pass:'vip12345',name:'Sofia Morales',emoji:'👑',prefs:'Premium spirits, clubs'},
 };
 
-let pct=0;
-const fillEl=document.getElementById('splash-fill');
-setTimeout(function(){if(pct<100){pct=100;fillEl.style.width='100%';setTimeout(showAuth,300);}},2000);
-const splashT=setInterval(function(){
-  pct+=2;if(!fillEl)return;fillEl.style.width=pct+'%';
-  if(pct>=100){clearInterval(splashT);setTimeout(showAuth,300);}
-},20);
+try {
+  var fillEl=document.getElementById('splash-fill');
+  var splashPct=0;
+  var splashTimer=setInterval(function(){
+    splashPct+=2;
+    if(fillEl)fillEl.style.width=splashPct+'%';
+    if(splashPct>=100){clearInterval(splashTimer);setTimeout(showAuth,200);}
+  },25);
+  setTimeout(function(){if(splashPct<100){clearInterval(splashTimer);showAuth();}},3000);
+}catch(e){setTimeout(showAuth,500);}
 
 function skipSplash(){
-  clearInterval(splashT);fillEl.style.width='100%';
-  setTimeout(showAuth,200);
+  try{
+    clearInterval(splashTimer);
+    if(fillEl)fillEl.style.width='100%';
+    showAuth();
+  }catch(e){showAuth();}
 }
 
 function showAuth(){
-  document.getElementById('splash').style.animation='fadeIn .3s ease reverse forwards';
-  setTimeout(()=>{document.getElementById('splash').style.display='none';document.getElementById('auth').style.display='flex';updateClock();setInterval(updateClock,1000);},300);
+  try{
+    var sp=document.getElementById('splash');
+    if(sp)sp.style.display='none';
+    var au=document.getElementById('auth');
+    if(au)au.style.display='flex';
+    updateClock();
+    setInterval(updateClock,1000);
+  }catch(e){}
 }
 
 function switchAuthTab(tab){
