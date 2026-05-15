@@ -764,7 +764,7 @@ body.warm [style*="--gold3"]{--gold3:rgba(180,83,9,.12);--gold4:rgba(180,83,9,.0
         <div class="auth-aux"><div class="check-wrap" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-lbl" data-i18n="remember_me">Remember me</span></div></div>
         <button class="auth-btn" id="l-btn" data-i18n="sign_in" onclick="doLogin()">Sign In</button>
         <div class="auth-divider" data-i18n="or_continue">or continue with</div>
-        <div class="social-row"><button class="social-btn" onclick="socialLogin('Apple')">🍎 Apple</button><button class="social-btn" onclick="socialLogin('Google')">🔵 Google</button></div>
+        <div class="social-row"><button class="social-btn" onclick="socialLogin('Apple',{currentTarget:this})">🍎 Apple</button><button class="social-btn" onclick="socialLogin('Google',{currentTarget:this})">🔵 Google</button></div>
         <div class="auth-terms" data-i18n-html="terms">By signing in you agree to our <a>Terms</a> and <a>Privacy Policy</a>.</div>
       </div>
       <div id="form-signup" style="display:none;">
@@ -773,7 +773,7 @@ body.warm [style*="--gold3"]{--gold3:rgba(180,83,9,.12);--gold4:rgba(180,83,9,.0
         <div class="field"><div class="field-label" data-i18n="password">Password</div><div class="field-wrap"><span class="field-icon">🔒</span><input class="field-inp" id="s-pass" type="password" placeholder="Min. 8 characters"><button class="eye-btn" onclick="toggleEye('s-pass',this)">👁</button></div><div class="field-err" id="s-pass-err"></div></div>
         <button class="auth-btn" id="s-btn" data-i18n="create_account" onclick="doSignup()">Create Account</button>
         <div class="auth-divider" data-i18n="or_continue">or continue with</div>
-        <div class="social-row"><button class="social-btn" onclick="socialLogin('Apple')">🍎 Apple</button><button class="social-btn" onclick="socialLogin('Google')">🔵 Google</button></div>
+        <div class="social-row"><button class="social-btn" onclick="socialLogin('Apple',{currentTarget:this})">🍎 Apple</button><button class="social-btn" onclick="socialLogin('Google',{currentTarget:this})">🔵 Google</button></div>
         <div class="auth-terms" data-i18n-html="signup_terms">By creating an account you agree to our <a>Terms</a>.</div>
       </div>
     </div>
@@ -1501,9 +1501,16 @@ function switchAuthTab(tab){
 function toggleEye(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
 function toggleCheck(w){const b=w.querySelector('.check-box');b.classList.toggle('checked');b.textContent=b.classList.contains('checked')?'✓':'';}
 function handleForgot(){toast('Reset link sent!','info');}
-function socialLogin(p){
-  const btn=event.currentTarget;btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
-  setTimeout(()=>{btn.innerHTML=p==='Apple'?'🍎 Apple':'🔵 Google';btn.disabled=false;S.user={name:p==='Apple'?'Alex Rivera':'Alex G.',email:p.toLowerCase()+'@oauth.com',emoji:p==='Apple'?'🍎':'🔵',prefs:'Cocktails, rooftop'};showOnboarding();},1400);
+function socialLogin(p,e){
+  var btn=e?e.currentTarget:(event&&event.currentTarget);
+  if(!btn)btn=document.activeElement;
+  if(btn){btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;}
+  var origLabel=p==='Apple'?'🍎 Apple':'🔵 Google';
+  setTimeout(function(){
+    if(btn){btn.innerHTML=origLabel;btn.disabled=false;}
+    S.user={name:p==='Apple'?'Alex Rivera':'Alex G.',email:p.toLowerCase()+'@oauth.com',emoji:p==='Apple'?'🍎':'🔵',prefs:'Cocktails, rooftop'};
+    showOnboarding();
+  },1400);
 }
 function doLogin(){
   var email=document.getElementById('l-email').value.trim();
@@ -1522,16 +1529,18 @@ function doLogin(){
     S.user={name:u.displayName||email.split('@')[0],email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
     loadVenues(function(){btn.innerHTML='Sign In';btn.disabled=false;showOnboarding();});
   }).catch(function(err){
-    btn.innerHTML='Sign In';btn.disabled=false;
-    if(err.code==='auth/user-not-found'){
+    if(err.code==='auth/user-not-found'||err.code==='auth/invalid-credential'){
       fbAuth.createUserWithEmailAndPassword(email,pass).then(function(cred){
         var u=cred.user;
         S.user={name:email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}),email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
-        loadVenues(function(){showOnboarding();});
+        loadVenues(function(){btn.innerHTML='Sign In';btn.disabled=false;showOnboarding();});
       }).catch(function(e2){
+        btn.innerHTML='Sign In';btn.disabled=false;
         document.getElementById('l-pass-err').textContent=e2.message;
+        pEl.classList.add('err');setTimeout(function(){pEl.classList.remove('err');},600);
       });
     }else{
+      btn.innerHTML='Sign In';btn.disabled=false;
       document.getElementById('l-pass-err').textContent=err.message;
       pEl.classList.add('err');setTimeout(function(){pEl.classList.remove('err');},600);
     }
@@ -1854,6 +1863,7 @@ function buildMap(venues){
       });
     }
   });
+  feedMarkers.addTo(feedMap);
   feedMarkerRefs=[];
   var bounds=[];
   for(var i=0;i<venues.length;i++){
@@ -2086,6 +2096,7 @@ function syncExploreMap(){
       });
     }
   });
+  exploreMarkers.addTo(exploreMap);
   exploreMarkerRefs=[];
   var venues=exploreFilterCat==='all'?VENUES:VENUES.filter(function(v){return v.cat.indexOf(exploreFilterCat)!==-1||v.tags.indexOf(exploreFilterCat)!==-1;});
   for(var i=0;i<venues.length;i++){
@@ -2296,7 +2307,7 @@ function openVenue(id){
   document.getElementById('skip-head').textContent=v.cap>50?'⚡ Skip '+qLen+' people':'⚡ Walk straight in';
   document.getElementById('skip-sub').textContent=S.express?'Your Express Pass is active':'Get Express Pass for $9.99';
   var cs=document.getElementById('vd-credit-sub');
-  if(S.credit.active&&S.credit.venue===v.name){cs.textContent='$'+S.credit.balance.toFixed(2)+' left';cs.style.color='var(--gold)';}
+  if(S.credit.active&&S.credit.venue&&S.credit.venue===v.name){cs.textContent='$'+S.credit.balance.toFixed(2)+' left';cs.style.color='var(--gold)';}
   else{cs.textContent='Pay at entry';cs.style.color='';}
   document.getElementById('menu-sec').style.display='none';
   openScreen('venue-detail');
@@ -2461,7 +2472,7 @@ function openScreen(id){
       initExploreMap();
       syncExploreMap();
       if(userCoords&&exploreMap)exploreMap.setView(userCoords,14);
-      exploreMap.invalidateSize();
+      if(exploreMap)exploreMap.invalidateSize();
     },100);
     document.querySelectorAll('.bnav .nav-item').forEach(function(n){n.classList.remove('active');});
     document.getElementById('nav-explore').classList.add('active');
