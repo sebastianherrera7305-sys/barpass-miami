@@ -8,6 +8,11 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" crossorigin="anonymous">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" crossorigin="anonymous">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
 <style>
 /* ════════════════════════════════════════════
    BARPASS MIAMI — AI NIGHTLIFE PLATFORM
@@ -1168,10 +1173,16 @@ var firebaseConfig = {
   appId: "1:695158513507:web:ed41537c88b1b606733d56",
   measurementId: "G-077837SB1D"
 };
-firebase.initializeApp(firebaseConfig);
-var db = firebase.firestore();
-var fbAuth = firebase.auth();
+var db = null, fbAuth = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  fbAuth = firebase.auth();
+} catch(e) {
+  console.warn('Firebase unavailable, running in local mode');
+}
 function loadVenues(cb){
+  if(!db){if(cb)cb(VENUES);return;}
   db.collection('venues').orderBy('id').get().then(function(snap){
     var fbVenues=[];
     snap.forEach(function(d){fbVenues.push(d.data());});
@@ -2232,23 +2243,6 @@ function refreshWalletUI(){
   if(pill&&S.credit.active&&S.credit.balance>0){pill.style.display='flex';document.getElementById('cp-bal').textContent='$'+bal.toFixed(2);}
   else if(pill)pill.style.display='none';
 }
-function confirmLoad(amount){
-  var v=S.currentVenue;
-  var c=S.credit;
-  c.active=true;if(v)c.venue=v.name;
-  c.loaded=parseFloat((c.loaded+amount).toFixed(2));
-  c.balance=parseFloat((c.balance+amount).toFixed(2));
-  var bonus=amount>=500?50:amount>=200?15:amount>=100?5:0;
-  if(bonus>0){c.balance=parseFloat((c.balance+bonus).toFixed(2));S.cashback=parseFloat((S.cashback+bonus).toFixed(2));}
-  S.points+=Math.floor(amount/10);
-  document.getElementById('load-section').style.display='none';
-  refreshWalletUI();
-  var el=document.getElementById('wallet-balance');
-  if(el){el.style.color='var(--teal)';setTimeout(function(){el.style.color='';},800);}
-  closeScreen('wallet-screen');
-  toast('🪙 $'+amount+' loaded'+(bonus?' +$'+bonus+' bonus':'')+'!','credit');
-  refreshCreditUI();
-}
 
 function toggleTheme(){
   var body=document.body;
@@ -2374,12 +2368,17 @@ function confirmLoad(amount){
   c.active=true;c.venue=v.name;
   c.loaded=parseFloat((c.loaded+amount).toFixed(2));
   c.balance=parseFloat((c.balance+amount).toFixed(2));
+  var bonus=amount>=500?50:amount>=200?15:amount>=100?5:0;
+  if(bonus>0){c.balance=parseFloat((c.balance+bonus).toFixed(2));S.cashback=parseFloat((S.cashback+bonus).toFixed(2));}
+  S.points+=Math.floor(amount/10);
   document.getElementById('load-section').style.display='none';
-  refreshCreditUI();
-  var el=document.getElementById('cc-amount');
-  if(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');}
-  closeScreen('venue-detail');
-  toast('🪙 $'+amount+' credit loaded at '+v.name+'!','credit');
+  refreshCreditUI();refreshWalletUI();
+  var elBal=document.getElementById('wallet-balance');
+  if(elBal){elBal.style.color='var(--teal)';setTimeout(function(){elBal.style.color='';},800);}
+  var elAmt=document.getElementById('cc-amount');
+  if(elAmt){elAmt.classList.remove('flash');void elAmt.offsetWidth;elAmt.classList.add('flash');}
+  closeScreen('wallet-screen');
+  toast('🪙 $'+amount+' loaded at '+v.name+(bonus?' · +$'+bonus+' bonus':'')+'!','credit');
 }
 function payWithCredit(){
   var sub=0;for(var si=0;si<S.cart.length;si++)sub+=S.cart[si].price*S.cart[si].qty;
@@ -2545,7 +2544,7 @@ function filterDistrict(el,district){
 }
 function signOut(){
   closeScreen('profile-screen');
-  fbAuth.signOut();
+  if(fbAuth)fbAuth.signOut();
   setTimeout(function(){
     S.user=null;S.express=false;S.cart=[];S.totalSpent=0;
     S.credit={active:false,venue:null,loaded:0,balance:0,spent:0,txs:[],id:S.credit.id};
@@ -2570,10 +2569,5 @@ function toast(msg,type){
   clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2800);
 }
 </script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </body>
 </html>
