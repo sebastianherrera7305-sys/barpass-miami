@@ -10,4 +10,5 @@ BarPass*.html
 !index.html
 service-account-key.json
 node_modules/
-.envseed-venues.js
+.env
+seed-venues.js
