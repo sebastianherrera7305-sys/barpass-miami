@@ -638,6 +638,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 
 /* ── MICRO ANIMATIONS ── */
 @keyframes fadeScaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+/* Leaflet marker fade — opacity only so translate3d positioning isn't overridden */
+@keyframes markerFadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideRight{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
 @keyframes popBounce{0%{transform:scale(0)}50%{transform:scale(1.12)}70%{transform:scale(.96)}100%{transform:scale(1)}}
 @keyframes glowPulse{0%,100%{opacity:.6}50%{opacity:1}}
@@ -699,8 +701,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 @keyframes markerPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 .marker-pulse .marker-inner{animation:markerPulse 2s ease-in-out infinite;}
 .bp-marker,.bp-landmark{background:none !important;border:none !important;}
-.leaflet-marker-icon.bp-cluster{background:none !important;border:none !important;animation:fadeScaleIn .3s ease both;}
-.leaflet-marker-icon.bp-marker,.leaflet-marker-icon.bp-landmark{animation:fadeScaleIn .35s cubic-bezier(.22,1,.36,1) both;}
+.leaflet-marker-icon.bp-cluster{background:none !important;border:none !important;animation:markerFadeIn .3s ease both;}
+.leaflet-marker-icon.bp-marker,.leaflet-marker-icon.bp-landmark{animation:markerFadeIn .35s cubic-bezier(.22,1,.36,1) both;}
 .district-glow{transition:opacity .5s ease;}
 .leaflet-popup.bp-popup .leaflet-popup-content-wrapper{border-radius:18px !important;padding:4px !important;}
 .leaflet-popup.bp-popup .leaflet-popup-content{margin:16px 18px !important;}
@@ -2047,19 +2049,22 @@ function addLandmarksToMap(mapGroup,zoom){
     L.marker([lm.lat,lm.lng],{icon:icon,interactive:false}).addTo(mapGroup);
   }
 }
+/* Districts: 5 major shown at zoom>=12; secondary at zoom>=14 (spread enough apart) */
+var MAJOR_DISTRICTS=['Miami Beach','Brickell','Downtown','Wynwood','Coconut Grove'];
 function addDistrictOverlays(mapInstance,group){
   if(group)mapInstance.removeLayer(group);
   var g=L.layerGroup();
   var zoom=mapInstance.getZoom();
   for(var d in DISTRICT_POLYGONS){
     var color=DISTRICT_COLORS[d]||'#f59e0b';
-    /* Polygon: very subtle, just a boundary hint */
+    /* Polygon boundary — very subtle */
     L.polygon(DISTRICT_POLYGONS[d],{
-      color:color,weight:1,fillColor:color,fillOpacity:.03,
-      opacity:.35,interactive:false
+      color:color,weight:1,fillColor:color,fillOpacity:.04,
+      opacity:.4,interactive:false
     }).addTo(g);
-    /* Label: only show at zoom >= 12, centered, no glow */
-    if(zoom>=12){
+    /* Labels: major 5 at zoom>=12; all 8 at zoom>=14 (minor districts too close at 12-13) */
+    var showLabel=(zoom>=14)||(zoom>=12&&MAJOR_DISTRICTS.indexOf(d)!==-1);
+    if(showLabel){
       var center=[0,0];
       for(var pi=0;pi<DISTRICT_POLYGONS[d].length;pi++){
         center[0]+=DISTRICT_POLYGONS[d][pi][0];
@@ -2067,11 +2072,11 @@ function addDistrictOverlays(mapInstance,group){
       }
       center[0]/=DISTRICT_POLYGONS[d].length;
       center[1]/=DISTRICT_POLYGONS[d].length;
-      var labelW=d.length*7+20; /* approximate width */
+      var fontSize=zoom>=14?10:9;
       L.marker(center,{
         icon:L.divIcon({
           className:'',
-          html:'<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+color+';background:rgba(8,6,8,.72);backdrop-filter:blur(6px);padding:3px 10px;border-radius:100px;border:1px solid '+color+'28;white-space:nowrap;transform:translate(-50%,-50%);pointer-events:none;">'+d+'</div>',
+          html:'<div style="font-size:'+fontSize+'px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:'+color+';background:rgba(8,6,8,.78);backdrop-filter:blur(8px);padding:3px 10px;border-radius:100px;border:1px solid '+color+'35;white-space:nowrap;transform:translate(-50%,-50%);pointer-events:none;">'+d+'</div>',
           iconSize:[0,0],iconAnchor:[0,0],
         }),
         interactive:false,
@@ -2088,7 +2093,7 @@ function buildMap(venues){
   var container=document.getElementById('map-container-el');
   if(!container)return;
   if(!feedMap){
-    feedMap=L.map(container,{zoomControl:false,attributionControl:false,minZoom:11,maxZoom:18}).setView([25.775,-80.190],12);
+    feedMap=L.map(container,{zoomControl:false,attributionControl:false,minZoom:11,maxZoom:18}).setView([25.782,-80.163],12);
     feedTileLayer=L.tileLayer(getTileUrl(),{maxZoom:19}).addTo(feedMap);
     feedMap.on('zoomend',function refreshFeedMarkers(){
       if(feedMap&&feedMarkers){
@@ -2114,12 +2119,12 @@ function buildMap(venues){
     iconCreateFunction:function(c){
       var count=c.getChildCount();
       var size=count>20?40:count>8?34:28;
-      var bg=count>20?'rgba(251,113,133,.18)':count>8?'rgba(245,158,11,.18)':'rgba(96,165,250,.18)';
+      var bg=count>20?'rgba(251,113,133,.35)':count>8?'rgba(245,158,11,.35)':'rgba(96,165,250,.35)';
       var border=count>20?'#fb7185':count>8?'#f59e0b':'#60a5fa';
       var textColor=count>20?'#fb7185':count>8?'#f59e0b':'#60a5fa';
       return L.divIcon({
         className:'bp-cluster',
-        html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+bg+';border:1.5px solid '+border+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:'+textColor+';backdrop-filter:blur(6px);">'+count+'</div>',
+        html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+bg+';border:2px solid '+border+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:'+textColor+';backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.5);">'+count+'</div>',
         iconSize:[size,size],iconAnchor:[size/2,size/2]
       });
     }
@@ -2134,7 +2139,8 @@ function buildMap(venues){
     addMarkerToMap(feedMarkers,v);
     bounds.push([v.lat,v.lng]);
   }
-  if(bounds.length>0)feedMap.fitBounds(bounds,{padding:[32,32],maxZoom:13,animate:false});
+  /* Center on core Miami nightlife area rather than fitting all 50 venues (which zooms too far out) */
+  feedMap.setView([25.782,-80.163],12,{animate:false});
   setTimeout(function(){feedMap.invalidateSize();},100);
   if(document.getElementById('stat-venues'))document.getElementById('stat-venues').textContent=venues.length;
 }
@@ -2325,7 +2331,7 @@ var exploreFilterCat='all';
 function initExploreMap(){
   var container=document.getElementById('explore-map');
   if(!container||exploreMap)return;
-  exploreMap=L.map(container,{zoomControl:false,attributionControl:false,minZoom:11,maxZoom:18}).setView([25.775,-80.190],12);
+  exploreMap=L.map(container,{zoomControl:false,attributionControl:false,minZoom:11,maxZoom:18}).setView([25.782,-80.163],12);
   exploreTileLayer=L.tileLayer(getTileUrl(),{maxZoom:19}).addTo(exploreMap);
   exploreMap.on('zoomend',function(){
     if(exploreMarkerRefs.length&&exploreMarkers){
@@ -2350,12 +2356,12 @@ function syncExploreMap(){
     iconCreateFunction:function(c){
       var count=c.getChildCount();
       var size=count>20?40:count>8?34:28;
-      var bg=count>20?'rgba(251,113,133,.18)':count>8?'rgba(245,158,11,.18)':'rgba(96,165,250,.18)';
+      var bg=count>20?'rgba(251,113,133,.35)':count>8?'rgba(245,158,11,.35)':'rgba(96,165,250,.35)';
       var border=count>20?'#fb7185':count>8?'#f59e0b':'#60a5fa';
       var textColor=count>20?'#fb7185':count>8?'#f59e0b':'#60a5fa';
       return L.divIcon({
         className:'bp-cluster',
-        html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+bg+';border:1.5px solid '+border+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:'+textColor+';backdrop-filter:blur(6px);">'+count+'</div>',
+        html:'<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+bg+';border:2px solid '+border+';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:'+textColor+';backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,.5);">'+count+'</div>',
         iconSize:[size,size],iconAnchor:[size/2,size/2]
       });
     }
@@ -2370,10 +2376,9 @@ function syncExploreMap(){
     addMarkerToMap(exploreMarkers,v);
   }
   addLandmarksToMap(exploreMarkers,exploreMap.getZoom());
-  if(venues.length>0){
-    var bounds=[];
-    for(var bi=0;bi<venues.length;bi++)if(venues[bi].lat&&venues[bi].lng)bounds.push([venues[bi].lat,venues[bi].lng]);
-    exploreMap.fitBounds(bounds,{padding:[50,50],maxZoom:14});
+  if(!userCoords){
+    /* Default to core Miami nightlife center — avoid zooming out to show all 50 venues */
+    exploreMap.setView([25.782,-80.163],12);
   }
   document.getElementById('exp-venues').textContent=venues.length;
   if(userCoords&&document.getElementById('exp-nearby')){
