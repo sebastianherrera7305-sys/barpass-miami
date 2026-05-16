@@ -960,6 +960,178 @@ body::after{
 }
 .marker-pulse .marker-inner{ animation: markerPulse 2s infinite; }
 
+/* ════════════════════════════════
+   SOCIAL SCREEN — Crossed Paths
+════════════════════════════════ */
+.stories-bar{display:flex;gap:12px;padding:16px 20px 8px;overflow-x:auto;scrollbar-width:none;}
+.story-ring{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;cursor:pointer;}
+.story-avatar{width:52px;height:52px;border-radius:50%;border:2px solid transparent;background:linear-gradient(var(--ink),var(--ink)) padding-box,linear-gradient(135deg,var(--gold),var(--coral),var(--violet)) border-box;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;transition:transform .2s;}
+.story-avatar.seen{background:linear-gradient(var(--ink),var(--ink)) padding-box,linear-gradient(135deg,rgba(255,248,235,.2),rgba(255,248,235,.1)) border-box;}
+.story-avatar:active{transform:scale(.92);}
+.story-lbl{font-size:9px;color:var(--cream4);font-weight:600;white-space:nowrap;max-width:52px;overflow:hidden;text-overflow:ellipsis;}
+.story-live-dot{position:absolute;bottom:0;right:0;width:12px;height:12px;border-radius:50%;background:var(--coral);border:2px solid var(--ink);animation:liveBlip 1.4s ease infinite;}
+@keyframes liveBlip{0%,100%{opacity:1}50%{opacity:.4}}
+
+.cp-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r2);background:var(--smoke);border:1px solid var(--border);margin-bottom:8px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.cp-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(245,158,11,.04),transparent);pointer-events:none;}
+.cp-card:active{transform:scale(.98);}
+.cp-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:var(--smoke2);border:1px solid var(--border2);}
+.cp-info{flex:1;min-width:0;}
+.cp-name{font-size:14px;font-weight:700;color:var(--cream);}
+.cp-meta{font-size:11px;color:var(--cream4);margin-top:2px;}
+.cp-venue-tag{display:inline-flex;align-items:center;gap:4px;margin-top:5px;padding:2px 8px;border-radius:100px;background:var(--smoke2);font-size:10px;color:var(--cream3);}
+.cp-actions{display:flex;flex-direction:column;gap:6px;}
+.cp-btn{padding:6px 12px;border-radius:100px;border:none;font-size:11px;font-weight:700;cursor:pointer;transition:all .18s;white-space:nowrap;}
+.cp-btn.wave{background:var(--gold3);color:var(--gold);}
+.cp-btn.cheers{background:var(--teal2);color:var(--teal);}
+.cp-btn:active{transform:scale(.92);}
+
+.vibe-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;}
+.vibe-fire{background:rgba(251,113,133,.15);color:var(--coral);}
+.vibe-chill{background:rgba(45,212,191,.15);color:var(--teal);}
+.vibe-vip{background:rgba(245,158,11,.15);color:var(--gold);}
+
+.live-room-card{border-radius:var(--r2);background:linear-gradient(135deg,rgba(251,113,133,.06),rgba(245,158,11,.04));border:1px solid rgba(251,113,133,.2);padding:14px;margin-bottom:8px;cursor:pointer;transition:all .22s;}
+.live-room-card:active{transform:scale(.98);}
+.lr-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.lr-live{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:100px;background:rgba(251,113,133,.15);font-size:10px;font-weight:800;color:var(--coral);letter-spacing:.05em;}
+.lr-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--coral);animation:liveBlip 1s infinite;}
+.lr-crowd{display:flex;gap:2px;margin-top:8px;}
+.lr-face{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ink);margin-left:-6px;background:var(--smoke2);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.lr-face:first-child{margin-left:0;}
+.energy-bar-wrap{height:4px;border-radius:100px;background:var(--smoke2);overflow:hidden;margin-top:8px;}
+.energy-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--coral),var(--gold));transition:width .8s var(--ease);}
+
+/* ════════════════════════════════
+   GAMES SCREEN — XP & Challenges
+════════════════════════════════ */
+.xp-card{border-radius:var(--r3);background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(96,165,250,.06));border:1px solid rgba(167,139,250,.2);padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
+.xp-card::after{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.12),transparent 70%);pointer-events:none;}
+.xp-level{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);margin-bottom:4px;}
+.xp-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:26px;color:var(--cream);margin-bottom:12px;}
+.xp-bar-wrap{height:8px;border-radius:100px;background:rgba(167,139,250,.15);overflow:hidden;margin-bottom:6px;}
+.xp-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--violet),var(--blue));transition:width 1.2s var(--ease);}
+.xp-nums{display:flex;justify-content:space-between;font-size:10px;color:var(--cream4);}
+
+.streak-card{display:flex;align-items:center;gap:16px;padding:14px 18px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(251,113,133,.06),rgba(245,158,11,.04));border:1px solid rgba(251,113,133,.18);margin-bottom:10px;}
+.streak-fire{font-size:32px;flex-shrink:0;}
+.streak-num{font-family:'Instrument Serif',serif;font-size:36px;color:var(--coral);font-style:italic;line-height:1;}
+.streak-info{flex:1;}
+.streak-label{font-size:13px;font-weight:700;color:var(--cream);}
+.streak-sub{font-size:11px;color:var(--cream4);margin-top:2px;}
+
+.challenge-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r2);background:var(--smoke);border:1px solid var(--border);margin-bottom:8px;}
+.ch-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ch-info{flex:1;min-width:0;}
+.ch-name{font-size:13px;font-weight:700;color:var(--cream);}
+.ch-desc{font-size:11px;color:var(--cream4);margin-top:2px;}
+.ch-prog{height:3px;border-radius:100px;background:var(--smoke2);overflow:hidden;margin-top:8px;}
+.ch-prog-fill{height:100%;border-radius:100px;transition:width .8s var(--ease);}
+.ch-reward{font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0;text-align:right;}
+
+.spin-card{border-radius:var(--r3);background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(251,113,133,.05));border:1px solid rgba(245,158,11,.25);padding:20px;text-align:center;position:relative;overflow:hidden;margin-bottom:16px;}
+.spin-wheel{width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--gold) 0deg 60deg,var(--coral) 60deg 120deg,var(--teal) 120deg 180deg,var(--violet) 180deg 240deg,var(--gold2) 240deg 300deg,var(--pink) 300deg 360deg);margin:0 auto 14px;position:relative;transition:transform 3s cubic-bezier(.17,.67,.12,1);box-shadow:0 8px 32px rgba(0,0,0,.4);cursor:pointer;}
+.spin-wheel::after{content:'▼';position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:20px;color:var(--gold);}
+.spin-wheel-center{position:absolute;inset:8px;border-radius:50%;background:var(--ink2);display:flex;align-items:center;justify-content:center;font-size:28px;}
+.spin-btn{padding:12px 32px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);font-weight:800;font-size:14px;cursor:pointer;transition:all .22s;box-shadow:0 6px 20px var(--gold-glow);}
+.spin-btn:active{transform:scale(.95);}
+.spin-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px;}
+.badge-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
+.badge-icon{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1.5px solid var(--border2);transition:transform .2s;}
+.badge-icon.earned{border-color:var(--gold);background:var(--gold3);}
+.badge-icon.locked{opacity:.35;filter:grayscale(.8);}
+.badge-icon:active{transform:scale(.92);}
+.badge-lbl{font-size:9px;color:var(--cream4);text-align:center;font-weight:600;}
+
+.lboard-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.lboard-rank{width:24px;font-size:13px;font-weight:800;color:var(--cream4);text-align:center;}
+.lboard-rank.top{color:var(--gold);}
+.lboard-avatar{width:32px;height:32px;border-radius:50%;background:var(--smoke2);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.lboard-name{flex:1;font-size:13px;font-weight:600;color:var(--cream2);}
+.lboard-pts{font-size:12px;font-weight:700;color:var(--gold);}
+
+/* ════════════════════════════════
+   AFTER / RECAP SCREEN
+════════════════════════════════ */
+#after-screen{background:linear-gradient(160deg,#0a0614 0%,#08060a 50%,#0d0a1a 100%);}
+.after-hero{padding:40px 28px 28px;position:relative;}
+.after-date{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--violet);margin-bottom:8px;}
+.after-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:38px;color:var(--cream);line-height:1.1;margin-bottom:4px;}
+.after-sub{font-size:13px;color:var(--cream4);}
+.after-score-ring{width:88px;height:88px;border-radius:50%;border:3px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;position:absolute;top:36px;right:28px;background:radial-gradient(circle,rgba(245,158,11,.12),transparent 70%);}
+.after-score-num{font-family:'Instrument Serif',serif;font-size:30px;color:var(--gold);font-style:italic;line-height:1;}
+.after-score-lbl{font-size:8px;font-weight:700;color:var(--gold3);letter-spacing:.1em;text-transform:uppercase;}
+
+.after-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 20px;}
+.after-stat{border-radius:var(--r2);padding:16px;display:flex;flex-direction:column;gap:4px;}
+.after-stat-n{font-family:'Instrument Serif',serif;font-size:32px;color:var(--cream);font-style:italic;}
+.after-stat-l{font-size:11px;color:var(--cream4);font-weight:600;}
+
+.after-timeline{padding:0 20px 20px;}
+.after-tl-item{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start;}
+.after-tl-line{display:flex;flex-direction:column;align-items:center;gap:0;}
+.after-tl-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:3px;}
+.after-tl-connector{width:1px;flex:1;background:var(--border2);min-height:32px;margin:4px 0;}
+.after-tl-content{flex:1;padding-bottom:4px;}
+.after-tl-venue{font-size:13px;font-weight:700;color:var(--cream2);}
+.after-tl-time{font-size:11px;color:var(--cream4);margin-top:2px;}
+.after-tl-emoji{font-size:20px;margin-top:4px;}
+
+/* ════════════════════════════════
+   LIVE ROOM MODAL
+════════════════════════════════ */
+#live-room-modal{background:linear-gradient(160deg,#0c0818 0%,#08060c 100%);z-index:1000;}
+.lr-modal-hero{height:180px;display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;flex-shrink:0;}
+.lr-modal-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(8,6,8,.95));}
+.lr-energy-section{padding:16px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+.lr-energy-label{font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--cream3);}
+.lr-energy-meter{flex:1;height:6px;border-radius:100px;background:var(--smoke2);overflow:hidden;}
+.lr-energy-val{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--coral),var(--gold));animation:energyPulse 2s ease infinite;}
+@keyframes energyPulse{0%,100%{opacity:1}50%{opacity:.7}}
+.lr-people-bar{display:flex;gap:-4px;padding:0 20px 12px;flex-shrink:0;}
+.lr-p-face{width:28px;height:28px;border-radius:50%;border:2px solid var(--ink);margin-right:-8px;background:var(--smoke2);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.lr-reactions{display:flex;gap:8px;padding:12px 20px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.lr-react{padding:10px 16px;border-radius:100px;background:var(--smoke2);border:1px solid var(--border2);font-size:20px;cursor:pointer;transition:all .18s;flex-shrink:0;}
+.lr-react:active{transform:scale(.88);background:var(--smoke3);}
+.chat-area{flex:1;overflow-y:auto;padding:12px 20px;display:flex;flex-direction:column;gap:10px;}
+.chat-msg{display:flex;gap:10px;align-items:flex-end;}
+.chat-face{width:28px;height:28px;border-radius:50%;background:var(--smoke2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.chat-bubble{background:var(--smoke2);border-radius:14px 14px 14px 4px;padding:8px 12px;max-width:75%;font-size:12px;color:var(--cream2);line-height:1.4;}
+.chat-bubble.mine{background:var(--gold3);border-radius:14px 14px 4px 14px;color:var(--gold);}
+.chat-name{font-size:9px;color:var(--cream4);margin-bottom:3px;font-weight:600;}
+.chat-input-row{padding:12px 20px;padding-bottom:max(20px,calc(20px + env(safe-area-inset-bottom,0px) - 12px));display:flex;gap:10px;flex-shrink:0;border-top:1px solid var(--border);}
+.chat-inp{flex:1;background:var(--smoke2);border:1px solid var(--border2);border-radius:100px;padding:10px 16px;font-size:13px;color:var(--cream);outline:none;}
+.chat-send{width:38px;height:38px;border-radius:50%;border:none;background:var(--gold);color:var(--ink);font-size:16px;cursor:pointer;flex-shrink:0;transition:all .18s;}
+
+/* ════════════════════════════════
+   TONIGHT SCREEN — Enhanced
+════════════════════════════════ */
+.tonight-stories{display:flex;gap:12px;padding:12px 20px 0;overflow-x:auto;scrollbar-width:none;}
+.ts-item{flex-shrink:0;width:64px;border-radius:var(--r2);overflow:hidden;cursor:pointer;position:relative;transition:transform .2s;}
+.ts-item:active{transform:scale(.94);}
+.ts-bg{height:80px;display:flex;align-items:center;justify-content:center;font-size:32px;}
+.ts-name{padding:4px 6px 6px;font-size:9px;font-weight:700;color:var(--cream2);text-align:center;background:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ts-live-badge{position:absolute;top:4px;left:4px;padding:2px 5px;border-radius:4px;background:var(--coral);font-size:7px;font-weight:800;color:#fff;letter-spacing:.05em;}
+
+/* Heatmap zone overlay on map */
+.heatmap-zone{pointer-events:none;}
+
+/* ════════════════════════════════
+   NAV — 5 items (no wide gap)
+════════════════════════════════ */
+.bnav .nav-item{font-size:10px;}
+.bnav .nav-ico{font-size:19px;}
+
+/* ════════════════════════════════
+   PROFILE SCREEN — Enhanced
+════════════════════════════════ */
+.ns-ring{width:80px;height:80px;border-radius:50%;border:3px solid transparent;background:linear-gradient(var(--ink2),var(--ink2)) padding-box,linear-gradient(135deg,var(--gold),var(--coral)) border-box;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;}
+.ns-level{position:absolute;bottom:-4px;right:-4px;background:var(--gold);border-radius:100px;padding:2px 7px;font-size:9px;font-weight:800;color:var(--ink);border:2px solid var(--ink2);}
+.night-score{font-family:'Instrument Serif',serif;font-size:48px;color:var(--gold);font-style:italic;line-height:1;}
+.nscore-label{font-size:11px;color:var(--cream4);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+
 </style>
 </head>
 <body>
@@ -1174,11 +1346,11 @@ body::after{
 
   <!-- Bottom Nav -->
   <nav class="bnav">
-    <div class="nav-item" id="nav-feed" onclick="navToFeed(this)"><div class="nav-ico">🏠</div><div class="nav-lbl">Feed</div></div>
-    <div class="nav-item" id="nav-tonight" onclick="openScreen('tonight-screen')"><div class="nav-ico">🌙</div><div class="nav-lbl">Tonight</div></div>
+    <div class="nav-item active" id="nav-feed" onclick="navToFeed(this)"><div class="nav-ico">🏠</div><div class="nav-lbl">Feed</div></div>
+    <div class="nav-item" id="nav-social" onclick="openScreen('social-screen')"><div class="nav-ico" style="position:relative;">👥<span id="social-badge" style="position:absolute;top:-3px;right:-6px;width:8px;height:8px;border-radius:50%;background:var(--coral);border:1.5px solid var(--ink);display:none;"></span></div><div class="nav-lbl">Social</div></div>
     <div class="nav-center" id="nav-explore" onclick="openScreen('explore-screen')">🗺️<div class="nav-badge" id="map-badge" style="position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--gold);border:2px solid var(--ink);display:none;"></div></div>
-    <div class="nav-item" id="nav-wallet" onclick="openScreen('wallet-screen')"><div class="nav-ico">🪙</div><div class="nav-lbl">Wallet</div></div>
-    <div class="nav-item" id="nav-ai" onclick="openScreen('ai-screen')"><div class="nav-ico">🧠</div><div class="nav-lbl">AI</div></div>
+    <div class="nav-item" id="nav-tonight" onclick="openScreen('tonight-screen')"><div class="nav-ico">🌙</div><div class="nav-lbl">Tonight</div></div>
+    <div class="nav-item" id="nav-games" onclick="openScreen('games-screen')"><div class="nav-ico" style="position:relative;">🎮<span id="games-badge" style="position:absolute;top:-3px;right:-6px;width:8px;height:8px;border-radius:50%;background:var(--violet);border:1.5px solid var(--ink);"></span></div><div class="nav-lbl">Games</div></div>
   </nav>
 </div>
 
@@ -1293,12 +1465,23 @@ body::after{
 <div class="screen" id="tonight-screen" style="display:none;">
   <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
   <div style="display:flex;justify-content:flex-end;padding:2px 20px;flex-shrink:0;"><button class="screen-close" onclick="closeScreen('tonight-screen')">✕</button></div>
-  <div style="padding:8px 24px 4px;flex-shrink:0;"><div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;">Tonight</div><div style="font-size:12px;color:var(--cream3);margin-top:2px;">Live · Trending · Events</div></div>
+  <div style="padding:6px 24px 2px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div><div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;color:var(--cream);">Tonight</div><div style="font-size:11px;color:var(--cream4);margin-top:1px;">Live · Trending · Events</div></div>
+    <button onclick="buildAfterRecap()" style="padding:7px 14px;border-radius:100px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;">✦ My Recap</button>
+  </div>
+  <!-- Venue Stories -->
+  <div class="tonight-stories" id="tonight-stories"></div>
   <div class="screen-scroll" style="padding:0 20px;">
-    <div id="tonight-trending" style="display:flex;gap:10px;overflow-x:auto;padding:12px 0;scrollbar-width:none;"></div>
-    <div style="font-size:13px;font-weight:700;margin:16px 0 10px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);"></span> Live Now</div>
+    <!-- Trending -->
+    <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--cream4);margin:14px 0 8px;">🔥 Trending Now</div>
+    <div id="tonight-trending" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;"></div>
+    <!-- Live Rooms -->
+    <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--cream4);margin:18px 0 10px;display:flex;align-items:center;gap:6px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--coral);animation:liveBlip 1s infinite;"></span> Live Rooms</div>
+    <div id="tonight-live-rooms"></div>
+    <!-- Live Now -->
+    <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--cream4);margin:18px 0 8px;">🟢 Live Now</div>
     <div id="tonight-live" style="display:flex;flex-direction:column;gap:8px;"></div>
-    <div style="font-size:13px;font-weight:700;margin:20px 0 10px;">🎟️ Events Tonight</div>
+    <div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--cream4);margin:20px 0 10px;">🎟️ Events Tonight</div>
     <div id="tonight-events" style="display:flex;flex-direction:column;gap:10px;"></div>
   </div>
 </div>
@@ -1402,6 +1585,154 @@ body::after{
     <div class="explore-stat"><strong id="exp-venues">50</strong> venues</div>
     <div class="explore-stat"><strong id="exp-nearby">-</strong> nearby</div>
     <div class="explore-stat"><strong id="exp-wait">6m</strong> avg wait</div>
+  </div>
+</div>
+
+<!-- ══ SOCIAL SCREEN — Crossed Paths ══ -->
+<div class="screen" id="social-screen" style="display:none;">
+  <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time" id="social-clock">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 20px;flex-shrink:0;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;color:var(--cream);">Social</div>
+      <div style="font-size:11px;color:var(--cream4);">Crossed Paths · Live Rooms · Connections</div>
+    </div>
+    <button class="screen-close" onclick="closeScreen('social-screen')">✕</button>
+  </div>
+  <!-- Who's Out Tonight -->
+  <div style="padding:12px 20px 4px;font-size:12px;font-weight:700;color:var(--cream3);letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">🌙 Out Tonight</div>
+  <div class="stories-bar" id="social-stories"></div>
+  <!-- Crossed Paths -->
+  <div class="screen-scroll" style="padding:0 20px 20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px;">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:var(--cream);">✦ Crossed Paths</div>
+        <div style="font-size:11px;color:var(--cream4);margin-top:1px;">People from your venues tonight</div>
+      </div>
+      <div style="padding:4px 10px;border-radius:100px;background:rgba(251,113,133,.15);font-size:10px;font-weight:700;color:var(--coral);" id="cp-count">0 people</div>
+    </div>
+    <div id="crossed-paths-list"></div>
+    <!-- Live Rooms -->
+    <div style="font-size:14px;font-weight:800;color:var(--cream);margin:20px 0 10px;">🔴 Live Venue Rooms</div>
+    <div id="live-rooms-list"></div>
+    <!-- Privacy Notice -->
+    <div style="margin-top:16px;padding:14px;border-radius:var(--r2);background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.15);display:flex;gap:10px;align-items:flex-start;">
+      <div style="font-size:18px;flex-shrink:0;">🔒</div>
+      <div style="font-size:11px;color:var(--teal);line-height:1.5;">Privacy-first. Only visible when opted in. No exact location shared. Temporary 8-hour visibility. You can go invisible anytime.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GAMES SCREEN — XP + Challenges ══ -->
+<div class="screen" id="games-screen" style="display:none;">
+  <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 20px;flex-shrink:0;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;color:var(--cream);">Games</div>
+      <div style="font-size:11px;color:var(--cream4);">XP · Challenges · Rewards · Leaderboard</div>
+    </div>
+    <button class="screen-close" onclick="closeScreen('games-screen')">✕</button>
+  </div>
+  <div class="screen-scroll" style="padding:0 20px 20px;">
+    <!-- XP Progress -->
+    <div class="xp-card" style="margin-top:12px;" id="xp-card">
+      <div class="xp-level" id="xp-level-label">LEVEL 4 · NIGHT OWL</div>
+      <div class="xp-title" id="xp-title">Night Owl</div>
+      <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xp-bar" style="width:62%;"></div></div>
+      <div class="xp-nums"><span id="xp-current">620 XP</span><span id="xp-next">1,000 XP next level</span></div>
+    </div>
+    <!-- Streak -->
+    <div class="streak-card" id="streak-card">
+      <div class="streak-fire">🔥</div>
+      <div><div class="streak-num" id="streak-num">4</div></div>
+      <div class="streak-info">
+        <div class="streak-label">Night Streak</div>
+        <div class="streak-sub">Keep going — bonus tomorrow!</div>
+      </div>
+      <div style="text-align:right;"><div style="font-size:11px;font-weight:700;color:var(--coral);">+50 XP</div><div style="font-size:10px;color:var(--cream4);">bonus</div></div>
+    </div>
+    <!-- Spin Wheel -->
+    <div class="spin-card">
+      <div style="font-size:12px;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:12px;">🎡 DAILY SPIN</div>
+      <div class="spin-wheel" id="spin-wheel" onclick="spinWheel()">
+        <div class="spin-wheel-center">🍸</div>
+      </div>
+      <div style="font-size:12px;color:var(--cream4);margin-bottom:12px;" id="spin-result">Tap to spin — free daily reward</div>
+      <button class="spin-btn" id="spin-btn" onclick="spinWheel()">Spin Now ✦</button>
+    </div>
+    <!-- Daily Challenges -->
+    <div style="font-size:14px;font-weight:800;color:var(--cream);margin:4px 0 10px;">⚡ Daily Challenges</div>
+    <div id="challenges-list"></div>
+    <!-- Badges -->
+    <div style="font-size:14px;font-weight:800;color:var(--cream);margin:20px 0 10px;">🏅 Badges</div>
+    <div class="badge-grid" id="badges-grid"></div>
+    <!-- Leaderboard -->
+    <div style="font-size:14px;font-weight:800;color:var(--cream);margin:20px 0 10px;">🏆 Tonight's Leaderboard</div>
+    <div id="leaderboard-list"></div>
+  </div>
+</div>
+
+<!-- ══ AFTER SCREEN — Morning Recap ══ -->
+<div class="screen" id="after-screen" style="display:none;">
+  <div class="ios-bar" style="flex-shrink:0;position:relative;z-index:2;"><span class="ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
+  <div style="display:flex;justify-content:flex-end;padding:2px 20px;flex-shrink:0;position:relative;z-index:2;"><button class="screen-close" onclick="closeScreen('after-screen')" style="background:rgba(255,248,235,.08);">✕</button></div>
+  <div class="screen-scroll">
+    <div class="after-hero">
+      <div class="after-date" id="after-date">FRIDAY NIGHT</div>
+      <div class="after-title">Your Night<br><em>Recap</em></div>
+      <div class="after-sub" id="after-sub">Miami · 3 venues · 6 hours</div>
+      <div class="after-score-ring">
+        <div class="after-score-num" id="after-score">87</div>
+        <div class="after-score-lbl">NIGHT<br>SCORE</div>
+      </div>
+    </div>
+    <!-- Stats grid -->
+    <div class="after-stats" id="after-stats-grid"></div>
+    <!-- Timeline -->
+    <div class="after-timeline">
+      <div style="font-size:13px;font-weight:800;color:var(--cream);margin-bottom:14px;">📍 Your Night Timeline</div>
+      <div id="after-timeline-list"></div>
+    </div>
+    <!-- Share -->
+    <div style="padding:0 20px 40px;display:flex;gap:10px;">
+      <button onclick="toast('Sharing recap…','ok')" style="flex:1;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);font-weight:800;font-size:14px;cursor:pointer;">Share Recap ↗</button>
+      <button onclick="closeScreen('after-screen')" style="padding:14px 18px;border-radius:var(--r2);border:1px solid var(--border2);background:var(--smoke);color:var(--cream3);font-size:14px;cursor:pointer;">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LIVE ROOM MODAL ══ -->
+<div class="screen" id="live-room-modal" style="display:none;z-index:900;">
+  <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 20px 0;flex-shrink:0;">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cream4);" id="lr-district">Wynwood</div>
+      <div style="font-size:20px;font-weight:800;color:var(--cream);" id="lr-venue-name">LIV Miami</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="lr-live">LIVE</div>
+      <button class="screen-close" onclick="closeScreen('live-room-modal')">✕</button>
+    </div>
+  </div>
+  <div class="lr-modal-hero" id="lr-hero"><span style="position:relative;z-index:2;font-size:64px;" id="lr-emoji">🎉</span></div>
+  <div class="lr-energy-section">
+    <div class="lr-energy-label">ENERGY</div>
+    <div class="lr-energy-meter"><div class="lr-energy-val" id="lr-energy-fill" style="width:78%;"></div></div>
+    <div style="font-size:12px;font-weight:800;color:var(--coral);" id="lr-energy-pct">78%</div>
+  </div>
+  <div class="lr-people-bar" id="lr-people"></div>
+  <div class="lr-reactions">
+    <div class="lr-react" onclick="liveReact('🔥')">🔥</div>
+    <div class="lr-react" onclick="liveReact('🍸')">🍸</div>
+    <div class="lr-react" onclick="liveReact('🎵')">🎵</div>
+    <div class="lr-react" onclick="liveReact('💃')">💃</div>
+    <div class="lr-react" onclick="liveReact('⚡')">⚡</div>
+    <div class="lr-react" onclick="liveReact('❤️')">❤️</div>
+    <div class="lr-react" onclick="liveReact('👑')">👑</div>
+  </div>
+  <div class="chat-area" id="lr-chat"></div>
+  <div class="chat-input-row">
+    <input class="chat-inp" placeholder="Say something…" id="chat-input" onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" onclick="sendChat()">↑</button>
   </div>
 </div>
 
@@ -1875,6 +2206,14 @@ function enterApp(){
     if(document.getElementById('stat-wait'))document.getElementById('stat-wait').textContent=Math.floor(Math.random()*10+4)+'m';
     if(document.getElementById('stat-energy'))document.getElementById('stat-energy').textContent=['🔥','⚡','🚀'][Math.floor(Math.random()*3)];
   },4000);
+  /* Show social badge notification after 3s */
+  setTimeout(function(){
+    var sb=document.getElementById('social-badge');
+    if(sb)sb.style.display='block';
+    toast('👥 '+CROSSED_PATHS.filter(function(p){return p.active;}).length+' people crossed your path tonight','info');
+  },3000);
+  /* Games badge always on */
+  var gb=document.getElementById('games-badge');if(gb)gb.style.display='block';
 }
 
 var insightIdx=0;
@@ -2752,12 +3091,16 @@ function openScreen(id){
   if(id==='cart-screen')renderCart();
   if(id==='wallet-screen'){refreshWalletUI();document.getElementById('load-section').style.display='none';}
   if(id==='venue-detail'&&feedMap)setTimeout(function(){feedMap.invalidateSize();},300);
-  if(id==='tonight-screen')buildTonight();
+  if(id==='tonight-screen'){buildTonight();buildTonightStories();buildTonightLiveRooms();}
   if(id==='ai-screen'){buildAI(aiMoodCache);}
+  if(id==='social-screen'){buildSocial();}
+  if(id==='games-screen'){buildGames();}
   document.querySelectorAll('.bnav .nav-item').forEach(function(n){n.classList.remove('active');});
   if(id==='tonight-screen')document.getElementById('nav-tonight')&&document.getElementById('nav-tonight').classList.add('active');
   if(id==='wallet-screen')document.getElementById('nav-wallet')&&document.getElementById('nav-wallet').classList.add('active');
   if(id==='ai-screen')document.getElementById('nav-ai')&&document.getElementById('nav-ai').classList.add('active');
+  if(id==='social-screen')document.getElementById('nav-social')&&document.getElementById('nav-social').classList.add('active');
+  if(id==='games-screen')document.getElementById('nav-games')&&document.getElementById('nav-games').classList.add('active');
 }
 function closeScreen(id){
   var s=document.getElementById(id);if(!s)return;
@@ -2848,6 +3191,351 @@ function toast(msg,type){
   t.textContent=msg;t.className='toast '+type+' show';
   clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2800);
 }
+
+/* ═══════════════════════════════════════════
+   SOCIAL SYSTEM — Crossed Paths
+═══════════════════════════════════════════ */
+var CROSSED_PATHS=[
+  {id:'cp1',emoji:'🦊',name:'Valentina R.',vibe:'fire',venue:'LIV',time:'2h ago',music:'House · EDM',mutualVenue:'LIV Miami',active:true,note:'Also at Sugar last week'},
+  {id:'cp2',emoji:'🐺',name:'Marco D.',vibe:'chill',venue:'Wynwood Yard',time:'3h ago',music:'Hip-Hop · R&B',mutualVenue:'Wynwood Yard',active:true,note:'Shared 3 venues this month'},
+  {id:'cp3',emoji:'🦋',name:'Sofia M.',vibe:'vip',venue:'E11EVEN',time:'1h ago',music:'Techno · Deep House',mutualVenue:'E11EVEN Miami',active:true,note:'VIP table tonight'},
+  {id:'cp4',emoji:'🐬',name:'Carlos V.',vibe:'fire',venue:'Brickell Tavern',time:'4h ago',music:'Latin · Reggaeton',mutualVenue:'Brickell City Centre',active:false,note:''},
+  {id:'cp5',emoji:'🦁',name:'Isabella T.',vibe:'chill',venue:'Blackbird Ordinary',time:'5h ago',music:'Jazz · Cocktail',mutualVenue:'Blackbird Ordinary',active:true,note:''},
+];
+var OUT_TONIGHT=[
+  {emoji:'🦊',name:'Val',active:true},{emoji:'🐺',name:'Marco',active:true},{emoji:'🎭',name:'Ana',active:true},
+  {emoji:'🐬',name:'Luis',active:false},{emoji:'🌙',name:'Nina',active:true},{emoji:'🔮',name:'Diego',active:true},
+  {emoji:'🦋',name:'Sofia',active:true},{emoji:'⚡',name:'Rafa',active:false},{emoji:'🌺',name:'Mia',active:true},
+];
+var LIVE_ROOMS=[
+  {id:'lr1',venue:'LIV Miami',emoji:'🎉',district:'Miami Beach',energy:92,people:247,genre:'EDM · Hip-Hop',preview:['🦊','🐺','🎭','🌙','🔮']},
+  {id:'lr2',venue:'E11EVEN Miami',emoji:'🌙',district:'Downtown',energy:88,people:189,genre:'House · Techno',preview:['🦋','⚡','🌺','🦁','🐬']},
+  {id:'lr3',venue:'Wynwood Yard',emoji:'🎨',district:'Wynwood',energy:74,people:92,genre:'Hip-Hop · R&B',preview:['🎭','🔮','🌙','🦊']},
+  {id:'lr4',venue:'Sugar',emoji:'🍸',district:'Brickell',energy:81,people:134,genre:'Jazz · Deep House',preview:['⚡','🌺','🦁','🐬','🎭']},
+];
+function buildSocial(){
+  buildSocialStories();
+  buildCrossedPaths();
+  buildLiveRooms();
+  document.getElementById('social-badge').style.display='block';
+}
+function buildSocialStories(){
+  var el=document.getElementById('social-stories');
+  if(!el)return;
+  el.innerHTML=OUT_TONIGHT.map(function(u){
+    return '<div class="story-ring" onclick="toast(\'Viewing '+u.name+'\\\'s night story\',\'info\')">'+
+      '<div class="story-avatar'+(u.active?'':' seen')+'">'+u.emoji+
+      (u.active?'<div class="story-live-dot"></div>':'')+
+      '</div><div class="story-lbl">'+u.name+'</div></div>';
+  }).join('');
+}
+function buildCrossedPaths(){
+  var el=document.getElementById('crossed-paths-list');
+  var cnt=document.getElementById('cp-count');
+  if(!el)return;
+  var active=CROSSED_PATHS.filter(function(p){return p.active;});
+  if(cnt)cnt.textContent=active.length+' people';
+  el.innerHTML=CROSSED_PATHS.map(function(p){
+    var vibeCls=p.vibe==='fire'?'vibe-fire':p.vibe==='vip'?'vibe-vip':'vibe-chill';
+    var vibeLabel=p.vibe==='fire'?'🔥 On fire':p.vibe==='vip'?'👑 VIP':'✦ Chill';
+    return '<div class="cp-card" onclick="toast(\'Connection request sent to '+p.name+'\',\'ok\')">'+
+      '<div class="cp-avatar">'+p.emoji+'</div>'+
+      '<div class="cp-info">'+
+        '<div class="cp-name">'+p.name+'</div>'+
+        '<div class="cp-meta">'+p.time+' · '+p.music+'</div>'+
+        '<div class="cp-venue-tag">📍 '+p.mutualVenue+'</div>'+
+        (p.note?'<div style="font-size:10px;color:var(--cream4);margin-top:4px;">'+p.note+'</div>':'')+
+      '</div>'+
+      '<div class="cp-actions">'+
+        '<button class="cp-btn wave" onclick="event.stopPropagation();waveAt(\''+p.id+'\',\''+p.name+'\')">👋 Wave</button>'+
+        '<button class="cp-btn cheers" onclick="event.stopPropagation();cheersAt(\''+p.id+'\',\''+p.name+'\')">🍸 Cheers</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function buildLiveRooms(){
+  var el=document.getElementById('live-rooms-list');if(!el)return;
+  el.innerHTML=LIVE_ROOMS.map(function(r){
+    var facesHtml=r.preview.map(function(f){return '<div class="lr-face">'+f+'</div>';}).join('');
+    return '<div class="live-room-card" onclick="openLiveRoom(\''+r.id+'\')">'+
+      '<div class="lr-header">'+
+        '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:22px;">'+r.emoji+'</span>'+
+          '<div><div style="font-size:14px;font-weight:700;color:var(--cream);">'+r.venue+'</div>'+
+          '<div style="font-size:11px;color:var(--cream4);">'+r.district+' · '+r.genre+'</div></div></div>'+
+        '<div class="lr-live">LIVE</div>'+
+      '</div>'+
+      '<div class="energy-bar-wrap"><div class="energy-bar-fill" style="width:'+r.energy+'%;"></div></div>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">'+
+        '<div class="lr-crowd">'+facesHtml+'<div class="lr-face" style="background:var(--smoke3);font-size:9px;font-weight:700;color:var(--cream4);">+'+Math.max(0,r.people-5)+'</div></div>'+
+        '<div style="font-size:11px;color:var(--cream3);">'+r.energy+'% energy · Enter →</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function waveAt(id,name){toast('👋 Wave sent to '+name,'ok');}
+function cheersAt(id,name){toast('🍸 Cheers sent to '+name+' — enjoy your night!','ok');}
+
+/* ── LIVE ROOM ── */
+var currentLiveRoom=null;
+var chatMessages=[
+  {face:'🦊',name:'Valentina',text:'The energy in here is INSANE 🔥🔥'},
+  {face:'🐺',name:'Marco',text:'DJ just dropped the remix 🎵'},
+  {face:'🎭',name:'AnaB',text:'VIP table 4 is popping off 👑'},
+  {face:'🌙',name:'Nina',text:'Who else is at the rooftop rn?'},
+  {face:'⚡',name:'Rafa',text:'Getting my 4th drink 🍸 no regrets'},
+];
+function openLiveRoom(id){
+  var room=LIVE_ROOMS.find(function(r){return r.id===id;});
+  if(!room)return;
+  currentLiveRoom=room;
+  document.getElementById('lr-venue-name').textContent=room.venue;
+  document.getElementById('lr-district').textContent=room.district;
+  document.getElementById('lr-emoji').textContent=room.emoji;
+  document.getElementById('lr-energy-fill').style.width=room.energy+'%';
+  document.getElementById('lr-energy-pct').textContent=room.energy+'%';
+  var peoplEl=document.getElementById('lr-people');
+  peoplEl.innerHTML=room.preview.map(function(f){return '<div class="lr-p-face">'+f+'</div>';}).join('')+
+    '<div class="lr-p-face" style="background:var(--smoke3);font-size:9px;font-weight:700;color:var(--cream4);width:auto;padding:0 6px;border-radius:100px;">+'+Math.max(0,room.people-5)+'</div>';
+  var chatEl=document.getElementById('lr-chat');
+  chatEl.innerHTML=chatMessages.map(function(m){
+    return '<div class="chat-msg"><div class="chat-face">'+m.face+'</div>'+
+      '<div><div class="chat-name">'+m.name+'</div>'+
+      '<div class="chat-bubble">'+m.text+'</div></div></div>';
+  }).join('');
+  chatEl.scrollTop=chatEl.scrollHeight;
+  openScreen('live-room-modal');
+  toast('Joined '+room.venue+' live room 🎉','ok');
+}
+function liveReact(emoji){
+  toast(emoji+' reaction sent to '+((currentLiveRoom&&currentLiveRoom.venue)||'venue'),'ok');
+  addLiveReactAnim(emoji);
+}
+function addLiveReactAnim(emoji){
+  var el=document.createElement('div');
+  el.textContent=emoji;
+  el.style.cssText='position:fixed;font-size:28px;bottom:120px;right:'+Math.floor(Math.random()*200+80)+'px;z-index:9999;animation:floatUp 1.5s ease forwards;pointer-events:none;';
+  document.body.appendChild(el);
+  setTimeout(function(){el.remove();},1600);
+}
+function sendChat(){
+  var inp=document.getElementById('chat-input');
+  var msg=inp.value.trim();
+  if(!msg)return;
+  var chatEl=document.getElementById('lr-chat');
+  chatEl.innerHTML+='<div class="chat-msg" style="flex-direction:row-reverse;">'+
+    '<div class="chat-face">'+((S.user&&S.user.emoji)||'🦁')+'</div>'+
+    '<div style="align-items:flex-end;display:flex;flex-direction:column;">'+
+    '<div class="chat-name" style="text-align:right;">You</div>'+
+    '<div class="chat-bubble mine">'+msg+'</div></div></div>';
+  chatEl.scrollTop=chatEl.scrollHeight;
+  inp.value='';
+}
+
+/* ═══════════════════════════════════════════
+   GAMES SYSTEM — XP + Challenges + Spin
+═══════════════════════════════════════════ */
+var GAME_STATE={
+  xp:620,level:4,levelName:'Night Owl',xpNext:1000,streak:4,spunToday:false,
+  claimedChallenges:[]
+};
+var CHALLENGES=[
+  {id:'c1',icon:'🍸',name:'Cocktail Connoisseur',desc:'Order 3 cocktails tonight',prog:2,total:3,reward:'+75 XP',color:'var(--teal)',done:false},
+  {id:'c2',icon:'📍',name:'District Hopper',desc:'Visit 2 different districts',prog:1,total:2,reward:'+100 XP',color:'var(--violet)',done:false},
+  {id:'c3',icon:'👥',name:'Social Butterfly',desc:'Wave at 3 crossed paths',prog:0,total:3,reward:'+50 XP',color:'var(--coral)',done:false},
+  {id:'c4',icon:'🗺️',name:'Night Explorer',desc:'Check into any venue',prog:1,total:1,reward:'+150 XP',color:'var(--gold)',done:true},
+];
+var BADGES=[
+  {icon:'🔥',label:'On Fire',earned:true},{icon:'🍸',label:'Mixologist',earned:true},
+  {icon:'🗺️',label:'Explorer',earned:true},{icon:'👑',label:'VIP',earned:false},
+  {icon:'🌙',label:'Night Owl',earned:true},{icon:'💎',label:'Diamond',earned:false},
+  {icon:'🎵',label:'Audiophile',earned:false},{icon:'🏆',label:'Champion',earned:false},
+];
+var LEADERBOARD=[
+  {emoji:'🦊',name:'Valentina R.',pts:2840,rank:1},{emoji:'🐺',name:'Marco D.',pts:2610,rank:2},
+  {emoji:'🎭',name:'AnaB',pts:2390,rank:3},{emoji:'🔮',name:'Diego F.',pts:1980,rank:4},
+  {emoji:'🌙',name:'Nina K.',pts:1750,rank:5},
+];
+var SPIN_PRIZES=['🍸 Free Drink','⚡ +50 XP','💫 Skip Line','🎟️ VIP Pass','🪙 $5 Credit','🎊 +100 XP'];
+function buildGames(){
+  buildXPCard();buildChallenges();buildBadges();buildLeaderboard();
+}
+function buildXPCard(){
+  var pct=Math.round((GAME_STATE.xp/GAME_STATE.xpNext)*100);
+  document.getElementById('xp-level-label').textContent='LEVEL '+GAME_STATE.level+' · '+GAME_STATE.levelName.toUpperCase();
+  document.getElementById('xp-title').textContent=GAME_STATE.levelName;
+  document.getElementById('xp-bar').style.width=pct+'%';
+  document.getElementById('xp-current').textContent=GAME_STATE.xp+' XP';
+  document.getElementById('xp-next').textContent=GAME_STATE.xpNext+' XP next level';
+  document.getElementById('streak-num').textContent=GAME_STATE.streak;
+}
+function buildChallenges(){
+  var el=document.getElementById('challenges-list');if(!el)return;
+  el.innerHTML=CHALLENGES.map(function(c){
+    var pct=Math.round((c.prog/c.total)*100);
+    var progColor=c.done?'var(--gold)':c.color;
+    return '<div class="challenge-card">'+
+      '<div class="ch-icon" style="background:'+(c.done?'var(--gold3)':'var(--smoke2)')+';">'+c.icon+'</div>'+
+      '<div class="ch-info">'+
+        '<div class="ch-name" style="'+(c.done?'color:var(--gold)':'')+'">'+c.name+(c.done?' ✓':'')+'</div>'+
+        '<div class="ch-desc">'+c.desc+'</div>'+
+        '<div class="ch-prog"><div class="ch-prog-fill" style="width:'+pct+'%;background:'+progColor+';"></div></div>'+
+      '</div>'+
+      '<div class="ch-reward">'+c.reward+'<br><div style="font-size:9px;color:var(--cream4);margin-top:3px;">'+c.prog+'/'+c.total+'</div>'+
+        (c.done&&GAME_STATE.claimedChallenges.indexOf(c.id)===-1?'<button onclick="claimChallenge(\''+c.id+'\')" style="margin-top:5px;padding:3px 8px;border-radius:100px;border:none;background:var(--gold);color:var(--ink);font-size:9px;font-weight:800;cursor:pointer;">Claim</button>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function claimChallenge(id){
+  if(GAME_STATE.claimedChallenges.indexOf(id)!==-1)return;
+  GAME_STATE.claimedChallenges.push(id);
+  GAME_STATE.xp+=75;
+  toast('🎉 Challenge reward claimed! +75 XP','ok');
+  buildXPCard();buildChallenges();
+}
+function buildBadges(){
+  var el=document.getElementById('badges-grid');if(!el)return;
+  el.innerHTML=BADGES.map(function(b){
+    return '<div class="badge-item" onclick="toast(\''+(b.earned?b.label+' badge earned! 🏅':'Badge locked — keep playing')+'\',\'info\')">'+
+      '<div class="badge-icon '+(b.earned?'earned':'locked')+'">'+b.icon+'</div>'+
+      '<div class="badge-lbl">'+b.label+'</div>'+
+    '</div>';
+  }).join('');
+}
+function buildLeaderboard(){
+  var el=document.getElementById('leaderboard-list');if(!el)return;
+  el.innerHTML=LEADERBOARD.map(function(p){
+    return '<div class="lboard-row">'+
+      '<div class="lboard-rank '+(p.rank<=3?'top':'')+'">'+
+        (p.rank===1?'🥇':p.rank===2?'🥈':p.rank===3?'🥉':p.rank)+
+      '</div>'+
+      '<div class="lboard-avatar">'+p.emoji+'</div>'+
+      '<div class="lboard-name">'+p.name+'</div>'+
+      '<div class="lboard-pts">'+p.pts.toLocaleString()+' pts</div>'+
+    '</div>';
+  }).join('');
+  // Add current user at bottom
+  el.innerHTML+='<div class="lboard-row" style="background:var(--gold3);border-radius:var(--r);padding:10px;margin-top:4px;">'+
+    '<div class="lboard-rank" style="color:var(--gold);">12</div>'+
+    '<div class="lboard-avatar">'+((S.user&&S.user.emoji)||'🦁')+'</div>'+
+    '<div class="lboard-name" style="color:var(--gold);">You</div>'+
+    '<div class="lboard-pts">'+GAME_STATE.xp+' pts</div>'+
+  '</div>';
+}
+var spinRotation=0,spinActive=false;
+function spinWheel(){
+  if(spinActive)return;
+  if(GAME_STATE.spunToday){toast('Daily spin used — come back tomorrow!','warn');return;}
+  spinActive=true;
+  var btn=document.getElementById('spin-btn');
+  if(btn){btn.disabled=true;btn.textContent='Spinning…';}
+  var extraSpins=Math.floor(Math.random()*5+5);
+  var prizeIndex=Math.floor(Math.random()*SPIN_PRIZES.length);
+  spinRotation+=extraSpins*360+(prizeIndex*(360/SPIN_PRIZES.length));
+  var wheel=document.getElementById('spin-wheel');
+  if(wheel)wheel.style.transform='rotate('+spinRotation+'deg)';
+  setTimeout(function(){
+    spinActive=false;
+    GAME_STATE.spunToday=true;
+    var prize=SPIN_PRIZES[prizeIndex];
+    var resultEl=document.getElementById('spin-result');
+    if(resultEl)resultEl.textContent='🎉 You won: '+prize+'!';
+    if(btn){btn.disabled=true;btn.textContent='Claimed ✓';btn.style.background='var(--smoke2)';}
+    if(prize.includes('XP')){var bonus=parseInt(prize.match(/\d+/)[0]);GAME_STATE.xp+=bonus;buildXPCard();}
+    toast('🎉 '+prize+' — enjoy your night!','ok');
+  },3200);
+}
+
+/* ═══════════════════════════════════════════
+   TONIGHT — Stories + Live Rooms
+═══════════════════════════════════════════ */
+function buildTonightStories(){
+  var el=document.getElementById('tonight-stories');if(!el)return;
+  var topVenues=VENUES.slice().sort(function(a,b){return b.energy-a.energy;}).slice(0,8);
+  el.innerHTML=topVenues.map(function(v){
+    var bg='background:linear-gradient(135deg,'+((markerColors&&markerColors[getPinType(v)])||'#f59e0b')+'22,rgba(8,6,8,.8));';
+    return '<div class="ts-item" onclick="openLiveRoomByVenue(\''+v.id+'\')">'+
+      '<div class="ts-live-badge">LIVE</div>'+
+      '<div class="ts-bg" style="'+bg+'">'+v.emoji+'</div>'+
+      '<div class="ts-name">'+v.name+'</div>'+
+    '</div>';
+  }).join('');
+}
+function buildTonightLiveRooms(){
+  var el=document.getElementById('tonight-live-rooms');if(!el)return;
+  el.innerHTML=LIVE_ROOMS.slice(0,3).map(function(r){
+    return '<div class="live-room-card" onclick="openLiveRoom(\''+r.id+'\')" style="margin-bottom:8px;">'+
+      '<div class="lr-header">'+
+        '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:20px;">'+r.emoji+'</span>'+
+          '<div><div style="font-size:13px;font-weight:700;color:var(--cream);">'+r.venue+'</div>'+
+          '<div style="font-size:10px;color:var(--cream4);">'+r.people+' people · '+r.genre+'</div></div></div>'+
+        '<div class="lr-live">LIVE</div>'+
+      '</div>'+
+      '<div class="energy-bar-wrap"><div class="energy-bar-fill" style="width:'+r.energy+'%;"></div></div>'+
+    '</div>';
+  }).join('');
+}
+function openLiveRoomByVenue(venueId){
+  var v=VENUES.find(function(x){return x.id===venueId;});
+  if(!v)return;
+  var room={id:'v'+v.id,venue:v.name,emoji:v.emoji,district:v.district,energy:v.energy*10,people:Math.floor(Math.random()*200+40),genre:v.music.split('·')[0].trim(),preview:['🦊','🐺','🎭','🌙','🔮']};
+  LIVE_ROOMS.unshift(room);
+  openLiveRoom(room.id);
+}
+
+/* ═══════════════════════════════════════════
+   AFTER — Morning Recap
+═══════════════════════════════════════════ */
+function buildAfterRecap(){
+  var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var d=new Date();
+  var dateStr=days[d.getDay()].toUpperCase()+' NIGHT — '+d.toLocaleDateString('en-US',{month:'long',day:'numeric'});
+  var v1=VENUES[0],v2=VENUES[4],v3=VENUES[9];
+  document.getElementById('after-date').textContent=dateStr;
+  document.getElementById('after-sub').textContent='Miami · 3 venues · '+(Math.floor(Math.random()*2+4))+' hours';
+  document.getElementById('after-score').textContent=Math.floor(Math.random()*20+78);
+  var stats=[
+    {n:3,l:'Venues Visited',bg:'var(--smoke)',c:'var(--cream)'},
+    {n:Math.floor(Math.random()*8+4),l:'Drinks',bg:'var(--teal2)',c:'var(--teal)'},
+    {n:CROSSED_PATHS.filter(function(p){return p.active;}).length,l:'People Met',bg:'var(--violet2)',c:'var(--violet)'},
+    {n:GAME_STATE.xp,l:'XP Earned',bg:'var(--gold3)',c:'var(--gold)'},
+  ];
+  var grid=document.getElementById('after-stats-grid');
+  if(grid)grid.innerHTML=stats.map(function(s){
+    return '<div class="after-stat" style="background:'+s.bg+';border:1px solid var(--border);">'+
+      '<div class="after-stat-n" style="color:'+s.c+';">'+s.n+'</div>'+
+      '<div class="after-stat-l">'+s.l+'</div>'+
+    '</div>';
+  }).join('');
+  var timeline=[
+    {venue:v1.name,emoji:v1.emoji,time:'10:30 PM — 12:00 AM'},
+    {venue:v2.name,emoji:v2.emoji,time:'12:15 AM — 2:30 AM'},
+    {venue:v3.name,emoji:v3.emoji,time:'2:45 AM — 4:00 AM'},
+  ];
+  var tl=document.getElementById('after-timeline-list');
+  if(tl)tl.innerHTML=timeline.map(function(t,i){
+    return '<div class="after-tl-item">'+
+      '<div class="after-tl-line">'+
+        '<div class="after-tl-dot"></div>'+
+        (i<timeline.length-1?'<div class="after-tl-connector"></div>':'')+
+      '</div>'+
+      '<div class="after-tl-content">'+
+        '<div class="after-tl-emoji">'+t.emoji+'</div>'+
+        '<div class="after-tl-venue">'+t.venue+'</div>'+
+        '<div class="after-tl-time">'+t.time+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  openScreen('after-screen');
+}
+
+/* ═══════════════════════════════════════════
+   FLOAT UP ANIMATION for reactions
+═══════════════════════════════════════════ */
+var _floatStyle=document.createElement('style');
+_floatStyle.textContent='@keyframes floatUp{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-120px) scale(1.4)}}';
+document.head.appendChild(_floatStyle);
+
 </script>
 </body>
 </html>
