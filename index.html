@@ -733,6 +733,174 @@ body.warm #tonight-events .event-card{background:#f5efe7;border-color:rgba(80,50
 body.warm #ai-recs .ai-recs-card{background:#f5efe7;border-color:rgba(80,50,30,.1);}
 body.warm #ai-route .route-step{background:#f5efe7;border-color:rgba(80,50,30,.1);}
 body.warm [style*="--gold3"]{--gold3:rgba(180,83,9,.12);--gold4:rgba(180,83,9,.06);}
+
+/* ═══════════════════════════════════════════
+   V2 — PREMIUM UI/UX POLISH
+   8pt grid · safe areas · typography · depth
+═══════════════════════════════════════════ */
+
+/* ── BODY GLOW: fix cut-off bottom orange ── */
+body::after{
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(245,158,11,.09) 0%, transparent 62%),
+    radial-gradient(ellipse 55% 40% at 88% 92%, rgba(167,139,250,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 42% 32% at 10% 64%, rgba(45,212,191,.05) 0%, transparent 58%),
+    radial-gradient(ellipse 75% 45% at 50% 110%, rgba(245,158,11,.07) 0%, transparent 50%) !important;
+}
+
+/* ── ONBOARDING: safe area + layout fixes ── */
+.ob-float-map{
+  top: max(78px, calc(env(safe-area-inset-top,0px) + 68px)) !important;
+  height: min(340px, 46vh) !important;
+  z-index: 1;
+}
+.ob-bubble{
+  max-width: min(210px, 68vw);
+  box-sizing: border-box;
+}
+/* Slide text sits above the floating bubbles */
+.ob-slides{
+  z-index: 4;
+  min-height: 0;
+  flex-shrink: 1;
+}
+.ob-slide{
+  padding: 0 28px 4px;
+}
+/* Responsive headline — scales on SE to Pro Max */
+.ob-headline{
+  font-size: clamp(30px, 10vw, 44px) !important;
+  line-height: 1.06 !important;
+  margin-bottom: 12px !important;
+}
+.ob-body{
+  font-size: clamp(13px, 3.5vw, 15px) !important;
+  color: rgba(255,248,235,.5) !important;
+  line-height: 1.6 !important;
+  max-width: 290px;
+}
+/* CTA: respect iPhone home indicator */
+.ob-cta{
+  z-index: 4;
+  padding-top: 14px !important;
+  padding-bottom: max(28px, calc(env(safe-area-inset-bottom,0px) + 18px)) !important;
+}
+.ob-dots{ z-index: 4; padding-top: 20px !important; }
+.ob-bg{
+  background:
+    radial-gradient(ellipse 85% 60% at 50% 0%, rgba(245,158,11,.13) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 40% at 0% 100%, rgba(251,113,133,.08) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 35% at 100% 55%, rgba(45,212,191,.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(245,158,11,.05) 0%, transparent 50%) !important;
+}
+
+/* ── AUTH: safe area at top ── */
+.auth-hero{
+  padding-top: max(36px, calc(env(safe-area-inset-top,0px) + 28px)) !important;
+}
+
+/* ── MAP SECTION: premium depth ── */
+.map-container{
+  height: 268px !important;
+  border: 1.5px solid rgba(245,158,11,.18) !important;
+  box-shadow:
+    0 16px 56px rgba(0,0,0,.65),
+    0 0 0 1px rgba(245,158,11,.05),
+    inset 0 1px 0 rgba(255,248,235,.04) !important;
+}
+/* Gradient overlay at bottom of map for premium depth */
+.map-section::after{
+  content: '';
+  position: absolute;
+  left: 20px; right: 20px; bottom: 0;
+  height: 72px;
+  border-radius: 0 0 var(--r3) var(--r3);
+  background: linear-gradient(to top, rgba(8,6,8,.88) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 8;
+}
+
+/* ── LEAFLET: dark-mode popup ── */
+.leaflet-popup-content-wrapper{
+  background: rgba(12,10,14,.97) !important;
+  color: rgba(255,248,235,.92) !important;
+  border: 1px solid rgba(255,248,235,.1) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,.75) !important;
+  border-radius: 18px !important;
+  backdrop-filter: blur(24px);
+}
+.leaflet-popup-tip{ background: rgba(12,10,14,.97) !important; }
+.leaflet-popup-close-button{ color: rgba(255,248,235,.45) !important; font-size: 18px !important; top: 6px !important; right: 8px !important; }
+.leaflet-container{ font-family: 'Bricolage Grotesque', sans-serif !important; }
+.leaflet-control-zoom a{
+  background: rgba(9,7,9,.92) !important;
+  color: rgba(255,248,235,.7) !important;
+  border-color: rgba(255,248,235,.08) !important;
+  backdrop-filter: blur(12px);
+}
+.leaflet-control-zoom a:hover{
+  background: rgba(15,13,17,.97) !important;
+  color: var(--gold) !important;
+}
+
+/* ── VENUE CARDS: responsive, no overflow ── */
+.vc{ width: clamp(192px, 53vw, 220px); }
+.vc-media{ height: 148px; }
+.venues-row{ padding-right: 20px; padding-bottom: 4px; }
+.drinks-row{ padding-right: 20px; }
+.events-row{ padding-right: 20px; }
+
+/* ── SECTION HEADERS: 8pt spacing ── */
+.sec-hdr{ margin: 20px 0 10px; }
+.ai-picks-header{ padding: 16px 20px 8px; }
+.district-pills{ padding-bottom: 6px; }
+
+/* ── TYPOGRAPHY: cleaner hierarchy ── */
+.sec-title{ font-size: clamp(19px, 5vw, 22px); letter-spacing: -.01em; }
+.ai-insight{ font-size: clamp(12px, 3.2vw, 13px); }
+.header-loc{ color: rgba(255,248,235,.45); }
+.ai-sub{ color: rgba(255,248,235,.42); }
+
+/* ── SEARCH: better focus ring ── */
+.search-wrap:focus-within{
+  border-color: rgba(245,158,11,.38) !important;
+  box-shadow: 0 0 0 4px rgba(245,158,11,.06) !important;
+}
+
+/* ── SMALL SCREENS (iPhone SE 568px) ── */
+@media (max-height: 620px){
+  .ob-headline{ font-size: 28px !important; margin-bottom: 8px !important; }
+  .ob-eyebrow{ margin-bottom: 8px !important; }
+  .ob-body{ font-size: 12px !important; }
+  .ob-float-map{ height: min(260px, 38vh) !important; }
+  .map-container{ height: 220px !important; }
+  .ob-dots{ padding-top: 12px !important; }
+}
+
+/* ── MEDIUM SCREENS (iPhone 12/13 mini) ── */
+@media (max-height: 780px){
+  .ob-headline{ font-size: clamp(30px, 8.5vw, 40px) !important; }
+}
+
+/* ── PREMIUM MICROINTERACTION: card press ── */
+.vc:active{ transform: scale(.955) translateY(1px) !important; }
+.drink-card:active{ transform: scale(.955) translateY(1px) !important; }
+.ec:active{ transform: scale(.955) translateY(1px) !important; }
+
+/* ── VENUE PREVIEW PANEL: better border ── */
+#venue-preview{
+  border-top: 1.5px solid rgba(255,248,235,.08);
+  box-shadow: 0 -24px 64px rgba(0,0,0,.7);
+}
+
+/* ── MARKER PULSE ANIMATION ── */
+@keyframes markerPulse{
+  0%{ box-shadow: 0 0 0 0 currentColor; }
+  70%{ box-shadow: 0 0 0 10px transparent; }
+  100%{ box-shadow: 0 0 0 0 transparent; }
+}
+.marker-pulse .marker-inner{ animation: markerPulse 2s infinite; }
+
 </style>
 </head>
 <body>
@@ -866,7 +1034,28 @@ body.warm [style*="--gold3"]{--gold3:rgba(180,83,9,.12);--gold4:rgba(180,83,9,.0
 
     <!-- Map -->
     <div class="map-section">
-      <div class="map-container" id="map-container-el" style="height:240px;">
+      <div class="map-container" id="map-container-el">
+        <!-- Live overlay -->
+        <div class="map-overlay" style="z-index:9;">
+          <div class="map-badge live-badge" style="color:var(--green);gap:5px;">
+            <span id="stat-venues" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--gold);">50</span>
+            <span style="font-size:9px;font-weight:600;color:var(--cream4);letter-spacing:.04em;">VENUES</span>
+          </div>
+          <div class="map-badge" style="gap:5px;">
+            <span>⏱</span>
+            <span id="stat-wait" style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--teal);">7m</span>
+            <span style="font-size:9px;color:var(--cream4);">avg</span>
+          </div>
+          <div class="map-badge" style="gap:4px;">
+            <span id="stat-energy" style="font-size:12px;">🔥</span>
+          </div>
+        </div>
+        <!-- Zoom controls -->
+        <div class="map-ctrls" style="z-index:9;">
+          <button class="map-ctrl" onclick="if(feedMap)feedMap.zoomIn()">+</button>
+          <button class="map-ctrl" onclick="if(feedMap)feedMap.zoomOut()">−</button>
+          <button class="map-ctrl" onclick="requestLocation()" title="My location" style="font-size:11px;">📍</button>
+        </div>
       </div>
     </div>
 
@@ -1578,11 +1767,11 @@ function showOnboarding(){
 function buildOnboardingMap(){
   const map=document.getElementById('ob-map');
   const bubbles=[
-    {name:'LIV Miami Beach',emoji:'🔥',dist:'0.8 mi',live:'95% full · HOT',cls:'live-gold',top:'6%',left:'52%',delay:'0s',dur:'9s'},
-    {name:'E11EVEN Miami',emoji:'✨',dist:'1.2 mi',live:'Open 24/7',cls:'live-green',top:'20%',left:'3%',delay:'1.5s',dur:'8s'},
-    {name:'Sugar Rooftop',emoji:'🌆',dist:'0.3 mi',live:'8 min wait',cls:'live-gold',top:'44%',left:'56%',delay:'3s',dur:'7s'},
-    {name:'Komodo Lounge',emoji:'🐉',dist:'0.4 mi',live:'12 min wait',cls:'live-gold',top:'62%',left:'4%',delay:'2s',dur:'10s'},
-    {name:'Night Wallet',emoji:'🪙',dist:'$80 loaded',live:'Credit active',cls:'live-green',top:'32%',left:'28%',delay:'4s',dur:'8s'},
+    {name:'LIV Miami Beach',emoji:'🔥',dist:'0.8 mi',live:'95% full · HOT',cls:'live-gold',top:'18%',left:'30%',delay:'0s',dur:'9s'},
+    {name:'E11EVEN Miami',emoji:'✨',dist:'1.2 mi',live:'Open 24/7',cls:'live-green',top:'22%',left:'3%',delay:'1.5s',dur:'8s'},
+    {name:'Sugar Rooftop',emoji:'🌆',dist:'0.3 mi',live:'8 min wait',cls:'live-gold',top:'50%',left:'38%',delay:'3s',dur:'7s'},
+    {name:'Komodo Lounge',emoji:'🐉',dist:'0.4 mi',live:'12 min wait',cls:'live-gold',top:'66%',left:'4%',delay:'2s',dur:'10s'},
+    {name:'Night Wallet',emoji:'🪙',dist:'$80 loaded',live:'Credit active',cls:'live-green',top:'36%',left:'26%',delay:'4s',dur:'8s'},
   ];
   map.innerHTML=bubbles.map(function(b){
     return '<div class="ob-bubble" style="top:'+b.top+';left:'+b.left+';animation-delay:'+b.delay+';animation-duration:'+b.dur+';">'+
