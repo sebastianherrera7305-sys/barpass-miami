@@ -2217,15 +2217,16 @@ function showOnboarding(){
 function buildOnboardingMap(){
   const map=document.getElementById('ob-map');
   const bubbles=[
-    {name:'LIV Miami Beach',emoji:'🔥',dist:'0.8 mi',live:'95% full · HOT',cls:'live-gold',top:'18%',left:'30%',delay:'0s',dur:'9s'},
-    {name:'E11EVEN Miami',emoji:'✨',dist:'1.2 mi',live:'Open 24/7',cls:'live-green',top:'22%',left:'3%',delay:'1.5s',dur:'8s'},
-    {name:'Sugar Rooftop',emoji:'🌆',dist:'0.3 mi',live:'8 min wait',cls:'live-gold',top:'50%',left:'38%',delay:'3s',dur:'7s'},
-    {name:'Komodo Lounge',emoji:'🐉',dist:'0.4 mi',live:'12 min wait',cls:'live-gold',top:'66%',left:'4%',delay:'2s',dur:'10s'},
-    {name:'Night Wallet',emoji:'🪙',dist:'$80 loaded',live:'Credit active',cls:'live-green',top:'36%',left:'26%',delay:'4s',dur:'8s'},
+    {name:'LIV Miami Beach',venueName:'LIV',dist:'0.8 mi',live:'95% full · HOT',cls:'live-gold',top:'18%',left:'30%',delay:'0s',dur:'9s'},
+    {name:'E11EVEN Miami',venueName:'E11EVEN Miami',dist:'1.2 mi',live:'Open 24/7',cls:'live-green',top:'22%',left:'3%',delay:'1.5s',dur:'8s'},
+    {name:'Sugar Rooftop',venueName:'Sugar',dist:'0.3 mi',live:'8 min wait',cls:'live-gold',top:'50%',left:'38%',delay:'3s',dur:'7s'},
+    {name:'Komodo Lounge',venueName:'Komodo Lounge',dist:'0.4 mi',live:'12 min wait',cls:'live-gold',top:'66%',left:'4%',delay:'2s',dur:'10s'},
+    {name:'Night Wallet',venueName:null,dist:'$80 loaded',live:'Credit active',cls:'live-green',top:'36%',left:'26%',delay:'4s',dur:'8s'},
   ];
   map.innerHTML=bubbles.map(function(b){
-    return '<div class="ob-bubble" style="top:'+b.top+';left:'+b.left+';animation-delay:'+b.delay+';animation-duration:'+b.dur+';">'+
-      '<div class="ob-bubble-emoji">'+b.emoji+'</div>'+
+    var logoHtml=b.venueName?venueLogoHtml(VENUES.find(function(v){return v.name===b.venueName;}),24):'<div style="width:24px;height:24px;border-radius:50%;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:14px;">🪙</div>';
+    return '<div class="ob-bubble" style="top:'+b.top+';left:'+Math.min(parseFloat(b.left),88)+'%;animation-delay:'+b.delay+';animation-duration:'+b.dur+';">'+
+      '<div class="ob-bubble-emoji">'+logoHtml+'</div>'+
       '<div><div class="ob-bubble-name">'+b.name+'</div><div class="ob-bubble-dist">'+b.dist+'</div><div class="ob-bubble-live '+b.cls+'">'+b.live+'</div></div>'+
       '</div>';
   }.bind(this)).join('');
