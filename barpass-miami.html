@@ -1957,36 +1957,30 @@ const VENUES = [
 
 /* ── VENUE BRANDS — official logo URLs scraped from venue websites ── */
 var VENUE_BRANDS={
-  'LIV':{color:'#0d0005',accent:'#fb7185',logo:'LIV',
-    logoUrl:'https://livmiami.com/wp-content/uploads/2018/06/cropped-LIV_MIAMI_728x90LiVAll.png'},
+  'LIV':{color:'#0d0005',accent:'#fb7185',logo:'LIV'},
   'E11EVEN Miami':{color:'#0a0020',accent:'#c084fc',logo:'E11',
     logoUrl:'https://cdn.prod.website-files.com/6377f4b5d60031cd02999855/6377fe8403cd69232cd4a4f0_E11%20logo.avif'},
-  'Komodo Lounge':{color:'#011008',accent:'#2dd4bf',logo:'KMD',
-    logoUrl:'https://komodomiami.com/wp-content/uploads/2024/01/KomodoMiami_Logo-1-e1705032716310-100x27.png'},
+  'Komodo Lounge':{color:'#011008',accent:'#2dd4bf',logo:'KMD'},
   'Sexy Fish':{color:'#001020',accent:'#d4af37',logo:'SF',
     logoUrl:'https://sexyfish.com/wp-content/uploads/2023/07/SF_Gold.png'},
   'Sugar':{color:'#120900',accent:'#fbbf24',logo:'SGR'},
   'Mila Lounge':{color:'#12000c',accent:'#f472b6',logo:'MLA'},
-  'Swan Upstairs':{color:'#1a0a1a',accent:'#f9a8d4',logo:'SWN',
-    logoUrl:'https://swanmiami.com/wp-content/uploads/2023/12/Swan_NewLogo_PINK-copy.png'},
+  'Swan Upstairs':{color:'#1a0a1a',accent:'#f9a8d4',logo:'SWN'},
   'Blackbird Ordinary':{color:'#080706',accent:'#d6d3d1',logo:'BBO'},
   'Space Miami':{color:'#000012',accent:'#60a5fa',logo:'SPC',
     logoUrl:'https://images.squarespace-cdn.com/content/v1/699f454ee72b0109a8d7807e/7b8cc755-c2a0-4445-8610-c3da1295535b/IMG_6007.png?format=1500w'},
   'Bodega':{color:'#120b00',accent:'#fcd34d',logo:'BOD'},
   'Dirty Rabbit':{color:'#07000e',accent:'#818cf8',logo:'DRT'},
   'Rosa Sky':{color:'#12000c',accent:'#f9a8d4',logo:'RSK'},
-  'Nikki Beach Club':{color:'#120600',accent:'#fca5a5',logo:'NKB',
-    logoUrl:'https://nikkibeach.com/wp-content/uploads/2024/07/logo-group-horizontal.svg'},
+  'Nikki Beach Club':{color:'#120600',accent:'#fca5a5',logo:'NKB'},
   "Dante's HiFi":{color:'#070a01',accent:'#a3e635',logo:'DHF'},
   'Sweet Liberty':{color:'#000c18',accent:'#93c5fd',logo:'SWL',
     logoUrl:'https://cdn.prod.website-files.com/65bc68aafffa61a6d8ef5a77/65c09dda62ed5413a3bb48d9_logo_dark.svg'},
   'Broken Shaker':{color:'#00100e',accent:'#5eead4',logo:'BSH'},
   'Joia Beach Club':{color:'#000e1e',accent:'#38bdf8',logo:'JOI'},
-  'Café La Trova':{color:'#120600',accent:'#fb923c',logo:'CLT',
-    logoUrl:'https://images.getbento.com/brKv1CSuQU85zaJ0wman_LaTrova-logo.png'},
+  'Café La Trova':{color:'#120600',accent:'#fb923c',logo:'CLT'},
   'El Patio Wynwood':{color:'#010d05',accent:'#4ade80',logo:'EPW'},
-  'Papi Steak Lounge':{color:'#090400',accent:'#f59e0b',logo:'PSL',
-    logoUrl:'https://papisteak.com/wp-content/uploads/2025/10/Group-20.png'},
+  'Papi Steak Lounge':{color:'#090400',accent:'#f59e0b',logo:'PSL'},
   'Marion':{color:'#0a0018',accent:'#d4af37',logo:'MAR',
     logoUrl:'https://marionmiami.com/wp-content/uploads/2024/07/MARION_Face_goldv1.png'},
   'Baoli Miami':{color:'#030608',accent:'#e2e8f0',logo:'BAO'},
@@ -2011,8 +2005,7 @@ var VENUE_BRANDS={
   'Coyo Taco':{color:'#0e0300',accent:'#ef4444',logo:'COY'},
   'SLS Brickell Bar':{color:'#060014',accent:'#a78bfa',logo:'SLS'},
   'Byblos Miami':{color:'#010903',accent:'#4ade80',logo:'BYB'},
-  '1800 Lucky':{color:'#060600',accent:'#facc15',logo:'18L',
-    logoUrl:'https://static.spotapps.co/website_images/ab_websites/102627_website_v1/logo.png'},
+  '1800 Lucky':{color:'#060600',accent:'#facc15',logo:'18L'},
   'Freehold Miami':{color:'#030901',accent:'#86efac',logo:'FRH'},
   'Bunbury':{color:'#090600',accent:'#d4af37',logo:'BNB'},
   'Zuma Miami':{color:'#030303',accent:'#e2e8f0',logo:'ZUM',
@@ -3005,7 +2998,21 @@ function openVenue(id){
   S.currentVenue=VENUES.find(function(v){return v.id===id;});
   if(!S.currentVenue)return;
   var v=S.currentVenue;
-  document.getElementById('vd-emoji').textContent=v.emoji;
+  var br=getBrand(v.name);
+  var hero=document.getElementById('vd-hero');
+  var emojiEl=document.getElementById('vd-emoji');
+  emojiEl.innerHTML='';
+  if(br.logoUrl){
+    hero.style.background=br.color;
+    var logoImg=document.createElement('img');
+    logoImg.src=br.logoUrl;
+    logoImg.style.cssText='max-width:220px;max-height:100px;object-fit:contain;position:relative;z-index:1;';
+    logoImg.onerror=function(){hero.style.background='';emojiEl.innerHTML='';emojiEl.textContent=v.emoji;};
+    emojiEl.appendChild(logoImg);
+  }else{
+    hero.style.background='';
+    emojiEl.textContent=v.emoji;
+  }
   document.getElementById('vd-name').textContent=v.name;
   document.getElementById('vd-district').textContent=v.district;
   document.getElementById('vd-meta').innerHTML='<span>⭐ '+v.rating+'</span><span>·</span><span>'+v.price+'</span><span>·</span><span>'+v.dist+'</span><span>·</span><span>👗 '+v.dress+'</span>';
