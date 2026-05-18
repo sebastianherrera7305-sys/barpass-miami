@@ -429,7 +429,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 
 /* ── VENUE DETAIL ── */
 .vd-hero{flex-shrink:0;height:220px;position:relative;display:flex;align-items:center;justify-content:center;font-size:84px;background:var(--ink2);overflow:hidden;}
-.vd-hero-ov{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 35%,var(--ink) 100%);}
+.vd-hero-ov{position:absolute;inset:0;background:none;}
 .vd-body{flex:1;overflow-y:auto;padding:0 20px 24px;scrollbar-width:none;}
 .vd-name{font-family:'Instrument Serif',serif;font-size:30px;font-style:italic;margin-bottom:4px;}
 .vd-district{font-size:11px;color:var(--gold);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
@@ -1957,69 +1957,106 @@ const VENUES = [
 
 /* ── VENUE BRANDS — official logo URLs scraped from venue websites ── */
 var VENUE_BRANDS={
-  'LIV':{color:'#0d0005',accent:'#fb7185',logo:'LIV'},
+  'LIV':{color:'#0d0005',accent:'#fb7185',logo:'LIV',logoBg:'#fff',
+    logoUrl:'https://livmiami.com/wp-content/uploads/2018/06/cropped-LIV_MIAMI_728x90LiVAll.png'},
   'E11EVEN Miami':{color:'#0a0020',accent:'#c084fc',logo:'E11',
     logoUrl:'https://cdn.prod.website-files.com/6377f4b5d60031cd02999855/6377fe8403cd69232cd4a4f0_E11%20logo.avif'},
   'Komodo Lounge':{color:'#011008',accent:'#2dd4bf',logo:'KMD',
     logoUrl:'https://groothospitality.com/wp-content/uploads/2025/04/Komodo-white.png'},
   'Sexy Fish':{color:'#001020',accent:'#d4af37',logo:'SF',
     logoUrl:'https://sexyfish.com/wp-content/uploads/2023/07/SF_Gold.png'},
-  'Sugar':{color:'#120900',accent:'#fbbf24',logo:'SGR'},
-  'Mila Lounge':{color:'#12000c',accent:'#f472b6',logo:'MLA'},
-  'Swan Upstairs':{color:'#1a0a1a',accent:'#f9a8d4',logo:'SWN'},
-  'Blackbird Ordinary':{color:'#080706',accent:'#d6d3d1',logo:'BBO'},
+  'Sugar':{color:'#120900',accent:'#fbbf24',logo:'SGR',logoBg:'#fff',
+    logoUrl:'https://www.easthotels.com/wp-content/uploads/2019/09/sugar-brickell-logo.png'},
+  'Mila Lounge':{color:'#12000c',accent:'#f472b6',logo:'MLA',logoBg:'#fff',
+    logoUrl:'https://milalounge.com/wp-content/uploads/2024/01/mila-lounge-miami-logo.png'},
+  'Swan Upstairs':{color:'#1a0a1a',accent:'#f9a8d4',logo:'SWN',logoBg:'#fff',
+    logoUrl:'https://swanmiami.com/wp-content/uploads/2023/12/Swan_NewLogo_PINK-copy.png'},
+  'Blackbird Ordinary':{color:'#080706',accent:'#d6d3d1',logo:'BBO',
+    logoUrl:'https://blackbirdordinary.com/wp-content/uploads/2022/09/blackbird-logo-white.png'},
   'Space Miami':{color:'#000012',accent:'#60a5fa',logo:'SPC',
     logoUrl:'https://images.squarespace-cdn.com/content/v1/699f454ee72b0109a8d7807e/7b8cc755-c2a0-4445-8610-c3da1295535b/IMG_6007.png?format=1500w'},
-  'Bodega':{color:'#120b00',accent:'#fcd34d',logo:'BOD'},
-  'Dirty Rabbit':{color:'#07000e',accent:'#818cf8',logo:'DRT'},
-  'Rosa Sky':{color:'#12000c',accent:'#f9a8d4',logo:'RSK'},
-  'Nikki Beach Club':{color:'#120600',accent:'#fca5a5',logo:'NKB'},
-  "Dante's HiFi":{color:'#070a01',accent:'#a3e635',logo:'DHF'},
+  'Bodega':{color:'#120b00',accent:'#fcd34d',logo:'BOD',
+    logoUrl:'https://bodegamia.com/wp-content/uploads/2021/01/bodega-logo-white.png'},
+  'Dirty Rabbit':{color:'#07000e',accent:'#818cf8',logo:'DRT',
+    logoUrl:'https://dirtyrabbitmiami.com/wp-content/uploads/dirty-rabbit-logo-white.png'},
+  'Rosa Sky':{color:'#12000c',accent:'#f9a8d4',logo:'RSK',logoBg:'#fff',
+    logoUrl:'https://rosasky.com/wp-content/uploads/2023/rosa-sky-logo.png'},
+  'Nikki Beach Club':{color:'#120600',accent:'#fca5a5',logo:'NKB',logoBg:'#fff',
+    logoUrl:'https://nikkibeach.com/wp-content/uploads/2024/07/logo-group-horizontal.svg'},
+  "Dante's HiFi":{color:'#070a01',accent:'#a3e635',logo:'DHF',
+    logoUrl:'https://danteshifi.com/wp-content/uploads/dantes-hifi-logo-white.png'},
   'Sweet Liberty':{color:'#000c18',accent:'#93c5fd',logo:'SWL',
     logoUrl:'https://cdn.prod.website-files.com/65bc68aafffa61a6d8ef5a77/65c09dda62ed5413a3bb48d9_logo_dark.svg'},
-  'Broken Shaker':{color:'#00100e',accent:'#5eead4',logo:'BSH'},
-  'Joia Beach Club':{color:'#000e1e',accent:'#38bdf8',logo:'JOI'},
-  'Café La Trova':{color:'#120600',accent:'#fb923c',logo:'CLT'},
-  'El Patio Wynwood':{color:'#010d05',accent:'#4ade80',logo:'EPW'},
+  'Broken Shaker':{color:'#00100e',accent:'#5eead4',logo:'BSH',logoBg:'#fff',
+    logoUrl:'https://images.getbento.com/accounts/f468abc38bf68e2c74a93581297771cf/media/images/27110Broken_Shaker_Logo_all.png'},
+  'Joia Beach Club':{color:'#000e1e',accent:'#38bdf8',logo:'JOI',logoBg:'#fff',
+    logoUrl:'https://joiabeachmiami.com/wp-content/uploads/2025/02/joia-logo-jo.png'},
+  'Café La Trova':{color:'#120600',accent:'#fb923c',logo:'CLT',logoBg:'#fff',
+    logoUrl:'https://images.getbento.com/brKv1CSuQU85zaJ0wman_LaTrova-logo.png'},
+  'El Patio Wynwood':{color:'#010d05',accent:'#4ade80',logo:'EPW',
+    logoUrl:'https://elpatiowynwood.com/wp-content/uploads/el-patio-logo-white.png'},
   'Papi Steak Lounge':{color:'#090400',accent:'#f59e0b',logo:'PSL',
     logoUrl:'https://groothospitality.com/wp-content/uploads/2025/04/PapiSteak_Logo_White-e1726597876528-1920x789-1-1-1024x421.webp'},
   'Marion':{color:'#0a0018',accent:'#d4af37',logo:'MAR',
     logoUrl:'https://marionmiami.com/wp-content/uploads/2024/07/MARION_Face_goldv1.png'},
-  'Baoli Miami':{color:'#030608',accent:'#e2e8f0',logo:'BAO'},
-  'Strawberry Moon':{color:'#120011',accent:'#f472b6',logo:'STM'},
-  'Copper 29 Bar':{color:'#120600',accent:'#fb923c',logo:'C29'},
-  'The Sylvester':{color:'#090600',accent:'#ef4444',logo:'SYL'},
-  'Astra Lounge':{color:'#010206',accent:'#818cf8',logo:'AST'},
-  'Giselle Miami':{color:'#0a061e',accent:'#d8b4fe',logo:'GIS'},
-  'Mayami Bar':{color:'#010e06',accent:'#86efac',logo:'MAY'},
-  'Queen Miami Beach':{color:'#070015',accent:'#e879f9',logo:'QMB'},
-  'Vendome Miami':{color:'#040404',accent:'#d4af37',logo:'VND'},
-  'Bodega Taqueria':{color:'#120b00',accent:'#fcd34d',logo:'BDT'},
-  'Louie Bossi':{color:'#090400',accent:'#f97316',logo:'LBS'},
-  'Oasis Wynwood':{color:'#010e06',accent:'#4ade80',logo:'OAS',
+  'Baoli Miami':{color:'#030608',accent:'#e2e8f0',logo:'BAO',logoBg:'#fff',
+    logoUrl:'https://baoli-miami.com/wp-content/uploads/baoli-miami-logo.png'},
+  'Strawberry Moon':{color:'#120011',accent:'#f472b6',logo:'STM',
+    logoUrl:'https://www.strawberrymoonmiami.com/wp-content/uploads/strawberry-moon-logo-white.png'},
+  'Copper 29 Bar':{color:'#120600',accent:'#fb923c',logo:'C29',
+    logoUrl:'https://copper29.com/wp-content/uploads/copper-29-bar-logo-white.png'},
+  'The Sylvester':{color:'#090600',accent:'#ef4444',logo:'SYL',
+    logoUrl:'https://thesylvester.com/wp-content/uploads/sylvester-logo-white.png'},
+  'Astra Lounge':{color:'#010206',accent:'#818cf8',logo:'AST',
+    logoUrl:'https://astralounge.com/wp-content/uploads/astra-logo-white.png'},
+  'Giselle Miami':{color:'#0a061e',accent:'#d8b4fe',logo:'GIS',
+    logoUrl:'https://gisellerestaurant.com/wp-content/uploads/giselle-miami-logo-white.png'},
+  'Mayami Bar':{color:'#010e06',accent:'#86efac',logo:'MAY',
+    logoUrl:'https://mayamibar.com/wp-content/uploads/mayami-bar-logo-white.png'},
+  'Queen Miami Beach':{color:'#070015',accent:'#e879f9',logo:'QMB',logoBg:'#fff',
+    logoUrl:'https://queenmiamibeach.com/wp-content/uploads/queen-miami-beach-logo.svg'},
+  'Vendome Miami':{color:'#040404',accent:'#d4af37',logo:'VND',
+    logoUrl:'https://vendomemiami.com/wp-content/uploads/vendome-logo-white.png'},
+  'Bodega Taqueria':{color:'#120b00',accent:'#fcd34d',logo:'BDT',logoBg:'#fff',
+    logoUrl:'https://images.getbento.com/accounts/33df34d609a7630609ad327639457292/media/images/4815220098Q17bxbM6Rum6zPoch6Zk_BodegaLogo_FINAL-site_1.png'},
+  'Louie Bossi':{color:'#090400',accent:'#f97316',logo:'LBS',logoBg:'#fff',
+    logoUrl:'https://static.wixstatic.com/media/5e0d1a_fc4c643a0f55491f98433b4fee6a9046.png/v1/fill/w_470,h_87,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/5e0d1a_fc4c643a0f55491f98433b4fee6a9046.png'},
+  'Oasis Wynwood':{color:'#010e06',accent:'#4ade80',logo:'OAS',logoBg:'#fff',
     logoUrl:'https://images.squarespace-cdn.com/content/v1/6035336bf362d00f3099f1a7/1629305418946-S241FK0XAY57DIA5HA8T/OasisLogo.png'},
-  'The Rusty Pelican':{color:'#000c18',accent:'#38bdf8',logo:'TRP'},
-  'Ball & Chain':{color:'#0e0600',accent:'#f97316',logo:'B&C'},
+  'The Rusty Pelican':{color:'#000c18',accent:'#38bdf8',logo:'TRP',
+    logoUrl:'https://rustypelican.com/wp-content/uploads/rusty-pelican-logo-white.png'},
+  'Ball & Chain':{color:'#0e0600',accent:'#f97316',logo:'B&C',
+    logoUrl:'https://ballandchainmiami.com/wp-content/uploads/ball-and-chain-logo-white.png'},
   'Kiki on the River':{color:'#001218',accent:'#22d3ee',logo:'KKR',
     logoUrl:'https://www.kikiontheriver.com/wp-content/uploads/2025/12/kiki-logo-white-512-120x33.png'},
   'Catch Miami':{color:'#000916',accent:'#60a5fa',logo:'CAT',
     logoUrl:'https://images.getbento.com/accounts/725231f634a05302aa9e40b8c2886927/media/images/80666catch-white.png'},
-  'Bar Lab':{color:'#030312',accent:'#818cf8',logo:'BRL'},
-  'Mondrian Beach Bar':{color:'#000c20',accent:'#93c5fd',logo:'MBB'},
-  'Gramps':{color:'#090600',accent:'#d97706',logo:'GRP'},
+  'Bar Lab':{color:'#030312',accent:'#818cf8',logo:'BRL',
+    logoUrl:'https://barlabmiami.com/wp-content/uploads/bar-lab-logo-white.png'},
+  'Mondrian Beach Bar':{color:'#000c20',accent:'#93c5fd',logo:'MBB',logoBg:'#fff',
+    logoUrl:'https://www.mondrian-miami.com/wp-content/uploads/mondrian-logo.png'},
+  'Gramps':{color:'#090600',accent:'#d97706',logo:'GRP',
+    logoUrl:'https://gramps.com/wp-content/uploads/gramps-logo-white.png'},
   'Coyo Taco':{color:'#0e0300',accent:'#ef4444',logo:'COY',
     logoUrl:'https://cdn.prod.website-files.com/616a1bd1184188496a7a42c0/616a1bd1184188448b7a4300_Coyo-Transparent-Logo.svg'},
-  'SLS Brickell Bar':{color:'#060014',accent:'#a78bfa',logo:'SLS'},
-  'Byblos Miami':{color:'#010903',accent:'#4ade80',logo:'BYB'},
-  '1800 Lucky':{color:'#060600',accent:'#facc15',logo:'18L'},
-  'Freehold Miami':{color:'#030901',accent:'#86efac',logo:'FRH'},
+  'SLS Brickell Bar':{color:'#060014',accent:'#a78bfa',logo:'SLS',
+    logoUrl:'https://www.sbe.com/wp-content/uploads/SLS-Logo-white.png'},
+  'Byblos Miami':{color:'#010903',accent:'#4ade80',logo:'BYB',logoBg:'#fff',
+    logoUrl:'https://byblosdowntown.com/wp-content/uploads/2021/03/Byblos-Wordmark.png'},
+  '1800 Lucky':{color:'#060600',accent:'#facc15',logo:'18L',logoBg:'#fff',
+    logoUrl:'https://static.spotapps.co/website_images/ab_websites/102627_website_v1/logo.png'},
+  'Freehold Miami':{color:'#030901',accent:'#86efac',logo:'FRH',
+    logoUrl:'https://freeholdmiami.com/wp-content/uploads/freehold-logo-white.png'},
   'Bunbury':{color:'#090600',accent:'#d4af37',logo:'BNB',
     logoUrl:'https://bunburymiami.com/wp-content/uploads/2024/07/BUNBURY-ISOLOGOTIPO-white.svg'},
   'Zuma Miami':{color:'#030303',accent:'#e2e8f0',logo:'ZUM',
     logoUrl:'https://www.zumarestaurant.com/assets/images/zuma_logo.svg'},
-  'Clandestino':{color:'#020106',accent:'#6366f1',logo:'CLD'},
-  'Watr at the 1':{color:'#001220',accent:'#38bdf8',logo:'WTR'},
-  'Three Bees':{color:'#090600',accent:'#fbbf24',logo:'3BS'},
+  'Clandestino':{color:'#020106',accent:'#6366f1',logo:'CLD',
+    logoUrl:'https://clandestinomiami.com/wp-content/uploads/clandestino-logo-white.png'},
+  'Watr at the 1':{color:'#001220',accent:'#38bdf8',logo:'WTR',
+    logoUrl:'https://www.1hotels.com/south-beach/restaurants/watr/wp-content/uploads/watr-logo-white.png'},
+  'Three Bees':{color:'#090600',accent:'#fbbf24',logo:'3BS',
+    logoUrl:'https://threebees.com/wp-content/uploads/three-bees-logo-white.png'},
 };
 function getBrand(vname){
   return VENUE_BRANDS[vname]||{color:'#0d0a14',accent:'#f59e0b',logo:(vname||'?').replace(/[^A-Z0-9]/gi,'').substring(0,3).toUpperCase()||'BAR'};
@@ -2040,8 +2077,9 @@ function brandLogoSVG(logo,color,accent,size){
 function brandLogoEl(br,size){
   size=size||40;
   var r=Math.round(size*0.22);
-  var p=Math.round(size*0.1); /* inner padding so wide logos breathe */
+  var p=Math.round(size*0.12); /* inner padding so wide logos breathe */
   var fs=br.logo.length>2?Math.floor(size*0.28):Math.floor(size*0.34);
+  var bg=br.logoBg||br.color; /* use logoBg (e.g. '#fff') for logos with light/opaque backgrounds */
   var svgFallback='<svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg">'+
     '<rect width="'+size+'" height="'+size+'" rx="'+r+'" fill="'+br.color+'"/>'+
     '<rect width="'+size+'" height="'+size+'" rx="'+r+'" fill="none" stroke="'+br.accent+'" stroke-width="1" stroke-opacity="0.4"/>'+
@@ -2049,11 +2087,11 @@ function brandLogoEl(br,size){
     '</svg>';
   var logoSrc=br.logoUrl||(br.domain?'https://www.google.com/s2/favicons?domain='+br.domain+'&sz=128':'');
   if(!logoSrc) return '<div style="width:'+size+'px;height:'+size+'px;border-radius:'+r+'px;overflow:hidden;position:relative;flex-shrink:0;">'+svgFallback+'</div>';
-  return '<div style="width:'+size+'px;height:'+size+'px;border-radius:'+r+'px;overflow:hidden;background:'+br.color+';flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;position:relative;">'+
-    svgFallback+
+  return '<div style="width:'+size+'px;height:'+size+'px;border-radius:'+r+'px;overflow:hidden;background:'+bg+';flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;position:relative;">'+
+    (br.logoBg?'':svgFallback)+ /* only show SVG fallback when no special bg — with logoBg the real logo is on proper background */
     '<img src="'+logoSrc+'" '+
     'style="width:calc(100% - '+p*2+'px);height:calc(100% - '+p*2+'px);object-fit:contain;position:absolute;inset:'+p+'px;max-width:100%;max-height:100%;" '+
-    'onerror="this.style.display=\'none\';">'+
+    'onerror="this.style.display=\'none\';this.parentNode.style.background=\''+br.color+'\';this.insertAdjacentHTML(\'afterend\',\''+svgFallback.replace(/'/g,"\\'")+'\')" >'+
     '</div>';
 }
 
@@ -2685,6 +2723,7 @@ function buildVC(v,lux){
     tags+='<span class="vc-tag tag-'+tg+'">'+(tg==='skip'?'⚡ Skip':tg==='hot'?'🔥 Hot':tg==='new'?'New':tg==='vip'?'💎 VIP':tg==='live'?'🎵 Live':'AI')+'</span>';
   }
   var br=getBrand(v.name);
+  var logoSize=v.featured||lux?56:48;
   return '<div class="vc'+(v.featured?' featured':'')+(lux?' vip-card':'')+'" onclick="openVenue('+v.id+')">'+
     '<div class="vc-media">'+
     '<img src="'+v.img+'" alt="'+v.name+'" loading="lazy" onerror="this.parentElement.style.background=\''+br.color+'\'">'+
@@ -2692,9 +2731,10 @@ function buildVC(v,lux){
     '<div class="vc-tags">'+tags+'</div>'+
     '<div class="vc-energy">'+energy+'</div>'+
     '<div class="vc-cap"><span class="cap-badge '+capClass+'">'+v.cap+'%</span></div>'+
+    '<div style="position:absolute;bottom:10px;left:10px;z-index:3;filter:drop-shadow(0 2px 10px rgba(0,0,0,0.7));border-radius:'+Math.round(logoSize*0.22)+'px;">'+brandLogoEl(br,logoSize)+'</div>'+
     '</div>'+
     '<div class="vc-body">'+
-    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'+brandLogoEl(br,28)+'<div class="vc-name" style="margin-bottom:0;">'+v.name+'</div></div>'+
+    '<div class="vc-name">'+v.name+'</div>'+
     '<div class="vc-meta"><span>'+v.rating+'★</span><div class="meta-sep"></div><span>'+v.price+'</span><div class="meta-sep"></div><span>'+v.district+'</span></div>'+
     '<div class="vc-vibe">'+v.vibe+'</div>'+
     '<div class="vc-wait '+wClass+'"><span>'+(v.wc==='fast'?'⚡':v.wc==='med'?'⏱':'🕐')+'</span>'+v.waitL+'</div>'+
@@ -3010,10 +3050,12 @@ function openVenue(id){
   var emojiEl=document.getElementById('vd-emoji');
   emojiEl.innerHTML='';
   if(br.logoUrl){
-    hero.style.background=br.color;
+    var heroBg=br.logoBg||br.color;
+    hero.style.background=heroBg;
     var logoImg=document.createElement('img');
     logoImg.src=br.logoUrl;
-    logoImg.style.cssText='max-width:220px;max-height:100px;object-fit:contain;position:relative;z-index:1;';
+    var pad=br.logoBg?'16px':'8px';
+    logoImg.style.cssText='max-width:200px;max-height:90px;object-fit:contain;position:relative;z-index:1;padding:'+pad+';';
     logoImg.onerror=function(){hero.style.background='';emojiEl.innerHTML='';emojiEl.textContent=v.emoji;};
     emojiEl.appendChild(logoImg);
   }else{
