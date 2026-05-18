@@ -316,8 +316,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .vc-media{height:145px;position:relative;overflow:hidden;background:var(--ink3);}
 .vc-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s ease;}
 .vc:active .vc-media img{transform:scale(1.05);}
-.vc-emoji{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;position:absolute;inset:0;}
-.vc-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05) 0%,rgba(9,7,9,.96) 100%);}
+.vc-emoji{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:absolute;inset:0;}
+.vc-emoji .vl-logo{box-shadow:0 0 0 3px rgba(255,248,235,.08),0 8px 32px rgba(0,0,0,.4);animation:logoGlow 3s ease-in-out infinite alternate;}
+@keyframes logoGlow{0%{box-shadow:0 0 0 3px rgba(255,248,235,.08),0 8px 32px rgba(0,0,0,.4);}100%{box-shadow:0 0 0 4px rgba(245,158,11,.15),0 0 20px rgba(245,158,11,.1),0 8px 32px rgba(0,0,0,.4);}}
 .vc-tags{position:absolute;top:10px;left:10px;display:flex;gap:4px;z-index:2;}
 .vc-tag{padding:4px 9px;border-radius:7px;font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 2px 8px rgba(0,0,0,.4);}
 .tag-skip{background:var(--gold);color:var(--ink);}
@@ -393,7 +394,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .vl::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 2px 2px 0;background:transparent;transition:background .2s;}
 .vl:active{transform:translateX(6px);background:var(--smoke2);}
 .vl:active::before{background:var(--gold);}
-.vl-ico{width:48px;height:48px;border-radius:14px;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--border);}
+.vl-ico{width:48px;height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.vl-logo img{filter:drop-shadow(0 0 4px rgba(255,248,235,.08));}
 .vl-info{flex:1;min-width:0;}
 .vl-name{font-size:15px;font-weight:700;margin-bottom:3px;}
 .vl-sub{font-size:11px;color:var(--cream3);display:flex;align-items:center;gap:5px;margin-bottom:4px;}
@@ -428,7 +430,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .screen-close:active{background:var(--smoke3);transform:scale(.9);}
 
 /* ── VENUE DETAIL ── */
-.vd-hero{flex-shrink:0;height:220px;position:relative;display:flex;align-items:center;justify-content:center;font-size:84px;background:var(--ink2);overflow:hidden;}
+.vd-hero{flex-shrink:0;height:220px;position:relative;display:flex;align-items:center;justify-content:center;background:var(--ink2);overflow:hidden;}
+#vd-emoji .vl-logo{border:3px solid rgba(255,248,235,.12);box-shadow:0 0 0 1px rgba(245,158,11,.2),0 0 60px rgba(245,158,11,.08);}
 .vd-hero-ov{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 35%,var(--ink) 100%);}
 .vd-body{flex:1;overflow-y:auto;padding:0 20px 24px;scrollbar-width:none;}
 .vd-name{font-family:'Instrument Serif',serif;font-size:30px;font-style:italic;margin-bottom:4px;}
@@ -1955,6 +1958,63 @@ const VENUES = [
   {id:50,name:'Three Bees',emoji:'🐝',district:'Coconut Grove',dist:'3.0 mi',walk:'60 min',cap:55,wait:0,waitL:'No wait',wc:'fast',tags:[],cat:['cocktail','speakeasy'],music:'Jazz · Funk',dress:'Casual',age:'26-45',price:'$$',rating:4.7,vibe:'Neighborhood cocktail bar & bottle shop',pop:80,energy:6,px:'28%',py:'80%',featured:false,bestNight:'Thu-Sat',aiTip:'Best natural wine and amaro selection in Miami. Hidden gem of Coconut Grove.',img:'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400&q=80&fit=crop',menu:[{n:'Three Bee Sting',p:16,e:'🐝',f:'Honey bourbon'},{n:'Amaro Selection',p:14,e:'🌿',f:'Bitter digestivo'},{n:'Natural Wine Spritz',p:15,e:'🍷',f:'Biodynamic spritz'}]},
 ];
 
+//── VENUE DOMAINS FOR LOGOS ──
+const VDOMAINS={};
+VDOMAINS['LIV']='livnightclub.com';
+VDOMAINS['E11EVEN Miami']='11miami.com';
+VDOMAINS['Komodo Lounge']='komodomiami.com';
+VDOMAINS['Sexy Fish']='sexyfishmiami.com';
+VDOMAINS['Sugar']='east-miami.com';
+VDOMAINS['Mila Lounge']='mila-miami.com';
+VDOMAINS['Swan Upstairs']='swanmiami.com';
+VDOMAINS['Blackbird Ordinary']='blackbirdordinary.com';
+VDOMAINS['Space Miami']='clubspace.com';
+VDOMAINS['Bodega']='bodegataqueria.com';
+VDOMAINS['Dirty Rabbit']='thedirtyrabbitwynwood.com';
+VDOMAINS['Rosa Sky']='rosaskyrooftop.com';
+VDOMAINS['Nikki Beach Club']='nikkibeach.com';
+VDOMAINS["Dante's HiFi"]='danteshifi.com';
+VDOMAINS['Sweet Liberty']='mysweetliberty.com';
+VDOMAINS['Broken Shaker']='brokenshaker.com';
+VDOMAINS['Joia Beach Club']='joiabeachmiami.com';
+VDOMAINS['Cafe La Trova']='cafelatrova.com';
+VDOMAINS['El Patio Wynwood']='elpatiowynwood.com';
+VDOMAINS['Papi Steak Lounge']='papisteak.com';
+VDOMAINS['Marion']='marionmiami.com';
+VDOMAINS['Baoli Miami']='baolimiami.com';
+VDOMAINS['Strawberry Moon']='thegoodtimehotel.com';
+VDOMAINS['Copper 29 Bar']='copper29bar.com';
+VDOMAINS['The Sylvester']='thesylvesterbar.com';
+VDOMAINS['Astra Lounge']='astraloungemiami.com';
+VDOMAINS['Giselle Miami']='gisellegroup.com';
+VDOMAINS['Mayami Bar']='mayamibar.com';
+VDOMAINS['Queen Miami Beach']='queenmiamibeach.com';
+VDOMAINS['Vendome Miami']='vendomebarmiami.com';
+VDOMAINS['Bodega Taqueria']='bodegataqueria.com';
+VDOMAINS['Louie Bossi']='louiebossi.com';
+VDOMAINS['Oasis Wynwood']='oasiswynwood.com';
+VDOMAINS['The Rusty Pelican']='therustypelican.com';
+VDOMAINS['Ball & Chain']='ballandchainmiami.com';
+VDOMAINS['Kiki on the River']='kikiontheriver.com';
+VDOMAINS['Catch Miami']='catchrestaurants.com';
+VDOMAINS['Bar Lab']='barlabmiami.com';
+VDOMAINS['Mondrian Beach Bar']='mondrianhotels.com';
+VDOMAINS['Gramps']='grampswynwood.com';
+VDOMAINS['Coyo Taco']='coyotaco.com';
+VDOMAINS['SLS Brickell Bar']='slshotels.com';
+VDOMAINS['Byblos Miami']='byblosmiami.com';
+VDOMAINS['1800 Lucky']='1800luckymiami.com';
+VDOMAINS['Freehold Miami']='freeholdmiami.com';
+VDOMAINS['Bunbury']='bunburymiami.com';
+VDOMAINS['Zuma Miami']='zumarestaurant.com';
+VDOMAINS['Clandestino']='clandestinomiami.com';
+VDOMAINS['Watr at the 1']='1hotels.com';
+VDOMAINS['Three Bees']='threebeesmiami.com';
+
+function venueLogoHtml(v,s){s=s||44;var d=VDOMAINS[v.name]||'',u=d?'https://logo.clearbit.com/'+d:'',i=v.name.split(' ').map(function(w){return w[0]}).join('').slice(0,3).toUpperCase(),g='radial-gradient(circle at 35% 30%,rgba(245,158,11,.25),rgba(120,50,0,.6))';
+if(!u)return '<div class="vl-logo" style="width:'+s+'px;height:'+s+'px;border-radius:'+(s/2)+'px;background:'+g+';display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-weight:700;font-size:'+Math.round(s*0.35)+'px;color:#fff;letter-spacing:.5px;">'+i+'</span></div>';
+return '<div class="vl-logo" style="width:'+s+'px;height:'+s+'px;border-radius:'+(s/2)+'px;overflow:hidden;flex-shrink:0;background:rgba(255,248,235,.05);display:flex;align-items:center;justify-content:center;"><img src="'+u+'" alt="" style="width:75%;height:75%;object-fit:contain" onerror="var p=this.parentNode;p.style.background=\''+g+'\';p.innerHTML=\'<span style=\\\'font-weight:700;font-size:'+Math.round(s*0.35)+'px;color:#fff;letter-spacing:.5px;\\\'>'+i+'</span>\'"></div>';}
+
 const ALL_DRINKS = [
   {id:'em1',name:'Espresso Martini',emoji:'☕',tag:'Vodka · Kahlúa',flavor:'Rich & bold',price:18,match:97,type:'espresso',mood:['date','energy'],url:'https://images.unsplash.com/photo-1586981852052-6f7d72e37f68?w=300&q=80&fit=crop',viral:true,luxury:false,ai:true},
   {id:'em2',name:'White Chocolate Espresso',emoji:'🤍',tag:'Vodka · White Choc',flavor:'Sweet & indulgent',price:22,match:91,type:'espresso',mood:['date','luxury'],url:'https://images.unsplash.com/photo-1586981852052-6f7d72e37f68?w=300&q=80&fit=crop',viral:false,luxury:true,ai:false},
@@ -2296,7 +2356,7 @@ function venuePopupHTML(v){
   var waitColor=v.wc==='fast'?'#4ade80':v.wc==='med'?'#f59e0b':'#fb7185';
   return '<div style="min-width:200px;font-family:Bricolage Grotesque,sans-serif;">'+
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'+
-    '<div style="width:40px;height:40px;border-radius:12px;background:'+(markerColors[getPinType(v)]||'#f59e0b')+';display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">'+v.emoji+'</div>'+
+    '<div style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'+venueLogoHtml(v,40)+'</div>'+
     '<div><div style="font-size:16px;font-weight:700;">'+v.name+'</div>'+
     '<div style="font-size:11px;opacity:.6;">'+(markerNames[getPinType(v)]||'Venue')+' · '+v.district+'</div></div></div>'+
     '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">'+
@@ -2326,8 +2386,8 @@ function buildMarkerIcon(v,zoom){
   return L.divIcon({
     className:'bp-marker bp-marker-'+pt,
     html:'<div style="position:relative;display:flex;flex-direction:column;align-items:center;">'+
-      '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';display:flex;align-items:center;justify-content:center;font-size:'+fontSize+'px;border:2px solid rgba(8,6,8,.9);box-shadow:0 2px 8px rgba(0,0,0,.45);position:relative;">'+
-      v.emoji+statusDot+
+      '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';display:flex;align-items:center;justify-content:center;border:2px solid rgba(8,6,8,.9);box-shadow:0 2px 8px rgba(0,0,0,.45);position:relative;overflow:hidden;">'+
+      venueLogoHtml(v,size)+statusDot+
       '</div>'+nameLabel+
       '</div>',
     iconSize:[size,showName?size+26:size],
@@ -2343,7 +2403,7 @@ function showVenuePreview(id){
   var waitColor=v.wc==='fast'?'#4ade80':v.wc==='med'?'#f59e0b':'#fb7185';
   el.style.display='flex';
   el.innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">'+
-    '<div style="width:48px;height:48px;border-radius:14px;background:'+(markerColors[getPinType(v)]||'#f59e0b')+';display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">'+v.emoji+'</div>'+
+    '<div style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'+venueLogoHtml(v,44)+'</div>'+
     '<div><div style="font-size:18px;font-weight:700;">'+v.name+'</div><div style="font-size:12px;opacity:.5;">'+v.district+' · '+(markerNames[getPinType(v)]||'Venue')+'</div></div>'+
     '<button style="margin-left:auto;width:28px;height:28px;border-radius:50%;border:none;background:var(--smoke2);color:var(--cream3);font-size:12px;cursor:pointer;" onclick="document.getElementById(\'venue-preview\').style.display=\'none\'">✕</button></div>'+
     '<div style="display:flex;gap:10px;margin-bottom:12px;">'+
@@ -2581,7 +2641,7 @@ function buildVC(v,lux){
   return '<div class="vc'+(v.featured?' featured':'')+(lux?' vip-card':'')+'" onclick="openVenue('+v.id+')">'+
     '<div class="vc-media">'+
     '<img src="'+v.img+'" alt="'+v.name+'" loading="lazy" onerror="this.style.display=\'none\'">'+
-    '<div class="vc-emoji">'+v.emoji+'</div>'+
+    '<div class="vc-emoji">'+venueLogoHtml(v,36)+'</div>'+
     '<div class="vc-ov"></div>'+
     '<div class="vc-tags">'+tags+'</div>'+
     '<div class="vc-energy">'+energy+'</div>'+
@@ -2613,7 +2673,7 @@ function buildVenueList(venues){
   document.getElementById('venues-list').innerHTML=venues.map(function(v){
     var wClass=v.wc==='fast'?'fast-wait':v.wc==='slow'?'slow-wait':'med-wait';
     return '<div class="vl" onclick="openVenue('+v.id+')">'+
-      '<div class="vl-ico">'+v.emoji+'</div>'+
+      '<div class="vl-ico">'+venueLogoHtml(v,40)+'</div>'+
       '<div class="vl-info">'+
       '<div class="vl-name">'+v.name+'</div>'+
       '<div class="vl-sub"><span>'+v.rating+'★</span><span>·</span><span>'+v.district+'</span><span>·</span><span>'+v.price+'</span></div>'+
@@ -2799,11 +2859,11 @@ function toggleLang(){
 function buildTonight(){
   var trending=VENUES.slice().sort(function(a,b){return b.energy-a.energy;}).slice(0,8);
   document.getElementById('tonight-trending').innerHTML=trending.map(function(v){
-    return '<div class="tonight-card" onclick="openVenue('+v.id+')"><div style="height:90px;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;">'+v.emoji+'<div style="position:absolute;bottom:6px;right:6px;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;background:'+(v.energy>=8?'rgba(251,113,133,.2);color:var(--coral)':'rgba(74,222,128,.2);color:var(--green)')+';">'+(v.energy>=8?'🔥 '+v.energy+'/10':'⚡ '+v.energy+'/10')+'</div></div><div style="padding:10px;"><div style="font-size:13px;font-weight:700;">'+v.name+'</div><div style="font-size:10px;color:var(--cream3);margin-top:2px;">'+v.district+' · '+v.waitL+'</div></div></div>';
+    return '<div class="tonight-card" onclick="openVenue('+v.id+')"><div style="height:90px;background:var(--ink3);display:flex;align-items:center;justify-content:center;position:relative;">'+venueLogoHtml(v,50)+'<div style="position:absolute;bottom:6px;right:6px;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;background:'+(v.energy>=8?'rgba(251,113,133,.2);color:var(--coral)':'rgba(74,222,128,.2);color:var(--green)')+';">'+(v.energy>=8?'🔥 '+v.energy+'/10':'⚡ '+v.energy+'/10')+'</div></div><div style="padding:10px;"><div style="font-size:13px;font-weight:700;">'+v.name+'</div><div style="font-size:10px;color:var(--cream3);margin-top:2px;">'+v.district+' · '+v.waitL+'</div></div></div>';
   }.bind(this)).join('');
   var live=VENUES.filter(function(v){return v.tags.indexOf('live')!==-1||v.tags.indexOf('hot')!==-1;}).slice(0,8);
   document.getElementById('tonight-live').innerHTML=live.map(function(v){
-    return '<div class="live-card" onclick="openVenue('+v.id+')"><div style="width:42px;height:42px;border-radius:12px;background:'+(markerColors[getPinType(v)]||'var(--gold)')+';display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">'+v.emoji+'</div><div style="flex:1;"><div style="font-size:14px;font-weight:700;">'+v.name+'</div><div style="font-size:11px;color:var(--cream3);margin-top:2px;">'+v.music.split('·')[0].trim()+' · '+v.district+'</div></div><div style="text-align:right;"><div style="font-size:12px;font-weight:700;color:'+(v.cap>70?'var(--coral)':'var(--green)')+';">'+v.cap+'%</div><div style="font-size:10px;color:var(--cream4);">'+v.waitL+'</div></div></div>';
+    return '<div class="live-card" onclick="openVenue('+v.id+')"><div style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'+venueLogoHtml(v,42)+'</div><div style="flex:1;"><div style="font-size:14px;font-weight:700;">'+v.name+'</div><div style="font-size:11px;color:var(--cream3);margin-top:2px;">'+v.music.split('·')[0].trim()+' · '+v.district+'</div></div><div style="text-align:right;"><div style="font-size:12px;font-weight:700;color:'+(v.cap>70?'var(--coral)':'var(--green)')+';">'+v.cap+'%</div><div style="font-size:10px;color:var(--cream4);">'+v.waitL+'</div></div></div>';
   }.bind(this)).join('');
   document.getElementById('tonight-events').innerHTML=EVENTS.map(function(e){
     return '<div class="event-card" onclick="toast(\''+esc(e.title)+'\',\'info\')" style="border-left:3px solid '+e.col+';">'+
@@ -2828,12 +2888,12 @@ function buildAI(mood){
   var picks=moodVenues[mood]||VENUES;
   picks=picks.slice(0,8);
   document.getElementById('ai-recs').innerHTML=picks.map(function(v){
-    return '<div class="ai-recs-card" onclick="openVenue('+v.id+')"><div style="height:90px;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:36px;">'+v.emoji+'<div style="position:absolute;bottom:6px;left:6px;padding:2px 10px;border-radius:6px;font-size:9px;font-weight:700;background:rgba(245,158,11,.15);color:var(--gold);">'+(markerNames[getPinType(v)]||'Venue')+'</div></div><div style="padding:10px;"><div style="font-size:13px;font-weight:700;">'+v.name+'</div><div style="font-size:10px;color:var(--cream3);margin-top:2px;">'+v.district+' · ★ '+v.rating+'</div></div></div>';
+    return '<div class="ai-recs-card" onclick="openVenue('+v.id+')"><div style="height:90px;background:var(--ink3);display:flex;align-items:center;justify-content:center;">'+venueLogoHtml(v,52)+'<div style="position:absolute;bottom:6px;left:6px;padding:2px 10px;border-radius:6px;font-size:9px;font-weight:700;background:rgba(245,158,11,.15);color:var(--gold);">'+(markerNames[getPinType(v)]||'Venue')+'</div></div><div style="padding:10px;"><div style="font-size:13px;font-weight:700;">'+v.name+'</div><div style="font-size:10px;color:var(--cream3);margin-top:2px;">'+v.district+' · ★ '+v.rating+'</div></div></div>';
   }.bind(this)).join('');
   var route=[];
   for(var ri=0;ri<Math.min(4,picks.length);ri++)route.push(picks[ri]);
   document.getElementById('ai-route').innerHTML=route.map(function(v,i){
-    return '<div class="route-step" onclick="openVenue('+v.id+')"><div style="width:32px;height:32px;border-radius:50%;background:'+(markerColors[getPinType(v)]||'var(--gold)')+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">'+v.emoji+'</div><div style="flex:1;"><div style="font-size:13px;font-weight:700;">'+(i+1)+'. '+v.name+'</div><div style="font-size:10px;color:var(--cream3);">'+v.district+' · '+v.vibe.slice(0,40)+'</div></div><div style="font-size:10px;color:var(--cream4);">'+(i<route.length-1?'→':'')+'</div></div>';
+    return '<div class="route-step" onclick="openVenue('+v.id+')"><div style="width:32px;height:32px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+venueLogoHtml(v,32)+'</div><div style="flex:1;"><div style="font-size:13px;font-weight:700;">'+(i+1)+'. '+v.name+'</div><div style="font-size:10px;color:var(--cream3);">'+v.district+' · '+v.vibe.slice(0,40)+'</div></div><div style="font-size:10px;color:var(--cream4);">'+(i<route.length-1?'→':'')+'</div></div>';
   }.bind(this)).join('');
   var moodDrinks={'party':['Paloma','Espresso Martini','Miami Vice'],'chill':['Negroni','Old Fashioned','Gin & Tonic'],'luxury':['24K Gold Martini','Champagne Bottle','Dom Pérignon'],'dance':['Tequila Sunrise','Caipirinha','Spicy Jalapeño Margarita'],'date':['Rosé Spritz','French 75','Aviation Cocktail'],'explore':['Aperol Spritz','Jungle Bird','Oaxacan Negroni']};
   var drinkNames=moodDrinks[mood]||moodDrinks['party'];
@@ -2898,7 +2958,7 @@ function openVenue(id){
   S.currentVenue=VENUES.find(function(v){return v.id===id;});
   if(!S.currentVenue)return;
   var v=S.currentVenue;
-  document.getElementById('vd-emoji').textContent=v.emoji;
+  document.getElementById('vd-emoji').innerHTML=venueLogoHtml(v,60);
   document.getElementById('vd-name').textContent=v.name;
   document.getElementById('vd-district').textContent=v.district;
   document.getElementById('vd-meta').innerHTML='<span>⭐ '+v.rating+'</span><span>·</span><span>'+v.price+'</span><span>·</span><span>'+v.dist+'</span><span>·</span><span>👗 '+v.dress+'</span>';
@@ -3456,7 +3516,7 @@ function buildTonightStories(){
     var bg='background:linear-gradient(135deg,'+((markerColors&&markerColors[getPinType(v)])||'#f59e0b')+'22,rgba(8,6,8,.8));';
     return '<div class="ts-item" onclick="openLiveRoomByVenue(\''+v.id+'\')">'+
       '<div class="ts-live-badge">LIVE</div>'+
-      '<div class="ts-bg" style="'+bg+'">'+v.emoji+'</div>'+
+      '<div class="ts-bg" style="'+bg+'">'+venueLogoHtml(v,40)+'</div>'+
       '<div class="ts-name">'+v.name+'</div>'+
     '</div>';
   }).join('');
