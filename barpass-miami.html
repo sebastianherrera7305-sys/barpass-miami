@@ -1955,6 +1955,74 @@ const VENUES = [
   {id:50,name:'Three Bees',emoji:'🐝',district:'Coconut Grove',dist:'3.0 mi',walk:'60 min',cap:55,wait:0,waitL:'No wait',wc:'fast',tags:[],cat:['cocktail','speakeasy'],music:'Jazz · Funk',dress:'Casual',age:'26-45',price:'$$',rating:4.7,vibe:'Neighborhood cocktail bar & bottle shop',pop:80,energy:6,px:'28%',py:'80%',featured:false,bestNight:'Thu-Sat',aiTip:'Best natural wine and amaro selection in Miami. Hidden gem of Coconut Grove.',img:'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400&q=80&fit=crop',menu:[{n:'Three Bee Sting',p:16,e:'🐝',f:'Honey bourbon'},{n:'Amaro Selection',p:14,e:'🌿',f:'Bitter digestivo'},{n:'Natural Wine Spritz',p:15,e:'🍷',f:'Biodynamic spritz'}]},
 ];
 
+/* ── VENUE BRANDS — brand colors, logo initials, identity system ── */
+var VENUE_BRANDS={
+  'LIV':{color:'#1a0008',accent:'#fb7185',logo:'LIV'},
+  'E11EVEN Miami':{color:'#12003d',accent:'#a78bfa',logo:'E11'},
+  'Komodo Lounge':{color:'#041a12',accent:'#2dd4bf',logo:'KMD'},
+  'Sexy Fish':{color:'#001a2e',accent:'#22d3ee',logo:'SF'},
+  'Sugar':{color:'#1a0e00',accent:'#fbbf24',logo:'SGR'},
+  'Mila Lounge':{color:'#1a0010',accent:'#f472b6',logo:'MLA'},
+  'Swan Upstairs':{color:'#08071e',accent:'#a5b4fc',logo:'SWN'},
+  'Blackbird Ordinary':{color:'#0a0907',accent:'#d6d3d1',logo:'BBO'},
+  'Space Miami':{color:'#00001a',accent:'#60a5fa',logo:'SPC'},
+  'Bodega':{color:'#1a0f00',accent:'#fcd34d',logo:'BOD'},
+  'Dirty Rabbit':{color:'#0a0014',accent:'#818cf8',logo:'DRT'},
+  'Rosa Sky':{color:'#1a0010',accent:'#f9a8d4',logo:'RSK'},
+  'Nikki Beach Club':{color:'#1a0a00',accent:'#fca5a5',logo:'NKB'},
+  "Dante's HiFi":{color:'#0a0f02',accent:'#a3e635',logo:'DHF'},
+  'Sweet Liberty':{color:'#001020',accent:'#93c5fd',logo:'SWL'},
+  'Broken Shaker':{color:'#001614',accent:'#5eead4',logo:'BSH'},
+  'Joia Beach Club':{color:'#001428',accent:'#38bdf8',logo:'JOI'},
+  'Café La Trova':{color:'#1a0800',accent:'#fb923c',logo:'CLT'},
+  'El Patio Wynwood':{color:'#021208',accent:'#4ade80',logo:'EPW'},
+  'Papi Steak Lounge':{color:'#0d0600',accent:'#f59e0b',logo:'PSL'},
+  'Marion':{color:'#08071e',accent:'#c084fc',logo:'MAR'},
+  'Baoli Miami':{color:'#040810',accent:'#e2e8f0',logo:'BAO'},
+  'Strawberry Moon':{color:'#1a0018',accent:'#f472b6',logo:'STM'},
+  'Copper 29 Bar':{color:'#1a0800',accent:'#fb923c',logo:'C29'},
+  'The Sylvester':{color:'#0c0800',accent:'#ef4444',logo:'SYL'},
+  'Astra Lounge':{color:'#020308',accent:'#818cf8',logo:'AST'},
+  'Giselle Miami':{color:'#0e0828',accent:'#d8b4fe',logo:'GIS'},
+  'Mayami Bar':{color:'#021408',accent:'#86efac',logo:'MAY'},
+  'Queen Miami Beach':{color:'#0a001e',accent:'#e879f9',logo:'QMB'},
+  'Vendome Miami':{color:'#060606',accent:'#d4af37',logo:'VND'},
+  'Bodega Taqueria':{color:'#1a0f00',accent:'#fcd34d',logo:'BDT'},
+  'Louie Bossi':{color:'#0c0600',accent:'#f97316',logo:'LBS'},
+  'Oasis Wynwood':{color:'#021408',accent:'#4ade80',logo:'OAS'},
+  'The Rusty Pelican':{color:'#001220',accent:'#38bdf8',logo:'TRP'},
+  'Ball & Chain':{color:'#140800',accent:'#f97316',logo:'B&C'},
+  'Kiki on the River':{color:'#001820',accent:'#22d3ee',logo:'KKR'},
+  'Catch Miami':{color:'#000c1e',accent:'#60a5fa',logo:'CAT'},
+  'Bar Lab':{color:'#04041a',accent:'#818cf8',logo:'BRL'},
+  'Mondrian Beach Bar':{color:'#001028',accent:'#93c5fd',logo:'MBB'},
+  'Gramps':{color:'#0c0800',accent:'#d97706',logo:'GRP'},
+  'Coyo Taco':{color:'#140400',accent:'#ef4444',logo:'COY'},
+  'SLS Brickell Bar':{color:'#08001a',accent:'#a78bfa',logo:'SLS'},
+  'Byblos Miami':{color:'#020c04',accent:'#4ade80',logo:'BYB'},
+  '1800 Lucky':{color:'#080800',accent:'#facc15',logo:'18L'},
+  'Freehold Miami':{color:'#040c02',accent:'#86efac',logo:'FRH'},
+  'Bunbury':{color:'#0c0800',accent:'#d4af37',logo:'BNB'},
+  'Zuma Miami':{color:'#040404',accent:'#e2e8f0',logo:'ZUM'},
+  'Clandestino':{color:'#020208',accent:'#6366f1',logo:'CLD'},
+  'Watr at the 1':{color:'#001828',accent:'#38bdf8',logo:'WTR'},
+  'Three Bees':{color:'#0c0800',accent:'#fbbf24',logo:'3BS'},
+};
+function getBrand(vname){
+  return VENUE_BRANDS[vname]||{color:'#0d0a14',accent:'#f59e0b',logo:(vname||'?').replace(/[^A-Z0-9]/gi,'').substring(0,3).toUpperCase()||'BAR'};
+}
+function brandLogoSVG(logo,color,accent,size){
+  size=size||32;
+  var fs=logo.length>2?Math.floor(size*0.28):Math.floor(size*0.34);
+  var r=Math.round(size*0.22);
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg">'+
+    '<rect width="'+size+'" height="'+size+'" rx="'+r+'" fill="'+color+'"/>'+
+    '<rect width="'+size+'" height="'+size+'" rx="'+r+'" fill="none" stroke="'+accent+'" stroke-width="1" stroke-opacity="0.35"/>'+
+    '<text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" '+
+    'font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="'+fs+'" fill="'+accent+'">'+logo+'</text>'+
+    '</svg>';
+}
+
 const ALL_DRINKS = [
   {id:'em1',name:'Espresso Martini',emoji:'☕',tag:'Vodka · Kahlúa',flavor:'Rich & bold',price:18,match:97,type:'espresso',mood:['date','energy'],url:'https://images.unsplash.com/photo-1586981852052-6f7d72e37f68?w=300&q=80&fit=crop',viral:true,luxury:false,ai:true},
   {id:'em2',name:'White Chocolate Espresso',emoji:'🤍',tag:'Vodka · White Choc',flavor:'Sweet & indulgent',price:22,match:91,type:'espresso',mood:['date','luxury'],url:'https://images.unsplash.com/photo-1586981852052-6f7d72e37f68?w=300&q=80&fit=crop',viral:false,luxury:true,ai:false},
@@ -2294,9 +2362,10 @@ function setMapTheme(){
 function venuePopupHTML(v){
   var capColor=v.cap<60?'#4ade80':v.cap<80?'#f59e0b':'#fb7185';
   var waitColor=v.wc==='fast'?'#4ade80':v.wc==='med'?'#f59e0b':'#fb7185';
+  var br=getBrand(v.name);
   return '<div style="min-width:200px;font-family:Bricolage Grotesque,sans-serif;">'+
     '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">'+
-    '<div style="width:40px;height:40px;border-radius:12px;background:'+(markerColors[getPinType(v)]||'#f59e0b')+';display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">'+v.emoji+'</div>'+
+    '<div style="border-radius:12px;overflow:hidden;flex-shrink:0;">'+brandLogoSVG(br.logo,br.color,br.accent,40)+'</div>'+
     '<div><div style="font-size:16px;font-weight:700;">'+v.name+'</div>'+
     '<div style="font-size:11px;opacity:.6;">'+(markerNames[getPinType(v)]||'Venue')+' · '+v.district+'</div></div></div>'+
     '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">'+
@@ -2314,20 +2383,22 @@ function venuePopupHTML(v){
 function buildMarkerIcon(v,zoom){
   zoom=zoom||13;
   var pt=getPinType(v);
-  var color=markerColors[pt]||'#f59e0b';
+  var br=getBrand(v.name);
+  var color=br.color;
+  var accent=br.accent;
   var showName=zoom>=15;
-  var size=zoom>=15?38:zoom>=13?28:20;
-  var fontSize=zoom>=15?17:zoom>=13?13:9;
-  /* Status dot: capacity signal */
+  var size=zoom>=15?42:zoom>=13?30:22;
   var statusColor=v.cap>=80?'#fb7185':v.cap>=60?'#f59e0b':'#4ade80';
-  var statusDot=size>=28?'<div style="position:absolute;bottom:-1px;right:-1px;width:8px;height:8px;border-radius:50%;background:'+statusColor+';border:1.5px solid rgba(8,6,8,.95);"></div>':'';
-  /* Name label at high zoom */
-  var nameLabel=showName?'<div style="position:absolute;top:100%;margin-top:3px;padding:2px 8px;border-radius:5px;background:rgba(8,6,8,.88);border:1px solid rgba(255,248,235,.1);font-size:9px;font-weight:700;white-space:nowrap;color:rgba(255,248,235,.9);pointer-events:none;">'+v.name+'<span style="opacity:.45;font-weight:400;"> '+v.waitL+'</span></div>':'';
+  var statusDot=size>=28?'<div style="position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border-radius:50%;background:'+statusColor+';border:2px solid rgba(8,6,8,.95);"></div>':'';
+  var nameLabel=showName?'<div style="position:absolute;top:100%;margin-top:3px;padding:2px 8px;border-radius:5px;background:rgba(8,6,8,.9);border:1px solid rgba(255,248,235,.12);font-size:9px;font-weight:700;white-space:nowrap;color:rgba(255,248,235,.9);pointer-events:none;">'+v.name+'<span style="opacity:.45;font-weight:400;"> '+v.waitL+'</span></div>':'';
+  var logoFs=size>=30?Math.floor(size*0.27):Math.floor(size*0.3);
+  var logoTxt=size>=22?br.logo:'';
+  var inner=logoTxt?'<span style="font-size:'+logoFs+'px;font-weight:800;color:'+accent+';font-family:Bricolage Grotesque,sans-serif;line-height:1;letter-spacing:-.02em;">'+logoTxt+'</span>':'<span style="font-size:'+Math.floor(size*0.45)+'px;">'+v.emoji+'</span>';
   return L.divIcon({
     className:'bp-marker bp-marker-'+pt,
     html:'<div style="position:relative;display:flex;flex-direction:column;align-items:center;">'+
-      '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';display:flex;align-items:center;justify-content:center;font-size:'+fontSize+'px;border:2px solid rgba(8,6,8,.9);box-shadow:0 2px 8px rgba(0,0,0,.45);position:relative;">'+
-      v.emoji+statusDot+
+      '<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+color+';display:flex;align-items:center;justify-content:center;border:2px solid '+accent+';box-shadow:0 2px 10px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.4);position:relative;">'+
+      inner+statusDot+
       '</div>'+nameLabel+
       '</div>',
     iconSize:[size,showName?size+26:size],
@@ -2341,9 +2412,10 @@ function showVenuePreview(id){
   if(!el)return;
   var capColor=v.cap<60?'#4ade80':v.cap<80?'#f59e0b':'#fb7185';
   var waitColor=v.wc==='fast'?'#4ade80':v.wc==='med'?'#f59e0b':'#fb7185';
+  var br=getBrand(v.name);
   el.style.display='flex';
   el.innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">'+
-    '<div style="width:48px;height:48px;border-radius:14px;background:'+(markerColors[getPinType(v)]||'#f59e0b')+';display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">'+v.emoji+'</div>'+
+    '<div style="border-radius:14px;overflow:hidden;flex-shrink:0;">'+brandLogoSVG(br.logo,br.color,br.accent,48)+'</div>'+
     '<div><div style="font-size:18px;font-weight:700;">'+v.name+'</div><div style="font-size:12px;opacity:.5;">'+v.district+' · '+(markerNames[getPinType(v)]||'Venue')+'</div></div>'+
     '<button style="margin-left:auto;width:28px;height:28px;border-radius:50%;border:none;background:var(--smoke2);color:var(--cream3);font-size:12px;cursor:pointer;" onclick="document.getElementById(\'venue-preview\').style.display=\'none\'">✕</button></div>'+
     '<div style="display:flex;gap:10px;margin-bottom:12px;">'+
@@ -2578,10 +2650,11 @@ function buildVC(v,lux){
     var tg=v.tags[t];
     tags+='<span class="vc-tag tag-'+tg+'">'+(tg==='skip'?'⚡ Skip':tg==='hot'?'🔥 Hot':tg==='new'?'New':tg==='vip'?'💎 VIP':tg==='live'?'🎵 Live':'AI')+'</span>';
   }
+  var br=getBrand(v.name);
   return '<div class="vc'+(v.featured?' featured':'')+(lux?' vip-card':'')+'" onclick="openVenue('+v.id+')">'+
     '<div class="vc-media">'+
-    '<img src="'+v.img+'" alt="'+v.name+'" loading="lazy" onerror="this.style.display=\'none\'">'+
-    '<div class="vc-emoji">'+v.emoji+'</div>'+
+    '<img src="'+v.img+'" alt="'+v.name+'" loading="lazy" onerror="this.style.background=\''+br.color+'\';this.style.display=\'none\'">'+
+    '<div style="position:absolute;top:10px;left:10px;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.6);z-index:2;">'+brandLogoSVG(br.logo,br.color,br.accent,36)+'</div>'+
     '<div class="vc-ov"></div>'+
     '<div class="vc-tags">'+tags+'</div>'+
     '<div class="vc-energy">'+energy+'</div>'+
@@ -2612,8 +2685,9 @@ function buildVenueList(venues){
   document.getElementById('list-count').textContent=vl+' open';
   document.getElementById('venues-list').innerHTML=venues.map(function(v){
     var wClass=v.wc==='fast'?'fast-wait':v.wc==='slow'?'slow-wait':'med-wait';
+    var br=getBrand(v.name);
     return '<div class="vl" onclick="openVenue('+v.id+')">'+
-      '<div class="vl-ico">'+v.emoji+'</div>'+
+      '<div class="vl-ico" style="border-radius:12px;overflow:hidden;flex-shrink:0;width:44px;height:44px;">'+brandLogoSVG(br.logo,br.color,br.accent,44)+'</div>'+
       '<div class="vl-info">'+
       '<div class="vl-name">'+v.name+'</div>'+
       '<div class="vl-sub"><span>'+v.rating+'★</span><span>·</span><span>'+v.district+'</span><span>·</span><span>'+v.price+'</span></div>'+
@@ -3257,9 +3331,12 @@ function buildLiveRooms(){
   var el=document.getElementById('live-rooms-list');if(!el)return;
   el.innerHTML=LIVE_ROOMS.map(function(r){
     var facesHtml=r.preview.map(function(f){return '<div class="lr-face">'+f+'</div>';}).join('');
+    var vobj=VENUES.find(function(v){return v.name===r.venue;})||VENUES.find(function(v){return r.venue.indexOf(v.name)!==-1||v.name.indexOf(r.venue.split(' ')[0])!==-1;});
+    var br=vobj?getBrand(vobj.name):{color:'#0d0a14',accent:'#f59e0b',logo:r.venue.replace(/[^A-Za-z0-9]/g,'').substring(0,3).toUpperCase()||'BAR'};
     return '<div class="live-room-card" onclick="openLiveRoom(\''+r.id+'\')">'+
       '<div class="lr-header">'+
-        '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:22px;">'+r.emoji+'</span>'+
+        '<div style="display:flex;align-items:center;gap:10px;">'+
+        '<div style="border-radius:10px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.4);">'+brandLogoSVG(br.logo,br.color,br.accent,38)+'</div>'+
           '<div><div style="font-size:14px;font-weight:700;color:var(--cream);">'+r.venue+'</div>'+
           '<div style="font-size:11px;color:var(--cream4);">'+r.district+' · '+r.genre+'</div></div></div>'+
         '<div class="lr-live">LIVE</div>'+
@@ -3453,20 +3530,27 @@ function buildTonightStories(){
   var el=document.getElementById('tonight-stories');if(!el)return;
   var topVenues=VENUES.slice().sort(function(a,b){return b.energy-a.energy;}).slice(0,8);
   el.innerHTML=topVenues.map(function(v){
-    var bg='background:linear-gradient(135deg,'+((markerColors&&markerColors[getPinType(v)])||'#f59e0b')+'22,rgba(8,6,8,.8));';
+    var br=getBrand(v.name);
     return '<div class="ts-item" onclick="openLiveRoomByVenue(\''+v.id+'\')">'+
       '<div class="ts-live-badge">LIVE</div>'+
-      '<div class="ts-bg" style="'+bg+'">'+v.emoji+'</div>'+
-      '<div class="ts-name">'+v.name+'</div>'+
+      '<div class="ts-bg" style="background:'+br.color+';border:1.5px solid '+br.accent+'44;">'+
+        '<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">'+
+          '<span style="font-size:16px;font-weight:900;color:'+br.accent+';font-family:Bricolage Grotesque,sans-serif;line-height:1;text-align:center;letter-spacing:-.02em;">'+br.logo+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="ts-name">'+v.name.split(' ')[0]+'</div>'+
     '</div>';
   }).join('');
 }
 function buildTonightLiveRooms(){
   var el=document.getElementById('tonight-live-rooms');if(!el)return;
   el.innerHTML=LIVE_ROOMS.slice(0,3).map(function(r){
+    var vobj2=VENUES.find(function(v){return v.name===r.venue;})||VENUES.find(function(v){return r.venue.indexOf(v.name)!==-1||v.name.indexOf(r.venue.split(' ')[0])!==-1;});
+    var br2=vobj2?getBrand(vobj2.name):{color:'#0d0a14',accent:'#f59e0b',logo:r.venue.replace(/[^A-Za-z0-9]/g,'').substring(0,3).toUpperCase()||'BAR'};
     return '<div class="live-room-card" onclick="openLiveRoom(\''+r.id+'\')" style="margin-bottom:8px;">'+
       '<div class="lr-header">'+
-        '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:20px;">'+r.emoji+'</span>'+
+        '<div style="display:flex;align-items:center;gap:8px;">'+
+        '<div style="border-radius:9px;overflow:hidden;flex-shrink:0;">'+brandLogoSVG(br2.logo,br2.color,br2.accent,34)+'</div>'+
           '<div><div style="font-size:13px;font-weight:700;color:var(--cream);">'+r.venue+'</div>'+
           '<div style="font-size:10px;color:var(--cream4);">'+r.people+' people · '+r.genre+'</div></div></div>'+
         '<div class="lr-live">LIVE</div>'+
