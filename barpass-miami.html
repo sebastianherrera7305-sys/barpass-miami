@@ -1955,58 +1955,71 @@ const VENUES = [
   {id:50,name:'Three Bees',emoji:'🐝',district:'Coconut Grove',dist:'3.0 mi',walk:'60 min',cap:55,wait:0,waitL:'No wait',wc:'fast',tags:[],cat:['cocktail','speakeasy'],music:'Jazz · Funk',dress:'Casual',age:'26-45',price:'$$',rating:4.7,vibe:'Neighborhood cocktail bar & bottle shop',pop:80,energy:6,px:'28%',py:'80%',featured:false,bestNight:'Thu-Sat',aiTip:'Best natural wine and amaro selection in Miami. Hidden gem of Coconut Grove.',img:'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400&q=80&fit=crop',menu:[{n:'Three Bee Sting',p:16,e:'🐝',f:'Honey bourbon'},{n:'Amaro Selection',p:14,e:'🌿',f:'Bitter digestivo'},{n:'Natural Wine Spritz',p:15,e:'🍷',f:'Biodynamic spritz'}]},
 ];
 
-/* ── VENUE BRANDS — official logo domains + brand colors + fallback initials ── */
+/* ── VENUE BRANDS — official logo URLs scraped from venue websites ── */
 var VENUE_BRANDS={
-  'LIV':{color:'#0d0005',accent:'#fb7185',logo:'LIV',domain:'livmiami.com'},
-  'E11EVEN Miami':{color:'#0a0020',accent:'#a78bfa',logo:'E11',domain:'11miami.com'},
-  'Komodo Lounge':{color:'#011008',accent:'#2dd4bf',logo:'KMD',domain:'komodomiami.com'},
-  'Sexy Fish':{color:'#00101c',accent:'#22d3ee',logo:'SF',domain:'sexyfish.com'},
-  'Sugar':{color:'#120900',accent:'#fbbf24',logo:'SGR',domain:'eatsugar.com'},
-  'Mila Lounge':{color:'#12000c',accent:'#f472b6',logo:'MLA',domain:'milarestaurant.com'},
-  'Swan Upstairs':{color:'#060516',accent:'#a5b4fc',logo:'SWN',domain:'swanmiami.com'},
-  'Blackbird Ordinary':{color:'#080706',accent:'#d6d3d1',logo:'BBO',domain:'blackbirdordinary.com'},
-  'Space Miami':{color:'#000012',accent:'#60a5fa',logo:'SPC',domain:'clubspace.com'},
-  'Bodega':{color:'#120b00',accent:'#fcd34d',logo:'BOD',domain:'bodegamia.com'},
-  'Dirty Rabbit':{color:'#07000e',accent:'#818cf8',logo:'DRT',domain:'dirtyrabbitbar.com'},
-  'Rosa Sky':{color:'#12000c',accent:'#f9a8d4',logo:'RSK',domain:'rosaskybar.com'},
-  'Nikki Beach Club':{color:'#120600',accent:'#fca5a5',logo:'NKB',domain:'nikkibeach.com'},
-  "Dante's HiFi":{color:'#070a01',accent:'#a3e635',logo:'DHF',domain:'danteshifi.com'},
-  'Sweet Liberty':{color:'#000c18',accent:'#93c5fd',logo:'SWL',domain:'mysweetliberty.com'},
-  'Broken Shaker':{color:'#00100e',accent:'#5eead4',logo:'BSH',domain:'thefreehand.com'},
-  'Joia Beach Club':{color:'#000e1e',accent:'#38bdf8',logo:'JOI',domain:'joiabeach.com'},
-  'Café La Trova':{color:'#120600',accent:'#fb923c',logo:'CLT',domain:'cafelatrovamiami.com'},
-  'El Patio Wynwood':{color:'#010d05',accent:'#4ade80',logo:'EPW',domain:'elpatiobar.com'},
-  'Papi Steak Lounge':{color:'#090400',accent:'#f59e0b',logo:'PSL',domain:'papisteak.com'},
-  'Marion':{color:'#060516',accent:'#c084fc',logo:'MAR',domain:'marionmiami.com'},
-  'Baoli Miami':{color:'#030608',accent:'#e2e8f0',logo:'BAO',domain:'baolicollection.com'},
-  'Strawberry Moon':{color:'#120011',accent:'#f472b6',logo:'STM',domain:'strawberrymoon.com'},
-  'Copper 29 Bar':{color:'#120600',accent:'#fb923c',logo:'C29',domain:'copper29bar.com'},
-  'The Sylvester':{color:'#090600',accent:'#ef4444',logo:'SYL',domain:'sylvesterbar.com'},
-  'Astra Lounge':{color:'#010206',accent:'#818cf8',logo:'AST',domain:'astralounge.com'},
-  'Giselle Miami':{color:'#0a061e',accent:'#d8b4fe',logo:'GIS',domain:'gisellerestaurant.com'},
-  'Mayami Bar':{color:'#010e06',accent:'#86efac',logo:'MAY',domain:'mayamibar.com'},
-  'Queen Miami Beach':{color:'#070015',accent:'#e879f9',logo:'QMB',domain:'queenmiami.com'},
-  'Vendome Miami':{color:'#040404',accent:'#d4af37',logo:'VND',domain:'vendomemiami.com'},
-  'Bodega Taqueria':{color:'#120b00',accent:'#fcd34d',logo:'BDT',domain:'bodegataqueria.com'},
-  'Louie Bossi':{color:'#090400',accent:'#f97316',logo:'LBS',domain:'louiebossi.com'},
-  'Oasis Wynwood':{color:'#010e06',accent:'#4ade80',logo:'OAS',domain:'oasiswynwood.com'},
-  'The Rusty Pelican':{color:'#000c18',accent:'#38bdf8',logo:'TRP',domain:'therustypelican.com'},
-  'Ball & Chain':{color:'#0e0600',accent:'#f97316',logo:'B&C',domain:'ballandchainmiami.com'},
-  'Kiki on the River':{color:'#001218',accent:'#22d3ee',logo:'KKR',domain:'kikimiami.com'},
-  'Catch Miami':{color:'#000916',accent:'#60a5fa',logo:'CAT',domain:'catchrestaurants.com'},
-  'Bar Lab':{color:'#030312',accent:'#818cf8',logo:'BRL',domain:'thebarlabmiami.com'},
-  'Mondrian Beach Bar':{color:'#000c20',accent:'#93c5fd',logo:'MBB',domain:'mondrian-miami.com'},
-  'Gramps':{color:'#090600',accent:'#d97706',logo:'GRP',domain:'gramps.com'},
-  'Coyo Taco':{color:'#0e0300',accent:'#ef4444',logo:'COY',domain:'coyotaco.com'},
-  'SLS Brickell Bar':{color:'#060014',accent:'#a78bfa',logo:'SLS',domain:'sbe.com'},
-  'Byblos Miami':{color:'#010903',accent:'#4ade80',logo:'BYB',domain:'byblosmiami.com'},
-  '1800 Lucky':{color:'#060600',accent:'#facc15',logo:'18L',domain:'1800lucky.com'},
-  'Freehold Miami':{color:'#030901',accent:'#86efac',logo:'FRH',domain:'freeholdmiami.com'},
-  'Bunbury':{color:'#090600',accent:'#d4af37',logo:'BNB',domain:'bunburybar.com'},
-  'Zuma Miami':{color:'#030303',accent:'#e2e8f0',logo:'ZUM',domain:'zumarestaurant.com'},
-  'Clandestino':{color:'#020106',accent:'#6366f1',logo:'CLD',domain:'clandestinomiami.com'},
-  'Watr at the 1':{color:'#001220',accent:'#38bdf8',logo:'WTR',domain:'1hotels.com'},
-  'Three Bees':{color:'#090600',accent:'#fbbf24',logo:'3BS',domain:'threebeesbar.com'},
+  'LIV':{color:'#0d0005',accent:'#fb7185',logo:'LIV',
+    logoUrl:'https://livmiami.com/wp-content/uploads/2018/06/cropped-LIV_MIAMI_728x90LiVAll.png'},
+  'E11EVEN Miami':{color:'#0a0020',accent:'#c084fc',logo:'E11',
+    logoUrl:'https://cdn.prod.website-files.com/6377f4b5d60031cd02999855/6377fe8403cd69232cd4a4f0_E11%20logo.avif'},
+  'Komodo Lounge':{color:'#011008',accent:'#2dd4bf',logo:'KMD',
+    logoUrl:'https://komodomiami.com/wp-content/uploads/2024/01/KomodoMiami_Logo-1-e1705032716310-100x27.png'},
+  'Sexy Fish':{color:'#001020',accent:'#d4af37',logo:'SF',
+    logoUrl:'https://sexyfish.com/wp-content/uploads/2023/07/SF_Gold.png'},
+  'Sugar':{color:'#120900',accent:'#fbbf24',logo:'SGR'},
+  'Mila Lounge':{color:'#12000c',accent:'#f472b6',logo:'MLA'},
+  'Swan Upstairs':{color:'#1a0a1a',accent:'#f9a8d4',logo:'SWN',
+    logoUrl:'https://swanmiami.com/wp-content/uploads/2023/12/Swan_NewLogo_PINK-copy.png'},
+  'Blackbird Ordinary':{color:'#080706',accent:'#d6d3d1',logo:'BBO'},
+  'Space Miami':{color:'#000012',accent:'#60a5fa',logo:'SPC',
+    logoUrl:'https://images.squarespace-cdn.com/content/v1/699f454ee72b0109a8d7807e/7b8cc755-c2a0-4445-8610-c3da1295535b/IMG_6007.png?format=1500w'},
+  'Bodega':{color:'#120b00',accent:'#fcd34d',logo:'BOD'},
+  'Dirty Rabbit':{color:'#07000e',accent:'#818cf8',logo:'DRT'},
+  'Rosa Sky':{color:'#12000c',accent:'#f9a8d4',logo:'RSK'},
+  'Nikki Beach Club':{color:'#120600',accent:'#fca5a5',logo:'NKB',
+    logoUrl:'https://nikkibeach.com/wp-content/uploads/2024/07/logo-group-horizontal.svg'},
+  "Dante's HiFi":{color:'#070a01',accent:'#a3e635',logo:'DHF'},
+  'Sweet Liberty':{color:'#000c18',accent:'#93c5fd',logo:'SWL',
+    logoUrl:'https://cdn.prod.website-files.com/65bc68aafffa61a6d8ef5a77/65c09dda62ed5413a3bb48d9_logo_dark.svg'},
+  'Broken Shaker':{color:'#00100e',accent:'#5eead4',logo:'BSH'},
+  'Joia Beach Club':{color:'#000e1e',accent:'#38bdf8',logo:'JOI'},
+  'Café La Trova':{color:'#120600',accent:'#fb923c',logo:'CLT',
+    logoUrl:'https://images.getbento.com/brKv1CSuQU85zaJ0wman_LaTrova-logo.png'},
+  'El Patio Wynwood':{color:'#010d05',accent:'#4ade80',logo:'EPW'},
+  'Papi Steak Lounge':{color:'#090400',accent:'#f59e0b',logo:'PSL',
+    logoUrl:'https://papisteak.com/wp-content/uploads/2025/10/Group-20.png'},
+  'Marion':{color:'#0a0018',accent:'#d4af37',logo:'MAR',
+    logoUrl:'https://marionmiami.com/wp-content/uploads/2024/07/MARION_Face_goldv1.png'},
+  'Baoli Miami':{color:'#030608',accent:'#e2e8f0',logo:'BAO'},
+  'Strawberry Moon':{color:'#120011',accent:'#f472b6',logo:'STM'},
+  'Copper 29 Bar':{color:'#120600',accent:'#fb923c',logo:'C29'},
+  'The Sylvester':{color:'#090600',accent:'#ef4444',logo:'SYL'},
+  'Astra Lounge':{color:'#010206',accent:'#818cf8',logo:'AST'},
+  'Giselle Miami':{color:'#0a061e',accent:'#d8b4fe',logo:'GIS'},
+  'Mayami Bar':{color:'#010e06',accent:'#86efac',logo:'MAY'},
+  'Queen Miami Beach':{color:'#070015',accent:'#e879f9',logo:'QMB'},
+  'Vendome Miami':{color:'#040404',accent:'#d4af37',logo:'VND'},
+  'Bodega Taqueria':{color:'#120b00',accent:'#fcd34d',logo:'BDT'},
+  'Louie Bossi':{color:'#090400',accent:'#f97316',logo:'LBS'},
+  'Oasis Wynwood':{color:'#010e06',accent:'#4ade80',logo:'OAS'},
+  'The Rusty Pelican':{color:'#000c18',accent:'#38bdf8',logo:'TRP'},
+  'Ball & Chain':{color:'#0e0600',accent:'#f97316',logo:'B&C'},
+  'Kiki on the River':{color:'#001218',accent:'#22d3ee',logo:'KKR'},
+  'Catch Miami':{color:'#000916',accent:'#60a5fa',logo:'CAT'},
+  'Bar Lab':{color:'#030312',accent:'#818cf8',logo:'BRL'},
+  'Mondrian Beach Bar':{color:'#000c20',accent:'#93c5fd',logo:'MBB'},
+  'Gramps':{color:'#090600',accent:'#d97706',logo:'GRP'},
+  'Coyo Taco':{color:'#0e0300',accent:'#ef4444',logo:'COY'},
+  'SLS Brickell Bar':{color:'#060014',accent:'#a78bfa',logo:'SLS'},
+  'Byblos Miami':{color:'#010903',accent:'#4ade80',logo:'BYB'},
+  '1800 Lucky':{color:'#060600',accent:'#facc15',logo:'18L',
+    logoUrl:'https://static.spotapps.co/website_images/ab_websites/102627_website_v1/logo.png'},
+  'Freehold Miami':{color:'#030901',accent:'#86efac',logo:'FRH'},
+  'Bunbury':{color:'#090600',accent:'#d4af37',logo:'BNB'},
+  'Zuma Miami':{color:'#030303',accent:'#e2e8f0',logo:'ZUM',
+    logoUrl:'https://www.zumarestaurant.com/assets/images/zuma_logo.svg'},
+  'Clandestino':{color:'#020106',accent:'#6366f1',logo:'CLD'},
+  'Watr at the 1':{color:'#001220',accent:'#38bdf8',logo:'WTR'},
+  'Three Bees':{color:'#090600',accent:'#fbbf24',logo:'3BS'},
 };
 function getBrand(vname){
   return VENUE_BRANDS[vname]||{color:'#0d0a14',accent:'#f59e0b',logo:(vname||'?').replace(/[^A-Z0-9]/gi,'').substring(0,3).toUpperCase()||'BAR'};
@@ -2023,22 +2036,23 @@ function brandLogoSVG(logo,color,accent,size){
     'font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="'+fs+'" fill="'+accent+'">'+logo+'</text>'+
     '</svg>';
 }
-/* Real logo loader — Clearbit image on top, SVG fallback behind it */
+/* Real logo loader — official venue logo on top, SVG initials behind as fallback */
 function brandLogoEl(br,size){
   size=size||40;
   var r=Math.round(size*0.22);
+  var p=Math.round(size*0.1); /* inner padding so wide logos breathe */
   var fs=br.logo.length>2?Math.floor(size*0.28):Math.floor(size*0.34);
   var svgFallback='<svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg">'+
     '<rect width="'+size+'" height="'+size+'" rx="'+r+'" fill="'+br.color+'"/>'+
-    '<rect width="'+size+'" height="'+size+'" rx="'+r+'" fill="none" stroke="'+br.accent+'" stroke-width="1" stroke-opacity="0.35"/>'+
+    '<rect width="'+size+'" height="'+size+'" rx="'+r+'" fill="none" stroke="'+br.accent+'" stroke-width="1" stroke-opacity="0.4"/>'+
     '<text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="'+fs+'" fill="'+br.accent+'">'+br.logo+'</text>'+
     '</svg>';
-  if(!br.domain) return '<div style="width:'+size+'px;height:'+size+'px;border-radius:'+r+'px;overflow:hidden;position:relative;flex-shrink:0;">'+svgFallback+'</div>';
+  var logoSrc=br.logoUrl||(br.domain?'https://www.google.com/s2/favicons?domain='+br.domain+'&sz=128':'');
+  if(!logoSrc) return '<div style="width:'+size+'px;height:'+size+'px;border-radius:'+r+'px;overflow:hidden;position:relative;flex-shrink:0;">'+svgFallback+'</div>';
   return '<div style="width:'+size+'px;height:'+size+'px;border-radius:'+r+'px;overflow:hidden;background:'+br.color+';flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;position:relative;">'+
     svgFallback+
-    '<img src="https://www.google.com/s2/favicons?domain='+br.domain+'&sz=128" '+
-    'width="'+size+'" height="'+size+'" '+
-    'style="width:100%;height:100%;object-fit:contain;position:absolute;inset:0;border-radius:'+r+'px;image-rendering:crisp-edges;" '+
+    '<img src="'+logoSrc+'" '+
+    'style="width:calc(100% - '+p*2+'px);height:calc(100% - '+p*2+'px);object-fit:contain;position:absolute;inset:'+p+'px;max-width:100%;max-height:100%;" '+
     'onerror="this.style.display=\'none\';">'+
     '</div>';
 }
