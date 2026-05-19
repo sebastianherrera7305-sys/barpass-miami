@@ -2324,6 +2324,11 @@ function enterApp(){
     buildMap();
     requestLocation();
     initExploreMap();
+    /* Extra invalidation after layout settles — fixes iOS WKWebView sizing */
+    setTimeout(function(){
+      if(feedMap){feedMap.invalidateSize(true);feedMap.setView([25.782,-80.163],12,{animate:false});}
+      if(exploreMap){exploreMap.invalidateSize(true);exploreMap.setView([25.782,-80.163],12,{animate:false});}
+    },800);
   },300);
   setInterval(buildAIBanner,8000);
   setInterval(function(){
@@ -2611,9 +2616,11 @@ function buildMap(venues){
     addMarkerToMap(feedMarkers,v);
     bounds.push([v.lat,v.lng]);
   }
-  /* Center on core Miami nightlife area rather than fitting all 50 venues (which zooms too far out) */
+  /* Center on core Miami nightlife area */
   feedMap.setView([25.782,-80.163],12,{animate:false});
-  setTimeout(function(){feedMap.invalidateSize();},100);
+  /* Double invalidation: first pass fixes hidden-container sizing, second locks coords */
+  setTimeout(function(){feedMap.invalidateSize(true);feedMap.setView([25.782,-80.163],12,{animate:false});},150);
+  setTimeout(function(){feedMap.invalidateSize(true);feedMap.setView([25.782,-80.163],12,{animate:false});},600);
   if(document.getElementById('stat-venues'))document.getElementById('stat-venues').textContent=venues.length;
 }
 function getVenueCoords(v){
@@ -3015,7 +3022,9 @@ function toggleTheme(){
 (function(){
   try{
     var savedTheme=localStorage.getItem('bp-theme');
-    if(savedTheme==='warm'){
+    /* In native iOS app always stay in dark mode */
+    var isNativeiOS=!!(window.webkit&&window.webkit.messageHandlers);
+    if(savedTheme==='warm'&&!isNativeiOS){
       document.body.classList.add('warm');
       setTimeout(setMapTheme,500);
       var btn=document.getElementById('theme-btn');
