@@ -2052,10 +2052,10 @@ function brandLogoSVG(logo,color,accent,size){
 function brandLogoEl(br,size){
   size=size||40;
   var r=Math.round(size*0.22);
-  var p=Math.round(size*0.12);
+  var p=Math.round(size*0.1);
   var fs=br.logo.length>2?Math.floor(size*0.28):Math.floor(size*0.34);
   var bg=br.logoBg||br.color;
-  /* SVG initials — always rendered as background fallback */
+  /* SVG initials — always rendered as background fallback (square) */
   var svg='<svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg">'+
     '<rect width="'+size+'" height="'+size+'" rx="'+r+'" fill="'+br.color+'"/>'+
     '<rect width="'+size+'" height="'+size+'" rx="'+r+'" fill="none" stroke="'+br.accent+'" stroke-width="1" stroke-opacity="0.4"/>'+
@@ -2063,7 +2063,16 @@ function brandLogoEl(br,size){
     '</svg>';
   var logoSrc=br.logoUrl||(br.domain?'https://www.google.com/s2/favicons?domain='+br.domain+'&sz=128':'');
   if(!logoSrc) return '<div style="width:'+size+'px;height:'+size+'px;border-radius:'+r+'px;overflow:hidden;position:relative;flex-shrink:0;">'+svg+'</div>';
-  /* Real logo overlaid — onerror simply hides img, SVG shows through */
+  /* logoBg venues (white-bg logos): use wide pill so full horizontal logo is visible */
+  if(br.logoBg){
+    var h=size; var maxW=Math.round(size*2.6);
+    return '<div style="height:'+h+'px;max-width:'+maxW+'px;min-width:'+h+'px;width:auto;border-radius:'+r+'px;overflow:hidden;background:'+bg+';flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;padding:'+p+'px '+(p+4)+'px;box-sizing:border-box;">'+
+      '<img src="'+logoSrc+'" '+
+      'style="max-height:'+(h-p*2)+'px;max-width:'+(maxW-p*2-8)+'px;width:auto;height:auto;object-fit:contain;display:block;" '+
+      'onerror="this.parentNode.outerHTML=\''+svg.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\'">'+
+      '</div>';
+  }
+  /* transparent-bg logos: square container with SVG fallback behind */
   return '<div style="width:'+size+'px;height:'+size+'px;border-radius:'+r+'px;overflow:hidden;background:'+bg+';flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;position:relative;">'+
     svg+
     '<img src="'+logoSrc+'" '+
