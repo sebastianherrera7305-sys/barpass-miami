@@ -8,11 +8,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" crossorigin="anonymous">
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" crossorigin="anonymous">
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
 <style>
 /* ════════════════════════════════════════════
    BARPASS MIAMI — AI NIGHTLIFE PLATFORM
@@ -2191,6 +2186,7 @@ function showAuth(){
 }
 
 function skipSplash(){
+  nativeHaptic('light');
   showAuth();
 }
 
@@ -2225,6 +2221,7 @@ function doLogin(){
   if(!pass){document.getElementById('l-pass-err').textContent='Password required';pEl.classList.add('err');setTimeout(function(){pEl.classList.remove('err');},600);return;}
   var btn=document.getElementById('l-btn');btn.innerHTML='<span class="auth-loader"></span>';btn.disabled=true;
   if(!fbAuth){
+    nativeHaptic('success');
     S.user={name:email.split('@')[0].replace(/\./g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}),email:email,emoji:'🎉',prefs:'Cocktails, rooftop'};
     loadVenues(function(){btn.innerHTML='Sign In';btn.disabled=false;showOnboarding();});
     return;
@@ -2297,6 +2294,7 @@ function buildOnboardingMap(){
   }.bind(this)).join('');
 }
 function obNext(){
+  nativeHaptic('select');
   obSlide++;
   if(obSlide>=4){enterApp();return;}
   document.querySelectorAll('.ob-slide').forEach(function(s,i){s.classList.toggle('active',i===obSlide);});
@@ -2305,6 +2303,7 @@ function obNext(){
   document.getElementById('ob-next-btn').textContent=labels[obSlide];
 }
 function enterApp(){
+  nativeHaptic('success');
   document.getElementById('onboarding').style.display='none';
   document.getElementById('app').style.display='flex';
   var u=S.user;
@@ -2338,6 +2337,10 @@ function enterApp(){
     if(sb)sb.style.display='block';
     toast('👥 '+CROSSED_PATHS.filter(function(p){return p.active;}).length+' people crossed your path tonight','info');
   },3000);
+  /* Request native push notifications after 5s */
+  setTimeout(function(){
+    if(window.barpassNative) window.barpassNative.requestNotifications();
+  },5000);
   /* Games badge always on */
   var gb=document.getElementById('games-badge');if(gb)gb.style.display='block';
 }
@@ -2763,6 +2766,7 @@ function buildVenueList(venues){
 /* ── GEOLOCATION ── */
 var userCoords=null;
 function requestLocation(){
+  if(window.barpassNative){window.barpassNative.requestLocation();return;}
   if(!navigator.geolocation){return;}
   navigator.geolocation.getCurrentPosition(function(pos){
     userCoords=[pos.coords.latitude,pos.coords.longitude];
@@ -3028,6 +3032,7 @@ function toggleTheme(){
 })();
 
 function openVenue(id){
+  nativeHaptic('light');
   S.currentVenue=VENUES.find(function(v){return v.id===id;});
   if(!S.currentVenue)return;
   var v=S.currentVenue;
@@ -3100,6 +3105,8 @@ function useSkip(){
   closeScreen('venue-detail');
 }
 function activateExpress(){
+  nativeHaptic('success');
+  if(window.barpassNative) window.barpassNative.applePayCharge(9.99,'BarPass Express · All Night');
   S.express=true;closeScreen('express-screen');
   document.getElementById('express-banner').style.display='none';
   document.getElementById('express-pill').style.display='flex';
@@ -3221,6 +3228,10 @@ function placeOrder(){
   toast('🚀 Order placed! ~8 min delivery','ok');
 }
 
+// ── Native iOS bridge helpers ─────────────────────────────────────────────────
+function nativeHaptic(style){ if(window.barpassNative) window.barpassNative.haptic(style||'light'); }
+function nativeLog(msg){ if(window.barpassNative) window.barpassNative.log(msg); }
+
 function openScreen(id){
   var s=document.getElementById(id);if(!s)return;
   if(id==='explore-screen'){
@@ -3281,6 +3292,7 @@ var CAT_AI_SUBS={
   latin:'Latin nightlife & dancing hotspots',sports:'Sports bars with game night energy'
 };
 function filterCat(el,cat){
+  nativeHaptic('select');
   S.currentCat=cat;
   document.querySelectorAll('.cat-chip').forEach(function(c){c.classList.remove('active');});el.classList.add('active');
   var venues=VENUES;
@@ -3696,5 +3708,10 @@ _floatStyle.textContent='@keyframes floatUp{from{opacity:1;transform:translateY(
 document.head.appendChild(_floatStyle);
 
 </script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
 </body>
 </html>
