@@ -1,0 +1,376 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA0000010000000000000001 /* BarPassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000001 /* BarPassApp.swift */; };
+		AA0000010000000000000002 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000002 /* AppState.swift */; };
+		AA0000010000000000000003 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000003 /* RootView.swift */; };
+		AA0000010000000000000004 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000004 /* SplashView.swift */; };
+		AA0000010000000000000005 /* BarPassWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000005 /* BarPassWebView.swift */; };
+		AA0000010000000000000006 /* WebViewCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000006 /* WebViewCoordinator.swift */; };
+		AA0000010000000000000007 /* NativeBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000007 /* NativeBridge.swift */; };
+		AA0000010000000000000008 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000008 /* HapticService.swift */; };
+		AA0000010000000000000009 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000009 /* LocationService.swift */; };
+		AA000001000000000000000A /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000A /* NotificationService.swift */; };
+		AA000001000000000000000B /* BiometricService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000B /* BiometricService.swift */; };
+		AA000001000000000000000C /* ApplePayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000C /* ApplePayService.swift */; };
+		AA000001000000000000000D /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000D /* CacheManager.swift */; };
+		AA000001000000000000000E /* barpass-miami.html in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000E /* barpass-miami.html */; };
+		AA000001000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000F /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA0000020000000000000001 /* BarPassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarPassApp.swift; sourceTree = "<group>"; };
+		AA0000020000000000000002 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		AA0000020000000000000003 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		AA0000020000000000000004 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		AA0000020000000000000005 /* BarPassWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarPassWebView.swift; sourceTree = "<group>"; };
+		AA0000020000000000000006 /* WebViewCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewCoordinator.swift; sourceTree = "<group>"; };
+		AA0000020000000000000007 /* NativeBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeBridge.swift; sourceTree = "<group>"; };
+		AA0000020000000000000008 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticService.swift; sourceTree = "<group>"; };
+		AA0000020000000000000009 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		AA000002000000000000000A /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		AA000002000000000000000B /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricService.swift; sourceTree = "<group>"; };
+		AA000002000000000000000C /* ApplePayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayService.swift; sourceTree = "<group>"; };
+		AA000002000000000000000D /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
+		AA000002000000000000000E /* barpass-miami.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "barpass-miami.html"; sourceTree = "<group>"; };
+		AA000002000000000000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA00000200000000000000A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA00000200000000000000A1 /* BarPass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BarPass.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA0000030000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA0000040000000000000000 = {
+			isa = PBXGroup;
+			children = (
+				AA0000040000000000000001 /* BarPass */,
+				AA000004000000000000000F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA000004000000000000000F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA00000200000000000000A1 /* BarPass.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA0000040000000000000001 /* BarPass */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000020000000000000001 /* BarPassApp.swift */,
+				AA0000020000000000000002 /* AppState.swift */,
+				AA0000040000000000000002 /* Core */,
+				AA000004000000000000000A /* Features */,
+				AA000004000000000000000B /* Resources */,
+				AA000004000000000000000E /* Web */,
+			);
+			path = BarPass;
+			sourceTree = "<group>";
+		};
+		AA0000040000000000000002 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000040000000000000003 /* WebView */,
+				AA0000040000000000000005 /* Bridge */,
+				AA0000040000000000000006 /* Services */,
+				AA0000040000000000000009 /* Cache */,
+			);
+			name = Core;
+			path = Core;
+			sourceTree = "<group>";
+		};
+		AA0000040000000000000003 /* WebView */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000020000000000000005 /* BarPassWebView.swift */,
+				AA0000020000000000000006 /* WebViewCoordinator.swift */,
+			);
+			name = WebView;
+			path = WebView;
+			sourceTree = "<group>";
+		};
+		AA0000040000000000000005 /* Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000020000000000000007 /* NativeBridge.swift */,
+			);
+			name = Bridge;
+			path = Bridge;
+			sourceTree = "<group>";
+		};
+		AA0000040000000000000006 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000020000000000000008 /* HapticService.swift */,
+				AA0000020000000000000009 /* LocationService.swift */,
+				AA000002000000000000000A /* NotificationService.swift */,
+				AA000002000000000000000B /* BiometricService.swift */,
+				AA000002000000000000000C /* ApplePayService.swift */,
+			);
+			name = Services;
+			path = Services;
+			sourceTree = "<group>";
+		};
+		AA0000040000000000000009 /* Cache */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000000000D /* CacheManager.swift */,
+			);
+			name = Cache;
+			path = Cache;
+			sourceTree = "<group>";
+		};
+		AA000004000000000000000A /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000020000000000000003 /* RootView.swift */,
+				AA000004000000000000000C /* Splash */,
+			);
+			name = Features;
+			path = Features;
+			sourceTree = "<group>";
+		};
+		AA000004000000000000000C /* Splash */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000020000000000000004 /* SplashView.swift */,
+			);
+			name = Splash;
+			path = Splash;
+			sourceTree = "<group>";
+		};
+		AA000004000000000000000B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AA00000200000000000000A0 /* Info.plist */,
+				AA000002000000000000000F /* Assets.xcassets */,
+			);
+			name = Resources;
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		AA000004000000000000000E /* Web */ = {
+			isa = PBXGroup;
+			children = (
+				AA000002000000000000000E /* barpass-miami.html */,
+			);
+			name = Web;
+			path = Web;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA0000050000000000000000 /* BarPass */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000060000000000000001 /* Build configuration list for PBXNativeTarget "BarPass" */;
+			buildPhases = (
+				AA0000030000000000000001 /* Sources */,
+				AA0000030000000000000002 /* Resources */,
+				AA0000030000000000000003 /* Frameworks */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = BarPass;
+			productName = BarPass;
+			productReference = AA00000200000000000000A1 /* BarPass.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA0000070000000000000000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1700;
+				LastUpgradeCheck = 1700;
+				TargetAttributes = {
+					AA0000050000000000000000 = {
+						CreatedOnToolsVersion = 17.0;
+					};
+				};
+			};
+			buildConfigurationList = AA0000060000000000000000 /* Build configuration list for PBXProject "BarPass" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AA0000040000000000000000;
+			productRefGroup = AA000004000000000000000F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA0000050000000000000000 /* BarPass */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA0000030000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000001000000000000000E /* barpass-miami.html in Resources */,
+				AA000001000000000000000F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA0000030000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000010000000000000001 /* BarPassApp.swift in Sources */,
+				AA0000010000000000000002 /* AppState.swift in Sources */,
+				AA0000010000000000000003 /* RootView.swift in Sources */,
+				AA0000010000000000000004 /* SplashView.swift in Sources */,
+				AA0000010000000000000005 /* BarPassWebView.swift in Sources */,
+				AA0000010000000000000006 /* WebViewCoordinator.swift in Sources */,
+				AA0000010000000000000007 /* NativeBridge.swift in Sources */,
+				AA0000010000000000000008 /* HapticService.swift in Sources */,
+				AA0000010000000000000009 /* LocationService.swift in Sources */,
+				AA000001000000000000000A /* NotificationService.swift in Sources */,
+				AA000001000000000000000B /* BiometricService.swift in Sources */,
+				AA000001000000000000000C /* ApplePayService.swift in Sources */,
+				AA000001000000000000000D /* CacheManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA0000080000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				VALIDATE_PRODUCT = NO;
+			};
+			name = Debug;
+		};
+		AA0000080000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AA0000080000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BarPass/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.barpass.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AA0000080000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BarPass/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.barpass.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA0000060000000000000000 /* Build configuration list for PBXProject "BarPass" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000080000000000000001 /* Debug */,
+				AA0000080000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000060000000000000001 /* Build configuration list for PBXNativeTarget "BarPass" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000080000000000000003 /* Debug */,
+				AA0000080000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = AA0000070000000000000000 /* Project object */;
+}
