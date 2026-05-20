@@ -1,0 +1,45 @@
+name: Generate BarPass Apple Wallet Pass
+
+on:
+  repository_dispatch:
+    types: [generate-pass]
+
+# Permisos necesarios para que el Action haga commit al repo
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install node-fetch@3
+
+      - name: Generate pass via PassKit
+        id: gen
+        env:
+          PASSKIT_API_KEY:      ${{ secrets.PASSKIT_API_KEY }}
+          PASSKIT_TEMPLATE:     ${{ secrets.PASSKIT_TEMPLATE_NAME }}
+          BP_SECRET:            ${{ secrets.BP_SECRET }}
+          WALLET_PAYLOAD:       ${{ toJSON(github.event.client_payload) }}
+        run: node .github/scripts/generate-pass.js
+
+      - name: Commit pass URL to repo
+        run: |
+          git config user.name  "BarPass Bot 🤖"
+          git config user.email "bot@barpass.io"
+          git add passes/
+          git diff --staged --quiet || git commit -m "🎫 Pass generated: ${{ github.event.client_payload.walletId }}"
+          git push
