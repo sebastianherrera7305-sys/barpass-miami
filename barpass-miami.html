@@ -1132,6 +1132,85 @@ body::after{
 .night-score{font-family:'Instrument Serif',serif;font-size:48px;color:var(--gold);font-style:italic;line-height:1;}
 .nscore-label{font-size:11px;color:var(--cream4);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
 
+/* ════════════════════════════════
+   WALLET CREDENTIAL — QR Ticket
+════════════════════════════════ */
+@keyframes ticketReveal{from{opacity:0;transform:scale(.92) rotateX(8deg)}to{opacity:1;transform:scale(1) rotateX(0)}}
+@keyframes ticketGlow{0%,100%{box-shadow:0 0 20px rgba(245,158,11,.15),0 24px 80px rgba(0,0,0,.7)}50%{box-shadow:0 0 40px rgba(245,158,11,.25),0 24px 80px rgba(0,0,0,.7)}}
+@keyframes qrPulse{0%,100%{opacity:1}50%{opacity:.7}}
+@keyframes scanLine{0%{transform:translateY(-100%)}100%{transform:translateY(300%)}}
+@keyframes ticketShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes stampPop{0%{transform:scale(0) rotate(-15deg)}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+
+.ticket-screen{background:linear-gradient(180deg,#0a0612 0%,#08060a 50%,#0d0a1a 100%);}
+.ticket-header{padding:20px 24px 0;text-align:center;flex-shrink:0;position:relative;}
+.ticket-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:100px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.ticket-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:32px;color:var(--cream);line-height:1.1;margin-bottom:4px;}
+.ticket-sub{font-size:12px;color:var(--cream4);}
+
+.ticket-card{margin:16px 20px;border-radius:var(--r4);background:linear-gradient(145deg,#1a1407,#0f0a04);border:1.5px solid rgba(245,158,11,.35);position:relative;overflow:hidden;animation:ticketReveal .6s cubic-bezier(.22,1,.36,1) both;box-shadow:0 24px 80px rgba(0,0,0,.7);}
+.ticket-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.5),transparent);}
+.ticket-card::after{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.1),transparent 70%);pointer-events:none;}
+.ticket-glow{animation:ticketGlow 3s ease-in-out infinite;}
+
+.ticket-top{padding:24px 24px 16px;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;}
+.ticket-brand{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:var(--gold2);letter-spacing:-.01em;}
+.ticket-active{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:700;color:var(--teal);letter-spacing:.08em;text-transform:uppercase;}
+.ticket-active::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);animation:pulse 1.5s infinite;}
+
+.ticket-member{padding:0 24px 12px;position:relative;z-index:1;}
+.ticket-member-name{font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;color:var(--cream);margin-bottom:2px;}
+.ticket-member-tier{font-size:11px;color:var(--gold3);font-weight:700;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+.ticket-member-tier .tier-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);display:inline-block;}
+
+.ticket-perf{border:none;border-top:1.5px dashed rgba(245,158,11,.2);margin:0 10px;position:relative;}
+.ticket-perf::before,.ticket-perf::after{content:'';position:absolute;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--ink);}
+.ticket-perf::before{left:-16px;}
+.ticket-perf::after{right:-16px;}
+
+.ticket-qr-section{padding:20px 24px 16px;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;}
+.ticket-qr-wrap{width:200px;height:200px;border-radius:var(--r2);background:white;padding:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(245,158,11,.15);position:relative;}
+.ticket-qr-wrap canvas,.ticket-qr-wrap img{display:block;width:176px;height:176px;image-rendering:pixelated;}
+.ticket-qr-scanline{position:absolute;left:12px;right:12px;height:2px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.6),transparent);animation:scanLine 2.5s linear infinite;pointer-events:none;}
+
+.ticket-id-row{padding:12px 24px 8px;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:12px;}
+.ticket-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,158,11,.4);letter-spacing:.2em;}
+.ticket-id-sep{width:3px;height:3px;border-radius:50%;background:var(--cream5);}
+
+.ticket-bottom{padding:16px 24px 20px;position:relative;z-index:1;display:flex;gap:10px;border-top:1px solid rgba(245,158,11,.08);}
+.ticket-stat{flex:1;text-align:center;}
+.ticket-stat-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:var(--gold2);display:block;}
+.ticket-stat-lbl{font-size:9px;color:var(--cream4);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+
+.ticket-actions{padding:0 20px 20px;flex-shrink:0;display:flex;gap:10px;}
+.ticket-btn{flex:1;padding:16px;border-radius:var(--r2);border:none;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ticket-btn:active{transform:scale(.96);}
+.ticket-btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);box-shadow:0 8px 24px var(--gold-glow);}
+.ticket-btn.secondary{background:var(--smoke2);color:var(--cream2);border:1px solid var(--border2);}
+.ticket-btn.secondary:active{background:var(--smoke3);}
+
+.ticket-stamp{position:absolute;top:24px;right:24px;width:64px;height:64px;border-radius:50%;border:2.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;transform:rotate(15deg);animation:stampPop .5s cubic-bezier(.22,1,.36,1) .8s both;z-index:2;background:rgba(245,158,11,.06);}
+.ticket-stamp::after{content:'ACTIVE';position:absolute;bottom:-18px;font-size:7px;font-weight:800;letter-spacing:.12em;color:var(--gold);white-space:nowrap;}
+
+.no-ticket{padding:60px 20px;text-align:center;}
+.no-ticket-icon{font-size:64px;margin-bottom:16px;opacity:.5;}
+.no-ticket-head{font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;color:var(--cream);margin-bottom:8px;}
+.no-ticket-body{font-size:14px;color:var(--cream4);line-height:1.5;margin-bottom:20px;max-width:300px;margin-left:auto;margin-right:auto;}
+.no-ticket-btn{padding:18px 32px;border-radius:var(--r4);border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 32px var(--gold-glow);transition:all .2s;}
+.no-ticket-btn:active{transform:scale(.96);}
+
+/* ── Venue Customization Panel ── */
+.venue-params{padding:16px 20px;border-radius:var(--r3);background:linear-gradient(135deg,rgba(245,158,11,.05),rgba(245,158,11,.02));border:1px solid rgba(245,158,11,.15);margin:12px 0;}
+.vp-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.vp-row:last-child{border-bottom:none;}
+.vp-label{font-size:12px;color:var(--cream3);display:flex;align-items:center;gap:6px;}
+.vp-val{font-size:12px;font-weight:700;color:var(--gold2);font-family:'JetBrains Mono',monospace;}
+.vp-badge{font-size:9px;padding:3px 8px;border-radius:100px;background:var(--gold4);color:var(--gold);}
+
+/* ── Points Toast ── */
+@keyframes pointsFly{0%{opacity:0;transform:translateY(0) scale(.5)}20%{opacity:1;transform:translateY(-20px) scale(1.2)}80%{opacity:1;transform:translateY(-60px) scale(1)}100%{opacity:0;transform:translateY(-100px) scale(.8)}}
+.points-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;font-size:32px;font-weight:800;color:var(--gold);text-shadow:0 4px 20px rgba(245,158,11,.4);pointer-events:none;animation:pointsFly 1.8s ease-out forwards;}
+
 </style>
 </head>
 <body>
@@ -1455,9 +1534,76 @@ body::after{
       <div style="padding:14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">💎</div><div style="font-size:11px;font-weight:700;">VIP Tables</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Priority booking</div></div>
       <div style="padding:14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">🎟️</div><div style="font-size:11px;font-weight:700;">Events</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Early access tickets</div></div>
     </div>
+    <div onclick="openScreen('credential-screen')" style="margin-top:14px;padding:14px 16px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.22);display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;">
+      <div style="font-size:22px;">🎟️</div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--gold);">Wallet Credential</div><div style="font-size:11px;color:var(--cream4);margin-top:2px;">Your QR payment pass · Earn points on every spend</div></div>
+      <div style="font-size:18px;color:var(--gold3);">›</div>
+    </div>
     <div id="wallet-txs" style="margin-top:16px;">
       <div id="wallet-empty" style="text-align:center;padding:24px 0;color:var(--cream4);font-size:13px;">No transactions yet</div>
       <div id="tx-list" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WALLET CREDENTIAL — QR Ticket ══ -->
+<div class="screen ticket-screen" id="credential-screen" style="display:none;background:linear-gradient(180deg,#0a0612 0%,#08060a 50%,#0d0a1a 100%);">
+  <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
+  <div style="display:flex;justify-content:flex-end;padding:2px 20px;flex-shrink:0;"><button class="screen-close" onclick="closeScreen('credential-screen')">✕</button></div>
+  <div class="ticket-header">
+    <div class="ticket-badge">🎟️ WALLET CREDENTIAL</div>
+    <div class="ticket-title">Your Night Pass</div>
+    <div class="ticket-sub">Show this QR at any venue to pay with credits</div>
+  </div>
+  <!-- Active Ticket -->
+  <div id="ticket-active" style="display:none;flex:1;overflow-y:auto;scrollbar-width:none;">
+    <div class="ticket-card ticket-glow" id="ticket-card">
+      <div class="ticket-stamp" id="ticket-stamp">🪙</div>
+      <div class="ticket-top">
+        <div class="ticket-brand">BarPass</div>
+        <div class="ticket-active">Active</div>
+      </div>
+      <div class="ticket-member">
+        <div class="ticket-member-name" id="ticket-name">Alex Rivera</div>
+        <div class="ticket-member-tier"><span class="tier-dot"></span> <span id="ticket-tier">Bronze</span> Member</div>
+      </div>
+      <hr class="ticket-perf">
+      <div class="ticket-qr-section">
+        <div class="ticket-qr-wrap" id="qr-wrap">
+          <div class="ticket-qr-scanline"></div>
+          <div id="qr-code"></div>
+        </div>
+        <div style="margin-top:10px;font-size:10px;color:var(--cream4);">Scan to pay · Valid all night</div>
+      </div>
+      <hr class="ticket-perf">
+      <div class="ticket-id-row">
+        <span class="ticket-id" id="ticket-wallet-id">BP-XXXX-XXXX</span>
+        <span class="ticket-id-sep"></span>
+        <span class="ticket-id" id="ticket-issued">Just now</span>
+      </div>
+      <div class="ticket-bottom">
+        <div class="ticket-stat"><span class="ticket-stat-val" id="ticket-bal">$0</span><span class="ticket-stat-lbl">Credits</span></div>
+        <div class="ticket-stat"><span class="ticket-stat-val" id="ticket-pts">0</span><span class="ticket-stat-lbl">Points</span></div>
+        <div class="ticket-stat"><span class="ticket-stat-val" id="ticket-cb">$0</span><span class="ticket-stat-lbl">Cashback</span></div>
+      </div>
+    </div>
+    <div class="ticket-actions">
+      <button class="ticket-btn primary" onclick="shareTicket()">📤 Share</button>
+      <button class="ticket-btn secondary" onclick="refreshQR()">🔄 Refresh QR</button>
+    </div>
+  </div>
+  <!-- No Ticket / Activate -->
+  <div id="ticket-inactive" style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+    <div class="no-ticket">
+      <div class="no-ticket-icon">🎟️</div>
+      <div class="no-ticket-head">Activate Your Wallet</div>
+      <div class="no-ticket-body">Get your unique QR credential to pay instantly at any venue. Every time you pay, you earn points toward your next reward.</div>
+      <button class="no-ticket-btn" onclick="activateWalletCredential()">✨ Activate Now</button>
+      <div style="margin-top:16px;display:flex;gap:16px;justify-content:center;">
+        <div style="text-align:center;"><div style="font-size:24px;">🪙</div><div style="font-size:10px;color:var(--cream4);margin-top:4px;">Pay with QR</div></div>
+        <div style="text-align:center;"><div style="font-size:24px;">⭐</div><div style="font-size:10px;color:var(--cream4);margin-top:4px;">Earn Points</div></div>
+        <div style="text-align:center;"><div style="font-size:24px;">🎁</div><div style="font-size:10px;color:var(--cream4);margin-top:4px;">Unlock Rewards</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1549,6 +1695,7 @@ body::after{
   </div>
   <div class="profile-list">
     <div class="prow credit-row" onclick="openScreen('wallet-screen')"><div class="prow-ico">🪙</div><div class="prow-lbl">Night Wallet</div><div class="prow-val" id="p-wallet-val">No credit</div><div class="prow-arr">›</div></div>
+    <div class="prow" onclick="openScreen('credential-screen')" style="border-bottom:1px solid var(--border);"><div class="prow-ico" style="background:var(--gold4);">🎟️</div><div class="prow-lbl" style="color:var(--gold2);">QR Credential</div><div class="prow-val" style="color:var(--gold);font-size:10px;" id="p-credential-status">Not activated</div><div class="prow-arr">›</div></div>
     <div class="prow" onclick="toast('Night history…','info')"><div class="prow-ico">📍</div><div class="prow-lbl">Night History</div><div class="prow-val">47 venues</div><div class="prow-arr">›</div></div>
     <div class="prow" onclick="toast('Saved venues…','info')"><div class="prow-ico">❤️</div><div class="prow-lbl">Saved Venues</div><div class="prow-val">8 saved</div><div class="prow-arr">›</div></div>
     <div class="prow" onclick="openScreen('express-screen')"><div class="prow-ico">⚡</div><div class="prow-lbl">Express Pass</div><div class="prow-val" id="p-express-val" style="color:var(--cream4);">Get access</div><div class="prow-arr">›</div></div>
@@ -2173,6 +2320,7 @@ const S = {
   user:null, express:false, cart:[], totalSpent:0, currentVenue:null,
   district:'all', searchQ:'', points:0, cashback:0, tier:0,
   credit:{active:false,venue:null,loaded:0,balance:0,spent:0,txs:[],id:'BP-'+Math.random().toString(36).substr(2,4).toUpperCase()+'-'+Math.random().toString(36).substr(2,4).toUpperCase()},
+  credential:null,
 };
 
 const USERS = {
@@ -3716,6 +3864,295 @@ function buildAfterRecap(){
 }
 
 /* ═══════════════════════════════════════════
+   WALLET CREDENTIAL — QR + Points Engine
+═══════════════════════════════════════════ */
+var qrInstance = null;
+var qrRefreshTimer = null;
+
+// ── Venue Customization: multipliers & offers ──
+var VENUE_CONFIG = {};
+function getVenueConfig(venueName) {
+  if (VENUE_CONFIG[venueName]) return VENUE_CONFIG[venueName];
+  return { pointsMultiplier: 1, discount: 0, welcomeBonus: 0, minLoad: 0, color: 'var(--gold)' };
+}
+function initVenueConfigs() {
+  VENUE_CONFIG = {
+    'LIV Miami': { pointsMultiplier: 2, discount: 0.05, welcomeBonus: 50, minLoad: 20, color: 'var(--coral)' },
+    'E11EVEN Miami': { pointsMultiplier: 2.5, discount: 0.08, welcomeBonus: 100, minLoad: 50, color: 'var(--violet)' },
+    'Komodo Miami': { pointsMultiplier: 1.5, discount: 0.03, welcomeBonus: 25, minLoad: 20, color: 'var(--gold)' },
+    'Sugar Rooftop': { pointsMultiplier: 1.8, discount: 0.04, welcomeBonus: 30, minLoad: 15, color: 'var(--teal)' },
+    'Nikki Beach Club': { pointsMultiplier: 1.3, discount: 0, welcomeBonus: 20, minLoad: 10, color: 'var(--green)' },
+  };
+  VENUES.forEach(function(v) {
+    if (!VENUE_CONFIG[v.name]) {
+      VENUE_CONFIG[v.name] = { pointsMultiplier: 1, discount: 0, welcomeBonus: 0, minLoad: 0, color: 'var(--cream3)' };
+    }
+  });
+}
+initVenueConfigs();
+
+// ── Award Points on spend ──
+function awardPoints(amount, venueName) {
+  var cfg = getVenueConfig(venueName || (S.currentVenue && S.currentVenue.name));
+  var base = Math.floor(amount);
+  var bonus = Math.floor(base * (cfg.pointsMultiplier - 1));
+  var total = base + bonus;
+  S.points += total;
+  showPointsFly(total, bonus > 0 ? '×' + cfg.pointsMultiplier : '');
+  refreshWalletUI();
+  return total;
+}
+
+function showPointsFly(pts, label) {
+  var el = document.createElement('div');
+  el.className = 'points-toast';
+  el.textContent = '✦ +' + pts + ' pts' + (label ? ' ' + label : '');
+  document.body.appendChild(el);
+  setTimeout(function() { el.remove(); }, 1900);
+}
+
+// ── Generate QR Code ──
+function generateWalletQR(containerId) {
+  if (!S.credential || !S.credential.active) return;
+  var el = document.getElementById(containerId || 'qr-code');
+  if (!el) return;
+  el.innerHTML = '';
+  if (typeof QRCode === 'undefined') {
+    el.innerHTML = '<div style="font-size:10px;color:var(--cream4);text-align:center;">QR: ' + esc(S.credential.code) + '</div>';
+    return;
+  }
+  try {
+    qrInstance = new QRCode(el, {
+      text: S.credential.code,
+      width: 176,
+      height: 176,
+      colorDark: '#0f0a04',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:10px;color:var(--cream4);text-align:center;">' + esc(S.credential.code) + '</div>';
+  }
+}
+
+function refreshQR() {
+  if (!S.credential || !S.credential.active) return;
+  S.credential.refreshedAt = Date.now();
+  S.credential.code = 'BP:' + S.credential.id + ':' + S.credential.refreshedAt + ':' + (S.user ? S.user.email.slice(0,8) : 'guest');
+  generateWalletQR('qr-code');
+  document.getElementById('ticket-issued').textContent = 'Refreshed ' + new Date().toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit',hour12:true});
+  toast('🔄 QR refreshed','info');
+}
+
+function shareTicket() {
+  if (!S.credential || !S.credential.active) return;
+  var txt = 'BarPass Wallet Credential\nID: ' + S.credential.id + '\nName: ' + (S.user ? S.user.name : 'Guest') + '\nTier: ' + calcTier() + '\nBalance: $' + (S.credit.active ? S.credit.balance.toFixed(2) : '0.00') + '\nShow this at any venue to pay with credits.';
+  if (navigator.share) {
+    navigator.share({ title: 'BarPass Wallet', text: txt }).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(txt).then(function() {
+      toast('📤 Credential copied to clipboard','ok');
+    }).catch(function() {
+      toast('📤 Share not available','warn');
+    });
+  }
+}
+
+// ── Activate Wallet Credential ──
+function activateWalletCredential() {
+  if (!S.user) { toast('Sign in first','warn'); return; }
+  nativeHaptic('success');
+  var walletId = 'BP-' + Math.random().toString(36).substr(2,4).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+  var ts = Date.now();
+  var code = 'BP:' + walletId + ':' + ts + ':' + (S.user.email ? S.user.email.slice(0,8) : 'guest');
+  S.credential = {
+    active: true,
+    id: walletId,
+    code: code,
+    activatedAt: ts,
+    refreshedAt: ts,
+    venueHistory: []
+  };
+  document.getElementById('ticket-inactive').style.display = 'none';
+  document.getElementById('ticket-active').style.display = 'block';
+  document.getElementById('ticket-name').textContent = S.user.name || 'Guest';
+  document.getElementById('ticket-tier').textContent = calcTier();
+  document.getElementById('ticket-wallet-id').textContent = walletId;
+  document.getElementById('ticket-issued').textContent = 'Just now';
+  document.getElementById('ticket-bal').textContent = '$' + (S.credit.active ? S.credit.balance.toFixed(2) : '0.00');
+  document.getElementById('ticket-pts').textContent = S.points || 0;
+  document.getElementById('ticket-cb').textContent = '$' + (S.cashback || 0).toFixed(2);
+  refreshWalletUI();
+  setTimeout(function() { generateWalletQR('qr-code'); }, 100);
+  document.getElementById('ticket-card').style.animation = 'none';
+  void document.getElementById('ticket-card').offsetWidth;
+  document.getElementById('ticket-card').style.animation = 'ticketReveal .6s cubic-bezier(.22,1,.36,1) both';
+  toast('🎟️ Wallet activated! Show your QR to pay at any venue.','credit');
+
+  if (S.currentVenue) {
+    var cfg = getVenueConfig(S.currentVenue.name);
+    if (cfg.welcomeBonus > 0) {
+      S.points += cfg.welcomeBonus;
+      document.getElementById('ticket-pts').textContent = S.points;
+      showPointsFly(cfg.welcomeBonus, 'welcome');
+      toast('🎉 +' + cfg.welcomeBonus + ' welcome points at ' + S.currentVenue.name + '!','ok');
+    }
+  }
+}
+
+// ── Update ticket UI on wallet changes ──
+function refreshTicketUI() {
+  var pStatus = document.getElementById('p-credential-status');
+  if (!S.credential || !S.credential.active) {
+    if (pStatus) pStatus.textContent = 'Not activated';
+    return;
+  }
+  var tier = calcTier();
+  document.getElementById('ticket-tier').textContent = tier;
+  document.getElementById('ticket-bal').textContent = '$' + (S.credit.active ? S.credit.balance.toFixed(2) : '0.00');
+  document.getElementById('ticket-pts').textContent = S.points || 0;
+  document.getElementById('ticket-cb').textContent = '$' + (S.cashback || 0).toFixed(2);
+  document.getElementById('ticket-name').textContent = (S.user && S.user.name) || 'Guest';
+  if (pStatus) pStatus.textContent = '🎟️ Active — ' + S.credential.id;
+  var stamp = document.getElementById('ticket-stamp');
+  if (tier === 'Platinum') stamp.textContent = '💎';
+  else if (tier === 'Gold') stamp.textContent = '🥇';
+  else if (tier === 'Silver') stamp.textContent = '🥈';
+  else stamp.textContent = '🪙';
+}
+
+// ── Show venue customization in venue detail ──
+function showVenueCustomization(venueName) {
+  var cfg = getVenueConfig(venueName);
+  var existing = document.getElementById('venue-params');
+  if (existing) existing.remove();
+  var div = document.createElement('div');
+  div.id = 'venue-params';
+  div.className = 'venue-params';
+  div.innerHTML =
+    '<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">✦ ' + venueName + ' Benefits</div>' +
+    (cfg.pointsMultiplier > 1 ? '<div class="vp-row"><span class="vp-label">⭐ Points Multiplier</span><span class="vp-val">×' + cfg.pointsMultiplier.toFixed(1) + '</span></div>' : '') +
+    (cfg.discount > 0 ? '<div class="vp-row"><span class="vp-label">💎 Credit Discount</span><span class="vp-val" style="color:var(--teal);">' + (cfg.discount * 100).toFixed(0) + '% off</span></div>' : '') +
+    (cfg.welcomeBonus > 0 ? '<div class="vp-row"><span class="vp-label">🎁 Welcome Bonus</span><span class="vp-val" style="color:var(--green);">+' + cfg.welcomeBonus + ' pts</span></div>' : '') +
+    (cfg.minLoad > 0 ? '<div class="vp-row"><span class="vp-label">📦 Min Load</span><span class="vp-val">$' + cfg.minLoad + '</span></div>' : '') +
+    '<div class="vp-row" style="border-bottom:none;"><span class="vp-label">🪙 You earn</span><span class="vp-val">' + Math.floor(cfg.pointsMultiplier) + ' pt per $1</span></div>';
+  var vdBody = document.querySelector('.vd-body');
+  if (vdBody) vdBody.insertBefore(div, vdBody.firstChild);
+}
+
+// ── Override payWithCredit to award points ──
+var _origPayWithCredit = payWithCredit;
+payWithCredit = function() {
+  var sub = 0; for (var si = 0; si < S.cart.length; si++) sub += S.cart[si].price * S.cart[si].qty;
+  var total = parseFloat((sub + 0.99).toFixed(2));
+  var c = S.credit;
+  if (!c.active || c.balance < 0.01) { toast('No credit available','warn'); return; }
+  var pay = Math.min(total, c.balance);
+  c.balance = parseFloat((c.balance - pay).toFixed(2));
+  c.spent = parseFloat((c.spent + pay).toFixed(2));
+  S.totalSpent = parseFloat((S.totalSpent + pay).toFixed(2));
+  var names = []; for (var si = 0; si < S.cart.length; si++) names.push(S.cart[si].name);
+  c.txs.unshift({name:'Round · ' + names.join(', '), price:pay, emoji:'🍸', time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true})});
+  // Award points on every payment
+  var venueName = S.currentVenue ? S.currentVenue.name : null;
+  var pts = awardPoints(pay, venueName);
+  S.cart = []; updateCartBadge(); renderCart();
+  closeScreen('cart-screen');
+  refreshCreditUI();
+  refreshTicketUI();
+  document.getElementById('p-spent').textContent = '$' + S.totalSpent.toFixed(0);
+  toast('🪙 Paid $' + pay.toFixed(2) + ' · $' + c.balance.toFixed(2) + ' left · +' + pts + ' pts','credit');
+};
+
+// ── Override placeOrder to award points ──
+var _origPlaceOrder = placeOrder;
+placeOrder = function() {
+  var sub = 0; for (var si = 0; si < S.cart.length; si++) sub += S.cart[si].price * S.cart[si].qty;
+  var total = sub + 0.99;
+  S.totalSpent += total;
+  document.getElementById('p-spent').textContent = '$' + S.totalSpent.toFixed(0);
+  var venueName = S.currentVenue ? S.currentVenue.name : null;
+  awardPoints(sub, venueName);
+  S.cart = []; updateCartBadge(); renderCart(); closeScreen('cart-screen');
+  refreshTicketUI();
+  toast('🚀 Order placed! +' + Math.floor(sub) + ' pts earned','ok');
+};
+
+// ── Override confirmLoad to show venue-specific config ──
+var _origConfirmLoad = confirmLoad;
+confirmLoad = function(amount) {
+  var v = S.currentVenue; if (!v) { toast('Select a venue first','warn'); return; }
+  var cfg = getVenueConfig(v.name);
+  if (cfg.minLoad > 0 && amount < cfg.minLoad) {
+    toast('Minimum load $' + cfg.minLoad + ' at ' + v.name,'warn');
+    return;
+  }
+  var c = S.credit;
+  c.active = true; c.venue = v.name;
+  c.loaded = parseFloat((c.loaded + amount).toFixed(2));
+  var discounted = cfg.discount > 0 ? amount * (1 + cfg.discount) : amount;
+  c.balance = parseFloat((c.balance + discounted).toFixed(2));
+  var bonus = amount >= 500 ? 50 : amount >= 200 ? 15 : amount >= 100 ? 5 : 0;
+  if (bonus > 0) {
+    c.balance = parseFloat((c.balance + bonus).toFixed(2));
+    S.cashback = parseFloat((S.cashback + bonus).toFixed(2));
+  }
+  var pts = Math.floor(amount / 10) * cfg.pointsMultiplier;
+  S.points += pts;
+  document.getElementById('load-section').style.display = 'none';
+  refreshCreditUI(); refreshWalletUI(); refreshTicketUI();
+  var elBal = document.getElementById('wallet-balance');
+  if (elBal) { elBal.style.color = 'var(--teal)'; setTimeout(function(){ elBal.style.color = ''; },800); }
+  var elAmt = document.getElementById('cc-amount');
+  if (elAmt) { elAmt.classList.remove('flash'); void elAmt.offsetWidth; elAmt.classList.add('flash'); }
+  closeScreen('wallet-screen');
+  var bonusTxt = '';
+  if (cfg.discount > 0) bonusTxt += ' · +' + (cfg.discount * 100).toFixed(0) + '% bonus credit';
+  if (bonus > 0) bonusTxt += ' · +$' + bonus + ' cashback';
+  toast('🪙 $' + amount + ' loaded at ' + v.name + bonusTxt + ' · +' + pts + ' pts','credit');
+};
+
+// ── Extend openScreen for credential screen ──
+var _origOpenScreen = openScreen;
+openScreen = function(id) {
+  _origOpenScreen(id);
+  if (id === 'credential-screen') {
+    if (S.credential && S.credential.active) {
+      document.getElementById('ticket-inactive').style.display = 'none';
+      document.getElementById('ticket-active').style.display = 'block';
+      refreshTicketUI();
+      setTimeout(function() { generateWalletQR('qr-code'); }, 100);
+    } else {
+      document.getElementById('ticket-active').style.display = 'none';
+      document.getElementById('ticket-inactive').style.display = 'flex';
+    }
+  }
+};
+
+// ── Extend openVenue to show venue customization ──
+var _origOpenVenue = openVenue;
+openVenue = function(id) {
+  _origOpenVenue(id);
+  var v = VENUES.find(function(x) { return x.id === id; });
+  if (v) setTimeout(function() { showVenueCustomization(v.name); }, 200);
+};
+
+// ── Extend refreshWalletUI to also update ticket ──
+var _origRefreshWalletUI = refreshWalletUI;
+refreshWalletUI = function() {
+  _origRefreshWalletUI();
+  if (S.credential && S.credential.active) refreshTicketUI();
+};
+
+// ── Extend signOut to clear credential ──
+var _origSignOut = signOut;
+signOut = function() {
+  S.credential = null;
+  qrInstance = null;
+  _origSignOut();
+};
+
+/* ═══════════════════════════════════════════
    FLOAT UP ANIMATION for reactions
 ═══════════════════════════════════════════ */
 var _floatStyle=document.createElement('style');
@@ -3728,5 +4165,6 @@ document.head.appendChild(_floatStyle);
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </body>
 </html>

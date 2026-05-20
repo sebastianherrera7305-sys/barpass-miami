@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>BarPass POS</title>
+
+<!-- jsQR for camera QR scanning -->
+<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<style>
+  :root {
+    --ink: #060608;
+    --ink2: #0d0c10;
+    --gold: #d4a017;
+    --gold2: #f5c842;
+    --gold-dim: rgba(212,160,23,.15);
+    --gold-glow: rgba(212,160,23,.25);
+    --surface: rgba(255,255,255,.04);
+    --surface2: rgba(255,255,255,.07);
+    --border: rgba(255,255,255,.08);
+    --text: #f0ede8;
+    --text2: rgba(240,237,232,.55);
+    --text3: rgba(240,237,232,.30);
+    --success: #22c55e;
+    --success-dim: rgba(34,197,94,.15);
+    --error: #ef4444;
+    --error-dim: rgba(239,68,68,.15);
+    --warn: #f59e0b;
+    --warn-dim: rgba(245,158,11,.12);
+    --radius: 20px;
+  }
+
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--ink);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* ── LAYOUT ─────────────────────────────────── */
+  #app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    padding-top: calc(16px + env(safe-area-inset-top));
+    background: rgba(6,6,8,.98);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topbar-logo img {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+  }
+  .topbar-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+  }
+  .topbar-title span {
+    color: var(--gold);
+  }
+  .topbar-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: var(--gold-dim);
+    color: var(--gold);
+    border: 1px solid rgba(212,160,23,.25);
+    text-transform: uppercase;
+  }
+  .venue-selector-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .venue-selector-btn:hover { background: rgba(255,255,255,.1); }
+  .venue-selector-btn .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 6px var(--success);
+  }
+  .venue-selector-btn .dot.offline { background: var(--error); box-shadow: 0 0 6px var(--error); }
+
+  /* MAIN CONTENT */
+  .main { flex: 1; overflow-y: auto; overflow-x: hidden; }
+
+  /* ── TABS ────────────────────────────────────── */
+  .tabs {
+    display: flex;
+    padding: 12px 20px 0;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    background: var(--ink);
+    flex-shrink: 0;
+  }
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 4px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .2s;
+    letter-spacing: -.01em;
+  }
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* ── PANEL VIEWS ─────────────────────────────── */
+  .panel { display: none; height: 100%; }
+  .panel.active { display: flex; flex-direction: column; }
+
+  /* ── SCAN PANEL ──────────────────────────────── */
+  #panel-scan {
+    padding: 20px;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .scan-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .scan-viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background: #000;
+    overflow: hidden;
+    max-height: 340px;
+  }
+  #camera-video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #camera-canvas { display: none; }
+
+  .scan-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .scan-frame {
+    width: 200px; height: 200px;
+    position: relative;
+  }
+  .scan-frame::before, .scan-frame::after,
+  .scan-frame-inner::before, .scan-frame-inner::after {
+    content: '';
+    position: absolute;
+    width: 28px; height: 28px;
+    border-color: var(--gold);
+    border-style: solid;
+  }
+  .scan-frame::before  { top:0; left:0;  border-width:3px 0 0 3px; border-radius:4px 0 0 0; }
+  .scan-frame::after   { top:0; right:0; border-width:3px 3px 0 0; border-radius:0 4px 0 0; }
+  .scan-frame-inner::before { bottom:0; left:0;  border-width:0 0 3px 3px; border-radius:0 0 0 4px; }
+  .scan-frame-inner::after  { bottom:0; right:0; border-width:0 3px 3px 0; border-radius:0 0 4px 0; }
+  .scan-laser {
+    position: absolute;
+    left: 10px; right: 10px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    top: 0;
+    animation: laserScan 2s ease-in-out infinite;
+    box-shadow: 0 0 8px var(--gold-glow);
+  }
+  @keyframes laserScan {
+    0%, 100% { top: 10px; opacity:.8; }
+    50% { top: calc(100% - 12px); opacity:1; }
+  }
+
+  .scan-darken {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle 110px at center, transparent 0%, rgba(0,0,0,.65) 100%);
+  }
+
+  /* Camera controls */
+  .scan-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .scan-start-btn {
+    flex: 1;
+    background: linear-gradient(135deg, var(--gold), #c8900c);
+    color: #000;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .scan-start-btn:hover { filter: brightness(1.1); }
+  .scan-start-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .scan-start-btn.scanning {
+    background: var(--error-dim);
+    color: var(--error);
+    border: 1px solid rgba(239,68,68,.25);
+  }
+
+  .torch-btn {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s;
+    margin-left: 10px;
+    flex-shrink: 0;
+  }
+  .torch-btn.on { color: var(--gold); background: var(--gold-dim); border-color: rgba(212,160,23,.25); }
+
+  /* Scan status bar */
+  .scan-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border-top: 1px solid var(--border);
+    color: var(--text2);
+    min-height: 48px;
+  }
+  .scan-status .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text3);
+    flex-shrink: 0;
+  }
+  .scan-status.scanning { color: var(--gold); }
+  .scan-status.scanning .status-dot { background: var(--gold); animation: pulse 1s infinite; }
+  .scan-status.success { color: var(--success); }
+  .scan-status.success .status-dot { background: var(--success); box-shadow: 0 0 8px var(--success); }
+  .scan-status.error { color: var(--error); }
+  .scan-status.error .status-dot { background: var(--error); }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+  /* ── PAYMENT FORM ────────────────────────────── */
+  .payment-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .pf-header {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pf-wallet-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: var(--gold-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .pf-wallet-info { flex: 1; min-width: 0; }
+  .pf-wallet-id {
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: .04em;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .pf-wallet-name {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+  .pf-balance-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .pf-balance-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; }
+  .pf-balance-value { font-size: 18px; font-weight: 700; color: var(--success); letter-spacing: -.02em; }
+  .pf-balance-value.low { color: var(--error); }
+
+  .pf-body { padding: 18px; }
+  .pf-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text3);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  /* Amount input */
+  .amount-wrap {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,.05);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 0 16px;
+    margin-bottom: 14px;
+    transition: border-color .2s;
+  }
+  .amount-wrap:focus-within { border-color: var(--gold); }
+  .amount-symbol {
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--text2);
+    padding-right: 8px;
+  }
+  #amount-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    padding: 14px 0;
+    letter-spacing: -.03em;
+    width: 100%;
+    caret-color: var(--gold);
+  }
+  #amount-input::placeholder { color: var(--text3); font-weight: 300; font-size: 28px; }
+
+  /* Quick amounts */
+  .quick-amounts {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .qa-btn {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 0;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .qa-btn:hover { background: var(--gold-dim); color: var(--gold); border-color: rgba(212,160,23,.3); }
+
+  /* Notes input */
+  .notes-input {
+    width: 100%;
+    background: rgba(255,255,255,.04);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    transition: border-color .2s;
+    margin-bottom: 16px;
+  }
+  .notes-input:focus { border-color: rgba(212,160,23,.4); }
+  .notes-input::placeholder { color: var(--text3); }
+
+  /* Points preview */
+  .points-preview {
+    background: var(--gold-dim);
+    border: 1px solid rgba(212,160,23,.2);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pp-label { font-size: 13px; color: var(--gold); font-weight: 500; }
+  .pp-value { font-size: 16px; font-weight: 700; color: var(--gold2); letter-spacing: -.01em; }
+  .points-preview.hidden { display: none; }
+
+  /* Charge button */
+  .charge-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold), #c8900c);
+    color: #000;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    border: none;
+    border-radius: 14px;
+    padding: 17px;
+    cursor: pointer;
+    transition: all .25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .charge-btn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); box-shadow: 0 8px 30px rgba(212,160,23,.35); }
+  .charge-btn:active:not(:disabled) { transform: translateY(0); }
+  .charge-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ── SUCCESS SCREEN ──────────────────────────── */
+  #success-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(6,6,8,.97);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    text-align: center;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    animation: fadeIn .2s ease;
+  }
+  #success-screen.visible { display: flex; }
+  @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+
+  .success-icon {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: var(--success-dim);
+    border: 2px solid rgba(34,197,94,.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    margin-bottom: 24px;
+    animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from{transform:scale(.4); opacity:0;} to{transform:scale(1); opacity:1;} }
+
+  .success-amount {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -.04em;
+    color: var(--success);
+    margin-bottom: 4px;
+  }
+  .success-label {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 24px;
+  }
+  .success-detail-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    width: 100%;
+    max-width: 360px;
+    margin-bottom: 28px;
+  }
+  .sd-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+  }
+  .sd-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+  .sd-row .key { color: var(--text2); }
+  .sd-row .val { font-weight: 600; color: var(--text); }
+  .sd-row .val.gold { color: var(--gold); }
+  .sd-row .val.green { color: var(--success); }
+
+  .success-done-btn {
+    width: 100%;
+    max-width: 360px;
+    background: linear-gradient(135deg, var(--gold), #c8900c);
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    cursor: pointer;
+  }
+
+  /* ── HISTORY PANEL ───────────────────────────── */
+  #panel-history { overflow-y: auto; padding: 16px 20px; gap: 12px; }
+
+  .history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .history-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .history-clear {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 12px;
+    color: var(--text3);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .history-clear:hover { color: var(--error); border-color: rgba(239,68,68,.3); }
+
+  .session-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .stat-card .sv { font-size: 22px; font-weight: 800; letter-spacing: -.03em; color: var(--text); }
+  .stat-card .sl { font-size: 11px; color: var(--text3); font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: .06em; }
+  .stat-card .sv.gold { color: var(--gold); }
+  .stat-card .sv.green { color: var(--success); }
+
+  .tx-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .tx-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideUp .25s ease;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+  .tx-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--success-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .tx-icon.refund { background: var(--error-dim); }
+
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-wallet-id {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tx-note {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tx-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  .tx-right { text-align: right; flex-shrink: 0; }
+  .tx-amount { font-size: 17px; font-weight: 700; color: var(--error); letter-spacing: -.02em; }
+  .tx-points { font-size: 11px; color: var(--gold); font-weight: 600; margin-top: 2px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .empty-state .icon { font-size: 48px; opacity: .4; }
+  .empty-state .msg { font-size: 15px; font-weight: 500; }
+  .empty-state .sub { font-size: 13px; opacity: .7; }
+
+  /* ── VENUE MODAL ─────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet {
+    background: #111013;
+    border-radius: 24px 24px 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    width: 100%;
+    max-width: 540px;
+    padding: 20px;
+    animation: sheetUp .3s cubic-bezier(.34,1.25,.64,1);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  @keyframes sheetUp { from{transform:translateY(100%);} to{transform:translateY(0);} }
+  .modal-handle {
+    width: 40px; height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    margin: 0 auto 20px;
+  }
+  .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; letter-spacing: -.02em; }
+
+  .venue-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background .15s;
+    border: 1px solid transparent;
+  }
+  .venue-option:hover, .venue-option.selected { background: var(--gold-dim); border-color: rgba(212,160,23,.2); }
+  .venue-option-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .venue-option-info { flex: 1; }
+  .von { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+  .vox { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .venue-mult-badge {
+    background: var(--gold-dim);
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(212,160,23,.2);
+  }
+
+  /* ── MISC ────────────────────────────────────── */
+  .divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* No venue warning */
+  .no-venue-banner {
+    background: var(--warn-dim);
+    border: 1px solid rgba(245,158,11,.2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--warn);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* Manual ID input */
+  .manual-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .manual-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .manual-row { display: flex; gap: 10px; }
+  .manual-input {
+    flex: 1;
+    background: rgba(255,255,255,.05);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    letter-spacing: .08em;
+    outline: none;
+    text-transform: uppercase;
+    transition: border-color .2s;
+  }
+  .manual-input:focus { border-color: var(--gold); }
+  .manual-input::placeholder { color: var(--text3); font-family: inherit; font-size: 13px; letter-spacing: normal; }
+  .manual-lookup-btn {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: var(--gold);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .manual-lookup-btn:hover { background: var(--gold-dim); border-color: rgba(212,160,23,.3); }
+
+  /* Network info bar */
+  .net-bar {
+    background: var(--ink2);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text3);
+    flex-shrink: 0;
+  }
+  .net-bar span { display: flex; align-items: center; gap: 5px; }
+  .net-mode {
+    background: var(--gold-dim);
+    color: var(--gold);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    padding: 2px 7px;
+    border-radius: 6px;
+    border: 1px solid rgba(212,160,23,.2);
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <img src="barpass-logo.svg" alt="BP" onerror="this.style.display='none'"/>
+      <div class="topbar-title">Bar<span>Pass</span> <span style="font-size:11px;color:var(--text3);font-weight:400;letter-spacing:.04em;">POS</span></div>
+    </div>
+    <button class="venue-selector-btn" id="venue-btn" onclick="openVenueModal()">
+      <span class="dot" id="venue-dot"></span>
+      <span id="venue-label">Select Venue</span>
+      <span style="color:var(--text3); font-size:12px;">▾</span>
+    </button>
+  </div>
+
+  <!-- NET BAR -->
+  <div class="net-bar">
+    <span>🏠 Local Mode</span>
+    <span class="net-mode">OFFLINE READY</span>
+    <span id="session-time">Session: 0:00</span>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('scan')" id="tab-scan">⚡ Scan & Charge</button>
+    <button class="tab-btn" onclick="switchTab('history')" id="tab-history">📋 History</button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- SCAN PANEL -->
+    <div class="panel active" id="panel-scan">
+
+      <!-- No venue warning -->
+      <div class="no-venue-banner" id="no-venue-banner" onclick="openVenueModal()">
+        <span style="font-size:20px;">⚠️</span>
+        Tap to select a venue before charging
+      </div>
+
+      <!-- Camera scanner card -->
+      <div class="scan-card" id="scanner-card">
+        <div class="scan-viewport">
+          <video id="camera-video" playsinline autoplay muted></video>
+          <canvas id="camera-canvas"></canvas>
+          <div class="scan-overlay">
+            <div class="scan-frame">
+              <div class="scan-frame-inner"></div>
+              <div class="scan-laser" id="scan-laser"></div>
+            </div>
+          </div>
+          <div class="scan-darken"></div>
+        </div>
+        <div class="scan-controls">
+          <button class="scan-start-btn" id="scan-btn" onclick="toggleCamera()">
+            <span id="scan-btn-icon">📷</span>
+            <span id="scan-btn-text">Start Scanner</span>
+          </button>
+          <button class="torch-btn" id="torch-btn" onclick="toggleTorch()" title="Torch">🔦</button>
+        </div>
+        <div class="scan-status" id="scan-status">
+          <div class="status-dot"></div>
+          <span id="scan-status-text">Point camera at customer's QR code</span>
+        </div>
+      </div>
+
+      <!-- Manual wallet ID lookup -->
+      <div class="manual-section">
+        <div class="manual-title">⌨️ Manual Wallet ID</div>
+        <div class="manual-row">
+          <input
+            class="manual-input"
+            id="manual-id-input"
+            type="text"
+            placeholder="BP + 8 characters (e.g. BPX7K9M2A1)"
+            maxlength="10"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="manual-lookup-btn" onclick="lookupManualWallet()">Lookup</button>
+        </div>
+      </div>
+
+      <!-- Payment form (hidden until wallet found) -->
+      <div class="payment-form" id="payment-form" style="display:none;">
+        <div class="pf-header">
+          <div class="pf-wallet-icon">💳</div>
+          <div class="pf-wallet-info">
+            <div class="pf-wallet-id" id="pf-wallet-id">—</div>
+            <div class="pf-wallet-name" id="pf-wallet-name">—</div>
+          </div>
+          <div class="pf-balance-chip">
+            <span class="pf-balance-label">Balance</span>
+            <span class="pf-balance-value" id="pf-balance">$0</span>
+          </div>
+        </div>
+        <div class="pf-body">
+          <label class="pf-label">Charge Amount</label>
+          <div class="amount-wrap">
+            <span class="amount-symbol">$</span>
+            <input
+              id="amount-input"
+              type="number"
+              inputmode="decimal"
+              placeholder="0.00"
+              min="0.01"
+              step="0.01"
+              autocomplete="off"
+              oninput="onAmountChange()"
+            />
+          </div>
+
+          <div class="quick-amounts">
+            <button class="qa-btn" onclick="setAmount(20)">$20</button>
+            <button class="qa-btn" onclick="setAmount(50)">$50</button>
+            <button class="qa-btn" onclick="setAmount(100)">$100</button>
+            <button class="qa-btn" onclick="setAmount(200)">$200</button>
+          </div>
+
+          <label class="pf-label">Note (optional)</label>
+          <textarea
+            class="notes-input"
+            id="charge-note"
+            placeholder="e.g. Table 4 bottle service…"
+            rows="2"
+          ></textarea>
+
+          <div class="points-preview" id="points-preview">
+            <span class="pp-label">✨ Customer earns</span>
+            <span class="pp-value" id="pp-value">0 pts</span>
+          </div>
+
+          <button class="charge-btn" id="charge-btn" onclick="processCharge()" disabled>
+            <span>⚡</span> Charge $<span id="charge-btn-amount">0.00</span>
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /panel-scan -->
+
+    <!-- HISTORY PANEL -->
+    <div class="panel" id="panel-history">
+      <div class="history-header">
+        <span class="history-title">Session Transactions</span>
+        <button class="history-clear" onclick="clearHistory()">Clear</button>
+      </div>
+
+      <div class="session-stats">
+        <div class="stat-card">
+          <div class="sv green" id="stat-total">$0</div>
+          <div class="sl">Charged</div>
+        </div>
+        <div class="stat-card">
+          <div class="sv" id="stat-count">0</div>
+          <div class="sl">Txns</div>
+        </div>
+        <div class="stat-card">
+          <div class="sv gold" id="stat-pts">0</div>
+          <div class="sl">Pts Given</div>
+        </div>
+      </div>
+
+      <div class="tx-list" id="tx-list">
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          <div class="msg">No transactions yet</div>
+          <div class="sub">Charged transactions will appear here</div>
+        </div>
+      </div>
+    </div><!-- /panel-history -->
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- SUCCESS SCREEN -->
+<div id="success-screen">
+  <div class="success-icon">✓</div>
+  <div class="success-amount" id="s-amount">$0.00</div>
+  <div class="success-label">Payment Processed</div>
+  <div class="success-detail-card">
+    <div class="sd-row">
+      <span class="key">Wallet</span>
+      <span class="val" id="s-wallet">—</span>
+    </div>
+    <div class="sd-row">
+      <span class="key">Customer</span>
+      <span class="val" id="s-name">—</span>
+    </div>
+    <div class="sd-row">
+      <span class="key">Venue</span>
+      <span class="val" id="s-venue">—</span>
+    </div>
+    <div class="sd-row">
+      <span class="key">Points Earned</span>
+      <span class="val gold" id="s-points">+0 pts</span>
+    </div>
+    <div class="sd-row">
+      <span class="key">New Balance</span>
+      <span class="val green" id="s-balance">$0.00</span>
+    </div>
+  </div>
+  <button class="success-done-btn" onclick="dismissSuccess()">New Transaction ⚡</button>
+</div>
+
+<!-- VENUE MODAL -->
+<div class="modal-overlay" id="venue-modal" onclick="closeVenueOnBackdrop(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Select Venue</div>
+    <div id="venue-list"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════════════════
+const SECRET = 'BP_S3CR3T_2024_M1AM1';
+const QR_TTL = 60; // seconds tolerance
+const POINTS_PER_DOLLAR = 10;
+
+const VENUES_CONFIG = [
+  { id:'e11even',  name:'E11EVEN Miami',   emoji:'🎰', multiplier:2.5, discount:15, category:'Club' },
+  { id:'liv',      name:'LIV Nightclub',   emoji:'🎉', multiplier:2.0, discount:10, category:'Club' },
+  { id:'story',    name:'Story Nightclub', emoji:'🌟', multiplier:1.8, discount:8,  category:'Club' },
+  { id:'komodo',   name:'Komodo',          emoji:'🐉', multiplier:1.5, discount:5,  category:'Restaurant' },
+  { id:'moxy',     name:'Moxy Miami',      emoji:'🏨', multiplier:1.3, discount:5,  category:'Hotel Bar' },
+  { id:'wall',     name:'Wall Lounge',     emoji:'🍸', multiplier:1.2, discount:0,  category:'Lounge' },
+];
+
+const TIER_MULTS = { bronze:1.0, silver:1.5, gold:2.0, platinum:3.0 };
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════
+let currentVenue = null;
+let currentWallet = null; // wallet data found via scan/manual
+let cameraStream = null;
+let scanning = false;
+let torchOn = false;
+let scanAnimFrame = null;
+let sessionStart = Date.now();
+let sessionTx = [];
+
+// ═══════════════════════════════════════════════════════════════════
+//  CRYPTO
+// ═══════════════════════════════════════════════════════════════════
+function simpleHash(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 0x9e3779b9);
+    h2 = Math.imul(h2 ^ ch, 0x5c4bcfad);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 0x45d9f3b) ^ Math.imul(h2 ^ (h2 >>> 13), 0x45d9f3b);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 0x45d9f3b) ^ Math.imul(h1 ^ (h1 >>> 13), 0x45d9f3b);
+  return ((h2 >>> 0) * 0x100000000 + (h1 >>> 0)).toString(16).padStart(16, '0').toUpperCase().slice(0, 8);
+}
+
+function validateQRCode(qrStr) {
+  if (!qrStr) return { valid: false, reason: 'Empty QR' };
+  const parts = qrStr.split(':');
+  if (parts.length !== 4 || parts[0] !== 'BP') return { valid: false, reason: 'Invalid format' };
+  const [, walletId, tsStr, hash] = parts;
+  const ts = parseInt(tsStr);
+  if (isNaN(ts)) return { valid: false, reason: 'Invalid timestamp' };
+  const now = Math.floor(Date.now() / 1000);
+  const age = now - ts;
+  if (age > QR_TTL) return { valid: false, reason: `QR expired (${age}s old)`, walletId };
+  if (age < -10) return { valid: false, reason: 'QR timestamp in future', walletId };
+  const expectedHash = simpleHash(walletId + ':' + tsStr + ':' + SECRET);
+  if (hash !== expectedHash) return { valid: false, reason: 'Invalid signature' };
+  return { valid: true, walletId, ts };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  WALLET LOOKUP
+// ═══════════════════════════════════════════════════════════════════
+function getWalletById(walletId) {
+  // Try to get wallet from localStorage (shared with credential.html)
+  const raw = localStorage.getItem('bp_wallet');
+  if (!raw) return null;
+  try {
+    const w = JSON.parse(raw);
+    if (w.walletId === walletId) return w;
+  } catch(e) {}
+  return null;
+}
+
+function loadWalletForPayment(walletId, source) {
+  const wallet = getWalletById(walletId);
+  if (!wallet) {
+    setScanStatus('error', `Wallet ${walletId} not found in this device`);
+    return false;
+  }
+  if (!wallet.activated) {
+    setScanStatus('error', `Wallet not activated`);
+    return false;
+  }
+  currentWallet = wallet;
+  renderPaymentForm(wallet, source);
+  setScanStatus('success', `Wallet found — ${wallet.userName}`);
+  stopCamera();
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  CAMERA & QR SCANNING
+// ═══════════════════════════════════════════════════════════════════
+async function toggleCamera() {
+  if (scanning) { stopCamera(); return; }
+  await startCamera();
+}
+
+async function startCamera() {
+  try {
+    setScanStatus('scanning', 'Requesting camera access…');
+    const constraints = {
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const video = document.getElementById('camera-video');
+    video.srcObject = cameraStream;
+    await video.play();
+
+    scanning = true;
+    const btn = document.getElementById('scan-btn');
+    btn.classList.add('scanning');
+    document.getElementById('scan-btn-icon').textContent = '⏹';
+    document.getElementById('scan-btn-text').textContent = 'Stop Scanner';
+    setScanStatus('scanning', 'Scanning… point at customer QR');
+    document.getElementById('scan-laser').style.display = 'block';
+
+    scanLoop();
+  } catch (err) {
+    setScanStatus('error', `Camera error: ${err.message}`);
+    stopCamera();
+  }
+}
+
+function stopCamera() {
+  scanning = false;
+  if (scanAnimFrame) { cancelAnimationFrame(scanAnimFrame); scanAnimFrame = null; }
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  const video = document.getElementById('camera-video');
+  video.srcObject = null;
+  const btn = document.getElementById('scan-btn');
+  btn.classList.remove('scanning');
+  document.getElementById('scan-btn-icon').textContent = '📷';
+  document.getElementById('scan-btn-text').textContent = 'Start Scanner';
+  document.getElementById('scan-laser').style.display = 'none';
+  if (!currentWallet) {
+    setScanStatus('idle', 'Point camera at customer\'s QR code');
+  }
+}
+
+function scanLoop() {
+  if (!scanning) return;
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('camera-canvas');
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    const w = video.videoWidth;
+    const h = video.videoHeight;
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, w, h);
+    const imageData = ctx.getImageData(0, 0, w, h);
+    try {
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'dontInvert'
+      });
+      if (code && code.data) {
+        handleQRScanned(code.data);
+        return; // stop loop after finding QR
+      }
+    } catch(e) {}
+  }
+  scanAnimFrame = requestAnimationFrame(scanLoop);
+}
+
+function handleQRScanned(qrData) {
+  setScanStatus('scanning', `QR detected — validating…`);
+  const result = validateQRCode(qrData);
+  if (!result.valid) {
+    setScanStatus('error', `Invalid QR: ${result.reason}`);
+    // brief pause then resume scan
+    setTimeout(() => {
+      if (scanning) {
+        setScanStatus('scanning', 'Scanning… point at customer QR');
+        scanAnimFrame = requestAnimationFrame(scanLoop);
+      }
+    }, 1800);
+    return;
+  }
+  // Valid — load wallet
+  loadWalletForPayment(result.walletId, 'camera');
+}
+
+async function toggleTorch() {
+  if (!cameraStream) return;
+  const track = cameraStream.getVideoTracks()[0];
+  if (!track) return;
+  try {
+    torchOn = !torchOn;
+    await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+    document.getElementById('torch-btn').classList.toggle('on', torchOn);
+  } catch(e) {
+    // torch not supported
+    document.getElementById('torch-btn').style.opacity = '.3';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MANUAL LOOKUP
+// ═══════════════════════════════════════════════════════════════════
+function lookupManualWallet() {
+  const input = document.getElementById('manual-id-input');
+  const id = input.value.trim().toUpperCase();
+  if (!id) return;
+  if (id.length < 4) { setScanStatus('error', 'Wallet ID too short'); return; }
+
+  const found = getWalletById(id);
+  if (!found) {
+    setScanStatus('error', `Wallet "${id}" not found`);
+    return;
+  }
+  if (!found.activated) {
+    setScanStatus('error', `Wallet "${id}" is not activated`);
+    return;
+  }
+  currentWallet = found;
+  renderPaymentForm(found, 'manual');
+  setScanStatus('success', `Wallet found — ${found.userName}`);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  PAYMENT FORM
+// ═══════════════════════════════════════════════════════════════════
+function renderPaymentForm(wallet, source) {
+  const form = document.getElementById('payment-form');
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  document.getElementById('pf-wallet-id').textContent = wallet.walletId;
+  document.getElementById('pf-wallet-name').textContent = wallet.userName;
+
+  const balEl = document.getElementById('pf-balance');
+  balEl.textContent = '$' + wallet.balance.toFixed(2);
+  balEl.className = 'pf-balance-value' + (wallet.balance < 20 ? ' low' : '');
+
+  document.getElementById('amount-input').value = '';
+  document.getElementById('charge-note').value = '';
+  document.getElementById('charge-btn').disabled = true;
+  document.getElementById('charge-btn-amount').textContent = '0.00';
+  document.getElementById('points-preview').classList.add('hidden');
+}
+
+function setAmount(val) {
+  document.getElementById('amount-input').value = val;
+  onAmountChange();
+}
+
+function onAmountChange() {
+  const amt = parseFloat(document.getElementById('amount-input').value) || 0;
+  const btn = document.getElementById('charge-btn');
+  const btnAmt = document.getElementById('charge-btn-amount');
+  const pp = document.getElementById('points-preview');
+  const ppVal = document.getElementById('pp-value');
+
+  btnAmt.textContent = amt > 0 ? amt.toFixed(2) : '0.00';
+
+  if (amt > 0 && currentWallet) {
+    btn.disabled = false;
+    const pts = calculatePoints(amt, currentWallet.tier);
+    ppVal.textContent = pts.toLocaleString() + ' pts';
+    pp.classList.remove('hidden');
+  } else {
+    btn.disabled = true;
+    pp.classList.add('hidden');
+  }
+}
+
+function calculatePoints(amount, tier) {
+  const venueMult = currentVenue ? currentVenue.multiplier : 1.0;
+  const tierMult = TIER_MULTS[tier] || 1.0;
+  return Math.floor(amount * POINTS_PER_DOLLAR * venueMult * tierMult);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  PROCESS CHARGE
+// ═══════════════════════════════════════════════════════════════════
+function processCharge() {
+  if (!currentWallet) { alert('No wallet loaded'); return; }
+  if (!currentVenue) { openVenueModal(); return; }
+
+  const amount = parseFloat(document.getElementById('amount-input').value);
+  if (!amount || amount <= 0) { alert('Enter a valid amount'); return; }
+  if (amount > currentWallet.balance) {
+    setScanStatus('error', `Insufficient balance ($${currentWallet.balance.toFixed(2)} available)`);
+    return;
+  }
+
+  const note = document.getElementById('charge-note').value.trim() || `${currentVenue.name} charge`;
+  const pts = calculatePoints(amount, currentWallet.tier);
+
+  // Write payment instruction to localStorage for cross-tab sync
+  const payment = {
+    walletId: currentWallet.walletId,
+    amount,
+    venueId: currentVenue.id,
+    venueName: currentVenue.name,
+    note,
+    points: pts,
+    ts: Date.now()
+  };
+  localStorage.setItem('bp_pos_payment', JSON.stringify(payment));
+
+  // Also update the wallet directly (same-device usage)
+  const updatedWallet = applyPaymentToLocalWallet(currentWallet, amount, pts, note, currentVenue);
+
+  // Record in session history
+  const tx = {
+    id: 'TX' + Date.now(),
+    walletId: currentWallet.walletId,
+    customerName: currentWallet.userName,
+    amount,
+    points: pts,
+    venue: currentVenue.name,
+    note,
+    ts: Date.now(),
+    newBalance: updatedWallet ? updatedWallet.balance : (currentWallet.balance - amount)
+  };
+  sessionTx.unshift(tx);
+
+  // Show success
+  showSuccess(tx, updatedWallet);
+
+  // Update stats
+  updateSessionStats();
+}
+
+function applyPaymentToLocalWallet(wallet, amount, points, note, venue) {
+  try {
+    const raw = localStorage.getItem('bp_wallet');
+    if (!raw) return null;
+    const w = JSON.parse(raw);
+    if (w.walletId !== wallet.walletId) return null;
+
+    w.balance = Math.max(0, (w.balance || 0) - amount);
+    w.totalSpent = (w.totalSpent || 0) + amount;
+    w.points = (w.points || 0) + points;
+
+    // Update tier
+    w.tier = calcTier(w.points);
+
+    // Add transaction
+    if (!w.transactions) w.transactions = [];
+    w.transactions.unshift({
+      id: 'TX' + Date.now(),
+      type: 'payment',
+      amount: -amount,
+      points,
+      note,
+      venueId: venue.id,
+      venueName: venue.name,
+      ts: Date.now()
+    });
+
+    // Track venue visit
+    if (!w.venueVisits) w.venueVisits = {};
+    w.venueVisits[venue.id] = (w.venueVisits[venue.id] || 0) + 1;
+
+    localStorage.setItem('bp_wallet', JSON.stringify(w));
+    return w;
+  } catch(e) {
+    return null;
+  }
+}
+
+function calcTier(points) {
+  if (points >= 15000) return 'platinum';
+  if (points >= 5000)  return 'gold';
+  if (points >= 1000)  return 'silver';
+  return 'bronze';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SUCCESS SCREEN
+// ═══════════════════════════════════════════════════════════════════
+function showSuccess(tx, updatedWallet) {
+  document.getElementById('s-amount').textContent = '$' + tx.amount.toFixed(2);
+  document.getElementById('s-wallet').textContent = tx.walletId;
+  document.getElementById('s-name').textContent = tx.customerName;
+  document.getElementById('s-venue').textContent = tx.venue;
+  document.getElementById('s-points').textContent = '+' + tx.points.toLocaleString() + ' pts';
+  document.getElementById('s-balance').textContent = '$' + tx.newBalance.toFixed(2);
+  document.getElementById('success-screen').classList.add('visible');
+}
+
+function dismissSuccess() {
+  document.getElementById('success-screen').classList.remove('visible');
+  // Reset for next transaction
+  currentWallet = null;
+  document.getElementById('payment-form').style.display = 'none';
+  document.getElementById('amount-input').value = '';
+  document.getElementById('charge-note').value = '';
+  document.getElementById('manual-id-input').value = '';
+  setScanStatus('idle', 'Ready for next customer');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  SESSION STATS
+// ═══════════════════════════════════════════════════════════════════
+function updateSessionStats() {
+  const total = sessionTx.reduce((s, t) => s + t.amount, 0);
+  const pts = sessionTx.reduce((s, t) => s + t.points, 0);
+  document.getElementById('stat-total').textContent = '$' + total.toFixed(0);
+  document.getElementById('stat-count').textContent = sessionTx.length;
+  document.getElementById('stat-pts').textContent = pts.toLocaleString();
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('tx-list');
+  if (sessionTx.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <div class="msg">No transactions yet</div>
+        <div class="sub">Charged transactions will appear here</div>
+      </div>`;
+    return;
+  }
+  list.innerHTML = sessionTx.map(tx => {
+    const d = new Date(tx.ts);
+    const timeStr = d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    return `
+      <div class="tx-item">
+        <div class="tx-icon">💳</div>
+        <div class="tx-info">
+          <div class="tx-wallet-id">${tx.walletId}</div>
+          <div class="tx-note">${escHtml(tx.note)}</div>
+          <div class="tx-time">${timeStr} · ${tx.venue}</div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount">−$${tx.amount.toFixed(2)}</div>
+          <div class="tx-points">+${tx.points.toLocaleString()} pts</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function clearHistory() {
+  if (sessionTx.length === 0) return;
+  if (!confirm('Clear session history?')) return;
+  sessionTx = [];
+  updateSessionStats();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  VENUE MODAL
+// ═══════════════════════════════════════════════════════════════════
+function openVenueModal() {
+  const list = document.getElementById('venue-list');
+  list.innerHTML = VENUES_CONFIG.map(v => `
+    <div class="venue-option ${currentVenue && currentVenue.id === v.id ? 'selected' : ''}"
+         onclick="selectVenue('${v.id}')">
+      <div class="venue-option-icon">${v.emoji}</div>
+      <div class="venue-option-info">
+        <div class="von">${v.name}</div>
+        <div class="vox">${v.category} · ${v.discount > 0 ? v.discount + '% discount' : 'No discount'}</div>
+      </div>
+      <div class="venue-mult-badge">×${v.multiplier} pts</div>
+    </div>
+  `).join('');
+  document.getElementById('venue-modal').classList.add('open');
+}
+
+function selectVenue(id) {
+  currentVenue = VENUES_CONFIG.find(v => v.id === id);
+  document.getElementById('venue-label').textContent = currentVenue.emoji + ' ' + currentVenue.name;
+  document.getElementById('venue-dot').classList.remove('offline');
+  document.getElementById('no-venue-banner').style.display = 'none';
+  // Update points preview if form is open
+  onAmountChange();
+  closeVenueModal();
+}
+
+function closeVenueModal() {
+  document.getElementById('venue-modal').classList.remove('open');
+}
+
+function closeVenueOnBackdrop(e) {
+  if (e.target === document.getElementById('venue-modal')) closeVenueModal();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════════════
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATUS
+// ═══════════════════════════════════════════════════════════════════
+function setScanStatus(type, msg) {
+  const el = document.getElementById('scan-status');
+  const txt = document.getElementById('scan-status-text');
+  el.className = 'scan-status' + (type !== 'idle' ? ' ' + type : '');
+  txt.textContent = msg;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════════════
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Session timer
+function updateSessionTime() {
+  const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  document.getElementById('session-time').textContent = `Session: ${m}:${s.toString().padStart(2,'0')}`;
+}
+setInterval(updateSessionTime, 1000);
+
+// Listen for wallet updates from credential.html (cross-tab)
+window.addEventListener('storage', e => {
+  if (e.key === 'bp_wallet' && currentWallet) {
+    try {
+      const updated = JSON.parse(e.newValue);
+      if (updated.walletId === currentWallet.walletId) {
+        currentWallet = updated;
+        // Refresh balance in form if visible
+        const form = document.getElementById('payment-form');
+        if (form.style.display !== 'none') {
+          const balEl = document.getElementById('pf-balance');
+          balEl.textContent = '$' + updated.balance.toFixed(2);
+          balEl.className = 'pf-balance-value' + (updated.balance < 20 ? ' low' : '');
+        }
+      }
+    } catch(e) {}
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════
+(function init() {
+  // Check if no venue set
+  const banner = document.getElementById('no-venue-banner');
+  banner.style.display = 'flex';
+  document.getElementById('venue-dot').classList.add('offline');
+
+  // Hide laser initially
+  document.getElementById('scan-laser').style.display = 'none';
+
+  // Set initial stats
+  updateSessionStats();
+
+  // Check camera availability
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    document.getElementById('scan-btn').disabled = true;
+    setScanStatus('error', 'Camera not available in this browser');
+  }
+
+  // Check jsQR loaded
+  if (typeof jsQR === 'undefined') {
+    document.getElementById('scan-btn').disabled = true;
+    setScanStatus('error', 'QR scanner library failed to load — check internet connection');
+  }
+})();
+</script>
+
+</body>
+</html>
