@@ -123,21 +123,22 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .ios-icons{display:flex;gap:5px;align-items:center;font-size:12px;}
 
 /* ── SPLASH ── */
-#splash{position:fixed;inset:0;z-index:9000;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.splash-logo{font-family:'Instrument Serif',serif;font-size:60px;font-style:italic;background:linear-gradient(135deg,#c8880a,#f59e0b,#fbbf24,#f59e0b,#c8880a);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease infinite,rise .6s var(--ease) both;margin-bottom:6px;}
-.splash-city{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--cream4);font-weight:300;animation:rise .6s ease .2s both;}
-.splash-bar{width:180px;height:2px;border-radius:1px;background:var(--smoke3);margin-top:44px;overflow:hidden;animation:rise .4s ease .4s both;}
-.splash-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--teal));background-size:200%;animation:shimmer 1.2s ease infinite, fillBar 2s ease-in-out forwards;border-radius:1px;width:0;}
+#splash{position:fixed;inset:0;z-index:9000;background:radial-gradient(ellipse 70% 50% at 50% 30%,rgba(212,160,23,.12) 0%,transparent 65%),var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.splash-logo-img{width:120px;height:120px;border-radius:28px;animation:rise .7s var(--ease) both;box-shadow:0 24px 80px rgba(212,160,23,.25),0 8px 32px rgba(0,0,0,.6);margin-bottom:20px;}
+.splash-logo{font-family:'Instrument Serif',serif;font-size:36px;font-style:italic;background:linear-gradient(135deg,#c8880a,#f59e0b,#fbbf24,#f59e0b,#c8880a);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease infinite,rise .6s var(--ease) .1s both;margin-bottom:5px;letter-spacing:.02em;}
+.splash-city{font-size:10px;letter-spacing:.45em;text-transform:uppercase;color:var(--cream4);font-weight:300;animation:rise .6s ease .25s both;}
+.splash-bar{width:140px;height:1.5px;border-radius:1px;background:var(--smoke2);margin-top:48px;overflow:hidden;animation:rise .4s ease .4s both;}
+.splash-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));background-size:200%;animation:shimmer 1.2s ease infinite, fillBar 2.2s ease-in-out forwards;border-radius:1px;width:0;}
 
 /* ── AUTH ── */
 #auth{position:fixed;inset:0;z-index:8000;background:var(--ink);display:none;flex-direction:column;}
 .auth-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;min-height:0;padding-bottom:40px;}
 .auth-hero{padding:40px 28px 24px;flex-shrink:0;text-align:center;}
-.auth-wordmark{font-family:'Instrument Serif',serif;font-style:italic;font-size:48px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;animation:rise .5s var(--ease) both;}
-.auth-city{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold3);color:rgba(245,158,11,.5);font-weight:600;margin-bottom:8px;}
-.auth-sub{font-size:15px;color:var(--cream3);line-height:1.5;animation:rise .5s ease .1s both;}
-.auth-card{background:var(--ink2);border-radius:var(--r4) var(--r4) 0 0;padding:28px 24px;border-top:1px solid var(--border);animation:screenIn .45s var(--ease) both;position:relative;}
-.auth-card::before{content:'';position:absolute;top:0;left:25%;right:25%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.auth-wordmark{font-family:'Instrument Serif',serif;font-style:italic;font-size:52px;background:linear-gradient(135deg,#c8880a,#f59e0b,#fbbf24,#f59e0b,#c8880a);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;animation:shimmer 4s ease infinite,rise .5s var(--ease) both;letter-spacing:-.02em;}
+.auth-city{font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:rgba(245,158,11,.45);font-weight:600;margin-bottom:10px;}
+.auth-sub{font-size:15px;color:var(--cream3);line-height:1.55;animation:rise .5s ease .1s both;max-width:280px;margin:0 auto;}
+.auth-card{background:var(--ink2);border-radius:var(--r4) var(--r4) 0 0;padding:30px 24px;border-top:1px solid rgba(255,248,235,.08);animation:screenIn .45s var(--ease) both;position:relative;}
+.auth-card::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.6),transparent);}
 .auth-tabs{display:flex;background:var(--smoke);border-radius:var(--r);padding:3px;margin-bottom:24px;flex-shrink:0;}
 .auth-tab{flex:1;padding:8px;border-radius:10px;border:none;background:none;color:var(--cream3);font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
 .auth-tab.active{background:var(--ink3);color:var(--cream);box-shadow:0 2px 8px rgba(0,0,0,.4);}
@@ -185,8 +186,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .ob-slide{display:none;padding:0 28px;animation:slideUp .5s var(--ease) both;}
 .ob-slide.active{display:block;}
 .ob-eyebrow{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:14px;}
-.ob-headline{font-family:'Instrument Serif',serif;font-size:42px;line-height:1.05;color:var(--cream);margin-bottom:16px;font-style:italic;}
-.ob-headline em{color:var(--gold);font-style:normal;}
+.ob-headline{font-family:'Instrument Serif',serif;font-size:46px;line-height:1.02;color:var(--cream);margin-bottom:18px;font-style:italic;letter-spacing:-.02em;}
+.ob-headline em{background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
 .ob-body{font-size:15px;color:var(--cream3);line-height:1.65;max-width:310px;}
 .ob-dots{display:flex;gap:6px;padding:28px 28px 0;position:relative;z-index:2;}
 .ob-dot{height:4px;border-radius:2px;background:var(--smoke3);transition:all .35s var(--ease);width:20px;}
@@ -227,32 +228,35 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .search-filter:active{transform:scale(.9);}
 
 /* ── CATEGORY CHIPS ── */
-.cats{padding:0 20px;display:flex;gap:7px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px;}
-.cat-chip{padding:8px 15px;border-radius:100px;border:1px solid var(--border);background:var(--smoke);color:var(--cream3);font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer;transition:all .2s;flex-shrink:0;display:flex;align-items:center;gap:5px;}
-.cat-chip.active{background:var(--gold3);border-color:rgba(245,158,11,.32);color:var(--gold);}
-.cat-chip:active{transform:scale(.94);}
+.cats{padding:0 20px;display:flex;gap:8px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:4px;margin-bottom:2px;}
+.cat-chip{padding:9px 17px;border-radius:100px;border:1px solid var(--border2);background:rgba(255,248,235,.04);color:var(--cream3);font-size:12.5px;font-weight:500;white-space:nowrap;cursor:pointer;transition:all .2s var(--ease);flex-shrink:0;display:flex;align-items:center;gap:5px;letter-spacing:-.01em;}
+.cat-chip.active{background:linear-gradient(135deg,rgba(245,158,11,.16),rgba(245,158,11,.08));border-color:rgba(245,158,11,.36);color:var(--gold2);box-shadow:0 0 0 1px rgba(245,158,11,.12) inset;}
+.cat-chip:active{transform:scale(.93);}
 
 /* ── SCROLL AREA ── */
 .scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;min-height:0;}
 
 /* ── AI INTELLIGENCE BANNER ── */
 .ai-banner{
-  margin:14px 20px;border-radius:var(--r3);overflow:hidden;
-  background:linear-gradient(135deg,#0d0a18 0%,#100b1e 100%);
-  border:1px solid rgba(167,139,250,.3);
-  position:relative;cursor:pointer;transition:all .25s;
+  margin:16px 20px;border-radius:var(--r3);overflow:hidden;
+  background:linear-gradient(135deg,#0f0c1f 0%,#0c091a 60%,#0f0c1f 100%);
+  border:1px solid rgba(167,139,250,.32);
+  position:relative;cursor:pointer;transition:all .28s;
+  box-shadow:0 8px 40px rgba(167,139,250,.08),0 2px 8px rgba(0,0,0,.4);
 }
-.ai-banner::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(167,139,250,.06),transparent 60%);pointer-events:none;}
-.ai-banner-body{padding:16px 18px;display:flex;align-items:center;gap:14px;}
-.ai-orb{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--violet),rgba(167,139,250,.4));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 0 24px rgba(167,139,250,.3);animation:orb 6s ease-in-out infinite;}
+.ai-banner:active{transform:scale(.984);}
+.ai-banner::before{content:'';position:absolute;inset:0;background:linear-gradient(120deg,rgba(167,139,250,.09) 0%,transparent 55%);pointer-events:none;}
+.ai-banner::after{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(167,139,250,.5),transparent);}
+.ai-banner-body{padding:18px 20px;display:flex;align-items:center;gap:16px;}
+.ai-orb{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,rgba(167,139,250,.3),rgba(167,139,250,.15));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 0 28px rgba(167,139,250,.25),inset 0 1px 0 rgba(255,255,255,.08);animation:orb 6s ease-in-out infinite;border:1px solid rgba(167,139,250,.2);}
 .ai-text{flex:1;}
-.ai-label{font-size:9px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;color:var(--violet);margin-bottom:3px;}
-.ai-insight{font-size:13px;font-weight:600;color:var(--cream);line-height:1.4;}
-.ai-sub{font-size:11px;color:var(--cream3);margin-top:2px;}
-.ai-arrow{color:var(--violet);font-size:18px;flex-shrink:0;}
+.ai-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--violet);margin-bottom:4px;opacity:.9;}
+.ai-insight{font-size:13.5px;font-weight:700;color:var(--cream);line-height:1.35;letter-spacing:-.01em;}
+.ai-sub{font-size:11px;color:var(--cream3);margin-top:3px;}
+.ai-arrow{color:rgba(167,139,250,.7);font-size:20px;flex-shrink:0;}
 /* AI Energy Bar */
-.ai-energy{height:3px;background:linear-gradient(90deg,var(--violet),var(--teal),var(--gold));position:relative;overflow:hidden;}
-.ai-energy::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:energyFlow 1.8s linear infinite;}
+.ai-energy{height:2.5px;background:linear-gradient(90deg,var(--violet),var(--teal),var(--gold));position:relative;overflow:hidden;}
+.ai-energy::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);animation:energyFlow 1.8s linear infinite;}
 
 /* ── EXPRESS BANNER ── */
 .express-banner{}
@@ -297,23 +301,23 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .dist-pill.active{background:var(--gold3);border-color:rgba(245,158,11,.32);color:var(--gold);}
 
 /* ── SECTION HEADERS ── */
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin:22px 0 12px;}
-.sec-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:22px;}
-.sec-link{font-size:12px;color:var(--gold);font-weight:600;cursor:pointer;}
-.sec-badge{font-size:9px;font-weight:700;padding:4px 9px;border-radius:100px;background:var(--gold3);color:var(--gold);border:1px solid rgba(245,158,11,.25);letter-spacing:.05em;text-transform:uppercase;}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin:24px 0 14px;}
+.sec-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:25px;letter-spacing:-.02em;color:var(--cream);}
+.sec-link{font-size:12px;color:rgba(245,158,11,.75);font-weight:600;cursor:pointer;letter-spacing:.01em;}
+.sec-badge{font-size:9px;font-weight:700;padding:4px 10px;border-radius:100px;background:linear-gradient(135deg,rgba(245,158,11,.14),rgba(245,158,11,.07));color:var(--gold);border:1px solid rgba(245,158,11,.28);letter-spacing:.07em;text-transform:uppercase;}
 
 /* ── VENUE CARDS (horizontal) ── */
-.venues-row{padding:0 20px;display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
-.vc{flex-shrink:0;width:220px;border-radius:var(--r3);overflow:hidden;background:var(--ink2);border:1px solid var(--border);cursor:pointer;transition:transform .22s var(--ease),box-shadow .22s;box-shadow:0 4px 24px rgba(0,0,0,.35);position:relative;}
-.vc:active{transform:scale(.96);}
-.vc.featured{border-color:rgba(245,158,11,.22);box-shadow:0 4px 28px rgba(245,158,11,.08);}
-.vc.vip-card{border-color:rgba(167,139,250,.25);box-shadow:0 4px 28px rgba(167,139,250,.08);}
-.vc-media{height:145px;position:relative;overflow:hidden;background:var(--ink3);}
-.vc-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s ease;}
-.vc:active .vc-media img{transform:scale(1.05);}
-.vc-emoji{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:60px;position:absolute;inset:0;}
-.vc-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05) 0%,rgba(9,7,9,.96) 100%);}
-.vc-tags{position:absolute;top:10px;left:10px;display:flex;gap:4px;z-index:2;}
+.venues-row{padding:0 20px;display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.vc{flex-shrink:0;width:248px;border-radius:var(--r3);overflow:hidden;background:var(--ink2);border:1px solid var(--border);cursor:pointer;transition:transform .25s var(--ease),box-shadow .25s;box-shadow:0 6px 32px rgba(0,0,0,.45);position:relative;}
+.vc:active{transform:scale(.955);}
+.vc.featured{border-color:rgba(245,158,11,.28);box-shadow:0 6px 36px rgba(245,158,11,.12),0 2px 8px rgba(0,0,0,.4);}
+.vc.vip-card{border-color:rgba(167,139,250,.3);box-shadow:0 6px 36px rgba(167,139,250,.1);}
+.vc-media{height:188px;position:relative;overflow:hidden;background:var(--ink3);}
+.vc-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .45s ease;}
+.vc:active .vc-media img{transform:scale(1.06);}
+.vc-emoji{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:68px;position:absolute;inset:0;}
+.vc-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 0%,rgba(0,0,0,.1) 40%,rgba(6,4,8,.88) 75%,rgba(6,4,8,.99) 100%);}
+.vc-tags{position:absolute;top:11px;left:11px;display:flex;gap:4px;z-index:2;}
 .vc-tag{padding:4px 9px;border-radius:7px;font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 2px 8px rgba(0,0,0,.4);}
 .tag-skip{background:var(--gold);color:var(--ink);}
 .tag-hot{background:var(--coral);color:var(--ink);}
@@ -383,15 +387,16 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .ec-pill{font-size:10px;font-weight:600;padding:5px 10px;border-radius:8px;background:rgba(255,248,235,.09);color:var(--cream2);}
 
 /* ── VENUE LIST (vertical) ── */
-.venues-list{padding:0 20px;display:flex;flex-direction:column;gap:8px;padding-bottom:24px;}
-.vl{display:flex;align-items:center;gap:14px;padding:15px;border-radius:var(--r2);background:var(--smoke);border:1px solid var(--border);cursor:pointer;transition:transform .2s var(--ease),background .15s;position:relative;overflow:hidden;}
+.venues-list{padding:0 20px;display:flex;flex-direction:column;gap:9px;padding-bottom:24px;}
+.vl{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:var(--r2);background:rgba(255,248,235,.035);border:1px solid var(--border);cursor:pointer;transition:transform .22s var(--ease),background .15s,border-color .15s;position:relative;overflow:hidden;}
 .vl::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0 2px 2px 0;background:transparent;transition:background .2s;}
-.vl:active{transform:translateX(6px);background:var(--smoke2);}
+.vl:active{transform:translateX(7px);background:var(--smoke2);border-color:var(--border2);}
 .vl:active::before{background:var(--gold);}
-.vl-ico{width:48px;height:48px;border-radius:14px;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--border);}
+.vl-ico{width:50px;height:50px;border-radius:14px;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:25px;flex-shrink:0;border:1px solid var(--border2);overflow:hidden;}
+.vl-ico img{width:100%;height:100%;object-fit:cover;}
 .vl-info{flex:1;min-width:0;}
-.vl-name{font-size:15px;font-weight:700;margin-bottom:3px;}
-.vl-sub{font-size:11px;color:var(--cream3);display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+.vl-name{font-size:15px;font-weight:700;margin-bottom:3px;letter-spacing:-.01em;}
+.vl-sub{font-size:11px;color:var(--cream3);display:flex;align-items:center;gap:5px;margin-bottom:5px;}
 .vl-tags{display:flex;gap:4px;}
 .vl-tag{font-size:9px;font-weight:600;padding:2px 7px;border-radius:5px;background:var(--smoke2);}
 .vl-r{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
@@ -400,15 +405,15 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 .vl-pop{font-size:9px;color:var(--cream4);}
 
 /* ── BOTTOM NAV ── */
-.bnav{display:flex;align-items:center;padding:10px 16px;padding-bottom:max(14px,calc(14px + env(safe-area-inset-bottom,34px) - 34px));border-top:1px solid var(--border);background:rgba(8,6,8,.96);backdrop-filter:blur(28px);flex-shrink:0;position:relative;z-index:100;}
+.bnav{display:flex;align-items:center;padding:10px 16px;padding-bottom:max(16px,calc(16px + env(safe-area-inset-bottom,34px) - 34px));border-top:1px solid rgba(255,248,235,.07);background:rgba(6,4,8,.97);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);flex-shrink:0;position:relative;z-index:100;box-shadow:0 -1px 0 rgba(255,248,235,.04),0 -20px 60px rgba(0,0,0,.5);}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .18s;padding:3px 0;}
 .nav-ico{font-size:22px;transition:transform .22s var(--ease);}
-.nav-lbl{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--cream4);transition:color .18s;}
+.nav-lbl{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--cream4);transition:color .18s;}
 .nav-item.active .nav-lbl{color:var(--gold);}
-.nav-item.active .nav-ico{transform:scale(1.15) translateY(-1px);}
-.nav-item:active .nav-ico{transform:scale(.88);}
-.nav-center{flex-shrink:0;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;margin:0 6px;box-shadow:0 6px 28px var(--gold-glow);transition:all .22s var(--ease);position:relative;}
-.nav-center:active{transform:scale(.9);}
+.nav-item.active .nav-ico{transform:scale(1.18) translateY(-2px);}
+.nav-item:active .nav-ico{transform:scale(.86);}
+.nav-center{flex-shrink:0;width:54px;height:54px;border-radius:50%;background:linear-gradient(145deg,#e8a820,#f5b830,#fbbf24);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;margin:0 8px;box-shadow:0 4px 20px rgba(245,158,11,.45),0 0 0 1px rgba(245,158,11,.25);transition:all .22s var(--ease);position:relative;}
+.nav-center:active{transform:scale(.88);}
 .nav-badge{position:absolute;top:-2px;right:-2px;width:17px;height:17px;border-radius:50%;background:var(--coral);border:2px solid var(--ink);font-size:8px;font-weight:800;display:none;align-items:center;justify-content:center;color:white;}
 
 /* ── SCREENS ── */
@@ -1127,12 +1132,92 @@ body::after{
 .night-score{font-family:'Instrument Serif',serif;font-size:48px;color:var(--gold);font-style:italic;line-height:1;}
 .nscore-label{font-size:11px;color:var(--cream4);font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
 
+/* ════════════════════════════════
+   WALLET CREDENTIAL — QR Ticket
+════════════════════════════════ */
+@keyframes ticketReveal{from{opacity:0;transform:scale(.92) rotateX(8deg)}to{opacity:1;transform:scale(1) rotateX(0)}}
+@keyframes ticketGlow{0%,100%{box-shadow:0 0 20px rgba(245,158,11,.15),0 24px 80px rgba(0,0,0,.7)}50%{box-shadow:0 0 40px rgba(245,158,11,.25),0 24px 80px rgba(0,0,0,.7)}}
+@keyframes qrPulse{0%,100%{opacity:1}50%{opacity:.7}}
+@keyframes scanLine{0%{transform:translateY(-100%)}100%{transform:translateY(300%)}}
+@keyframes ticketShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes stampPop{0%{transform:scale(0) rotate(-15deg)}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+
+.ticket-screen{background:linear-gradient(180deg,#0a0612 0%,#08060a 50%,#0d0a1a 100%);}
+.ticket-header{padding:20px 24px 0;text-align:center;flex-shrink:0;position:relative;}
+.ticket-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:100px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.ticket-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:32px;color:var(--cream);line-height:1.1;margin-bottom:4px;}
+.ticket-sub{font-size:12px;color:var(--cream4);}
+
+.ticket-card{margin:16px 20px;border-radius:var(--r4);background:linear-gradient(145deg,#1a1407,#0f0a04);border:1.5px solid rgba(245,158,11,.35);position:relative;overflow:hidden;animation:ticketReveal .6s cubic-bezier(.22,1,.36,1) both;box-shadow:0 24px 80px rgba(0,0,0,.7);}
+.ticket-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.5),transparent);}
+.ticket-card::after{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.1),transparent 70%);pointer-events:none;}
+.ticket-glow{animation:ticketGlow 3s ease-in-out infinite;}
+
+.ticket-top{padding:24px 24px 16px;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;}
+.ticket-brand{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:var(--gold2);letter-spacing:-.01em;}
+.ticket-active{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:700;color:var(--teal);letter-spacing:.08em;text-transform:uppercase;}
+.ticket-active::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);animation:pulse 1.5s infinite;}
+
+.ticket-member{padding:0 24px 12px;position:relative;z-index:1;}
+.ticket-member-name{font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;color:var(--cream);margin-bottom:2px;}
+.ticket-member-tier{font-size:11px;color:var(--gold3);font-weight:700;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+.ticket-member-tier .tier-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);display:inline-block;}
+
+.ticket-perf{border:none;border-top:1.5px dashed rgba(245,158,11,.2);margin:0 10px;position:relative;}
+.ticket-perf::before,.ticket-perf::after{content:'';position:absolute;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--ink);}
+.ticket-perf::before{left:-16px;}
+.ticket-perf::after{right:-16px;}
+
+.ticket-qr-section{padding:20px 24px 16px;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;}
+.ticket-qr-wrap{width:200px;height:200px;border-radius:var(--r2);background:white;padding:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(245,158,11,.15);position:relative;}
+.ticket-qr-wrap canvas,.ticket-qr-wrap img{display:block;width:176px;height:176px;image-rendering:pixelated;}
+.ticket-qr-scanline{position:absolute;left:12px;right:12px;height:2px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.6),transparent);animation:scanLine 2.5s linear infinite;pointer-events:none;}
+
+.ticket-id-row{padding:12px 24px 8px;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:12px;}
+.ticket-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(245,158,11,.4);letter-spacing:.2em;}
+.ticket-id-sep{width:3px;height:3px;border-radius:50%;background:var(--cream5);}
+
+.ticket-bottom{padding:16px 24px 20px;position:relative;z-index:1;display:flex;gap:10px;border-top:1px solid rgba(245,158,11,.08);}
+.ticket-stat{flex:1;text-align:center;}
+.ticket-stat-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:500;color:var(--gold2);display:block;}
+.ticket-stat-lbl{font-size:9px;color:var(--cream4);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+
+.ticket-actions{padding:0 20px 20px;flex-shrink:0;display:flex;gap:10px;}
+.ticket-btn{flex:1;padding:16px;border-radius:var(--r2);border:none;font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ticket-btn:active{transform:scale(.96);}
+.ticket-btn.primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);box-shadow:0 8px 24px var(--gold-glow);}
+.ticket-btn.secondary{background:var(--smoke2);color:var(--cream2);border:1px solid var(--border2);}
+.ticket-btn.secondary:active{background:var(--smoke3);}
+
+.ticket-stamp{position:absolute;top:24px;right:24px;width:64px;height:64px;border-radius:50%;border:2.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;transform:rotate(15deg);animation:stampPop .5s cubic-bezier(.22,1,.36,1) .8s both;z-index:2;background:rgba(245,158,11,.06);}
+.ticket-stamp::after{content:'ACTIVE';position:absolute;bottom:-18px;font-size:7px;font-weight:800;letter-spacing:.12em;color:var(--gold);white-space:nowrap;}
+
+.no-ticket{padding:60px 20px;text-align:center;}
+.no-ticket-icon{font-size:64px;margin-bottom:16px;opacity:.5;}
+.no-ticket-head{font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;color:var(--cream);margin-bottom:8px;}
+.no-ticket-body{font-size:14px;color:var(--cream4);line-height:1.5;margin-bottom:20px;max-width:300px;margin-left:auto;margin-right:auto;}
+.no-ticket-btn{padding:18px 32px;border-radius:var(--r4);border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 8px 32px var(--gold-glow);transition:all .2s;}
+.no-ticket-btn:active{transform:scale(.96);}
+
+/* ── Venue Customization Panel ── */
+.venue-params{padding:16px 20px;border-radius:var(--r3);background:linear-gradient(135deg,rgba(245,158,11,.05),rgba(245,158,11,.02));border:1px solid rgba(245,158,11,.15);margin:12px 0;}
+.vp-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.vp-row:last-child{border-bottom:none;}
+.vp-label{font-size:12px;color:var(--cream3);display:flex;align-items:center;gap:6px;}
+.vp-val{font-size:12px;font-weight:700;color:var(--gold2);font-family:'JetBrains Mono',monospace;}
+.vp-badge{font-size:9px;padding:3px 8px;border-radius:100px;background:var(--gold4);color:var(--gold);}
+
+/* ── Points Toast ── */
+@keyframes pointsFly{0%{opacity:0;transform:translateY(0) scale(.5)}20%{opacity:1;transform:translateY(-20px) scale(1.2)}80%{opacity:1;transform:translateY(-60px) scale(1)}100%{opacity:0;transform:translateY(-100px) scale(.8)}}
+.points-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;font-size:32px;font-weight:800;color:var(--gold);text-shadow:0 4px 20px rgba(245,158,11,.4);pointer-events:none;animation:pointsFly 1.8s ease-out forwards;}
+
 </style>
 </head>
 <body>
 
 <!-- ══ SPLASH ══ -->
 <div id="splash" onclick="skipSplash()">
+  <img class="splash-logo-img" src="barpass-logo.svg" alt="BarPass" onerror="this.style.display='none'"/>
   <div class="splash-logo" data-i18n="app_name">BarPass</div>
   <div class="splash-city" data-i18n="splash_city">Miami · AI Nightlife</div>
   <div class="splash-bar"><div class="splash-fill" id="splash-fill"></div></div>
@@ -1210,6 +1295,10 @@ body::after{
         </div>
         <div class="lang-btn" id="lang-btn" onclick="toggleLang()" style="width:32px;height:32px;border-radius:10px;border:1px solid var(--border2);background:var(--smoke2);color:var(--cream3);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;letter-spacing:.02em;">EN</div>
         <div class="theme-btn" id="theme-btn" onclick="toggleTheme()" style="width:32px;height:32px;border-radius:10px;border:1px solid var(--border2);background:var(--smoke2);color:var(--cream3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;">🌤</div>
+        <div id="wallet-pass-btn" onclick="openAppleWallet()" title="Add to Apple Wallet" style="width:32px;height:32px;border-radius:10px;border:1px solid rgba(212,160,23,.35);background:rgba(212,160,23,.1);color:var(--gold2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;position:relative;">
+          🍎
+          <div id="wallet-pass-dot" style="display:none;position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 5px #22c55e;"></div>
+        </div>
         <div class="header-avatar" id="user-avatar" onclick="openScreen('profile-screen')">🎉<div class="avatar-dot"></div></div>
       </div>
     </div>
@@ -1449,9 +1538,76 @@ body::after{
       <div style="padding:14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">💎</div><div style="font-size:11px;font-weight:700;">VIP Tables</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Priority booking</div></div>
       <div style="padding:14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">🎟️</div><div style="font-size:11px;font-weight:700;">Events</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Early access tickets</div></div>
     </div>
+    <div onclick="openScreen('credential-screen')" style="margin-top:14px;padding:14px 16px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.22);display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;">
+      <div style="font-size:22px;">🎟️</div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--gold);">Wallet Credential</div><div style="font-size:11px;color:var(--cream4);margin-top:2px;">Your QR payment pass · Earn points on every spend</div></div>
+      <div style="font-size:18px;color:var(--gold3);">›</div>
+    </div>
     <div id="wallet-txs" style="margin-top:16px;">
       <div id="wallet-empty" style="text-align:center;padding:24px 0;color:var(--cream4);font-size:13px;">No transactions yet</div>
       <div id="tx-list" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WALLET CREDENTIAL — QR Ticket ══ -->
+<div class="screen ticket-screen" id="credential-screen" style="display:none;background:linear-gradient(180deg,#0a0612 0%,#08060a 50%,#0d0a1a 100%);">
+  <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
+  <div style="display:flex;justify-content:flex-end;padding:2px 20px;flex-shrink:0;"><button class="screen-close" onclick="closeScreen('credential-screen')">✕</button></div>
+  <div class="ticket-header">
+    <div class="ticket-badge">🎟️ WALLET CREDENTIAL</div>
+    <div class="ticket-title">Your Night Pass</div>
+    <div class="ticket-sub">Show this QR at any venue to pay with credits</div>
+  </div>
+  <!-- Active Ticket -->
+  <div id="ticket-active" style="display:none;flex:1;overflow-y:auto;scrollbar-width:none;">
+    <div class="ticket-card ticket-glow" id="ticket-card">
+      <div class="ticket-stamp" id="ticket-stamp">🪙</div>
+      <div class="ticket-top">
+        <div class="ticket-brand">BarPass</div>
+        <div class="ticket-active">Active</div>
+      </div>
+      <div class="ticket-member">
+        <div class="ticket-member-name" id="ticket-name">Alex Rivera</div>
+        <div class="ticket-member-tier"><span class="tier-dot"></span> <span id="ticket-tier">Bronze</span> Member</div>
+      </div>
+      <hr class="ticket-perf">
+      <div class="ticket-qr-section">
+        <div class="ticket-qr-wrap" id="qr-wrap">
+          <div class="ticket-qr-scanline"></div>
+          <div id="qr-code"></div>
+        </div>
+        <div style="margin-top:10px;font-size:10px;color:var(--cream4);">Scan to pay · Valid all night</div>
+      </div>
+      <hr class="ticket-perf">
+      <div class="ticket-id-row">
+        <span class="ticket-id" id="ticket-wallet-id">BP-XXXX-XXXX</span>
+        <span class="ticket-id-sep"></span>
+        <span class="ticket-id" id="ticket-issued">Just now</span>
+      </div>
+      <div class="ticket-bottom">
+        <div class="ticket-stat"><span class="ticket-stat-val" id="ticket-bal">$0</span><span class="ticket-stat-lbl">Credits</span></div>
+        <div class="ticket-stat"><span class="ticket-stat-val" id="ticket-pts">0</span><span class="ticket-stat-lbl">Points</span></div>
+        <div class="ticket-stat"><span class="ticket-stat-val" id="ticket-cb">$0</span><span class="ticket-stat-lbl">Cashback</span></div>
+      </div>
+    </div>
+    <div class="ticket-actions">
+      <button class="ticket-btn primary" onclick="shareTicket()">📤 Share</button>
+      <button class="ticket-btn secondary" onclick="refreshQR()">🔄 Refresh QR</button>
+    </div>
+  </div>
+  <!-- No Ticket / Activate -->
+  <div id="ticket-inactive" style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+    <div class="no-ticket">
+      <div class="no-ticket-icon">🎟️</div>
+      <div class="no-ticket-head">Activate Your Wallet</div>
+      <div class="no-ticket-body">Get your unique QR credential to pay instantly at any venue. Every time you pay, you earn points toward your next reward.</div>
+      <button class="no-ticket-btn" onclick="activateWalletCredential()">✨ Activate Now</button>
+      <div style="margin-top:16px;display:flex;gap:16px;justify-content:center;">
+        <div style="text-align:center;"><div style="font-size:24px;">🪙</div><div style="font-size:10px;color:var(--cream4);margin-top:4px;">Pay with QR</div></div>
+        <div style="text-align:center;"><div style="font-size:24px;">⭐</div><div style="font-size:10px;color:var(--cream4);margin-top:4px;">Earn Points</div></div>
+        <div style="text-align:center;"><div style="font-size:24px;">🎁</div><div style="font-size:10px;color:var(--cream4);margin-top:4px;">Unlock Rewards</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1543,6 +1699,7 @@ body::after{
   </div>
   <div class="profile-list">
     <div class="prow credit-row" onclick="openScreen('wallet-screen')"><div class="prow-ico">🪙</div><div class="prow-lbl">Night Wallet</div><div class="prow-val" id="p-wallet-val">No credit</div><div class="prow-arr">›</div></div>
+    <div class="prow" onclick="openScreen('credential-screen')" style="border-bottom:1px solid var(--border);"><div class="prow-ico" style="background:var(--gold4);">🎟️</div><div class="prow-lbl" style="color:var(--gold2);">QR Credential</div><div class="prow-val" style="color:var(--gold);font-size:10px;" id="p-credential-status">Not activated</div><div class="prow-arr">›</div></div>
     <div class="prow" onclick="toast('Night history…','info')"><div class="prow-ico">📍</div><div class="prow-lbl">Night History</div><div class="prow-val">47 venues</div><div class="prow-arr">›</div></div>
     <div class="prow" onclick="toast('Saved venues…','info')"><div class="prow-ico">❤️</div><div class="prow-lbl">Saved Venues</div><div class="prow-val">8 saved</div><div class="prow-arr">›</div></div>
     <div class="prow" onclick="openScreen('express-screen')"><div class="prow-ico">⚡</div><div class="prow-lbl">Express Pass</div><div class="prow-val" id="p-express-val" style="color:var(--cream4);">Get access</div><div class="prow-arr">›</div></div>
@@ -2167,6 +2324,7 @@ const S = {
   user:null, express:false, cart:[], totalSpent:0, currentVenue:null,
   district:'all', searchQ:'', points:0, cashback:0, tier:0,
   credit:{active:false,venue:null,loaded:0,balance:0,spent:0,txs:[],id:'BP-'+Math.random().toString(36).substr(2,4).toUpperCase()+'-'+Math.random().toString(36).substr(2,4).toUpperCase()},
+  credential:null,
 };
 
 const USERS = {
@@ -3007,6 +3165,66 @@ function refreshWalletUI(){
   else if(pill)pill.style.display='none';
 }
 
+/* ── APPLE WALLET ──────────────────────────────────────────── */
+function openAppleWallet(){
+  // Si ya tiene pase guardado → ir directo a credential.html
+  var saved = localStorage.getItem('bp_wallet');
+  var passUrl = null;
+  try{ var w=JSON.parse(saved||'{}'); passUrl=w._passKitUrl||null; }catch(e){}
+
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  var isSafari = /WebKit/.test(navigator.userAgent) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent);
+
+  // Construir el sheet
+  var overlay = document.createElement('div');
+  overlay.id = 'aw-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(6,4,8,.88);backdrop-filter:blur(18px);z-index:9500;display:flex;align-items:flex-end;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0);';
+
+  var content = '';
+
+  if(passUrl && isIOS && isSafari){
+    // Pase ya generado — mostrar botón directo
+    content = '<div style="font-size:13px;color:rgba(255,248,235,.55);text-align:center;margin-bottom:16px;">Tu credencial BarPass ya está lista</div>'
+      + '<a href="'+passUrl+'" style="display:flex;align-items:center;justify-content:center;background:#000;border:1px solid rgba(255,255,255,.15);border-radius:10px;width:220px;height:46px;text-decoration:none;margin:0 auto 12px;">'
+      + '<img src="https://developer.apple.com/wallet/add-to-apple-wallet-guidelines/downloads/Add_to_Apple_Wallet_rgb_US-UK.svg" style="height:46px;width:220px;object-fit:contain;" onerror="this.parentElement.innerHTML=\'<span style=\\\"color:#fff;font-weight:700;\\\">🍎 Open in Wallet</span>\'"/></a>';
+  } else {
+    // Ir a credential.html para activar/generar
+    content = '<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">'
+      + '<div style="width:52px;height:52px;border-radius:14px;background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.25);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🍎</div>'
+      + '<div><div style="font-size:18px;font-weight:700;letter-spacing:-.02em;">Apple Wallet</div>'
+      + '<div style="font-size:12px;color:rgba(255,248,235,.5);margin-top:2px;">Activa tu wallet y agrega la credencial</div></div></div>'
+      + '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">'
+      + '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,248,235,.65);"><span style="font-size:16px;">💳</span> QR dinámico para pagar en venues</div>'
+      + '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,248,235,.65);"><span style="font-size:16px;">✨</span> Balance y puntos visibles en Wallet</div>'
+      + '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,248,235,.65);"><span style="font-size:16px;">📍</span> Aparece en Lock Screen cerca de venues</div></div>'
+      + '<a href="credential.html" style="display:block;width:100%;padding:16px;border-radius:100px;border:none;background:linear-gradient(135deg,#c8880a,#f5b830);color:#000;font-size:15px;font-weight:800;text-align:center;text-decoration:none;letter-spacing:-.01em;">Ver mi Wallet →</a>';
+  }
+
+  overlay.innerHTML = '<div style="background:#111013;border:1px solid rgba(255,248,235,.1);border-radius:28px 28px 0 0;width:100%;max-width:440px;padding:20px 24px 28px;">'
+    + '<div style="width:40px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 20px;"></div>'
+    + content
+    + '<button onclick="document.getElementById(\'aw-overlay\').remove()" style="width:100%;padding:14px;border-radius:100px;border:1px solid rgba(255,255,255,.08);background:transparent;color:rgba(255,248,235,.4);font-size:14px;cursor:pointer;margin-top:10px;font-family:inherit;">Cerrar</button>'
+    + '</div>';
+
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+
+  // Punto verde si ya tiene pase
+  var dot = document.getElementById('wallet-pass-dot');
+  if(dot && passUrl) dot.style.display='block';
+}
+
+// Mostrar punto verde al cargar si ya tiene pase
+(function(){
+  try{
+    var w=JSON.parse(localStorage.getItem('bp_wallet')||'{}');
+    if(w._passKitUrl){
+      var dot=document.getElementById('wallet-pass-dot');
+      if(dot) dot.style.display='block';
+    }
+  }catch(e){}
+})();
+
 function toggleTheme(){
   var body=document.body;
   body.style.transition='background .4s cubic-bezier(.22,1,.36,1)';
@@ -3710,6 +3928,295 @@ function buildAfterRecap(){
 }
 
 /* ═══════════════════════════════════════════
+   WALLET CREDENTIAL — QR + Points Engine
+═══════════════════════════════════════════ */
+var qrInstance = null;
+var qrRefreshTimer = null;
+
+// ── Venue Customization: multipliers & offers ──
+var VENUE_CONFIG = {};
+function getVenueConfig(venueName) {
+  if (VENUE_CONFIG[venueName]) return VENUE_CONFIG[venueName];
+  return { pointsMultiplier: 1, discount: 0, welcomeBonus: 0, minLoad: 0, color: 'var(--gold)' };
+}
+function initVenueConfigs() {
+  VENUE_CONFIG = {
+    'LIV Miami': { pointsMultiplier: 2, discount: 0.05, welcomeBonus: 50, minLoad: 20, color: 'var(--coral)' },
+    'E11EVEN Miami': { pointsMultiplier: 2.5, discount: 0.08, welcomeBonus: 100, minLoad: 50, color: 'var(--violet)' },
+    'Komodo Miami': { pointsMultiplier: 1.5, discount: 0.03, welcomeBonus: 25, minLoad: 20, color: 'var(--gold)' },
+    'Sugar Rooftop': { pointsMultiplier: 1.8, discount: 0.04, welcomeBonus: 30, minLoad: 15, color: 'var(--teal)' },
+    'Nikki Beach Club': { pointsMultiplier: 1.3, discount: 0, welcomeBonus: 20, minLoad: 10, color: 'var(--green)' },
+  };
+  VENUES.forEach(function(v) {
+    if (!VENUE_CONFIG[v.name]) {
+      VENUE_CONFIG[v.name] = { pointsMultiplier: 1, discount: 0, welcomeBonus: 0, minLoad: 0, color: 'var(--cream3)' };
+    }
+  });
+}
+initVenueConfigs();
+
+// ── Award Points on spend ──
+function awardPoints(amount, venueName) {
+  var cfg = getVenueConfig(venueName || (S.currentVenue && S.currentVenue.name));
+  var base = Math.floor(amount);
+  var bonus = Math.floor(base * (cfg.pointsMultiplier - 1));
+  var total = base + bonus;
+  S.points += total;
+  showPointsFly(total, bonus > 0 ? '×' + cfg.pointsMultiplier : '');
+  refreshWalletUI();
+  return total;
+}
+
+function showPointsFly(pts, label) {
+  var el = document.createElement('div');
+  el.className = 'points-toast';
+  el.textContent = '✦ +' + pts + ' pts' + (label ? ' ' + label : '');
+  document.body.appendChild(el);
+  setTimeout(function() { el.remove(); }, 1900);
+}
+
+// ── Generate QR Code ──
+function generateWalletQR(containerId) {
+  if (!S.credential || !S.credential.active) return;
+  var el = document.getElementById(containerId || 'qr-code');
+  if (!el) return;
+  el.innerHTML = '';
+  if (typeof QRCode === 'undefined') {
+    el.innerHTML = '<div style="font-size:10px;color:var(--cream4);text-align:center;">QR: ' + esc(S.credential.code) + '</div>';
+    return;
+  }
+  try {
+    qrInstance = new QRCode(el, {
+      text: S.credential.code,
+      width: 176,
+      height: 176,
+      colorDark: '#0f0a04',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:10px;color:var(--cream4);text-align:center;">' + esc(S.credential.code) + '</div>';
+  }
+}
+
+function refreshQR() {
+  if (!S.credential || !S.credential.active) return;
+  S.credential.refreshedAt = Date.now();
+  S.credential.code = 'BP:' + S.credential.id + ':' + S.credential.refreshedAt + ':' + (S.user ? S.user.email.slice(0,8) : 'guest');
+  generateWalletQR('qr-code');
+  document.getElementById('ticket-issued').textContent = 'Refreshed ' + new Date().toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit',hour12:true});
+  toast('🔄 QR refreshed','info');
+}
+
+function shareTicket() {
+  if (!S.credential || !S.credential.active) return;
+  var txt = 'BarPass Wallet Credential\nID: ' + S.credential.id + '\nName: ' + (S.user ? S.user.name : 'Guest') + '\nTier: ' + calcTier() + '\nBalance: $' + (S.credit.active ? S.credit.balance.toFixed(2) : '0.00') + '\nShow this at any venue to pay with credits.';
+  if (navigator.share) {
+    navigator.share({ title: 'BarPass Wallet', text: txt }).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(txt).then(function() {
+      toast('📤 Credential copied to clipboard','ok');
+    }).catch(function() {
+      toast('📤 Share not available','warn');
+    });
+  }
+}
+
+// ── Activate Wallet Credential ──
+function activateWalletCredential() {
+  if (!S.user) { toast('Sign in first','warn'); return; }
+  nativeHaptic('success');
+  var walletId = 'BP-' + Math.random().toString(36).substr(2,4).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+  var ts = Date.now();
+  var code = 'BP:' + walletId + ':' + ts + ':' + (S.user.email ? S.user.email.slice(0,8) : 'guest');
+  S.credential = {
+    active: true,
+    id: walletId,
+    code: code,
+    activatedAt: ts,
+    refreshedAt: ts,
+    venueHistory: []
+  };
+  document.getElementById('ticket-inactive').style.display = 'none';
+  document.getElementById('ticket-active').style.display = 'block';
+  document.getElementById('ticket-name').textContent = S.user.name || 'Guest';
+  document.getElementById('ticket-tier').textContent = calcTier();
+  document.getElementById('ticket-wallet-id').textContent = walletId;
+  document.getElementById('ticket-issued').textContent = 'Just now';
+  document.getElementById('ticket-bal').textContent = '$' + (S.credit.active ? S.credit.balance.toFixed(2) : '0.00');
+  document.getElementById('ticket-pts').textContent = S.points || 0;
+  document.getElementById('ticket-cb').textContent = '$' + (S.cashback || 0).toFixed(2);
+  refreshWalletUI();
+  setTimeout(function() { generateWalletQR('qr-code'); }, 100);
+  document.getElementById('ticket-card').style.animation = 'none';
+  void document.getElementById('ticket-card').offsetWidth;
+  document.getElementById('ticket-card').style.animation = 'ticketReveal .6s cubic-bezier(.22,1,.36,1) both';
+  toast('🎟️ Wallet activated! Show your QR to pay at any venue.','credit');
+
+  if (S.currentVenue) {
+    var cfg = getVenueConfig(S.currentVenue.name);
+    if (cfg.welcomeBonus > 0) {
+      S.points += cfg.welcomeBonus;
+      document.getElementById('ticket-pts').textContent = S.points;
+      showPointsFly(cfg.welcomeBonus, 'welcome');
+      toast('🎉 +' + cfg.welcomeBonus + ' welcome points at ' + S.currentVenue.name + '!','ok');
+    }
+  }
+}
+
+// ── Update ticket UI on wallet changes ──
+function refreshTicketUI() {
+  var pStatus = document.getElementById('p-credential-status');
+  if (!S.credential || !S.credential.active) {
+    if (pStatus) pStatus.textContent = 'Not activated';
+    return;
+  }
+  var tier = calcTier();
+  document.getElementById('ticket-tier').textContent = tier;
+  document.getElementById('ticket-bal').textContent = '$' + (S.credit.active ? S.credit.balance.toFixed(2) : '0.00');
+  document.getElementById('ticket-pts').textContent = S.points || 0;
+  document.getElementById('ticket-cb').textContent = '$' + (S.cashback || 0).toFixed(2);
+  document.getElementById('ticket-name').textContent = (S.user && S.user.name) || 'Guest';
+  if (pStatus) pStatus.textContent = '🎟️ Active — ' + S.credential.id;
+  var stamp = document.getElementById('ticket-stamp');
+  if (tier === 'Platinum') stamp.textContent = '💎';
+  else if (tier === 'Gold') stamp.textContent = '🥇';
+  else if (tier === 'Silver') stamp.textContent = '🥈';
+  else stamp.textContent = '🪙';
+}
+
+// ── Show venue customization in venue detail ──
+function showVenueCustomization(venueName) {
+  var cfg = getVenueConfig(venueName);
+  var existing = document.getElementById('venue-params');
+  if (existing) existing.remove();
+  var div = document.createElement('div');
+  div.id = 'venue-params';
+  div.className = 'venue-params';
+  div.innerHTML =
+    '<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">✦ ' + venueName + ' Benefits</div>' +
+    (cfg.pointsMultiplier > 1 ? '<div class="vp-row"><span class="vp-label">⭐ Points Multiplier</span><span class="vp-val">×' + cfg.pointsMultiplier.toFixed(1) + '</span></div>' : '') +
+    (cfg.discount > 0 ? '<div class="vp-row"><span class="vp-label">💎 Credit Discount</span><span class="vp-val" style="color:var(--teal);">' + (cfg.discount * 100).toFixed(0) + '% off</span></div>' : '') +
+    (cfg.welcomeBonus > 0 ? '<div class="vp-row"><span class="vp-label">🎁 Welcome Bonus</span><span class="vp-val" style="color:var(--green);">+' + cfg.welcomeBonus + ' pts</span></div>' : '') +
+    (cfg.minLoad > 0 ? '<div class="vp-row"><span class="vp-label">📦 Min Load</span><span class="vp-val">$' + cfg.minLoad + '</span></div>' : '') +
+    '<div class="vp-row" style="border-bottom:none;"><span class="vp-label">🪙 You earn</span><span class="vp-val">' + Math.floor(cfg.pointsMultiplier) + ' pt per $1</span></div>';
+  var vdBody = document.querySelector('.vd-body');
+  if (vdBody) vdBody.insertBefore(div, vdBody.firstChild);
+}
+
+// ── Override payWithCredit to award points ──
+var _origPayWithCredit = payWithCredit;
+payWithCredit = function() {
+  var sub = 0; for (var si = 0; si < S.cart.length; si++) sub += S.cart[si].price * S.cart[si].qty;
+  var total = parseFloat((sub + 0.99).toFixed(2));
+  var c = S.credit;
+  if (!c.active || c.balance < 0.01) { toast('No credit available','warn'); return; }
+  var pay = Math.min(total, c.balance);
+  c.balance = parseFloat((c.balance - pay).toFixed(2));
+  c.spent = parseFloat((c.spent + pay).toFixed(2));
+  S.totalSpent = parseFloat((S.totalSpent + pay).toFixed(2));
+  var names = []; for (var si = 0; si < S.cart.length; si++) names.push(S.cart[si].name);
+  c.txs.unshift({name:'Round · ' + names.join(', '), price:pay, emoji:'🍸', time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true})});
+  // Award points on every payment
+  var venueName = S.currentVenue ? S.currentVenue.name : null;
+  var pts = awardPoints(pay, venueName);
+  S.cart = []; updateCartBadge(); renderCart();
+  closeScreen('cart-screen');
+  refreshCreditUI();
+  refreshTicketUI();
+  document.getElementById('p-spent').textContent = '$' + S.totalSpent.toFixed(0);
+  toast('🪙 Paid $' + pay.toFixed(2) + ' · $' + c.balance.toFixed(2) + ' left · +' + pts + ' pts','credit');
+};
+
+// ── Override placeOrder to award points ──
+var _origPlaceOrder = placeOrder;
+placeOrder = function() {
+  var sub = 0; for (var si = 0; si < S.cart.length; si++) sub += S.cart[si].price * S.cart[si].qty;
+  var total = sub + 0.99;
+  S.totalSpent += total;
+  document.getElementById('p-spent').textContent = '$' + S.totalSpent.toFixed(0);
+  var venueName = S.currentVenue ? S.currentVenue.name : null;
+  awardPoints(sub, venueName);
+  S.cart = []; updateCartBadge(); renderCart(); closeScreen('cart-screen');
+  refreshTicketUI();
+  toast('🚀 Order placed! +' + Math.floor(sub) + ' pts earned','ok');
+};
+
+// ── Override confirmLoad to show venue-specific config ──
+var _origConfirmLoad = confirmLoad;
+confirmLoad = function(amount) {
+  var v = S.currentVenue; if (!v) { toast('Select a venue first','warn'); return; }
+  var cfg = getVenueConfig(v.name);
+  if (cfg.minLoad > 0 && amount < cfg.minLoad) {
+    toast('Minimum load $' + cfg.minLoad + ' at ' + v.name,'warn');
+    return;
+  }
+  var c = S.credit;
+  c.active = true; c.venue = v.name;
+  c.loaded = parseFloat((c.loaded + amount).toFixed(2));
+  var discounted = cfg.discount > 0 ? amount * (1 + cfg.discount) : amount;
+  c.balance = parseFloat((c.balance + discounted).toFixed(2));
+  var bonus = amount >= 500 ? 50 : amount >= 200 ? 15 : amount >= 100 ? 5 : 0;
+  if (bonus > 0) {
+    c.balance = parseFloat((c.balance + bonus).toFixed(2));
+    S.cashback = parseFloat((S.cashback + bonus).toFixed(2));
+  }
+  var pts = Math.floor(amount / 10) * cfg.pointsMultiplier;
+  S.points += pts;
+  document.getElementById('load-section').style.display = 'none';
+  refreshCreditUI(); refreshWalletUI(); refreshTicketUI();
+  var elBal = document.getElementById('wallet-balance');
+  if (elBal) { elBal.style.color = 'var(--teal)'; setTimeout(function(){ elBal.style.color = ''; },800); }
+  var elAmt = document.getElementById('cc-amount');
+  if (elAmt) { elAmt.classList.remove('flash'); void elAmt.offsetWidth; elAmt.classList.add('flash'); }
+  closeScreen('wallet-screen');
+  var bonusTxt = '';
+  if (cfg.discount > 0) bonusTxt += ' · +' + (cfg.discount * 100).toFixed(0) + '% bonus credit';
+  if (bonus > 0) bonusTxt += ' · +$' + bonus + ' cashback';
+  toast('🪙 $' + amount + ' loaded at ' + v.name + bonusTxt + ' · +' + pts + ' pts','credit');
+};
+
+// ── Extend openScreen for credential screen ──
+var _origOpenScreen = openScreen;
+openScreen = function(id) {
+  _origOpenScreen(id);
+  if (id === 'credential-screen') {
+    if (S.credential && S.credential.active) {
+      document.getElementById('ticket-inactive').style.display = 'none';
+      document.getElementById('ticket-active').style.display = 'block';
+      refreshTicketUI();
+      setTimeout(function() { generateWalletQR('qr-code'); }, 100);
+    } else {
+      document.getElementById('ticket-active').style.display = 'none';
+      document.getElementById('ticket-inactive').style.display = 'flex';
+    }
+  }
+};
+
+// ── Extend openVenue to show venue customization ──
+var _origOpenVenue = openVenue;
+openVenue = function(id) {
+  _origOpenVenue(id);
+  var v = VENUES.find(function(x) { return x.id === id; });
+  if (v) setTimeout(function() { showVenueCustomization(v.name); }, 200);
+};
+
+// ── Extend refreshWalletUI to also update ticket ──
+var _origRefreshWalletUI = refreshWalletUI;
+refreshWalletUI = function() {
+  _origRefreshWalletUI();
+  if (S.credential && S.credential.active) refreshTicketUI();
+};
+
+// ── Extend signOut to clear credential ──
+var _origSignOut = signOut;
+signOut = function() {
+  S.credential = null;
+  qrInstance = null;
+  _origSignOut();
+};
+
+/* ═══════════════════════════════════════════
    FLOAT UP ANIMATION for reactions
 ═══════════════════════════════════════════ */
 var _floatStyle=document.createElement('style');
@@ -3722,5 +4229,6 @@ document.head.appendChild(_floatStyle);
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </body>
 </html>
