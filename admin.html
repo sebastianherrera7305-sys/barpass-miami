@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>BarPass · Command Center</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0c;--sidebar:#0f0f12;--card:#141416;--card2:#1a1a1e;
+  --border:#252528;--gold:#d4a017;--gold-l:#f5d060;--gold-d:#8a6510;
+  --text:#e8e8ec;--dim:#888890;--muted:#505058;
+  --red:#e05050;--green:#40c060;
+  --sw:224px;--hh:60px;--r:10px;--rs:6px;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;display:flex}
+/* SIDEBAR */
+#sb{width:var(--sw);background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-logo{padding:18px 18px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.sb-logo img{width:34px;height:34px;border-radius:8px;object-fit:cover}
+.sb-logo-b{display:flex;flex-direction:column}
+.sb-logo-b b{font-size:15px;color:var(--gold-l);letter-spacing:.4px}
+.sb-logo-b small{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.sb-nav{padding:10px 8px;flex:1;display:flex;flex-direction:column;gap:1px}
+.sb-lbl{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding:12px 10px 5px}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:var(--rs);cursor:pointer;color:var(--dim);font-size:13px;font-weight:450;transition:all .12s;user-select:none}
+.ni:hover{background:var(--card);color:var(--text)}
+.ni.on{background:rgba(212,160,23,.11);color:var(--gold-l)}
+.ni svg{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.ni.on svg{opacity:1}
+.ni span.badge{margin-left:auto;font-size:11px;background:var(--card2);padding:1px 6px;border-radius:9px;color:var(--muted)}
+.sb-foot{padding:10px;border-top:1px solid var(--border)}
+.open-app{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px;background:rgba(212,160,23,.09);border:1px solid rgba(212,160,23,.22);border-radius:var(--rs);color:var(--gold-l);font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;transition:all .12s}
+.open-app:hover{background:rgba(212,160,23,.16)}
+/* MAIN */
+#main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+#hdr{height:var(--hh);background:var(--sidebar);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:90}
+#hdr-title{font-size:16px;font-weight:600}
+#hdr-actions{display:flex;align-items:center;gap:9px}
+.saved-badge{font-size:11px;color:var(--green);background:rgba(64,192,96,.1);border:1px solid rgba(64,192,96,.2);border-radius:20px;padding:3px 10px;display:none}
+#content{padding:26px;flex:1}
+.sec{display:none}.sec.on{display:block}
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.ctitle{font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.9px;margin-bottom:14px}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:22px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.sc-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:7px}
+.sc-val{font-size:28px;font-weight:700;line-height:1}
+.sc-val.gold{color:var(--gold-l)}
+.sc-sub{font-size:11px;color:var(--muted);margin-top:3px}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;transition:all .12s;border:none;font-family:inherit}
+.btn-p{background:var(--gold);color:#000}.btn-p:hover{background:var(--gold-l)}
+.btn-g{background:transparent;color:var(--dim);border:1px solid var(--border)}.btn-g:hover{background:var(--card2);color:var(--text)}
+.btn-d{background:transparent;color:var(--red);border:1px solid rgba(224,80,80,.22)}.btn-d:hover{background:rgba(224,80,80,.09)}
+.btn-sm{padding:5px 9px;font-size:12px}
+/* TOOLBAR */
+.tb{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
+.si{flex:1;max-width:300px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:7px 11px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .12s}
+.si::placeholder{color:var(--muted)}.si:focus{border-color:var(--gold-d)}
+/* TABLE */
+.tw{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--card2);padding:9px 13px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--card2)}
+tbody td{padding:10px 13px;font-size:13px;vertical-align:middle}
+.vthumb{width:34px;height:34px;border-radius:6px;object-fit:cover;background:var(--card2)}
+.vph{width:34px;height:34px;border-radius:6px;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px}
+.tag{display:inline-block;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:500;background:var(--card2);color:var(--dim);border:1px solid var(--border)}
+.tag-a{background:rgba(64,192,96,.1);color:var(--green);border-color:rgba(64,192,96,.2)}
+.tag-i{background:rgba(80,80,88,.15);color:var(--muted);border-color:transparent}
+.tag-x{background:rgba(212,160,23,.1);color:var(--gold-l);border-color:rgba(212,160,23,.2)}
+.ra{display:flex;gap:5px}
+/* FORM */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.f{display:flex;flex-direction:column;gap:5px}
+.f.full{grid-column:1/-1}
+label{font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+input[type=text],input[type=number],input[type=url],input[type=time],select,textarea{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .12s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--gold-d)}
+select{cursor:pointer}
+textarea{resize:vertical;min-height:72px}
+input[type=color]{width:46px;height:34px;padding:2px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg);cursor:pointer}
+/* TOGGLE */
+.tr-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
+.tr-row:last-child{border-bottom:none}
+.tr-lbl span:first-child{display:block;font-size:13px;font-weight:500}
+.tr-lbl span:last-child{font-size:11px;color:var(--muted)}
+.tgl{width:38px;height:21px;background:var(--card2);border-radius:11px;position:relative;cursor:pointer;transition:background .18s;flex-shrink:0;border:1px solid var(--border)}
+.tgl.on{background:var(--gold);border-color:var(--gold)}
+.tgl::after{content:'';position:absolute;width:15px;height:15px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.tgl.on::after{transform:translateX(17px)}
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.mo.open{display:flex}
+.md{background:var(--card);border:1px solid var(--border);border-radius:14px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid var(--border)}
+.mt{font-size:15px;font-weight:600}
+.mx{width:26px;height:26px;background:var(--card2);border:1px solid var(--border);border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--dim);transition:all .12s}
+.mx:hover{background:var(--bg);color:var(--text)}
+.mb{padding:22px}
+.mf{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px;border-top:1px solid var(--border)}
+/* PRICING */
+.pc{background:linear-gradient(135deg,#181200,#0a0a0c);border:1px solid rgba(212,160,23,.28);border-radius:13px;padding:24px;max-width:340px}
+.pb{display:flex;align-items:center;gap:5px;padding:7px 0;font-size:13px;color:var(--dim);border-bottom:1px solid rgba(255,255,255,.05)}
+.pb:last-child{border-bottom:none}
+.pd{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+/* MEDIA */
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.mc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.mt-img{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--card2);display:block}
+.mt-empty{width:100%;aspect-ratio:16/9;background:var(--card2);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:26px}
+.mc-body{padding:11px}
+.ml{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:5px}
+/* COLOR ROW */
+.cr{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.cr:last-child{border-bottom:none}
+.cr-info{flex:1}
+.cr-info b{display:block;font-size:13px;font-weight:500}
+.cr-info small{font-size:11px;color:var(--muted)}
+.cprev{width:26px;height:26px;border-radius:5px;border:1px solid rgba(255,255,255,.1)}
+/* IMG PREVIEW */
+.iprev{width:100%;height:110px;object-fit:cover;border-radius:var(--rs);background:var(--card2);margin-top:7px;display:none}
+/* BENEFIT ROW */
+.br{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.br input{flex:1}
+/* DIVIDER */
+hr{border:none;border-top:1px solid var(--border);margin:18px 0}
+/* QUICK ACTION */
+.qa{display:flex;flex-direction:column;gap:7px}
+/* TOAST */
+#toast{position:fixed;bottom:26px;right:26px;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:11px 16px;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:999;transform:translateY(70px);opacity:0;transition:all .22s;display:flex;align-items:center;gap:9px}
+#toast.show{transform:translateY(0);opacity:1}
+.td{width:7px;height:7px;border-radius:50%;background:var(--green)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<aside id="sb">
+  <div class="sb-logo">
+    <img src="barpass-logo.svg" alt="" onerror="this.style.display='none'"/>
+    <div class="sb-logo-b">
+      <b>BarPass</b>
+      <small>Command Center</small>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-lbl">Overview</div>
+    <div class="ni on" data-s="dashboard">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+    </div>
+    <div class="sb-lbl">Content</div>
+    <div class="ni" data-s="venues">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Venues
+      <span class="badge" id="vc-badge">0</span>
+    </div>
+    <div class="ni" data-s="media">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Media
+    </div>
+    <div class="sb-lbl">Business</div>
+    <div class="ni" data-s="pricing">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Pricing
+    </div>
+    <div class="sb-lbl">System</div>
+    <div class="ni" data-s="settings">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </div>
+  </nav>
+  <div class="sb-foot">
+    <a href="barpass-miami.html" target="_blank" class="open-app">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Open App
+    </a>
+  </div>
+</aside>
+
+<div id="main">
+  <header id="hdr">
+    <span id="hdr-title">Dashboard</span>
+    <div id="hdr-actions">
+      <span class="saved-badge" id="saved-badge">✓ Saved</span>
+      <button class="btn btn-g btn-sm" onclick="exportConfig()">Export JSON</button>
+      <button class="btn btn-p btn-sm" onclick="saveAll()">Save Changes</button>
+    </div>
+  </header>
+
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <section id="sec-dashboard" class="sec on">
+      <div class="stats">
+        <div class="sc"><div class="sc-lbl">Total Venues</div><div class="sc-val" id="s-total">0</div><div class="sc-sub">en tu directorio</div></div>
+        <div class="sc"><div class="sc-lbl">Activos</div><div class="sc-val" id="s-active">0</div><div class="sc-sub">visible en el app</div></div>
+        <div class="sc"><div class="sc-lbl">Express Pass</div><div class="sc-val gold" id="s-price">$0</div><div class="sc-sub">precio actual</div></div>
+        <div class="sc"><div class="sc-lbl">Categorías</div><div class="sc-val" id="s-cats">0</div><div class="sc-sub">tipos de venue</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="ctitle">Quick Actions</div>
+          <div class="qa">
+            <button class="btn btn-g" style="justify-content:flex-start" onclick="nav('venues');setTimeout(openVenueModal,50)">+ Agregar Venue</button>
+            <button class="btn btn-g" style="justify-content:flex-start" onclick="nav('pricing')">💳 Editar Express Pass</button>
+            <button class="btn btn-g" style="justify-content:flex-start" onclick="nav('media')">🖼️ Gestionar Media</button>
+            <button class="btn btn-g" style="justify-content:flex-start" onclick="nav('settings')">⚙️ App Settings</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Express Pass Preview</div>
+          <div class="pc" style="padding:14px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <div style="width:34px;height:34px;background:rgba(212,160,23,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">⚡</div>
+              <div>
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Express Pass</div>
+                <div style="font-size:22px;font-weight:700;color:var(--gold-l)" id="d-price">$9.99</div>
+              </div>
+            </div>
+            <div id="d-benefits"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VENUES -->
+    <section id="sec-venues" class="sec">
+      <div class="tb">
+        <input class="si" type="text" id="vsearch" placeholder="Buscar venues…" oninput="filterVenues()"/>
+        <div style="display:flex;gap:8px">
+          <select id="vcat" onchange="filterVenues()" style="width:auto">
+            <option value="">All categories</option>
+            <option>nightclub</option><option>rooftop</option><option>lounge</option>
+            <option>restaurant</option><option>beach club</option><option>bar</option>
+          </select>
+          <button class="btn btn-p" onclick="openVenueModal()">+ Add Venue</button>
+        </div>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th style="width:42px"></th><th>Venue</th><th>Categoría</th><th>Neighborhood</th><th>Express</th><th>Status</th><th style="width:96px">Actions</th></tr></thead>
+          <tbody id="vtbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- MEDIA -->
+    <section id="sec-media" class="sec">
+      <div class="card">
+        <div class="ctitle">App Images</div>
+        <div class="mg" id="media-grid"></div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="sec-pricing" class="sec">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start">
+        <div class="card">
+          <div class="ctitle">Express Pass Config</div>
+          <div class="f" style="margin-bottom:16px">
+            <label>Precio (USD)</label>
+            <input type="number" id="ep" step="0.01" min="0" value="9.99" oninput="updPricing()"/>
+          </div>
+          <div class="ctitle" style="margin-top:18px">Beneficios</div>
+          <div id="blist"></div>
+          <button class="btn btn-g btn-sm" style="margin-top:9px" onclick="addBenefit()">+ Add Benefit</button>
+        </div>
+        <div>
+          <div class="ctitle" style="margin-bottom:10px">Preview</div>
+          <div class="pc">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+              <div style="width:42px;height:42px;background:rgba(212,160,23,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">⚡</div>
+              <div>
+                <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Express Pass</div>
+                <div style="font-size:30px;font-weight:700;color:var(--gold-l)">$<span id="pp-val">9.99</span> <span style="font-size:15px;font-weight:400;color:var(--dim)">/ night</span></div>
+              </div>
+            </div>
+            <div id="pp-benefits"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="sec-settings" class="sec">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div class="card">
+          <div class="ctitle">App Identity</div>
+          <div class="fg">
+            <div class="f full"><label>App Name</label><input type="text" id="s-name" value="BarPass Miami"/></div>
+            <div class="f full">
+              <label>Logo URL</label>
+              <input type="url" id="s-logo" value="/barpass-logo.svg" oninput="document.getElementById('logo-prev').src=this.value;document.getElementById('logo-prev').style.display='block'"/>
+              <img id="logo-prev" class="iprev" src="/barpass-logo.svg" style="display:block;height:70px;object-fit:contain;background:var(--card2);padding:8px;border-radius:8px"/>
+            </div>
+            <div class="f full">
+              <label>Splash Background URL</label>
+              <input type="url" id="s-splash" placeholder="https://…" oninput="prevImg('sp-prev',this.value)"/>
+              <img id="sp-prev" class="iprev"/>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Colors</div>
+          <div class="cr">
+            <div class="cr-info"><b>Gold / Primary</b><small>Botones, highlights, accents</small></div>
+            <div class="cprev" id="cp-gold" style="background:#d4a017"></div>
+            <input type="color" id="c-gold" value="#d4a017" oninput="updColor('gold',this.value)"/>
+          </div>
+          <div class="cr">
+            <div class="cr-info"><b>Background</b><small>Fondo principal del app</small></div>
+            <div class="cprev" id="cp-bg" style="background:#060606"></div>
+            <input type="color" id="c-bg" value="#060606" oninput="updColor('bg',this.value)"/>
+          </div>
+          <div class="cr">
+            <div class="cr-info"><b>Card Surface</b><small>Cards, modals, sheets</small></div>
+            <div class="cprev" id="cp-card" style="background:#141416"></div>
+            <input type="color" id="c-card" value="#141416" oninput="updColor('card',this.value)"/>
+          </div>
+          <div class="cr">
+            <div class="cr-info"><b>Accent Text</b><small>Precios, labels activos</small></div>
+            <div class="cprev" id="cp-accent" style="background:#f5d060"></div>
+            <input type="color" id="c-accent" value="#f5d060" oninput="updColor('accent',this.value)"/>
+          </div>
+        </div>
+        <div class="card" style="grid-column:1/-1">
+          <div class="ctitle">App Toggles</div>
+          <div class="tr-row"><div class="tr-lbl"><span>Express Pass Enabled</span><span>Mostrar Express Pass en el app</span></div><div class="tgl on" id="t-express" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tr-row"><div class="tr-lbl"><span>Map Enabled</span><span>Mostrar mapa de venues en el feed</span></div><div class="tgl on" id="t-map" onclick="this.classList.toggle('on')"></div></div>
+          <div class="tr-row"><div class="tr-lbl"><span>Maintenance Mode</span><span>Muestra pantalla de mantenimiento a usuarios</span></div><div class="tgl" id="t-maint" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- VENUE MODAL -->
+<div class="mo" id="vmodal">
+  <div class="md">
+    <div class="mh"><span class="mt" id="mtitle">Add Venue</span><div class="mx" onclick="closeModal()">×</div></div>
+    <div class="mb">
+      <div class="fg">
+        <div class="f full"><label>Venue Name *</label><input type="text" id="v-name" placeholder="e.g. Komodo"/></div>
+        <div class="f"><label>Categoría</label><select id="v-cat"><option>nightclub</option><option>rooftop</option><option>lounge</option><option>restaurant</option><option>beach club</option><option>bar</option></select></div>
+        <div class="f"><label>Neighborhood</label><input type="text" id="v-hood" placeholder="e.g. Brickell"/></div>
+        <div class="f full"><label>Address</label><input type="text" id="v-addr" placeholder="801 Brickell Ave, Miami"/></div>
+        <div class="f full"><label>Description</label><textarea id="v-desc" placeholder="Describe el venue…"></textarea></div>
+        <div class="f full"><label>Photo URL</label><input type="url" id="v-img" placeholder="https://…" oninput="prevImg('v-iprev',this.value)"/><img id="v-iprev" class="iprev"/></div>
+        <div class="f full"><label>Logo URL</label><input type="url" id="v-logo" placeholder="https://…"/></div>
+        <div class="f"><label>Abre</label><input type="time" id="v-open" value="20:00"/></div>
+        <div class="f"><label>Cierra</label><input type="time" id="v-close" value="05:00"/></div>
+        <div class="f"><label>Instagram</label><input type="text" id="v-ig" placeholder="@handle"/></div>
+        <div class="f"><label>Teléfono</label><input type="text" id="v-phone" placeholder="+1 305…"/></div>
+      </div>
+      <hr/>
+      <div class="tr-row"><div class="tr-lbl"><span>Express Access</span><span>Este venue acepta Express Pass</span></div><div class="tgl on" id="v-express" onclick="this.classList.toggle('on')"></div></div>
+      <div class="tr-row"><div class="tr-lbl"><span>Featured</span><span>Aparece destacado en el feed</span></div><div class="tgl" id="v-featured" onclick="this.classList.toggle('on')"></div></div>
+      <div class="tr-row"><div class="tr-lbl"><span>Active</span><span>Visible en el app</span></div><div class="tgl on" id="v-active" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" onclick="saveVenue()">Save Venue</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><div class="td"></div><span id="tmsg">Saved</span></div>
+
+<script>
+const DEFAULTS = [
+  {id:'komodo',name:'Komodo',cat:'restaurant',hood:'Brickell',addr:'801 Brickell Ave, Miami, FL 33131',desc:'Multi-level dining and nightlife in the heart of Brickell.',img:'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800&q=80',logo:'',open:'18:00',close:'03:00',ig:'@komodo_miami',phone:'+1 305 534 2100',express:true,featured:true,active:true},
+  {id:'liv',name:'LIV',cat:'nightclub',hood:'South Beach',addr:'4441 Collins Ave, Miami Beach, FL 33140',desc:'World-renowned nightclub at the Fontainebleau Hotel.',img:'https://images.unsplash.com/photo-1571266028191-d23e3ee93976?w=800&q=80',logo:'',open:'23:00',close:'06:00',ig:'@livnightclub',phone:'+1 305 674 4680',express:true,featured:true,active:true},
+  {id:'e11even',name:'E11EVEN',cat:'nightclub',hood:'Downtown',addr:'29 NE 11th St, Miami, FL 33132',desc:'24/7 ultraclub in Downtown Miami.',img:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80',logo:'',open:'23:00',close:'23:59',ig:'@e11evenmia',phone:'+1 305 829 2911',express:true,featured:true,active:true},
+  {id:'story',name:'Story',cat:'nightclub',hood:'South Beach',addr:'136 Collins Ave, Miami Beach, FL 33139',desc:'Premier nightclub on Collins featuring world-class DJs.',img:'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=800&q=80',logo:'',open:'23:00',close:'06:00',ig:'@storymia',phone:'+1 305 538 2424',express:true,featured:false,active:true},
+  {id:'moxy',name:'Moxy Rooftop',cat:'rooftop',hood:'South Beach',addr:'915 Washington Ave, Miami Beach, FL 33139',desc:'Rooftop bar with panoramic South Beach views.',img:'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=800&q=80',logo:'',open:'17:00',close:'02:00',ig:'@moxymiamisb',phone:'',express:false,featured:false,active:true},
+];
+const DSET = {expressPrice:9.99,benefits:['Skip the line at all venues','Priority entry all night','Exclusive VIP access','Valid at 20+ Miami venues'],appName:'BarPass Miami',logoUrl:'/barpass-logo.svg',splashUrl:'',colorGold:'#d4a017',colorBg:'#060606',colorCard:'#141416',colorAccent:'#f5d060',expressEnabled:true,mapEnabled:true,maintenanceMode:false};
+const DMEDIA = [{key:'splash',label:'Splash Background',url:''},{key:'ob1',label:'Onboarding Slide 1',url:''},{key:'ob2',label:'Onboarding Slide 2',url:''},{key:'ob3',label:'Onboarding Slide 3',url:''}];
+
+let DB = {venues:[],settings:{...DSET},media:[...DMEDIA]};
+let editId = null;
+
+function init(){
+  const s = localStorage.getItem('bp_admin');
+  if(s){try{DB=JSON.parse(s);}catch(e){DB.venues=[...DEFAULTS];}}
+  else{DB.venues=[...DEFAULTS];}
+  renderAll();
+}
+
+function renderAll(){renderStats();renderVenues();renderMedia();renderPricing();renderSettings();}
+
+function nav(s){
+  document.querySelectorAll('.ni').forEach(e=>e.classList.toggle('on',e.dataset.s===s));
+  document.querySelectorAll('.sec').forEach(e=>e.classList.toggle('on',e.id==='sec-'+s));
+  const T={dashboard:'Dashboard',venues:'Venues',media:'Media',pricing:'Pricing',settings:'Settings'};
+  document.getElementById('hdr-title').textContent=T[s]||s;
+}
+document.querySelectorAll('.ni').forEach(e=>e.addEventListener('click',()=>nav(e.dataset.s)));
+
+function renderStats(){
+  const t=DB.venues.length, a=DB.venues.filter(v=>v.active).length, c=new Set(DB.venues.map(v=>v.cat)).size;
+  document.getElementById('s-total').textContent=t;
+  document.getElementById('s-active').textContent=a;
+  document.getElementById('s-price').textContent='$'+(DB.settings.expressPrice||0).toFixed(2);
+  document.getElementById('s-cats').textContent=c;
+  document.getElementById('vc-badge').textContent=t;
+  document.getElementById('d-price').textContent='$'+(DB.settings.expressPrice||0).toFixed(2);
+  document.getElementById('d-benefits').innerHTML=(DB.settings.benefits||[]).map(b=>`<div class="pb"><div class="pd"></div>${b}</div>`).join('');
+}
+
+function renderVenues(q='',cat=''){
+  const rows=DB.venues.filter(v=>(!q||v.name.toLowerCase().includes(q.toLowerCase())||v.hood.toLowerCase().includes(q.toLowerCase()))&&(!cat||v.cat===cat))
+    .map(v=>`<tr>
+      <td>${v.img?`<img class="vthumb" src="${v.img}" onerror="this.style.display='none'"/>`:`<div class="vph">🏢</div>`}</td>
+      <td><div style="font-weight:500">${v.name}</div><div style="font-size:11px;color:var(--muted)">${v.addr||'—'}</div></td>
+      <td><span class="tag">${v.cat}</span></td>
+      <td style="color:var(--dim)">${v.hood||'—'}</td>
+      <td>${v.express?'<span class="tag tag-x">⚡ Express</span>':'<span style="color:var(--muted);font-size:11px">—</span>'}</td>
+      <td><span class="tag ${v.active?'tag-a':'tag-i'}">${v.active?'Active':'Inactive'}</span></td>
+      <td><div class="ra"><button class="btn btn-g btn-sm" onclick="editVenue('${v.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delVenue('${v.id}')">Del</button></div></td>
+    </tr>`).join('');
+  document.getElementById('vtbody').innerHTML=rows||'<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">No venues found</td></tr>';
+}
+
+function filterVenues(){renderVenues(document.getElementById('vsearch').value,document.getElementById('vcat').value);}
+
+function openVenueModal(v=null){
+  editId=v?v.id:null;
+  document.getElementById('mtitle').textContent=v?'Edit Venue':'Add Venue';
+  ['name','hood','addr','desc','img','logo','ig','phone'].forEach(f=>{const el=document.getElementById('v-'+f);if(el)el.value=v?(v[f]||''):'';});
+  document.getElementById('v-cat').value=v?v.cat:'nightclub';
+  document.getElementById('v-open').value=v?v.open:'20:00';
+  document.getElementById('v-close').value=v?v.close:'05:00';
+  setT('v-express',v?v.express:true);
+  setT('v-featured',v?v.featured:false);
+  setT('v-active',v?v.active!==false:true);
+  const pi=document.getElementById('v-iprev');
+  pi.style.display=v&&v.img?'block':'none';
+  if(v&&v.img)pi.src=v.img;
+  document.getElementById('vmodal').classList.add('open');
+}
+function closeModal(){document.getElementById('vmodal').classList.remove('open');editId=null;}
+
+function saveVenue(){
+  const name=document.getElementById('v-name').value.trim();
+  if(!name){alert('Name is required');return;}
+  const v={
+    id:editId||name.toLowerCase().replace(/\s+/g,'-')+'-'+Date.now(),
+    name,cat:document.getElementById('v-cat').value,
+    hood:document.getElementById('v-hood').value,
+    addr:document.getElementById('v-addr').value,
+    desc:document.getElementById('v-desc').value,
+    img:document.getElementById('v-img').value,
+    logo:document.getElementById('v-logo').value,
+    open:document.getElementById('v-open').value,
+    close:document.getElementById('v-close').value,
+    ig:document.getElementById('v-ig').value,
+    phone:document.getElementById('v-phone').value,
+    express:document.getElementById('v-express').classList.contains('on'),
+    featured:document.getElementById('v-featured').classList.contains('on'),
+    active:document.getElementById('v-active').classList.contains('on'),
+  };
+  if(editId){const i=DB.venues.findIndex(x=>x.id===editId);if(i!==-1)DB.venues[i]=v;}
+  else DB.venues.push(v);
+  closeModal();filterVenues();renderStats();saveAll(false);
+  toast(editId?'Venue updated ✓':'Venue added ✓');
+}
+
+function editVenue(id){const v=DB.venues.find(x=>x.id===id);if(v)openVenueModal(v);}
+function delVenue(id){if(!confirm('Delete this venue?'))return;DB.venues=DB.venues.filter(x=>x.id!==id);filterVenues();renderStats();saveAll(false);toast('Venue deleted');}
+
+function renderMedia(){
+  document.getElementById('media-grid').innerHTML=DB.media.map(m=>`
+    <div class="mc">
+      ${m.url?`<img class="mt-img" src="${m.url}" onerror="this.style.display='none'"/>`:`<div class="mt-empty">🖼️</div>`}
+      <div class="mc-body">
+        <div class="ml">${m.label}</div>
+        <input type="url" placeholder="https://…" value="${m.url||''}" oninput="updMedia('${m.key}',this.value)" style="font-size:11px;padding:5px 8px"/>
+      </div>
+    </div>`).join('');
+}
+function updMedia(key,url){const m=DB.media.find(x=>x.key===key);if(m)m.url=url;}
+
+function renderPricing(){
+  document.getElementById('ep').value=DB.settings.expressPrice||9.99;
+  renderBenefits();updPricing();
+}
+function renderBenefits(){
+  document.getElementById('blist').innerHTML=(DB.settings.benefits||[]).map((b,i)=>`
+    <div class="br">
+      <input type="text" value="${b}" oninput="DB.settings.benefits[${i}]=this.value;updPricing()"/>
+      <button class="btn btn-d btn-sm" onclick="rmBenefit(${i})">×</button>
+    </div>`).join('');
+}
+function addBenefit(){DB.settings.benefits.push('New benefit');renderBenefits();updPricing();}
+function rmBenefit(i){DB.settings.benefits.splice(i,1);renderBenefits();updPricing();}
+function updPricing(){
+  const p=parseFloat(document.getElementById('ep').value)||0;
+  DB.settings.expressPrice=p;
+  document.getElementById('pp-val').textContent=p.toFixed(2);
+  document.getElementById('pp-benefits').innerHTML=(DB.settings.benefits||[]).map(b=>`<div class="pb"><div class="pd"></div>${b}</div>`).join('');
+  document.getElementById('s-price').textContent='$'+p.toFixed(2);
+  document.getElementById('d-price').textContent='$'+p.toFixed(2);
+}
+
+function renderSettings(){
+  document.getElementById('s-name').value=DB.settings.appName||'BarPass Miami';
+  document.getElementById('s-logo').value=DB.settings.logoUrl||'';
+  document.getElementById('s-splash').value=DB.settings.splashUrl||'';
+  setT('t-express',DB.settings.expressEnabled!==false);
+  setT('t-map',DB.settings.mapEnabled!==false);
+  setT('t-maint',!!DB.settings.maintenanceMode);
+}
+
+function updColor(n,v){document.getElementById('cp-'+n).style.background=v;DB.settings['color'+n[0].toUpperCase()+n.slice(1)]=v;}
+function prevImg(id,url){const el=document.getElementById(id);if(el){el.src=url;el.style.display=url?'block':'none';}}
+
+function setT(id,v){const el=document.getElementById(id);if(el)el.classList.toggle('on',!!v);}
+
+function saveAll(showToast=true){
+  DB.settings.appName=document.getElementById('s-name')?.value||DB.settings.appName;
+  DB.settings.logoUrl=document.getElementById('s-logo')?.value||DB.settings.logoUrl;
+  DB.settings.splashUrl=document.getElementById('s-splash')?.value||'';
+  DB.settings.expressEnabled=document.getElementById('t-express')?.classList.contains('on');
+  DB.settings.mapEnabled=document.getElementById('t-map')?.classList.contains('on');
+  DB.settings.maintenanceMode=document.getElementById('t-maint')?.classList.contains('on');
+  DB.settings.expressPrice=parseFloat(document.getElementById('ep')?.value)||DB.settings.expressPrice;
+  ['gold','bg','card','accent'].forEach(n=>{const el=document.getElementById('c-'+n);if(el)DB.settings['color'+n[0].toUpperCase()+n.slice(1)]=el.value;});
+  localStorage.setItem('bp_admin',JSON.stringify(DB));
+  if(showToast)toast('All changes saved ✓');
+  const b=document.getElementById('saved-badge');b.style.display='inline-block';setTimeout(()=>b.style.display='none',2400);
+}
+
+function exportConfig(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='barpass-config.json';a.click();
+  toast('Config exported ✓');
+}
+
+function toast(msg){
+  document.getElementById('tmsg').textContent=msg;
+  const el=document.getElementById('toast');el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+init();
+</script>
+</body>
+</html>
