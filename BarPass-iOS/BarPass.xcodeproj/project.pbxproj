@@ -1,0 +1,393 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C0C178CDB9C84EFD9E193D25 /* BarPassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ABE4B8DD6384FB7BEDD719F /* BarPassApp.swift */; };
+		2470C401A3CD45FBB513088F /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FEF864459B497DA604E5A5 /* AppState.swift */; };
+		810EA5B9DE8E4B038C17650F /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F98E0845E9E54F8DAA4AFBCC /* RootView.swift */; };
+		0A5DB9F09CBF455D95F73794 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A337673F0C54C4DACA8E3DD /* SplashView.swift */; };
+		A2B906AAE3EE4104B9E0F96E /* WalletPassService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296BA4841BE04EF4824E91C1 /* WalletPassService.swift */; };
+		F40B33ED143F4799A00C4360 /* AppleWalletButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C261F72AE334DB5AB0162B6 /* AppleWalletButton.swift */; };
+		580ABE8FDEA04F8CA5F082C5 /* BarPassWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D12A1727D0B43FFB8E8510D /* BarPassWebView.swift */; };
+		2F73E0B2EC9C4D4CA719866C /* WebViewCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B89FA2ED0A479ABC6E9F93 /* WebViewCoordinator.swift */; };
+		44766107F8194ED6B7561189 /* NativeBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF79035AB344236A2996241 /* NativeBridge.swift */; };
+		9F61EE192E734E03BC4498E4 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC0B87A0FF854902B08834B3 /* HapticService.swift */; };
+		7F1A5302FF5341E09EE7A5F6 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0946EA16551F495E8C2B92DE /* LocationService.swift */; };
+		87B952774D4E422FA7E00F30 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D552554633734090BF3202B5 /* NotificationService.swift */; };
+		FCDBADBE96D1452C83564D1C /* BiometricService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130AC75507434163AC1F5CF4 /* BiometricService.swift */; };
+		FC45A92A9A92466592A33F72 /* ApplePayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61C4769FEFCD46459CA9FBB8 /* ApplePayService.swift */; };
+		21F94A3188514F50B68696A8 /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D68EC2378A4AFF89DD9543 /* CacheManager.swift */; };
+		C7713E974F9046499BDD6B90 /* barpass-miami.html in Resources */ = {isa = PBXBuildFile; fileRef = 73CDFED929544818BC183955 /* barpass-miami.html */; };
+		264B7CB3373A4552996A3A0D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A485ECCA18F4094ADBB925A /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		5ABE4B8DD6384FB7BEDD719F /* BarPassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BarPassApp.swift"; sourceTree = "<group>"; };
+		49FEF864459B497DA604E5A5 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppState.swift"; sourceTree = "<group>"; };
+		F98E0845E9E54F8DAA4AFBCC /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootView.swift"; sourceTree = "<group>"; };
+		3A337673F0C54C4DACA8E3DD /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SplashView.swift"; sourceTree = "<group>"; };
+		296BA4841BE04EF4824E91C1 /* WalletPassService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WalletPassService.swift"; sourceTree = "<group>"; };
+		4C261F72AE334DB5AB0162B6 /* AppleWalletButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppleWalletButton.swift"; sourceTree = "<group>"; };
+		2D12A1727D0B43FFB8E8510D /* BarPassWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BarPassWebView.swift"; sourceTree = "<group>"; };
+		72B89FA2ED0A479ABC6E9F93 /* WebViewCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebViewCoordinator.swift"; sourceTree = "<group>"; };
+		5AF79035AB344236A2996241 /* NativeBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NativeBridge.swift"; sourceTree = "<group>"; };
+		FC0B87A0FF854902B08834B3 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HapticService.swift"; sourceTree = "<group>"; };
+		0946EA16551F495E8C2B92DE /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LocationService.swift"; sourceTree = "<group>"; };
+		D552554633734090BF3202B5 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NotificationService.swift"; sourceTree = "<group>"; };
+		130AC75507434163AC1F5CF4 /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BiometricService.swift"; sourceTree = "<group>"; };
+		61C4769FEFCD46459CA9FBB8 /* ApplePayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ApplePayService.swift"; sourceTree = "<group>"; };
+		B9D68EC2378A4AFF89DD9543 /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CacheManager.swift"; sourceTree = "<group>"; };
+		73CDFED929544818BC183955 /* barpass-miami.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "barpass-miami.html"; sourceTree = "<group>"; };
+		0B0AFA9B7B734748B101143F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0A485ECCA18F4094ADBB925A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4E391D7E9E2C431CBF2DEA6E /* BarPass.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BarPass.entitlements; sourceTree = "<group>"; };
+		705F8C98EFAB4AC59540D50C /* BarPass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BarPass.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2EB96BEDD6A844FFB3C98CFE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FAF8F49DB0F342A8B2F9B144 = {
+			isa = PBXGroup;
+			children = (
+				BDBDF0E46367463FB140D275 /* BarPass */,
+				CF56B4FC734240C5B03FF097 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CF56B4FC734240C5B03FF097 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				705F8C98EFAB4AC59540D50C /* BarPass.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BDBDF0E46367463FB140D275 /* BarPass */ = {
+			isa = PBXGroup;
+			children = (
+				5ABE4B8DD6384FB7BEDD719F /* BarPassApp.swift */,
+				49FEF864459B497DA604E5A5 /* AppState.swift */,
+				556345A29EE146368F8022DF /* Core */,
+				C146DDE9153F4032A0AF531F /* Features */,
+				A6E12D8999D140318B84D32A /* Resources */,
+				20C81E8E606B46A6A63F34E4 /* Web */,
+				4E391D7E9E2C431CBF2DEA6E /* BarPass.entitlements */,
+			);
+			path = BarPass;
+			sourceTree = "<group>";
+		};
+		556345A29EE146368F8022DF /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				BC70050CEE2343DFBAF8FCB2 /* WebView */,
+				3614136F5B0341E48678A888 /* Bridge */,
+				03B0C34573674628BE47D442 /* Services */,
+				61DF15C7CB7F427FAC868D7B /* Cache */,
+			);
+			name = Core;
+			path = Core;
+			sourceTree = "<group>";
+		};
+		BC70050CEE2343DFBAF8FCB2 /* WebView */ = {
+			isa = PBXGroup;
+			children = (
+				2D12A1727D0B43FFB8E8510D /* BarPassWebView.swift */,
+				72B89FA2ED0A479ABC6E9F93 /* WebViewCoordinator.swift */,
+			);
+			name = WebView;
+			path = WebView;
+			sourceTree = "<group>";
+		};
+		3614136F5B0341E48678A888 /* Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				5AF79035AB344236A2996241 /* NativeBridge.swift */,
+			);
+			name = Bridge;
+			path = Bridge;
+			sourceTree = "<group>";
+		};
+		03B0C34573674628BE47D442 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				FC0B87A0FF854902B08834B3 /* HapticService.swift */,
+				0946EA16551F495E8C2B92DE /* LocationService.swift */,
+				D552554633734090BF3202B5 /* NotificationService.swift */,
+				130AC75507434163AC1F5CF4 /* BiometricService.swift */,
+				61C4769FEFCD46459CA9FBB8 /* ApplePayService.swift */,
+			);
+			name = Services;
+			path = Services;
+			sourceTree = "<group>";
+		};
+		61DF15C7CB7F427FAC868D7B /* Cache */ = {
+			isa = PBXGroup;
+			children = (
+				B9D68EC2378A4AFF89DD9543 /* CacheManager.swift */,
+			);
+			name = Cache;
+			path = Cache;
+			sourceTree = "<group>";
+		};
+		C146DDE9153F4032A0AF531F /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				F98E0845E9E54F8DAA4AFBCC /* RootView.swift */,
+				F92CA07158604681A2AF61E3 /* Splash */,
+				B56698A1F26A4FCA93643001 /* WalletPass */,
+			);
+			name = Features;
+			path = Features;
+			sourceTree = "<group>";
+		};
+		F92CA07158604681A2AF61E3 /* Splash */ = {
+			isa = PBXGroup;
+			children = (
+				3A337673F0C54C4DACA8E3DD /* SplashView.swift */,
+			);
+			name = Splash;
+			path = Splash;
+			sourceTree = "<group>";
+		};
+		B56698A1F26A4FCA93643001 /* WalletPass */ = {
+			isa = PBXGroup;
+			children = (
+				296BA4841BE04EF4824E91C1 /* WalletPassService.swift */,
+				4C261F72AE334DB5AB0162B6 /* AppleWalletButton.swift */,
+			);
+			name = WalletPass;
+			path = WalletPass;
+			sourceTree = "<group>";
+		};
+		A6E12D8999D140318B84D32A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0B0AFA9B7B734748B101143F /* Info.plist */,
+				0A485ECCA18F4094ADBB925A /* Assets.xcassets */,
+			);
+			name = Resources;
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		20C81E8E606B46A6A63F34E4 /* Web */ = {
+			isa = PBXGroup;
+			children = (
+				73CDFED929544818BC183955 /* barpass-miami.html */,
+			);
+			name = Web;
+			path = Web;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7D72EDEEAE0A40CFAC259DE7 /* BarPass */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 68ECA4FB162A49BC89F5ECF7 /* Build configuration list for PBXNativeTarget "BarPass" */;
+			buildPhases = (
+				90730F537ED54A168C937271 /* Sources */,
+				36B4A712B05240E9B2212D34 /* Resources */,
+				2EB96BEDD6A844FFB3C98CFE /* Frameworks */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = BarPass;
+			packageProductDependencies = ();
+			productName = BarPass;
+			productReference = 705F8C98EFAB4AC59540D50C /* BarPass.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FCB42D81B8DD45458494C380 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1700;
+				LastUpgradeCheck = 1700;
+				TargetAttributes = {
+					7D72EDEEAE0A40CFAC259DE7 = {
+						CreatedOnToolsVersion = 17.0;
+					};
+				};
+			};
+			buildConfigurationList = 7996FFBD18C64322A7D1057C /* Build configuration list for PBXProject "BarPass" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FAF8F49DB0F342A8B2F9B144;
+			packageReferences = ();
+			productRefGroup = CF56B4FC734240C5B03FF097 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7D72EDEEAE0A40CFAC259DE7 /* BarPass */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		36B4A712B05240E9B2212D34 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C7713E974F9046499BDD6B90 /* barpass-miami.html in Resources */,
+				264B7CB3373A4552996A3A0D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		90730F537ED54A168C937271 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0C178CDB9C84EFD9E193D25 /* BarPassApp.swift in Sources */,
+				2470C401A3CD45FBB513088F /* AppState.swift in Sources */,
+				810EA5B9DE8E4B038C17650F /* RootView.swift in Sources */,
+				0A5DB9F09CBF455D95F73794 /* SplashView.swift in Sources */,
+				A2B906AAE3EE4104B9E0F96E /* WalletPassService.swift in Sources */,
+				F40B33ED143F4799A00C4360 /* AppleWalletButton.swift in Sources */,
+				580ABE8FDEA04F8CA5F082C5 /* BarPassWebView.swift in Sources */,
+				2F73E0B2EC9C4D4CA719866C /* WebViewCoordinator.swift in Sources */,
+				44766107F8194ED6B7561189 /* NativeBridge.swift in Sources */,
+				9F61EE192E734E03BC4498E4 /* HapticService.swift in Sources */,
+				7F1A5302FF5341E09EE7A5F6 /* LocationService.swift in Sources */,
+				87B952774D4E422FA7E00F30 /* NotificationService.swift in Sources */,
+				FCDBADBE96D1452C83564D1C /* BiometricService.swift in Sources */,
+				FC45A92A9A92466592A33F72 /* ApplePayService.swift in Sources */,
+				21F94A3188514F50B68696A8 /* CacheManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		01700A57402C453E86900E0D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				VALIDATE_PRODUCT = NO;
+				ONLY_ACTIVE_ARCH = YES;
+			};
+			name = Debug;
+		};
+		3B041C7C5B1B4C1DB6312DBB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8CC323D7A42A490AA2E22713 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BarPass/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
+				PRODUCT_BUNDLE_IDENTIFIER = com.barpass.app;
+				PRODUCT_NAME = $(TARGET_NAME);
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		787C9AAFA876495F91D57226 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BarPass/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
+				PRODUCT_BUNDLE_IDENTIFIER = com.barpass.app;
+				PRODUCT_NAME = $(TARGET_NAME);
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7996FFBD18C64322A7D1057C /* Build configuration list for PBXProject "BarPass" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (01700A57402C453E86900E0D /* Debug */, 3B041C7C5B1B4C1DB6312DBB /* Release */,);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		68ECA4FB162A49BC89F5ECF7 /* Build configuration list for PBXNativeTarget "BarPass" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (8CC323D7A42A490AA2E22713 /* Debug */, 787C9AAFA876495F91D57226 /* Release */,);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FCB42D81B8DD45458494C380 /* Project object */;
+}

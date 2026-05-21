@@ -18,26 +18,29 @@ IDS = {k: uid() for k in [
     "PROJECT","TARGET","BUILD_CFG_APP_DBG","BUILD_CFG_APP_REL",
     "BUILD_CFG_PROJ_DBG","BUILD_CFG_PROJ_REL","CFG_LIST_APP","CFG_LIST_PROJ",
     "MAIN_GROUP","SRC_GROUP","CORE_GROUP","WEBVIEW_GRP","BRIDGE_GRP",
-    "SERVICES_GRP","CACHE_GRP","FEATURES_GRP","SPLASH_GRP","RESOURCES_GRP",
-    "WEB_GRP","PRODUCTS_GRP","COMPILE_PHASE","RESOURCES_PHASE","LINK_PHASE",
-    "PRODUCT_REF","HTML_REF","HTML_BUILD","PLIST_REF","ASSETS_REF","ASSETS_BUILD",
+    "SERVICES_GRP","CACHE_GRP","FEATURES_GRP","SPLASH_GRP","WALLETPASS_GRP",
+    "RESOURCES_GRP","WEB_GRP","PRODUCTS_GRP","COMPILE_PHASE","RESOURCES_PHASE",
+    "LINK_PHASE","PRODUCT_REF","HTML_REF","HTML_BUILD","PLIST_REF","ASSETS_REF",
+    "ASSETS_BUILD","ENTITLEMENTS_REF",
 ]}
 I = IDS
 
 SWIFT_FILES = [
-    ("App",      "BarPassApp.swift",        "BarPass/BarPassApp.swift"),
-    ("App",      "AppState.swift",           "BarPass/AppState.swift"),
-    ("Features", "RootView.swift",           "BarPass/Features/RootView.swift"),
-    ("Splash",   "SplashView.swift",         "BarPass/Features/Splash/SplashView.swift"),
-    ("WebView",  "BarPassWebView.swift",     "BarPass/Core/WebView/BarPassWebView.swift"),
-    ("WebView",  "WebViewCoordinator.swift", "BarPass/Core/WebView/WebViewCoordinator.swift"),
-    ("Bridge",   "NativeBridge.swift",       "BarPass/Core/Bridge/NativeBridge.swift"),
-    ("Services", "HapticService.swift",      "BarPass/Core/Services/HapticService.swift"),
-    ("Services", "LocationService.swift",    "BarPass/Core/Services/LocationService.swift"),
-    ("Services", "NotificationService.swift","BarPass/Core/Services/NotificationService.swift"),
-    ("Services", "BiometricService.swift",   "BarPass/Core/Services/BiometricService.swift"),
-    ("Services", "ApplePayService.swift",    "BarPass/Core/Services/ApplePayService.swift"),
-    ("Cache",    "CacheManager.swift",       "BarPass/Core/Cache/CacheManager.swift"),
+    ("App",         "BarPassApp.swift",          "BarPass/BarPassApp.swift"),
+    ("App",         "AppState.swift",             "BarPass/AppState.swift"),
+    ("Features",    "RootView.swift",             "BarPass/Features/RootView.swift"),
+    ("Splash",      "SplashView.swift",           "BarPass/Features/Splash/SplashView.swift"),
+    ("WalletPass",  "WalletPassService.swift",    "BarPass/Core/Services/WalletPassService.swift"),
+    ("WalletPass",  "AppleWalletButton.swift",    "BarPass/Features/WalletPass/AppleWalletButton.swift"),
+    ("WebView",     "BarPassWebView.swift",       "BarPass/Core/WebView/BarPassWebView.swift"),
+    ("WebView",     "WebViewCoordinator.swift",   "BarPass/Core/WebView/WebViewCoordinator.swift"),
+    ("Bridge",      "NativeBridge.swift",         "BarPass/Core/Bridge/NativeBridge.swift"),
+    ("Services",    "HapticService.swift",        "BarPass/Core/Services/HapticService.swift"),
+    ("Services",    "LocationService.swift",      "BarPass/Core/Services/LocationService.swift"),
+    ("Services",    "NotificationService.swift",  "BarPass/Core/Services/NotificationService.swift"),
+    ("Services",    "BiometricService.swift",     "BarPass/Core/Services/BiometricService.swift"),
+    ("Services",    "ApplePayService.swift",      "BarPass/Core/Services/ApplePayService.swift"),
+    ("Cache",       "CacheManager.swift",         "BarPass/Core/Cache/CacheManager.swift"),
 ]
 
 files = [{"grp": g, "name": n, "path": p, "ref": uid(), "build": uid()} for g,n,p in SWIFT_FILES]
@@ -88,6 +91,7 @@ for f in files:
 ln(f"\t\t{I['HTML_REF']} /* barpass-miami.html */ = {{isa = PBXFileReference; lastKnownFileType = text.html; path = \"barpass-miami.html\"; sourceTree = \"<group>\"; }};")
 ln(f"\t\t{I['PLIST_REF']} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = \"<group>\"; }};")
 ln(f"\t\t{I['ASSETS_REF']} /* Assets.xcassets */ = {{isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = \"<group>\"; }};")
+ln(f"\t\t{I['ENTITLEMENTS_REF']} /* BarPass.entitlements */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BarPass.entitlements; sourceTree = \"<group>\"; }};")
 ln(f"\t\t{I['PRODUCT_REF']} /* BarPass.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BarPass.app; sourceTree = BUILT_PRODUCTS_DIR; }};")
 section("PBXFileReference", False)
 
@@ -136,6 +140,7 @@ child(I['CORE_GROUP'], "Core")
 child(I['FEATURES_GRP'], "Features")
 child(I['RESOURCES_GRP'], "Resources")
 child(I['WEB_GRP'], "Web")
+child(I['ENTITLEMENTS_REF'], "BarPass.entitlements")
 children_end()
 attr("path", "BarPass")
 attr("sourceTree", "\"<group>\"")
@@ -175,6 +180,7 @@ attr("isa", "PBXGroup")
 children_start()
 for f in feat_files: child(f['ref'], f['name'])
 child(I['SPLASH_GRP'], "Splash")
+child(I['WALLETPASS_GRP'], "WalletPass")
 children_end()
 attr("name", "Features")
 attr("path", "Features")
@@ -189,6 +195,17 @@ for f in splash_files: child(f['ref'], f['name'])
 children_end()
 attr("name", "Splash")
 attr("path", "Splash")
+attr("sourceTree", "\"<group>\"")
+obj_end()
+
+walletpass_files = [f for f in files if f['grp'] == 'WalletPass']
+obj_start(I['WALLETPASS_GRP'], "WalletPass")
+attr("isa", "PBXGroup")
+children_start()
+for f in walletpass_files: child(f['ref'], f['name'])
+children_end()
+attr("name", "WalletPass")
+attr("path", "WalletPass")
 attr("sourceTree", "\"<group>\"")
 obj_end()
 
@@ -312,6 +329,7 @@ def write_build_config(cfg_id, name, release, is_target):
             "INFOPLIST_FILE": "BarPass/Resources/Info.plist",
             "IPHONEOS_DEPLOYMENT_TARGET": "17.0",
             "MARKETING_VERSION": "1.0",
+            "CODE_SIGN_ENTITLEMENTS": "BarPass/Resources/BarPass.entitlements",
             "PRODUCT_BUNDLE_IDENTIFIER": "com.barpass.app",
             "PRODUCT_NAME": "$(TARGET_NAME)",
             "SWIFT_EMIT_LOC_STRINGS": "YES",

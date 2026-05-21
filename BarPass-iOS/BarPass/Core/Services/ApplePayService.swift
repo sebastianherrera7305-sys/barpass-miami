@@ -26,6 +26,7 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
 
         let controller = PKPaymentAuthorizationController(paymentRequest: request)
         controller.delegate = self
+        
         controller.present()
     }
 
