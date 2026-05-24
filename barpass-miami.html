@@ -2768,7 +2768,7 @@ var LANG={
     map_live:'LIVE',venues_count:'venues',avg_wait:'avg wait',energy:'energy',
     skip_queue:'Skip Queue',order_drinks:'Order Drinks',load_credit:'Load Credit',
     save:'Save',instant_entry:'Instant entry',from_seat:'From your seat',
-    pay_at_entry:'Pay at entry',    add_to_list:'Add to list',add_drinks:'Add drinks from any Miami venue',
+    pay_at_entry:'Pay at entry',add_to_list:'Add to list',add_drinks:'Add drinks from any Miami venue',
     express:'Express',express_active:'Active',
     no_credit:'No credit',credit:'Credit',
     all_districts:'All Districts',
@@ -2785,11 +2785,33 @@ var LANG={
     search_venues:'Search venues…',
     close:'Close',loading:'Loading…',
     guest:'Guest',
-    nearby:'nearby',
-    found:'found',
-    open_now:'open',
+    nearby:'nearby',found:'found',open_now:'open',
     light_night:'Light night',solid_night:'Solid night',good_night:'Good night',
     big_night:'Big night',vip_night:'VIP night',all_night:'All night',
+    // ── Payments ──
+    pay_title:'Payments',pay_subtitle:'BarPass Credits · Miami Nightlife',
+    pay_topup:'Top Up',pay_send:'Send',pay_split:'Split',pay_qrpay:'QR Pay',
+    membership_plans:'Membership Plans',transactions:'Transactions',
+    my_wallet_pass:'My Wallet Pass',show_qr_sub:'Show QR at venues · Earn points instantly',
+    tx_all:'All',tx_venues:'🍸 Venues',tx_topups:'💳 Top Ups',tx_rewards:'🎁 Rewards',tx_splits:'✂️ Splits',
+    no_txs:'No transactions yet',no_txs_sub:'Top up your wallet and start spending at Miami\'s hottest venues.',
+    topup_title:'Add Credits',topup_sub:'Choose an amount to add to your BarPass wallet',
+    apple_pay_btn:'Pay with Apple Pay',or_card:'or pay with card',
+    addcard_title:'Add Payment Card',addcard_sub:'Your card is encrypted · Never stored on our servers',
+    card_number:'Card Number',expiry_date:'Expiry Date',cardholder:'Cardholder Name',
+    save_card_btn:'Save Card',
+    split_title:'Split the Bill',split_sub:'Divide the check with your crew',
+    how_many:'How many people?',each_pays:'Each person pays',
+    share_split_btn:'📤 Share Split Link',pay_share_btn:'💳 Pay My Share Now',
+    qrpay_title:'Scan to Pay',qrpay_sub:'Point your camera at the venue QR code',
+    balance_avail:'Balance available',open_camera_btn:'📷 Open Camera',show_my_qr_btn:'🎟️ Show My QR Instead',
+    send_title:'Send Credits',send_sub:'Transfer BarPass credits to a friend',
+    recipient_lbl:'Recipient',amount_lbl:'Amount',note_lbl:'Note (optional)',
+    send_credits_btn:'↗️ Send Credits',
+    plans_title:'Choose Your Plan',plans_sub:'Unlock exclusive Miami nightlife perks',
+    cancel_btn:'Cancel',close_btn:'Close',see_plans:'See all →',
+    nav_feed:'Feed',nav_social:'Social',nav_tonight:'Tonight',nav_games:'Games',
+    nav_wallet:'Wallet',nav_ai:'AI',nav_profile:'Profile',
   },
   es:{
     app_name:'BarPass',app_sub:'Inteligencia de Vida Nocturna',
@@ -2805,19 +2827,19 @@ var LANG={
     cat_all:'Todo Miami',cat_hot:'Tendencia',cat_rooftop:'Azoteas',cat_club:'Discotecas',
     cat_cocktail:'Coctelería',cat_beach:'Club Playa',cat_lounge:'Lounges',
     cat_speakeasy:'Speakeasy',cat_latin:'Latino',cat_sports:'Deportes',
-    ai_picks:'Recomendados',for_you:'Para',tonight:'esta noche',
+    ai_picks:'Recomendados IA',for_you:'Para',tonight:'esta noche',
     hot_now:'Popular Ahora',viral:'Virales en Miami',tonights_events:'Eventos de Hoy',
     luxury:'Experiencia Lujo',all_open:'Abiertos Ahora',see_all:'Ver todo →',
     explore_tab:'Explorar',feed_tab:'Inicio',wallet_tab:'Billetera',profile_tab:'Perfil',
     map_live:'EN VIVO',venues_count:'lugares',avg_wait:'espera prom',energy:'energía',
     skip_queue:'Saltar Fila',order_drinks:'Pedir Tragos',load_credit:'Cargar Crédito',
     save:'Guardar',instant_entry:'Entrada inmediata',from_seat:'Desde tu mesa',
-    pay_at_entry:'Paga al entrar',    add_to_list:'Agregar a lista',add_drinks:'Agrega tragos desde cualquier venue de Miami',
+    pay_at_entry:'Paga al entrar',add_to_list:'Agregar a lista',add_drinks:'Agrega tragos desde cualquier venue de Miami',
     express:'Express',express_active:'Activo',
     no_credit:'Sin crédito',credit:'Crédito',
     all_districts:'Todos los Distritos',
     express_headline:'Salta todas las filas.\nEsta noche.',
-    express_sub:'Un Express Pass. 50+ venues. Todo la noche.',
+    express_sub:'Un Express Pass. 50+ venues. Toda la noche.',
     get_express:'Obtén Express Pass · $9.99 ⚡',
     wallet_title:'Billetera Nocturna',
     no_credit_active:'Sin crédito activo',
@@ -2829,11 +2851,165 @@ var LANG={
     search_venues:'Busca venues…',
     close:'Cerrar',loading:'Cargando…',
     guest:'Invitado',
-    nearby:'cerca',
-    found:'encontrados',
-    open_now:'abiertos',
+    nearby:'cerca',found:'encontrados',open_now:'abiertos',
     light_night:'Noche ligera',solid_night:'Noche sólida',good_night:'Buena noche',
     big_night:'Gran noche',vip_night:'Noche VIP',all_night:'Toda la noche',
+    // ── Pagos ──
+    pay_title:'Pagos',pay_subtitle:'Créditos BarPass · Noche en Miami',
+    pay_topup:'Recargar',pay_send:'Enviar',pay_split:'Dividir',pay_qrpay:'Pago QR',
+    membership_plans:'Planes de Membresía',transactions:'Transacciones',
+    my_wallet_pass:'Mi Pase de Billetera',show_qr_sub:'Muestra QR en venues · Gana puntos al instante',
+    tx_all:'Todos',tx_venues:'🍸 Venues',tx_topups:'💳 Recargas',tx_rewards:'🎁 Recompensas',tx_splits:'✂️ Divisiones',
+    no_txs:'Sin transacciones aún',no_txs_sub:'Recarga tu billetera y comienza a gastar en los mejores venues de Miami.',
+    topup_title:'Agregar Créditos',topup_sub:'Elige un monto para cargar en tu billetera BarPass',
+    apple_pay_btn:'Pagar con Apple Pay',or_card:'o paga con tarjeta',
+    addcard_title:'Agregar Tarjeta',addcard_sub:'Tu tarjeta está encriptada · Nunca almacenada en nuestros servidores',
+    card_number:'Número de Tarjeta',expiry_date:'Fecha de Vencimiento',cardholder:'Nombre del Titular',
+    save_card_btn:'Guardar Tarjeta',
+    split_title:'Dividir la Cuenta',split_sub:'Divide el gasto con tu grupo',
+    how_many:'¿Cuántas personas?',each_pays:'Cada persona paga',
+    share_split_btn:'📤 Compartir Link',pay_share_btn:'💳 Pagar mi Parte',
+    qrpay_title:'Escanear para Pagar',qrpay_sub:'Apunta tu cámara al código QR del venue',
+    balance_avail:'Saldo disponible',open_camera_btn:'📷 Abrir Cámara',show_my_qr_btn:'🎟️ Mostrar mi QR',
+    send_title:'Enviar Créditos',send_sub:'Transfiere créditos BarPass a un amigo',
+    recipient_lbl:'Destinatario',amount_lbl:'Monto',note_lbl:'Nota (opcional)',
+    send_credits_btn:'↗️ Enviar Créditos',
+    plans_title:'Elige tu Plan',plans_sub:'Desbloquea beneficios exclusivos en Miami',
+    cancel_btn:'Cancelar',close_btn:'Cerrar',see_plans:'Ver todo →',
+    nav_feed:'Inicio',nav_social:'Social',nav_tonight:'Esta Noche',nav_games:'Juegos',
+    nav_wallet:'Billetera',nav_ai:'IA',nav_profile:'Perfil',
+  },
+  pt:{
+    app_name:'BarPass',app_sub:'Inteligência de Vida Noturna',
+    splash_city:'Miami · Vida Noturna AI',
+    auth_wordmark:'BarPass',auth_city:'Miami · Inteligência de Vida Noturna',
+    auth_sub:'A plataforma de vida noturna mais avançada de Miami.',
+    sign_in:'Entrar',create_account:'Criar Conta',email:'E-mail',password:'Senha',
+    full_name:'Nome Completo',forgot:'Esqueceu?',remember_me:'Lembrar-me',
+    or_continue:'ou continue com',terms:'Ao entrar você concorda com nossos <a>Termos</a> e <a>Privacidade</a>.',
+    signup_terms:'Ao criar conta você concorda com nossos <a>Termos</a>.',
+    search_placeholder:'Bares, drinks, vibes, distritos…',
+    explore_placeholder:'Buscar bares, distritos, drinks…',
+    cat_all:'Todo Miami',cat_hot:'Em Alta',cat_rooftop:'Rooftop',cat_club:'Baladas',
+    cat_cocktail:'Bares de Drinques',cat_beach:'Beach Club',cat_lounge:'Lounges',
+    cat_speakeasy:'Speakeasy',cat_latin:'Latino',cat_sports:'Esportes',
+    ai_picks:'Recomendados IA',for_you:'Para',tonight:'hoje à noite',
+    hot_now:'Bombando Agora',viral:'Viral em Miami',tonights_events:'Eventos de Hoje',
+    luxury:'Experiência Luxo',all_open:'Abertos Agora',see_all:'Ver tudo →',
+    explore_tab:'Explorar',feed_tab:'Feed',wallet_tab:'Carteira',profile_tab:'Perfil',
+    map_live:'AO VIVO',venues_count:'locais',avg_wait:'espera méd',energy:'energia',
+    skip_queue:'Furar a Fila',order_drinks:'Pedir Drinks',load_credit:'Carregar Saldo',
+    save:'Salvar',instant_entry:'Entrada imediata',from_seat:'Da sua mesa',
+    pay_at_entry:'Pagar na entrada',add_to_list:'Adicionar à lista',add_drinks:'Adicione drinks de qualquer venue de Miami',
+    express:'Express',express_active:'Ativo',
+    no_credit:'Sem saldo',credit:'Saldo',
+    all_districts:'Todos os Distritos',
+    express_headline:'Fure todas as filas.\nHoje à noite.',
+    express_sub:'Um Express Pass. 50+ venues. A noite toda.',
+    get_express:'Obter Express Pass · $9.99 ⚡',
+    wallet_title:'Carteira Noturna',
+    no_credit_active:'Sem saldo ativo',
+    load_at:'Carregar saldo em',
+    your_order:'Seu Pedido',empty_order:'Pedido vazio',
+    subtotal:'Subtotal',service_fee:'Taxa de serviço',total:'Total',
+    place_order:'Fazer Pedido 🚀',
+    sign_out:'Sair',
+    search_venues:'Buscar venues…',
+    close:'Fechar',loading:'Carregando…',
+    guest:'Convidado',
+    nearby:'próximo',found:'encontrados',open_now:'abertos',
+    light_night:'Noite leve',solid_night:'Noite sólida',good_night:'Boa noite',
+    big_night:'Grande noite',vip_night:'Noite VIP',all_night:'A noite toda',
+    // ── Pagamentos ──
+    pay_title:'Pagamentos',pay_subtitle:'Créditos BarPass · Noite em Miami',
+    pay_topup:'Recarregar',pay_send:'Enviar',pay_split:'Dividir',pay_qrpay:'Pagar QR',
+    membership_plans:'Planos de Assinatura',transactions:'Transações',
+    my_wallet_pass:'Meu Passe de Carteira',show_qr_sub:'Mostre QR nos venues · Ganhe pontos na hora',
+    tx_all:'Todos',tx_venues:'🍸 Venues',tx_topups:'💳 Recargas',tx_rewards:'🎁 Recompensas',tx_splits:'✂️ Divisões',
+    no_txs:'Nenhuma transação ainda',no_txs_sub:'Recarregue sua carteira e comece a gastar nos melhores venues de Miami.',
+    topup_title:'Adicionar Créditos',topup_sub:'Escolha um valor para adicionar à sua carteira BarPass',
+    apple_pay_btn:'Pagar com Apple Pay',or_card:'ou pagar com cartão',
+    addcard_title:'Adicionar Cartão',addcard_sub:'Seu cartão é criptografado · Nunca armazenado em nossos servidores',
+    card_number:'Número do Cartão',expiry_date:'Validade',cardholder:'Nome no Cartão',
+    save_card_btn:'Salvar Cartão',
+    split_title:'Dividir a Conta',split_sub:'Divida o total com seu grupo',
+    how_many:'Quantas pessoas?',each_pays:'Cada pessoa paga',
+    share_split_btn:'📤 Compartilhar Link',pay_share_btn:'💳 Pagar Minha Parte',
+    qrpay_title:'Escanear para Pagar',qrpay_sub:'Aponte a câmera para o QR code do venue',
+    balance_avail:'Saldo disponível',open_camera_btn:'📷 Abrir Câmera',show_my_qr_btn:'🎟️ Mostrar Meu QR',
+    send_title:'Enviar Créditos',send_sub:'Transfira créditos BarPass para um amigo',
+    recipient_lbl:'Destinatário',amount_lbl:'Valor',note_lbl:'Nota (opcional)',
+    send_credits_btn:'↗️ Enviar Créditos',
+    plans_title:'Escolha seu Plano',plans_sub:'Desbloqueie benefícios exclusivos em Miami',
+    cancel_btn:'Cancelar',close_btn:'Fechar',see_plans:'Ver tudo →',
+    nav_feed:'Feed',nav_social:'Social',nav_tonight:'Hoje',nav_games:'Jogos',
+    nav_wallet:'Carteira',nav_ai:'IA',nav_profile:'Perfil',
+  },
+  zh:{
+    app_name:'BarPass',app_sub:'AI夜生活智能平台',
+    splash_city:'迈阿密 · AI夜生活',
+    auth_wordmark:'BarPass',auth_city:'迈阿密 · AI夜生活智能',
+    auth_sub:'迈阿密最先进的豪华夜生活平台。',
+    sign_in:'登录',create_account:'注册账号',email:'邮箱',password:'密码',
+    full_name:'全名',forgot:'忘记？',remember_me:'记住我',
+    or_continue:'或通过以下方式继续',terms:'登录即表示您同意我们的<a>条款</a>和<a>隐私政策</a>。',
+    signup_terms:'注册即表示您同意我们的<a>条款</a>。',
+    search_placeholder:'搜索酒吧、鸡尾酒、氛围、地区…',
+    explore_placeholder:'搜索酒吧、地区、饮品…',
+    cat_all:'全部迈阿密',cat_hot:'热门',cat_rooftop:'屋顶酒吧',cat_club:'夜店',
+    cat_cocktail:'鸡尾酒吧',cat_beach:'海滩俱乐部',cat_lounge:'休闲吧',
+    cat_speakeasy:'秘密酒吧',cat_latin:'拉丁风情',cat_sports:'体育吧',
+    ai_picks:'AI推荐',for_you:'为你',tonight:'今晚',
+    hot_now:'现在最热',viral:'迈阿密热传',tonights_events:'今晚活动',
+    luxury:'奢华体验',all_open:'立即营业',see_all:'查看全部 →',
+    explore_tab:'探索',feed_tab:'动态',wallet_tab:'钱包',profile_tab:'我的',
+    map_live:'实时',venues_count:'场所',avg_wait:'平均等待',energy:'活力',
+    skip_queue:'快速入场',order_drinks:'点酒',load_credit:'充值',
+    save:'保存',instant_entry:'即时入场',from_seat:'在座位点单',
+    pay_at_entry:'入场付款',add_to_list:'加入清单',add_drinks:'从迈阿密任何场所添加饮品',
+    express:'快速通道',express_active:'已激活',
+    no_credit:'无余额',credit:'余额',
+    all_districts:'全部地区',
+    express_headline:'跳过所有排队。\n就在今晚。',
+    express_sub:'一张快速通道。50+场所。全夜有效。',
+    get_express:'获取快速通道 · $9.99 ⚡',
+    wallet_title:'夜间钱包',
+    no_credit_active:'无余额',
+    load_at:'在此充值',
+    your_order:'您的订单',empty_order:'订单为空',
+    subtotal:'小计',service_fee:'服务费',total:'总计',
+    place_order:'下单 🚀',
+    sign_out:'退出登录',
+    search_venues:'搜索场所…',
+    close:'关闭',loading:'加载中…',
+    guest:'访客',
+    nearby:'附近',found:'个结果',open_now:'营业中',
+    light_night:'轻松之夜',solid_night:'精彩之夜',good_night:'美好夜晚',
+    big_night:'狂欢之夜',vip_night:'VIP之夜',all_night:'整晚畅玩',
+    // ── 支付 ──
+    pay_title:'支付',pay_subtitle:'BarPass余额 · 迈阿密夜生活',
+    pay_topup:'充值',pay_send:'转账',pay_split:'分摊',pay_qrpay:'QR支付',
+    membership_plans:'会员计划',transactions:'交易记录',
+    my_wallet_pass:'我的钱包码',show_qr_sub:'在场所出示QR码 · 即时获得积分',
+    tx_all:'全部',tx_venues:'🍸 场所',tx_topups:'💳 充值',tx_rewards:'🎁 奖励',tx_splits:'✂️ 分摊',
+    no_txs:'暂无交易记录',no_txs_sub:'充值后即可在迈阿密最热门的场所消费。',
+    topup_title:'充值余额',topup_sub:'选择充值金额',
+    apple_pay_btn:'用 Apple Pay 支付',or_card:'或使用银行卡',
+    addcard_title:'添加银行卡',addcard_sub:'您的卡片已加密 · 从不存储在我们的服务器上',
+    card_number:'卡号',expiry_date:'有效期',cardholder:'持卡人姓名',
+    save_card_btn:'保存卡片',
+    split_title:'分摊账单',split_sub:'与朋友平摊消费',
+    how_many:'几个人分？',each_pays:'每人支付',
+    share_split_btn:'📤 分享分摊链接',pay_share_btn:'💳 支付我的份额',
+    qrpay_title:'扫码支付',qrpay_sub:'将相机对准场所的QR码',
+    balance_avail:'可用余额',open_camera_btn:'📷 打开相机',show_my_qr_btn:'🎟️ 出示我的QR码',
+    send_title:'转账余额',send_sub:'向朋友转账BarPass余额',
+    recipient_lbl:'收款人',amount_lbl:'金额',note_lbl:'备注（可选）',
+    send_credits_btn:'↗️ 转账余额',
+    plans_title:'选择您的计划',plans_sub:'解锁迈阿密夜生活专属特权',
+    cancel_btn:'取消',close_btn:'关闭',see_plans:'查看全部 →',
+    nav_feed:'动态',nav_social:'社交',nav_tonight:'今晚',nav_games:'游戏',
+    nav_wallet:'钱包',nav_ai:'AI',nav_profile:'我的',
   }
 };
 var currentLang=localStorage&&localStorage.getItem('bp-lang')||'en';
@@ -2866,6 +3042,123 @@ function translateAll(){
   document.querySelectorAll('[data-i18n-html]').forEach(function(el){
     el.innerHTML=tr(el.getAttribute('data-i18n-html'));
   });
+  // Translate payments section (elements that don't use data-i18n due to complex inline HTML)
+  _translatePaymentsSection();
+}
+
+function _translatePaymentsSection(){
+  function t(k){return tr(k);}
+  function setText(id,k){var el=document.getElementById(id);if(el&&t(k))el.textContent=t(k);}
+  // Wallet screen header
+  document.querySelectorAll('.pay-title').forEach(function(el){if(t('pay_title'))el.textContent=t('pay_title');});
+  setText('pay-subtitle','pay_subtitle');
+  // Quick action labels
+  var pabLbls=document.querySelectorAll('.pab-lbl');
+  var pabKeys=['pay_topup','pay_send','pay_split','pay_qrpay'];
+  pabLbls.forEach(function(el,i){if(pabKeys[i]&&t(pabKeys[i]))el.textContent=t(pabKeys[i]);});
+  // Section headers — find by looking for specific section label content
+  document.querySelectorAll('.pay-section-lbl span:first-child').forEach(function(el){
+    var txt=el.textContent.trim();
+    if(txt==='Membership Plans'||txt===t('membership_plans')){el.textContent=t('membership_plans');}
+    else if(txt==='Transactions'||txt===t('transactions')){el.textContent=t('transactions');}
+  });
+  // QR credential row
+  var qrPassTitle=document.querySelector('#wallet-screen .pay-tx-list [onclick*="credential-screen"] div:nth-child(2) > div:first-child');
+  if(qrPassTitle)qrPassTitle.textContent=t('my_wallet_pass');
+  var qrPassSub=document.querySelector('#wallet-screen .pay-tx-list [onclick*="credential-screen"] div:nth-child(2) > div:last-child');
+  if(qrPassSub)qrPassSub.textContent=t('show_qr_sub');
+  // TX filter chips
+  var chips=document.querySelectorAll('.ptf-chip');
+  var chipKeys=['tx_all','tx_venues','tx_topups','tx_rewards','tx_splits'];
+  chips.forEach(function(el,i){if(chipKeys[i]&&t(chipKeys[i]))el.textContent=t(chipKeys[i]);});
+  // No TX empty state
+  var noTx=document.querySelector('.pay-tx-empty div:nth-child(2)');if(noTx)noTx.textContent=t('no_txs');
+  var noTxSub=document.querySelector('.pay-tx-empty div:nth-child(3)');if(noTxSub)noTxSub.textContent=t('no_txs_sub');
+  // See plans link
+  document.querySelectorAll('.pay-section-lbl span:last-child[onclick*="openPlansModal"]').forEach(function(el){el.textContent=t('see_plans');});
+  // Top Up Modal
+  var tu=document.getElementById('topup-modal');
+  if(tu){
+    var tt=tu.querySelector('.pay-modal-title');if(tt)tt.textContent=t('topup_title');
+    var ts=tu.querySelector('.pay-modal-sub');if(ts)ts.textContent=t('topup_sub');
+    var apBtn=tu.querySelector('.apple-pay-btn');if(apBtn)apBtn.innerHTML='<span class="ap-logo">🍎</span> '+t('apple_pay_btn');
+    var dividers=tu.querySelectorAll('.pay-divider');dividers.forEach(function(d){d.textContent=t('or_card');});
+    var cancelBtns=tu.querySelectorAll('button:not(.apple-pay-btn):not(#topup-confirm-btn)');
+    cancelBtns.forEach(function(b){if(!b.getAttribute('onclick')||b.getAttribute('onclick').indexOf('closePayModal')>-1)b.textContent=t('cancel_btn');});
+  }
+  // Add Card Modal
+  var ac=document.getElementById('addcard-modal');
+  if(ac){
+    var at=ac.querySelector('.pay-modal-title');if(at)at.textContent=t('addcard_title');
+    var as_=ac.querySelector('.pay-modal-sub');if(as_)as_.textContent=t('addcard_sub');
+    var labels=ac.querySelectorAll('.cff-label');
+    var labelKeys=['card_number','expiry_date',null,'cardholder'];
+    labels.forEach(function(el,i){if(labelKeys[i]&&t(labelKeys[i]))el.textContent=t(labelKeys[i]);});
+    var saveBtn=ac.querySelector('button[onclick="saveCard()"]');if(saveBtn)saveBtn.textContent=t('save_card_btn');
+    var cancelBtn=ac.querySelector('button[onclick*="addcard-modal"]');if(cancelBtn)cancelBtn.textContent=t('cancel_btn');
+  }
+  // Split Modal
+  var sm=document.getElementById('split-modal');
+  if(sm){
+    var st=sm.querySelector('.pay-modal-title');if(st)st.textContent=t('split_title');
+    var ss=sm.querySelector('.pay-modal-sub');if(ss)ss.textContent=t('split_sub');
+    var hmEl=sm.querySelector('div[style*="text-align:center"]:not(.split-result)');if(hmEl)hmEl.textContent=t('how_many');
+    var srLbl=sm.querySelector('.sr-label');if(srLbl)srLbl.textContent=t('each_pays');
+    sm.querySelectorAll('button').forEach(function(b){
+      var oc=b.getAttribute('onclick')||'';
+      if(oc.indexOf('shareSplitBill')>-1)b.textContent=t('share_split_btn');
+      else if(oc.indexOf('payMySplit')>-1)b.textContent=t('pay_share_btn');
+      else if(oc.indexOf('closePayModal')>-1&&oc.indexOf('split')>-1)b.textContent=t('close_btn');
+    });
+  }
+  // QR Pay Modal
+  var qr=document.getElementById('qrpay-modal');
+  if(qr){
+    var qt=qr.querySelector('.pay-modal-title');if(qt)qt.textContent=t('qrpay_title');
+    var qs=qr.querySelector('.pay-modal-sub');if(qs)qs.textContent=t('qrpay_sub');
+    var balLbl=qr.querySelector('div[style*="font-size:13px"]');if(balLbl)balLbl.textContent=t('balance_avail');
+    qr.querySelectorAll('button').forEach(function(b){
+      var oc=b.getAttribute('onclick')||'';
+      if(oc.indexOf('activateQRCamera')>-1)b.textContent=t('open_camera_btn');
+      else if(oc.indexOf('credential-screen')>-1)b.textContent=t('show_my_qr_btn');
+      else if(oc.indexOf('closePayModal')>-1&&oc.indexOf('qrpay')>-1)b.textContent=t('cancel_btn');
+    });
+  }
+  // Send Modal
+  var snd=document.getElementById('send-modal');
+  if(snd){
+    var snt=snd.querySelector('.pay-modal-title');if(snt)snt.textContent=t('send_title');
+    var sns=snd.querySelector('.pay-modal-sub');if(sns)sns.textContent=t('send_sub');
+    var sndLbls=snd.querySelectorAll('.cff-label');
+    var sndKeys=['recipient_lbl','amount_lbl','note_lbl'];
+    sndLbls.forEach(function(el,i){if(sndKeys[i]&&t(sndKeys[i]))el.textContent=t(sndKeys[i]);});
+    var sendBtn=snd.querySelector('button[onclick="confirmSend()"]');if(sendBtn)sendBtn.textContent=t('send_credits_btn');
+    var sndCancel=snd.querySelector('button[onclick*="send-modal"]');if(sndCancel)sndCancel.textContent=t('cancel_btn');
+    // placeholders
+    var recip=document.getElementById('send-recipient');if(recip)recip.placeholder=currentLang==='es'?'@usuario o teléfono':currentLang==='pt'?'@usuário ou telefone':currentLang==='zh'?'@用户名或手机号':'@username or phone number';
+    var sendNote=document.getElementById('send-note');if(sendNote)sendNote.placeholder=currentLang==='es'?'Para los tragos 🍹':currentLang==='pt'?'Para os drinks 🍹':currentLang==='zh'?'备注 🍹':'For drinks 🍹';
+  }
+  // Plans Modal
+  var pl=document.getElementById('plans-modal');
+  if(pl){
+    var plt=pl.querySelector('.pay-modal-title');if(plt)plt.textContent=t('plans_title');
+    var pls=pl.querySelector('.pay-modal-sub');if(pls)pls.textContent=t('plans_sub');
+    var plClose=pl.querySelector('button[onclick*="plans-modal"]');if(plClose)plClose.textContent=t('close_btn');
+  }
+  // Nav bar labels
+  var navMap={
+    'nav-feed':'nav_feed','nav-social':'nav_social','nav-tonight':'nav_tonight',
+    'nav-games':'nav_games','nav-wallet':'nav_wallet','nav-ai':'nav_ai','nav-profile':'nav_profile'
+  };
+  Object.keys(navMap).forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    var lbl=el.querySelector('.nav-lbl');
+    if(lbl&&t(navMap[id]))lbl.textContent=t(navMap[id]);
+  });
+  // Update lang button label
+  var lb=document.getElementById('lang-btn');
+  if(lb)lb.textContent=(_LANG_LABELS&&_LANG_LABELS[currentLang])||currentLang.toUpperCase();
 }
 
 const VENUES = [
@@ -3904,14 +4197,18 @@ function handleSearch(q){
 }
 
 /* ── THEME TOGGLE ── */
+var _LANG_CYCLE = ['en','es','pt','zh'];
+var _LANG_LABELS = {en:'EN', es:'ES', pt:'PT', zh:'中文'};
+var _LANG_FLAGS  = {en:'🇺🇸 English', es:'🇪🇸 Español', pt:'🇧🇷 Português', zh:'🇨🇳 中文'};
 function toggleLang(){
-  var l=currentLang==='en'?'es':'en';
-  setLang(l);
-  var btn=document.getElementById('lang-btn');
-  if(btn)btn.textContent=l.toUpperCase();
-  toast(l==='es'?'🇪🇸 Español activado':'🇺🇸 English activated','info');
-  if(feedMap)setTimeout(function(){feedMap.invalidateSize();},200);
-  if(exploreMap)setTimeout(function(){exploreMap.invalidateSize();},200);
+  var idx = _LANG_CYCLE.indexOf(currentLang);
+  var next = _LANG_CYCLE[(idx + 1) % _LANG_CYCLE.length];
+  setLang(next);
+  var btn = document.getElementById('lang-btn');
+  if(btn) btn.textContent = _LANG_LABELS[next] || next.toUpperCase();
+  toast(_LANG_FLAGS[next] + ' activado', 'info');
+  if(feedMap) setTimeout(function(){feedMap.invalidateSize();}, 200);
+  if(exploreMap) setTimeout(function(){exploreMap.invalidateSize();}, 200);
 }
 /* ── TONIGHT SCREEN ── */
 function buildTonight(){
@@ -4415,12 +4712,12 @@ function toggleTheme(){
       if(btn)btn.textContent='🌙';
     }
     var savedLang=localStorage.getItem('bp-lang');
-    if(savedLang&&savedLang!==currentLang){
+    if(savedLang&&LANG[savedLang]&&savedLang!==currentLang){
       currentLang=savedLang;TR=LANG[savedLang]||LANG.en;
     }
     setTimeout(translateAll,100);
     var lb=document.getElementById('lang-btn');
-    if(lb)lb.textContent=currentLang.toUpperCase();
+    if(lb)lb.textContent=(_LANG_LABELS&&_LANG_LABELS[currentLang])||currentLang.toUpperCase();
   }catch(e){}
 })();
 
