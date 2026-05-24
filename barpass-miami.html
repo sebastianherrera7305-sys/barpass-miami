@@ -1360,54 +1360,122 @@ body::after{
 .energy-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--coral),var(--gold));transition:width .8s var(--ease);}
 
 /* ════════════════════════════════
-   GAMES SCREEN — XP & Challenges
-════════════════════════════════ */
-.xp-card{border-radius:var(--r3);background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(96,165,250,.06));border:1px solid rgba(167,139,250,.2);padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
-.xp-card::after{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.12),transparent 70%);pointer-events:none;}
-.xp-level{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--violet);margin-bottom:4px;}
-.xp-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:26px;color:var(--cream);margin-bottom:12px;}
-.xp-bar-wrap{height:8px;border-radius:100px;background:rgba(167,139,250,.15);overflow:hidden;margin-bottom:6px;}
-.xp-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--violet),var(--blue));transition:width 1.2s var(--ease);}
-.xp-nums{display:flex;justify-content:space-between;font-size:10px;color:var(--cream4);}
-
-.streak-card{display:flex;align-items:center;gap:16px;padding:14px 18px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(251,113,133,.06),rgba(245,158,11,.04));border:1px solid rgba(251,113,133,.18);margin-bottom:10px;}
-.streak-fire{font-size:32px;flex-shrink:0;}
-.streak-num{font-family:'Instrument Serif',serif;font-size:36px;color:var(--coral);font-style:italic;line-height:1;}
-.streak-info{flex:1;}
-.streak-label{font-size:13px;font-weight:700;color:var(--cream);}
-.streak-sub{font-size:11px;color:var(--cream4);margin-top:2px;}
-
-.challenge-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r2);background:var(--smoke);border:1px solid var(--border);margin-bottom:8px;}
-.ch-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.ch-info{flex:1;min-width:0;}
-.ch-name{font-size:13px;font-weight:700;color:var(--cream);}
-.ch-desc{font-size:11px;color:var(--cream4);margin-top:2px;}
-.ch-prog{height:3px;border-radius:100px;background:var(--smoke2);overflow:hidden;margin-top:8px;}
-.ch-prog-fill{height:100%;border-radius:100px;transition:width .8s var(--ease);}
-.ch-reward{font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0;text-align:right;}
-
-.spin-card{border-radius:var(--r3);background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(251,113,133,.05));border:1px solid rgba(245,158,11,.25);padding:20px;text-align:center;position:relative;overflow:hidden;margin-bottom:16px;}
-.spin-wheel{width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--gold) 0deg 60deg,var(--coral) 60deg 120deg,var(--teal) 120deg 180deg,var(--violet) 180deg 240deg,var(--gold2) 240deg 300deg,var(--pink) 300deg 360deg);margin:0 auto 14px;position:relative;transition:transform 3s cubic-bezier(.17,.67,.12,1);box-shadow:0 8px 32px rgba(0,0,0,.4);cursor:pointer;}
-.spin-wheel::after{content:'▼';position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:20px;color:var(--gold);}
-.spin-wheel-center{position:absolute;inset:8px;border-radius:50%;background:var(--ink2);display:flex;align-items:center;justify-content:center;font-size:28px;}
-.spin-btn{padding:12px 32px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--ink);font-weight:800;font-size:14px;cursor:pointer;transition:all .22s;box-shadow:0 6px 20px var(--gold-glow);}
-.spin-btn:active{transform:scale(.95);}
-.spin-btn:disabled{opacity:.5;cursor:not-allowed;}
-
-.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px;}
-.badge-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;}
-.badge-icon{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1.5px solid var(--border2);transition:transform .2s;}
-.badge-icon.earned{border-color:var(--gold);background:var(--gold3);}
-.badge-icon.locked{opacity:.35;filter:grayscale(.8);}
-.badge-icon:active{transform:scale(.92);}
-.badge-lbl{font-size:9px;color:var(--cream4);text-align:center;font-weight:600;}
-
+   SOCIAL GAMES SYSTEM v2 — 15 Games · 4 Categories
+════════════════════════════════════════════════════ */
+/* Header */
+.sg-hdr{padding:12px 20px 4px;flex-shrink:0;}
+.sg-hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.sg-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;color:var(--cream);}
+.sg-rep-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);cursor:pointer;}
+.sg-rep-txt{font-size:11px;font-weight:800;color:var(--violet);}
+.sg-xp-row{display:flex;align-items:center;gap:10px;padding:4px 0 8px;}
+.sg-xp-lbl{font-size:10px;color:var(--cream4);white-space:nowrap;font-family:'JetBrains Mono',monospace;}
+.sg-xp-track{flex:1;height:4px;border-radius:2px;background:var(--smoke3);overflow:hidden;}
+.sg-xp-fill{height:100%;background:linear-gradient(90deg,var(--violet),var(--blue));border-radius:2px;transition:width 1s var(--ease);}
+.sg-xp-next{font-size:10px;color:var(--violet);font-weight:700;white-space:nowrap;}
+/* Category tabs */
+.sg-tabs{display:flex;gap:6px;padding:2px 20px 12px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.sg-tabs::-webkit-scrollbar{display:none;}
+.sg-tab{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .18s;flex-shrink:0;font-family:'Bricolage Grotesque',sans-serif;}
+.sg-tab.active,.sg-tab:active{border-color:var(--violet);background:rgba(167,139,250,.1);color:var(--violet);}
+.sg-tab.cat-flirt.active{border-color:var(--coral);background:rgba(251,113,133,.1);color:var(--coral);}
+.sg-tab.cat-chaos.active{border-color:var(--gold);background:rgba(245,158,11,.1);color:var(--gold);}
+.sg-tab.cat-crowd.active{border-color:var(--teal);background:rgba(45,212,191,.1);color:var(--teal);}
+/* Featured game */
+.sg-featured{margin:0 20px 14px;border-radius:var(--r3);padding:24px 22px 20px;position:relative;overflow:hidden;cursor:pointer;transition:transform .2s;}
+.sg-featured:active{transform:scale(.98);}
+.sg-featured::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.18),transparent 70%);pointer-events:none;}
+.sg-feat-badge{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:100px;display:inline-flex;align-items:center;gap:4px;margin-bottom:10px;background:rgba(167,139,250,.2);color:var(--violet);}
+.sg-feat-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;color:var(--cream);line-height:1.1;margin-bottom:6px;}
+.sg-feat-tag{font-size:12px;color:rgba(255,248,235,.55);margin-bottom:18px;line-height:1.45;}
+.sg-feat-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sg-feat-pill{padding:5px 10px;border-radius:100px;background:rgba(0,0,0,.3);font-size:10px;font-weight:700;color:rgba(255,248,235,.65);}
+.sg-feat-play{padding:9px 20px;border-radius:100px;border:none;font-weight:800;font-size:12px;cursor:pointer;letter-spacing:-.01em;background:rgba(255,255,255,.12);color:var(--cream);transition:all .2s;}
+.sg-feat-play:active{background:rgba(255,255,255,.2);}
+/* Game grid */
+.sg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px;margin-bottom:16px;}
+.sg-card{border-radius:var(--r2);padding:16px;border:1px solid var(--border);background:var(--smoke);cursor:pointer;transition:all .18s;position:relative;overflow:hidden;}
+.sg-card:active{transform:scale(.95);background:var(--ink3);}
+.sg-card-ico{font-size:26px;margin-bottom:10px;}
+.sg-card-title{font-size:13px;font-weight:800;color:var(--cream);margin-bottom:4px;line-height:1.2;}
+.sg-card-tag{font-size:10px;color:var(--cream4);line-height:1.4;margin-bottom:10px;}
+.sg-card-footer{display:flex;align-items:center;justify-content:space-between;}
+.sg-card-xp{font-size:9px;font-weight:800;color:var(--violet);letter-spacing:.04em;}
+.sg-heat-row{display:flex;align-items:center;gap:3px;}
+.sg-heat-dots{display:flex;gap:2px;}
+.sg-heat-dot{width:4px;height:4px;border-radius:50%;background:var(--smoke3);}
+.sg-heat-dot.on{background:var(--coral);}
+.sg-card-accent{position:absolute;top:10px;right:10px;padding:2px 7px;border-radius:100px;font-size:8px;font-weight:800;letter-spacing:.04em;}
+.sg-acc-hot{background:rgba(251,113,133,.18);color:var(--coral);}
+.sg-acc-new{background:rgba(45,212,191,.18);color:var(--teal);}
+.sg-acc-wild{background:rgba(245,158,11,.18);color:var(--gold);}
+.sg-acc-live{background:rgba(251,113,133,.25);color:var(--coral);}
+.sg-acc-epic{background:rgba(167,139,250,.18);color:var(--violet);}
+/* Streak */
+.sg-streak{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(251,113,133,.06),rgba(245,158,11,.04));border:1px solid rgba(251,113,133,.18);margin-bottom:16px;}
+/* Leaderboard */
 .lboard-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
 .lboard-rank{width:24px;font-size:13px;font-weight:800;color:var(--cream4);text-align:center;}
 .lboard-rank.top{color:var(--gold);}
 .lboard-avatar{width:32px;height:32px;border-radius:50%;background:var(--smoke2);display:flex;align-items:center;justify-content:center;font-size:16px;}
 .lboard-name{flex:1;font-size:13px;font-weight:600;color:var(--cream2);}
-.lboard-pts{font-size:12px;font-weight:700;color:var(--gold);}
+.lboard-pts{font-size:12px;font-weight:700;color:var(--violet);}
+/* ── GAME PLAY MODAL ── */
+.sg-play-overlay{position:fixed;inset:0;background:rgba(6,4,8,.92);backdrop-filter:blur(24px);z-index:9700;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;opacity:0;transition:opacity .3s;pointer-events:none;}
+.sg-play-overlay.open{opacity:1;pointer-events:all;}
+.sg-play-sheet{background:#100e18;border:1px solid rgba(255,248,235,.08);border-radius:28px 28px 0 0;width:100%;max-width:480px;padding:20px 24px calc(40px + env(safe-area-inset-bottom,0px));transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);max-height:90vh;overflow-y:auto;scrollbar-width:none;}
+.sg-play-overlay.open .sg-play-sheet{transform:translateY(0);}
+.sg-play-handle{width:40px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin:0 auto 18px;}
+.sg-play-cat{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px;}
+.sg-play-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:26px;color:var(--cream);margin-bottom:4px;}
+.sg-play-sub{font-size:12px;color:var(--cream4);margin-bottom:20px;line-height:1.5;}
+/* Most Likely */
+.mlt-prompt-card{border-radius:var(--r2);padding:20px 18px;text-align:center;margin-bottom:16px;background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(167,139,250,.03));border:1px solid rgba(167,139,250,.2);}
+.mlt-prompt-lbl{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(167,139,250,.5);margin-bottom:8px;}
+.mlt-prompt-txt{font-family:'Instrument Serif',serif;font-style:italic;font-size:20px;color:var(--cream);line-height:1.35;}
+.mlt-players{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.mlt-player-btn{padding:13px 16px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.mlt-player-btn.voted{border-color:var(--violet);background:rgba(167,139,250,.1);}
+.mlt-player-btn:active{transform:scale(.97);}
+.mlt-res-bar{height:3px;border-radius:2px;background:var(--violet);margin-top:5px;width:0;transition:width .7s cubic-bezier(.22,1,.36,1);}
+/* Chaos Roulette */
+.chaos-wheel{width:176px;height:176px;border-radius:50%;background:conic-gradient(var(--coral) 0deg 72deg,var(--violet) 72deg 144deg,var(--gold) 144deg 216deg,var(--teal) 216deg 288deg,var(--blue) 288deg 360deg);margin:0 auto 16px;position:relative;transition:transform 3.5s cubic-bezier(.17,.67,.12,1);box-shadow:0 12px 40px rgba(0,0,0,.6);cursor:pointer;}
+.chaos-wheel::after{content:'▼';position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:22px;color:var(--cream);}
+.chaos-wheel-center{position:absolute;inset:12px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-size:32px;}
+/* The Drop card */
+.drop-card{border-radius:var(--r3);padding:28px 24px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;}
+.drop-card:active{transform:scale(.97);}
+.drop-card.flipped{background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.3);}
+.drop-card.unflipped{background:linear-gradient(135deg,rgba(20,16,30,1),rgba(12,10,20,1));border:1px solid rgba(255,255,255,.08);}
+/* Shoot Your Shot */
+.shot-anon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 12px;border:2px solid rgba(251,113,133,.4);background:rgba(251,113,133,.08);}
+.shot-suggestion{padding:10px 14px;border-radius:var(--r);border:1px solid rgba(251,113,133,.2);background:rgba(251,113,133,.05);color:var(--cream3);font-size:12px;cursor:pointer;margin-bottom:8px;line-height:1.45;transition:all .18s;}
+.shot-suggestion:active{background:rgba(251,113,133,.12);}
+.shot-textarea{width:100%;padding:14px;border-radius:var(--r2);border:1px solid var(--border2);background:rgba(255,248,235,.04);color:var(--cream);font-size:14px;line-height:1.5;outline:none;resize:none;box-sizing:border-box;font-family:'Bricolage Grotesque',sans-serif;transition:border-color .2s;}
+.shot-textarea:focus{border-color:rgba(251,113,133,.5);}
+/* Vibe Check */
+.vc-emoji-grid{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:16px 0 20px;}
+.vc-emo-btn{width:50px;height:50px;border-radius:50%;background:var(--smoke);border:2px solid transparent;font-size:22px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.vc-emo-btn.selected{border-color:var(--gold);background:rgba(245,158,11,.12);transform:scale(1.18);}
+/* Best Dressed */
+.bd-candidate{padding:13px 16px;border-radius:var(--r2);background:var(--smoke);border:1px solid var(--border);display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.bd-candidate.voted{border-color:var(--gold);background:rgba(245,158,11,.07);}
+.bd-emo{font-size:28px;width:40px;text-align:center;flex-shrink:0;}
+.bd-style{font-size:13px;font-weight:700;color:var(--cream);}
+.bd-desc{font-size:10px;color:var(--cream4);margin-top:2px;}
+.bd-bar{height:3px;border-radius:2px;background:var(--smoke3);overflow:hidden;margin-top:6px;}
+.bd-bar-fill{height:100%;border-radius:2px;background:var(--gold);transition:width .8s ease;}
+/* Result overlay */
+.sg-result-overlay{position:fixed;inset:0;background:rgba(6,4,8,.96);z-index:9800;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;transition:opacity .4s;pointer-events:none;}
+.sg-result-overlay.show{opacity:1;pointer-events:all;}
+.sg-result-card{background:linear-gradient(135deg,#1a1025,#0f0a18);border:1px solid rgba(167,139,250,.3);border-radius:24px;padding:32px 24px;text-align:center;width:100%;max-width:360px;position:relative;overflow:hidden;}
+.sg-result-card::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.14),transparent 70%);pointer-events:none;}
+.sg-res-emoji{font-size:56px;margin-bottom:14px;}
+.sg-res-headline{font-family:'Instrument Serif',serif;font-style:italic;font-size:26px;color:var(--cream);margin-bottom:6px;}
+.sg-res-sub{font-size:12px;color:var(--cream4);line-height:1.5;margin-bottom:18px;}
+.sg-res-xp-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:100px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);font-size:13px;font-weight:800;color:var(--violet);margin-bottom:18px;}
+/* Backwards compat (still referenced in Night Recap) */
+.xp-card{display:none;}.streak-card{display:none;}.spin-card{display:none;}.badge-grid{display:none;}
 
 /* ════════════════════════════════
    AFTER / RECAP SCREEN
@@ -2512,52 +2580,85 @@ body::after{
   </div>
 </div>
 
-<!-- ══ GAMES SCREEN — XP + Challenges ══ -->
-<div class="screen" id="games-screen" style="display:none;">
+<!-- ══ GAMES — Social Interaction Layer v2 ══ -->
+<div class="screen" id="games-screen" style="display:none;background:#08070a;">
   <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 20px;flex-shrink:0;">
-    <div>
-      <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;color:var(--cream);">Games</div>
-      <div style="font-size:11px;color:var(--cream4);">XP · Challenges · Rewards · Leaderboard</div>
+  <!-- Header -->
+  <div class="sg-hdr" style="flex-shrink:0;">
+    <div class="sg-hdr-top">
+      <div>
+        <div class="sg-title">Games</div>
+        <div style="font-size:11px;color:var(--cream4);">Social · Miami · Tonight</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="sg-rep-pill" onclick="toast('Social Rep: your influence score','info')">
+          <span style="font-size:13px;">⚡</span>
+          <span class="sg-rep-txt" id="sg-rep-txt">720 Rep</span>
+        </div>
+        <button class="screen-close" onclick="closeScreen('games-screen')" style="margin:0;">✕</button>
+      </div>
     </div>
-    <button class="screen-close" onclick="closeScreen('games-screen')">✕</button>
+    <div class="sg-xp-row">
+      <div class="sg-xp-lbl" id="sg-level-lbl">LVL 4</div>
+      <div class="sg-xp-track"><div class="sg-xp-fill" id="sg-xp-fill" style="width:62%"></div></div>
+      <div class="sg-xp-next" id="sg-xp-next">+380 to 5</div>
+    </div>
   </div>
-  <div class="screen-scroll" style="padding:0 20px 20px;">
-    <!-- XP Progress -->
-    <div class="xp-card" style="margin-top:12px;" id="xp-card">
-      <div class="xp-level" id="xp-level-label">LEVEL 4 · NIGHT OWL</div>
-      <div class="xp-title" id="xp-title">Night Owl</div>
-      <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xp-bar" style="width:62%;"></div></div>
-      <div class="xp-nums"><span id="xp-current">620 XP</span><span id="xp-next">1,000 XP next level</span></div>
-    </div>
-    <!-- Streak -->
-    <div class="streak-card" id="streak-card">
-      <div class="streak-fire">🔥</div>
-      <div><div class="streak-num" id="streak-num">4</div></div>
-      <div class="streak-info">
-        <div class="streak-label">Night Streak</div>
-        <div class="streak-sub">Keep going — bonus tomorrow!</div>
+  <!-- Category Tabs -->
+  <div class="sg-tabs">
+    <div class="sg-tab active" onclick="filterSGCat('all',this)">✦ All</div>
+    <div class="sg-tab cat-social" onclick="filterSGCat('social',this)">🧠 Psychology</div>
+    <div class="sg-tab cat-flirt" onclick="filterSGCat('flirt',this)">💌 Flirt</div>
+    <div class="sg-tab cat-chaos" onclick="filterSGCat('chaos',this)">🎲 Chaos</div>
+    <div class="sg-tab cat-crowd" onclick="filterSGCat('crowd',this)">🏟 Crowd</div>
+  </div>
+  <!-- Scroll -->
+  <div class="screen-scroll" style="padding:0 0 20px;">
+    <div id="sg-featured-slot"></div>
+    <div class="sg-grid" id="sg-grid"></div>
+    <!-- Streak + Leaderboard -->
+    <div style="padding:0 20px;">
+      <div class="sg-streak">
+        <div style="font-size:30px;flex-shrink:0;">🔥</div>
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:700;color:var(--cream);">Night Streak</div>
+          <div style="font-size:10px;color:var(--cream4);margin-top:2px;">Bonus XP if you play tomorrow</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;color:var(--coral);" id="sg-streak-num">4</div>
+          <div style="font-size:9px;color:var(--cream4);">nights</div>
+        </div>
       </div>
-      <div style="text-align:right;"><div style="font-size:11px;font-weight:700;color:var(--coral);">+50 XP</div><div style="font-size:10px;color:var(--cream4);">bonus</div></div>
-    </div>
-    <!-- Spin Wheel -->
-    <div class="spin-card">
-      <div style="font-size:12px;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:12px;">🎡 DAILY SPIN</div>
-      <div class="spin-wheel" id="spin-wheel" onclick="spinWheel()">
-        <div class="spin-wheel-center">🍸</div>
+      <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cream4);margin:0 0 10px;display:flex;align-items:center;justify-content:space-between;">
+        <span>🏆 Rep Leaderboard</span>
+        <span style="color:var(--violet);cursor:pointer;" onclick="toast('Full leaderboard coming soon','info')">See all →</span>
       </div>
-      <div style="font-size:12px;color:var(--cream4);margin-bottom:12px;" id="spin-result">Tap to spin — free daily reward</div>
-      <button class="spin-btn" id="spin-btn" onclick="spinWheel()">Spin Now ✦</button>
+      <div id="sg-leaderboard"></div>
     </div>
-    <!-- Daily Challenges -->
-    <div style="font-size:14px;font-weight:800;color:var(--cream);margin:4px 0 10px;">⚡ Daily Challenges</div>
-    <div id="challenges-list"></div>
-    <!-- Badges -->
-    <div style="font-size:14px;font-weight:800;color:var(--cream);margin:20px 0 10px;">🏅 Badges</div>
-    <div class="badge-grid" id="badges-grid"></div>
-    <!-- Leaderboard -->
-    <div style="font-size:14px;font-weight:800;color:var(--cream);margin:20px 0 10px;">🏆 Tonight's Leaderboard</div>
-    <div id="leaderboard-list"></div>
+  </div>
+</div>
+
+<!-- ══ GAME PLAY MODAL ══ -->
+<div class="sg-play-overlay" id="sg-play-overlay">
+  <div class="sg-play-sheet" id="sg-play-sheet">
+    <div class="sg-play-handle"></div>
+    <div class="sg-play-cat" id="sg-play-cat"></div>
+    <div class="sg-play-title" id="sg-play-title"></div>
+    <div class="sg-play-sub" id="sg-play-sub"></div>
+    <div id="sg-play-content"></div>
+    <button onclick="closeSGPlay()" style="width:100%;padding:13px;border-radius:var(--r2);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:13px;cursor:pointer;margin-top:10px;font-family:'Bricolage Grotesque',sans-serif;">Close</button>
+  </div>
+</div>
+
+<!-- ══ GAME RESULT OVERLAY ══ -->
+<div class="sg-result-overlay" id="sg-result-overlay">
+  <div class="sg-result-card" id="sg-result-card">
+    <div class="sg-res-emoji" id="sg-res-emoji">🎯</div>
+    <div class="sg-res-headline" id="sg-res-headline">Result!</div>
+    <div class="sg-res-sub" id="sg-res-sub"></div>
+    <div class="sg-res-xp-badge" id="sg-res-xp">+100 XP</div>
+    <button onclick="shareSGResult()" style="width:100%;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,var(--violet),var(--blue));color:#fff;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:10px;position:relative;z-index:1;">📸 Share Moment</button>
+    <button onclick="closeSGResult()" style="width:100%;padding:12px;border-radius:var(--r2);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:13px;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;position:relative;z-index:1;">Keep Playing</button>
   </div>
 </div>
 
@@ -5186,119 +5287,909 @@ function sendChat(){
 }
 
 /* ═══════════════════════════════════════════
-   GAMES SYSTEM — XP + Challenges + Spin
+   SOCIAL GAMES SYSTEM v2 — 15 Games · 4 Categories
+   Psychology · Flirt · Chaos · Crowd
 ═══════════════════════════════════════════ */
-var GAME_STATE={
-  xp:620,level:4,levelName:'Night Owl',xpNext:1000,streak:4,spunToday:false,
-  claimedChallenges:[]
+var GST={
+  xp:620,level:4,levelName:'Night Owl',xpNext:1000,
+  streak:4,rep:720,repRank:'Socialite',
+  activeCat:'all',activeGameId:null,
+  gamesPlayed:[],claimedChallenges:[],
+  chaosWheelRot:0,chaosWheelActive:false,
+  mltPromptIdx:0,mltVoted:false,
+  dropIdx:0,dropFlipped:false,
+  vcSelected:null,vcSubmitted:false,
+  shotSent:false,shotText:'',
+  bdVoted:false,
+  htSent:false,
+  saDropped:false,
+  twRevealed:false,
+  magneticIdx:0,magneticVoted:false,
+  twVoted:false,
+  tableChallenge:null,
+  lastResult:null
 };
-var CHALLENGES=[
-  {id:'c1',icon:'🍸',name:'Cocktail Connoisseur',desc:'Order 3 cocktails tonight',prog:2,total:3,reward:'+75 XP',color:'var(--teal)',done:false},
-  {id:'c2',icon:'📍',name:'District Hopper',desc:'Visit 2 different districts',prog:1,total:2,reward:'+100 XP',color:'var(--violet)',done:false},
-  {id:'c3',icon:'👥',name:'Social Butterfly',desc:'Wave at 3 crossed paths',prog:0,total:3,reward:'+50 XP',color:'var(--coral)',done:false},
-  {id:'c4',icon:'🗺️',name:'Night Explorer',desc:'Check into any venue',prog:1,total:1,reward:'+150 XP',color:'var(--gold)',done:true},
+
+var SG_PLAYERS=[
+  {emoji:'🦊',name:'Valentina R.'},
+  {emoji:'🐺',name:'Marco D.'},
+  {emoji:'🎭',name:'Ana B.'},
+  {emoji:'🔮',name:'You'},
 ];
-var BADGES=[
-  {icon:'🔥',label:'On Fire',earned:true},{icon:'🍸',label:'Mixologist',earned:true},
-  {icon:'🗺️',label:'Explorer',earned:true},{icon:'👑',label:'VIP',earned:false},
-  {icon:'🌙',label:'Night Owl',earned:true},{icon:'💎',label:'Diamond',earned:false},
-  {icon:'🎵',label:'Audiophile',earned:false},{icon:'🏆',label:'Champion',earned:false},
+var MLT_PROMPTS=[
+  'most likely to end up on top of the bar',
+  'most likely to forget which venue they\'re at',
+  'most likely to befriend the DJ',
+  'most likely to order the most expensive bottle',
+  'most likely to still be here at 5AM',
+  'most likely to start the group chat drama tomorrow',
+  'most likely to kiss a stranger tonight',
+  'most likely to suggest moving to another venue',
+  'most likely to pretend they remember everyone\'s name',
+  'most likely to go viral tonight',
+  'most likely to lose their phone',
+  'most likely to get pulled into a VIP section',
 ];
-var LEADERBOARD=[
-  {emoji:'🦊',name:'Valentina R.',pts:2840,rank:1},{emoji:'🐺',name:'Marco D.',pts:2610,rank:2},
-  {emoji:'🎭',name:'AnaB',pts:2390,rank:3},{emoji:'🔮',name:'Diego F.',pts:1980,rank:4},
-  {emoji:'🌙',name:'Nina K.',pts:1750,rank:5},
+var DROP_DARES=[
+  {ico:'🎤',txt:'Go up to someone at the bar and give them a genuine compliment. No context, no explanation.'},
+  {ico:'📸',txt:'Take the most dramatic group photo possible. At least one person must be mid-air or making a face.'},
+  {ico:'🕺',txt:'Initiate a 30-second dance moment wherever you are. No music required. Own it.'},
+  {ico:'🥂',txt:'Buy a drink for a complete stranger. Their reaction is the reward.'},
+  {ico:'🎯',txt:'Make eye contact with someone across the room and hold it for 5 full seconds. Don\'t look away first.'},
+  {ico:'💌',txt:'Tell the person to your left one thing that\'s genuinely impressive about them. Be specific.'},
+  {ico:'🌀',txt:'Walk up to any group and introduce yourself as a "nightlife journalist documenting Miami." Report back.'},
+  {ico:'🎭',txt:'Do your best impression of someone in your group. They have to guess who it is.'},
+  {ico:'🔥',txt:'Get at least three strangers to agree on the best song that\'s played tonight.'},
+  {ico:'🌟',txt:'Be the first person on the dance floor. Stay for 60 full seconds. No backing out.'},
+  {ico:'👑',txt:'Walk to the other side of the venue, then walk back as if you own the place. Full energy.'},
+  {ico:'🎲',txt:'Challenge a stranger to a 30-second conversation. They get to pick the topic.'},
 ];
-var SPIN_PRIZES=['🍸 Free Drink','⚡ +50 XP','💫 Skip Line','🎟️ VIP Pass','🪙 $5 Credit','🎊 +100 XP'];
+var CHAOS_CHALLENGES=[
+  {emoji:'🎤',txt:'Karaoke Mode — Sing one line of whatever song is currently playing. Out loud.'},
+  {emoji:'📸',txt:'Content Drop — Film a story-worthy clip in the next 90 seconds. Make it interesting.'},
+  {emoji:'👑',txt:'Power Walk — Cross the entire venue like you\'re runway-walking. Straight face.'},
+  {emoji:'🤝',txt:'Connector — Introduce two people in your group who haven\'t talked much tonight.'},
+  {emoji:'💬',txt:'Icebreaker — Tell someone nearby one unexpectedly interesting fact about Miami.'},
+  {emoji:'🌀',txt:'Relocate — Move to a completely different spot in the venue for 10 minutes.'},
+  {emoji:'🍸',txt:'Sommelier Mode — Describe your drink like a pretentious wine critic. Full monologue.'},
+  {emoji:'🎲',txt:'Wild Card — Do something completely unscripted and unexpected. You decide what counts.'},
+  {emoji:'😂',txt:'Laugh Bomb — Get at least 3 people at your table genuinely laughing within 60 seconds.'},
+  {emoji:'🔮',txt:'Prophet Mode — Make 3 predictions for tonight. Say them out loud. We\'ll revisit.'},
+];
+var VIBE_EMOJIS=[
+  {e:'😴',lbl:'Dead'},
+  {e:'😑',lbl:'Meh'},
+  {e:'🙂',lbl:'Okay'},
+  {e:'🙌',lbl:'Good'},
+  {e:'😄',lbl:'Fun'},
+  {e:'🔥',lbl:'Fire'},
+  {e:'🚀',lbl:'Insane'},
+];
+var BD_CANDIDATES=[
+  {emoji:'👑',style:'The VIP',desc:'Head-to-toe designer · walks like they own the room',votes:67},
+  {emoji:'🌙',style:'Midnight Aesthetic',desc:'All black · mysterious · clearly has a playlist for this',votes:45},
+  {emoji:'✨',style:'The Glow-Up',desc:'Sparkling details · effortlessly put together · flash of the night',votes:38},
+  {emoji:'🎭',style:'The Statement',desc:'One bold piece that says everything · artistic, risky, iconic',votes:29},
+];
+var SHOT_LINES=[
+  '"Your energy from across the room was impossible to ignore."',
+  '"I\'d regret not saying something. Here\'s me saying something."',
+  '"Whatever you\'re doing tonight, it\'s working."',
+  '"This is the most anonymous thing I\'ll do all year."',
+  '"You\'ve got the kind of presence that makes a room better."',
+];
+var MAGNETIC_PROFILES=[
+  {emoji:'🦋',desc:'"Shows up to every party already knowing the bartender." · Brickell energy'},
+  {emoji:'🌙',desc:'"Gets quieter as the night gets louder." · Speaks in layers'},
+  {emoji:'🔥',desc:'"First on the dance floor. Last to leave." · LIV regular'},
+  {emoji:'🎭',desc:'"Has a story about this exact venue from 2019." · Well-traveled'},
+  {emoji:'💫',desc:'"Orders something that\'s not on the menu." · Regulars-only knowledge'},
+];
+var TW_STATEMENTS=[
+  ['"I\'ve been to 4 venues tonight."','"I spent $200 without checking the bill."','"I\'m completely sober right now."'],
+  ['"I know the DJ personally."','"I already lost my card."','"I work in the nightlife industry."'],
+  ['"I came out tonight just for one drink."','"I have work tomorrow at 7AM."','"I\'ve been to this exact spot 10+ times."'],
+  ['"I haven\'t checked my phone in 2 hours."','"I already gave my number to someone tonight."','"I only know half the people at this table."'],
+];
+var TABLE_CHALLENGES=[
+  {ico:'💃',txt:'First table to get someone to join their dance wins.'},
+  {ico:'🎤',txt:'Best group lip-sync to the current song. 30 seconds.'},
+  {ico:'📸',txt:'Most creative group selfie using only what\'s on the table.'},
+  {ico:'🤝',txt:'First table to get a free drink from a stranger.'},
+  {ico:'🔊',txt:'Loudest group applause when the next song drops.'},
+];
+var PLOT_TWISTS=[
+  'Switch tables with whoever is closest to you right now.',
+  'Order something you\'ve never tried before. No looking at the menu — just ask for "the most interesting thing."',
+  'Spend the next 20 minutes talking only to people you haven\'t met yet tonight.',
+  'Challenge the person next to you to a 1-minute conversation starter. They pick the topic.',
+  'Move to the spot in this venue with the highest energy. Stay 15 minutes.',
+  'Find out one thing about someone in your group you didn\'t know before tonight.',
+  'Order a round for the whole table. No discussing. Just do it.',
+  'Get up and explore a part of this venue you haven\'t been to tonight.',
+];
+var WHO_WOULD_YOU=[
+  '"...talk to first if you knew no one here?"',
+  '"...trust to hold your phone for an hour?"',
+  '"...want to end up at the same after-party as?"',
+  '"...guess has the wildest story from tonight?"',
+  '"...bet makes the most interesting life decisions?"',
+  '"...want navigating the night if everything went sideways?"',
+];
+
+var SG_GAMES=[
+  // ── SOCIAL PSYCHOLOGY ──
+  {id:'most-likely',cat:'social',emoji:'🎯',
+    title:'Most Likely Tonight',tagline:'Anonymous votes. Instant chaos.',
+    desc:'One prompt. Your whole table votes. Results revealed simultaneously.',
+    players:'3–10',duration:'3 min',xp:150,heat:96,
+    grad:'linear-gradient(135deg,#1a0d28,#0d0a1e)',
+    accent:'var(--violet)',rgb:'167,139,250',
+    badge:'🔥 HOT',featured:true},
+  {id:'vibe-decode',cat:'social',emoji:'🧬',
+    title:'Vibe Decode',tagline:'What energy are you actually giving tonight?',
+    desc:'Pick an aesthetic that matches each person at your table — anonymously.',
+    players:'2–8',duration:'2 min',xp:100,heat:82,
+    grad:'linear-gradient(135deg,#0d1a25,#080d14)',
+    accent:'var(--blue)',rgb:'96,165,250',
+    badge:'',featured:false},
+  {id:'energy-rating',cat:'social',emoji:'⚡',
+    title:'Energy Rating',tagline:'Rate the group. No filters.',
+    desc:'Everyone scores the table\'s vibe 1–10. The average is revealed. Prepare for honesty.',
+    players:'3+',duration:'1 min',xp:75,heat:78,
+    grad:'linear-gradient(135deg,#1a1205,#0d0902)',
+    accent:'var(--gold)',rgb:'245,158,11',
+    badge:'',featured:false},
+  {id:'hot-take',cat:'social',emoji:'🌶️',
+    title:'Hot Take Drop',tagline:'Your most controversial nightlife opinion.',
+    desc:'Anonymous. The group reacts. Fire or ice — the crowd decides.',
+    players:'Any',duration:'2 min',xp:120,heat:88,
+    grad:'linear-gradient(135deg,#1a0808,#0d0505)',
+    accent:'var(--coral)',rgb:'251,113,133',
+    badge:'✨ NEW',featured:false},
+  // ── FLIRT & CONNECTION ──
+  {id:'shoot-your-shot',cat:'flirt',emoji:'💌',
+    title:'Shoot Your Shot',tagline:'Anonymous. Bold. Delivered.',
+    desc:'Write a flirt. It gets delivered anonymously to someone nearby. No regrets.',
+    players:'Any',duration:'2 min',xp:200,heat:95,
+    grad:'linear-gradient(135deg,#1a0812,#0d0508)',
+    accent:'var(--coral)',rgb:'251,113,133',
+    badge:'🔥 HOT',featured:false},
+  {id:'magnetic',cat:'flirt',emoji:'💫',
+    title:'Magnetic',tagline:'Would you talk to them at the bar?',
+    desc:'Anonymous swipe-style profiles. See if the energy is mutual without the awkwardness.',
+    players:'2+',duration:'1 min',xp:100,heat:91,
+    grad:'linear-gradient(135deg,#1a0d1a,#0d0810)',
+    accent:'var(--pink)',rgb:'244,114,182',
+    badge:'',featured:false},
+  {id:'secret-admirer',cat:'flirt',emoji:'🌹',
+    title:'Secret Admirer',tagline:'Send it. They\'ll wonder who.',
+    desc:'Drop an anonymous compliment to someone in the room. You stay mysterious.',
+    players:'Any',duration:'1 min',xp:150,heat:86,
+    grad:'linear-gradient(135deg,#1a0a0a,#0d0606)',
+    accent:'var(--coral)',rgb:'251,113,133',
+    badge:'✨ NEW',featured:false},
+  {id:'who-would-you',cat:'flirt',emoji:'👁',
+    title:'Who Would You?',tagline:'Anonymous group choice game.',
+    desc:'Group answers "who would you..." anonymously. Results drop at once. Chaos ensues.',
+    players:'3–8',duration:'3 min',xp:175,heat:89,
+    grad:'linear-gradient(135deg,#100d1a,#080510)',
+    accent:'var(--violet)',rgb:'167,139,250',
+    badge:'',featured:false},
+  // ── CHAOS & MOMENTS ──
+  {id:'the-drop',cat:'chaos',emoji:'🎴',
+    title:'The Drop',tagline:'Flip the card. Do the thing.',
+    desc:'Mystery social challenge revealed one at a time. Tap to flip. No skipping.',
+    players:'Any',duration:'Anytime',xp:180,heat:92,
+    grad:'linear-gradient(135deg,#1a1205,#0d0a02)',
+    accent:'var(--gold)',rgb:'245,158,11',
+    badge:'🔥 HOT',featured:false},
+  {id:'chaos-roulette',cat:'chaos',emoji:'🎰',
+    title:'Chaos Roulette',tagline:'Spin. Accept the consequence.',
+    desc:'Wheel of social chaos. 10 challenges. You spin, you do it.',
+    players:'Any',duration:'2 min',xp:200,heat:97,
+    grad:'linear-gradient(135deg,#1a0805,#0d0502)',
+    accent:'var(--coral)',rgb:'251,113,133',
+    badge:'🎲 WILD',featured:false},
+  {id:'two-truths',cat:'chaos',emoji:'🎭',
+    title:'Two Truths · One Night',tagline:'Nightlife edition. Nothing is safe.',
+    desc:'Three statements. Two true, one lie. Your table guesses. Miami rules.',
+    players:'3–8',duration:'5 min',xp:175,heat:85,
+    grad:'linear-gradient(135deg,#0d1020,#080a14)',
+    accent:'var(--blue)',rgb:'96,165,250',
+    badge:'',featured:false},
+  {id:'plot-twist',cat:'chaos',emoji:'🌀',
+    title:'Plot Twist',tagline:'Your night plan just changed.',
+    desc:'A random curveball for your night. Accept it or dare someone else to.',
+    players:'Any',duration:'1 min',xp:125,heat:80,
+    grad:'linear-gradient(135deg,#0a1a15,#060d0b)',
+    accent:'var(--teal)',rgb:'45,212,191',
+    badge:'✨ NEW',featured:false},
+  // ── CROWD / VENUE ──
+  {id:'best-dressed',cat:'crowd',emoji:'👑',
+    title:'Best Dressed',tagline:'The crowd decides. No appeal.',
+    desc:'Anonymous vote for the vibe of the night. Results live in 60 seconds.',
+    players:'Venue',duration:'60 sec',xp:100,heat:88,
+    grad:'linear-gradient(135deg,#1a1205,#0d0902)',
+    accent:'var(--gold)',rgb:'245,158,11',
+    badge:'',featured:false},
+  {id:'vibe-check',cat:'crowd',emoji:'🌡️',
+    title:'Vibe Check',tagline:'What\'s the real energy in this room?',
+    desc:'Tap your vibe. See what the whole venue thinks right now.',
+    players:'Venue',duration:'30 sec',xp:75,heat:90,
+    grad:'linear-gradient(135deg,#0a1a0a,#060d06)',
+    accent:'var(--teal)',rgb:'45,212,191',
+    badge:'🔴 LIVE',featured:false},
+  {id:'table-wars',cat:'crowd',emoji:'⚔️',
+    title:'Table Wars',tagline:'Send a challenge to the next table.',
+    desc:'Pick a micro-challenge. Another table in the venue gets it. The crowd judges.',
+    players:'Table',duration:'5 min',xp:250,heat:93,
+    grad:'linear-gradient(135deg,#1a0a05,#0d0603)',
+    accent:'var(--coral)',rgb:'251,113,133',
+    badge:'🏆 EPIC',featured:false},
+];
+
+var SG_LEADERBOARD=[
+  {emoji:'🦊',name:'Valentina R.',rep:2840,rank:1},
+  {emoji:'🐺',name:'Marco D.',rep:2610,rank:2},
+  {emoji:'🎭',name:'Ana B.',rep:2390,rank:3},
+  {emoji:'🌙',name:'Nina K.',rep:1980,rank:4},
+  {emoji:'🔮',name:'Diego F.',rep:1750,rank:5},
+];
+
+/* ── Entry Point ── */
 function buildGames(){
-  buildXPCard();buildChallenges();buildBadges();buildLeaderboard();
+  buildSGHeader();
+  filterSGCat('all',null);
+  buildSGLeaderboard();
 }
-function buildXPCard(){
-  var pct=Math.round((GAME_STATE.xp/GAME_STATE.xpNext)*100);
-  document.getElementById('xp-level-label').textContent='LEVEL '+GAME_STATE.level+' · '+GAME_STATE.levelName.toUpperCase();
-  document.getElementById('xp-title').textContent=GAME_STATE.levelName;
-  document.getElementById('xp-bar').style.width=pct+'%';
-  document.getElementById('xp-current').textContent=GAME_STATE.xp+' XP';
-  document.getElementById('xp-next').textContent=GAME_STATE.xpNext+' XP next level';
-  document.getElementById('streak-num').textContent=GAME_STATE.streak;
+
+function buildSGHeader(){
+  var pct=Math.round((GST.xp/GST.xpNext)*100);
+  var el=document.getElementById('sg-xp-fill');if(el)el.style.width=pct+'%';
+  el=document.getElementById('sg-level-lbl');if(el)el.textContent='LVL '+GST.level;
+  el=document.getElementById('sg-xp-next');if(el)el.textContent='+'+(GST.xpNext-GST.xp)+' to '+(GST.level+1);
+  el=document.getElementById('sg-rep-txt');if(el)el.textContent=GST.rep+' Rep';
+  el=document.getElementById('sg-streak-num');if(el)el.textContent=GST.streak;
 }
-function buildChallenges(){
-  var el=document.getElementById('challenges-list');if(!el)return;
-  el.innerHTML=CHALLENGES.map(function(c){
-    var pct=Math.round((c.prog/c.total)*100);
-    var progColor=c.done?'var(--gold)':c.color;
-    return '<div class="challenge-card">'+
-      '<div class="ch-icon" style="background:'+(c.done?'var(--gold3)':'var(--smoke2)')+';">'+c.icon+'</div>'+
-      '<div class="ch-info">'+
-        '<div class="ch-name" style="'+(c.done?'color:var(--gold)':'')+'">'+c.name+(c.done?' ✓':'')+'</div>'+
-        '<div class="ch-desc">'+c.desc+'</div>'+
-        '<div class="ch-prog"><div class="ch-prog-fill" style="width:'+pct+'%;background:'+progColor+';"></div></div>'+
-      '</div>'+
-      '<div class="ch-reward">'+c.reward+'<br><div style="font-size:9px;color:var(--cream4);margin-top:3px;">'+c.prog+'/'+c.total+'</div>'+
-        (c.done&&GAME_STATE.claimedChallenges.indexOf(c.id)===-1?'<button onclick="claimChallenge(\''+c.id+'\')" style="margin-top:5px;padding:3px 8px;border-radius:100px;border:none;background:var(--gold);color:var(--ink);font-size:9px;font-weight:800;cursor:pointer;">Claim</button>':'')+
-      '</div>'+
-    '</div>';
-  }).join('');
+
+function filterSGCat(cat,btn){
+  GST.activeCat=cat;
+  document.querySelectorAll('.sg-tab').forEach(function(t){t.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  var games=cat==='all'?SG_GAMES:SG_GAMES.filter(function(g){return g.cat===cat;});
+  var featured=cat==='all'?SG_GAMES.find(function(g){return g.featured;}):games[0];
+  var grid=cat==='all'?SG_GAMES.filter(function(g){return !g.featured;}):games.slice(1);
+  // Featured
+  var fSlot=document.getElementById('sg-featured-slot');
+  if(fSlot&&featured){fSlot.innerHTML=renderSGFeatured(featured);}
+  else if(fSlot){fSlot.innerHTML='';}
+  // Grid
+  var gGrid=document.getElementById('sg-grid');
+  if(gGrid){gGrid.innerHTML=grid.map(renderSGCard).join('');}
 }
-function claimChallenge(id){
-  if(GAME_STATE.claimedChallenges.indexOf(id)!==-1)return;
-  GAME_STATE.claimedChallenges.push(id);
-  GAME_STATE.xp+=75;
-  toast('🎉 Challenge reward claimed! +75 XP','ok');
-  buildXPCard();buildChallenges();
-}
-function buildBadges(){
-  var el=document.getElementById('badges-grid');if(!el)return;
-  el.innerHTML=BADGES.map(function(b){
-    return '<div class="badge-item" onclick="toast(\''+(b.earned?b.label+' badge earned! 🏅':'Badge locked — keep playing')+'\',\'info\')">'+
-      '<div class="badge-icon '+(b.earned?'earned':'locked')+'">'+b.icon+'</div>'+
-      '<div class="badge-lbl">'+b.label+'</div>'+
-    '</div>';
-  }).join('');
-}
-function buildLeaderboard(){
-  var el=document.getElementById('leaderboard-list');if(!el)return;
-  el.innerHTML=LEADERBOARD.map(function(p){
-    return '<div class="lboard-row">'+
-      '<div class="lboard-rank '+(p.rank<=3?'top':'')+'">'+
-        (p.rank===1?'🥇':p.rank===2?'🥈':p.rank===3?'🥉':p.rank)+
-      '</div>'+
-      '<div class="lboard-avatar">'+p.emoji+'</div>'+
-      '<div class="lboard-name">'+p.name+'</div>'+
-      '<div class="lboard-pts">'+p.pts.toLocaleString()+' pts</div>'+
-    '</div>';
-  }).join('');
-  // Add current user at bottom
-  el.innerHTML+='<div class="lboard-row" style="background:var(--gold3);border-radius:var(--r);padding:10px;margin-top:4px;">'+
-    '<div class="lboard-rank" style="color:var(--gold);">12</div>'+
-    '<div class="lboard-avatar">'+((S.user&&S.user.emoji)||'🦁')+'</div>'+
-    '<div class="lboard-name" style="color:var(--gold);">You</div>'+
-    '<div class="lboard-pts">'+GAME_STATE.xp+' pts</div>'+
+
+function renderSGFeatured(g){
+  var accentBadge=g.badge?'<div class="sg-feat-badge">'+g.badge+'</div>':'';
+  var heatDots=renderHeatDots(g.heat);
+  return '<div class="sg-featured" style="background:'+g.grad+';border:1px solid rgba('+g.rgb+',.25);" onclick="openSGGame(\''+g.id+'\')">'+
+    accentBadge+
+    '<div class="sg-feat-title">'+g.title+'</div>'+
+    '<div class="sg-feat-tag">'+g.tagline+'</div>'+
+    '<div class="sg-feat-meta">'+
+      '<div class="sg-feat-pill">👥 '+g.players+'</div>'+
+      '<div class="sg-feat-pill">⏱ '+g.duration+'</div>'+
+      '<div class="sg-feat-pill">'+heatDots+'</div>'+
+      '<div class="sg-feat-play" style="color:rgba('+g.rgb+',1);border:1px solid rgba('+g.rgb+',.3);margin-left:auto;">Play →</div>'+
+    '</div>'+
   '</div>';
 }
-var spinRotation=0,spinActive=false;
-function spinWheel(){
-  if(spinActive)return;
-  if(GAME_STATE.spunToday){toast('Daily spin used — come back tomorrow!','warn');return;}
-  spinActive=true;
-  var btn=document.getElementById('spin-btn');
-  if(btn){btn.disabled=true;btn.textContent='Spinning…';}
-  var extraSpins=Math.floor(Math.random()*5+5);
-  var prizeIndex=Math.floor(Math.random()*SPIN_PRIZES.length);
-  spinRotation+=extraSpins*360+(prizeIndex*(360/SPIN_PRIZES.length));
-  var wheel=document.getElementById('spin-wheel');
-  if(wheel)wheel.style.transform='rotate('+spinRotation+'deg)';
-  setTimeout(function(){
-    spinActive=false;
-    GAME_STATE.spunToday=true;
-    var prize=SPIN_PRIZES[prizeIndex];
-    var resultEl=document.getElementById('spin-result');
-    if(resultEl)resultEl.textContent='🎉 You won: '+prize+'!';
-    if(btn){btn.disabled=true;btn.textContent='Claimed ✓';btn.style.background='var(--smoke2)';}
-    if(prize.includes('XP')){var bonus=parseInt(prize.match(/\d+/)[0]);GAME_STATE.xp+=bonus;buildXPCard();}
-    toast('🎉 '+prize+' — enjoy your night!','ok');
-  },3200);
+
+function renderSGCard(g){
+  var badge=g.badge?'<div class="sg-card-accent '+badgeClass(g.badge)+'">'+g.badge+'</div>':'';
+  var heatDots=renderHeatDots(g.heat);
+  return '<div class="sg-card" style="border-color:rgba('+g.rgb+',.2);" onclick="openSGGame(\''+g.id+'\')">'+
+    badge+
+    '<div class="sg-card-ico">'+g.emoji+'</div>'+
+    '<div class="sg-card-title">'+g.title+'</div>'+
+    '<div class="sg-card-tag">'+g.tagline+'</div>'+
+    '<div class="sg-card-footer">'+
+      '<div class="sg-card-xp" style="color:rgba('+g.rgb+',1);">+'+g.xp+' XP</div>'+
+      '<div class="sg-heat-row">'+heatDots+'</div>'+
+    '</div>'+
+  '</div>';
 }
+
+function renderHeatDots(heat){
+  var filled=Math.round(heat/20);
+  var html='<div class="sg-heat-dots">';
+  for(var i=0;i<5;i++){html+='<div class="sg-heat-dot'+(i<filled?' on':'')+'"></div>';}
+  html+='</div>';
+  return html;
+}
+
+function badgeClass(badge){
+  if(!badge)return '';
+  if(badge.indexOf('HOT')>-1)return 'sg-acc-hot';
+  if(badge.indexOf('NEW')>-1)return 'sg-acc-new';
+  if(badge.indexOf('WILD')>-1)return 'sg-acc-wild';
+  if(badge.indexOf('LIVE')>-1)return 'sg-acc-live';
+  if(badge.indexOf('EPIC')>-1)return 'sg-acc-epic';
+  return 'sg-acc-hot';
+}
+
+function buildSGLeaderboard(){
+  var el=document.getElementById('sg-leaderboard');if(!el)return;
+  el.innerHTML=SG_LEADERBOARD.map(function(p){
+    return '<div class="lboard-row">'+
+      '<div class="lboard-rank '+(p.rank<=3?'top':'')+'">'+
+        (p.rank===1?'🥇':p.rank===2?'🥈':p.rank===3?'🥉':p.rank)+'</div>'+
+      '<div class="lboard-avatar">'+p.emoji+'</div>'+
+      '<div class="lboard-name">'+p.name+'</div>'+
+      '<div class="lboard-pts">'+p.rep.toLocaleString()+'</div>'+
+    '</div>';
+  }).join('')+
+  '<div class="lboard-row" style="background:rgba(167,139,250,.06);border-radius:var(--r);padding:10px;margin-top:4px;border:1px solid rgba(167,139,250,.15);">'+
+    '<div class="lboard-rank" style="color:var(--violet);">#12</div>'+
+    '<div class="lboard-avatar">'+((S&&S.user&&S.user.emoji)||'🦁')+'</div>'+
+    '<div class="lboard-name" style="color:var(--violet);">You</div>'+
+    '<div class="lboard-pts">'+GST.rep+'</div>'+
+  '</div>';
+}
+
+/* ── Open Game ── */
+function openSGPlay(){
+  var ov=document.getElementById('sg-play-overlay');
+  if(ov){ov.classList.add('open');ov.addEventListener('click',function outsideClose(e){if(e.target===ov){ov.classList.remove('open');ov.removeEventListener('click',outsideClose);}});}
+}
+function closeSGPlay(){
+  var ov=document.getElementById('sg-play-overlay');if(ov)ov.classList.remove('open');
+}
+
+var CAT_LABELS={social:'🧠 SOCIAL PSYCHOLOGY',flirt:'💌 FLIRT & CONNECTION',chaos:'🎲 CHAOS & MOMENTS',crowd:'🏟 CROWD / VENUE'};
+var CAT_COLORS={social:'var(--violet)',flirt:'var(--coral)',chaos:'var(--gold)',crowd:'var(--teal)'};
+
+function openSGGame(id){
+  nativeHaptic('medium');
+  GST.activeGameId=id;
+  var g=SG_GAMES.find(function(x){return x.id===id;});if(!g)return;
+  // Set modal header
+  var catEl=document.getElementById('sg-play-cat');if(catEl){catEl.textContent=CAT_LABELS[g.cat]||'GAME';catEl.style.color=CAT_COLORS[g.cat]||'var(--violet)';}
+  var titleEl=document.getElementById('sg-play-title');if(titleEl)titleEl.textContent=g.title;
+  var subEl=document.getElementById('sg-play-sub');if(subEl)subEl.textContent=g.desc;
+  // Render game UI
+  var content=document.getElementById('sg-play-content');
+  if(content)content.innerHTML=renderSGGameUI(id);
+  openSGPlay();
+}
+
+function renderSGGameUI(id){
+  switch(id){
+    case 'most-likely':     return renderMLT();
+    case 'vibe-decode':     return renderVibeDecodeUI();
+    case 'energy-rating':   return renderEnergyRatingUI();
+    case 'hot-take':        return renderHotTakeUI();
+    case 'shoot-your-shot': return renderShootYourShotUI();
+    case 'magnetic':        return renderMagneticUI();
+    case 'secret-admirer':  return renderSecretAdmirerUI();
+    case 'who-would-you':   return renderWhoWouldYouUI();
+    case 'the-drop':        return renderTheDropUI();
+    case 'chaos-roulette':  return renderChaosRouletteUI();
+    case 'two-truths':      return renderTwoTruthsUI();
+    case 'plot-twist':      return renderPlotTwistUI();
+    case 'best-dressed':    return renderBestDressedUI();
+    case 'vibe-check':      return renderVibeCheckUI();
+    case 'table-wars':      return renderTableWarsUI();
+    default: return '<div style="text-align:center;padding:40px 20px;color:var(--cream4);">Coming soon!</div>';
+  }
+}
+
+/* ══ GAME UIs ══════════════════════════════════════ */
+
+/* 1. Most Likely Tonight */
+function renderMLT(){
+  GST.mltVoted=false;
+  var prompt=MLT_PROMPTS[GST.mltPromptIdx%MLT_PROMPTS.length];
+  var playersHtml=SG_PLAYERS.map(function(p,i){
+    return '<div class="mlt-player-btn" id="mlt-p-'+i+'" onclick="voteMostLikely('+i+')">'+
+      '<div style="font-size:24px;width:36px;text-align:center;flex-shrink:0;">'+p.emoji+'</div>'+
+      '<div style="flex:1;">'+
+        '<div style="font-size:14px;font-weight:700;color:var(--cream);">'+p.name+'</div>'+
+        '<div class="mlt-res-bar" id="mlt-bar-'+i+'"></div>'+
+      '</div>'+
+      '<div id="mlt-pct-'+i+'" style="font-size:11px;color:var(--cream4);display:none;font-family:\'JetBrains Mono\',monospace;"></div>'+
+    '</div>';
+  }).join('');
+  return '<div class="mlt-prompt-card">'+
+    '<div class="mlt-prompt-lbl">Tonight\'s Prompt</div>'+
+    '<div class="mlt-prompt-txt">"Who is <em style=\"color:var(--violet)\">'+prompt+'</em>"</div>'+
+    '</div>'+
+    '<div class="mlt-players">'+playersHtml+'</div>'+
+    '<button onclick="nextMLTPrompt()" style="width:100%;padding:11px;border-radius:var(--r2);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:12px;cursor:pointer;margin-bottom:4px;font-family:\'Bricolage Grotesque\',sans-serif;">↻ New Prompt</button>';
+}
+function voteMostLikely(idx){
+  if(GST.mltVoted){toast('Already voted!','warn');return;}
+  GST.mltVoted=true;nativeHaptic('medium');
+  var votes=SG_PLAYERS.map(function(_,i){
+    return i===idx?Math.floor(Math.random()*20+35):Math.floor(Math.random()*25+5);
+  });
+  var total=votes.reduce(function(a,b){return a+b;},0);
+  SG_PLAYERS.forEach(function(p,i){
+    var btn=document.getElementById('mlt-p-'+i);
+    var bar=document.getElementById('mlt-bar-'+i);
+    var pct=document.getElementById('mlt-pct-'+i);
+    var percent=Math.round((votes[i]/total)*100);
+    if(btn&&i===idx){btn.style.borderColor='var(--violet)';btn.style.background='rgba(167,139,250,.08)';}
+    if(bar){setTimeout(function(){bar.style.width=percent+'%';},100+i*80);}
+    if(pct){pct.style.display='block';pct.textContent=percent+'%';if(i===idx)pct.style.color='var(--violet)';}
+  });
+  var winner=SG_PLAYERS[idx];
+  var prompt=MLT_PROMPTS[GST.mltPromptIdx%MLT_PROMPTS.length];
+  setTimeout(function(){
+    awardSGXP(150);
+    showSGResult('🎯','Group has spoken!',winner.emoji+' '+winner.name+' is officially "'+prompt+'"',150);
+  },2000);
+}
+function nextMLTPrompt(){
+  GST.mltPromptIdx++;GST.mltVoted=false;nativeHaptic('select');
+  var content=document.getElementById('sg-play-content');
+  if(content)content.innerHTML=renderMLT();
+}
+
+/* 2. Vibe Decode */
+function renderVibeDecodeUI(){
+  var vibes=['Main Character','The Mystery','Golden Hour','Controlled Chaos','Social Architect','Quiet Storm','Party Catalyst','Midnight Philosopher'];
+  var html='<div style="margin-bottom:16px;">';
+  SG_PLAYERS.forEach(function(p,pi){
+    html+='<div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:700;color:var(--cream);margin-bottom:7px;">'+p.emoji+' '+p.name+'</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+    vibes.forEach(function(v){
+      html+='<div class="ptf-chip" onclick="pickVibeDecode('+pi+',this,\''+v+'\')" style="font-size:10px;">'+v+'</div>';
+    });
+    html+='</div></div>';
+  });
+  html+='</div>'+
+    '<button onclick="submitVibeDecode()" style="width:100%;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,#1a6090,#2196f3);color:#fff;font-size:14px;font-weight:800;cursor:pointer;">Reveal Vibe Reads ✦</button>';
+  return html;
+}
+function pickVibeDecode(playerIdx,el,vibe){
+  nativeHaptic('select');
+  el.closest('.sg-play-content div div div div')&&el.closest('div').querySelectorAll('.ptf-chip').forEach(function(c){c.classList.remove('active');});
+  el.classList.add('active');
+  if(!GST.vibeDecodeSelections)GST.vibeDecodeSelections={};
+  GST.vibeDecodeSelections[playerIdx]=vibe;
+}
+function submitVibeDecode(){
+  awardSGXP(100);
+  showSGResult('🧬','Vibes decoded!','Anonymous reads shared with your table. The truth has been spoken.',100);
+}
+
+/* 3. Energy Rating */
+function renderEnergyRatingUI(){
+  return '<div style="text-align:center;margin-bottom:20px;">'+
+    '<div style="font-size:12px;color:var(--cream4);margin-bottom:16px;">How\'s the table energy right now? (anonymous)</div>'+
+    '<div style="display:flex;gap:6px;justify-content:center;margin-bottom:20px;" id="energy-rating-btns">'+
+    [1,2,3,4,5,6,7,8,9,10].map(function(n){
+      return '<div onclick="selectEnergyRating('+n+',this)" style="width:26px;height:32px;border-radius:6px;background:var(--smoke);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;color:var(--cream3);transition:all .15s;">'+n+'</div>';
+    }).join('')+
+    '</div>'+
+    '<div id="energy-rating-selected" style="font-family:\'Instrument Serif\',serif;font-style:italic;font-size:20px;color:var(--cream);margin-bottom:16px;min-height:28px;"></div>'+
+    '</div>'+
+    '<button onclick="submitEnergyRating()" id="energy-submit-btn" style="width:100%;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,#c8880a,#f5b830);color:#000;font-size:14px;font-weight:800;cursor:pointer;opacity:.5;pointer-events:none;">Submit Rating</button>';
+}
+var _energyRatingVal=0;
+var _energyLabels={1:'💀 Dead zone',2:'😑 Very flat',3:'🙁 Struggling',4:'😐 Lukewarm',5:'🙂 Decent',6:'😊 Pretty good',7:'😄 Solid',8:'🔥 Hot',9:'🚀 Insane',10:'💥 LEGENDARY'};
+function selectEnergyRating(n,el){
+  nativeHaptic('select');_energyRatingVal=n;
+  document.querySelectorAll('#energy-rating-btns div').forEach(function(d,i){
+    d.style.background=(i<n)?'rgba(245,158,11,.3)':'var(--smoke)';
+    d.style.borderColor=(i<n)?'rgba(245,158,11,.5)':'var(--border)';
+    d.style.color=(i<n)?'var(--gold)':'var(--cream3)';
+  });
+  var lbl=document.getElementById('energy-rating-selected');
+  if(lbl)lbl.textContent=_energyLabels[n]||'';
+  var btn=document.getElementById('energy-submit-btn');
+  if(btn){btn.style.opacity='1';btn.style.pointerEvents='auto';}
+}
+function submitEnergyRating(){
+  if(!_energyRatingVal){toast('Pick a rating first','warn');return;}
+  var avg=Math.round((_energyRatingVal+Math.random()*3+5)/2);avg=Math.min(10,avg);
+  awardSGXP(75);
+  showSGResult('⚡','Table Average: '+avg+'/10',_energyLabels[avg]||'The group has spoken.',75);
+}
+
+/* 4. Hot Take */
+function renderHotTakeUI(){
+  var examples=['Miami venues peak before midnight.','The best outfit is the one that gets you in without waiting.','Tequila is always the right decision at 11PM.','The DJ matters more than the venue.','VIP sections are mostly just FOMO.'];
+  return '<div style="font-size:11px;color:var(--cream4);margin-bottom:10px;">Drop a nightlife hot take. Anonymous. The table reacts.</div>'+
+    '<textarea class="shot-textarea" id="ht-textarea" rows="3" maxlength="140" placeholder="Your most controversial opinion about tonight..."></textarea>'+
+    '<div style="font-size:10px;color:var(--cream5);text-align:right;margin:4px 0 12px;" id="ht-char">0/140</div>'+
+    '<div style="font-size:10px;font-weight:700;color:var(--cream4);margin-bottom:8px;letter-spacing:.06em;">OR PICK ONE:</div>'+
+    examples.map(function(e){return '<div class="shot-suggestion" onclick="pickHotTake(this,\''+e+'\')">'+e+'</div>';}).join('')+
+    '<button onclick="dropHotTake()" style="width:100%;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,#a8000a,#fb7185);color:#fff;font-size:14px;font-weight:800;cursor:pointer;margin-top:8px;">🌶️ Drop the Take</button>';
+}
+function pickHotTake(el,text){
+  nativeHaptic('select');
+  var ta=document.getElementById('ht-textarea');if(ta)ta.value=text;
+  document.querySelectorAll('.shot-suggestion').forEach(function(s){s.style.borderColor='';s.style.background='';});
+  el.style.borderColor='rgba(251,113,133,.5)';el.style.background='rgba(251,113,133,.08)';
+}
+function dropHotTake(){
+  var ta=document.getElementById('ht-textarea');
+  var text=(ta&&ta.value.trim())||'';
+  if(!text){toast('Type your hot take first','warn');return;}
+  nativeHaptic('medium');
+  awardSGXP(120);
+  showSGResult('🌶️','Hot Take Dropped!','"'+text+'" — The table is reacting. Expect chaos.',120);
+}
+
+/* 5. Shoot Your Shot */
+function renderShootYourShotUI(){
+  var randomEmojis=['🎭','🦋','🌙','🔮','🦊','✨','🎵','🌹'];
+  var anon=randomEmojis[Math.floor(Math.random()*randomEmojis.length)];
+  return '<div class="shot-anon">'+anon+'</div>'+
+    '<div style="text-align:center;font-size:11px;color:var(--cream4);margin-bottom:16px;">Anonymous profile · Nearby table</div>'+
+    '<div style="font-size:10px;font-weight:700;color:var(--cream4);letter-spacing:.06em;margin-bottom:8px;">QUICK LINES:</div>'+
+    SHOT_LINES.map(function(l){return '<div class="shot-suggestion" onclick="pickShotLine(this,'+JSON.stringify(l)+')">'+l+'</div>';}).join('')+
+    '<div style="font-size:10px;font-weight:700;color:var(--cream4);letter-spacing:.06em;margin:12px 0 8px;">OR WRITE YOUR OWN:</div>'+
+    '<textarea class="shot-textarea" id="shot-textarea" rows="2" maxlength="120" placeholder="Make it count. Anonymous. No way to trace it back."></textarea>'+
+    '<button onclick="sendShot()" style="width:100%;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,#8b001a,#fb7185);color:#fff;font-size:14px;font-weight:800;cursor:pointer;margin-top:12px;">💌 Send Anonymously</button>';
+}
+function pickShotLine(el,text){
+  nativeHaptic('select');
+  var ta=document.getElementById('shot-textarea');if(ta)ta.value=text;
+  document.querySelectorAll('.shot-suggestion').forEach(function(s){s.style.borderColor='';s.style.background='';});
+  el.style.borderColor='rgba(251,113,133,.5)';el.style.background='rgba(251,113,133,.08)';
+}
+function sendShot(){
+  var ta=document.getElementById('shot-textarea');
+  var text=(ta&&ta.value.trim())||'';
+  if(!text){toast('Write something first','warn');return;}
+  nativeHaptic('heavy');
+  awardSGXP(200);
+  showSGResult('💌','Shot sent!','Your anonymous message was delivered. Someone nearby just got it.',200);
+}
+
+/* 6. Magnetic */
+function renderMagneticUI(){
+  GST.magneticIdx=0;GST.magneticVoted=false;
+  return _renderMagneticCard();
+}
+function _renderMagneticCard(){
+  var profile=MAGNETIC_PROFILES[GST.magneticIdx%MAGNETIC_PROFILES.length];
+  return '<div style="text-align:center;padding:24px 0 8px;">'+
+    '<div style="font-size:64px;margin-bottom:12px;">'+profile.emoji+'</div>'+
+    '<div style="font-size:13px;color:var(--cream3);line-height:1.5;margin-bottom:24px;font-style:italic;">'+profile.desc+'</div>'+
+    '<div style="font-size:11px;color:var(--cream4);margin-bottom:16px;">Would you go up and talk to this person at the bar?</div>'+
+    '<div style="display:flex;gap:10px;">'+
+      '<button onclick="magneticVote(false)" style="flex:1;padding:16px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);color:var(--cream4);font-size:18px;cursor:pointer;transition:all .2s;">❌</button>'+
+      '<button onclick="magneticVote(true)" style="flex:1;padding:16px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,rgba(244,114,182,.2),rgba(244,114,182,.08));border:1px solid rgba(244,114,182,.4);color:var(--pink);font-size:18px;cursor:pointer;transition:all .2s;">❤️</button>'+
+    '</div>'+
+    '<div style="text-align:center;font-size:10px;color:var(--cream5);margin-top:10px;">'+(GST.magneticIdx+1)+' of '+MAGNETIC_PROFILES.length+'</div>'+
+  '</div>';
+}
+function magneticVote(yes){
+  nativeHaptic('select');
+  GST.magneticIdx++;
+  if(GST.magneticIdx>=MAGNETIC_PROFILES.length){
+    awardSGXP(100);
+    showSGResult('💫','Vibe mapped!','Your magnetic compatibility score has been logged. The results are… interesting.',100);
+    return;
+  }
+  var content=document.getElementById('sg-play-content');
+  if(content){
+    content.style.opacity='0';content.style.transform='translateX('+(yes?'-30px':'30px')+')';
+    content.style.transition='all .2s';
+    setTimeout(function(){
+      content.innerHTML=renderMagneticUI();
+      content.style.opacity='';content.style.transform='';content.style.transition='';
+    },200);
+  }
+}
+
+/* 7. Secret Admirer */
+function renderSecretAdmirerUI(){
+  var compliments=[
+    'Your confidence in this room is something else.',
+    'Whoever you came with is very lucky tonight.',
+    'You have the kind of energy that makes the room better.',
+    'You\'re effortlessly magnetic and you probably don\'t even know it.',
+    'Your smile hit different tonight. Just so you know.',
+  ];
+  return '<div style="text-align:center;margin-bottom:16px;"><div style="font-size:48px;">🌹</div><div style="font-size:12px;color:var(--cream4);margin-top:8px;">Anonymous compliment · Delivered nearby</div></div>'+
+    '<div style="font-size:10px;font-weight:700;color:var(--cream4);letter-spacing:.06em;margin-bottom:8px;">PICK A COMPLIMENT:</div>'+
+    compliments.map(function(c){return '<div class="shot-suggestion" onclick="pickCompliment(this,'+JSON.stringify(c)+')">'+c+'</div>';}).join('')+
+    '<button onclick="dropCompliment()" style="width:100%;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,#8b001a,#fb7185);color:#fff;font-size:14px;font-weight:800;cursor:pointer;margin-top:12px;">🌹 Drop Anonymously</button>';
+}
+var _selectedCompliment='';
+function pickCompliment(el,text){
+  nativeHaptic('select');_selectedCompliment=text;
+  document.querySelectorAll('.shot-suggestion').forEach(function(s){s.style.borderColor='';s.style.background='';});
+  el.style.borderColor='rgba(251,113,133,.5)';el.style.background='rgba(251,113,133,.08)';
+}
+function dropCompliment(){
+  if(!_selectedCompliment){toast('Pick a compliment first','warn');return;}
+  nativeHaptic('heavy');awardSGXP(150);
+  showSGResult('🌹','Dropped!','Your anonymous compliment was delivered. Someone nearby just had their night made.',150);
+}
+
+/* 8. Who Would You? */
+function renderWhoWouldYouUI(){
+  GST.twVoted=false;
+  var prompt=WHO_WOULD_YOU[Math.floor(Math.random()*WHO_WOULD_YOU.length)];
+  var html='<div class="mlt-prompt-card" style="background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(167,139,250,.03));border:1px solid rgba(167,139,250,.2);margin-bottom:16px;">'+
+    '<div class="mlt-prompt-lbl">Anonymous Vote</div>'+
+    '<div class="mlt-prompt-txt">"Who would you '+prompt+'"</div>'+
+    '</div>'+
+    '<div class="mlt-players">'+
+    SG_PLAYERS.map(function(p,i){
+      return '<div class="mlt-player-btn" onclick="voteWhoWouldYou('+i+',this)">'+
+        '<div style="font-size:24px;width:36px;text-align:center;flex-shrink:0;">'+p.emoji+'</div>'+
+        '<div style="font-size:14px;font-weight:700;color:var(--cream);">'+p.name+'</div>'+
+      '</div>';
+    }).join('')+
+    '</div>';
+  return html;
+}
+function voteWhoWouldYou(idx,el){
+  if(GST.twVoted){toast('Already voted!','warn');return;}
+  GST.twVoted=true;nativeHaptic('medium');
+  el.style.borderColor='var(--violet)';el.style.background='rgba(167,139,250,.1)';
+  awardSGXP(175);
+  setTimeout(function(){
+    showSGResult('👁','Votes in!','The group has spoken — anonymously. Check the vibe at your table.',175);
+  },1000);
+}
+
+/* 9. The Drop */
+function renderTheDropUI(){
+  GST.dropFlipped=false;
+  GST.dropIdx=Math.floor(Math.random()*DROP_DARES.length);
+  return '<div class="drop-card unflipped" id="drop-card" onclick="flipDropCard()">'+
+    '<div style="font-size:40px;margin-bottom:12px;">🎴</div>'+
+    '<div style="font-size:14px;font-weight:700;color:var(--cream3);">Tap to reveal your challenge</div>'+
+    '<div style="font-size:11px;color:var(--cream5);margin-top:6px;">No skipping. No excuses.</div>'+
+  '</div>';
+}
+function flipDropCard(){
+  if(GST.dropFlipped)return;
+  GST.dropFlipped=true;nativeHaptic('heavy');
+  var dare=DROP_DARES[GST.dropIdx];
+  var card=document.getElementById('drop-card');
+  if(card){
+    card.classList.remove('unflipped');card.classList.add('flipped');
+    card.onclick=null;
+    card.innerHTML='<div style="font-size:40px;margin-bottom:14px;">'+dare.ico+'</div>'+
+      '<div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,158,11,.6);margin-bottom:8px;">YOUR CHALLENGE</div>'+
+      '<div style="font-family:\'Instrument Serif\',serif;font-style:italic;font-size:18px;color:var(--cream);line-height:1.4;">'+dare.txt+'</div>';
+  }
+  // Append complete/skip buttons
+  var content=document.getElementById('sg-play-content');
+  if(content){
+    var btns=document.createElement('div');
+    btns.style.cssText='display:flex;gap:10px;margin-top:16px;';
+    btns.innerHTML='<button onclick="completeDropDare()" style="flex:1;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,#c8880a,#f5b830);color:#000;font-weight:800;font-size:14px;cursor:pointer;">✓ Done it</button>'+
+      '<button onclick="skipDropDare()" style="padding:14px 20px;border-radius:var(--r2);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:14px;cursor:pointer;font-family:\'Bricolage Grotesque\',sans-serif;">Skip</button>';
+    content.appendChild(btns);
+  }
+}
+function completeDropDare(){nativeHaptic('heavy');awardSGXP(180);showSGResult('🔥','Challenge complete!','The group witnessed it. +180 XP · Rep boost unlocked.',180);}
+function skipDropDare(){toast('No skipping allowed 😈','warn');}
+
+/* 10. Chaos Roulette */
+var _chaosWheelRot=0,_chaosSpinning=false;
+function renderChaosRouletteUI(){
+  return '<div style="text-align:center;">'+
+    '<div class="chaos-wheel" id="chaos-wheel" onclick="spinChaosWheel()"><div class="chaos-wheel-center">🎰</div></div>'+
+    '<div style="font-size:12px;color:var(--cream4);margin-bottom:16px;" id="chaos-result">Tap to spin — accept what comes</div>'+
+    '<button onclick="spinChaosWheel()" id="chaos-spin-btn" style="padding:13px 32px;border-radius:100px;border:none;background:linear-gradient(135deg,#e05f00,#fb7185);color:#fff;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(251,113,133,.3);">Spin the Chaos ✦</button>'+
+  '</div>';
+}
+function spinChaosWheel(){
+  if(_chaosSpinning){return;}
+  nativeHaptic('heavy');_chaosSpinning=true;
+  var btn=document.getElementById('chaos-spin-btn');
+  if(btn){btn.disabled=true;btn.textContent='Spinning…';}
+  var idx=Math.floor(Math.random()*CHAOS_CHALLENGES.length);
+  _chaosWheelRot+=Math.floor(Math.random()*5+5)*360+(idx*(360/CHAOS_CHALLENGES.length));
+  var wheel=document.getElementById('chaos-wheel');
+  if(wheel)wheel.style.transform='rotate('+_chaosWheelRot+'deg)';
+  setTimeout(function(){
+    _chaosSpinning=false;
+    var challenge=CHAOS_CHALLENGES[idx];
+    var res=document.getElementById('chaos-result');
+    if(res)res.innerHTML='<span style="font-size:20px;">'+challenge.emoji+'</span> '+challenge.txt;
+    if(btn){btn.disabled=false;btn.textContent='Spin Again ✦';}
+    awardSGXP(200);
+    nativeHaptic('medium');
+  },3600);
+}
+
+/* 11. Two Truths · One Night */
+function renderTwoTruthsUI(){
+  var set=TW_STATEMENTS[Math.floor(Math.random()*TW_STATEMENTS.length)];
+  return '<div style="font-size:12px;color:var(--cream4);margin-bottom:16px;">Two are true. One is a lie. Pick the lie:</div>'+
+    set.map(function(s,i){
+      return '<div class="bd-candidate" onclick="pickTwLie('+i+',this)" style="margin-bottom:10px;">'+
+        '<div style="width:28px;height:28px;border-radius:50%;background:var(--smoke3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cream4);flex-shrink:0;">'+(i+1)+'</div>'+
+        '<div style="font-size:13px;color:var(--cream);line-height:1.4;font-style:italic;">'+s+'</div>'+
+      '</div>';
+    }).join('')+
+    '<div style="font-size:10px;color:var(--cream5);text-align:center;margin-top:8px;">Tap the statement you think is the lie</div>';
+}
+function pickTwLie(idx,el){
+  nativeHaptic('medium');
+  document.querySelectorAll('.bd-candidate').forEach(function(b){b.classList.remove('voted');});
+  el.classList.add('voted');
+  var lieIdx=Math.floor(Math.random()*3);
+  setTimeout(function(){
+    var correct=idx===lieIdx;
+    awardSGXP(175);
+    showSGResult(correct?'🎯':'😅',correct?'Got it!':'Nope!',correct?'Sharp instincts. You spotted the lie.':'Wrong! The lie was statement #'+(lieIdx+1)+'. The table is judging.',175);
+  },1200);
+}
+
+/* 12. Plot Twist */
+function renderPlotTwistUI(){
+  var twist=PLOT_TWISTS[Math.floor(Math.random()*PLOT_TWISTS.length)];
+  return '<div style="border-radius:var(--r3);padding:28px 22px;text-align:center;background:linear-gradient(135deg,rgba(45,212,191,.08),rgba(45,212,191,.02));border:1px solid rgba(45,212,191,.2);margin-bottom:20px;">'+
+    '<div style="font-size:40px;margin-bottom:14px;">🌀</div>'+
+    '<div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(45,212,191,.6);margin-bottom:10px;">TONIGHT\'S PLOT TWIST</div>'+
+    '<div style="font-family:\'Instrument Serif\',serif;font-style:italic;font-size:19px;color:var(--cream);line-height:1.45;" id="pt-text">'+twist+'</div>'+
+  '</div>'+
+  '<div style="display:flex;gap:10px;">'+
+    '<button onclick="acceptPlotTwist()" style="flex:1;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,#0a7a73,#2dd4bf);color:#000;font-size:14px;font-weight:800;cursor:pointer;">Accept it ✓</button>'+
+    '<button onclick="passPlotTwist()" style="padding:14px 18px;border-radius:var(--r2);border:1px solid rgba(45,212,191,.3);background:transparent;color:var(--teal);font-size:14px;cursor:pointer;font-family:\'Bricolage Grotesque\',sans-serif;">Pass it →</button>'+
+  '</div>';
+}
+function acceptPlotTwist(){nativeHaptic('heavy');awardSGXP(125);showSGResult('🌀','Plot accepted!','Brave. The night just changed direction. +125 XP.',125);}
+function passPlotTwist(){
+  nativeHaptic('select');
+  var twist=PLOT_TWISTS[Math.floor(Math.random()*PLOT_TWISTS.length)];
+  var el=document.getElementById('pt-text');
+  if(el){el.style.opacity='0';setTimeout(function(){el.textContent=twist;el.style.opacity='1';el.style.transition='opacity .4s';},300);}
+  toast('Passed to the next person 😈','info');
+}
+
+/* 13. Best Dressed */
+function renderBestDressedUI(){
+  GST.bdVoted=false;
+  return '<div style="font-size:11px;color:var(--cream4);margin-bottom:14px;">Anonymous vote. Pick the vibe that\'s winning tonight:</div>'+
+    BD_CANDIDATES.map(function(c,i){
+      var pct=Math.round((c.votes/(67+45+38+29))*100);
+      return '<div class="bd-candidate" id="bd-cand-'+i+'" onclick="voteBestDressed('+i+',this)">'+
+        '<div class="bd-emo">'+c.emoji+'</div>'+
+        '<div style="flex:1;">'+
+          '<div class="bd-style">'+c.style+'</div>'+
+          '<div class="bd-desc">'+c.desc+'</div>'+
+          '<div class="bd-bar"><div class="bd-bar-fill" id="bd-fill-'+i+'" style="width:0%"></div></div>'+
+        '</div>'+
+        '<div id="bd-pct-'+i+'" style="font-size:11px;color:var(--cream4);font-family:\'JetBrains Mono\',monospace;display:none;">'+pct+'%</div>'+
+      '</div>';
+    }).join('');
+}
+function voteBestDressed(idx,el){
+  if(GST.bdVoted){toast('Already voted!','warn');return;}
+  GST.bdVoted=true;nativeHaptic('medium');
+  el.classList.add('voted');
+  var total=BD_CANDIDATES.reduce(function(a,c){return a+c.votes;},0);
+  BD_CANDIDATES.forEach(function(c,i){
+    var pct=Math.round((c.votes/total)*100);
+    var fill=document.getElementById('bd-fill-'+i);
+    var pctEl=document.getElementById('bd-pct-'+i);
+    if(fill)setTimeout(function(){fill.style.width=pct+'%';},100+i*80);
+    if(pctEl){pctEl.style.display='block';}
+  });
+  var winner=BD_CANDIDATES[0];
+  setTimeout(function(){
+    awardSGXP(100);
+    showSGResult('👑','Results in!',winner.emoji+' "'+winner.style+'" is winning tonight with '+Math.round((winner.votes/(total))*100)+'% of votes.',100);
+  },2000);
+}
+
+/* 14. Vibe Check */
+function renderVibeCheckUI(){
+  GST.vcSelected=null;GST.vcSubmitted=false;
+  return '<div style="text-align:center;font-size:13px;color:var(--cream3);margin-bottom:4px;">What\'s the real energy in this room right now?</div>'+
+    '<div style="text-align:center;font-size:10px;color:var(--cream5);margin-bottom:20px;">Anonymous · +'+Math.floor(Math.random()*50+80)+' people voted</div>'+
+    '<div class="vc-emoji-grid">'+
+    VIBE_EMOJIS.map(function(v,i){
+      return '<div class="vc-emo-btn" id="vc-emo-'+i+'" onclick="selectVC('+i+',this)">'+
+        '<div>'+v.e+'</div>'+
+        '<div style="font-size:9px;color:var(--cream5);margin-top:3px;">'+v.lbl+'</div>'+
+      '</div>';
+    }).join('')+
+    '</div>'+
+    '<button onclick="submitVC()" id="vc-submit" style="width:100%;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,#0a7a73,#2dd4bf);color:#000;font-size:14px;font-weight:800;cursor:pointer;opacity:.5;pointer-events:none;">Submit Vibe</button>';
+}
+function selectVC(idx,el){
+  nativeHaptic('select');GST.vcSelected=idx;
+  document.querySelectorAll('.vc-emo-btn').forEach(function(b){b.classList.remove('selected');});
+  el.classList.add('selected');
+  var btn=document.getElementById('vc-submit');
+  if(btn){btn.style.opacity='1';btn.style.pointerEvents='auto';}
+}
+function submitVC(){
+  if(GST.vcSelected===null){toast('Pick your vibe first','warn');return;}
+  nativeHaptic('medium');
+  var myVibe=VIBE_EMOJIS[GST.vcSelected];
+  var roomAvg=VIBE_EMOJIS[4+Math.floor(Math.random()*2)];
+  awardSGXP(75);
+  showSGResult(roomAvg.e,'Room says: "'+roomAvg.lbl+'"','You said '+myVibe.e+' '+myVibe.lbl+'. The venue average is '+roomAvg.e+' '+roomAvg.lbl+'.',75);
+}
+
+/* 15. Table Wars */
+function renderTableWarsUI(){
+  var challenge=TABLE_CHALLENGES[Math.floor(Math.random()*TABLE_CHALLENGES.length)];
+  GST.tableChallenge=challenge;
+  return '<div style="border-radius:var(--r3);padding:24px;background:linear-gradient(135deg,rgba(251,113,133,.08),rgba(251,113,133,.02));border:1px solid rgba(251,113,133,.25);margin-bottom:20px;text-align:center;">'+
+    '<div style="font-size:40px;margin-bottom:12px;">'+challenge.ico+'</div>'+
+    '<div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(251,113,133,.6);margin-bottom:8px;">TABLE CHALLENGE</div>'+
+    '<div style="font-family:\'Instrument Serif\',serif;font-style:italic;font-size:18px;color:var(--cream);line-height:1.45;">'+challenge.txt+'</div>'+
+  '</div>'+
+  '<div style="font-size:11px;color:var(--cream4);text-align:center;margin-bottom:16px;">Send this challenge to a nearby table. The crowd judges who does it better.</div>'+
+  '<button onclick="sendTableWarChallenge()" style="width:100%;padding:14px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,#a80015,#fb7185);color:#fff;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:8px;">⚔️ Send Challenge to Next Table</button>'+
+  '<button onclick="rerollTableWar()" style="width:100%;padding:12px;border-radius:var(--r2);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:13px;cursor:pointer;font-family:\'Bricolage Grotesque\',sans-serif;">↻ Different Challenge</button>';
+}
+function sendTableWarChallenge(){
+  nativeHaptic('heavy');awardSGXP(250);
+  toast('⚔️ Challenge sent to Table 7!','ok');
+  showSGResult('⚔️','War declared!','Table 7 just received your challenge. The venue is watching. May the best table win.',250);
+}
+function rerollTableWar(){
+  nativeHaptic('select');
+  var content=document.getElementById('sg-play-content');
+  if(content)content.innerHTML=renderTableWarsUI();
+}
+
+/* ── Reward & Result System ── */
+function awardSGXP(amount){
+  GST.xp+=amount;
+  GST.rep+=Math.floor(amount*.8);
+  if(GST.xp>=GST.xpNext){GST.level++;GST.xpNext=Math.round(GST.xpNext*1.5);toast('🎉 LEVEL UP → '+GST.level+'!','ok');}
+  buildSGHeader();refreshWalletUI&&refreshWalletUI();
+}
+
+function showSGResult(emoji,headline,sub,xp){
+  GST.lastResult={emoji:emoji,headline:headline,sub:sub,xp:xp};
+  var ov=document.getElementById('sg-result-overlay');
+  var emo=document.getElementById('sg-res-emoji');
+  var hl=document.getElementById('sg-res-headline');
+  var sv=document.getElementById('sg-res-sub');
+  var xpEl=document.getElementById('sg-res-xp');
+  if(emo)emo.textContent=emoji;
+  if(hl)hl.textContent=headline;
+  if(sv)sv.textContent=sub;
+  if(xpEl)xpEl.textContent='+'+xp+' XP · +'+Math.floor(xp*.8)+' Rep';
+  if(ov){ov.classList.add('show');nativeHaptic('heavy');}
+}
+function closeSGResult(){
+  var ov=document.getElementById('sg-result-overlay');
+  if(ov)ov.classList.remove('show');
+  closeSGPlay();
+  buildSGHeader();
+}
+function shareSGResult(){
+  var r=GST.lastResult||{};
+  var text='🎮 BarPass Games · '+r.headline+'\n\n'+r.emoji+' '+r.sub+'\n\n'+r.xp+' XP earned tonight in Miami 🌃\n\nPlay at barpass.io';
+  if(window.barpassNative&&typeof window.barpassNative.share==='function'){
+    window.barpassNative.share(text,'BarPass Games');
+  } else if(navigator.share){
+    navigator.share({title:'BarPass Games',text:text}).catch(function(){});
+  } else {
+    navigator.clipboard&&navigator.clipboard.writeText(text);
+    toast('Result copied!','ok');
+  }
+}
+
+/* Backwards compat stubs */
+function buildXPCard(){}
+function buildChallenges(){}
+function claimChallenge(){}
+function buildBadges(){}
+function buildLeaderboard(){buildSGLeaderboard();}
+function spinWheel(){openSGGame('chaos-roulette');}
+var GAME_STATE=GST; // alias
 
 /* ═══════════════════════════════════════════
    TONIGHT — Stories + Live Rooms
