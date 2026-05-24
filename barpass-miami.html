@@ -757,6 +757,154 @@ body.after-hours .credit-pill{box-shadow:0 0 20px rgba(245,158,11,.25);}
 .wallet-add-btn{margin:8px 20px 20px;padding:16px;border-radius:var(--r3);border:1px solid var(--border2);background:var(--smoke);color:var(--cream2);font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;}
 .wallet-add-btn:active{transform:scale(.97);}
 
+/* ── PAYMENTS / FINTECH UI ── */
+.pay-header{padding:16px 24px 8px;flex-shrink:0;}
+.pay-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+.pay-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:30px;color:var(--cream);}
+.pay-subtitle{font-size:12px;color:var(--cream4);}
+.pay-settings-btn{width:36px;height:36px;border-radius:50%;background:var(--smoke);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;}
+
+/* Card Carousel */
+.pay-card-carousel{padding:16px 0 0;flex-shrink:0;position:relative;}
+.pay-card-track{display:flex;gap:16px;overflow-x:auto;padding:0 24px 16px;scrollbar-width:none;scroll-snap-type:x mandatory;}
+.pay-card-track::-webkit-scrollbar{display:none;}
+.pay-virtual-card{min-width:300px;height:170px;border-radius:20px;padding:22px;position:relative;overflow:hidden;cursor:pointer;scroll-snap-align:start;flex-shrink:0;transition:transform .2s;}
+.pay-virtual-card:active{transform:scale(.97);}
+.pvc-barpass{background:linear-gradient(135deg,#1a1407 0%,#2a1f08 40%,#0f0a04 100%);border:1.5px solid rgba(245,158,11,.4);box-shadow:0 16px 48px rgba(0,0,0,.6),0 0 0 1px rgba(245,158,11,.08) inset;}
+.pvc-add{background:var(--smoke);border:1.5px dashed rgba(255,248,235,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:140px;}
+.pvc-add-icon{width:44px;height:44px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.pvc-add-lbl{font-size:13px;color:var(--cream4);font-weight:600;}
+.pvc-logo{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--gold2);position:relative;z-index:1;}
+.pvc-chip{position:absolute;top:22px;right:22px;z-index:1;}
+.pvc-chip svg{width:32px;height:24px;opacity:.85;}
+.pvc-balance-lbl{font-size:9px;color:rgba(245,158,11,.6);letter-spacing:.1em;text-transform:uppercase;position:relative;z-index:1;margin-top:auto;}
+.pvc-balance{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:500;color:var(--gold2);line-height:1;position:relative;z-index:1;}
+.pvc-bottom{display:flex;justify-content:space-between;align-items:flex-end;position:relative;z-index:1;margin-top:12px;}
+.pvc-name{font-size:11px;color:rgba(245,158,11,.5);font-weight:600;letter-spacing:.08em;text-transform:uppercase;}
+.pvc-tier-badge{padding:3px 8px;border-radius:100px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);font-size:9px;font-weight:800;color:var(--gold);letter-spacing:.06em;text-transform:uppercase;}
+.pvc-shine{position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.04),transparent);animation:cardShine 4s ease-in-out infinite;}
+@keyframes cardShine{0%{left:-100%}60%{left:200%}100%{left:200%}}
+.pvc-dots{position:absolute;bottom:-20px;right:-20px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.12),transparent 70%);pointer-events:none;}
+
+/* Quick Actions */
+.pay-actions{display:flex;gap:8px;padding:4px 24px 16px;flex-shrink:0;}
+.pay-action-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:var(--r2);background:var(--smoke);border:1px solid var(--border);cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.pay-action-btn:active{transform:scale(.93);background:var(--ink3);}
+.pab-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.pab-lbl{font-size:10px;font-weight:700;color:var(--cream3);}
+.pab-topup .pab-icon{background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.08));border:1px solid rgba(245,158,11,.25);}
+.pab-send .pab-icon{background:linear-gradient(135deg,rgba(45,212,191,.15),rgba(45,212,191,.06));border:1px solid rgba(45,212,191,.2);}
+.pab-split .pab-icon{background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(167,139,250,.06));border:1px solid rgba(167,139,250,.2);}
+.pab-qr .pab-icon{background:linear-gradient(135deg,rgba(251,113,133,.15),rgba(251,113,133,.06));border:1px solid rgba(251,113,133,.2);}
+
+/* Plans */
+.pay-plans-tabs{display:flex;gap:6px;padding:0 24px 12px;flex-shrink:0;}
+.pay-plan-tab{flex:1;padding:7px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;text-align:center;font-family:'Bricolage Grotesque',sans-serif;}
+.pay-plan-tab.active{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.35);color:var(--gold);}
+
+/* Transaction History */
+.pay-section-lbl{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--cream4);padding:0 24px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.pay-tx-filter{display:flex;gap:6px;padding:0 24px 10px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.pay-tx-filter::-webkit-scrollbar{display:none;}
+.ptf-chip{padding:5px 12px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:'Bricolage Grotesque',sans-serif;}
+.ptf-chip.active{background:rgba(255,248,235,.08);border-color:var(--border2);color:var(--cream2);}
+.pay-tx-list{flex:1;overflow-y:auto;padding:0 24px 100px;scrollbar-width:none;}
+.pay-tx-list::-webkit-scrollbar{display:none;}
+.ptx-group-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cream5);margin:16px 0 8px;}
+.ptx-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,248,235,.04);}
+.ptx-item:last-child{border-bottom:none;}
+.ptx-ico{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.ptx-ico.cat-venue{background:rgba(245,158,11,.1);}
+.ptx-ico.cat-topup{background:rgba(45,212,191,.1);}
+.ptx-ico.cat-reward{background:rgba(167,139,250,.1);}
+.ptx-ico.cat-split{background:rgba(251,113,133,.1);}
+.ptx-ico.cat-sub{background:rgba(99,102,241,.1);}
+.ptx-info{flex:1;min-width:0;}
+.ptx-name{font-size:14px;font-weight:600;color:var(--cream);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ptx-meta{font-size:11px;color:var(--cream4);}
+.ptx-right{text-align:right;flex-shrink:0;}
+.ptx-amount{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;}
+.ptx-amount.debit{color:var(--coral);}
+.ptx-amount.credit{color:var(--teal);}
+.ptx-pts{font-size:10px;color:var(--gold3);margin-top:2px;}
+.pay-tx-empty{text-align:center;padding:40px 20px;color:var(--cream4);font-size:13px;}
+
+/* Stats Bar */
+.pay-stats-bar{display:flex;gap:0;padding:12px 24px;background:var(--smoke);border-radius:var(--r2);margin:0 24px 16px;flex-shrink:0;}
+.psb-item{flex:1;text-align:center;}
+.psb-item+.psb-item{border-left:1px solid var(--border);}
+.psb-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--cream);}
+.psb-lbl{font-size:9px;color:var(--cream4);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+
+/* Tier Progress */
+.pay-tier-bar{margin:0 24px 16px;padding:14px 16px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(245,158,11,.06),rgba(245,158,11,.02));border:1px solid rgba(245,158,11,.14);flex-shrink:0;}
+.ptb-top{display:flex;justify-content:space-between;margin-bottom:10px;}
+.ptb-tier{font-size:12px;font-weight:700;color:var(--gold);}
+.ptb-next{font-size:11px;color:var(--cream4);}
+.ptb-bar{height:4px;border-radius:2px;background:var(--smoke3);overflow:hidden;}
+.ptb-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .8s cubic-bezier(.22,1,.36,1);}
+
+/* MODAL BASE */
+.pay-modal-overlay{position:fixed;inset:0;background:rgba(6,4,8,.88);backdrop-filter:blur(20px);z-index:9600;display:flex;align-items:flex-end;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0);opacity:0;transition:opacity .3s;pointer-events:none;}
+.pay-modal-overlay.open{opacity:1;pointer-events:all;}
+.pay-modal-sheet{background:#111013;border:1px solid rgba(255,248,235,.08);border-radius:28px 28px 0 0;width:100%;max-width:480px;padding:20px 24px 32px;transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);}
+.pay-modal-overlay.open .pay-modal-sheet{transform:translateY(0);}
+.pay-modal-handle{width:40px;height:4px;background:rgba(255,255,255,.12);border-radius:2px;margin:0 auto 20px;}
+.pay-modal-title{font-family:'Instrument Serif',serif;font-style:italic;font-size:24px;color:var(--cream);margin-bottom:4px;}
+.pay-modal-sub{font-size:12px;color:var(--cream4);margin-bottom:20px;}
+
+/* Apple Pay Button */
+.apple-pay-btn{width:100%;padding:16px;border-radius:var(--r3);border:none;background:#000;color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.01em;margin-bottom:12px;transition:opacity .2s;}
+.apple-pay-btn:active{opacity:.85;}
+.apple-pay-btn .ap-logo{font-size:17px;}
+
+/* Card Input */
+.card-form-field{margin-bottom:14px;}
+.cff-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cream4);margin-bottom:6px;}
+.cff-input{width:100%;padding:14px 16px;border-radius:var(--r2);border:1px solid var(--border2);background:rgba(255,248,235,.04);color:var(--cream);font-family:'JetBrains Mono',monospace;font-size:15px;outline:none;transition:border-color .2s;box-sizing:border-box;}
+.cff-input:focus{border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.03);}
+.cff-input::placeholder{color:var(--cream5);}
+.cff-row{display:flex;gap:10px;}
+.cff-row .card-form-field{flex:1;}
+.pay-divider{display:flex;align-items:center;gap:12px;margin:12px 0;color:var(--cream5);font-size:11px;}
+.pay-divider::before,.pay-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Split Bill */
+.split-amount-display{text-align:center;padding:20px 0;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.sad-total{font-size:11px;color:var(--cream4);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+.sad-amount{font-family:'JetBrains Mono',monospace;font-size:48px;font-weight:500;color:var(--cream);line-height:1;}
+.split-people{display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;}
+.sp-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--border);background:var(--smoke);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;color:var(--cream3);}
+.sp-btn.active{border-color:var(--gold);background:rgba(245,158,11,.12);color:var(--gold);}
+.split-result{text-align:center;padding:14px;background:var(--smoke);border-radius:var(--r2);margin-bottom:16px;}
+.sr-label{font-size:12px;color:var(--cream4);margin-bottom:4px;}
+.sr-amount{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:600;color:var(--teal);}
+.sr-each{font-size:11px;color:var(--cream5);margin-top:2px;}
+
+/* Plans Modal */
+.plan-card{border-radius:var(--r2);border:1px solid var(--border);padding:16px;margin-bottom:10px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.plan-card.active,.plan-card:active{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.05);}
+.plan-card-pro{border-color:rgba(245,158,11,.3);background:linear-gradient(135deg,rgba(245,158,11,.06),rgba(245,158,11,.02));}
+.plan-card-vip{border-color:rgba(167,139,250,.3);background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(167,139,250,.02));}
+.plan-badge{position:absolute;top:12px;right:12px;padding:3px 8px;border-radius:100px;font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.plan-badge.popular{background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);color:var(--gold);}
+.plan-badge.premium{background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.4);color:var(--violet);}
+.plan-name{font-size:16px;font-weight:800;color:var(--cream);margin-bottom:2px;}
+.plan-price{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600;color:var(--gold2);margin-bottom:8px;}
+.plan-price span{font-size:12px;color:var(--cream4);}
+.plan-perks{display:flex;flex-direction:column;gap:5px;}
+.plan-perk{font-size:12px;color:var(--cream3);display:flex;align-items:center;gap:7px;}
+.plan-perk::before{content:'✓';color:var(--teal);font-weight:700;font-size:11px;}
+
+/* QR Pay Modal */
+.qr-pay-scanner{width:220px;height:220px;border-radius:20px;background:rgba(255,255,255,.04);border:2px solid rgba(245,158,11,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;position:relative;overflow:hidden;}
+.qr-corner{position:absolute;width:24px;height:24px;border-color:var(--gold);border-style:solid;border-width:0;}
+.qr-corner.tl{top:10px;left:10px;border-top-width:2px;border-left-width:2px;border-top-left-radius:4px;}
+.qr-corner.tr{top:10px;right:10px;border-top-width:2px;border-right-width:2px;border-top-right-radius:4px;}
+.qr-corner.bl{bottom:10px;left:10px;border-bottom-width:2px;border-left-width:2px;border-bottom-left-radius:4px;}
+.qr-corner.br{bottom:10px;right:10px;border-bottom-width:2px;border-right-width:2px;border-bottom-right-radius:4px;}
+.qr-scan-line{position:absolute;left:20px;right:20px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:scanLine 2s linear infinite;}
+
 /* ── CART ── */
 .cart-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--cream4);}
 .cart-items{flex:1;overflow-y:auto;padding:0 20px;scrollbar-width:none;}
@@ -1723,59 +1871,400 @@ body::after{
   <div class="exp-cta"><button class="exp-btn" data-i18n="get_express" onclick="activateExpress()">Get Express Pass · $9.99 ⚡</button><div class="exp-note">Charged once · Valid all night · No subscription</div></div>
 </div>
 
-<!-- ══ WALLET ══ -->
-<div class="screen" id="wallet-screen" style="display:none;">
-  <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
-  <div style="display:flex;justify-content:flex-end;padding:2px 20px;flex-shrink:0;"><button class="screen-close" onclick="closeScreen('wallet-screen')">✕</button></div>
-  <div style="padding:8px 24px 4px;flex-shrink:0;"><div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:28px;">Wallet</div><div style="font-size:12px;color:var(--cream3);margin-top:2px;">BarPass Credits · Membership</div></div>
-  <!-- Membership Card -->
-  <div style="margin:12px 20px 0;border-radius:var(--r4);padding:24px;background:linear-gradient(135deg,#1a1407,#0f0a04);border:1px solid rgba(245,158,11,.25);position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-30px;right:-30px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.15),transparent 70%);pointer-events:none;"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold3);font-weight:700;">MEMBER</div><div id="wallet-tier" style="font-family:'Instrument Serif',serif;font-size:22px;font-style:italic;color:var(--gold);">Bronze</div></div>
-      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 16px var(--gold-glow);">🪙</div>
-    </div>
-    <div style="display:flex;gap:16px;margin-bottom:14px;">
-      <div style="flex:1;"><div style="font-size:10px;color:var(--cream4);letter-spacing:.08em;text-transform:uppercase;">Credits</div><div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:500;color:var(--gold2);" id="wallet-balance">$0</div></div>
-      <div style="flex:1;"><div style="font-size:10px;color:var(--cream4);letter-spacing:.08em;text-transform:uppercase;">Points</div><div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:500;color:var(--cream2);" id="wallet-points">0</div></div>
-      <div style="flex:1;"><div style="font-size:10px;color:var(--cream4);letter-spacing:.08em;text-transform:uppercase;">Cashback</div><div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:500;color:var(--teal);" id="wallet-cashback">$0</div></div>
-    </div>
-    <div style="height:4px;border-radius:2px;background:var(--smoke3);overflow:hidden;margin-bottom:10px;"><div id="tier-progress" style="height:100%;width:0%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .8s ease;"></div></div>
-    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--cream4);"><span>Bronze</span><span>Silver</span><span>Gold</span><span>Platinum</span></div>
-    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:10px;">
-      <button style="flex:1;padding:10px;border-radius:var(--r);border:1px solid var(--gold3);background:var(--gold4);color:var(--gold);font-size:12px;font-weight:700;cursor:pointer;" onclick="showLoadSection()">+ Add Credits</button>
-      <button style="flex:1;padding:10px;border-radius:var(--r);border:1px solid var(--border2);background:var(--smoke);color:var(--cream2);font-size:12px;font-weight:600;cursor:pointer;" onclick="toast('Rewards coming soon','info')">🎁 Rewards</button>
+<!-- ══ WALLET / PAYMENTS ══ -->
+<div class="screen" id="wallet-screen" style="display:none;background:#08070a;">
+  <div class="ios-bar" style="flex-shrink:0;"><span class="ios-time" id="pay-ios-time">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
+  <!-- Header -->
+  <div class="pay-header" style="flex-shrink:0;">
+    <div class="pay-header-top">
+      <div>
+        <div class="pay-title">Payments</div>
+        <div class="pay-subtitle" id="pay-subtitle">BarPass Credits · Miami Nightlife</div>
+      </div>
+      <button class="pay-settings-btn" onclick="openPaySettings()">⚙️</button>
     </div>
   </div>
-  <!-- Credit load -->
-  <div id="load-section" style="display:none;padding:0 20px;">
-    <div style="padding:16px 0 10px;font-size:14px;color:var(--cream3);">Load Credits</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-      <div style="padding:14px 8px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;cursor:pointer;transition:all .2s;" onclick="confirmLoad(20)"><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--gold2);">$20</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Light</div></div>
-      <div style="padding:14px 8px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;cursor:pointer;transition:all .2s;" onclick="confirmLoad(50)"><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--gold2);">$50</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Standard</div></div>
-      <div style="padding:14px 8px;border-radius:var(--r2);border:1px solid var(--border);background:rgba(245,158,11,.08);text-align:center;cursor:pointer;transition:all .2s;" onclick="confirmLoad(100)"><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--gold2);">$100</div><div style="font-size:10px;color:var(--teal);margin-top:3px;">+$5 bonus</div></div>
-      <div style="padding:14px 8px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;cursor:pointer;transition:all .2s;" onclick="confirmLoad(200)"><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--gold2);">$200</div><div style="font-size:10px;color:var(--teal);margin-top:3px;">+$15 bonus</div></div>
-      <div style="padding:14px 8px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;cursor:pointer;transition:all .2s;" onclick="confirmLoad(500)"><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--gold2);">$500</div><div style="font-size:10px;color:var(--teal);margin-top:3px;">+$50 bonus</div></div>
-      <div style="padding:14px 8px;border-radius:var(--r2);border:1px solid var(--border);background:rgba(167,139,250,.08);text-align:center;cursor:pointer;transition:all .2s;" onclick="toast('Custom amount','info')"><div style="font-size:18px;font-weight:600;color:var(--violet);">Custom</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Any amount</div></div>
+
+  <!-- Card Carousel -->
+  <div class="pay-card-carousel">
+    <div class="pay-card-track" id="pay-card-track">
+      <!-- BarPass Virtual Card -->
+      <div class="pay-virtual-card pvc-barpass" onclick="openScreen('credential-screen')">
+        <div class="pvc-shine"></div>
+        <div class="pvc-dots"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;">
+          <div class="pvc-logo">BarPass</div>
+          <div class="pvc-chip">
+            <svg viewBox="0 0 32 24" fill="none">
+              <rect width="32" height="24" rx="4" fill="rgba(245,158,11,0.15)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
+              <rect x="8" y="6" width="16" height="12" rx="2" fill="rgba(245,158,11,0.3)" stroke="rgba(245,158,11,0.4)" stroke-width=".8"/>
+              <line x1="8" y1="11" x2="24" y2="11" stroke="rgba(245,158,11,0.3)" stroke-width=".8"/>
+              <line x1="8" y1="14" x2="24" y2="14" stroke="rgba(245,158,11,0.3)" stroke-width=".8"/>
+            </svg>
+          </div>
+        </div>
+        <div style="margin-top:18px;position:relative;z-index:1;">
+          <div class="pvc-balance-lbl">Available Balance</div>
+          <div class="pvc-balance" id="pvc-balance">$0.00</div>
+        </div>
+        <div class="pvc-bottom">
+          <div class="pvc-name" id="pvc-name">MEMBER</div>
+          <div class="pvc-tier-badge" id="pvc-tier-badge">Bronze</div>
+        </div>
+      </div>
+      <!-- Add Card Button -->
+      <div class="pay-virtual-card pvc-add" onclick="openAddCardModal()">
+        <div class="pvc-add-icon">＋</div>
+        <div class="pvc-add-lbl">Add Card</div>
+      </div>
+    </div>
+    <!-- Carousel dots -->
+    <div style="display:flex;justify-content:center;gap:5px;padding-bottom:4px;" id="pvc-dots-row">
+      <div style="width:16px;height:3px;border-radius:2px;background:var(--gold);transition:all .3s;"></div>
+      <div style="width:6px;height:3px;border-radius:2px;background:var(--smoke3);transition:all .3s;"></div>
     </div>
   </div>
-  <!-- Perks -->
-  <div class="screen-scroll" style="padding:0 20px 20px;">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;">
-      <div style="padding:14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">⚡</div><div style="font-size:11px;font-weight:700;">Express Access</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Skip lines at 50+ venues</div></div>
-      <div style="padding:14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">🎁</div><div style="font-size:11px;font-weight:700;">Welcome Drink</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Free cocktail on us</div></div>
-      <div style="padding:14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">💎</div><div style="font-size:11px;font-weight:700;">VIP Tables</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Priority booking</div></div>
-      <div style="padding:14px;border-radius:var(--r2);border:1px solid var(--border);background:var(--smoke);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">🎟️</div><div style="font-size:11px;font-weight:700;">Events</div><div style="font-size:10px;color:var(--cream4);margin-top:3px;">Early access tickets</div></div>
+
+  <!-- Stats Bar -->
+  <div class="pay-stats-bar">
+    <div class="psb-item">
+      <div class="psb-val" id="psb-points">0</div>
+      <div class="psb-lbl">Points</div>
     </div>
-    <div onclick="openScreen('credential-screen')" style="margin-top:14px;padding:14px 16px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.22);display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;">
-      <div style="font-size:22px;">🎟️</div>
-      <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--gold);">Wallet Credential</div><div style="font-size:11px;color:var(--cream4);margin-top:2px;">Your QR payment pass · Earn points on every spend</div></div>
-      <div style="font-size:18px;color:var(--gold3);">›</div>
+    <div class="psb-item">
+      <div class="psb-val" id="psb-cashback">$0</div>
+      <div class="psb-lbl">Cashback</div>
     </div>
-    <div id="wallet-txs" style="margin-top:16px;">
-      <div id="wallet-empty" style="text-align:center;padding:24px 0;color:var(--cream4);font-size:13px;">No transactions yet</div>
+    <div class="psb-item">
+      <div class="psb-val" id="psb-spent">$0</div>
+      <div class="psb-lbl">This Month</div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="pay-actions">
+    <div class="pay-action-btn pab-topup" onclick="openTopUpModal()">
+      <div class="pab-icon">💳</div>
+      <div class="pab-lbl">Top Up</div>
+    </div>
+    <div class="pay-action-btn pab-send" onclick="openSendModal()">
+      <div class="pab-icon">↗️</div>
+      <div class="pab-lbl">Send</div>
+    </div>
+    <div class="pay-action-btn pab-split" onclick="openSplitModal()">
+      <div class="pab-icon">✂️</div>
+      <div class="pab-lbl">Split</div>
+    </div>
+    <div class="pay-action-btn pab-qr" onclick="openQRPayModal()">
+      <div class="pab-icon">📱</div>
+      <div class="pab-lbl">QR Pay</div>
+    </div>
+  </div>
+
+  <!-- Tier Progress -->
+  <div class="pay-tier-bar">
+    <div class="ptb-top">
+      <div class="ptb-tier" id="pay-tier-name">🥉 Bronze Member</div>
+      <div class="ptb-next" id="pay-tier-next">$200 to Silver</div>
+    </div>
+    <div class="ptb-bar"><div class="ptb-fill" id="pay-tier-fill" style="width:0%"></div></div>
+  </div>
+
+  <!-- Scrollable content -->
+  <div class="pay-tx-list screen-scroll" style="padding-top:0;">
+    <!-- QR Credential Quick Access -->
+    <div onclick="openScreen('credential-screen')" style="padding:14px 16px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.03));border:1px solid rgba(245,158,11,.2);display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:20px;transition:all .2s;">
+      <div style="width:40px;height:40px;border-radius:12px;background:rgba(245,158,11,.12);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🎟️</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;color:var(--gold);">My Wallet Pass</div>
+        <div style="font-size:11px;color:var(--cream4);margin-top:2px;">Show QR at venues · Earn points instantly</div>
+      </div>
+      <div style="font-size:20px;color:var(--gold3);">›</div>
+    </div>
+
+    <!-- Plans Section -->
+    <div class="pay-section-lbl" style="padding:0;margin-bottom:10px;">
+      <span>Membership Plans</span>
+      <span style="color:var(--gold3);font-size:9px;cursor:pointer;" onclick="openPlansModal()">See all →</span>
+    </div>
+    <div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;margin-bottom:20px;">
+      <div style="min-width:140px;padding:14px;border-radius:var(--r2);background:var(--smoke);border:1px solid var(--border);">
+        <div style="font-size:10px;font-weight:800;color:var(--cream4);letter-spacing:.06em;margin-bottom:6px;">FREE</div>
+        <div style="font-size:20px;font-weight:700;color:var(--cream);margin-bottom:6px;">$0<span style="font-size:11px;color:var(--cream4);font-weight:400;">/mo</span></div>
+        <div style="font-size:10px;color:var(--cream4);">QR Wallet · 1% cashback</div>
+      </div>
+      <div style="min-width:140px;padding:14px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(245,158,11,.08),rgba(245,158,11,.02));border:1px solid rgba(245,158,11,.3);position:relative;">
+        <div style="position:absolute;top:8px;right:8px;padding:2px 7px;border-radius:100px;background:rgba(245,158,11,.2);font-size:8px;font-weight:800;color:var(--gold);letter-spacing:.05em;">POPULAR</div>
+        <div style="font-size:10px;font-weight:800;color:var(--gold);letter-spacing:.06em;margin-bottom:6px;">PRO</div>
+        <div style="font-size:20px;font-weight:700;color:var(--gold2);margin-bottom:6px;">$9.99<span style="font-size:11px;color:var(--cream4);font-weight:400;">/mo</span></div>
+        <div style="font-size:10px;color:var(--cream4);">Express · 3% cashback · VIP access</div>
+      </div>
+      <div style="min-width:140px;padding:14px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(167,139,250,.02));border:1px solid rgba(167,139,250,.3);">
+        <div style="font-size:10px;font-weight:800;color:var(--violet);letter-spacing:.06em;margin-bottom:6px;">VIP</div>
+        <div style="font-size:20px;font-weight:700;color:var(--violet);margin-bottom:6px;">$24.99<span style="font-size:11px;color:var(--cream4);font-weight:400;">/mo</span></div>
+        <div style="font-size:10px;color:var(--cream4);">All Pro · 5% back · Concierge</div>
+      </div>
+    </div>
+
+    <!-- Transaction History -->
+    <div class="pay-section-lbl" style="padding:0;margin-bottom:8px;">
+      <span>Transactions</span>
+      <span style="color:var(--cream5);font-size:9px;" id="pay-tx-count">0 total</span>
+    </div>
+    <!-- Filter chips -->
+    <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:12px;margin-bottom:4px;">
+      <button class="ptf-chip active" onclick="filterPayTx('all',this)">All</button>
+      <button class="ptf-chip" onclick="filterPayTx('venue',this)">🍸 Venues</button>
+      <button class="ptf-chip" onclick="filterPayTx('topup',this)">💳 Top Ups</button>
+      <button class="ptf-chip" onclick="filterPayTx('reward',this)">🎁 Rewards</button>
+      <button class="ptf-chip" onclick="filterPayTx('split',this)">✂️ Splits</button>
+    </div>
+    <!-- Transaction list -->
+    <div id="pay-tx-container">
+      <div class="pay-tx-empty" id="pay-tx-empty">
+        <div style="font-size:40px;margin-bottom:12px;">💳</div>
+        <div style="font-weight:700;color:var(--cream3);margin-bottom:6px;">No transactions yet</div>
+        <div style="font-size:12px;line-height:1.5;">Top up your wallet and start spending at Miami's hottest venues.</div>
+      </div>
+      <div id="pay-tx-list" style="display:none;"></div>
+    </div>
+
+    <!-- Hidden compatibility divs (used by existing JS) -->
+    <div id="wallet-txs" style="display:none;">
+      <div id="wallet-empty" style="display:none;"></div>
       <div id="tx-list" style="display:none;"></div>
     </div>
+    <!-- Hidden compatibility elements -->
+    <div id="wallet-tier" style="display:none;"></div>
+    <div id="wallet-balance" style="display:none;"></div>
+    <div id="wallet-points" style="display:none;"></div>
+    <div id="wallet-cashback" style="display:none;"></div>
+    <div id="tier-progress" style="display:none;"></div>
+    <div id="load-section" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ══ TOP UP MODAL ══ -->
+<div class="pay-modal-overlay" id="topup-modal">
+  <div class="pay-modal-sheet">
+    <div class="pay-modal-handle"></div>
+    <div class="pay-modal-title">Add Credits</div>
+    <div class="pay-modal-sub">Choose an amount to load into your BarPass wallet</div>
+    <!-- Apple Pay -->
+    <button class="apple-pay-btn" onclick="triggerApplePay()">
+      <span class="ap-logo">🍎</span> Pay with Apple Pay
+    </button>
+    <div class="pay-divider">or pay with card</div>
+    <!-- Amount Grid -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+      <div class="load-amt" onclick="selectTopUpAmount(20,this)">
+        <div class="load-amt-val">$20</div>
+        <div class="load-amt-lbl">Light</div>
+      </div>
+      <div class="load-amt" onclick="selectTopUpAmount(50,this)">
+        <div class="load-amt-val">$50</div>
+        <div class="load-amt-lbl">Standard</div>
+      </div>
+      <div class="load-amt" onclick="selectTopUpAmount(100,this)" style="border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.06);">
+        <div class="load-amt-val">$100</div>
+        <div class="load-amt-lbl" style="color:var(--teal);">+$5 bonus</div>
+      </div>
+      <div class="load-amt" onclick="selectTopUpAmount(200,this)">
+        <div class="load-amt-val">$200</div>
+        <div class="load-amt-lbl" style="color:var(--teal);">+$15 bonus</div>
+      </div>
+      <div class="load-amt" onclick="selectTopUpAmount(500,this)">
+        <div class="load-amt-val">$500</div>
+        <div class="load-amt-lbl" style="color:var(--teal);">+$50 bonus</div>
+      </div>
+      <div class="load-amt" onclick="openCustomAmountInput()" style="border-color:rgba(167,139,250,.25);background:rgba(167,139,250,.06);">
+        <div class="load-amt-val" style="color:var(--violet);">Custom</div>
+        <div class="load-amt-lbl">Any amount</div>
+      </div>
+    </div>
+    <!-- Custom Input (hidden by default) -->
+    <div id="topup-custom-field" style="display:none;margin-bottom:14px;">
+      <div class="card-form-field">
+        <div class="cff-label">Custom Amount ($)</div>
+        <input class="cff-input" id="topup-custom-input" type="number" min="5" max="2000" placeholder="Enter amount..." oninput="updateCustomTopUp()">
+      </div>
+    </div>
+    <!-- Selected amount confirm -->
+    <button id="topup-confirm-btn" style="width:100%;padding:16px;border-radius:var(--r3);border:none;background:linear-gradient(135deg,#d4a017,#f5b830);color:#000;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:-.01em;opacity:.5;pointer-events:none;" onclick="confirmTopUp()">
+      Add Credits
+    </button>
+    <button style="width:100%;padding:14px;border-radius:var(--r3);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:14px;cursor:pointer;margin-top:8px;font-family:'Bricolage Grotesque',sans-serif;" onclick="closePayModal('topup-modal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ ADD CARD MODAL ══ -->
+<div class="pay-modal-overlay" id="addcard-modal">
+  <div class="pay-modal-sheet">
+    <div class="pay-modal-handle"></div>
+    <div class="pay-modal-title">Add Payment Method</div>
+    <div class="pay-modal-sub">Your card info is encrypted and never stored on our servers</div>
+    <!-- Card Number -->
+    <div class="card-form-field">
+      <div class="cff-label">Card Number</div>
+      <input class="cff-input" id="card-num" type="tel" inputmode="numeric" maxlength="19" placeholder="0000  0000  0000  0000" oninput="formatCardNumber(this)">
+    </div>
+    <div class="cff-row">
+      <div class="card-form-field">
+        <div class="cff-label">Expiry Date</div>
+        <input class="cff-input" id="card-exp" type="tel" inputmode="numeric" maxlength="5" placeholder="MM/YY" oninput="formatExpiry(this)">
+      </div>
+      <div class="card-form-field">
+        <div class="cff-label">CVV</div>
+        <input class="cff-input" id="card-cvv" type="tel" inputmode="numeric" maxlength="4" placeholder="•••">
+      </div>
+    </div>
+    <div class="card-form-field">
+      <div class="cff-label">Cardholder Name</div>
+      <input class="cff-input" id="card-name" type="text" placeholder="Name on card">
+    </div>
+    <!-- Card brand detect row -->
+    <div id="card-brand-row" style="display:flex;align-items:center;gap:10px;margin-bottom:16px;opacity:.4;">
+      <span style="font-size:22px;" id="card-brand-icon">💳</span>
+      <span style="font-size:12px;color:var(--cream4);" id="card-brand-name">Enter card number</span>
+      <div style="margin-left:auto;display:flex;gap:6px;">
+        <div style="padding:4px 8px;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid var(--border);font-size:10px;color:var(--cream4);">🔒 256-bit</div>
+      </div>
+    </div>
+    <button onclick="saveCard()" style="width:100%;padding:16px;border-radius:var(--r3);border:none;background:linear-gradient(135deg,#d4a017,#f5b830);color:#000;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:-.01em;margin-bottom:8px;">Save Card</button>
+    <button onclick="closePayModal('addcard-modal')" style="width:100%;padding:14px;border-radius:var(--r3);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:14px;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ SPLIT BILL MODAL ══ -->
+<div class="pay-modal-overlay" id="split-modal">
+  <div class="pay-modal-sheet">
+    <div class="pay-modal-handle"></div>
+    <div class="pay-modal-title">Split the Bill</div>
+    <div class="pay-modal-sub">Divide the check with your crew</div>
+    <div class="split-amount-display">
+      <div class="sad-total">Total Amount</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+        <span style="font-size:24px;color:var(--cream4);">$</span>
+        <input id="split-total" type="number" inputmode="decimal" value="100" min="1" max="99999" style="background:none;border:none;outline:none;font-family:'JetBrains Mono',monospace;font-size:48px;font-weight:500;color:var(--cream);width:160px;text-align:center;" oninput="updateSplitCalc()">
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--cream4);text-align:center;margin-bottom:10px;">How many people?</div>
+    <div class="split-people" id="split-people-row">
+      <div class="sp-btn" onclick="setSplitPeople(2,this)">2</div>
+      <div class="sp-btn active" onclick="setSplitPeople(3,this)">3</div>
+      <div class="sp-btn" onclick="setSplitPeople(4,this)">4</div>
+      <div class="sp-btn" onclick="setSplitPeople(5,this)">5</div>
+      <div class="sp-btn" onclick="setSplitPeople(6,this)">6</div>
+      <div class="sp-btn" onclick="setSplitPeople(8,this)">8</div>
+      <div class="sp-btn" onclick="setSplitPeople(10,this)">10</div>
+    </div>
+    <div class="split-result">
+      <div class="sr-label">Each person pays</div>
+      <div class="sr-amount" id="split-result-amount">$33.33</div>
+      <div class="sr-each" id="split-result-each">3 people · $100 total</div>
+    </div>
+    <button onclick="shareSplitBill()" style="width:100%;padding:16px;border-radius:var(--r3);border:none;background:linear-gradient(135deg,#0a7a73,#2dd4bf);color:#000;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:8px;">📤 Share Split Link</button>
+    <button onclick="payMySplit()" style="width:100%;padding:14px;border-radius:var(--r3);border:none;background:linear-gradient(135deg,#d4a017,#f5b830);color:#000;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">💳 Pay My Share Now</button>
+    <button onclick="closePayModal('split-modal')" style="width:100%;padding:12px;border-radius:var(--r3);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:14px;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;">Close</button>
+  </div>
+</div>
+
+<!-- ══ QR PAY MODAL ══ -->
+<div class="pay-modal-overlay" id="qrpay-modal">
+  <div class="pay-modal-sheet">
+    <div class="pay-modal-handle"></div>
+    <div class="pay-modal-title">Scan to Pay</div>
+    <div class="pay-modal-sub">Point your camera at the venue's QR code</div>
+    <div class="qr-pay-scanner">
+      <div class="qr-corner tl"></div>
+      <div class="qr-corner tr"></div>
+      <div class="qr-corner bl"></div>
+      <div class="qr-corner br"></div>
+      <div class="qr-scan-line"></div>
+      <div style="text-align:center;color:var(--cream5);">
+        <div style="font-size:48px;margin-bottom:8px;">📷</div>
+        <div style="font-size:12px;">Camera access needed</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:13px;color:var(--cream3);margin-bottom:4px;">Balance available</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:28px;color:var(--gold2);" id="qr-pay-balance">$0.00</div>
+    </div>
+    <button onclick="activateQRCamera()" style="width:100%;padding:16px;border-radius:var(--r3);border:none;background:linear-gradient(135deg,#d4a017,#f5b830);color:#000;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:8px;">📷 Open Camera</button>
+    <button onclick="openScreen('credential-screen');closePayModal('qrpay-modal');" style="width:100%;padding:14px;border-radius:var(--r3);border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.06);color:var(--gold);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">🎟️ Show My QR Instead</button>
+    <button onclick="closePayModal('qrpay-modal')" style="width:100%;padding:12px;border-radius:var(--r3);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:14px;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ SEND CREDITS MODAL ══ -->
+<div class="pay-modal-overlay" id="send-modal">
+  <div class="pay-modal-sheet">
+    <div class="pay-modal-handle"></div>
+    <div class="pay-modal-title">Send Credits</div>
+    <div class="pay-modal-sub">Transfer BarPass credits to friends</div>
+    <div style="margin-bottom:16px;">
+      <div class="cff-label">Recipient</div>
+      <input class="cff-input" id="send-recipient" type="text" placeholder="@username or phone number">
+    </div>
+    <div style="margin-bottom:16px;">
+      <div class="cff-label">Amount</div>
+      <div style="position:relative;">
+        <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--cream4);">$</span>
+        <input class="cff-input" id="send-amount" type="number" min="1" placeholder="0.00" style="padding-left:36px;" oninput="updateSendPreview()">
+      </div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div class="cff-label">Note (optional)</div>
+      <input class="cff-input" id="send-note" type="text" placeholder="For drinks 🍹">
+    </div>
+    <div id="send-preview" style="display:none;padding:12px 14px;border-radius:var(--r2);background:var(--smoke);border:1px solid var(--border);margin-bottom:16px;font-size:13px;color:var(--cream3);">
+      Sending <strong id="send-preview-amt" style="color:var(--gold);">$0</strong> → your balance after: <strong id="send-preview-after" style="color:var(--cream);">$0</strong>
+    </div>
+    <button onclick="confirmSend()" style="width:100%;padding:16px;border-radius:var(--r3);border:none;background:linear-gradient(135deg,#0a7a73,#2dd4bf);color:#000;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:8px;">↗️ Send Credits</button>
+    <button onclick="closePayModal('send-modal')" style="width:100%;padding:12px;border-radius:var(--r3);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:14px;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ PLANS MODAL ══ -->
+<div class="pay-modal-overlay" id="plans-modal">
+  <div class="pay-modal-sheet">
+    <div class="pay-modal-handle"></div>
+    <div class="pay-modal-title">Choose Your Plan</div>
+    <div class="pay-modal-sub">Unlock exclusive Miami nightlife perks</div>
+    <div class="plan-card" onclick="selectPlan('free',this)">
+      <div class="plan-name">BarPass Free</div>
+      <div class="plan-price">$0 <span>/month</span></div>
+      <div class="plan-perks">
+        <div class="plan-perk">QR Wallet credential</div>
+        <div class="plan-perk">1% cashback on spends</div>
+        <div class="plan-perk">Basic venue discovery</div>
+      </div>
+    </div>
+    <div class="plan-card plan-card-pro" onclick="selectPlan('pro',this)">
+      <div class="plan-badge popular">Most Popular</div>
+      <div class="plan-name">BarPass Pro</div>
+      <div class="plan-price" style="color:var(--gold2);">$9.99 <span>/month</span></div>
+      <div class="plan-perks">
+        <div class="plan-perk">Everything in Free</div>
+        <div class="plan-perk">Express line access at 50+ venues</div>
+        <div class="plan-perk">3% cashback on all spends</div>
+        <div class="plan-perk">Priority table reservations</div>
+        <div class="plan-perk">Free welcome drink monthly</div>
+      </div>
+    </div>
+    <div class="plan-card plan-card-vip" onclick="selectPlan('vip',this)">
+      <div class="plan-badge premium">Premium</div>
+      <div class="plan-name" style="color:var(--violet);">BarPass VIP</div>
+      <div class="plan-price" style="color:var(--violet);">$24.99 <span>/month</span></div>
+      <div class="plan-perks">
+        <div class="plan-perk">Everything in Pro</div>
+        <div class="plan-perk">5% cashback · No limits</div>
+        <div class="plan-perk">Personal nightlife concierge</div>
+        <div class="plan-perk">Exclusive after-hours events</div>
+        <div class="plan-perk">Platinum membership tier</div>
+      </div>
+    </div>
+    <button onclick="closePayModal('plans-modal')" style="width:100%;padding:14px;border-radius:var(--r3);border:1px solid var(--border);background:transparent;color:var(--cream4);font-size:14px;cursor:pointer;margin-top:4px;font-family:'Bricolage Grotesque',sans-serif;">Close</button>
   </div>
 </div>
 
@@ -3479,17 +3968,367 @@ function calcTier(){
 }
 function refreshWalletUI(){
   var tierName=calcTier();
-  document.getElementById('wallet-tier').textContent=tierName;
+  // Legacy compat (hidden elements)
+  var el;
+  el=document.getElementById('wallet-tier');if(el)el.textContent=tierName;
   var bal=S.credit.active?S.credit.balance:0;
-  document.getElementById('wallet-balance').textContent='$'+bal.toFixed(2);
-  document.getElementById('wallet-points').textContent=Math.floor(bal*.1+S.points);
-  document.getElementById('wallet-cashback').textContent='$'+S.cashback.toFixed(2);
+  el=document.getElementById('wallet-balance');if(el)el.textContent='$'+bal.toFixed(2);
+  el=document.getElementById('wallet-points');if(el)el.textContent=Math.floor(bal*.1+S.points);
+  el=document.getElementById('wallet-cashback');if(el)el.textContent='$'+S.cashback.toFixed(2);
   var nextTier=TIERS[Math.min(S.tier+1,TIERS.length-1)];
   var pct=nextTier&&nextTier.min>0?Math.min(100,(S.totalSpent/nextTier.min)*100):100;
-  document.getElementById('tier-progress').style.width=pct+'%';
+  el=document.getElementById('tier-progress');if(el)el.style.width=pct+'%';
+  // Credit pill
   var pill=document.getElementById('credit-pill');
-  if(pill&&S.credit.active&&S.credit.balance>0){pill.style.display='flex';document.getElementById('cp-bal').textContent='$'+bal.toFixed(2);}
+  if(pill&&S.credit.active&&S.credit.balance>0){pill.style.display='flex';var cpb=document.getElementById('cp-bal');if(cpb)cpb.textContent='$'+bal.toFixed(2);}
   else if(pill)pill.style.display='none';
+  // New fintech UI
+  refreshPaymentsUI();
+}
+
+/* ═══════════════════════════════════════════════════
+   PAYMENTS — Fintech UI
+═══════════════════════════════════════════════════ */
+var _payTxFilter = 'all';
+var _topUpAmount = 0;
+var _splitPeople = 3;
+
+function refreshPaymentsUI(){
+  var bal = S.credit.active ? S.credit.balance : 0;
+  var pts = Math.floor(bal * .1 + S.points);
+  var tierName = calcTier();
+  var TIER_CONFIG = {
+    'Bronze':   {next:'Silver',   min:200,  emoji:'🥉'},
+    'Silver':   {next:'Gold',     min:500,  emoji:'🥈'},
+    'Gold':     {next:'Platinum', min:1000, emoji:'🥇'},
+    'Platinum': {next:null,       min:0,    emoji:'💎'}
+  };
+  var tc = TIER_CONFIG[tierName] || TIER_CONFIG['Bronze'];
+
+  // Virtual card
+  var el;
+  el=document.getElementById('pvc-balance');     if(el)el.textContent='$'+bal.toFixed(2);
+  el=document.getElementById('pvc-tier-badge');  if(el)el.textContent=tierName;
+  el=document.getElementById('pvc-name');
+  if(el){var name=(S.user&&S.user.name)||'MEMBER';el.textContent=name.toUpperCase();}
+
+  // Stats bar
+  el=document.getElementById('psb-points');   if(el)el.textContent=pts.toLocaleString();
+  el=document.getElementById('psb-cashback'); if(el)el.textContent='$'+S.cashback.toFixed(2);
+  el=document.getElementById('psb-spent');    if(el)el.textContent='$'+(S.totalSpent||0).toFixed(0);
+
+  // Tier bar
+  el=document.getElementById('pay-tier-name');
+  if(el)el.textContent=tc.emoji+' '+tierName+' Member';
+  el=document.getElementById('pay-tier-next');
+  if(el)el.textContent=tc.next?'$'+(tc.min-(S.totalSpent||0)).toFixed(0)+' to '+tc.next:'Max Tier! 🏆';
+  var pct=tc.next&&tc.min>0?Math.min(100,((S.totalSpent||0)/tc.min)*100):100;
+  el=document.getElementById('pay-tier-fill');if(el)el.style.width=pct+'%';
+
+  // QR pay balance
+  el=document.getElementById('qr-pay-balance');if(el)el.textContent='$'+bal.toFixed(2);
+
+  // Transaction count
+  var txs=buildAllPayTxs();
+  el=document.getElementById('pay-tx-count');if(el)el.textContent=txs.length+' total';
+
+  // Render transactions
+  renderPayTransactions(txs);
+}
+
+function buildAllPayTxs(){
+  var txs=[];
+  // From credit transactions
+  if(S.credit&&S.credit.txs){
+    S.credit.txs.forEach(function(t){
+      txs.push({
+        cat:'venue',
+        icon:'🍸',
+        name:t.name||'Venue Purchase',
+        meta:t.time||'Tonight',
+        amount:-Math.abs(t.price||0),
+        pts:Math.floor((t.price||0)*10)
+      });
+    });
+  }
+  // Fake historical transactions for demo (only if no real ones)
+  if(txs.length===0){
+    var demo=[
+      {cat:'topup', icon:'💳', name:'Added Credits', meta:'Today, 9:41 PM', amount:+100, pts:0},
+      {cat:'venue', icon:'🍹', name:'LIV Miami · Cocktails', meta:'Sat, 11:32 PM', amount:-47.50, pts:475},
+      {cat:'venue', icon:'🎵', name:'Story Nightclub · Bottle', meta:'Sat, 10:18 PM', amount:-120, pts:1200},
+      {cat:'reward',icon:'🎁', name:'Cashback Reward', meta:'Fri, 12:00 AM', amount:+5, pts:0},
+      {cat:'split', icon:'✂️', name:'Split · 4 people', meta:'Thu, 11:45 PM', amount:-28.75, pts:287},
+      {cat:'venue', icon:'🍸', name:'E11even · Round', meta:'Thu, 10:20 PM', amount:-55, pts:550},
+      {cat:'topup', icon:'💳', name:'Added Credits', meta:'Thu, 9:00 PM', amount:+200, pts:0},
+      {cat:'sub',   icon:'⭐', name:'BarPass Pro · Monthly', meta:'May 1', amount:-9.99, pts:0}
+    ];
+    txs=demo;
+  }
+  return txs;
+}
+
+function renderPayTransactions(txs){
+  var filtered=_payTxFilter==='all'?txs:txs.filter(function(t){return t.cat===_payTxFilter;});
+  var list=document.getElementById('pay-tx-list');
+  var empty=document.getElementById('pay-tx-empty');
+  if(!list)return;
+  if(filtered.length===0){
+    list.style.display='none';
+    if(empty)empty.style.display='block';
+    return;
+  }
+  if(empty)empty.style.display='none';
+  list.style.display='block';
+  // Group by date prefix
+  var groups={};var order=[];
+  filtered.forEach(function(t){
+    var day=t.meta?t.meta.split(',')[0]:'Today';
+    if(!groups[day]){groups[day]=[];order.push(day);}
+    groups[day].push(t);
+  });
+  var html='';
+  order.forEach(function(day){
+    html+='<div class="ptx-group-lbl">'+day+'</div>';
+    groups[day].forEach(function(t){
+      var amtStr=(t.amount>0?'+':'')+t.amount.toFixed(2);
+      var amtClass=t.amount>0?'credit':'debit';
+      var ptsStr=t.pts>0?'<div class="ptx-pts">+'+t.pts+' pts</div>':'';
+      html+='<div class="ptx-item">'
+        +'<div class="ptx-ico cat-'+t.cat+'">'+t.icon+'</div>'
+        +'<div class="ptx-info"><div class="ptx-name">'+t.name+'</div><div class="ptx-meta">'+t.meta+'</div></div>'
+        +'<div class="ptx-right"><div class="ptx-amount '+amtClass+'">$'+amtStr+'</div>'+ptsStr+'</div>'
+        +'</div>';
+    });
+  });
+  list.innerHTML=html;
+}
+
+function filterPayTx(cat,btn){
+  _payTxFilter=cat;
+  document.querySelectorAll('.ptf-chip').forEach(function(c){c.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  renderPayTransactions(buildAllPayTxs());
+}
+
+/* ── Modals ── */
+function openPayModal(id){
+  var m=document.getElementById(id);
+  if(!m)return;
+  m.classList.add('open');
+  m.addEventListener('click',function outsideClick(e){
+    if(e.target===m){m.classList.remove('open');m.removeEventListener('click',outsideClick);}
+  });
+}
+function closePayModal(id){
+  var m=document.getElementById(id);
+  if(m)m.classList.remove('open');
+}
+
+function openTopUpModal(){openPayModal('topup-modal');_topUpAmount=0;updateTopUpBtn();}
+function openAddCardModal(){openPayModal('addcard-modal');}
+function openSendModal(){openPayModal('send-modal');}
+function openSplitModal(){openPayModal('split-modal');updateSplitCalc();}
+function openQRPayModal(){openPayModal('qrpay-modal');}
+function openPlansModal(){openPayModal('plans-modal');}
+function openPaySettings(){toast('Payment settings coming soon','info');}
+
+/* ── Top Up ── */
+var _selectedTopUpEl = null;
+function selectTopUpAmount(amount,el){
+  _topUpAmount=amount;
+  document.querySelectorAll('.load-amt').forEach(function(e){
+    e.style.borderColor='';e.style.background='';
+  });
+  if(el){el.style.borderColor='rgba(245,158,11,.5)';el.style.background='rgba(245,158,11,.1)';}
+  _selectedTopUpEl=el;
+  updateTopUpBtn();
+}
+function openCustomAmountInput(){
+  var f=document.getElementById('topup-custom-field');
+  if(f){f.style.display='block';var inp=document.getElementById('topup-custom-input');if(inp)inp.focus();}
+}
+function updateCustomTopUp(){
+  var inp=document.getElementById('topup-custom-input');
+  if(inp){_topUpAmount=parseFloat(inp.value)||0;updateTopUpBtn();}
+}
+function updateTopUpBtn(){
+  var btn=document.getElementById('topup-confirm-btn');
+  if(!btn)return;
+  if(_topUpAmount>0){
+    var bonus=_topUpAmount>=500?50:_topUpAmount>=200?15:_topUpAmount>=100?5:0;
+    btn.style.opacity='1';btn.style.pointerEvents='auto';
+    btn.textContent='Add $'+_topUpAmount+(bonus?' + $'+bonus+' bonus':'');
+  } else {
+    btn.style.opacity='.5';btn.style.pointerEvents='none';
+    btn.textContent='Add Credits';
+  }
+}
+function triggerApplePay(){
+  if(window.barpassNative&&typeof window.barpassNative.applePayCharge==='function'){
+    window.barpassNative.applePayCharge(50,'BarPass Credits · $50');
+  } else {
+    // Fallback: open top up with $50
+    selectTopUpAmount(50, null);
+    toast('Apple Pay · $50 selected','info');
+  }
+}
+function confirmTopUp(){
+  if(_topUpAmount<=0){toast('Select an amount','warn');return;}
+  if(!S.currentVenue&&!S.credit.active){
+    // Auto-activate with first load
+    S.credit.active=true;
+  }
+  var c=S.credit;
+  c.active=true;
+  if(!c.venue&&S.currentVenue)c.venue=S.currentVenue.name;
+  var bonus=_topUpAmount>=500?50:_topUpAmount>=200?15:_topUpAmount>=100?5:0;
+  c.loaded=parseFloat((c.loaded+_topUpAmount).toFixed(2));
+  c.balance=parseFloat((c.balance+_topUpAmount).toFixed(2));
+  if(bonus>0){c.balance=parseFloat((c.balance+bonus).toFixed(2));S.cashback=parseFloat((S.cashback+bonus).toFixed(2));}
+  S.points+=Math.floor(_topUpAmount/10);
+  // Add to transactions
+  if(!c.txs)c.txs=[];
+  c.txs.unshift({name:'Credits Added',price:_topUpAmount,emoji:'💳',time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}),type:'topup'});
+  closePayModal('topup-modal');
+  refreshCreditUI();refreshWalletUI();
+  toast('🪙 $'+_topUpAmount+(bonus?' + $'+bonus+' bonus':'')+' added!','credit');
+}
+
+/* ── Add Card ── */
+function formatCardNumber(inp){
+  var v=inp.value.replace(/\D/g,'').substring(0,16);
+  var f='';
+  for(var i=0;i<v.length;i++){if(i>0&&i%4===0)f+='  ';f+=v[i];}
+  inp.value=f;
+  detectCardBrand(v);
+}
+function formatExpiry(inp){
+  var v=inp.value.replace(/\D/g,'').substring(0,4);
+  if(v.length>=3)inp.value=v.substring(0,2)+'/'+v.substring(2);
+  else inp.value=v;
+}
+function detectCardBrand(num){
+  var icon='💳',name='Card Number';
+  if(/^4/.test(num)){icon='💙';name='Visa';}
+  else if(/^5[1-5]/.test(num)||/^2[2-7]/.test(num)){icon='🟠';name='Mastercard';}
+  else if(/^3[47]/.test(num)){icon='🟢';name='American Express';}
+  else if(/^6(?:011|5)/.test(num)){icon='🔵';name='Discover';}
+  var row=document.getElementById('card-brand-row');
+  var bi=document.getElementById('card-brand-icon');
+  var bn=document.getElementById('card-brand-name');
+  if(row)row.style.opacity=num.length>0?'1':'.4';
+  if(bi)bi.textContent=icon;
+  if(bn)bn.textContent=name.length>0?name:'Enter card number';
+}
+function saveCard(){
+  var num=document.getElementById('card-num');
+  var exp=document.getElementById('card-exp');
+  var cvv=document.getElementById('card-cvv');
+  var name=document.getElementById('card-name');
+  if(!num||!num.value.replace(/\s/g,'').match(/^\d{15,16}$/)){toast('Enter a valid card number','warn');return;}
+  if(!exp||!exp.value.match(/^\d{2}\/\d{2}$/)){toast('Enter expiry as MM/YY','warn');return;}
+  if(!cvv||cvv.value.length<3){toast('Enter CVV','warn');return;}
+  closePayModal('addcard-modal');
+  // Clear form
+  [num,exp,cvv,name].forEach(function(el){if(el)el.value='';});
+  toast('💳 Card saved securely','ok');
+}
+
+/* ── Split Bill ── */
+function setSplitPeople(n,btn){
+  _splitPeople=n;
+  document.querySelectorAll('.sp-btn').forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  updateSplitCalc();
+}
+function updateSplitCalc(){
+  var inp=document.getElementById('split-total');
+  var total=parseFloat(inp?inp.value:100)||100;
+  var each=total/_splitPeople;
+  var res=document.getElementById('split-result-amount');
+  var lbl=document.getElementById('split-result-each');
+  if(res)res.textContent='$'+each.toFixed(2);
+  if(lbl)lbl.textContent=_splitPeople+' people · $'+total.toFixed(2)+' total';
+}
+function shareSplitBill(){
+  var inp=document.getElementById('split-total');
+  var total=parseFloat(inp?inp.value:100)||100;
+  var each=(total/_splitPeople).toFixed(2);
+  var text='🍸 BarPass Split Bill\n💰 Total: $'+total+'\n👥 '+_splitPeople+' people · $'+each+' each\n\nPay your share via BarPass! Download: barpass.io';
+  if(navigator.share){navigator.share({title:'BarPass Split Bill',text:text}).catch(function(){});}
+  else if(navigator.clipboard){navigator.clipboard.writeText(text);toast('Split link copied!','ok');}
+  else{toast('Share: $'+each+' each','info');}
+}
+function payMySplit(){
+  var inp=document.getElementById('split-total');
+  var total=parseFloat(inp?inp.value:100)||100;
+  var each=parseFloat((total/_splitPeople).toFixed(2));
+  var c=S.credit;
+  if(!c.active||c.balance<each){toast('Not enough credits','warn');return;}
+  c.balance=parseFloat((c.balance-each).toFixed(2));
+  c.spent=parseFloat((c.spent+each).toFixed(2));
+  if(!c.txs)c.txs=[];
+  c.txs.unshift({name:'Split Bill · '+_splitPeople+' people',price:each,emoji:'✂️',time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true})});
+  closePayModal('split-modal');
+  refreshCreditUI();refreshWalletUI();
+  toast('✂️ Paid $'+each.toFixed(2)+' · split with '+(_splitPeople-1)+' others','credit');
+}
+
+/* ── Send Credits ── */
+function updateSendPreview(){
+  var amtEl=document.getElementById('send-amount');
+  var amt=parseFloat(amtEl?amtEl.value:0)||0;
+  var preview=document.getElementById('send-preview');
+  var preAmt=document.getElementById('send-preview-amt');
+  var preAfter=document.getElementById('send-preview-after');
+  var bal=S.credit.active?S.credit.balance:0;
+  if(amt>0&&preview){
+    preview.style.display='block';
+    if(preAmt)preAmt.textContent='$'+amt.toFixed(2);
+    if(preAfter)preAfter.textContent='$'+(bal-amt).toFixed(2);
+  } else if(preview){
+    preview.style.display='none';
+  }
+}
+function confirmSend(){
+  var recip=document.getElementById('send-recipient');
+  var amtEl=document.getElementById('send-amount');
+  var noteEl=document.getElementById('send-note');
+  if(!recip||!recip.value.trim()){toast('Enter recipient','warn');return;}
+  var amt=parseFloat(amtEl?amtEl.value:0)||0;
+  if(amt<1){toast('Enter amount to send','warn');return;}
+  var bal=S.credit.active?S.credit.balance:0;
+  if(amt>bal){toast('Not enough credits','warn');return;}
+  S.credit.balance=parseFloat((bal-amt).toFixed(2));
+  S.credit.spent=parseFloat((S.credit.spent+amt).toFixed(2));
+  if(!S.credit.txs)S.credit.txs=[];
+  S.credit.txs.unshift({name:'Sent to '+recip.value.trim(),price:amt,emoji:'↗️',time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true})});
+  closePayModal('send-modal');
+  if(recip)recip.value='';if(amtEl)amtEl.value='';if(noteEl)noteEl.value='';
+  refreshCreditUI();refreshWalletUI();
+  toast('↗️ $'+amt.toFixed(2)+' sent!','ok');
+}
+
+/* ── QR Camera ── */
+function activateQRCamera(){
+  if(window.barpassNative&&typeof window.barpassNative.openCamera==='function'){
+    window.barpassNative.openCamera('qr');
+  } else {
+    openScreen('credential-screen');
+    closePayModal('qrpay-modal');
+  }
+}
+
+/* ── Plan Selection ── */
+function selectPlan(planId,el){
+  document.querySelectorAll('.plan-card').forEach(function(c){c.classList.remove('active');});
+  if(el)el.classList.add('active');
+  var names={free:'BarPass Free',pro:'BarPass Pro',vip:'BarPass VIP'};
+  var prices={free:'$0',pro:'$9.99',vip:'$24.99'};
+  closePayModal('plans-modal');
+  if(planId==='free'){toast('Already on Free plan','info');return;}
+  toast('✨ Upgrading to '+names[planId]+' ('+prices[planId]+'/mo)','ok');
 }
 
 /* ── APPLE WALLET ──────────────────────────────────────────── */
@@ -3684,12 +4523,12 @@ function refreshCreditUI(){
   }
 }
 function openLoadCredit(){
-  if(!S.currentVenue){toast('Select a venue first','warn');return;}
-  openScreen('wallet-screen');showLoadSection();
+  openScreen('wallet-screen');
+  setTimeout(function(){openTopUpModal();},300);
 }
 function showLoadSection(){
-  var sec=document.getElementById('load-section');
-  if(sec)sec.style.display='block';
+  // Redirected to new modal UI
+  openTopUpModal();
 }
 function confirmLoad(amount){
   var v=S.currentVenue;if(!v){toast('Select a venue first','warn');return;}
