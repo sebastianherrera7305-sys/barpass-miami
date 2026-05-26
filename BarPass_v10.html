@@ -2078,13 +2078,17 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
 .stad-zone-tab:hover{color:var(--text2);}
 .stad-zone-tab.active{background:#141a35;border-color:#5AA5FF;color:#5AA5FF;}
 
-/* ── Sidebar ── */
-.stad-sidebar{width:288px;flex-shrink:0;background:#07091a;border-left:1px solid #151935;display:flex;flex-direction:column;overflow:hidden;}
-.stad-panel{border-bottom:1px solid #151935;display:flex;flex-direction:column;flex-shrink:0;}
-.stad-panel.grow{flex:1;overflow:hidden;min-height:0;}
-.stad-panel-head{padding:8px 13px;background:#0a0c1c;font-family:'Syne',sans-serif;font-weight:700;font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;}
-.stad-panel-body{padding:10px 12px;overflow-y:auto;}
-.stad-panel.grow .stad-panel-body{flex:1;overflow-y:auto;}
+/* ── Sidebar — independently scrollable ── */
+.stad-sidebar{width:400px;flex-shrink:0;background:#07091a;border-left:1px solid #151935;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#1e2448 #07091a;transition:width .25s ease;}
+.stad-sidebar::-webkit-scrollbar{width:4px;}
+.stad-sidebar::-webkit-scrollbar-track{background:#07091a;}
+.stad-sidebar::-webkit-scrollbar-thumb{background:#1e2448;border-radius:2px;}
+.stad-sidebar::-webkit-scrollbar-thumb:hover{background:#5AA5FF55;}
+.stad-panel{border-bottom:1px solid #151935;flex-shrink:0;}
+.stad-panel.grow{/* natural height — sidebar scrolls as one unit */}
+.stad-panel-head{padding:8px 13px;background:#0a0c1c;font-family:'Syne',sans-serif;font-weight:700;font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:2;}
+.stad-panel-body{padding:10px 12px;}
+.stad-panel.grow .stad-panel-body{}
 
 /* Zone detail */
 .sdz-name{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--text);}
@@ -2108,6 +2112,32 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
 .salert.ai{background:rgba(90,165,255,.05);border-color:rgba(90,165,255,.18);color:#5AA5FF;}
 .salert-t{font-size:7px;opacity:.55;float:right;font-weight:400;}
 .salert-tag{font-size:7px;font-weight:700;letter-spacing:.1em;margin-right:4px;opacity:.8;}
+.salert-msg{display:block;overflow:hidden;max-height:2.6em;transition:max-height .25s ease;text-overflow:ellipsis;white-space:nowrap;}
+.salert.expanded .salert-msg{max-height:10em;white-space:normal;text-overflow:unset;}
+.salert-expand-icon{float:right;font-size:7px;opacity:.35;margin-left:4px;transition:transform .2s;}
+.salert.expanded .salert-expand-icon{transform:rotate(180deg);}
+
+/* Alert severity filter chips */
+.stad-alert-filters{display:flex;gap:4px;flex-wrap:wrap;width:100%;padding-top:2px;}
+.saf-btn{padding:2px 7px;border-radius:3px;border:1px solid #1e2448;background:#0c0f1e;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:7px;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:all .15s;}
+.saf-btn:hover{color:var(--text2);}
+.saf-btn.active{background:#141a35;border-color:#5AA5FF;color:#5AA5FF;}
+.saf-btn.cr.active{border-color:#FF4466;color:#FF4466;background:rgba(255,68,102,.1);}
+.saf-btn.wa.active{border-color:#FFba38;color:#FFba38;background:rgba(255,186,56,.1);}
+.saf-btn.ok.active{border-color:#00e87a;color:#00e87a;background:rgba(0,232,122,.1);}
+.saf-btn.ai.active{border-color:#5AA5FF;color:#5AA5FF;background:rgba(90,165,255,.1);}
+
+/* Focus mode toggle buttons */
+.focus-btn{padding:3px 9px;border-radius:4px;border:1px solid #1e2448;background:#0c0f1e;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;cursor:pointer;letter-spacing:.06em;transition:all .18s;white-space:nowrap;}
+.focus-btn:hover{color:var(--text2);border-color:#2a3560;}
+.focus-btn.active{background:#141a35;border-color:#5AA5FF;color:#5AA5FF;box-shadow:0 0 8px rgba(90,165,255,.15);}
+.focus-mode-group{display:flex;gap:3px;margin-left:auto;padding-left:8px;border-left:1px solid #1e2448;}
+
+/* Drag-resize splitter between map and sidebar */
+.stad-resizer{width:5px;flex-shrink:0;cursor:col-resize;background:#0a0c1e;position:relative;transition:background .15s;}
+.stad-resizer:hover,.stad-resizer.dragging{background:#111828;}
+.stad-resizer::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:48px;background:#1e2448;border-radius:1px;transition:background .15s;}
+.stad-resizer:hover::after,.stad-resizer.dragging::after{background:#5AA5FF60;box-shadow:0 0 6px #5AA5FF40;}
 
 /* AI panel */
 .stad-ai-panel{padding:10px 12px;display:flex;flex-direction:column;gap:7px;overflow-y:auto;}
@@ -3718,12 +3748,17 @@ BarPass/<br>
     <button class="layer-btn la" data-layer="ai" onclick="stadToggleLayer('ai',this)"><span class="lb-dot"></span>INTEL</button>
     <button class="layer-btn on lr" data-layer="risk" onclick="stadToggleLayer('risk',this)"><span class="lb-dot"></span>RISK</button>
     <button class="layer-btn on lc" data-layer="crowd" onclick="stadToggleLayer('crowd',this)"><span class="lb-dot"></span>CROWD</button>
+    <div class="focus-mode-group">
+      <button class="focus-btn active" id="focus-btn-split" onclick="stadSetFocus('split',this)" title="Split View">SPLIT</button>
+      <button class="focus-btn" id="focus-btn-map" onclick="stadSetFocus('map',this)" title="Map Only">MAP</button>
+      <button class="focus-btn" id="focus-btn-data" onclick="stadSetFocus('telem',this)" title="Data Only">DATA</button>
+    </div>
   </div>
 
   <!-- Body -->
   <div class="stad-body">
     <!-- Map Panel -->
-    <div class="stad-map-panel">
+    <div class="stad-map-panel" id="stad-map-panel">
       <div class="stad-map-wrap" id="stad-map-wrap">
         <!-- Stadium operational map -->
         <svg id="stad-svg" viewBox="0 0 800 540" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block">
@@ -4229,8 +4264,11 @@ BarPass/<br>
       </div>
     </div>
 
+    <!-- Drag-resize splitter -->
+    <div class="stad-resizer" id="stad-resizer"></div>
+
     <!-- Sidebar -->
-    <div class="stad-sidebar">
+    <div class="stad-sidebar" id="stad-sidebar">
       <!-- AI Panel (hidden by default) -->
       <div class="stad-panel" id="stad-ai-panel" style="display:none;">
         <div class="stad-panel-head">
@@ -4261,12 +4299,21 @@ BarPass/<br>
 
       <!-- Alert Stream -->
       <div class="stad-panel grow">
-        <div class="stad-panel-head">
-          <span>ALERT STREAM</span>
-          <span style="color:#FF4466;font-size:8px;font-weight:700;" id="stad-alert-count">0 ACTIVE</span>
+        <div class="stad-panel-head" style="flex-direction:column;align-items:flex-start;">
+          <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+            <span>ALERT STREAM</span>
+            <span style="color:#FF4466;font-size:8px;font-weight:700;" id="stad-alert-count">0 ACTIVE</span>
+          </div>
+          <div class="stad-alert-filters">
+            <button class="saf-btn active" onclick="stadFilterAlerts('all',this)">ALL</button>
+            <button class="saf-btn cr" onclick="stadFilterAlerts('cr',this)">CRITICAL</button>
+            <button class="saf-btn wa" onclick="stadFilterAlerts('wa',this)">WARNING</button>
+            <button class="saf-btn ok" onclick="stadFilterAlerts('ok',this)">RESOLVED</button>
+            <button class="saf-btn ai" onclick="stadFilterAlerts('ai',this)">INTEL</button>
+          </div>
         </div>
         <div class="stad-panel-body">
-          <div class="stad-alerts" id="stad-alerts"></div>
+          <div class="stad-alerts" id="stad-alerts" style="min-height:180px;"></div>
         </div>
       </div>
     </div>
@@ -8244,7 +8291,7 @@ const STAD_ALERT_POOL=[
 ];
 
 let stadActive=false, stadAIMode=false, stadCurrentZone='ALL';
-let stadAlertCount=0, stadIntervals=[], stadAIIndex=0;
+let stadAlertCount=0, stadIntervals=[], stadAIIndex=0, stadAlertFilter='all';
 let stadGameSec=520, stadQ=2;
 
 function ellipsePt(cx,cy,rx,ry,deg){
@@ -8502,11 +8549,89 @@ function stadAddAlert(type, msg){
   const tag={cr:'CRITICAL',wa:'WARNING',ok:'RESOLVED',ai:'INTEL'}[type]||'INFO';
   const div=document.createElement('div');
   div.className=`salert ${type}`;
-  div.innerHTML=`<span class="salert-t">${time}</span><span class="salert-tag">${tag}</span>${Security.sanitize(msg)}`;
+  div.setAttribute('onclick',"this.classList.toggle('expanded')");
+  div.innerHTML=`<span class="salert-t">${time}</span><span class="salert-tag">${tag}</span><span class="salert-expand-icon">▼</span><span class="salert-msg">${Security.sanitize(msg)}</span>`;
+  // Apply current severity filter
+  if(stadAlertFilter&&stadAlertFilter!=='all'&&!div.classList.contains(stadAlertFilter)){div.style.display='none';}
   stream.insertBefore(div,stream.firstChild);
-  // Keep max 20 alerts
-  while(stream.children.length>20)stream.removeChild(stream.lastChild);
+  // Keep max 30 alerts
+  while(stream.children.length>30)stream.removeChild(stream.lastChild);
 }
+
+/* ── Severity filter ── */
+function stadFilterAlerts(sev, el){
+  stadAlertFilter=sev;
+  document.querySelectorAll('.saf-btn').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.querySelectorAll('#stad-alerts .salert').forEach(a=>{
+    a.style.display=(sev==='all'||a.classList.contains(sev))?'':'none';
+  });
+}
+
+/* ── Focus mode (Split / Map only / Data only) ── */
+function stadSetFocus(mode, el){
+  document.querySelectorAll('.focus-btn').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const mapPanel=document.getElementById('stad-map-panel');
+  const sidebar=document.getElementById('stad-sidebar');
+  const resizer=document.getElementById('stad-resizer');
+  if(!mapPanel||!sidebar)return;
+  if(mode==='map'){
+    mapPanel.style.flex='1';
+    mapPanel.style.minWidth='';
+    sidebar.style.width='0';
+    sidebar.style.overflow='hidden';
+    if(resizer)resizer.style.display='none';
+  } else if(mode==='telem'){
+    mapPanel.style.flex='0 0 0';
+    mapPanel.style.minWidth='0';
+    mapPanel.style.overflow='hidden';
+    sidebar.style.width='100%';
+    sidebar.style.overflow='auto';
+    if(resizer)resizer.style.display='none';
+  } else {
+    // split (default)
+    mapPanel.style.flex='1';
+    mapPanel.style.minWidth='0';
+    mapPanel.style.overflow='hidden';
+    sidebar.style.width='400px';
+    sidebar.style.overflow='auto';
+    if(resizer)resizer.style.display='';
+  }
+}
+
+/* ── Drag-resize splitter ── */
+(function(){
+  let dragging=false, startX=0, startW=0;
+  function initResizer(){
+    const resizer=document.getElementById('stad-resizer');
+    const sidebar=document.getElementById('stad-sidebar');
+    if(!resizer||!sidebar)return;
+    resizer.addEventListener('mousedown',function(e){
+      dragging=true; startX=e.clientX; startW=sidebar.offsetWidth;
+      resizer.classList.add('dragging');
+      document.body.style.cursor='col-resize';
+      document.body.style.userSelect='none';
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove',function(e){
+      if(!dragging)return;
+      const delta=startX-e.clientX;
+      const newW=Math.max(280,Math.min(640,startW+delta));
+      sidebar.style.width=newW+'px';
+    });
+    document.addEventListener('mouseup',function(){
+      if(!dragging)return;
+      dragging=false;
+      const resizer=document.getElementById('stad-resizer');
+      if(resizer)resizer.classList.remove('dragging');
+      document.body.style.cursor='';
+      document.body.style.userSelect='';
+    });
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initResizer);}
+  else{initResizer();}
+})();
 
 function stadRenderNodes(){
   const container=document.getElementById('stad-nodes');
