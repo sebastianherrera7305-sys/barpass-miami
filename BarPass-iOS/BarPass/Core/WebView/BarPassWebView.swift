@@ -70,15 +70,32 @@ struct BarPassWebView: UIViewRepresentable {
 
     func updateUIView(_ webView: WKWebView, context: Context) {}
 
+    // URL siempre actualizada — GitHub Pages tiene la última versión
+    private let liveURL = URL(string: "https://sebastianherrera7305-sys.github.io/barpass-miami/barpass-miami.html")!
+
     private func loadContent(_ webView: WKWebView) {
-        // Load bundled HTML with full local file access
-        if let htmlURL = Bundle.main.url(forResource: "barpass-miami", withExtension: "html") {
+        // Primero intenta cargar la versión live (siempre actualizada)
+        // Si no hay internet, cae al bundle local
+        if isOnline() {
+            var req = URLRequest(url: liveURL)
+            req.cachePolicy = .reloadIgnoringLocalCacheData  // siempre la versión más reciente
+            webView.load(req)
+        } else if let htmlURL = Bundle.main.url(forResource: "barpass-miami", withExtension: "html") {
+            // Sin internet → bundle (puede ser versión anterior, pero funciona offline)
             let dir = htmlURL.deletingLastPathComponent()
             webView.loadFileURL(htmlURL, allowingReadAccessTo: dir)
         } else {
-            // Fallback: load from GitHub Pages if bundle missing
-            let fallback = URL(string: "https://sebastianherrera7305-sys.github.io/barpass-miami/")!
-            webView.load(URLRequest(url: fallback, cachePolicy: .returnCacheDataElseLoad))
+            // Último recurso: caché del navegador
+            webView.load(URLRequest(url: liveURL, cachePolicy: .returnCacheDataElseLoad))
         }
+    }
+
+    private func isOnline() -> Bool {
+        // Chequeo rápido de conectividad
+        let host = CFHostCreateWithName(nil, "github.com" as CFString).takeRetainedValue()
+        var resolved: DarwinBoolean = false
+        CFHostStartInfoResolution(host, .addresses, nil)
+        CFHostGetAddressing(host, &resolved)
+        return resolved.boolValue
     }
 }

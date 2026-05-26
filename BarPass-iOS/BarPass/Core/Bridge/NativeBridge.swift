@@ -77,7 +77,16 @@ final class NativeBridge: ObservableObject {
             let granted = await notif.requestPermission()
             sendToJS("barpassNative.onNotificationPermission", args: [granted])
             if granted {
-                UIApplication.shared.registerForRemoteNotifications()
+                // Only register for remote notifications if the aps-environment
+                // entitlement is present — avoids crash on dev builds without push cert.
+                #if !targetEnvironment(simulator)
+                if Bundle.main.object(forInfoDictionaryKey: "aps-environment") != nil ||
+                   Bundle.main.path(forResource: "embedded", ofType: "mobileprovision") != nil {
+                    await MainActor.run {
+                        UIApplication.shared.registerForRemoteNotifications()
+                    }
+                }
+                #endif
             }
         }
     }
@@ -110,20 +119,34 @@ final class NativeBridge: ObservableObject {
 
     // MARK: - Page lifecycle
     func onPageLoaded() {
-        // Inject device info
+        // Inject device info via the bridge (setDeviceInfo is now always a function)
         let info: [String: Any] = [
-            "platform": "ios",
-            "version": UIDevice.current.systemVersion,
-            "model": UIDevice.current.model,
-            "safeAreaTop": safeAreaInsets.top,
-            "safeAreaBottom": safeAreaInsets.bottom,
-            "hasFaceID": biometric.biometricType == "Face ID",
-            "hasTouchID": biometric.biometricType == "Touch ID",
-            "hasApplePay": true
+            "platform":        "ios",
+            "version":         UIDevice.current.systemVersion,
+            "model":           UIDevice.current.model,
+            "safeAreaTop":     safeAreaInsets.top,
+            "safeAreaBottom":  safeAreaInsets.bottom,
+            "hasFaceID":       biometric.biometricType == "Face ID",
+            "hasTouchID":      biometric.biometricType == "Touch ID",
+            "hasApplePay":     true
         ]
-        if let json = try? JSONSerialization.data(withJSONObject: info),
-           let str = String(data: json, encoding: .utf8) {
-            webView?.evaluateJavaScript("window.barpassNative && barpassNative.setDeviceInfo(\(str))")
+        guard let json = try? JSONSerialization.data(withJSONObject: info),
+              let str  = String(data: json, encoding: .utf8) else { return }
+
+        // Defensive: check bridge exists first to avoid "Can't find variable" error
+        let js = """
+        (function(){
+          if(typeof window.barpassNative !== 'undefined' &&
+             typeof window.barpassNative.setDeviceInfo === 'function'){
+            window.barpassNative.setDeviceInfo(\(str));
+          } else {
+            // Bridge not ready yet — store for later pickup
+            window.__barpassDeviceInfoPending = \(str);
+          }
+        })();
+        """
+        webView?.evaluateJavaScript(js) { _, err in
+            if let err { print("[Bridge] setDeviceInfo error: \(err)") }
         }
     }
 
@@ -169,35 +192,53 @@ final class NativeBridge: ObservableObject {
 
           function post(handler, data){
             try{ window.webkit.messageHandlers[handler].postMessage(data||{}); }
-            catch(e){ console.warn('[Bridge] handler not found:',handler); }
+            catch(e){ console.warn('[Bridge] handler not found:',handler,e); }
           }
 
           window.barpassNative = {
-            // Called by Swift → Web
-            onLocation: null,
-            onNotificationPermission: null,
-            onBiometricResult: null,
-            setDeviceInfo: null,
-            handleDeepLink: null,
+            // ── Swift → Web callbacks (functions, not null) ──
+            // These dispatch a CustomEvent so any listener in the page can react
+            setDeviceInfo: function(info){
+              window.__barpassDeviceInfo = info;
+              document.dispatchEvent(new CustomEvent('barpass:deviceInfo', { detail: info }));
+            },
+            onLocation: function(lat, lon, acc){
+              window.__barpassLocation = { lat:lat, lon:lon, acc:acc };
+              document.dispatchEvent(new CustomEvent('barpass:location', { detail: {lat:lat,lon:lon,acc:acc} }));
+            },
+            onNotificationPermission: function(granted){
+              document.dispatchEvent(new CustomEvent('barpass:notifPermission', { detail: {granted:granted} }));
+            },
+            onBiometricResult: function(success){
+              document.dispatchEvent(new CustomEvent('barpass:biometric', { detail: {success:success} }));
+            },
+            handleDeepLink: function(path){
+              document.dispatchEvent(new CustomEvent('barpass:deepLink', { detail: {path:path} }));
+            },
 
-            // Called by Web → Swift
+            // ── Web → Swift calls ──
             haptic: function(style){ post('haptic',{style:style||'light'}); },
             requestLocation: function(){ post('location',{action:'once'}); },
             startLocation: function(){ post('location',{action:'start'}); },
             stopLocation: function(){ post('location',{action:'stop'}); },
             requestNotifications: function(){ post('notification',{action:'request'}); },
             authenticate: function(reason){ post('biometric',{reason:reason||'Verify your identity'}); },
-            share: function(text,url){ post('share',{text:text,url:url}); },
+            share: function(text,url){ post('share',{text:text||'',url:url||''}); },
             openCamera: function(){ post('camera',{}); },
             applePayCharge: function(amount,label){ post('applePay',{amount:amount,label:label}); },
             log: function(msg){ post('log',{msg:String(msg)}); },
             signalReady: function(){ post('ready',{}); }
           };
 
-          // Signal native we're injected
-          document.addEventListener('DOMContentLoaded', function(){
-            window.barpassNative.signalReady();
-          });
+          // Signal native once DOM is ready
+          if(document.readyState === 'loading'){
+            document.addEventListener('DOMContentLoaded', function(){
+              window.barpassNative.signalReady();
+            }, { once: true });
+          } else {
+            // DOMContentLoaded already fired
+            setTimeout(function(){ window.barpassNative.signalReady(); }, 0);
+          }
 
           console.log('[BarPass] Native bridge injected ✓');
         })();

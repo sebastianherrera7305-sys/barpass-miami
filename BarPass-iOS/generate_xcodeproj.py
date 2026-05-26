@@ -20,8 +20,8 @@ IDS = {k: uid() for k in [
     "MAIN_GROUP","SRC_GROUP","CORE_GROUP","WEBVIEW_GRP","BRIDGE_GRP",
     "SERVICES_GRP","CACHE_GRP","FEATURES_GRP","SPLASH_GRP","WALLETPASS_GRP",
     "RESOURCES_GRP","WEB_GRP","PRODUCTS_GRP","COMPILE_PHASE","RESOURCES_PHASE",
-    "LINK_PHASE","PRODUCT_REF","HTML_REF","HTML_BUILD","PLIST_REF","ASSETS_REF",
-    "ASSETS_BUILD","ENTITLEMENTS_REF",
+    "LINK_PHASE","PRODUCT_REF","HTML_REF","HTML_BUILD","SVG_REF","SVG_BUILD",
+    "PLIST_REF","ASSETS_REF","ASSETS_BUILD","ENTITLEMENTS_REF",
 ]}
 I = IDS
 
@@ -81,6 +81,7 @@ section("PBXBuildFile")
 for f in files:
     ln(f"\t\t{f['build']} /* {f['name']} in Sources */ = {{isa = PBXBuildFile; fileRef = {f['ref']} /* {f['name']} */; }};")
 ln(f"\t\t{I['HTML_BUILD']} /* barpass-miami.html in Resources */ = {{isa = PBXBuildFile; fileRef = {I['HTML_REF']} /* barpass-miami.html */; }};")
+ln(f"\t\t{I['SVG_BUILD']} /* barpass-logo.svg in Resources */ = {{isa = PBXBuildFile; fileRef = {I['SVG_REF']} /* barpass-logo.svg */; }};")
 ln(f"\t\t{I['ASSETS_BUILD']} /* Assets.xcassets in Resources */ = {{isa = PBXBuildFile; fileRef = {I['ASSETS_REF']} /* Assets.xcassets */; }};")
 section("PBXBuildFile", False)
 
@@ -89,6 +90,7 @@ section("PBXFileReference")
 for f in files:
     ln(f"\t\t{f['ref']} /* {f['name']} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = \"{f['name']}\"; sourceTree = \"<group>\"; }};")
 ln(f"\t\t{I['HTML_REF']} /* barpass-miami.html */ = {{isa = PBXFileReference; lastKnownFileType = text.html; path = \"barpass-miami.html\"; sourceTree = \"<group>\"; }};")
+ln(f"\t\t{I['SVG_REF']} /* barpass-logo.svg */ = {{isa = PBXFileReference; lastKnownFileType = image.svg; path = \"barpass-logo.svg\"; sourceTree = \"<group>\"; }};")
 ln(f"\t\t{I['PLIST_REF']} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = \"<group>\"; }};")
 ln(f"\t\t{I['ASSETS_REF']} /* Assets.xcassets */ = {{isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = \"<group>\"; }};")
 ln(f"\t\t{I['ENTITLEMENTS_REF']} /* BarPass.entitlements */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BarPass.entitlements; sourceTree = \"<group>\"; }};")
@@ -226,6 +228,7 @@ obj_start(I['WEB_GRP'], "Web")
 attr("isa", "PBXGroup")
 children_start()
 child(I['HTML_REF'], "barpass-miami.html")
+child(I['SVG_REF'], "barpass-logo.svg")
 children_end()
 attr("name", "Web")
 attr("path", "Web")
@@ -294,6 +297,7 @@ attr("isa", "PBXResourcesBuildPhase")
 attr("buildActionMask", "2147483647")
 ln("\t\t\tfiles = (")
 ln(f"\t\t\t\t{I['HTML_BUILD']} /* barpass-miami.html in Resources */,")
+ln(f"\t\t\t\t{I['SVG_BUILD']} /* barpass-logo.svg in Resources */,")
 ln(f"\t\t\t\t{I['ASSETS_BUILD']} /* Assets.xcassets in Resources */,")
 ln("\t\t\t);")
 attr("runOnlyForDeploymentPostprocessing", "0")
