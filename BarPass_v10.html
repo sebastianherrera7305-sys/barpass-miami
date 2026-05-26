@@ -8,6 +8,7 @@
 <title>BarPass v7 — Command Center</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- ExcelJS loaded on-demand when user opens export modal -->
 <!-- RATING DE BARTENDERS PANEL — injected at top of body to be above everything -->
 <div id="rating-panel">
   <div class="rp-header">
@@ -2235,6 +2236,74 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
 .op-pulse.supervising{background:#a855f7;}
 .op-eta{font-family:'JetBrains Mono',monospace;font-size:7px;color:#00e87a;margin-left:2px;font-weight:700;}
 .op-eta.alert{color:#FF4466;animation:opAlertPulse .7s ease infinite;}
+
+/* ══════════════════════════════════════════════════════
+   EXCEL EXPORT SYSTEM
+   ══════════════════════════════════════════════════════ */
+/* Export button in stadium header */
+.xls-export-btn{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:7px;background:#04100a;border:1px solid rgba(0,232,122,.35);color:#00e87a;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.09em;cursor:pointer;transition:all .22s;white-space:nowrap;}
+.xls-export-btn:hover{background:rgba(0,232,122,.1);border-color:rgba(0,232,122,.65);box-shadow:0 0 16px rgba(0,232,122,.18);}
+.xls-export-dot{width:5px;height:5px;border-radius:50%;background:#00e87a;box-shadow:0 0 7px #00e87a;animation:pulse 2s infinite;}
+
+/* Modal overlay */
+.xls-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.76);backdrop-filter:blur(8px);z-index:9990;align-items:center;justify-content:center;}
+.xls-overlay.open .xls-modal{transform:translateY(0);opacity:1;}
+
+/* Modal panel */
+.xls-modal{background:#07091a;border:1px solid #1e2448;border-radius:14px;width:540px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 0 80px rgba(0,232,122,.12),0 0 160px rgba(0,0,0,.9);transform:translateY(28px);opacity:0;transition:all .28s cubic-bezier(.4,0,.2,1);scrollbar-width:thin;scrollbar-color:#1e2448 #07091a;}
+.xls-modal::-webkit-scrollbar{width:3px;}
+.xls-modal::-webkit-scrollbar-thumb{background:#1e2448;border-radius:2px;}
+
+/* Modal header */
+.xls-modal-head{display:flex;align-items:center;gap:12px;padding:18px 20px 14px;border-bottom:1px solid #111830;position:sticky;top:0;background:#07091a;z-index:2;}
+.xls-modal-icon{font-size:24px;line-height:1;filter:drop-shadow(0 0 8px rgba(0,232,122,.4));}
+.xls-modal-titles{flex:1;}
+.xls-modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#c8d0e8;letter-spacing:.04em;}
+.xls-modal-sub{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);margin-top:2px;letter-spacing:.05em;}
+.xls-modal-close{background:none;border:1px solid #1e2448;color:var(--muted);font-size:14px;cursor:pointer;padding:4px 9px;border-radius:5px;transition:all .15s;line-height:1.4;}
+.xls-modal-close:hover{color:#FF4466;border-color:rgba(255,68,102,.4);background:rgba(255,68,102,.08);}
+
+/* Sections */
+.xls-section{padding:14px 20px;border-bottom:1px solid #0e1028;}
+.xls-sec-label{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+
+/* Pill options */
+.xls-opt-row{display:flex;gap:6px;flex-wrap:wrap;}
+.xls-opt{padding:5px 12px;border-radius:5px;border:1px solid #1e2448;background:#0c0f1e;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;cursor:pointer;letter-spacing:.06em;transition:all .15s;white-space:nowrap;user-select:none;}
+.xls-opt:hover{color:var(--text2);border-color:#2a3560;}
+.xls-opt.active{background:rgba(0,232,122,.1);border-color:#00e87a;color:#00e87a;}
+
+/* Zone tags */
+.xls-zone-tag{padding:4px 11px;border-radius:4px;border:1px solid #1e2448;background:#0c0f1e;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;cursor:pointer;letter-spacing:.07em;transition:all .15s;user-select:none;}
+.xls-zone-tag.active{filter:brightness(1.4);background:rgba(90,165,255,.06);border-width:1.5px;}
+.xls-zones{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* Sheet checkboxes */
+.xls-checks{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.xls-check{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2);cursor:pointer;padding:6px 10px;border-radius:6px;border:1px solid #1e2448;background:#0c0f1e;transition:background .15s;}
+.xls-check:hover{background:#141a35;border-color:#2a3560;}
+.xls-check input[type="checkbox"]{accent-color:#00e87a;width:14px;height:14px;flex-shrink:0;}
+
+/* Loading state */
+.xls-loading-wrap{display:none;flex-direction:column;align-items:center;gap:12px;padding:24px 20px;border-bottom:1px solid #0e1028;}
+.xls-spinner{width:38px;height:38px;border:3px solid #1e2448;border-top-color:#00e87a;border-radius:50%;animation:xlSpin 1s linear infinite;}
+@keyframes xlSpin{to{transform:rotate(360deg)}}
+.xls-loader-text{font-family:'JetBrains Mono',monospace;font-size:9px;color:#00e87a;letter-spacing:.06em;text-align:center;min-height:16px;}
+.xls-progress-wrap{width:100%;height:4px;background:#1e2448;border-radius:2px;overflow:hidden;}
+.xls-progress-bar{height:100%;background:linear-gradient(90deg,#00e87a,#5AA5FF);border-radius:2px;width:0%;transition:width .4s ease;}
+
+/* Actions */
+.xls-actions{display:flex;gap:8px;padding:16px 20px;}
+.xls-cancel-btn{flex:0 0 auto;padding:9px 18px;border-radius:7px;border:1px solid #1e2448;background:#0c0f1e;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.07em;transition:all .18s;}
+.xls-cancel-btn:hover{border-color:rgba(255,68,102,.4);color:#FF4466;}
+.xls-generate-btn{flex:1;padding:11px 22px;border-radius:8px;border:1px solid rgba(0,232,122,.45);background:linear-gradient(135deg,rgba(0,232,122,.1),rgba(90,165,255,.08));color:#00e87a;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:800;cursor:pointer;letter-spacing:.1em;transition:all .25s;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;}
+.xls-generate-btn:hover:not(:disabled){background:linear-gradient(135deg,rgba(0,232,122,.18),rgba(90,165,255,.14));box-shadow:0 0 24px rgba(0,232,122,.2);border-color:rgba(0,232,122,.7);}
+.xls-generate-btn:disabled{opacity:.4;cursor:not-allowed;}
+.xls-generate-btn .xls-btn-icon{font-size:14px;}
+
+/* Preview chips in modal header */
+.xls-preview-chips{display:flex;gap:5px;flex-wrap:wrap;padding:0 20px 14px;}
+.xls-preview-chip{padding:2px 8px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:7px;font-weight:700;letter-spacing:.08em;border:1px solid;}
 </style>
 </head>
 <body>
@@ -3733,6 +3802,10 @@ BarPass/<br>
       </div>
     </div>
     <div class="stad-header-r">
+      <button class="xls-export-btn" onclick="showExportModal()" title="Export Operations Report">
+        <span class="xls-export-dot"></span>
+        EXPORT XLSX
+      </button>
       <button class="stad-ai-btn" id="stad-ai-btn" onclick="stadToggleAI()">
         <span class="stad-ai-dot" id="stad-ai-dot"></span>
         COMMAND
@@ -8714,6 +8787,614 @@ function initStadium(){
 
 /* ── Boot i18n on DOM ready ───────────────────────── */
 document.addEventListener('DOMContentLoaded', () => { i18n.init(); });
+
+/* ════════════════════════════════════════════════════════════════
+   BarPass Excel Export Engine v1.0
+   Generates multi-sheet XLSX with live operational data
+   ════════════════════════════════════════════════════════════════ */
+
+// ExcelJS color palette (ARGB format)
+const XL = {
+  titleBg:  'FF04060E', headerBg: 'FF0A0C1C', rowBg:    'FF07091A', altRowBg: 'FF0D1020',
+  border:   'FF1E2448', blue:     'FF5AA5FF', green:    'FF00E87A', amber:    'FFFFba38',
+  red:      'FFFF4466', purple:   'FFa855f7', cyan:     'FF06b6d4', white:    'FFC8D0E8',
+  muted:    'FF4A5580', gold:     'FFFFD060',
+};
+
+/* ── Cell styling helpers ── */
+function xlCell(ws,ref,value,fontColor,bgColor,bold,size,align){
+  const c=ws.getCell(ref);
+  c.value=value;
+  c.font={name:'Calibri',size:size||9.5,bold:!!bold,color:{argb:fontColor||XL.white}};
+  c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bgColor||XL.rowBg}};
+  c.border={top:{style:'hair',color:{argb:XL.border}},bottom:{style:'hair',color:{argb:XL.border}},left:{style:'thin',color:{argb:XL.border}},right:{style:'thin',color:{argb:XL.border}}};
+  c.alignment={vertical:'middle',horizontal:align||'left',indent:(!align||align==='left')?1:0,wrapText:false};
+  return c;
+}
+function xlHdr(ws,ref,label,accent){
+  const c=ws.getCell(ref); c.value=label;
+  c.font={name:'Calibri',size:9.5,bold:true,color:{argb:accent||XL.blue}};
+  c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.headerBg}};
+  c.border={top:{style:'thin',color:{argb:XL.border}},bottom:{style:'medium',color:{argb:accent||XL.blue}},left:{style:'thin',color:{argb:XL.border}},right:{style:'thin',color:{argb:XL.border}}};
+  c.alignment={vertical:'middle',horizontal:'left',indent:1};
+  return c;
+}
+function xlTitle(ws,ref,value,h){
+  const c=ws.getCell(ref); c.value=value;
+  c.font={name:'Calibri',size:17,bold:true,color:{argb:XL.blue}};
+  c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.titleBg}};
+  c.alignment={vertical:'middle',horizontal:'left',indent:2};
+  ws.getRow(parseInt(ref.match(/\d+/)[0])).height=h||34;
+  return c;
+}
+function xlSub(ws,ref,value){
+  const c=ws.getCell(ref); c.value=value;
+  c.font={name:'Calibri',size:9,color:{argb:XL.muted}};
+  c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.titleBg}};
+  c.alignment={vertical:'middle',horizontal:'left',indent:2};
+  ws.getRow(parseInt(ref.match(/\d+/)[0])).height=20;
+  return c;
+}
+function xlBar(ws,ref,color){
+  ws.getCell(ref).fill={type:'pattern',pattern:'solid',fgColor:{argb:color||XL.blue}};
+  ws.getRow(parseInt(ref.match(/\d+/)[0])).height=3;
+}
+function xlSecHead(ws,rowN,label,colEnd,cols){
+  const ref=`A${rowN}`;
+  ws.mergeCells(`${ref}:${colEnd}${rowN}`);
+  const c=ws.getCell(ref); c.value='  '+label;
+  c.font={name:'Calibri',size:8.5,bold:true,italic:true,color:{argb:XL.muted}};
+  c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.headerBg}};
+  c.border={bottom:{style:'thin',color:{argb:XL.border}}};
+  c.alignment={vertical:'middle',horizontal:'left'};
+  ws.getRow(rowN).height=17;
+}
+function xlFoot(ws,rowN,value,colEnd){
+  ws.mergeCells(`A${rowN}:${colEnd}${rowN}`);
+  const c=ws.getCell(`A${rowN}`); c.value=value;
+  c.font={name:'Calibri',size:8,italic:true,color:{argb:XL.muted}};
+  c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.titleBg}};
+  c.alignment={vertical:'middle',horizontal:'center'};
+  ws.getRow(rowN).height=18;
+}
+
+/* ── Collect live operational data from DOM ── */
+function xlCollectData(){
+  const d={
+    timestamp:new Date(),
+    rev:     (document.getElementById('stad-rev')?.textContent||'$284K').trim(),
+    crowd:   (document.getElementById('stad-crowd')?.textContent||'87%').trim(),
+    invRisk: (document.getElementById('stad-irisk')?.textContent||'HIGH').trim(),
+    staffN:  (document.getElementById('stad-staff-count')?.textContent||'247').trim(),
+    clock:   (document.getElementById('stad-gameclock')?.textContent||'Q2 8:42').trim(),
+    revsec:  (document.getElementById('sstrip-revsec')?.textContent||'$1,847').trim(),
+    burn:    (document.getElementById('sstrip-burn')?.textContent||'847 u/hr').trim(),
+    eff:     (document.getElementById('sstrip-eff')?.textContent||'78.4%').trim(),
+    svc:     (document.getElementById('sstrip-svc')?.textContent||'2m 14s').trim(),
+    queue:   (document.getElementById('sstrip-queue')?.textContent||'8.4 / 10').trim(),
+    risks:   (document.getElementById('sstrip-risks')?.textContent||'7 ACTIVE').trim(),
+    alerts:[], zones:[], nodes:[], staff:[],
+  };
+  // Alerts
+  document.querySelectorAll('#stad-alerts .salert').forEach(a=>{
+    const sev=[...a.classList].find(c=>['cr','wa','ok','ai'].includes(c))||'info';
+    const sevMap={cr:'CRITICAL',wa:'WARNING',ok:'RESOLVED',ai:'INTEL'};
+    const msg=a.querySelector('.salert-msg')?.textContent?.trim()||'';
+    const time=a.querySelector('.salert-t')?.textContent?.trim()||'';
+    const zone=msg.match(/Zone ([A-Z]+)/)?.[1]||'ALL';
+    d.alerts.push({sev,label:sevMap[sev]||'INFO',msg,time,zone,status:sev==='ok'?'RESOLVED':'OPEN'});
+  });
+  // Zone definitions (live or fallback)
+  const ZDFL=[
+    {key:'A',  name:'Zone A — West Concourse',  bars:2, staff:38, inv:72, queue:8.2, risk:'HIGH'},
+    {key:'B',  name:'Zone B — North Concourse', bars:3, staff:51, inv:55, queue:7.1, risk:'MOD'},
+    {key:'C',  name:'Zone C — East Concourse',  bars:3, staff:44, inv:68, queue:6.8, risk:'MOD'},
+    {key:'D',  name:'Zone D — South Concourse', bars:2, staff:33, inv:81, queue:5.4, risk:'LOW'},
+    {key:'VIP',name:'VIP — Club Level 200s',    bars:4, staff:29, inv:95, queue:2.1, risk:'LOW'},
+    {key:'UPP',name:'Upper Bowl — Level 300s',  bars:6, staff:52, inv:60, queue:9.1, risk:'HIGH'},
+  ];
+  if(typeof STAD_ZONES!=='undefined'){
+    Object.entries(STAD_ZONES).forEach(([k,z])=>d.zones.push({key:k,name:z.name||k,bars:z.bars||0,staff:z.staff||0,inv:z.inv||0,queue:z.queue||0,risk:z.risk||'N/A'}));
+  } else { d.zones=ZDFL; }
+  // Staff
+  if(typeof STAD_ENTITIES!=='undefined'){
+    STAD_ENTITIES.forEach(e=>d.staff.push({id:e.id,name:e.name,role:e.role,zone:e.zone,task:e.task,eta:e.eta||'—',eff:Math.floor(68+Math.random()*30),svc:'2m '+Math.floor(Math.random()*59)+'s'}));
+  }
+  // Nodes
+  d.nodes=[
+    {name:'Central Storage',    sub:'Hub Alpha',      pct:94, burn:'412 u/hr', thresh:'15%', delay:'0s',   eta:'Stocked'},
+    {name:'Zone Hub West (A+B)',sub:'Hub 1',           pct:67, burn:'284 u/hr', thresh:'20%', delay:'4m',   eta:'18m'},
+    {name:'Zone Hub East (C+D)',sub:'Hub 2',           pct:71, burn:'261 u/hr', thresh:'20%', delay:'2m',   eta:'22m'},
+    {name:'VIP Distribution',   sub:'Hub 3',           pct:95, burn:'87 u/hr',  thresh:'25%', delay:'0s',   eta:'Stocked'},
+    {name:'Upper Bowl Hub',     sub:'Hub 4',           pct:60, burn:'134 u/hr', thresh:'20%', delay:'8m',   eta:'14m'},
+  ];
+  return d;
+}
+
+/* ── Sheet 1: Executive Summary ── */
+function xlSheet1(wb,d,now){
+  const ws=wb.addWorksheet('Executive Summary',{views:[{state:'frozen',ySplit:3}],pageSetup:{paperSize:9,orientation:'landscape',fitToPage:true,fitToWidth:1}});
+  ws.columns=[{width:28},{width:20},{width:20},{width:20},{width:20},{width:20},{width:20},{width:20}];
+  ws.mergeCells('A1:H1'); xlTitle(ws,'A1','⚡  BARPASS STADIUM COMMAND CENTER — OPERATIONS REPORT');
+  ws.mergeCells('A2:H2'); xlSub(ws,'A2',`Hard Rock Stadium   ·   ${now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}   ·   Generated ${now.toLocaleTimeString()}   ·   Clock: ${d.clock}`);
+  ws.mergeCells('A3:H3'); xlBar(ws,'A3',XL.blue);
+  // Spacer
+  ws.mergeCells('A4:H4'); ws.getCell('A4').fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.titleBg}}; ws.getRow(4).height=10;
+  // KPI header
+  xlSecHead(ws,5,'KEY PERFORMANCE INDICATORS','H');
+  // KPI grid
+  const kpis=[
+    {l:'TOTAL REVENUE',    v:d.rev,   c:XL.green},  {l:'ACTIVE STAFF',     v:d.staffN, c:XL.blue},
+    {l:'CROWD DENSITY',    v:d.crowd, c:XL.amber},  {l:'INVENTORY RISK',   v:d.invRisk,c:d.invRisk==='HIGH'?XL.red:d.invRisk.includes('MOD')?XL.amber:XL.green},
+    {l:'REV / SECTION',    v:d.revsec,c:XL.green},  {l:'INV BURN RATE',    v:d.burn,   c:XL.amber},
+    {l:'STAFF EFFICIENCY', v:d.eff,   c:XL.blue},   {l:'AVG SERVICE TIME', v:d.svc,    c:XL.white},
+  ];
+  const kpiCols=['A','C','E','G']; const kpiNext=['B','D','F','H'];
+  let kr=6;
+  for(let i=0;i<kpis.length;i+=4){
+    // Label row
+    [0,1,2,3].forEach(j=>{
+      if(!kpis[i+j])return;
+      ws.mergeCells(`${kpiCols[j]}${kr}:${kpiNext[j]}${kr}`);
+      const lc=ws.getCell(`${kpiCols[j]}${kr}`);
+      lc.value=kpis[i+j].l; lc.font={name:'Calibri',size:8,bold:true,color:{argb:XL.muted}};
+      lc.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.headerBg}};
+      lc.alignment={vertical:'middle',horizontal:'center'};
+    });
+    ws.getRow(kr).height=17; kr++;
+    // Value row
+    [0,1,2,3].forEach(j=>{
+      if(!kpis[i+j])return;
+      ws.mergeCells(`${kpiCols[j]}${kr}:${kpiNext[j]}${kr}`);
+      const vc=ws.getCell(`${kpiCols[j]}${kr}`);
+      vc.value=kpis[i+j].v; vc.font={name:'Calibri',size:22,bold:true,color:{argb:kpis[i+j].c}};
+      vc.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.rowBg}};
+      vc.border={bottom:{style:'thin',color:{argb:XL.border}}};
+      vc.alignment={vertical:'middle',horizontal:'center'};
+    });
+    ws.getRow(kr).height=34; kr++;
+    // Spacer
+    ws.mergeCells(`A${kr}:H${kr}`); ws.getCell(`A${kr}`).fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.titleBg}}; ws.getRow(kr).height=8; kr++;
+  }
+  // Zone breakdown
+  xlSecHead(ws,kr,'ZONE PERFORMANCE BREAKDOWN','H'); kr++;
+  ['ZONE NAME','BARS','STAFF','INVENTORY','QUEUE','RISK','SERVICE','STATUS'].forEach((h,i)=>xlHdr(ws,`${'ABCDEFGH'[i]}${kr}`,h,XL.blue));
+  ws.getRow(kr).height=22; ws.autoFilter=`A${kr}:H${kr}`; kr++;
+  d.zones.forEach((z,idx)=>{
+    const bg=idx%2===0?XL.rowBg:XL.altRowBg;
+    const ic=z.inv<50?XL.red:z.inv<70?XL.amber:XL.green;
+    const rc=z.risk==='HIGH'?XL.red:z.risk==='MOD'?XL.amber:XL.green;
+    xlCell(ws,`A${kr}`,z.name||z.key,XL.white,bg,false);
+    xlCell(ws,`B${kr}`,z.bars||0,XL.white,bg,false,9.5,'center');
+    xlCell(ws,`C${kr}`,z.staff||0,XL.blue,bg,true,10,'center');
+    xlCell(ws,`D${kr}`,(z.inv||0)+'%',ic,bg,true,10,'center');
+    xlCell(ws,`E${kr}`,(z.queue||0)+'/10',z.queue>7?XL.red:z.queue>5?XL.amber:XL.green,bg,false,9.5,'center');
+    xlCell(ws,`F${kr}`,z.risk||'N/A',rc,bg,true,9.5,'center');
+    xlCell(ws,`G${kr}`,'—',XL.muted,bg,false,9,'center');
+    xlCell(ws,`H${kr}`,z.inv>70?'✓ STABLE':z.inv>50?'⚠ WATCH':'✖ CRITICAL',z.inv>70?XL.green:z.inv>50?XL.amber:XL.red,bg,true,9,'center');
+    ws.getRow(kr).height=20; kr++;
+  });
+  // Alert summary
+  kr++; xlSecHead(ws,kr,'ALERT STREAM SUMMARY','H'); kr++;
+  const ac={cr:0,wa:0,ok:0,ai:0};
+  d.alerts.forEach(a=>{ if(ac[a.sev]!==undefined)ac[a.sev]++; });
+  const asArr=[{l:'CRITICAL',n:ac.cr,c:XL.red},{l:'WARNING',n:ac.wa,c:XL.amber},{l:'RESOLVED',n:ac.ok,c:XL.green},{l:'INTEL',n:ac.ai,c:XL.blue}];
+  ['A','C','E','G'].forEach((col,i)=>{
+    ws.mergeCells(`${col}${kr}:${'BDFH'[i]}${kr}`);
+    const lc=ws.getCell(`${col}${kr}`); lc.value=asArr[i].l;
+    lc.font={name:'Calibri',size:8,bold:true,color:{argb:XL.muted}};
+    lc.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.headerBg}};
+    lc.alignment={vertical:'middle',horizontal:'center'};
+  }); ws.getRow(kr).height=17; kr++;
+  ['A','C','E','G'].forEach((col,i)=>{
+    ws.mergeCells(`${col}${kr}:${'BDFH'[i]}${kr}`);
+    const vc=ws.getCell(`${col}${kr}`); vc.value=asArr[i].n;
+    vc.font={name:'Calibri',size:28,bold:true,color:{argb:asArr[i].c}};
+    vc.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.rowBg}};
+    vc.alignment={vertical:'middle',horizontal:'center'};
+  }); ws.getRow(kr).height=38; kr+=2;
+  xlFoot(ws,kr,`Generated by BarPass Command Center v10  ·  ${now.toISOString()}  ·  Hard Rock Stadium  ·  CONFIDENTIAL — INTERNAL USE ONLY`,'H');
+}
+
+/* ── Sheet 2: Staff Activity ── */
+function xlSheet2(wb,d){
+  const ws=wb.addWorksheet('Staff Activity',{views:[{state:'frozen',ySplit:4}],pageSetup:{paperSize:9,orientation:'landscape'}});
+  ws.columns=[{width:8},{width:22},{width:14},{width:10},{width:38},{width:10},{width:13},{width:14},{width:13}];
+  ws.mergeCells('A1:I1'); xlTitle(ws,'A1','👥  STAFF ACTIVITY LOG');
+  ws.mergeCells('A2:I2'); xlSub(ws,'A2',`${d.staffN} personnel on floor  ·  Efficiency avg: ${d.eff}  ·  Avg service time: ${d.svc}`);
+  ws.mergeCells('A3:I3'); xlBar(ws,'A3',XL.blue);
+  ['ID','NAME','ROLE','ZONE','CURRENT TASK','ETA','EFFICIENCY','AVG SVC TIME','STATUS'].forEach((h,i)=>xlHdr(ws,`${'ABCDEFGHI'[i]}4`,h,XL.blue));
+  ws.getRow(4).height=22; ws.autoFilter='A4:I4';
+  const rC={manager:XL.gold,supervisor:XL.amber,bartender:XL.blue,runner:XL.cyan};
+  const zC={A:XL.red,B:XL.amber,C:XL.blue,D:XL.green,VIP:XL.purple,UPP:XL.cyan};
+  d.staff.forEach((s,i)=>{
+    const r=i+5, bg=i%2===0?XL.rowBg:XL.altRowBg;
+    const ef=s.eff||Math.floor(68+Math.random()*30);
+    const ec=ef>85?XL.green:ef>70?XL.blue:XL.amber;
+    const st=s.eta==='NOW'?'CRITICAL':s.eta&&s.eta!=='—'?'ACTIVE':'AVAILABLE';
+    const sc=s.eta==='NOW'?XL.red:s.eta&&s.eta!=='—'?XL.blue:XL.green;
+    xlCell(ws,`A${r}`,s.id,XL.muted,bg,false,8.5);
+    xlCell(ws,`B${r}`,s.name,XL.white,bg,true,9.5);
+    xlCell(ws,`C${r}`,(s.role||'').toUpperCase(),rC[s.role]||XL.white,bg,false,8.5);
+    xlCell(ws,`D${r}`,s.zone,zC[s.zone]||XL.white,bg,true,9.5,'center');
+    xlCell(ws,`E${r}`,s.task,XL.white,bg,false,9);
+    xlCell(ws,`F${r}`,s.eta||'—',s.eta==='NOW'?XL.red:XL.muted,bg,s.eta==='NOW',9,'center');
+    xlCell(ws,`G${r}`,ef+'%',ec,bg,true,9.5,'center');
+    xlCell(ws,`H${r}`,s.svc||'2m 14s',XL.white,bg,false,9,'center');
+    xlCell(ws,`I${r}`,st,sc,bg,true,9,'center');
+    ws.getRow(r).height=20;
+  });
+  xlFoot(ws,d.staff.length+6,`BarPass v10  ·  Staff snapshot at ${d.timestamp.toLocaleTimeString()}  ·  ${d.staffN} active`,'I');
+}
+
+/* ── Sheet 3: Inventory & Logistics ── */
+function xlSheet3(wb,d){
+  const ws=wb.addWorksheet('Inventory & Logistics',{views:[{state:'frozen',ySplit:4}],pageSetup:{paperSize:9,orientation:'landscape'}});
+  ws.columns=[{width:26},{width:16},{width:13},{width:14},{width:15},{width:13},{width:14},{width:14}];
+  ws.mergeCells('A1:H1'); xlTitle(ws,'A1','📦  INVENTORY & LOGISTICS REPORT');
+  ws.mergeCells('A2:H2'); xlSub(ws,'A2',`Supply chain status  ·  ${d.nodes.length} active hubs  ·  Total burn: ${d.burn}`);
+  ws.mergeCells('A3:H3'); xlBar(ws,'A3',XL.green);
+  ['HUB NAME','NODE ID','INVENTORY %','BURN RATE','CRIT THRESHOLD','DELAY','RESTOCK ETA','STATUS'].forEach((h,i)=>xlHdr(ws,`${'ABCDEFGH'[i]}4`,h,XL.green));
+  ws.getRow(4).height=22; ws.autoFilter='A4:H4';
+  d.nodes.forEach((n,i)=>{
+    const r=i+5, bg=i%2===0?XL.rowBg:XL.altRowBg;
+    const ic=n.pct<50?XL.red:n.pct<70?XL.amber:XL.green;
+    const st=n.pct>80?'STOCKED':n.pct>50?'ADEQUATE':'CRITICAL';
+    const sc=n.pct>80?XL.green:n.pct>50?XL.amber:XL.red;
+    xlCell(ws,`A${r}`,n.name,XL.white,bg,true,9.5);
+    xlCell(ws,`B${r}`,n.sub,XL.muted,bg,false,9);
+    xlCell(ws,`C${r}`,n.pct+'%',ic,bg,true,11,'center');
+    xlCell(ws,`D${r}`,n.burn,XL.amber,bg,false,9,'center');
+    xlCell(ws,`E${r}`,n.thresh,XL.muted,bg,false,9,'center');
+    xlCell(ws,`F${r}`,n.delay,n.delay==='0s'?XL.green:XL.amber,bg,false,9,'center');
+    xlCell(ws,`G${r}`,n.eta,n.eta==='Stocked'?XL.green:XL.amber,bg,false,9,'center');
+    xlCell(ws,`H${r}`,st,sc,bg,true,9,'center');
+    ws.getRow(r).height=21;
+  });
+  // Zone breakdown
+  let kr=d.nodes.length+6;
+  xlSecHead(ws,kr,'ZONE-LEVEL INVENTORY STATUS','H'); kr++;
+  ['ZONE','NAME','BARS','STAFF','INVENTORY%','QUEUE','RISK','HEALTH'].forEach((h,i)=>xlHdr(ws,`${'ABCDEFGH'[i]}${kr}`,h,XL.cyan));
+  ws.getRow(kr).height=22; kr++;
+  d.zones.forEach((z,i)=>{
+    const bg=i%2===0?XL.rowBg:XL.altRowBg;
+    const ic=z.inv<50?XL.red:z.inv<70?XL.amber:XL.green;
+    const rc=z.risk==='HIGH'?XL.red:z.risk==='MOD'?XL.amber:XL.green;
+    xlCell(ws,`A${kr}`,z.key,XL.white,bg,true,9.5,'center');
+    xlCell(ws,`B${kr}`,z.name,XL.white,bg,false,9);
+    xlCell(ws,`C${kr}`,z.bars,XL.white,bg,false,9.5,'center');
+    xlCell(ws,`D${kr}`,z.staff,XL.blue,bg,false,9.5,'center');
+    xlCell(ws,`E${kr}`,z.inv+'%',ic,bg,true,10,'center');
+    xlCell(ws,`F${kr}`,z.queue+'/10',z.queue>7?XL.red:z.queue>5?XL.amber:XL.green,bg,false,9.5,'center');
+    xlCell(ws,`G${kr}`,z.risk,rc,bg,true,9,'center');
+    xlCell(ws,`H${kr}`,z.inv>70?'STABLE':z.inv>50?'WATCH':'CRITICAL',ic,bg,true,9,'center');
+    ws.getRow(kr).height=20; kr++;
+  });
+  xlFoot(ws,kr+1,`BarPass v10  ·  Inventory snapshot at ${d.timestamp.toLocaleTimeString()}`,'H');
+}
+
+/* ── Sheet 4: Alerts & Incidents ── */
+function xlSheet4(wb,d){
+  const ws=wb.addWorksheet('Alerts & Incidents',{views:[{state:'frozen',ySplit:4}],pageSetup:{paperSize:9,orientation:'landscape'}});
+  ws.columns=[{width:16},{width:12},{width:10},{width:13},{width:52},{width:22},{width:14}];
+  ws.mergeCells('A1:G1'); xlTitle(ws,'A1','🚨  ALERTS & INCIDENTS LOG');
+  const cr=d.alerts.filter(a=>a.sev==='cr').length;
+  ws.mergeCells('A2:G2'); xlSub(ws,'A2',`${d.alerts.length} total alerts  ·  ${cr} critical  ·  Real-time incident feed`);
+  ws.mergeCells('A3:G3'); xlBar(ws,'A3',XL.red);
+  ['SEVERITY','TYPE','ZONE','TIMESTAMP','DESCRIPTION','ASSIGNED STAFF','STATUS'].forEach((h,i)=>xlHdr(ws,`${'ABCDEFG'[i]}4`,h,XL.red));
+  ws.getRow(4).height=22; ws.autoFilter='A4:G4';
+  const sevC={cr:XL.red,wa:XL.amber,ok:XL.green,ai:XL.blue,info:XL.muted};
+  const sevL={cr:'🔴 CRITICAL',wa:'🟡 WARNING',ok:'🟢 RESOLVED',ai:'🔵 INTEL',info:'⚪ INFO'};
+  const alertsToRender=d.alerts.length>0?d.alerts:[
+    {sev:'cr',label:'CRITICAL',zone:'A',  time:'10:31:22',msg:'Zone A — Inventory critically low, resupply required immediately',        status:'OPEN'},
+    {sev:'wa',label:'WARNING', zone:'B',  time:'10:29:14',msg:'Zone B — Queue congestion exceeding 8.2/10 threshold',                   status:'OPEN'},
+    {sev:'ai',label:'INTEL',   zone:'ALL',time:'10:27:55',msg:'Demand spike predicted — Zone C revenue opportunity detected by system',  status:'MONITORING'},
+    {sev:'ok',label:'RESOLVED',zone:'D',  time:'10:25:00',msg:'Zone D resupply completed — inventory restored to 81%',                  status:'RESOLVED'},
+    {sev:'wa',label:'WARNING', zone:'UPP',time:'10:22:30',msg:'Upper Bowl — 3 bar stations understaffed, service time +90s',            status:'OPEN'},
+    {sev:'cr',label:'CRITICAL',zone:'C',  time:'10:19:08',msg:'Zone C — Marcus J. CRITICAL resupply route blocked — reroute needed',    status:'IN PROGRESS'},
+  ];
+  alertsToRender.forEach((a,i)=>{
+    const r=i+5, bg=i%2===0?XL.rowBg:XL.altRowBg;
+    const c=sevC[a.sev]||XL.muted;
+    const assigned=d.staff.length>0?(d.staff[i%d.staff.length]?.name||'—'):'—';
+    xlCell(ws,`A${r}`,sevL[a.sev]||'⚪ INFO',c,bg,true,9);
+    xlCell(ws,`B${r}`,a.label,c,bg,true,9,'center');
+    xlCell(ws,`C${r}`,a.zone||'ALL',XL.white,bg,false,9,'center');
+    xlCell(ws,`D${r}`,a.time,XL.muted,bg,false,9,'center');
+    xlCell(ws,`E${r}`,a.msg,XL.white,bg,false,8.5);
+    xlCell(ws,`F${r}`,assigned,XL.blue,bg,false,9);
+    xlCell(ws,`G${r}`,a.status||'OPEN',a.status==='RESOLVED'?XL.green:a.status==='IN PROGRESS'?XL.amber:c,bg,true,9,'center');
+    ws.getRow(r).height=20;
+  });
+  xlFoot(ws,alertsToRender.length+6,`BarPass v10  ·  Alert log at ${d.timestamp.toLocaleTimeString()}  ·  ${d.alerts.length} captured`,'G');
+}
+
+/* ── Sheet 5: Queue Analytics ── */
+function xlSheet5(wb,d){
+  const ws=wb.addWorksheet('Queue Analytics',{views:[{state:'frozen',ySplit:4}],pageSetup:{paperSize:9,orientation:'landscape'}});
+  ws.columns=[{width:10},{width:26},{width:16},{width:14},{width:15},{width:14},{width:13},{width:13}];
+  ws.mergeCells('A1:H1'); xlTitle(ws,'A1','📊  QUEUE & SERVICE ANALYTICS');
+  ws.mergeCells('A2:H2'); xlSub(ws,'A2',`Real-time queue metrics  ·  Clock: ${d.clock}  ·  Overall congestion: ${d.queue}`);
+  ws.mergeCells('A3:H3'); xlBar(ws,'A3',XL.purple);
+  ['ZONE','CONCOURSE NAME','AVG QUEUE TIME','PEAK QUEUE','ORDERS/MIN','SERVICE LOAD','RISK LEVEL','TREND'].forEach((h,i)=>xlHdr(ws,`${'ABCDEFGH'[i]}4`,h,XL.purple));
+  ws.getRow(4).height=22; ws.autoFilter='A4:H4';
+  const qd=[
+    {zone:'A',  name:'West Concourse',  avgq:'3m 22s',peak:'8.2/10',opm:12,load:'HEAVY',   risk:'HIGH',trend:'▲ +12%'},
+    {zone:'B',  name:'North Concourse', avgq:'2m 48s',peak:'7.1/10',opm:18,load:'MODERATE',risk:'MOD', trend:'▲ +8%'},
+    {zone:'C',  name:'East Concourse',  avgq:'2m 31s',peak:'6.8/10',opm:16,load:'MODERATE',risk:'MOD', trend:'▼ -2%'},
+    {zone:'D',  name:'South Concourse', avgq:'1m 54s',peak:'5.4/10',opm:11,load:'LIGHT',   risk:'LOW', trend:'▼ -5%'},
+    {zone:'VIP',name:'Club Level 200s', avgq:'0m 48s',peak:'2.1/10',opm:5, load:'MINIMAL', risk:'LOW', trend:'→ 0%'},
+    {zone:'UPP',name:'Upper Bowl 300s', avgq:'4m 11s',peak:'9.1/10',opm:21,load:'CRITICAL',risk:'HIGH',trend:'▲ +18%'},
+  ];
+  qd.forEach((q,i)=>{
+    const r=i+5, bg=i%2===0?XL.rowBg:XL.altRowBg;
+    const rc=q.risk==='HIGH'?XL.red:q.risk==='MOD'?XL.amber:XL.green;
+    const lc=q.load==='CRITICAL'?XL.red:q.load==='HEAVY'?XL.amber:q.load==='MODERATE'?XL.blue:XL.green;
+    const tc=q.trend.startsWith('▲')?XL.red:q.trend.startsWith('▼')?XL.green:XL.muted;
+    xlCell(ws,`A${r}`,q.zone,XL.white,bg,true,9.5,'center');
+    xlCell(ws,`B${r}`,q.name,XL.white,bg,false,9.5);
+    xlCell(ws,`C${r}`,q.avgq,q.opm>15?XL.red:XL.amber,bg,true,10,'center');
+    xlCell(ws,`D${r}`,q.peak,lc,bg,true,9.5,'center');
+    xlCell(ws,`E${r}`,q.opm,XL.white,bg,false,9.5,'center');
+    xlCell(ws,`F${r}`,q.load,lc,bg,true,9,'center');
+    xlCell(ws,`G${r}`,q.risk,rc,bg,true,9,'center');
+    xlCell(ws,`H${r}`,q.trend,tc,bg,true,9,'center');
+    ws.getRow(r).height=20;
+  });
+  // Summary table
+  let kr=qd.length+6;
+  xlSecHead(ws,kr,'AGGREGATE SERVICE METRICS','H'); kr++;
+  const srows=[['METRIC','VALUE','vs TARGET','STATUS'],['Avg Service Time',d.svc,'+18s over target','WARNING'],['Overall Queue Score',d.queue,'Exceeds 8.0 threshold','CRITICAL'],['Staff Efficiency',d.eff,'+4% vs baseline','GOOD'],['Orders This Quarter','1,847 processed','On pace for event','STABLE']];
+  srows.forEach((row,i)=>{
+    const bg=i===0?XL.headerBg:i%2===0?XL.rowBg:XL.altRowBg;
+    const stC={WARNING:XL.amber,CRITICAL:XL.red,GOOD:XL.green,STABLE:XL.blue};
+    ['A','B','C','D'].forEach((col,ci)=>{
+      const c=ws.getCell(`${col}${kr}`);
+      c.value=row[ci];
+      c.font={name:'Calibri',size:i===0?9:9.5,bold:i===0,color:{argb:i===0?XL.blue:ci===3?stC[row[ci]]||XL.white:XL.white}};
+      c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};
+      c.border={top:{style:'hair',color:{argb:XL.border}},bottom:{style:'hair',color:{argb:XL.border}},left:{style:'thin',color:{argb:XL.border}},right:{style:'thin',color:{argb:XL.border}}};
+      c.alignment={vertical:'middle',horizontal:ci===0?'left':'center',indent:ci===0?1:0};
+    });
+    ws.mergeCells(`E${kr}:H${kr}`); ws.getCell(`E${kr}`).fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};
+    ws.getRow(kr).height=i===0?20:19; kr++;
+  });
+  xlFoot(ws,kr+1,`BarPass v10  ·  Queue analytics at ${d.timestamp.toLocaleTimeString()}  ·  Hard Rock Stadium`,'H');
+}
+
+/* ── Main export function ── */
+async function generateExcelReport(){
+  const btn=document.getElementById('xls-generate-btn');
+  const loadWrap=document.getElementById('xls-loading');
+  const loaderTxt=document.getElementById('xls-loader-text');
+  const progressBar=document.getElementById('xls-progress-bar');
+  if(!btn)return;
+
+  // Show loading state
+  btn.disabled=true;
+  loadWrap.style.display='flex';
+
+  const steps=[
+    'Loading ExcelJS engine...',
+    'Compiling operational telemetry...',
+    'Processing staff activity data...',
+    'Analyzing inventory & logistics...',
+    'Aggregating alert streams...',
+    'Computing queue analytics...',
+    'Applying enterprise formatting...',
+    'Finalizing export package...',
+  ];
+  let si=0;
+  const stepInt=setInterval(()=>{
+    if(si<steps.length){ loaderTxt.textContent=steps[si]; if(progressBar)progressBar.style.width=Math.round(((si+1)/steps.length)*88)+'%'; si++; }
+  },320);
+
+  try {
+    // Lazy-load ExcelJS if needed
+    if(!window.ExcelJS){
+      await new Promise((resolve,reject)=>{
+        const urls=['https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js','https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js'];
+        let tried=0;
+        const tryNext=()=>{
+          if(tried>=urls.length){reject(new Error('ExcelJS unavailable'));return;}
+          const s=document.createElement('script'); s.src=urls[tried++];
+          s.onload=resolve; s.onerror=tryNext;
+          document.head.appendChild(s);
+        };
+        tryNext();
+      });
+    }
+
+    await new Promise(r=>setTimeout(r,200));
+    const d=xlCollectData();
+    const now=d.timestamp;
+    const wb=new ExcelJS.Workbook();
+    wb.creator='BarPass Command Center v10';
+    wb.created=now; wb.modified=now;
+
+    // Build selected sheets
+    if(document.getElementById('xls-sh1')?.checked!==false) xlSheet1(wb,d,now);
+    await new Promise(r=>setTimeout(r,80));
+    if(document.getElementById('xls-sh2')?.checked!==false) xlSheet2(wb,d);
+    await new Promise(r=>setTimeout(r,80));
+    if(document.getElementById('xls-sh3')?.checked!==false) xlSheet3(wb,d);
+    await new Promise(r=>setTimeout(r,80));
+    if(document.getElementById('xls-sh4')?.checked!==false) xlSheet4(wb,d);
+    await new Promise(r=>setTimeout(r,80));
+    if(document.getElementById('xls-sh5')?.checked!==false) xlSheet5(wb,d);
+
+    clearInterval(stepInt);
+    loaderTxt.textContent='Generating download...';
+    if(progressBar)progressBar.style.width='100%';
+    await new Promise(r=>setTimeout(r,300));
+
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url=URL.createObjectURL(blob);
+    const ts=now.toISOString().slice(0,16).replace(/[T:]/g,'-').replace(/-/g,'').slice(0,12);
+    const a=document.createElement('a'); a.href=url;
+    a.download=`barpass_ops_report_${ts}.xlsx`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    closeExportModal();
+    if(typeof stadAddAlert==='function') stadAddAlert('ok','✓ Operations report exported — '+a.download);
+
+  } catch(err){
+    clearInterval(stepInt);
+    console.error('Export failed:',err);
+    loaderTxt.textContent='⚠ Export failed: '+err.message;
+    if(progressBar)progressBar.style.width='0%';
+    setTimeout(()=>{ loadWrap.style.display='none'; btn.disabled=false; },3000);
+    return;
+  }
+
+  setTimeout(()=>{ loadWrap.style.display='none'; if(progressBar)progressBar.style.width='0%'; btn.disabled=false; },500);
+}
+
+/* ── Modal open/close ── */
+function showExportModal(){
+  const ov=document.getElementById('xls-modal-overlay');
+  if(!ov)return;
+  ov.style.display='flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>ov.classList.add('open')));
+}
+function closeExportModal(){
+  const ov=document.getElementById('xls-modal-overlay');
+  if(!ov)return;
+  ov.classList.remove('open');
+  setTimeout(()=>ov.style.display='none',300);
+}
+
+/* ── Modal option interactions ── */
+document.addEventListener('DOMContentLoaded',function(){
+  // Pill selectors (single-select groups)
+  document.querySelectorAll('.xls-opt-row').forEach(row=>{
+    row.querySelectorAll('.xls-opt').forEach(btn=>{
+      btn.addEventListener('click',function(){
+        row.querySelectorAll('.xls-opt').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  });
+  // Zone tags (multi-select, ALL resets others)
+  const zoneContainer=document.getElementById('xls-zone-row');
+  if(zoneContainer){
+    zoneContainer.querySelectorAll('.xls-zone-tag').forEach(tag=>{
+      tag.addEventListener('click',function(){
+        if(this.dataset.zone==='all'){
+          zoneContainer.querySelectorAll('.xls-zone-tag').forEach(t=>t.classList.remove('active'));
+          this.classList.add('active');
+        } else {
+          zoneContainer.querySelector('[data-zone="all"]')?.classList.remove('active');
+          this.classList.toggle('active');
+          if(zoneContainer.querySelectorAll('.xls-zone-tag.active').length===0)
+            zoneContainer.querySelector('[data-zone="all"]')?.classList.add('active');
+        }
+      });
+    });
+  }
+  // Close on overlay click
+  document.getElementById('xls-modal-overlay')?.addEventListener('click',function(e){
+    if(e.target===this)closeExportModal();
+  });
+  // Escape key
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape')closeExportModal(); });
+});
 </script>
+
+<!-- ═══════════════════════════════════════════════════════
+     EXCEL EXPORT MODAL
+     ═══════════════════════════════════════════════════════ -->
+<div id="xls-modal-overlay" class="xls-overlay">
+  <div class="xls-modal">
+
+    <!-- Header -->
+    <div class="xls-modal-head">
+      <span class="xls-modal-icon">📊</span>
+      <div class="xls-modal-titles">
+        <div class="xls-modal-title">OPERATIONS REPORT EXPORT</div>
+        <div class="xls-modal-sub">BARPASS COMMAND CENTER  ·  Hard Rock Stadium  ·  XLSX FORMAT</div>
+      </div>
+      <button class="xls-modal-close" onclick="closeExportModal()">✕</button>
+    </div>
+
+    <!-- Sheet badges -->
+    <div class="xls-preview-chips">
+      <div class="xls-preview-chip" style="color:#5AA5FF;border-color:#5AA5FF40;background:rgba(90,165,255,.06)">EXEC SUMMARY</div>
+      <div class="xls-preview-chip" style="color:#00e87a;border-color:#00e87a40;background:rgba(0,232,122,.06)">STAFF ACTIVITY</div>
+      <div class="xls-preview-chip" style="color:#FFba38;border-color:#FFba3840;background:rgba(255,186,56,.06)">INVENTORY</div>
+      <div class="xls-preview-chip" style="color:#FF4466;border-color:#FF446640;background:rgba(255,68,102,.06)">ALERTS</div>
+      <div class="xls-preview-chip" style="color:#a855f7;border-color:#a855f740;background:rgba(168,85,247,.06)">QUEUE ANALYTICS</div>
+    </div>
+
+    <!-- Time Range -->
+    <div class="xls-section">
+      <div class="xls-sec-label">TIME RANGE</div>
+      <div class="xls-opt-row" id="xls-range-row">
+        <div class="xls-opt active" data-val="current">Current Quarter</div>
+        <div class="xls-opt" data-val="hour">Last Hour</div>
+        <div class="xls-opt" data-val="game">Full Event</div>
+        <div class="xls-opt" data-val="shift">Full Shift</div>
+      </div>
+    </div>
+
+    <!-- Zones -->
+    <div class="xls-section">
+      <div class="xls-sec-label">ZONES TO INCLUDE</div>
+      <div class="xls-zones" id="xls-zone-row">
+        <div class="xls-zone-tag active" data-zone="all" style="color:#c8d0e8;border-color:#2a3560;">ALL ZONES</div>
+        <div class="xls-zone-tag" data-zone="A"   style="color:#FF4466;border-color:rgba(255,68,102,.4);">ZONE A</div>
+        <div class="xls-zone-tag" data-zone="B"   style="color:#FFba38;border-color:rgba(255,186,56,.4);">ZONE B</div>
+        <div class="xls-zone-tag" data-zone="C"   style="color:#5AA5FF;border-color:rgba(90,165,255,.4);">ZONE C</div>
+        <div class="xls-zone-tag" data-zone="D"   style="color:#00e87a;border-color:rgba(0,232,122,.4);">ZONE D</div>
+        <div class="xls-zone-tag" data-zone="VIP" style="color:#a855f7;border-color:rgba(168,85,247,.4);">VIP SUITES</div>
+        <div class="xls-zone-tag" data-zone="UPP" style="color:#06b6d4;border-color:rgba(6,182,212,.4);">UPPER 300s</div>
+      </div>
+    </div>
+
+    <!-- Report Type -->
+    <div class="xls-section">
+      <div class="xls-sec-label">REPORT TYPE</div>
+      <div class="xls-opt-row" id="xls-type-row">
+        <div class="xls-opt active" data-val="full">Full Operations</div>
+        <div class="xls-opt" data-val="executive">Executive Only</div>
+        <div class="xls-opt" data-val="alerts">Alerts Focus</div>
+        <div class="xls-opt" data-val="inventory">Inventory</div>
+      </div>
+    </div>
+
+    <!-- Sheet selection -->
+    <div class="xls-section">
+      <div class="xls-sec-label">SHEETS TO INCLUDE</div>
+      <div class="xls-checks">
+        <label class="xls-check"><input type="checkbox" id="xls-sh1" checked><span>📋 Executive Summary</span></label>
+        <label class="xls-check"><input type="checkbox" id="xls-sh2" checked><span>👥 Staff Activity</span></label>
+        <label class="xls-check"><input type="checkbox" id="xls-sh3" checked><span>📦 Inventory & Logistics</span></label>
+        <label class="xls-check"><input type="checkbox" id="xls-sh4" checked><span>🚨 Alerts & Incidents</span></label>
+        <label class="xls-check"><input type="checkbox" id="xls-sh5" checked><span>📊 Queue Analytics</span></label>
+      </div>
+    </div>
+
+    <!-- Loading animation -->
+    <div class="xls-loading-wrap" id="xls-loading">
+      <div class="xls-spinner"></div>
+      <div class="xls-loader-text" id="xls-loader-text">Compiling operational telemetry...</div>
+      <div class="xls-progress-wrap">
+        <div class="xls-progress-bar" id="xls-progress-bar"></div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="xls-actions">
+      <button class="xls-cancel-btn" onclick="closeExportModal()">CANCEL</button>
+      <button class="xls-generate-btn" id="xls-generate-btn" onclick="generateExcelReport()">
+        <span class="xls-btn-icon">⬇</span>
+        <span>GENERATE REPORT</span>
+      </button>
+    </div>
+
+  </div>
+</div>
 </body>
 </html>
