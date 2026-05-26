@@ -2140,6 +2140,71 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
 .sstrip-label{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;text-align:center;}
 .sstrip-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;}
 .sstrip-delta{font-family:'JetBrains Mono',monospace;font-size:8px;}
+
+/* ═══ OPERATIONAL INTELLIGENCE — Layer, Entity & Flow System ═══ */
+
+/* Layer toggle bar */
+.stad-layers{display:flex;gap:4px;padding:5px 12px;background:#07091a;border-bottom:1px solid #151935;flex-shrink:0;overflow-x:auto;}
+.stad-layers::-webkit-scrollbar{display:none;}
+.layer-btn{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:4px;border:1px solid #151935;background:#0c0f1e;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;cursor:pointer;letter-spacing:.07em;text-transform:uppercase;transition:all .18s;white-space:nowrap;}
+.layer-btn .lb-dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.5;transition:.18s;}
+.layer-btn.on .lb-dot{opacity:1;box-shadow:0 0 5px currentColor;}
+.layer-btn.on{background:#111830;border-color:#5AA5FF;color:#5AA5FF;}
+.layer-btn.on.lc{background:rgba(255,68,102,.06);border-color:#FF4466;color:#FF4466;}
+.layer-btn.on.li{background:rgba(0,232,122,.05);border-color:#00e87a;color:#00e87a;}
+.layer-btn.on.la{background:rgba(168,85,247,.05);border-color:#a855f7;color:#a855f7;}
+.layer-btn.on.lr{background:rgba(255,186,56,.05);border-color:#FFba38;color:#FFba38;}
+.layer-btn.on.lrev{background:rgba(6,182,212,.05);border-color:#06b6d4;color:#06b6d4;}
+
+/* Supply lane flow animation */
+.sl-anim{animation:supplyFlow 1.4s linear infinite;}
+.sl-fast{animation:supplyFlow 0.82s linear infinite;}
+.sl-slow{animation:supplyFlow 3.4s linear infinite;}
+.sl-vip{animation:supplyFlow 1.0s linear infinite;}
+@keyframes supplyFlow{from{stroke-dashoffset:0}to{stroke-dashoffset:-32}}
+
+/* AI route overlay */
+.ai-route-line{stroke-dasharray:16,8;animation:aiRouteAnim .72s linear infinite;filter:drop-shadow(0 0 6px #5AA5FF);}
+@keyframes aiRouteAnim{from{stroke-dashoffset:0}to{stroke-dashoffset:-24}}
+.ai-pulse-ring{animation:aiRingPulse 1.5s ease-out infinite;}
+@keyframes aiRingPulse{0%{r:18;stroke-opacity:.9}100%{r:72;stroke-opacity:0}}
+.ai-pulse-ring-2{animation:aiRingPulse 1.5s ease-out infinite;animation-delay:.5s;}
+
+/* Risk ring */
+.risk-ring-anim{animation:riskPulse 2.4s ease-out infinite;}
+@keyframes riskPulse{0%{stroke-opacity:.85;stroke-width:3}100%{stroke-opacity:0;stroke-width:.5}}
+
+/* Operational entity (staff capsule) */
+.op-entity{
+  position:absolute;display:flex;align-items:center;gap:4px;
+  padding:3px 7px 3px 3px;border-radius:5px;
+  background:rgba(6,8,20,.92);border:1px solid;
+  backdrop-filter:blur(8px);pointer-events:auto;
+  transform:translate(-50%,-50%);white-space:nowrap;
+  transition:left 7s cubic-bezier(.4,0,.2,1),top 7s cubic-bezier(.4,0,.2,1);
+  z-index:10;
+}
+.op-entity[data-role=bartender]{border-color:rgba(90,165,255,.4);}
+.op-entity[data-role=runner]{border-color:rgba(0,232,122,.4);}
+.op-entity[data-role=supervisor]{border-color:rgba(255,186,56,.4);}
+.op-entity[data-role=manager]{border-color:rgba(255,68,102,.4);}
+.op-entity[data-status=alert]{animation:opAlertPulse 1.1s ease infinite;}
+@keyframes opAlertPulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px rgba(255,68,102,.5)}}
+.op-icon{width:16px;height:16px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.op-icon.bartender{background:rgba(90,165,255,.14);}
+.op-icon.runner{background:rgba(0,232,122,.14);}
+.op-icon.supervisor{background:rgba(255,186,56,.14);}
+.op-icon.manager{background:rgba(255,68,102,.14);}
+.op-name{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;color:var(--text);letter-spacing:.06em;}
+.op-task{font-family:'JetBrains Mono',monospace;font-size:7px;display:flex;align-items:center;gap:2px;margin-top:1px;}
+.op-pulse{width:4px;height:4px;border-radius:50%;flex-shrink:0;}
+.op-pulse.serving{background:#5AA5FF;}
+.op-pulse.moving{background:#00e87a;animation:pulse .8s ease infinite;}
+.op-pulse.alert{background:#FF4466;animation:pulse .48s ease infinite;}
+.op-pulse.monitoring{background:#FFba38;}
+.op-pulse.supervising{background:#a855f7;}
+.op-eta{font-family:'JetBrains Mono',monospace;font-size:7px;color:#00e87a;margin-left:2px;font-weight:700;}
+.op-eta.alert{color:#FF4466;animation:opAlertPulse .7s ease infinite;}
 </style>
 </head>
 <body>
@@ -3638,12 +3703,6 @@ BarPass/<br>
       </div>
     </div>
     <div class="stad-header-r">
-      <select class="stad-layer-sel" id="stad-layer" onchange="stadUpdateLayer()">
-        <option value="heat">🌡 Heat Map</option>
-        <option value="staff">👥 Staff Tracking</option>
-        <option value="inv">📦 Inventory Flow</option>
-        <option value="revenue">💰 Revenue</option>
-      </select>
       <button class="stad-ai-btn" id="stad-ai-btn" onclick="stadToggleAI()">
         <span class="stad-ai-dot" id="stad-ai-dot"></span>
         AI COMMAND
@@ -3651,71 +3710,257 @@ BarPass/<br>
     </div>
   </div>
 
+  <!-- Layer Toggle Bar -->
+  <div class="stad-layers">
+    <button class="layer-btn on ls" data-layer="staff" onclick="stadToggleLayer('staff',this)"><span class="lb-dot"></span>STAFF</button>
+    <button class="layer-btn on li" data-layer="inventory" onclick="stadToggleLayer('inventory',this)"><span class="lb-dot"></span>INV FLOW</button>
+    <button class="layer-btn on" data-layer="infra" onclick="stadToggleLayer('infra',this)"><span class="lb-dot"></span>INFRA</button>
+    <button class="layer-btn la" data-layer="ai" onclick="stadToggleLayer('ai',this)"><span class="lb-dot"></span>AI LAYER</button>
+    <button class="layer-btn on lr" data-layer="risk" onclick="stadToggleLayer('risk',this)"><span class="lb-dot"></span>RISK</button>
+    <button class="layer-btn on lc" data-layer="crowd" onclick="stadToggleLayer('crowd',this)"><span class="lb-dot"></span>CROWD</button>
+  </div>
+
   <!-- Body -->
   <div class="stad-body">
     <!-- Map Panel -->
     <div class="stad-map-panel">
       <div class="stad-map-wrap" id="stad-map-wrap">
-        <canvas id="stad-heat-canvas"></canvas>
-        <!-- Stadium SVG base -->
+        <!-- Stadium operational map -->
         <svg id="stad-svg" viewBox="0 0 800 540" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-          <!-- Background -->
+          <defs>
+            <!-- Supply lane paths for animateMotion -->
+            <path id="lane-ca" d="M400,50 C270,105 160,192 82,272"/>
+            <path id="lane-cb" d="M400,50 C382,74 348,92 312,110"/>
+            <path id="lane-cc" d="M400,50 C530,105 640,192 718,272"/>
+            <path id="lane-cd" d="M400,50 C428,198 458,328 490,436"/>
+            <path id="lane-cvip" d="M400,50 L400,192"/>
+            <path id="lane-a1" d="M82,272 L44,222"/>
+            <path id="lane-a2" d="M82,272 L44,324"/>
+            <path id="lane-b1" d="M312,110 L240,74"/>
+            <path id="lane-b2" d="M312,110 L350,64"/>
+            <path id="lane-c1" d="M718,272 L756,222"/>
+            <path id="lane-c2" d="M718,272 L756,324"/>
+            <path id="lane-d1" d="M490,436 L314,480"/>
+            <path id="lane-d2" d="M490,436 L490,482"/>
+            <path id="lane-vip1" d="M400,192 L277,192"/>
+            <path id="lane-vip2" d="M400,192 L523,192"/>
+            <!-- Glow filter -->
+            <filter id="fg" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="2.8" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="fg-sm" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="1.6" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- Background + grid -->
           <rect width="800" height="540" fill="#060810"/>
-          <!-- Outer approach -->
-          <ellipse cx="400" cy="272" rx="386" ry="258" fill="#08091a"/>
-          <!-- Stadium outer wall -->
+          <g stroke="#0c0e1c" stroke-width="0.6">
+            <line x1="0" y1="108" x2="800" y2="108"/><line x1="0" y1="216" x2="800" y2="216"/>
+            <line x1="0" y1="324" x2="800" y2="324"/><line x1="0" y1="432" x2="800" y2="432"/>
+            <line x1="160" y1="0" x2="160" y2="540"/><line x1="320" y1="0" x2="320" y2="540"/>
+            <line x1="480" y1="0" x2="480" y2="540"/><line x1="640" y1="0" x2="640" y2="540"/>
+          </g>
+
+          <!-- Stadium structure -->
+          <ellipse cx="400" cy="272" rx="386" ry="258" fill="#07091a"/>
           <ellipse cx="400" cy="272" rx="352" ry="234" fill="#0d1020" stroke="#151935" stroke-width="1.5"/>
-          <!-- Upper bowl ring -->
           <ellipse cx="400" cy="272" rx="326" ry="216" fill="#0a0c1c"/>
-          <!-- Club level band -->
           <ellipse cx="400" cy="272" rx="284" ry="188" fill="#0c0e1e"/>
-          <!-- VIP suite boxes -->
-          <rect x="272" y="168" width="60" height="40" rx="5" fill="#0f0d22" stroke="#1a1535" stroke-width="1"/>
-          <rect x="468" y="168" width="60" height="40" rx="5" fill="#0f0d22" stroke="#1a1535" stroke-width="1"/>
-          <text x="302" y="192" fill="#1e1840" font-family="JetBrains Mono,monospace" font-size="7" text-anchor="middle">VIP</text>
-          <text x="498" y="192" fill="#1e1840" font-family="JetBrains Mono,monospace" font-size="7" text-anchor="middle">VIP</text>
-          <!-- Lower bowl -->
           <ellipse cx="400" cy="272" rx="250" ry="166" fill="#090b18"/>
-          <!-- Field concourse -->
           <ellipse cx="400" cy="272" rx="208" ry="138" fill="#0b0d18"/>
-          <!-- Field grass -->
           <rect x="222" y="213" width="356" height="119" rx="22" fill="#061610"/>
-          <!-- Endzones -->
-          <rect x="222" y="213" width="44" height="119" rx="22 0 0 22" fill="#050e0d"/>
-          <rect x="534" y="213" width="44" height="119" rx="0 22 22 0" fill="#050e0d"/>
-          <!-- Yard lines -->
-          <line x1="254" y1="215" x2="254" y2="330" stroke="#0a2018" stroke-width="0.7"/>
-          <line x1="286" y1="215" x2="286" y2="330" stroke="#0a2018" stroke-width="0.7"/>
-          <line x1="318" y1="215" x2="318" y2="330" stroke="#0a2018" stroke-width="0.7"/>
-          <line x1="350" y1="215" x2="350" y2="330" stroke="#0a2018" stroke-width="0.7"/>
-          <line x1="382" y1="215" x2="382" y2="330" stroke="#0a2018" stroke-width="1.2"/>
-          <line x1="414" y1="215" x2="414" y2="330" stroke="#0a2018" stroke-width="0.7"/>
-          <line x1="446" y1="215" x2="446" y2="330" stroke="#0a2018" stroke-width="0.7"/>
-          <line x1="478" y1="215" x2="478" y2="330" stroke="#0a2018" stroke-width="0.7"/>
-          <line x1="510" y1="215" x2="510" y2="330" stroke="#0a2018" stroke-width="0.7"/>
-          <!-- 50 yd label -->
-          <text x="400" y="277" fill="#0d2818" font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle" font-weight="700">50</text>
-          <!-- Zone heat overlays (JS will update opacity/color) -->
-          <path id="stad-zA" fill="rgba(255,68,102,0)" style="transition:fill .8s ease;cursor:pointer;" onclick="stadSelectZone('A',null)" class="stad-zone-svg"/>
-          <path id="stad-zB" fill="rgba(255,186,56,0)" style="transition:fill .8s ease;cursor:pointer;" onclick="stadSelectZone('B',null)" class="stad-zone-svg"/>
-          <path id="stad-zC" fill="rgba(90,165,255,0)" style="transition:fill .8s ease;cursor:pointer;" onclick="stadSelectZone('C',null)" class="stad-zone-svg"/>
-          <path id="stad-zD" fill="rgba(0,232,122,0)" style="transition:fill .8s ease;cursor:pointer;" onclick="stadSelectZone('D',null)" class="stad-zone-svg"/>
-          <path id="stad-zUPP" fill="rgba(6,182,212,0)" style="transition:fill .8s ease;cursor:pointer;" onclick="stadSelectZone('UPP',null)" class="stad-zone-svg"/>
+          <rect x="222" y="213" width="44" height="119" fill="#051008"/>
+          <rect x="534" y="213" width="44" height="119" fill="#051008"/>
+          <line x1="266" y1="215" x2="266" y2="330" stroke="#0a2018" stroke-width="0.7"/>
+          <line x1="298" y1="215" x2="298" y2="330" stroke="#0a2018" stroke-width="0.7"/>
+          <line x1="330" y1="215" x2="330" y2="330" stroke="#0a2018" stroke-width="0.7"/>
+          <line x1="362" y1="215" x2="362" y2="330" stroke="#0a2018" stroke-width="0.7"/>
+          <line x1="400" y1="213" x2="400" y2="332" stroke="#0d2818" stroke-width="1.4"/>
+          <line x1="438" y1="215" x2="438" y2="330" stroke="#0a2018" stroke-width="0.7"/>
+          <line x1="470" y1="215" x2="470" y2="330" stroke="#0a2018" stroke-width="0.7"/>
+          <line x1="502" y1="215" x2="502" y2="330" stroke="#0a2018" stroke-width="0.7"/>
+          <text x="400" y="277" fill="#0d2818" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle" font-weight="700">50</text>
+
+          <!-- Zone pressure breathing (shapes set by stadBuildZonePaths via pres- prefix) -->
+          <g id="stad-pressure-layer">
+            <path id="pres-A" fill="#FF4466" pointer-events="none">
+              <animate attributeName="opacity" values="0.07;0.26;0.07" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <path id="pres-B" fill="#FFba38" pointer-events="none">
+              <animate attributeName="opacity" values="0.05;0.16;0.05" dur="4.2s" repeatCount="indefinite"/>
+            </path>
+            <path id="pres-C" fill="#5AA5FF" pointer-events="none">
+              <animate attributeName="opacity" values="0.07;0.24;0.07" dur="2.3s" repeatCount="indefinite"/>
+            </path>
+            <path id="pres-D" fill="#00e87a" pointer-events="none">
+              <animate attributeName="opacity" values="0.04;0.13;0.04" dur="5.5s" repeatCount="indefinite"/>
+            </path>
+            <path id="pres-UPP" fill="#06b6d4" pointer-events="none">
+              <animate attributeName="opacity" values="0.08;0.30;0.08" dur="1.5s" repeatCount="indefinite"/>
+            </path>
+          </g>
+
+          <!-- Zone selection paths (transparent click targets + selection highlight) -->
+          <path id="stad-zA" fill="rgba(255,68,102,0)" style="cursor:pointer;" onclick="stadSelectZone('A',null)"/>
+          <path id="stad-zB" fill="rgba(255,186,56,0)" style="cursor:pointer;" onclick="stadSelectZone('B',null)"/>
+          <path id="stad-zC" fill="rgba(90,165,255,0)" style="cursor:pointer;" onclick="stadSelectZone('C',null)"/>
+          <path id="stad-zD" fill="rgba(0,232,122,0)" style="cursor:pointer;" onclick="stadSelectZone('D',null)"/>
+          <path id="stad-zUPP" fill="rgba(6,182,212,0)" style="cursor:pointer;" onclick="stadSelectZone('UPP',null)"/>
+
+          <!-- ═══ SUPPLY CHAIN INFRASTRUCTURE ═══ -->
+          <g id="stad-infra-layer">
+            <!-- Primary supply corridors — animated dashed lanes -->
+            <path d="M400,50 C270,105 160,192 82,272" stroke="#FF4466" stroke-width="1.8" fill="none" stroke-dasharray="10,6" stroke-opacity="0.45" class="sl-fast"/>
+            <path d="M400,50 C382,74 348,92 312,110" stroke="#FFba38" stroke-width="1.5" fill="none" stroke-dasharray="10,6" stroke-opacity="0.38" class="sl-anim"/>
+            <path d="M400,50 C530,105 640,192 718,272" stroke="#5AA5FF" stroke-width="1.8" fill="none" stroke-dasharray="10,6" stroke-opacity="0.42" class="sl-anim"/>
+            <path d="M400,50 C428,198 458,328 490,436" stroke="#00e87a" stroke-width="1.4" fill="none" stroke-dasharray="10,6" stroke-opacity="0.32" class="sl-slow"/>
+            <path d="M400,50 L400,192" stroke="#a855f7" stroke-width="1.5" fill="none" stroke-dasharray="7,5" stroke-opacity="0.48" class="sl-vip"/>
+            <!-- Secondary corridors (hub → bar) -->
+            <path d="M82,272 L44,222" stroke="#FF4466" stroke-width="1" fill="none" stroke-dasharray="5,4" stroke-opacity="0.28"/>
+            <path d="M82,272 L44,324" stroke="#FF4466" stroke-width="1" fill="none" stroke-dasharray="5,4" stroke-opacity="0.28"/>
+            <path d="M312,110 L240,74" stroke="#FFba38" stroke-width="1" fill="none" stroke-dasharray="5,4" stroke-opacity="0.25"/>
+            <path d="M312,110 L350,64" stroke="#FFba38" stroke-width="1" fill="none" stroke-dasharray="5,4" stroke-opacity="0.25"/>
+            <path d="M718,272 L756,222" stroke="#5AA5FF" stroke-width="1" fill="none" stroke-dasharray="5,4" stroke-opacity="0.28"/>
+            <path d="M718,272 L756,324" stroke="#5AA5FF" stroke-width="1" fill="none" stroke-dasharray="5,4" stroke-opacity="0.28"/>
+            <path d="M490,436 L314,480" stroke="#00e87a" stroke-width="1" fill="none" stroke-dasharray="5,4" stroke-opacity="0.22"/>
+            <path d="M490,436 L490,482" stroke="#00e87a" stroke-width="1" fill="none" stroke-dasharray="5,4" stroke-opacity="0.22"/>
+            <path d="M400,192 L277,192" stroke="#a855f7" stroke-width="1" fill="none" stroke-dasharray="5,4" stroke-opacity="0.32"/>
+            <path d="M400,192 L523,192" stroke="#a855f7" stroke-width="1" fill="none" stroke-dasharray="5,4" stroke-opacity="0.32"/>
+            <!-- Bar station endpoints -->
+            <rect x="33" y="216" width="26" height="12" rx="3" fill="#0c1020" stroke="#FF4466" stroke-width="1" stroke-opacity="0.55"/>
+            <text x="46" y="225" fill="#FF4466" fill-opacity="0.65" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle" letter-spacing="0.04em">BAR A1</text>
+            <rect x="33" y="318" width="26" height="12" rx="3" fill="#0c1020" stroke="#FF4466" stroke-width="1" stroke-opacity="0.55"/>
+            <text x="46" y="327" fill="#FF4466" fill-opacity="0.65" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle" letter-spacing="0.04em">BAR A2</text>
+            <rect x="228" y="68" width="26" height="12" rx="3" fill="#0c1020" stroke="#FFba38" stroke-width="1" stroke-opacity="0.5"/>
+            <text x="241" y="77" fill="#FFba38" fill-opacity="0.65" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle">BAR B1</text>
+            <rect x="338" y="58" width="26" height="12" rx="3" fill="#0c1020" stroke="#FFba38" stroke-width="1" stroke-opacity="0.5"/>
+            <text x="351" y="67" fill="#FFba38" fill-opacity="0.65" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle">BAR B2</text>
+            <rect x="742" y="216" width="26" height="12" rx="3" fill="#0c1020" stroke="#5AA5FF" stroke-width="1" stroke-opacity="0.55"/>
+            <text x="755" y="225" fill="#5AA5FF" fill-opacity="0.65" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle">BAR C1</text>
+            <rect x="742" y="318" width="26" height="12" rx="3" fill="#0c1020" stroke="#5AA5FF" stroke-width="1" stroke-opacity="0.55"/>
+            <text x="755" y="327" fill="#5AA5FF" fill-opacity="0.65" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle">BAR C2</text>
+            <rect x="301" y="474" width="26" height="12" rx="3" fill="#0c1020" stroke="#00e87a" stroke-width="1" stroke-opacity="0.5"/>
+            <text x="314" y="483" fill="#00e87a" fill-opacity="0.65" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle">BAR D1</text>
+            <rect x="478" y="474" width="26" height="12" rx="3" fill="#0c1020" stroke="#00e87a" stroke-width="1" stroke-opacity="0.5"/>
+            <text x="491" y="483" fill="#00e87a" fill-opacity="0.65" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle">BAR D2</text>
+            <rect x="262" y="186" width="30" height="12" rx="3" fill="#0c1020" stroke="#a855f7" stroke-width="1" stroke-opacity="0.55"/>
+            <text x="277" y="195" fill="#a855f7" fill-opacity="0.7" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle">VIP BAR</text>
+            <rect x="508" y="186" width="30" height="12" rx="3" fill="#0c1020" stroke="#a855f7" stroke-width="1" stroke-opacity="0.55"/>
+            <text x="523" y="195" fill="#a855f7" fill-opacity="0.7" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle">VIP BAR</text>
+            <!-- Hub nodes -->
+            <!-- Central Storage -->
+            <circle cx="400" cy="50" r="16" fill="#0c1428" stroke="#5AA5FF" stroke-width="1.8" filter="url(#fg)"/>
+            <circle cx="400" cy="50" r="26" fill="none" stroke="#5AA5FF" stroke-width="0.6" stroke-opacity="0">
+              <animate attributeName="r" values="16;30;16" dur="3.2s" repeatCount="indefinite"/>
+              <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="3.2s" repeatCount="indefinite"/>
+            </circle>
+            <text x="400" y="47" fill="#5AA5FF" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle" font-weight="700" letter-spacing="0.05em">CENTRAL</text>
+            <text x="400" y="55" fill="#5AA5FF" fill-opacity=".75" font-family="JetBrains Mono,monospace" font-size="5" text-anchor="middle">STORAGE</text>
+            <!-- Hub A West -->
+            <circle cx="82" cy="272" r="12" fill="#0d1020" stroke="#FF4466" stroke-width="1.5" filter="url(#fg-sm)"/>
+            <circle cx="82" cy="272" r="20" fill="none" stroke="#FF4466" stroke-width="0.5" stroke-opacity="0">
+              <animate attributeName="r" values="12;22;12" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="stroke-opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <text x="82" y="269" fill="#FF4466" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle" font-weight="700">HUB</text>
+            <text x="82" y="277" fill="#FF4466" fill-opacity=".75" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle">A</text>
+            <!-- Hub B North -->
+            <circle cx="312" cy="110" r="11" fill="#0d1020" stroke="#FFba38" stroke-width="1.5" filter="url(#fg-sm)"/>
+            <circle cx="312" cy="110" r="18" fill="none" stroke="#FFba38" stroke-width="0.5" stroke-opacity="0">
+              <animate attributeName="r" values="11;20;11" dur="4.2s" repeatCount="indefinite"/>
+              <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="4.2s" repeatCount="indefinite"/>
+            </circle>
+            <text x="312" y="107" fill="#FFba38" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle" font-weight="700">HUB</text>
+            <text x="312" y="115" fill="#FFba38" fill-opacity=".75" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle">B</text>
+            <!-- Hub C East -->
+            <circle cx="718" cy="272" r="12" fill="#0d1020" stroke="#5AA5FF" stroke-width="1.5" filter="url(#fg-sm)"/>
+            <circle cx="718" cy="272" r="20" fill="none" stroke="#5AA5FF" stroke-width="0.5" stroke-opacity="0">
+              <animate attributeName="r" values="12;22;12" dur="2.3s" repeatCount="indefinite"/>
+              <animate attributeName="stroke-opacity" values="0.6;0;0.6" dur="2.3s" repeatCount="indefinite"/>
+            </circle>
+            <text x="718" y="269" fill="#5AA5FF" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle" font-weight="700">HUB</text>
+            <text x="718" y="277" fill="#5AA5FF" fill-opacity=".75" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle">C</text>
+            <!-- Hub D South -->
+            <circle cx="490" cy="436" r="11" fill="#0d1020" stroke="#00e87a" stroke-width="1.5" filter="url(#fg-sm)"/>
+            <circle cx="490" cy="436" r="18" fill="none" stroke="#00e87a" stroke-width="0.5" stroke-opacity="0">
+              <animate attributeName="r" values="11;20;11" dur="5.5s" repeatCount="indefinite"/>
+              <animate attributeName="stroke-opacity" values="0.4;0;0.4" dur="5.5s" repeatCount="indefinite"/>
+            </circle>
+            <text x="490" y="433" fill="#00e87a" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle" font-weight="700">HUB</text>
+            <text x="490" y="441" fill="#00e87a" fill-opacity=".75" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle">D</text>
+            <!-- VIP Hub -->
+            <circle cx="400" cy="192" r="10" fill="#0d1020" stroke="#a855f7" stroke-width="1.5"/>
+            <circle cx="400" cy="192" r="16" fill="none" stroke="#a855f7" stroke-width="0.5" stroke-opacity="0">
+              <animate attributeName="r" values="10;18;10" dur="3.8s" repeatCount="indefinite"/>
+              <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="3.8s" repeatCount="indefinite"/>
+            </circle>
+            <text x="400" y="189" fill="#a855f7" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle" font-weight="700">VIP</text>
+            <text x="400" y="197" fill="#a855f7" fill-opacity=".75" font-family="JetBrains Mono,monospace" font-size="5.5" text-anchor="middle">HUB</text>
+          </g>
+
+          <!-- ═══ INVENTORY FLOW LAYER ═══ -->
+          <g id="stad-flow-layer">
+            <!-- Zone A — CRITICAL (3 packets, fast 3.2s) -->
+            <circle r="6" fill="#FF4466" filter="url(#fg)"><animateMotion dur="3.2s" repeatCount="indefinite" begin="0s" rotate="auto"><mpath href="#lane-ca"/></animateMotion></circle>
+            <circle r="4.2" fill="#FF4466" opacity=".72"><animateMotion dur="3.2s" repeatCount="indefinite" begin="-1.07s" rotate="auto"><mpath href="#lane-ca"/></animateMotion></circle>
+            <circle r="2.8" fill="#FF4466" opacity=".48"><animateMotion dur="3.2s" repeatCount="indefinite" begin="-2.14s" rotate="auto"><mpath href="#lane-ca"/></animateMotion></circle>
+            <!-- Zone B — NORMAL (2 packets, 5s) -->
+            <circle r="4.8" fill="#FFba38" filter="url(#fg-sm)"><animateMotion dur="5s" repeatCount="indefinite" begin="0s" rotate="auto"><mpath href="#lane-cb"/></animateMotion></circle>
+            <circle r="3.2" fill="#FFba38" opacity=".6"><animateMotion dur="5s" repeatCount="indefinite" begin="-2.5s" rotate="auto"><mpath href="#lane-cb"/></animateMotion></circle>
+            <!-- Zone C — NORMAL (2 packets, 4.5s) -->
+            <circle r="5" fill="#5AA5FF" filter="url(#fg-sm)"><animateMotion dur="4.5s" repeatCount="indefinite" begin="0s" rotate="auto"><mpath href="#lane-cc"/></animateMotion></circle>
+            <circle r="3.2" fill="#5AA5FF" opacity=".62"><animateMotion dur="4.5s" repeatCount="indefinite" begin="-2.25s" rotate="auto"><mpath href="#lane-cc"/></animateMotion></circle>
+            <!-- Zone D — STABLE (1 packet, 7.5s) -->
+            <circle r="4.2" fill="#00e87a" filter="url(#fg-sm)"><animateMotion dur="7.5s" repeatCount="indefinite" begin="0s" rotate="auto"><mpath href="#lane-cd"/></animateMotion></circle>
+            <!-- VIP — PRIORITY (2 packets, 3.8s) -->
+            <circle r="5.2" fill="#a855f7" filter="url(#fg)"><animateMotion dur="3.8s" repeatCount="indefinite" begin="0s" rotate="auto"><mpath href="#lane-cvip"/></animateMotion></circle>
+            <circle r="3.5" fill="#a855f7" opacity=".68"><animateMotion dur="3.8s" repeatCount="indefinite" begin="-1.9s" rotate="auto"><mpath href="#lane-cvip"/></animateMotion></circle>
+            <!-- Secondary flows (hub to bar) -->
+            <circle r="2.8" fill="#FF4466" opacity=".65"><animateMotion dur="2.2s" repeatCount="indefinite" begin="0s"><mpath href="#lane-a1"/></animateMotion></circle>
+            <circle r="2.8" fill="#FF4466" opacity=".65"><animateMotion dur="2.2s" repeatCount="indefinite" begin="-1.1s"><mpath href="#lane-a2"/></animateMotion></circle>
+            <circle r="2.5" fill="#FFba38" opacity=".6"><animateMotion dur="2.8s" repeatCount="indefinite" begin="0s"><mpath href="#lane-b1"/></animateMotion></circle>
+            <circle r="2.5" fill="#5AA5FF" opacity=".62"><animateMotion dur="2.6s" repeatCount="indefinite" begin="0s"><mpath href="#lane-c1"/></animateMotion></circle>
+            <circle r="2.5" fill="#5AA5FF" opacity=".62"><animateMotion dur="2.6s" repeatCount="indefinite" begin="-1.3s"><mpath href="#lane-c2"/></animateMotion></circle>
+            <circle r="2.2" fill="#a855f7" opacity=".72"><animateMotion dur="1.6s" repeatCount="indefinite" begin="0s"><mpath href="#lane-vip1"/></animateMotion></circle>
+            <circle r="2.2" fill="#a855f7" opacity=".72"><animateMotion dur="1.6s" repeatCount="indefinite" begin="-0.8s"><mpath href="#lane-vip2"/></animateMotion></circle>
+          </g>
+
+          <!-- ═══ AI COMMAND OVERLAY ═══ -->
+          <g id="stad-ai-overlay" style="display:none">
+            <path id="ai-route-path" d="M400,50 C270,105 160,192 82,272" stroke="#5AA5FF" stroke-width="4" fill="none" opacity=".92" class="ai-route-line"/>
+            <circle id="ai-ring-1" cx="82" cy="272" r="18" fill="none" stroke="#5AA5FF" stroke-width="2.5" class="ai-pulse-ring"/>
+            <circle id="ai-ring-2" cx="82" cy="272" r="18" fill="none" stroke="#5AA5FF" stroke-width="1.5" class="ai-pulse-ring-2"/>
+            <text id="ai-action-lbl" x="230" y="168" fill="#5AA5FF" font-family="JetBrains Mono,monospace" font-size="8.5" font-weight="700" text-anchor="middle" opacity=".95">→ REASSIGN 3 RUNNERS</text>
+            <rect id="ai-action-bg" x="148" y="156" width="164" height="14" rx="3" fill="rgba(8,12,28,.8)" stroke="#5AA5FF" stroke-width=".5" stroke-opacity=".4"/>
+          </g>
+
+          <!-- ═══ RISK OVERLAY ═══ -->
+          <g id="stad-risk-overlay">
+            <circle id="risk-A" cx="82" cy="272" r="12" fill="none" stroke="#FF4466" stroke-width="3" class="risk-ring-anim"/>
+            <circle id="risk-UPP" cx="400" cy="272" r="145" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0">
+              <animate attributeName="opacity" values="0;0.55;0" dur="3.5s" repeatCount="indefinite"/>
+              <animate attributeName="r" values="145;168;145" dur="3.5s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+
           <!-- Gate labels -->
-          <text x="46" y="276" fill="#1e2448" font-family="JetBrains Mono,monospace" font-size="8" text-anchor="middle">GATE A</text>
-          <text x="400" y="34" fill="#1e2448" font-family="JetBrains Mono,monospace" font-size="8" text-anchor="middle">GATE B · GATE C</text>
-          <text x="754" y="276" fill="#1e2448" font-family="JetBrains Mono,monospace" font-size="8" text-anchor="middle">GATE D</text>
-          <text x="400" y="514" fill="#1e2448" font-family="JetBrains Mono,monospace" font-size="8" text-anchor="middle">GATE G · GATE H</text>
-          <!-- Zone labels -->
-          <text id="zlA" x="96" y="274" fill="rgba(255,68,102,.3)" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" font-weight="700">A</text>
-          <text id="zlB" x="400" y="84" fill="rgba(255,186,56,.3)" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" font-weight="700">B</text>
-          <text id="zlC" x="704" y="274" fill="rgba(90,165,255,.3)" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" font-weight="700">C</text>
-          <text id="zlD" x="400" y="464" fill="rgba(0,232,122,.3)" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" font-weight="700">D</text>
+          <text x="44" y="276" fill="#1e2448" font-family="JetBrains Mono,monospace" font-size="7.5" text-anchor="middle" letter-spacing=".04em">GATE A</text>
+          <text x="400" y="32" fill="#1e2448" font-family="JetBrains Mono,monospace" font-size="7.5" text-anchor="middle" letter-spacing=".04em">GATE B · GATE C</text>
+          <text x="756" y="276" fill="#1e2448" font-family="JetBrains Mono,monospace" font-size="7.5" text-anchor="middle" letter-spacing=".04em">GATE D</text>
+          <text x="400" y="514" fill="#1e2448" font-family="JetBrains Mono,monospace" font-size="7.5" text-anchor="middle" letter-spacing=".04em">GATE G · GATE H</text>
+          <!-- Zone labels (brightness updated by JS) -->
+          <text id="zlA" x="150" y="272" fill="rgba(255,68,102,.25)" font-family="JetBrains Mono,monospace" font-size="8" text-anchor="middle" font-weight="700" letter-spacing=".1em">WEST</text>
+          <text id="zlB" x="400" y="82" fill="rgba(255,186,56,.25)" font-family="JetBrains Mono,monospace" font-size="8" text-anchor="middle" font-weight="700" letter-spacing=".1em">NORTH</text>
+          <text id="zlC" x="650" y="272" fill="rgba(90,165,255,.25)" font-family="JetBrains Mono,monospace" font-size="8" text-anchor="middle" font-weight="700" letter-spacing=".1em">EAST</text>
+          <text id="zlD" x="400" y="466" fill="rgba(0,232,122,.25)" font-family="JetBrains Mono,monospace" font-size="8" text-anchor="middle" font-weight="700" letter-spacing=".1em">SOUTH</text>
           <!-- Scan line -->
-          <line x1="0" y1="0" x2="800" y2="0" stroke="rgba(90,165,255,.12)" stroke-width="2" class="stad-scan-line"/>
+          <line x1="0" y1="0" x2="800" y2="0" stroke="rgba(90,165,255,.1)" stroke-width="1.8" class="stad-scan-line"/>
         </svg>
-        <!-- Staff dots layer -->
-        <div id="stad-staff-layer"></div>
+        <!-- Operational staff entity layer -->
+        <div id="stad-staff-layer" style="pointer-events:none;"></div>
       </div>
       <!-- Zone selector bar -->
       <div class="stad-zone-bar">
@@ -7720,12 +7965,12 @@ const STAD_ZONES={
 };
 
 const STAD_AI_RECS=[
-  {head:'STAFF REALLOCATION',body:'Move 3 runners from Zone D to Zone A.\nZone A queue is 2.8× stadium average.',impact:'Expected: +18% efficiency · +$4,200 rev'},
-  {head:'INVENTORY CRITICAL',body:'Zone C tequila stock at 23%.\nProjected stockout in 14 minutes at current burn.',impact:'Dispatch resupply immediately · Risk: $8,400'},
-  {head:'HALFTIME SURGE ALERT',body:'Halftime demand spike in ~8 min.\nZone B + Zone D historically peak 340%.',impact:'Suggest: +4 staff on Level 300 now'},
-  {head:'VIP OPPORTUNITY',body:'Suite 218 wait time 14 min above SLA.\n2 servers available in Zone D now.',impact:'Reassign → +$1,800 incremental rev'},
-  {head:'REVENUE OPTIMIZATION',body:'Zone A underperforming by 22% vs avg.\nUpsell conversion rate dropped 6% last 20 min.',impact:'Coach Carlos · Expected +$3,100 recovery'},
-  {head:'CONGESTION RELIEF',body:'Club Level Bar 7 handling 3× normal load.\nPredicted service failure in 9 minutes.',impact:'Reroute to Bar 5 · Redistribute inventory'},
+  {head:'STAFF REALLOCATION',zone:'A',body:'Move 3 runners from Zone D to Zone A.\nZone A queue is 2.8× stadium average.',impact:'Expected: +18% efficiency · +$4,200 rev'},
+  {head:'INVENTORY CRITICAL',zone:'C',body:'Zone C tequila stock at 23%.\nProjected stockout in 14 minutes at current burn.',impact:'Dispatch resupply immediately · Risk: $8,400'},
+  {head:'HALFTIME SURGE ALERT',zone:'B',body:'Halftime demand spike in ~8 min.\nZone B + Zone D historically peak 340%.',impact:'Suggest: +4 staff on Level 300 now'},
+  {head:'VIP OPPORTUNITY',zone:'VIP',body:'Suite 218 wait time 14 min above SLA.\n2 servers available in Zone D now.',impact:'Reassign → +$1,800 incremental rev'},
+  {head:'REVENUE OPTIMIZATION',zone:'A',body:'Zone A underperforming by 22% vs avg.\nUpsell conversion rate dropped 6% last 20 min.',impact:'Coach Carlos · Expected +$3,100 recovery'},
+  {head:'CONGESTION RELIEF',zone:'D',body:'Club Level Bar 7 handling 3× normal load.\nPredicted service failure in 9 minutes.',impact:'Reroute to Bar 5 · Redistribute inventory'},
 ];
 
 const STAD_ALERT_POOL=[
@@ -7744,7 +7989,7 @@ const STAD_ALERT_POOL=[
 ];
 
 let stadActive=false, stadAIMode=false, stadCurrentZone='ALL';
-let stadAlertCount=0, stadStaffDots=[], stadIntervals=[], stadAIIndex=0;
+let stadAlertCount=0, stadIntervals=[], stadAIIndex=0;
 let stadGameSec=520, stadQ=2;
 
 function ellipsePt(cx,cy,rx,ry,deg){
@@ -7766,79 +8011,87 @@ function annularSector(cx,cy,rx1,ry1,rx2,ry2,a1,a2){
 }
 
 function stadBuildZonePaths(){
-  // Zone A, B, C, D — annular sectors on the lower+upper bowl ring
   ['A','B','C','D','UPP'].forEach(key=>{
     const z=STAD_ZONES[key];
-    const el=document.getElementById('stad-z'+key);
-    if(!el)return;
+    let d;
     if(key==='UPP'){
-      // Full ring: two concentric ellipses
-      el.setAttribute('d',`M${STAD_CX+z.rx2},${STAD_CY} A${z.rx2},${z.ry2} 0 1,1 ${STAD_CX-z.rx2},${STAD_CY} A${z.rx2},${z.ry2} 0 1,1 ${STAD_CX+z.rx2},${STAD_CY} M${STAD_CX+z.rx1},${STAD_CY} A${z.rx1},${z.ry1} 0 1,0 ${STAD_CX-z.rx1},${STAD_CY} A${z.rx1},${z.ry1} 0 1,0 ${STAD_CX+z.rx1},${STAD_CY} Z`);
+      d=`M${STAD_CX+z.rx2},${STAD_CY} A${z.rx2},${z.ry2} 0 1,1 ${STAD_CX-z.rx2},${STAD_CY} A${z.rx2},${z.ry2} 0 1,1 ${STAD_CX+z.rx2},${STAD_CY} M${STAD_CX+z.rx1},${STAD_CY} A${z.rx1},${z.ry1} 0 1,0 ${STAD_CX-z.rx1},${STAD_CY} A${z.rx1},${z.ry1} 0 1,0 ${STAD_CX+z.rx1},${STAD_CY} Z`;
     } else {
-      el.setAttribute('d',annularSector(STAD_CX,STAD_CY,z.rx1,z.ry1,z.rx2,z.ry2,z.a1,z.a2));
+      d=annularSector(STAD_CX,STAD_CY,z.rx1,z.ry1,z.rx2,z.ry2,z.a1,z.a2);
+    }
+    const el=document.getElementById('stad-z'+key);
+    if(el)el.setAttribute('d',d);
+    const pres=document.getElementById('pres-'+(key==='UPP'?'UPP':key));
+    if(pres)pres.setAttribute('d',d);
+  });
+}
+
+function stadToggleLayer(layer, btn){
+  const layerMap={
+    staff:'stad-staff-layer',
+    inventory:'stad-flow-layer',
+    infra:'stad-infra-layer',
+    ai:'stad-ai-overlay',
+    risk:'stad-risk-overlay',
+    crowd:'stad-pressure-layer'
+  };
+  const on=btn.classList.toggle('on');
+  const elId=layerMap[layer];
+  if(elId){
+    const el=document.getElementById(elId);
+    if(el)el.style.display=on?'':'none';
+  }
+}
+
+// Entity data for staff capsules
+const STAD_ENTITIES=[
+  {id:'e1',role:'manager',name:'Maria R.',task:'Overseeing Zone A',eta:'',zone:'A',x:105,y:230,color:'#FF4466'},
+  {id:'e2',role:'bartender',name:'Carlos M.',task:'Running Bar A1',eta:'3m',zone:'A',x:88,y:290,color:'#5AA5FF'},
+  {id:'e3',role:'runner',name:'Diego L.',task:'Resupply A1→A2',eta:'2m',zone:'A',x:130,y:320,color:'#00e87a'},
+  {id:'e4',role:'supervisor',name:'Lena K.',task:'Zone B Monitor',eta:'',zone:'B',x:320,y:90,color:'#FFba38'},
+  {id:'e5',role:'bartender',name:'Ana P.',task:'Bar B1 Service',eta:'5m',zone:'B',x:290,y:108,color:'#5AA5FF'},
+  {id:'e6',role:'runner',name:'Tom S.',task:'Inv. pickup Hub B',eta:'4m',zone:'B',x:390,y:95,color:'#00e87a'},
+  {id:'e7',role:'supervisor',name:'Raj N.',task:'Zone C Command',eta:'',zone:'C',x:680,y:230,color:'#FFba38'},
+  {id:'e8',role:'bartender',name:'Sofia V.',task:'Bar C2 VIP Rush',eta:'1m',zone:'C',x:705,y:290,color:'#5AA5FF'},
+  {id:'e9',role:'runner',name:'Marcus J.',task:'CRITICAL resupply',eta:'NOW',zone:'C',x:670,y:320,color:'#FF4466'},
+  {id:'e10',role:'bartender',name:'Priya D.',task:'Bar D1 Service',eta:'6m',zone:'D',x:460,y:450,color:'#5AA5FF'},
+  {id:'e11',role:'runner',name:'Jake W.',task:'Idle → Zone D',eta:'3m',zone:'D',x:520,y:460,color:'#00e87a'},
+  {id:'e12',role:'manager',name:'Elena C.',task:'VIP Suite 218',eta:'',zone:'VIP',x:370,y:180,color:'#a855f7'},
+  {id:'e13',role:'bartender',name:'Ivan B.',task:'VIP Bar Service',eta:'2m',zone:'VIP',x:420,y:200,color:'#5AA5FF'},
+];
+
+function stadRenderEntities(){
+  const layer=document.getElementById('stad-staff-layer');
+  if(!layer)return;
+  layer.innerHTML='';
+  const roleIcon={manager:'★',supervisor:'◆',bartender:'🍹',runner:'⚡'};
+  STAD_ENTITIES.forEach(e=>{
+    const div=document.createElement('div');
+    div.className=`op-entity`;
+    div.dataset.role=e.role;
+    div.dataset.id=e.id;
+    div.style.cssText=`left:${(e.x/800*100).toFixed(2)}%;top:${(e.y/540*100).toFixed(2)}%;`;
+    const alertCls=e.eta==='NOW'?' alert':'';
+    div.innerHTML=`<span class="op-icon ${e.role}${alertCls}">${roleIcon[e.role]||'●'}</span><span class="op-name">${e.name}</span><span class="op-task">${e.task}</span>${e.eta?`<span class="op-eta${e.eta==='NOW'?' alert':''}">${e.eta}</span>`:''}`;
+    layer.appendChild(div);
+  });
+}
+
+function stadTickEntities(){
+  // Subtle position drift to simulate movement — keep entities in their zone regions
+  const zoneRegions={A:{x:[72,158],y:[180,370]},B:{x:[255,545],y:[65,120]},C:{x:[638,728],y:[180,370]},D:{x:[255,545],y:[425,480]},VIP:{x:[340,460],y:[162,210]},UPP:{x:[90,710],y:[50,520]}};
+  STAD_ENTITIES.forEach(e=>{
+    const reg=zoneRegions[e.zone];
+    if(!reg)return;
+    const drift=6;
+    e.x=Math.max(reg.x[0],Math.min(reg.x[1],e.x+(Math.random()-0.5)*drift));
+    e.y=Math.max(reg.y[0],Math.min(reg.y[1],e.y+(Math.random()-0.5)*drift));
+    const el=document.querySelector(`.op-entity[data-id="${e.id}"]`);
+    if(el){
+      el.style.left=(e.x/800*100).toFixed(2)+'%';
+      el.style.top=(e.y/540*100).toFixed(2)+'%';
     }
   });
-}
-
-function stadUpdateHeatCanvas(layer){
-  const wrap=document.getElementById('stad-map-wrap');
-  const canvas=document.getElementById('stad-heat-canvas');
-  if(!canvas||!wrap)return;
-  const W=wrap.offsetWidth, H=wrap.offsetHeight;
-  canvas.width=W; canvas.height=H;
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-  const scaleX=W/800, scaleY=H/540;
-
-  Object.values(STAD_ZONES).forEach(z=>{
-    const x=z.heatX*scaleX, y=z.heatY*scaleY, r=z.heatR*Math.max(scaleX,scaleY);
-    let intensity=0;
-    if(layer==='heat')intensity=1-(z.inv/100);
-    else if(layer==='staff')intensity=z.staff/60;
-    else if(layer==='inv')intensity=1-(z.inv/100);
-    else if(layer==='revenue')intensity=z.revenue/70000;
-    intensity=Math.min(1,Math.max(0.1,intensity));
-    const col=z.color;
-    // parse hex to rgba
-    const r2=parseInt(col.slice(1,3),16);
-    const g2=parseInt(col.slice(3,5),16);
-    const b2=parseInt(col.slice(5,7),16);
-    const grad=ctx.createRadialGradient(x,y,0,x,y,r*1.6);
-    grad.addColorStop(0,`rgba(${r2},${g2},${b2},${(intensity*0.45).toFixed(2)})`);
-    grad.addColorStop(0.5,`rgba(${r2},${g2},${b2},${(intensity*0.2).toFixed(2)})`);
-    grad.addColorStop(1,`rgba(${r2},${g2},${b2},0)`);
-    ctx.fillStyle=grad;
-    ctx.fillRect(0,0,W,H);
-  });
-}
-
-function stadUpdateZoneFills(layer){
-  Object.entries(STAD_ZONES).forEach(([key,z])=>{
-    const el=document.getElementById('stad-z'+key);
-    if(!el)return;
-    let intensity=0;
-    if(layer==='heat')intensity=1-(z.inv/100);
-    else if(layer==='staff')intensity=z.staff/60;
-    else if(layer==='inv')intensity=1-(z.inv/100);
-    else if(layer==='revenue')intensity=z.revenue/70000;
-    intensity=Math.min(0.45,Math.max(0.04,intensity*0.45));
-    el.setAttribute('fill',z.color.replace('#','rgba(').split('').join('')+`)`); // wrong, use proper
-    // Just set fill with alpha
-    const hex=z.color.replace('#','');
-    const r=parseInt(hex.slice(0,2),16);
-    const g=parseInt(hex.slice(2,4),16);
-    const b=parseInt(hex.slice(4,6),16);
-    el.setAttribute('fill',`rgba(${r},${g},${b},${intensity.toFixed(3)})`);
-    // Zone label brightness
-    const lbl=document.getElementById('zl'+key);
-    if(lbl)lbl.setAttribute('fill',`rgba(${r},${g},${b},${(intensity*2).toFixed(2)})`);
-  });
-}
-
-function stadUpdateLayer(){
-  const layer=document.getElementById('stad-layer')?.value||'heat';
-  stadUpdateHeatCanvas(layer);
-  stadUpdateZoneFills(layer);
 }
 
 function stadRenderZoneDetail(zoneKey){
@@ -7918,10 +8171,35 @@ function stadToggleAI(){
   const btn=document.getElementById('stad-ai-btn');
   const dot=document.getElementById('stad-ai-dot');
   const panel=document.getElementById('stad-ai-panel');
+  const overlay=document.getElementById('stad-ai-overlay');
   if(btn)btn.classList.toggle('active',stadAIMode);
   if(dot)dot.classList.toggle('on',stadAIMode);
   if(panel)panel.style.display=stadAIMode?'flex':'none';
-  if(stadAIMode)stadRenderAI();
+  if(overlay)overlay.style.display=stadAIMode?'':'none';
+  // Sync the AI layer toggle button
+  const aiLayerBtn=document.querySelector('.layer-btn[data-layer="ai"]');
+  if(aiLayerBtn){aiLayerBtn.classList.toggle('on',stadAIMode);}
+  if(stadAIMode){
+    stadRenderAI();
+    stadUpdateAIRoute();
+  }
+}
+
+function stadUpdateAIRoute(){
+  const rec=STAD_AI_RECS[stadAIIndex%STAD_AI_RECS.length];
+  const zoneHubs={A:{x:82,y:272},B:{x:312,y:110},C:{x:718,y:272},D:{x:490,y:436},VIP:{x:400,y:192},UPP:{x:400,y:50}};
+  const target=rec.zone||'A';
+  const hub=zoneHubs[target]||zoneHubs.A;
+  const routePath=document.getElementById('ai-route-path');
+  const ring1=document.getElementById('ai-ring-1');
+  const ring2=document.getElementById('ai-ring-2');
+  const label=document.getElementById('ai-action-label');
+  const labelBg=document.getElementById('ai-label-bg');
+  if(routePath)routePath.setAttribute('d',`M400,50 Q${(400+hub.x)/2},${(50+hub.y)/2-30} ${hub.x},${hub.y}`);
+  if(ring1){ring1.setAttribute('cx',hub.x);ring1.setAttribute('cy',hub.y);}
+  if(ring2){ring2.setAttribute('cx',hub.x);ring2.setAttribute('cy',hub.y);}
+  if(label){label.setAttribute('x',hub.x);label.setAttribute('y',hub.y-22);label.textContent=rec.head.slice(0,28).toUpperCase();}
+  if(labelBg){labelBg.setAttribute('x',hub.x-70);labelBg.setAttribute('y',hub.y-34);}
 }
 
 function stadRenderAI(){
@@ -7945,11 +8223,13 @@ function stadApplyAI(){
   stadAIIndex++;
   stadAddAlert('ok','✓ AI COMMAND APPLIED — '+STAD_AI_RECS[(stadAIIndex-1)%STAD_AI_RECS.length].head);
   stadRenderAI();
+  if(stadAIMode)stadUpdateAIRoute();
 }
 
 function stadDismissAI(){
   stadAIIndex++;
   stadRenderAI();
+  if(stadAIMode)stadUpdateAIRoute();
 }
 
 function stadAddAlert(type, msg){
@@ -7992,58 +8272,6 @@ function stadRenderNodes(){
     </div>`).join('');
 }
 
-function stadSpawnStaffDots(){
-  const layer=document.getElementById('stad-staff-layer');
-  if(!layer)return;
-  layer.innerHTML='';
-  stadStaffDots=[];
-
-  const roleColors={bartender:'#5AA5FF',runner:'#00e87a',supervisor:'#FFba38',manager:'#FF4466'};
-  const roleSizes={bartender:6,runner:5,supervisor:8,manager:9};
-
-  // Define spawn regions per zone (relative to 800x540 SVG viewBox, scaled by container)
-  const regions={
-    A:{x:[72,158],y:[170,370]},
-    B:{x:[250,550],y:[62,118]},
-    C:{x:[642,730],y:[170,370]},
-    D:{x:[250,550],y:[424,482]},
-    VIP:{x:[270,320],y:[162,208]},
-    UPP:{x:[80,720],y:[48,520]},
-  };
-  const roles=['bartender','bartender','bartender','runner','runner','supervisor','manager'];
-
-  Object.entries(STAD_ZONES).forEach(([zKey,zone])=>{
-    const reg=regions[zKey];
-    if(!reg)return;
-    const count=Math.min(zone.staff,12); // max 12 visible dots per zone
-    for(let i=0;i<count;i++){
-      const role=roles[Math.floor(Math.random()*roles.length)];
-      const color=roleColors[role];
-      const size=roleSizes[role];
-      // Random initial position within region
-      const xPct=reg.x[0]+(Math.random()*(reg.x[1]-reg.x[0]));
-      const yPct=reg.y[0]+(Math.random()*(reg.y[1]-reg.y[0]));
-      const dot=document.createElement('div');
-      dot.className='stad-dot';
-      dot.style.cssText=`width:${size}px;height:${size}px;background:${color};left:${(xPct/800*100).toFixed(2)}%;top:${(yPct/540*100).toFixed(2)}%;box-shadow:0 0 ${size+2}px ${color};opacity:0.85;`;
-      dot.dataset.zone=zKey;
-      dot.dataset.reg=JSON.stringify(reg);
-      layer.appendChild(dot);
-      stadStaffDots.push({el:dot,reg,zKey});
-    }
-  });
-}
-
-function stadAnimateStaff(){
-  stadStaffDots.forEach(d=>{
-    const reg=d.reg;
-    if(!reg)return;
-    const nx=reg.x[0]+(Math.random()*(reg.x[1]-reg.x[0]));
-    const ny=reg.y[0]+(Math.random()*(reg.y[1]-reg.y[0]));
-    d.el.style.left=(nx/800*100).toFixed(2)+'%';
-    d.el.style.top=(ny/540*100).toFixed(2)+'%';
-  });
-}
 
 function stadTickGameClock(){
   stadGameSec--;
@@ -8072,9 +8300,7 @@ function stadFluctuateKPIs(){
   const avgInv=Object.values(STAD_ZONES).reduce((a,z)=>a+z.inv,0)/Object.keys(STAD_ZONES).length;
   const riskEl=document.getElementById('stad-irisk');
   if(riskEl){riskEl.textContent=avgInv<50?'CRITICAL':avgInv<70?'HIGH':'MODERATE';riskEl.className='stad-kpi-val '+(avgInv<50?'sr':avgInv<70?'sa':'sg');}
-  // If current zone is shown, re-render
   if(stadCurrentZone)stadRenderZoneDetail(stadCurrentZone);
-  stadUpdateLayer();
 }
 
 function stadTriggerRandomAlert(){
@@ -8088,24 +8314,18 @@ function initStadium(){
   stadActive=true;
   document.body.classList.add('stad-mode');
   stadBuildZonePaths();
-  stadSpawnStaffDots();
+  stadRenderEntities();
   stadRenderNodes();
   stadRenderZoneDetail('ALL');
-  stadUpdateLayer();
   // Seed initial alerts
   ['cr','wa','ai','ok','wa'].forEach((t,i)=>{
     const pool=STAD_ALERT_POOL.filter(a=>a.type===t);
     if(pool.length)setTimeout(()=>stadAddAlert(t,pool[0].msg),(i+1)*400);
   });
-  // Start intervals
-  stadIntervals.push(setInterval(stadAnimateStaff,4200));
+  stadIntervals.push(setInterval(stadTickEntities,7000));
   stadIntervals.push(setInterval(stadTickGameClock,1000));
   stadIntervals.push(setInterval(stadFluctuateKPIs,5000));
   stadIntervals.push(setInterval(stadTriggerRandomAlert,12000));
-  // Resize handler for canvas
-  const observer=new ResizeObserver(()=>stadUpdateLayer());
-  const wrap=document.getElementById('stad-map-wrap');
-  if(wrap)observer.observe(wrap);
 }
 
 /* ── Boot i18n on DOM ready ───────────────────────── */
