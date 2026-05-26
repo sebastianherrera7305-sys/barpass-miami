@@ -514,7 +514,7 @@ nav::after{
 .uc-conf{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);font-weight:600;}
 
 /* ═══════════════════════════════════════════════════════
-   AI RISK ENGINE — Full Intelligence Dashboard
+   RISK ENGINE — Full Intelligence Dashboard
 ═══════════════════════════════════════════════════════ */
 /* Critical alert overlay */
 @keyframes alertPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,64,96,0);border-color:rgba(255,64,96,.6)}50%{box-shadow:0 0 0 6px rgba(255,64,96,.15);border-color:rgba(255,64,96,.9)}}
@@ -1198,7 +1198,7 @@ nav::after{
 .gs-card-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .gs-card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;display:flex;align-items:center;gap:7px;}
 .gs-card-body{padding:12px 14px;}
-/* AI Recommendations */
+/* Recommendations */
 .rec-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 0;scrollbar-width:none;}
 .rec-scroll::-webkit-scrollbar{display:none;}
 .rec-card{
@@ -2389,7 +2389,7 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
           <div class="uc-conf" id="uc-conf">—%</div>
         </div>
       </div>
-      <div id="no-sug" data-i18n="station.scanIdAI" style="text-align:center;color:var(--muted);font-size:11px;padding:8px;background:var(--bg3);border-radius:8px;margin-bottom:8px;flex-shrink:0">Scan ID for AI recommendations</div>
+      <div id="no-sug" data-i18n="station.scanIdAI" style="text-align:center;color:var(--muted);font-size:11px;padding:8px;background:var(--bg3);border-radius:8px;margin-bottom:8px;flex-shrink:0">Scan ID for recommendations</div>
       <!-- Hamburger Category Menu -->
       <div class="cat-menu-wrap" id="cat-menu-wrap">
         <div class="cat-menu-bar">
@@ -2423,7 +2423,7 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
         <div class="addon-header">
           <span class="addon-icon" id="addon-icon">🔥</span>
           <span class="addon-headline" id="addon-headline">Popular shots tonight</span>
-          <span style="font-size:8px;color:var(--muted);font-family:'JetBrains Mono',monospace" data-i18n="station.aiAddon">AI ADD-ON</span>
+          <span style="font-size:8px;color:var(--muted);font-family:'JetBrains Mono',monospace" data-i18n="station.aiAddon">ADD-ON</span>
         </div>
         <div class="addon-grid" id="addon-grid"></div>
       </div>
@@ -2655,7 +2655,7 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
         <div class="cmd-qbtn" onclick="navDropSelect('risk',null)">
           <span class="cmd-qbtn-icon">🛡️</span>
           <div class="cmd-qbtn-text">
-            <div class="cmd-qbtn-title" data-i18n="cmd.goRisk">Risk AI Dashboard</div>
+            <div class="cmd-qbtn-title" data-i18n="cmd.goRisk">Risk Dashboard</div>
             <div class="cmd-qbtn-sub" data-i18n="cmd.goRiskSub">Threats · patterns · heatmap</div>
           </div>
           <span class="cmd-qbtn-arrow">→</span>
@@ -2848,7 +2848,7 @@ BarPass/<br>
 <div id="risk-alert-overlay">
   <div class="rao-inner">
     <div class="rao-header">
-      <div class="rao-level">⚡ AI RISK ENGINE · THREAT DETECTED</div>
+      <div class="rao-level">⚡ RISK ENGINE · THREAT DETECTED</div>
       <div class="rao-title"><span class="rao-blink">🚨</span><span id="rao-title-text">SUSPICIOUS ID DETECTED</span></div>
     </div>
     <div class="rao-body">
@@ -2868,7 +2868,7 @@ BarPass/<br>
         </div>
       </div>
       <div class="rao-confidence">
-        <div class="rao-conf-lbl"><span>AI Confidence Level</span><span id="rao-conf-pct" style="color:var(--amber)">—%</span></div>
+        <div class="rao-conf-lbl"><span>Confidence Level</span><span id="rao-conf-pct" style="color:var(--amber)">—%</span></div>
         <div class="rao-conf-bar"><div class="rao-conf-fill" id="rao-conf-fill" style="width:0%"></div></div>
       </div>
       <div class="rao-flags" id="rao-flags"></div>
@@ -2882,14 +2882,14 @@ BarPass/<br>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
-     RISK INTELLIGENCE VIEW — AI Age & Fraud Engine
+     RISK INTELLIGENCE VIEW — Age & Fraud Engine
 ═══════════════════════════════════════════════════════ -->
 <div class="view" id="view-risk">
   <!-- 4 KPIs -->
   <div class="risk-kpi-bar">
     <div class="risk-kpi"><div class="risk-kpi-lbl">IDs Bloqueados</div><div class="risk-kpi-val" style="color:var(--red)" id="rk-blocked">0</div><div class="risk-kpi-delta" id="rk-blocked-d">esta noche</div></div>
     <div class="risk-kpi"><div class="risk-kpi-lbl">Menores Evitados</div><div class="risk-kpi-val" style="color:var(--amber)" id="rk-underage">0</div><div class="risk-kpi-delta">licencia protegida</div></div>
-    <div class="risk-kpi"><div class="risk-kpi-lbl">Precisión AI</div><div class="risk-kpi-val" style="color:var(--green)" id="rk-accuracy">97.4%</div><div class="risk-kpi-delta" id="rk-acc-delta">↑ +0.3% semana</div></div>
+    <div class="risk-kpi"><div class="risk-kpi-lbl">Precisión</div><div class="risk-kpi-val" style="color:var(--green)" id="rk-accuracy">97.4%</div><div class="risk-kpi-delta" id="rk-acc-delta">↑ +0.3% semana</div></div>
     <div class="risk-kpi"><div class="risk-kpi-lbl">Escaneos</div><div class="risk-kpi-val" style="color:var(--blue)" id="rk-scans">0</div><div class="risk-kpi-delta">acumulado</div></div>
     <!-- Hidden KPIs still needed by JS -->
     <div style="display:none">
@@ -2909,7 +2909,7 @@ BarPass/<br>
         <div style="color:var(--muted);font-size:11px;padding:10px 0;text-align:center">Esperando escaneos…</div>
       </div>
     </div>
-    <!-- AI Heatmap -->
+    <!-- Heatmap -->
     <div class="risk-card">
       <div class="risk-card-head">
         <div class="risk-card-title">🌡️ Heatmap por Hora</div>
@@ -2923,10 +2923,10 @@ BarPass/<br>
         <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap" id="rk-heat-insights"></div>
       </div>
     </div>
-    <!-- AI Pattern Insights -->
+    <!-- Pattern Insights -->
     <div class="risk-card">
       <div class="risk-card-head">
-        <div class="risk-card-title">🧠 Patrones AI</div>
+        <div class="risk-card-title">🧠 Patrones</div>
         <span class="badge bp" id="rk-ai-ver">v3.1</span>
       </div>
       <div class="risk-card-body">
@@ -2970,7 +2970,7 @@ BarPass/<br>
       <div class="cin-vd-val" style="color:var(--amber)" id="cin-rev">$284K</div>
     </div>
     <div class="cin-vd-item">
-      <div class="cin-vd-lbl">AI Risk Score</div>
+      <div class="cin-vd-lbl">Risk Score</div>
       <div class="cin-vd-val" style="color:var(--purple)">97.4%</div>
     </div>
   </div>
@@ -3014,10 +3014,10 @@ BarPass/<br>
   </div>
   <div class="guest-sections">
 
-    <!-- AI Recommendations -->
+    <!-- Recommendations -->
     <div class="gs-card">
       <div class="gs-card-head">
-        <div class="gs-card-title">✨ Curated for You <span style="font-size:9px;color:var(--purple);background:rgba(180,100,255,.1);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace">AI</span></div>
+        <div class="gs-card-title">✨ Curated for You <span style="font-size:9px;color:var(--purple);background:rgba(180,100,255,.1);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace"></span></div>
         <span style="font-size:10px;color:var(--muted)">Based on your preferences</span>
       </div>
       <div class="gs-card-body" style="padding-top:8px">
@@ -3115,10 +3115,10 @@ BarPass/<br>
       </div>
     </div>
 
-    <!-- AI Concierge -->
+    <!-- Concierge -->
     <div class="gs-card">
       <div class="gs-card-head">
-        <div class="gs-card-title">🤖 AI Concierge</div>
+        <div class="gs-card-title">🤖 Concierge</div>
         <span class="live-pulse"><span class="live-dot-sm"></span>Always on</span>
       </div>
       <div class="gs-card-body">
@@ -3231,7 +3231,7 @@ BarPass/<br>
     <div class="inv2-card" style="display:flex;flex-direction:column;">
       <div class="inv2-card-head">
         <div class="inv2-card-title">🧠 Live Alerts <span class="badge br" id="inv2-alert-count">5</span></div>
-        <span style="font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;">AI Anomaly Engine</span>
+        <span style="font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Anomaly Engine</span>
       </div>
       <div class="inv2-card-body" id="inv2-alert-feed" style="flex:1;overflow-y:auto;padding:6px;display:flex;flex-direction:column;gap:5px;"></div>
 
@@ -3309,13 +3309,13 @@ BarPass/<br>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
-     COMPLIANCE VIEW — Risk DB + AI Learning + Employee
+     COMPLIANCE VIEW — Risk DB + Learning + Employee
 ═══════════════════════════════════════════════════════ -->
 <div class="view" id="view-compliance">
   <div class="risk-kpi-bar">
     <div class="risk-kpi"><div class="risk-kpi-lbl" data-i18n="compliance.riskDb">Base de Riesgo</div><div class="risk-kpi-val" style="color:var(--red)">3</div><div class="risk-kpi-delta" data-i18n="compliance.flagged">clientes flaggeados</div></div>
     <div class="risk-kpi"><div class="risk-kpi-lbl" data-i18n="compliance.score">Compliance Score</div><div class="risk-kpi-val" style="color:var(--green)">94%</div><div class="risk-kpi-delta" data-i18n="compliance.teamAvg">equipo promedio</div></div>
-    <div class="risk-kpi"><div class="risk-kpi-lbl" data-i18n="compliance.aiModel">Modelo AI</div><div class="risk-kpi-val" style="color:var(--purple)">v3.1</div><div class="risk-kpi-delta" data-i18n="compliance.autoLearn">auto-aprendizaje</div></div>
+    <div class="risk-kpi"><div class="risk-kpi-lbl" data-i18n="compliance.aiModel">Modelo</div><div class="risk-kpi-val" style="color:var(--purple)">v3.1</div><div class="risk-kpi-delta" data-i18n="compliance.autoLearn">auto-aprendizaje</div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;flex:1;padding:8px;min-height:0;overflow:hidden;">
     <div class="risk-card">
@@ -3323,7 +3323,7 @@ BarPass/<br>
       <div class="risk-card-body" id="rk-risk-db-c"></div>
     </div>
     <div class="risk-card">
-      <div class="risk-card-head"><div class="risk-card-title" data-i18n="compliance.aiEngine">🧠 Motor de Aprendizaje AI</div><span class="badge bp">Auto</span></div>
+      <div class="risk-card-head"><div class="risk-card-title" data-i18n="compliance.aiEngine">🧠 Motor de Aprendizaje</div><span class="badge bp">Auto</span></div>
       <div class="risk-card-body" id="rk-ai-panel-c"></div>
     </div>
     <div class="risk-card">
@@ -3453,7 +3453,7 @@ BarPass/<br>
   </div>
   <div style="flex:1;padding:8px;display:grid;grid-template-columns:1.2fr 1fr;gap:8px;min-height:0;">
     <div class="inv-card">
-      <div class="inv-card-head"><div class="inv-card-title">🏭 Warehouse Zone Map</div><span class="badge bp">Vision AI</span></div>
+      <div class="inv-card-head"><div class="inv-card-title">🏭 Warehouse Zone Map</div><span class="badge bp">Computer Vision</span></div>
       <div class="inv-card-body">
         <div style="font-size:9px;color:var(--muted);margin-bottom:6px;letter-spacing:.1em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;">Click zone for details</div>
         <div class="wh-grid" id="wh-zone-map"></div>
@@ -3469,7 +3469,7 @@ BarPass/<br>
       </div>
     </div>
     <div class="inv-card">
-      <div class="inv-card-head"><div class="inv-card-title">⚡ Real-Time AI Ops Intel</div><span class="badge ba">Predictive</span></div>
+      <div class="inv-card-head"><div class="inv-card-title">⚡ Real-Time Ops Intel</div><span class="badge ba">Predictive</span></div>
       <div class="inv-card-body" id="wh-ai-panel"></div>
     </div>
   </div>
@@ -3489,7 +3489,7 @@ BarPass/<br>
       <div class="inv-card-body" id="runner-board"></div>
     </div>
     <div class="inv-card">
-      <div class="inv-card-head"><div class="inv-card-title">🧠 Runner AI Coaching</div><span class="badge bp">Auto-learning</span></div>
+      <div class="inv-card-head"><div class="inv-card-title">🧠 Runner Coaching</div><span class="badge bp">Auto-learning</span></div>
       <div class="inv-card-body" id="runner-coaching"></div>
     </div>
   </div>
@@ -3521,7 +3521,7 @@ BarPass/<br>
   <div class="rpt-kpi-bar">
     <div class="rpt-kpi"><div class="rpt-kpi-lbl" data-i18n="reports.revTonight">Revenue Tonight</div><div class="rpt-kpi-val" style="color:var(--green)" id="rpt-rev">$0</div><div class="rpt-kpi-delta" data-i18n="reports.vsYest" id="rpt-rev-d">↑ +12% vs ayer</div></div>
     <div class="rpt-kpi"><div class="rpt-kpi-lbl" data-i18n="reports.avgTicket">Ticket Promedio</div><div class="rpt-kpi-val" style="color:var(--blue)" id="rpt-avg">$0</div><div class="rpt-kpi-delta" data-i18n="reports.perOrder">por orden</div></div>
-    <div class="rpt-kpi"><div class="rpt-kpi-lbl" data-i18n="reports.upsellRate">Upsell Rate</div><div class="rpt-kpi-val" style="color:var(--purple)" id="rpt-ur">0%</div><div class="rpt-kpi-delta" data-i18n="reports.aiConv">conversión AI</div></div>
+    <div class="rpt-kpi"><div class="rpt-kpi-lbl" data-i18n="reports.upsellRate">Upsell Rate</div><div class="rpt-kpi-val" style="color:var(--purple)" id="rpt-ur">0%</div><div class="rpt-kpi-delta" data-i18n="reports.aiConv">conversión</div></div>
     <div class="rpt-kpi"><div class="rpt-kpi-lbl" data-i18n="reports.tipsEst">Tips Estimados</div><div class="rpt-kpi-val" style="color:var(--gold)" id="rpt-tips">$0</div><div class="rpt-kpi-delta" data-i18n="reports.tipAvg">18% promedio</div></div>
     <div class="rpt-kpi"><div class="rpt-kpi-lbl" data-i18n="reports.ordersTotal">Órdenes Totales</div><div class="rpt-kpi-val" style="color:var(--amber)" id="rpt-orders">0</div><div class="rpt-kpi-delta" data-i18n="reports.thisTurn">este turno</div></div>
     <div class="rpt-kpi"><div class="rpt-kpi-lbl" data-i18n="reports.discounts">Descuentos</div><div class="rpt-kpi-val" style="color:var(--red)" id="rpt-disc">$0</div><div class="rpt-kpi-delta" data-i18n="reports.applied">aplicados</div></div>
@@ -3608,7 +3608,7 @@ BarPass/<br>
       </div>
       <div class="stg-card-body">
         <div class="stg-row"><span class="stg-row-label" data-i18n="settings.riskAlerts">🚨 Alertas de riesgo</span><button class="stg-toggle" onclick="this.classList.toggle('off')"></button></div>
-        <div class="stg-row"><span class="stg-row-label" data-i18n="settings.aiRec">💡 Recomendaciones AI</span><button class="stg-toggle" onclick="this.classList.toggle('off')"></button></div>
+        <div class="stg-row"><span class="stg-row-label" data-i18n="settings.aiRec">💡 Recomendaciones</span><button class="stg-toggle" onclick="this.classList.toggle('off')"></button></div>
         <div class="stg-row"><span class="stg-row-label" data-i18n="settings.lowStock">📦 Inventario bajo</span><button class="stg-toggle" onclick="this.classList.toggle('off')"></button></div>
         <div class="stg-row"><span class="stg-row-label" data-i18n="settings.dailyReport">📊 Reporte diario</span><button class="stg-toggle" onclick="this.classList.toggle('off')"></button></div>
         <div class="stg-row"><span class="stg-row-label" data-i18n="settings.sapSync">📡 SAP sync</span><button class="stg-toggle" onclick="this.classList.toggle('off')"></button></div>
@@ -3705,7 +3705,7 @@ BarPass/<br>
     <div class="stad-header-r">
       <button class="stad-ai-btn" id="stad-ai-btn" onclick="stadToggleAI()">
         <span class="stad-ai-dot" id="stad-ai-dot"></span>
-        AI COMMAND
+        COMMAND
       </button>
     </div>
   </div>
@@ -3715,7 +3715,7 @@ BarPass/<br>
     <button class="layer-btn on ls" data-layer="staff" onclick="stadToggleLayer('staff',this)"><span class="lb-dot"></span>STAFF</button>
     <button class="layer-btn on li" data-layer="inventory" onclick="stadToggleLayer('inventory',this)"><span class="lb-dot"></span>INV FLOW</button>
     <button class="layer-btn on" data-layer="infra" onclick="stadToggleLayer('infra',this)"><span class="lb-dot"></span>INFRA</button>
-    <button class="layer-btn la" data-layer="ai" onclick="stadToggleLayer('ai',this)"><span class="lb-dot"></span>AI LAYER</button>
+    <button class="layer-btn la" data-layer="ai" onclick="stadToggleLayer('ai',this)"><span class="lb-dot"></span>INTEL</button>
     <button class="layer-btn on lr" data-layer="risk" onclick="stadToggleLayer('risk',this)"><span class="lb-dot"></span>RISK</button>
     <button class="layer-btn on lc" data-layer="crowd" onclick="stadToggleLayer('crowd',this)"><span class="lb-dot"></span>CROWD</button>
   </div>
@@ -3928,7 +3928,7 @@ BarPass/<br>
             <circle r="2.2" fill="#a855f7" opacity=".72"><animateMotion dur="1.6s" repeatCount="indefinite" begin="-0.8s"><mpath href="#lane-vip2"/></animateMotion></circle>
           </g>
 
-          <!-- ═══ AI COMMAND OVERLAY ═══ -->
+          <!-- ═══ COMMAND OVERLAY ═══ -->
           <g id="stad-ai-overlay" style="display:none">
             <path id="ai-route-path" d="M400,50 C270,105 160,192 82,272" stroke="#5AA5FF" stroke-width="4" fill="none" opacity=".92" class="ai-route-line"/>
             <circle id="ai-ring-1" cx="82" cy="272" r="18" fill="none" stroke="#5AA5FF" stroke-width="2.5" class="ai-pulse-ring"/>
@@ -3979,7 +3979,7 @@ BarPass/<br>
       <!-- AI Panel (hidden by default) -->
       <div class="stad-panel" id="stad-ai-panel" style="display:none;">
         <div class="stad-panel-head">
-          <span>AI COMMAND MODE</span>
+          <span>COMMAND MODE</span>
           <span style="color:#5AA5FF;font-size:8px;" id="stad-ai-conf">92% CONFIDENCE</span>
         </div>
         <div class="stad-ai-panel" id="stad-ai-recs"></div>
@@ -4541,7 +4541,7 @@ const VIEWS={
     {id:'manager',label:'Dashboard'},
     {id:'station',label:'Estación'},
     {section:'Seguridad'},
-    {id:'risk',label:'Risk AI'},
+    {id:'risk',label:'Risk'},
     {id:'team',label:'Equipo'},
     {section:'Inventario'},
     {id:'inv',label:'Inventario'},
@@ -4557,7 +4557,7 @@ const VIEWS={
     {id:'stadium',label:'Stadium POS'},
     {id:'station',label:'Estación'},
     {section:'Seguridad'},
-    {id:'risk',label:'Risk AI'},
+    {id:'risk',label:'Risk'},
     {id:'team',label:'Equipo'},
     {section:'Inventario'},
     {id:'inv',label:'Inventario'},
@@ -4777,7 +4777,7 @@ async function sim(key,bt){
   const ok=c.decision==='APPROVED';
   setVS(ok?'vs-ok':'vs-no',c.decision,c.name,c.doc+' · Age '+c.age);
   Security.log(ok?'info':'warn',currentRole,`ID scan: ${c.name} — ${c.decision} (Age ${c.age})`);
-  // AI Risk Engine analysis
+  // Risk Engine analysis
   aiAnalyzeScan(c,bt,ok);
   if(ok&&c.tier){
     const cls=c.tier==='platinum'?'tp-plat':c.tier==='vip'?'tp-vip':'tp-std';
@@ -4871,7 +4871,7 @@ function simReset(){
   activeDiscount=null;
   setVS('vs-wait','Ready to scan','—','Insert ID or passport');
   safeHide('fraud-box');safeHide('profile-zone');safeHide('uc');safeHide('temp-zone');
-  safeShow('no-sug');setText('no-sug','Scan ID for AI recommendations');
+  safeShow('no-sug');setText('no-sug','Scan ID for recommendations');
   document.getElementById('pgrid').innerHTML='';
   renderOrder();renderAddons();updateAll();
   Security.log('info',currentRole,'Session reset');
@@ -4946,7 +4946,7 @@ function renderOrder(){
     return `<div class="cart-item">
       <div class="cart-thumb">${thumbHtml}</div>
       <div class="cart-info">
-        <div class="cart-name">${Security.sanitize(item.name)}${item.isUpsell?'<span class="ai-badge">AI</span>':''}</div>
+        <div class="cart-name">${Security.sanitize(item.name)}${item.isUpsell?'<span class="ai-badge">+</span>':''}</div>
         <div class="cart-qty-row">
           <button class="qty-btn" onclick="changeQty(${i},-1)">−</button>
           <span class="cart-qty">1</span>
@@ -5355,7 +5355,7 @@ document.addEventListener('click',function(e){
 ═══════════════════════════════════════════════════════════ */
 const RP_WEIGHTS=[
   {label:'Ventas totales (revenue)',pct:30,color:'var(--green)',key:'sales'},
-  {label:'Upselling (conversión AI)',pct:20,color:'var(--purple)',key:'upsell'},
+  {label:'Upselling (conversión)',pct:20,color:'var(--purple)',key:'upsell'},
   {label:'Satisfacción del cliente (NPS)',pct:20,color:'var(--blue)',key:'satisfaction'},
   {label:'Velocidad de servicio',pct:15,color:'var(--amber)',key:'speed'},
   {label:'Precisión en pedidos',pct:15,color:'var(--teal)',key:'accuracy'},
@@ -5656,7 +5656,7 @@ document.addEventListener('click',function(e){
 });
 
 /* ═══════════════════════════════════════════════════════════
-   AI RISK ENGINE — Age Verification & Fraud Intelligence
+   RISK ENGINE — Age Verification & Fraud Intelligence
    Self-learning compliance platform for hospitality
 ═══════════════════════════════════════════════════════════ */
 const RiskEngine = (() => {
@@ -5701,11 +5701,11 @@ const RiskEngine = (() => {
 
   // AI pattern insights
   const _patterns = [
-    {icon:'🕙',txt:'Risk spikes 340% after 10 PM — AI increased scan weight x2.4 during peak hours.',color:'var(--red)'},
+    {icon:'🕙',txt:'Risk spikes 340% after 10 PM — increased scan weight x2.4 during peak hours.',color:'var(--red)'},
     {icon:'📍',txt:'Section C shows 3× higher fake ID frequency. Consider camera positioning.', color:'var(--amber)'},
     {icon:'🔁',txt:'Duplicate ID reuse detected across 3 venues in Miami-Dade. Cross-venue alert active.',color:'var(--purple)'},
-    {icon:'📅',txt:'Friday–Saturday nights: 71% of weekly fake ID attempts. AI pre-activates high-alert mode.',color:'var(--blue)'},
-    {icon:'🧠',txt:'AI model v3.1 improved 0.3% accuracy this week from 12 new confirmed incidents.',color:'var(--green)'},
+    {icon:'📅',txt:'Friday–Saturday nights: 71% of weekly fake ID attempts. System pre-activates high-alert mode.',color:'var(--blue)'},
+    {icon:'🧠',txt:'Model v3.1 improved 0.3% accuracy this week from 12 new confirmed incidents.',color:'var(--green)'},
   ];
 
   // ── Core Analysis ──────────────────────────────────────
@@ -5910,7 +5910,7 @@ const RiskEngine = (() => {
       <div style="font-size:9px;color:var(--muted);margin:-3px 0 6px;padding-left:60px;font-family:'JetBrains Mono',monospace">${d.scans} scans · ${d.skipRate}% skip rate · ${d.riskyApprovals} risky approvals</div>`;
     }).join('');
     const worstCoach = entries.sort((a,b)=>a[1].score-b[1].score)[0];
-    const html = `${barsHtml}<div class="emp-coaching">🤖 AI Coach: ${Security.sanitize(worstCoach[1].coaching)}</div>`;
+    const html = `${barsHtml}<div class="emp-coaching">💡 Coach: ${Security.sanitize(worstCoach[1].coaching)}</div>`;
     ['rk-emp-panel','rk-emp-panel-c'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
   }
 
@@ -6087,7 +6087,7 @@ function raoAction(action) {
   } else if(action==='dismiss') {
     toast(i18n.t('toast.overrideLogged'),'warn');
     Security.log('warn',currentRole,'Risk alert: staff dismissed — override logged');
-    addAlert({type:'wn',msg:'⚠️ Risk override: staff bypassed AI warning — logged for review',time:now()});
+    addAlert({type:'wn',msg:'⚠️ Risk override: staff bypassed warning — logged for review',time:now()});
     const bt = state.currentCustomer?.bartender;
     if(bt && RiskEngine){
       // Penalize compliance score for dismissal
@@ -6374,7 +6374,7 @@ const WH_AI_INTEL=[
   {type:'warn',icon:'⚠️',msg:'Grey Goose stock critical in 47 min. Automatic reorder triggered to supplier.'},
   {type:'warn',icon:'⚠️',msg:'Runner Marco: 4th consecutive late delivery. Reroute or reassign recommended.'},
   {type:'info',icon:'📊',msg:'Hennessy demand 23% above forecast tonight. Likely tied to VIP booking at Table 12.'},
-  {type:'info',icon:'💡',msg:'Optimal restock window: 22:00–22:30 (crowd dip predicted by AI crowd model).'},
+  {type:'info',icon:'💡',msg:'Optimal restock window: 22:00–22:30 (crowd dip predicted by crowd model).'},
   {type:'ok',icon:'✅',msg:'Beer rotation at optimal velocity. No action required for next 90 minutes.'},
 ];
 
@@ -6681,7 +6681,7 @@ function renderWhAiPanel(){
   el.innerHTML=`
     <div class="ai-learning-bar" style="margin-bottom:10px">
       <span class="ai-learn-icon">🧠</span>
-      <div class="ai-learn-info"><div class="ai-learn-title">Inventory AI v2.4 — Self-Learning</div><div class="ai-learn-sub">284 transfer patterns learned tonight</div></div>
+      <div class="ai-learn-info"><div class="ai-learn-title">Inventory v2.4 — Self-Learning</div><div class="ai-learn-sub">284 transfer patterns learned tonight</div></div>
       <div class="ai-learn-acc">94.2%</div>
     </div>
     ${WH_AI_INTEL.map(a=>`<div class="ai-chip ${cls[a.type]||'ai-chip-info'}"><span style="font-size:14px;flex-shrink:0">${a.icon}</span><span style="font-size:11px">${a.msg}</span></div>`).join('')}`;
@@ -6711,7 +6711,7 @@ function renderRunnerBoard(){
 function renderRunnerCoaching(){
   const el=document.getElementById('runner-coaching');if(!el)return;
   const insights=[
-    {icon:'🚨',name:'Marco R.',col:'var(--red)',msg:'4 consecutive late deliveries. AI recommends reassignment or route optimization. Avg delay: 9.2 min.'},
+    {icon:'🚨',name:'Marco R.',col:'var(--red)',msg:'4 consecutive late deliveries. System recommends reassignment or route optimization. Avg delay: 9.2 min.'},
     {icon:'🏆',name:'Ana K.',col:'var(--green)',msg:'Perfect delivery record tonight. 97% on-time, zero discrepancies. Recommend for runner of the night award.'},
     {icon:'💡',name:'Tom B.',col:'var(--amber)',msg:'1 return mismatch. Likely counting error at Stand 5. Suggest manual recount before next pickup.'},
     {icon:'📊',name:'All Runners',col:'var(--blue)',msg:'Peak demand window 22:00–23:30 predicted. Pre-stage inventory at dispatch now to reduce wait times.'},
@@ -6894,7 +6894,7 @@ const i18n = (() => {
     'station.profile':'Perfil','station.visits':'Visitas','station.avgDollar':'Prom $',
     'station.tier':'Nivel','station.spend':'Gasto','station.premium':'Premium',
     'station.loyalty':'Lealtad','station.tonight':'Esta Noche',
-    'station.scanIdAI':'Escanea ID para recomendaciones AI','station.aiAddon':'ADD-ON IA',
+    'station.scanIdAI':'Escanea ID para recomendaciones','station.aiAddon':'ADD-ON',
     'cart.clearAll':'Limpiar todo','cart.empty':'Carrito vacío — selecciona items',
     'cart.discountLock':'Descuento (manager debe habilitarlo)',
     'cart.enterCode':'INGRESA CÓDIGO','cart.apply':'Aplicar',
@@ -6919,9 +6919,9 @@ const i18n = (() => {
     'team.version':'Versión','team.forceRetrain':'Forzar reentrenamiento',
     'compliance.riskDb':'Base de Riesgo','compliance.flagged':'clientes flaggeados',
     'compliance.score':'Compliance Score','compliance.teamAvg':'equipo promedio',
-    'compliance.aiModel':'Modelo AI','compliance.autoLearn':'auto-aprendizaje',
+    'compliance.aiModel':'Modelo','compliance.autoLearn':'auto-aprendizaje',
     'compliance.riskDbTitle':'🗄️ Base de Datos de Riesgo',
-    'compliance.aiEngine':'🧠 Motor de Aprendizaje AI',
+    'compliance.aiEngine':'🧠 Motor de Aprendizaje',
     'compliance.empCompliance':'👮 Compliance de Empleados','compliance.tracking':'Rastreando',
     'prod.catalog':'Catálogo','prod.create':'+ Crear','prod.newProduct':'Nuevo Producto',
     'prod.all':'Todos','prod.selected':'seleccionados','prod.export':'📤 Exportar',
@@ -6937,7 +6937,7 @@ const i18n = (() => {
     'reports.upsellRate':'Tasa Upsell','reports.tipsEst':'Tips Estimados',
     'reports.ordersTotal':'Órdenes Totales','reports.discounts':'Descuentos',
     'reports.vsYest':'↑ +12% vs ayer','reports.perOrder':'por orden',
-    'reports.aiConv':'conversión AI','reports.tipAvg':'18% promedio',
+    'reports.aiConv':'conversión','reports.tipAvg':'18% promedio',
     'reports.thisTurn':'este turno','reports.applied':'aplicados',
     'reports.title':'📊 Reportes & Exportación','reports.currentTurn':'Turno actual',
     'reports.pdf':'📄 PDF','reports.excel':'📊 Excel',
@@ -6956,7 +6956,7 @@ const i18n = (() => {
     'settings.timezone':'⏰ Zona horaria','settings.security':'🔐 Seguridad',
     'settings.level3':'Nivel 3','settings.sessionTTL':'Tiempo de sesión','settings.8hours':'8 horas',
     'settings.notifications':'🔔 Notificaciones','settings.riskAlerts':'🚨 Alertas de riesgo',
-    'settings.aiRec':'💡 Recomendaciones AI','settings.lowStock':'📦 Inventario bajo',
+    'settings.aiRec':'💡 Recomendaciones','settings.lowStock':'📦 Inventario bajo',
     'settings.dailyReport':'📊 Reporte diario','settings.sapSync':'📡 SAP sync',
     'settings.integrations':'🔗 Integraciones','settings.connected':'● Conectado',
     'settings.active':'● Activo','settings.posOnline':'● Online','settings.hybrid':'● Hybrid',
@@ -7010,7 +7010,7 @@ const i18n = (() => {
     'cmd.sapSync':'Sync SAP','cmd.variance':'Varianza',
     'cmd.liveActivity':'Actividad en Vivo','cmd.quickActions':'Acciones Rápidas',
     'cmd.goStation':'Ir a Estación','cmd.goStationSub':'Atender clientes · escanear IDs',
-    'cmd.goRisk':'Risk AI Dashboard','cmd.goRiskSub':'Amenazas · patrones · mapa de calor',
+    'cmd.goRisk':'Risk Dashboard','cmd.goRiskSub':'Amenazas · patrones · mapa de calor',
     'cmd.goProducts':'Gestión de Productos','cmd.goProductsSub':'Crear · editar · catálogo',
     'cmd.goInventory':'Inteligencia de Inventario','cmd.goInventorySub':'RFID · merma · zonas',
     'cmd.goReports':'Reportes & Analítica','cmd.goReportsSub':'Desempeño · tendencias · exportar',
@@ -7035,7 +7035,7 @@ const i18n = (() => {
     'station.profile':'Profile','station.visits':'Visits','station.avgDollar':'Avg $',
     'station.tier':'Tier','station.spend':'Spend','station.premium':'Premium',
     'station.loyalty':'Loyalty','station.tonight':'Tonight',
-    'station.scanIdAI':'Scan ID for AI recommendations','station.aiAddon':'AI ADD-ON',
+    'station.scanIdAI':'Scan ID for recommendations','station.aiAddon':'ADD-ON',
     'cart.clearAll':'Clear all','cart.empty':'Cart empty — select items',
     'cart.discountLock':'Discount (manager must enable)',
     'cart.enterCode':'ENTER CODE','cart.apply':'Apply',
@@ -7060,9 +7060,9 @@ const i18n = (() => {
     'team.version':'Version','team.forceRetrain':'Force retrain',
     'compliance.riskDb':'Risk Database','compliance.flagged':'flagged customers',
     'compliance.score':'Compliance Score','compliance.teamAvg':'team average',
-    'compliance.aiModel':'AI Model','compliance.autoLearn':'auto-learning',
+    'compliance.aiModel':'Model','compliance.autoLearn':'auto-learning',
     'compliance.riskDbTitle':'🗄️ Risk Database',
-    'compliance.aiEngine':'🧠 AI Learning Engine',
+    'compliance.aiEngine':'🧠 Learning Engine',
     'compliance.empCompliance':'👮 Employee Compliance','compliance.tracking':'Tracking',
     'prod.catalog':'Catalog','prod.create':'+ Create','prod.newProduct':'New Product',
     'prod.all':'All','prod.selected':'selected','prod.export':'📤 Export',
@@ -7078,7 +7078,7 @@ const i18n = (() => {
     'reports.upsellRate':'Upsell Rate','reports.tipsEst':'Estimated Tips',
     'reports.ordersTotal':'Total Orders','reports.discounts':'Discounts',
     'reports.vsYest':'↑ +12% vs yesterday','reports.perOrder':'per order',
-    'reports.aiConv':'AI conversion','reports.tipAvg':'18% average',
+    'reports.aiConv':'conversion','reports.tipAvg':'18% average',
     'reports.thisTurn':'this shift','reports.applied':'applied',
     'reports.title':'📊 Reports & Export','reports.currentTurn':'Current shift',
     'reports.pdf':'📄 PDF','reports.excel':'📊 Excel',
@@ -7097,7 +7097,7 @@ const i18n = (() => {
     'settings.timezone':'⏰ Timezone','settings.security':'🔐 Security',
     'settings.level3':'Level 3','settings.sessionTTL':'Session TTL','settings.8hours':'8 hours',
     'settings.notifications':'🔔 Notifications','settings.riskAlerts':'🚨 Risk alerts',
-    'settings.aiRec':'💡 AI recommendations','settings.lowStock':'📦 Low inventory',
+    'settings.aiRec':'💡 Recommendations','settings.lowStock':'📦 Low inventory',
     'settings.dailyReport':'📊 Daily report','settings.sapSync':'📡 SAP sync',
     'settings.integrations':'🔗 Integrations','settings.connected':'● Connected',
     'settings.active':'● Active','settings.posOnline':'● Online','settings.hybrid':'● Hybrid',
@@ -7107,7 +7107,7 @@ const i18n = (() => {
     'settings.vipExp':'VIP experience','settings.appearance':'⚙️ Appearance & App',
     'settings.darkTheme':'🌗 Dark theme','settings.introApp':'🎬 Cinematic intro',
     'settings.mlEngine':'🧠 ML Engine','settings.version':'📦 Version',
-    'settings.lastSync':'🔄 Last sync','settings.aiEngine':'🧠 AI Engine',
+    'settings.lastSync':'🔄 Last sync','settings.aiEngine':'🧠 Engine',
     'settings.autoLearning':'Auto-learning','settings.upsellAcc':'Upsell accuracy',
     'settings.conversions':'Conversions','settings.riskEngine':'Risk engine',
     'settings.autoRetrain':'Auto-retrain','settings.feedbackLoop':'Feedback loop',
@@ -7151,7 +7151,7 @@ const i18n = (() => {
     'cmd.sapSync':'SAP Sync','cmd.variance':'Variance',
     'cmd.liveActivity':'Live Activity','cmd.quickActions':'Quick Actions',
     'cmd.goStation':'Go to Station','cmd.goStationSub':'Serve customers · scan IDs',
-    'cmd.goRisk':'Risk AI Dashboard','cmd.goRiskSub':'Threats · patterns · heatmap',
+    'cmd.goRisk':'Risk Dashboard','cmd.goRiskSub':'Threats · patterns · heatmap',
     'cmd.goProducts':'Product Management','cmd.goProductsSub':'Create · edit · manage catalog',
     'cmd.goInventory':'Inventory Intelligence','cmd.goInventorySub':'RFID · shrinkage · zones',
     'cmd.goReports':'Reports & Analytics','cmd.goReportsSub':'Performance · trends · export',
@@ -7176,7 +7176,7 @@ const i18n = (() => {
     'station.profile':'Perfil','station.visits':'Visitas','station.avgDollar':'Méd $',
     'station.tier':'Nível','station.spend':'Gasto','station.premium':'Premium',
     'station.loyalty':'Fidelidade','station.tonight':'Esta Noite',
-    'station.scanIdAI':'Escaneie ID para recomendações AI','station.aiAddon':'ADD-ON IA',
+    'station.scanIdAI':'Escaneie ID para recomendações','station.aiAddon':'ADD-ON',
     'cart.clearAll':'Limpar tudo','cart.empty':'Carrinho vazio — selecione itens',
     'cart.discountLock':'Desconto (gerente deve ativar)',
     'cart.enterCode':'INSERIR CÓDIGO','cart.apply':'Aplicar',
@@ -7201,9 +7201,9 @@ const i18n = (() => {
     'team.version':'Versão','team.forceRetrain':'Forçar retreinamento',
     'compliance.riskDb':'Base de Risco','compliance.flagged':'clientes sinalizados',
     'compliance.score':'Score de Conformidade','compliance.teamAvg':'média da equipe',
-    'compliance.aiModel':'Modelo AI','compliance.autoLearn':'auto-aprendizado',
+    'compliance.aiModel':'Modelo','compliance.autoLearn':'auto-aprendizado',
     'compliance.riskDbTitle':'🗄️ Base de Dados de Risco',
-    'compliance.aiEngine':'🧠 Motor de Aprendizado AI',
+    'compliance.aiEngine':'🧠 Motor de Aprendizado',
     'compliance.empCompliance':'👮 Conformidade de Funcionários','compliance.tracking':'Rastreando',
     'prod.catalog':'Catálogo','prod.create':'+ Criar','prod.newProduct':'Novo Produto',
     'prod.all':'Todos','prod.selected':'selecionados','prod.export':'📤 Exportar',
@@ -7219,7 +7219,7 @@ const i18n = (() => {
     'reports.upsellRate':'Taxa Upsell','reports.tipsEst':'Gorjetas Estimadas',
     'reports.ordersTotal':'Pedidos Totais','reports.discounts':'Descontos',
     'reports.vsYest':'↑ +12% vs ontem','reports.perOrder':'por pedido',
-    'reports.aiConv':'conversão AI','reports.tipAvg':'18% médio',
+    'reports.aiConv':'conversão','reports.tipAvg':'18% médio',
     'reports.thisTurn':'este turno','reports.applied':'aplicados',
     'reports.title':'📊 Relatórios & Exportação','reports.currentTurn':'Turno atual',
     'reports.pdf':'📄 PDF','reports.excel':'📊 Excel',
@@ -7238,7 +7238,7 @@ const i18n = (() => {
     'settings.timezone':'⏰ Fuso horário','settings.security':'🔐 Segurança',
     'settings.level3':'Nível 3','settings.sessionTTL':'TTL de Sessão','settings.8hours':'8 horas',
     'settings.notifications':'🔔 Notificações','settings.riskAlerts':'🚨 Alertas de risco',
-    'settings.aiRec':'💡 Recomendações AI','settings.lowStock':'📦 Estoque baixo',
+    'settings.aiRec':'💡 Recomendações','settings.lowStock':'📦 Estoque baixo',
     'settings.dailyReport':'📊 Relatório diário','settings.sapSync':'📡 SAP sync',
     'settings.integrations':'🔗 Integrações','settings.connected':'● Conectado',
     'settings.active':'● Ativo','settings.posOnline':'● Online','settings.hybrid':'● Hybrid',
@@ -7286,7 +7286,7 @@ const i18n = (() => {
     'cmd.sapSync':'Sync SAP','cmd.variance':'Variância',
     'cmd.liveActivity':'Atividade ao Vivo','cmd.quickActions':'Ações Rápidas',
     'cmd.goStation':'Ir para Estação','cmd.goStationSub':'Atender clientes · escanear IDs',
-    'cmd.goRisk':'Risk AI Dashboard','cmd.goRiskSub':'Ameaças · padrões · mapa de calor',
+    'cmd.goRisk':'Risk Dashboard','cmd.goRiskSub':'Ameaças · padrões · mapa de calor',
     'cmd.goProducts':'Gestão de Produtos','cmd.goProductsSub':'Criar · editar · catálogo',
     'cmd.goInventory':'Inteligência de Estoque','cmd.goInventorySub':'RFID · quebra · zonas',
     'cmd.goReports':'Relatórios & Análise','cmd.goReportsSub':'Desempenho · tendências · exportar',
@@ -7311,7 +7311,7 @@ const i18n = (() => {
     'station.profile':'Profil','station.visits':'Visites','station.avgDollar':'Moy $',
     'station.tier':'Niveau','station.spend':'Dépenses','station.premium':'Premium',
     'station.loyalty':'Fidélité','station.tonight':'Ce Soir',
-    'station.scanIdAI':'Scannez ID pour recommandations AI','station.aiAddon':'ADD-ON IA',
+    'station.scanIdAI':'Scannez ID pour recommandations','station.aiAddon':'ADD-ON',
     'cart.clearAll':'Tout effacer','cart.empty':'Panier vide — sélectionnez des articles',
     'cart.discountLock':'Remise (le manager doit activer)',
     'cart.enterCode':'ENTRER LE CODE','cart.apply':'Appliquer',
@@ -7336,9 +7336,9 @@ const i18n = (() => {
     'team.version':'Version','team.forceRetrain':'Forcer réentraînement',
     'compliance.riskDb':'Base de Risque','compliance.flagged':'clients signalés',
     'compliance.score':'Score Conformité','compliance.teamAvg':'moyenne équipe',
-    'compliance.aiModel':'Modèle AI','compliance.autoLearn':'auto-apprentissage',
+    'compliance.aiModel':'Modèle','compliance.autoLearn':'auto-apprentissage',
     'compliance.riskDbTitle':'🗄️ Base de Données Risque',
-    'compliance.aiEngine':'🧠 Moteur d\'Apprentissage AI',
+    'compliance.aiEngine':'🧠 Moteur d\'Apprentissage',
     'compliance.empCompliance':'👮 Conformité Employés','compliance.tracking':'Suivi',
     'prod.catalog':'Catalogue','prod.create':'+ Créer','prod.newProduct':'Nouveau Produit',
     'prod.all':'Tous','prod.selected':'sélectionnés','prod.export':'📤 Exporter',
@@ -7354,7 +7354,7 @@ const i18n = (() => {
     'reports.upsellRate':'Taux Upsell','reports.tipsEst':'Pourboires Estimés',
     'reports.ordersTotal':'Commandes Totales','reports.discounts':'Remises',
     'reports.vsYest':'↑ +12% vs hier','reports.perOrder':'par commande',
-    'reports.aiConv':'conversion AI','reports.tipAvg':'18% moyen',
+    'reports.aiConv':'conversion','reports.tipAvg':'18% moyen',
     'reports.thisTurn':'ce service','reports.applied':'appliquées',
     'reports.title':'📊 Rapports & Exportation','reports.currentTurn':'Service actuel',
     'reports.pdf':'📄 PDF','reports.excel':'📊 Excel',
@@ -7373,7 +7373,7 @@ const i18n = (() => {
     'settings.timezone':'⏰ Fuseau horaire','settings.security':'🔐 Sécurité',
     'settings.level3':'Niveau 3','settings.sessionTTL':'TTL de session','settings.8hours':'8 heures',
     'settings.notifications':'🔔 Notifications','settings.riskAlerts':'🚨 Alertes de risque',
-    'settings.aiRec':'💡 Recommandations AI','settings.lowStock':'📦 Stock faible',
+    'settings.aiRec':'💡 Recommandations','settings.lowStock':'📦 Stock faible',
     'settings.dailyReport':'📊 Rapport quotidien','settings.sapSync':'📡 SAP sync',
     'settings.integrations':'🔗 Intégrations','settings.connected':'● Connecté',
     'settings.active':'● Actif','settings.posOnline':'● En ligne','settings.hybrid':'● Hybride',
@@ -7421,7 +7421,7 @@ const i18n = (() => {
     'cmd.sapSync':'Sync SAP','cmd.variance':'Écart',
     'cmd.liveActivity':'Activité en Direct','cmd.quickActions':'Actions Rapides',
     'cmd.goStation':'Aller à la Station','cmd.goStationSub':'Servir clients · scanner IDs',
-    'cmd.goRisk':'Tableau Risk AI','cmd.goRiskSub':'Menaces · modèles · carte chaleur',
+    'cmd.goRisk':'Tableau Risk','cmd.goRiskSub':'Menaces · modèles · carte chaleur',
     'cmd.goProducts':'Gestion Produits','cmd.goProductsSub':'Créer · modifier · catalogue',
     'cmd.goInventory':'Intelligence Inventaire','cmd.goInventorySub':'RFID · démarque · zones',
     'cmd.goReports':'Rapports & Analyses','cmd.goReportsSub':'Performance · tendances · export',
@@ -7543,7 +7543,7 @@ const TRANSLATIONS = {
     'cmd.sapSync':'Sync SAP','cmd.variance':'Varianza',
     'cmd.liveActivity':'Actividad en Vivo','cmd.quickActions':'Acciones Rápidas',
     'cmd.goStation':'Ir a Estación','cmd.goStationSub':'Atender clientes · escanear IDs',
-    'cmd.goRisk':'Risk AI Dashboard','cmd.goRiskSub':'Amenazas · patrones · mapa de calor',
+    'cmd.goRisk':'Risk Dashboard','cmd.goRiskSub':'Amenazas · patrones · mapa de calor',
     'cmd.goProducts':'Gestión de Productos','cmd.goProductsSub':'Crear · editar · catálogo',
     'cmd.goInventory':'Inteligencia de Inventario','cmd.goInventorySub':'RFID · merma · zonas',
     'cmd.goReports':'Reportes & Analítica','cmd.goReportsSub':'Desempeño · tendencias · exportar',
@@ -7582,7 +7582,7 @@ const TRANSLATIONS = {
     'cmd.sapSync':'SAP Sync','cmd.variance':'Variance',
     'cmd.liveActivity':'Live Activity','cmd.quickActions':'Quick Actions',
     'cmd.goStation':'Go to Station','cmd.goStationSub':'Serve customers · scan IDs',
-    'cmd.goRisk':'Risk AI Dashboard','cmd.goRiskSub':'Threats · patterns · heatmap',
+    'cmd.goRisk':'Risk Dashboard','cmd.goRiskSub':'Threats · patterns · heatmap',
     'cmd.goProducts':'Product Management','cmd.goProductsSub':'Create · edit · manage catalog',
     'cmd.goInventory':'Inventory Intelligence','cmd.goInventorySub':'RFID · shrinkage · zones',
     'cmd.goReports':'Reports & Analytics','cmd.goReportsSub':'Performance · trends · export',
@@ -7597,8 +7597,8 @@ const TRANSLATIONS = {
     'prod.step1of5':'Step 1 of 5','prod.next':'Next →',
     'prod.pricingTitle':'Pricing & Revenue','prod.salePrice':'Sale Price ($)',
     'prod.costPrice':'Cost Price ($)','prod.happyHour':'Happy Hour Price ($)',
-    'prod.taxRate':'Tax Rate (%)','prod.upsellPairs':'Upsell Pairings (AI)',
-    'prod.upsellHint':'Comma-separated. Used by AI to suggest add-ons to bartenders.',
+    'prod.taxRate':'Tax Rate (%)','prod.upsellPairs':'Upsell Pairings',
+    'prod.upsellHint':'Comma-separated. Used to suggest add-ons to bartenders.',
     'prod.inventoryTitle':'Inventory Settings','prod.initialStock':'Initial Stock (units)',
     'prod.lowStockAlert':'Low Stock Alert (units)','prod.storageZone':'Storage Zone',
     'prod.unitType':'Unit Type','prod.storageRules':'Storage Rules',
@@ -7621,7 +7621,7 @@ const TRANSLATIONS = {
     'cmd.sapSync':'Sync SAP','cmd.variance':'Variância',
     'cmd.liveActivity':'Atividade ao Vivo','cmd.quickActions':'Ações Rápidas',
     'cmd.goStation':'Ir para Estação','cmd.goStationSub':'Atender clientes · escanear IDs',
-    'cmd.goRisk':'Risk AI Dashboard','cmd.goRiskSub':'Ameaças · padrões · mapa de calor',
+    'cmd.goRisk':'Risk Dashboard','cmd.goRiskSub':'Ameaças · padrões · mapa de calor',
     'cmd.goProducts':'Gestão de Produtos','cmd.goProductsSub':'Criar · editar · catálogo',
     'cmd.goInventory':'Inteligência de Estoque','cmd.goInventorySub':'RFID · quebra · zonas',
     'cmd.goReports':'Relatórios & Análise','cmd.goReportsSub':'Desempenho · tendências · exportar',
@@ -7646,7 +7646,7 @@ const TRANSLATIONS = {
     'cmd.sapSync':'Sync SAP','cmd.variance':'Écart',
     'cmd.liveActivity':'Activité en Direct','cmd.quickActions':'Actions Rapides',
     'cmd.goStation':'Aller à la Station','cmd.goStationSub':'Servir clients · scanner IDs',
-    'cmd.goRisk':'Tableau Risk AI','cmd.goRiskSub':'Menaces · modèles · carte chaleur',
+    'cmd.goRisk':'Tableau Risk','cmd.goRiskSub':'Menaces · modèles · carte chaleur',
     'cmd.goProducts':'Gestion Produits','cmd.goProductsSub':'Créer · modifier · catalogue',
     'cmd.goInventory':'Intelligence Inventaire','cmd.goInventorySub':'RFID · démarque · zones',
     'cmd.goReports':'Rapports & Analyses','cmd.goReportsSub':'Performance · tendances · export',
@@ -7980,11 +7980,11 @@ const STAD_ALERT_POOL=[
   {type:'wa',msg:'⚡ Zone A inventory imbalance — restock from Hub B recommended'},
   {type:'wa',msg:'⚡ Staff efficiency drop 6% — West Concourse past 20 min'},
   {type:'wa',msg:'⚡ Halftime surge predicted — 7 min · Pre-position staff now'},
-  {type:'ok',msg:'✓ AI relocated 2 runners to Zone C — service time improved 18%'},
+  {type:'ok',msg:'✓ Relocated 2 runners to Zone C — service time improved 18%'},
   {type:'ok',msg:'✓ Zone D restocked from Hub A — 88% inventory restored'},
   {type:'ok',msg:'✓ Revenue milestone: $280K exceeded at 8:42 of Q2'},
-  {type:'ai',msg:'🤖 AI COMMAND: Predicted demand +34% in next 12 min · Zone B'},
-  {type:'ai',msg:'🤖 PREDICTION: Q2 halftime in 7 min — surge 340% above baseline'},
+  {type:'ai',msg:'🤖 COMMAND: Predicted demand +34% in next 12 min · Zone B'},
+  {type:'ai',msg:'🔮 PREDICTION: Q2 halftime in 7 min — surge 340% above baseline'},
   {type:'wa',msg:'⚡ Runner delay causing 18% slowdown in Upper Bowl 300s'},
 ];
 
@@ -8207,7 +8207,7 @@ function stadRenderAI(){
   if(!container)return;
   const rec=STAD_AI_RECS[stadAIIndex%STAD_AI_RECS.length];
   container.innerHTML=`
-    <div class="sai-mode-on">🤖 AI COMMAND MODE ACTIVE<br>Analyzing 247 staff · 6 zones · real-time</div>
+    <div class="sai-mode-on">🤖 COMMAND MODE ACTIVE<br>Analyzing 247 staff · 6 zones · real-time</div>
     <div class="sai-rec">
       <div class="sai-rec-head">${rec.head}</div>
       <div class="sai-rec-body">${rec.body.replace(/\n/g,'<br>')}</div>
@@ -8221,7 +8221,7 @@ function stadRenderAI(){
 
 function stadApplyAI(){
   stadAIIndex++;
-  stadAddAlert('ok','✓ AI COMMAND APPLIED — '+STAD_AI_RECS[(stadAIIndex-1)%STAD_AI_RECS.length].head);
+  stadAddAlert('ok','✓ COMMAND APPLIED — '+STAD_AI_RECS[(stadAIIndex-1)%STAD_AI_RECS.length].head);
   stadRenderAI();
   if(stadAIMode)stadUpdateAIRoute();
 }
@@ -8240,7 +8240,7 @@ function stadAddAlert(type, msg){
   if(countEl)countEl.textContent=stadAlertCount+' ACTIVE';
   const now=new Date();
   const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
-  const tag={cr:'CRITICAL',wa:'WARNING',ok:'RESOLVED',ai:'AI INTEL'}[type]||'INFO';
+  const tag={cr:'CRITICAL',wa:'WARNING',ok:'RESOLVED',ai:'INTEL'}[type]||'INFO';
   const div=document.createElement('div');
   div.className=`salert ${type}`;
   div.innerHTML=`<span class="salert-t">${time}</span><span class="salert-tag">${tag}</span>${Security.sanitize(msg)}`;
