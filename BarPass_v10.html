@@ -2237,6 +2237,22 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
 .op-pulse.supervising{background:#a855f7;}
 .op-eta{font-family:'JetBrains Mono',monospace;font-size:7px;color:#00e87a;margin-left:2px;font-weight:700;}
 .op-eta.alert{color:#FF4466;animation:opAlertPulse .7s ease infinite;}
+.op-eta.ok{color:#00e87a;animation:none;}
+.op-eta.delay{color:#FFba38;animation:opAlertPulse .9s ease infinite;}
+.op-eta.traveling{color:#5AA5FF;}
+/* Active-trip entity: faster transition for smooth A→B movement */
+.op-entity[data-trip="active"]{transition:left 1.1s linear,top 1.1s linear;}
+/* Trip Log Panel */
+.trip-entry{padding:6px 0;border-bottom:1px solid #111428;}
+.trip-entry:last-child{border-bottom:none;}
+.trip-name{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--text);margin-bottom:2px;display:flex;align-items:center;gap:5px;}
+.trip-route-lbl{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--muted);margin-bottom:3px;letter-spacing:.02em;}
+.trip-times-row{display:flex;gap:8px;font-family:'JetBrains Mono',monospace;font-size:7.5px;align-items:center;}
+.trip-times-row .tl{color:var(--muted);margin-right:1px;}
+.trip-times-row .tv{color:var(--text2);}
+.trip-times-row .tdiff{font-weight:800;letter-spacing:.04em;}
+.trip-prog-wrap{margin-top:4px;height:2px;background:#0d1020;border-radius:1px;overflow:hidden;}
+.trip-prog-fill{height:100%;border-radius:1px;transition:width .8s linear;}
 
 /* ══════════════════════════════════════════════════════
    STADIUM POS — LIGHT THEME OVERRIDES
@@ -4577,6 +4593,17 @@ BarPass/<br>
         </div>
         <div class="stad-panel-body">
           <div class="stad-alerts" id="stad-alerts" style="min-height:180px;"></div>
+        </div>
+      </div>
+
+      <!-- Trip Log -->
+      <div class="stad-panel">
+        <div class="stad-panel-head" id="stad-triplog-head">
+          <span data-i18n="stad.panel.tripLog">TRIP LOG</span>
+          <span style="color:#00e87a;font-size:8px;font-weight:700;" id="stad-trips-active">0 <span data-i18n="stad.trips.active">EN RUTA</span></span>
+        </div>
+        <div class="stad-panel-body" style="padding:8px 12px;">
+          <div id="stad-trip-log"></div>
         </div>
       </div>
     </div>
@@ -7627,6 +7654,11 @@ const i18n = (() => {
     'stad.node.hubEast':'Hub Zona Este','stad.node.hubEastSub':'Sirviendo C+D · 71% inv',
     'stad.node.vip':'Distribución VIP','stad.node.vipSub':'Suites 200s · 95% inv',
     'stad.node.upper':'Hub Tribuna Alta','stad.node.upperSub':'Nivel 300 · 60% inv',
+    /* ── Trip Log ── */
+    'stad.panel.tripLog':'REGISTRO DE VIAJES','stad.trips.active':'EN RUTA',
+    'stad.trip.est':'EST','stad.trip.elapsed':'REAL','stad.trip.diff':'DIFER',
+    'stad.trip.completed':'completado','stad.trip.traveling':'en ruta',
+    'stad.trip.idle':'en espera',
   },
   /* ════════════════ ENGLISH ════════════════ */
   en: {
@@ -7815,6 +7847,11 @@ const i18n = (() => {
     'stad.node.hubEast':'Zone Hub East','stad.node.hubEastSub':'Serving C+D · 71% inv',
     'stad.node.vip':'VIP Distribution','stad.node.vipSub':'Suites 200s · 95% inv',
     'stad.node.upper':'Upper Bowl Hub','stad.node.upperSub':'Level 300 · 60% inv',
+    /* ── Trip Log ── */
+    'stad.panel.tripLog':'TRIP LOG','stad.trips.active':'EN ROUTE',
+    'stad.trip.est':'EST','stad.trip.elapsed':'ACTUAL','stad.trip.diff':'DIFF',
+    'stad.trip.completed':'completed','stad.trip.traveling':'en route',
+    'stad.trip.idle':'idle',
   },
   /* ════════════════ PORTUGUÊS ════════════════ */
   pt: {
@@ -7997,6 +8034,11 @@ const i18n = (() => {
     'stad.node.hubEast':'Hub Zona Leste','stad.node.hubEastSub':'Servindo C+D · 71% est',
     'stad.node.vip':'Distribuição VIP','stad.node.vipSub':'Camarotes 200s · 95% est',
     'stad.node.upper':'Hub Nível Superior','stad.node.upperSub':'Nível 300 · 60% est',
+    /* ── Trip Log ── */
+    'stad.panel.tripLog':'LOG DE VIAGENS','stad.trips.active':'EM ROTA',
+    'stad.trip.est':'EST','stad.trip.elapsed':'REAL','stad.trip.diff':'DIF',
+    'stad.trip.completed':'concluído','stad.trip.traveling':'em rota',
+    'stad.trip.idle':'aguardando',
   },
   /* ════════════════ FRANÇAIS ════════════════ */
   fr: {
@@ -8179,6 +8221,11 @@ const i18n = (() => {
     'stad.node.hubEast':'Hub Zone Est','stad.node.hubEastSub':'Servant C+D · 71% inv',
     'stad.node.vip':'Distribution VIP','stad.node.vipSub':'Suites 200s · 95% inv',
     'stad.node.upper':'Hub Tribune Haute','stad.node.upperSub':'Niveau 300 · 60% inv',
+    /* ── Trip Log ── */
+    'stad.panel.tripLog':'JOURNAL TRAJETS','stad.trips.active':'EN ROUTE',
+    'stad.trip.est':'EST','stad.trip.elapsed':'RÉEL','stad.trip.diff':'ÉCART',
+    'stad.trip.completed':'terminé','stad.trip.traveling':'en route',
+    'stad.trip.idle':'en attente',
   },
   };/* END TRANSLATIONS */
 
@@ -8932,9 +8979,11 @@ function stadRenderEntities(){
 
 function stadTickEntities(){
   // Subtle position drift to simulate movement — keep entities in their zone regions
-  // Zone regions match the real concourse positions in the new stadium layout
+  // Skip entities that are being controlled by the trip engine (STAD_TRIPS)
   const zoneRegions={A:{x:[82,218],y:[182,378]},B:{x:[252,548],y:[134,182]},C:{x:[582,660],y:[182,378]},D:{x:[268,532],y:[378,426]},VIP:{x:[660,718],y:[182,378]},UPP:{x:[163,637],y:[24,80]}};
   STAD_ENTITIES.forEach(e=>{
+    /* Skip if currently on a trip — trip engine handles position */
+    if(STAD_TRIPS[e.id]&&STAD_TRIPS[e.id].status==='traveling')return;
     const reg=zoneRegions[e.zone];
     if(!reg)return;
     const drift=6;
@@ -9252,6 +9301,172 @@ function stadTriggerRandomAlert(){
   stadAddAlert(alert.type,alert.msg);
 }
 
+/* ── Trip-Time Engine ─────────────────────────────────────────────────────────
+   Named waypoints in the SVG 800×560 coordinate space.
+   Runners/managers travel A→B in estimated time; engine tracks elapsed real time.
+   ──────────────────────────────────────────────────────────────────────────── */
+const STAD_WAYPOINTS={
+  central:  {name:'Central',    x:400, y:280},
+  hubWest:  {name:'Hub Oeste',  x:148, y:280},
+  hubEast:  {name:'Hub Este',   x:622, y:280},
+  barA1:    {name:'Bar A1',     x:111, y:242},
+  barA2:    {name:'Bar A2',     x:111, y:330},
+  barB1:    {name:'Bar B1',     x:290, y:150},
+  barB2:    {name:'Bar B2',     x:420, y:150},
+  barC1:    {name:'Bar C1',     x:622, y:228},
+  barC2:    {name:'Bar C2',     x:622, y:360},
+  barD1:    {name:'Bar D1',     x:295, y:405},
+  barD2:    {name:'Bar D2',     x:498, y:405},
+  vipBar:   {name:'VIP Bar',    x:686, y:280},
+  upperHub: {name:'Upper Hub',  x:400, y: 52},
+};
+
+/* Trip routes: each runner/manager cycles through these A→B pairs */
+const STAD_ROUTES={
+  e3:  [{from:'hubWest',to:'barA1',estSec:90},{from:'barA1',to:'barA2',estSec:50},{from:'barA2',to:'central',estSec:120},{from:'central',to:'hubWest',estSec:110}],
+  e6:  [{from:'hubWest',to:'barB1',estSec:80},{from:'barB1',to:'barB2',estSec:60},{from:'barB2',to:'hubEast',estSec:130},{from:'hubEast',to:'central',estSec:100}],
+  e9:  [{from:'hubEast',to:'barC2',estSec:60},{from:'barC2',to:'barC1',estSec:50},{from:'barC1',to:'central',estSec:110},{from:'central',to:'hubEast',estSec:105}],
+  e11: [{from:'central',to:'barD1',estSec:95},{from:'barD1',to:'barD2',estSec:70},{from:'barD2',to:'hubWest',estSec:115},{from:'hubWest',to:'central',estSec:120}],
+  e1:  [{from:'central',to:'hubWest',estSec:110},{from:'hubWest',to:'barA1',estSec:80},{from:'barA1',to:'barA2',estSec:50},{from:'barA2',to:'central',estSec:120}],
+  e4:  [{from:'hubEast',to:'barB1',estSec:90},{from:'barB1',to:'barB2',estSec:65},{from:'barB2',to:'central',estSec:125},{from:'central',to:'hubEast',estSec:115}],
+};
+
+/* State */
+let STAD_TRIPS={};   /* entityId → {from,to,estSec,startMs,routeIdx,status} */
+let STAD_TRIP_LOG=[]; /* completed trips, max 20 kept */
+
+/* ── Helpers ── */
+function stadFmtTime(sec){
+  if(sec<60)return sec+'s';
+  return Math.floor(sec/60)+'m'+(sec%60?''+(sec%60)+'s':'');
+}
+function stadFmtDiff(actualSec,estSec){
+  const d=actualSec-estSec;
+  if(Math.abs(d)<5)return {txt:'✓',cls:'ok'};
+  if(d>0)return {txt:'+'+stadFmtTime(d),cls:'delay'};
+  return {txt:'-'+stadFmtTime(Math.abs(d)),cls:'ok'};
+}
+
+/* ── Start a trip for an entity ── */
+function stadStartTrip(eId,routeIdx){
+  const routes=STAD_ROUTES[eId];
+  if(!routes)return;
+  const ri=(routeIdx||0)%routes.length;
+  const seg=routes[ri];
+  const from=STAD_WAYPOINTS[seg.from], to=STAD_WAYPOINTS[seg.to];
+  if(!from||!to)return;
+  const e=STAD_ENTITIES.find(x=>x.id===eId);
+  if(!e)return;
+  /* Snap entity to origin waypoint */
+  e.x=from.x; e.y=from.y;
+  const el=document.querySelector(`.op-entity[data-id="${eId}"]`);
+  if(el){
+    el.setAttribute('data-trip','active');
+    el.style.transition='left 1.1s linear,top 1.1s linear';
+  }
+  STAD_TRIPS[eId]={from:seg.from,to:seg.to,estSec:seg.estSec,startMs:Date.now(),routeIdx:ri,status:'traveling'};
+}
+
+/* ── Tick called every 1 second ── */
+function stadTickTrips(){
+  const now=Date.now();
+  let activeCount=0;
+  Object.keys(STAD_TRIPS).forEach(eId=>{
+    const trip=STAD_TRIPS[eId];
+    if(trip.status!=='traveling')return;
+    activeCount++;
+    const elapsedSec=Math.floor((now-trip.startMs)/1000);
+    const progress=Math.min(1,elapsedSec/trip.estSec);
+    /* Interpolate position */
+    const from=STAD_WAYPOINTS[trip.from], to=STAD_WAYPOINTS[trip.to];
+    if(from&&to){
+      const e=STAD_ENTITIES.find(x=>x.id===eId);
+      if(e){
+        e.x=from.x+(to.x-from.x)*progress;
+        e.y=from.y+(to.y-from.y)*progress;
+        const el=document.querySelector(`.op-entity[data-id="${eId}"]`);
+        if(el){
+          el.style.left=(e.x/800*100).toFixed(2)+'%';
+          el.style.top=(e.y/560*100).toFixed(2)+'%';
+          /* Update ETA badge */
+          const remaining=Math.max(0,trip.estSec-elapsedSec);
+          const etaEl=el.querySelector('.op-eta');
+          if(etaEl){
+            etaEl.textContent=remaining===0?_t('stad.trips.active'):stadFmtTime(remaining);
+            etaEl.className='op-eta'+(elapsedSec>trip.estSec+15?' delay':' traveling');
+          }
+        }
+      }
+    }
+    /* Trip complete? — allow 3 extra seconds grace */
+    if(elapsedSec>=trip.estSec+3){
+      stadCompleteTrip(eId,elapsedSec);
+    }
+  });
+  /* Update active badge */
+  const badge=document.getElementById('stad-trips-active');
+  if(badge)badge.innerHTML=activeCount+' <span data-i18n="stad.trips.active">'+_t('stad.trips.active')+'</span>';
+  stadRenderTripLog();
+}
+
+/* ── Complete a trip and schedule next ── */
+function stadCompleteTrip(eId,actualSec){
+  const trip=STAD_TRIPS[eId];
+  if(!trip)return;
+  const from=STAD_WAYPOINTS[trip.from], to=STAD_WAYPOINTS[trip.to];
+  const e=STAD_ENTITIES.find(x=>x.id===eId);
+  if(e&&to){e.x=to.x;e.y=to.y;}
+  const el=document.querySelector(`.op-entity[data-id="${eId}"]`);
+  if(el){el.removeAttribute('data-trip');el.style.transition='';}
+  /* Log it */
+  STAD_TRIP_LOG.unshift({
+    name:e?e.name:'?',
+    fromName:from?from.name:trip.from,
+    toName:to?to.name:trip.to,
+    estSec:trip.estSec,
+    actualSec:actualSec,
+    ts:Date.now(),
+  });
+  if(STAD_TRIP_LOG.length>20)STAD_TRIP_LOG.length=20;
+  STAD_TRIPS[eId].status='done';
+  /* Schedule next leg after short idle pause */
+  const nextIdx=(trip.routeIdx+1)%STAD_ROUTES[eId].length;
+  setTimeout(()=>stadStartTrip(eId,nextIdx), 4000+Math.random()*3000);
+}
+
+/* ── Render trip log panel ── */
+function stadRenderTripLog(){
+  const container=document.getElementById('stad-trip-log');
+  if(!container)return;
+  if(STAD_TRIP_LOG.length===0){
+    container.innerHTML=`<div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);padding:4px 0;">${_t('stad.trip.idle')}…</div>`;
+    return;
+  }
+  container.innerHTML=STAD_TRIP_LOG.slice(0,8).map(t=>{
+    const diff=stadFmtDiff(t.actualSec,t.estSec);
+    const progPct=Math.min(100,Math.round(t.actualSec/t.estSec*100));
+    const progColor=t.actualSec<=t.estSec+5?'#00e87a':'#FFba38';
+    return `<div class="trip-entry">
+      <div class="trip-name"><span>${t.name}</span><span style="color:var(--muted);font-size:7px;">✓ ${_t('stad.trip.completed')}</span></div>
+      <div class="trip-route-lbl">${t.fromName} → ${t.toName}</div>
+      <div class="trip-times-row">
+        <span class="tl">${_t('stad.trip.est')}</span><span class="tv">${stadFmtTime(t.estSec)}</span>
+        <span class="tl" style="margin-left:6px;">${_t('stad.trip.elapsed')}</span><span class="tv">${stadFmtTime(t.actualSec)}</span>
+        <span class="tl" style="margin-left:6px;">${_t('stad.trip.diff')}</span><span class="tdiff" style="color:${diff.cls==='ok'?'#00e87a':'#FFba38'};">${diff.txt}</span>
+      </div>
+      <div class="trip-prog-wrap"><div class="trip-prog-fill" style="width:${progPct}%;background:${progColor};"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Init all runner/manager trips ── */
+function stadInitTrips(){
+  /* Stagger starts so they don't all begin simultaneously */
+  Object.keys(STAD_ROUTES).forEach((eId,i)=>{
+    setTimeout(()=>stadStartTrip(eId,0), i*2500+800);
+  });
+}
+
 function initStadium(){
   if(stadActive)return;
   stadActive=true;
@@ -9269,6 +9484,9 @@ function initStadium(){
   stadIntervals.push(setInterval(stadTickGameClock,1000));
   stadIntervals.push(setInterval(stadFluctuateKPIs,5000));
   stadIntervals.push(setInterval(stadTriggerRandomAlert,12000));
+  /* Trip engine — 1s tick for real-time tracking */
+  stadIntervals.push(setInterval(stadTickTrips,1000));
+  stadInitTrips();
 }
 
 /* ── Boot i18n on DOM ready ───────────────────────── */
