@@ -2066,6 +2066,7 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
 .stad-body{display:flex;flex:1;overflow:hidden;}
 .stad-map-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
 .stad-map-wrap{flex:1;position:relative;overflow:hidden;background:#060810;cursor:crosshair;}
+#stad-arch-layer{filter:brightness(2.8) saturate(1.3);}
 #stad-heat-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:.85;}
 #stad-svg{position:absolute;top:0;left:0;width:100%;height:100%;}
 #stad-staff-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
@@ -4056,6 +4057,8 @@ BarPass/<br>
   </g>
 
   <!-- ══ HARD ROCK STADIUM SHELL (octagonal) ══ -->
+  <!-- Architecture layer — brightness filter makes dark fills visible against bg -->
+  <g id="stad-arch-layer">
   <polygon points="163,24 637,24 776,138 776,422 637,536 163,536 24,422 24,138" fill="#050819" stroke="#101630" stroke-width="2"/>
 
   <!-- ══ 300 LEVEL — UPPER BOWL ══ -->
@@ -4298,6 +4301,8 @@ BarPass/<br>
   <circle cx="400" cy="280" r="20" fill="none" stroke="#0e2412" stroke-width="1"/>
   <circle cx="400" cy="280" r="5" fill="#0c1e0e"/>
   <text x="400" y="285" text-anchor="middle" fill="#0e2412" font-size="7" font-family="'JetBrains Mono',monospace" font-weight="700">●</text>
+
+  </g><!-- end stad-arch-layer -->
 
   <!-- ══ BAR STATIONS ══ -->
   <!-- Zone A West -->
