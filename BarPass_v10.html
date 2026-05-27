@@ -2253,6 +2253,35 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
 .trip-times-row .tdiff{font-weight:800;letter-spacing:.04em;}
 .trip-prog-wrap{margin-top:4px;height:2px;background:#0d1020;border-radius:1px;overflow:hidden;}
 .trip-prog-fill{height:100%;border-radius:1px;transition:width .8s linear;}
+/* ── Staff Daily Log ── */
+.sdl-entry{padding:8px 0;border-bottom:1px solid #111428;}
+.sdl-entry:last-child{border-bottom:none;}
+.sdl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.sdl-name{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:5px;}
+.sdl-role{font-size:7px;padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.04em;}
+.sdl-role.manager{background:#FF446622;color:#FF4466;}
+.sdl-role.runner{background:#00e87a22;color:#00e87a;}
+.sdl-role.supervisor{background:#FFba3822;color:#FFba38;}
+.sdl-role.bartender{background:#5AA5FF22;color:#5AA5FF;}
+.sdl-trips{font-family:'JetBrains Mono',monospace;font-size:8px;color:#5AA5FF;font-weight:700;}
+.sdl-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:4px;}
+.sdl-stat{background:#0a0c1c;border-radius:3px;padding:3px 5px;}
+.sdl-stat-lbl{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:var(--muted);letter-spacing:.04em;margin-bottom:1px;}
+.sdl-stat-val{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;color:var(--text2);}
+.sdl-ontime-bar{height:2px;background:#0d1020;border-radius:1px;overflow:hidden;}
+.sdl-ontime-fill{height:100%;border-radius:1px;background:#00e87a;transition:width .8s linear;}
+.sdl-ontime-row{display:flex;align-items:center;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);margin-bottom:2px;}
+.sdl-toggle{background:none;border:none;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);padding:0;letter-spacing:.04em;}
+.sdl-legs{margin-top:4px;display:none;}
+.sdl-legs.open{display:block;}
+.sdl-leg{display:flex;gap:6px;font-family:'JetBrains Mono',monospace;font-size:7px;padding:2px 0;border-bottom:1px solid #0d1020;align-items:center;}
+.sdl-leg:last-child{border-bottom:none;}
+.sdl-leg-route{color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sdl-leg-times{color:var(--text2);white-space:nowrap;}
+.sdl-leg-diff.ok{color:#00e87a;font-weight:800;}
+.sdl-leg-diff.delay{color:#FFba38;font-weight:800;}
+[data-theme="light"] .sdl-stat{background:#eef2fb;}
+[data-theme="light"] .sdl-ontime-bar{background:#dde4f5;}
 
 /* ══════════════════════════════════════════════════════
    STADIUM POS — LIGHT THEME OVERRIDES
@@ -4604,6 +4633,17 @@ BarPass/<br>
         </div>
         <div class="stad-panel-body" style="padding:8px 12px;">
           <div id="stad-trip-log"></div>
+        </div>
+      </div>
+
+      <!-- Staff Daily Log -->
+      <div class="stad-panel">
+        <div class="stad-panel-head">
+          <span data-i18n="stad.panel.dailyLog">DAILY STAFF LOG</span>
+          <span style="color:#5AA5FF;font-size:8px;font-weight:700;" id="stad-daily-total">0 <span data-i18n="stad.daily.trips">VIAJES HOY</span></span>
+        </div>
+        <div class="stad-panel-body" style="padding:8px 12px;">
+          <div id="stad-staff-daily"></div>
         </div>
       </div>
     </div>
@@ -7659,6 +7699,10 @@ const i18n = (() => {
     'stad.trip.est':'EST','stad.trip.elapsed':'REAL','stad.trip.diff':'DIFER',
     'stad.trip.completed':'completado','stad.trip.traveling':'en ruta',
     'stad.trip.idle':'en espera',
+    'stad.panel.dailyLog':'LOG DIARIO PERSONAL','stad.daily.trips':'VIAJES HOY',
+    'stad.daily.total':'TOTAL','stad.daily.onTime':'A TIEMPO','stad.daily.avgTime':'PROM',
+    'stad.daily.best':'MEJOR','stad.daily.worst':'PEOR','stad.daily.detail':'VER DETALLE',
+    'stad.daily.hide':'OCULTAR','stad.daily.noTrips':'Sin viajes aún',
   },
   /* ════════════════ ENGLISH ════════════════ */
   en: {
@@ -7852,6 +7896,10 @@ const i18n = (() => {
     'stad.trip.est':'EST','stad.trip.elapsed':'ACTUAL','stad.trip.diff':'DIFF',
     'stad.trip.completed':'completed','stad.trip.traveling':'en route',
     'stad.trip.idle':'idle',
+    'stad.panel.dailyLog':'DAILY STAFF LOG','stad.daily.trips':'TRIPS TODAY',
+    'stad.daily.total':'TOTAL','stad.daily.onTime':'ON TIME','stad.daily.avgTime':'AVG',
+    'stad.daily.best':'BEST','stad.daily.worst':'WORST','stad.daily.detail':'DETAILS',
+    'stad.daily.hide':'HIDE','stad.daily.noTrips':'No trips yet',
   },
   /* ════════════════ PORTUGUÊS ════════════════ */
   pt: {
@@ -8039,6 +8087,10 @@ const i18n = (() => {
     'stad.trip.est':'EST','stad.trip.elapsed':'REAL','stad.trip.diff':'DIF',
     'stad.trip.completed':'concluído','stad.trip.traveling':'em rota',
     'stad.trip.idle':'aguardando',
+    'stad.panel.dailyLog':'LOG DIÁRIO EQUIPE','stad.daily.trips':'VIAGENS HOJE',
+    'stad.daily.total':'TOTAL','stad.daily.onTime':'NO PRAZO','stad.daily.avgTime':'MÉD',
+    'stad.daily.best':'MELHOR','stad.daily.worst':'PIOR','stad.daily.detail':'DETALHES',
+    'stad.daily.hide':'OCULTAR','stad.daily.noTrips':'Sem viagens ainda',
   },
   /* ════════════════ FRANÇAIS ════════════════ */
   fr: {
@@ -8226,6 +8278,10 @@ const i18n = (() => {
     'stad.trip.est':'EST','stad.trip.elapsed':'RÉEL','stad.trip.diff':'ÉCART',
     'stad.trip.completed':'terminé','stad.trip.traveling':'en route',
     'stad.trip.idle':'en attente',
+    'stad.panel.dailyLog':'JOURNAL QUOTIDIEN','stad.daily.trips':'TRAJETS AUJOURD\'HUI',
+    'stad.daily.total':'TOTAL','stad.daily.onTime':'À L\'HEURE','stad.daily.avgTime':'MOY',
+    'stad.daily.best':'MEILLEUR','stad.daily.worst':'PIRE','stad.daily.detail':'DÉTAILS',
+    'stad.daily.hide':'MASQUER','stad.daily.noTrips':'Aucun trajet encore',
   },
   };/* END TRANSLATIONS */
 
@@ -9332,8 +9388,9 @@ const STAD_ROUTES={
 };
 
 /* State */
-let STAD_TRIPS={};   /* entityId → {from,to,estSec,startMs,routeIdx,status} */
-let STAD_TRIP_LOG=[]; /* completed trips, max 20 kept */
+let STAD_TRIPS={};       /* entityId → {from,to,estSec,startMs,routeIdx,status} */
+let STAD_TRIP_LOG=[];    /* completed trips, max 20 kept */
+let STAD_STAFF_STATS={}; /* entityId → daily accumulated stats */
 
 /* ── Helpers ── */
 function stadFmtTime(sec){
@@ -9407,6 +9464,7 @@ function stadTickTrips(){
   const badge=document.getElementById('stad-trips-active');
   if(badge)badge.innerHTML=activeCount+' <span data-i18n="stad.trips.active">'+_t('stad.trips.active')+'</span>';
   stadRenderTripLog();
+  stadRenderStaffDaily();
 }
 
 /* ── Complete a trip and schedule next ── */
@@ -9419,15 +9477,32 @@ function stadCompleteTrip(eId,actualSec){
   const el=document.querySelector(`.op-entity[data-id="${eId}"]`);
   if(el){el.removeAttribute('data-trip');el.style.transition='';}
   /* Log it */
+  const fromName=from?from.name:trip.from, toName=to?to.name:trip.to;
   STAD_TRIP_LOG.unshift({
     name:e?e.name:'?',
-    fromName:from?from.name:trip.from,
-    toName:to?to.name:trip.to,
+    fromName, toName,
     estSec:trip.estSec,
     actualSec:actualSec,
     ts:Date.now(),
   });
   if(STAD_TRIP_LOG.length>20)STAD_TRIP_LOG.length=20;
+  /* Accumulate daily stats */
+  if(!STAD_STAFF_STATS[eId]){
+    STAD_STAFF_STATS[eId]={
+      name:e?e.name:'?', role:e?e.role:'runner',
+      tripsCompleted:0, totalActualSec:0, totalEstSec:0,
+      onTime:0, late:0, bestSec:null, worstSec:null, legs:[],
+    };
+  }
+  const st=STAD_STAFF_STATS[eId];
+  st.tripsCompleted++;
+  st.totalActualSec+=actualSec;
+  st.totalEstSec+=trip.estSec;
+  if(actualSec<=trip.estSec+5) st.onTime++; else st.late++;
+  if(st.bestSec===null||actualSec<st.bestSec) st.bestSec=actualSec;
+  if(st.worstSec===null||actualSec>st.worstSec) st.worstSec=actualSec;
+  st.legs.unshift({fromName,toName,estSec:trip.estSec,actualSec,ts:Date.now()});
+  if(st.legs.length>20)st.legs.length=20;
   STAD_TRIPS[eId].status='done';
   /* Schedule next leg after short idle pause */
   const nextIdx=(trip.routeIdx+1)%STAD_ROUTES[eId].length;
@@ -9455,6 +9530,67 @@ function stadRenderTripLog(){
         <span class="tl" style="margin-left:6px;">${_t('stad.trip.diff')}</span><span class="tdiff" style="color:${diff.cls==='ok'?'#00e87a':'#FFba38'};">${diff.txt}</span>
       </div>
       <div class="trip-prog-wrap"><div class="trip-prog-fill" style="width:${progPct}%;background:${progColor};"></div></div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Render Staff Daily Log panel ── */
+function stadRenderStaffDaily(){
+  const container=document.getElementById('stad-staff-daily');
+  if(!container)return;
+  const totalBadge=document.getElementById('stad-daily-total');
+  const totalTrips=Object.values(STAD_STAFF_STATS).reduce((s,st)=>s+st.tripsCompleted,0);
+  if(totalBadge)totalBadge.innerHTML=totalTrips+' <span data-i18n="stad.daily.trips">'+_t('stad.daily.trips')+'</span>';
+  const ids=Object.keys(STAD_ROUTES); /* keep order stable */
+  if(ids.every(id=>!STAD_STAFF_STATS[id])){
+    container.innerHTML=`<div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);padding:4px 0;">${_t('stad.daily.noTrips')}…</div>`;
+    return;
+  }
+  container.innerHTML=ids.map(eId=>{
+    const st=STAD_STAFF_STATS[eId];
+    if(!st)return '';
+    const pct=st.tripsCompleted?Math.round(st.onTime/st.tripsCompleted*100):0;
+    const avgSec=st.tripsCompleted?Math.round(st.totalActualSec/st.tripsCompleted):0;
+    const totalMin=Math.floor(st.totalActualSec/60);
+    const totalSec=st.totalActualSec%60;
+    const pctColor=pct>=90?'#00e87a':pct>=70?'#FFba38':'#FF4466';
+    const legsHtml=st.legs.slice(0,10).map((l,i)=>{
+      const d=stadFmtDiff(l.actualSec,l.estSec);
+      return `<div class="sdl-leg">
+        <span class="sdl-leg-route">${l.fromName}→${l.toName}</span>
+        <span class="sdl-leg-times">${stadFmtTime(l.estSec)}→${stadFmtTime(l.actualSec)}</span>
+        <span class="sdl-leg-diff ${d.cls}">${d.txt}</span>
+      </div>`;
+    }).join('');
+    return `<div class="sdl-entry">
+      <div class="sdl-header">
+        <div class="sdl-name">
+          <span>${st.name}</span>
+          <span class="sdl-role ${st.role}">${st.role.toUpperCase()}</span>
+        </div>
+        <span class="sdl-trips">${st.tripsCompleted} ${_t('stad.daily.total').toLowerCase()}</span>
+      </div>
+      <div class="sdl-stats">
+        <div class="sdl-stat">
+          <div class="sdl-stat-lbl">${_t('stad.daily.total')} TIME</div>
+          <div class="sdl-stat-val">${totalMin}m${totalSec}s</div>
+        </div>
+        <div class="sdl-stat">
+          <div class="sdl-stat-lbl">${_t('stad.daily.avgTime')}</div>
+          <div class="sdl-stat-val">${stadFmtTime(avgSec)}</div>
+        </div>
+        <div class="sdl-stat">
+          <div class="sdl-stat-lbl">${_t('stad.daily.best')}/${_t('stad.daily.worst')}</div>
+          <div class="sdl-stat-val">${st.bestSec!==null?stadFmtTime(st.bestSec):'–'}<span style="color:var(--muted);font-size:7px;"> / </span>${st.worstSec!==null?stadFmtTime(st.worstSec):'–'}</div>
+        </div>
+      </div>
+      <div class="sdl-ontime-row">
+        <span>${_t('stad.daily.onTime')}</span>
+        <span style="color:${pctColor};font-weight:700;">${pct}%</span>
+      </div>
+      <div class="sdl-ontime-bar"><div class="sdl-ontime-fill" style="width:${pct}%;background:${pctColor};"></div></div>
+      <button class="sdl-toggle" onclick="(()=>{const l=document.getElementById('sdl-legs-${eId}');l.classList.toggle('open');this.textContent=l.classList.contains('open')?'▲ ${_t('stad.daily.hide')}':'▼ ${_t('stad.daily.detail')} (${st.legs.length})';})()">▼ ${_t('stad.daily.detail')} (${st.legs.length})</button>
+      <div class="sdl-legs" id="sdl-legs-${eId}">${legsHtml}</div>
     </div>`;
   }).join('');
 }
