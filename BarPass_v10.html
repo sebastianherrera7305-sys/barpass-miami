@@ -3985,28 +3985,25 @@ BarPass/<br>
     <!-- Map Panel -->
     <div class="stad-map-panel" id="stad-map-panel">
       <div class="stad-map-wrap" id="stad-map-wrap">
-        <!-- Stadium operational map -->
-        <svg id="stad-svg" viewBox="0 0 800 540" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block">
+        <!-- Stadium operational map — Hard Rock Stadium layout -->
+        <svg id="stad-svg" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block">
   <defs>
-    <!-- Supply lane paths for animateMotion (realistic concourse routes) -->
-    <!-- Central Storage → Zone Hubs -->
-    <path id="lane-ca"  d="M400,516 L400,456 L97,428 L97,270"/>
-    <path id="lane-cb"  d="M400,516 L400,390 L400,131"/>
-    <path id="lane-cc"  d="M400,516 L400,456 L703,428 L703,270"/>
-    <path id="lane-cd"  d="M400,516 L400,409"/>
-    <path id="lane-cvip" d="M400,516 L703,490 L703,185"/>
-    <!-- Hub → Bar Stations -->
-    <path id="lane-a1"  d="M97,270 L97,150 L200,131"/>
-    <path id="lane-a2"  d="M97,270 L97,390 L200,409"/>
-    <path id="lane-b1"  d="M400,131 L250,131 L200,150"/>
-    <path id="lane-b2"  d="M400,131 L550,131 L600,150"/>
-    <path id="lane-c1"  d="M703,270 L703,150 L600,131"/>
-    <path id="lane-c2"  d="M703,270 L703,390 L600,409"/>
-    <path id="lane-d1"  d="M400,409 L250,409 L200,390"/>
-    <path id="lane-d2"  d="M400,409 L550,409 L600,390"/>
-    <path id="lane-vip1" d="M703,185 L703,172"/>
-    <path id="lane-vip2" d="M703,185 L703,374"/>
-    <!-- Filters -->
+    <!-- Supply lane paths — Hard Rock Stadium concourse routes -->
+    <path id="lane-ca"  d="M400,510 L400,460 L110,440 L110,280"/>
+    <path id="lane-cb"  d="M400,510 L400,135"/>
+    <path id="lane-cc"  d="M400,510 L400,460 L690,440 L690,280"/>
+    <path id="lane-cd"  d="M400,510 L400,445"/>
+    <path id="lane-cvip" d="M400,510 L690,490 L690,195"/>
+    <path id="lane-a1"  d="M110,280 L110,238"/>
+    <path id="lane-a2"  d="M110,280 L110,334"/>
+    <path id="lane-b1"  d="M400,135 L298,142"/>
+    <path id="lane-b2"  d="M400,135 L502,142"/>
+    <path id="lane-c1"  d="M690,280 L690,238"/>
+    <path id="lane-c2"  d="M690,280 L690,334"/>
+    <path id="lane-d1"  d="M400,445 L298,438"/>
+    <path id="lane-d2"  d="M400,445 L502,438"/>
+    <path id="lane-vip1" d="M690,195 L690,183"/>
+    <path id="lane-vip2" d="M690,195 L690,370"/>
     <filter id="fg" x="-60%" y="-60%" width="220%" height="220%">
       <feGaussianBlur stdDeviation="2.8" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -4022,377 +4019,429 @@ BarPass/<br>
   </defs>
 
   <!-- ══ TACTICAL BACKGROUND ══ -->
-  <rect width="800" height="540" fill="#04060e"/>
+  <rect width="800" height="560" fill="#04060e"/>
   <!-- Grid dots -->
   <g fill="#0a0d1c" opacity="0.9">
-    <rect x="80"  y="54"  width="2" height="2"/><rect x="160" y="54"  width="2" height="2"/><rect x="240" y="54"  width="2" height="2"/>
-    <rect x="320" y="54"  width="2" height="2"/><rect x="400" y="54"  width="2" height="2"/><rect x="480" y="54"  width="2" height="2"/>
-    <rect x="560" y="54"  width="2" height="2"/><rect x="640" y="54"  width="2" height="2"/><rect x="720" y="54"  width="2" height="2"/>
-    <rect x="80"  y="162" width="2" height="2"/><rect x="160" y="162" width="2" height="2"/><rect x="240" y="162" width="2" height="2"/>
-    <rect x="320" y="162" width="2" height="2"/><rect x="400" y="162" width="2" height="2"/><rect x="480" y="162" width="2" height="2"/>
-    <rect x="560" y="162" width="2" height="2"/><rect x="640" y="162" width="2" height="2"/><rect x="720" y="162" width="2" height="2"/>
-    <rect x="80"  y="270" width="2" height="2"/><rect x="160" y="270" width="2" height="2"/><rect x="240" y="270" width="2" height="2"/>
-    <rect x="320" y="270" width="2" height="2"/><rect x="400" y="270" width="2" height="2"/><rect x="480" y="270" width="2" height="2"/>
-    <rect x="560" y="270" width="2" height="2"/><rect x="640" y="270" width="2" height="2"/><rect x="720" y="270" width="2" height="2"/>
-    <rect x="80"  y="378" width="2" height="2"/><rect x="160" y="378" width="2" height="2"/><rect x="240" y="378" width="2" height="2"/>
-    <rect x="320" y="378" width="2" height="2"/><rect x="400" y="378" width="2" height="2"/><rect x="480" y="378" width="2" height="2"/>
-    <rect x="560" y="378" width="2" height="2"/><rect x="640" y="378" width="2" height="2"/><rect x="720" y="378" width="2" height="2"/>
-    <rect x="80"  y="486" width="2" height="2"/><rect x="160" y="486" width="2" height="2"/><rect x="240" y="486" width="2" height="2"/>
-    <rect x="320" y="486" width="2" height="2"/><rect x="400" y="486" width="2" height="2"/><rect x="480" y="486" width="2" height="2"/>
-    <rect x="560" y="486" width="2" height="2"/><rect x="640" y="486" width="2" height="2"/><rect x="720" y="486" width="2" height="2"/>
+    <rect x="80"  y="56"  width="2" height="2"/><rect x="160" y="56"  width="2" height="2"/><rect x="240" y="56"  width="2" height="2"/>
+    <rect x="320" y="56"  width="2" height="2"/><rect x="400" y="56"  width="2" height="2"/><rect x="480" y="56"  width="2" height="2"/>
+    <rect x="560" y="56"  width="2" height="2"/><rect x="640" y="56"  width="2" height="2"/><rect x="720" y="56"  width="2" height="2"/>
+    <rect x="80"  y="168" width="2" height="2"/><rect x="160" y="168" width="2" height="2"/><rect x="240" y="168" width="2" height="2"/>
+    <rect x="320" y="168" width="2" height="2"/><rect x="400" y="168" width="2" height="2"/><rect x="480" y="168" width="2" height="2"/>
+    <rect x="560" y="168" width="2" height="2"/><rect x="640" y="168" width="2" height="2"/><rect x="720" y="168" width="2" height="2"/>
+    <rect x="80"  y="280" width="2" height="2"/><rect x="160" y="280" width="2" height="2"/><rect x="240" y="280" width="2" height="2"/>
+    <rect x="320" y="280" width="2" height="2"/><rect x="400" y="280" width="2" height="2"/><rect x="480" y="280" width="2" height="2"/>
+    <rect x="560" y="280" width="2" height="2"/><rect x="640" y="280" width="2" height="2"/><rect x="720" y="280" width="2" height="2"/>
+    <rect x="80"  y="392" width="2" height="2"/><rect x="160" y="392" width="2" height="2"/><rect x="240" y="392" width="2" height="2"/>
+    <rect x="320" y="392" width="2" height="2"/><rect x="400" y="392" width="2" height="2"/><rect x="480" y="392" width="2" height="2"/>
+    <rect x="560" y="392" width="2" height="2"/><rect x="640" y="392" width="2" height="2"/><rect x="720" y="392" width="2" height="2"/>
+    <rect x="80"  y="504" width="2" height="2"/><rect x="160" y="504" width="2" height="2"/><rect x="240" y="504" width="2" height="2"/>
+    <rect x="320" y="504" width="2" height="2"/><rect x="400" y="504" width="2" height="2"/><rect x="480" y="504" width="2" height="2"/>
+    <rect x="560" y="504" width="2" height="2"/><rect x="640" y="504" width="2" height="2"/><rect x="720" y="504" width="2" height="2"/>
   </g>
 
-  <!-- ══ OUTER STADIUM SHELL ══ -->
-  <rect x="25" y="26" width="750" height="488" rx="14" fill="#06091a" stroke="#111830" stroke-width="2"/>
-  <!-- Outer service road ring -->
-  <rect x="32" y="33" width="736" height="474" rx="11" fill="none" stroke="#0c1128" stroke-width="6"/>
-
-  <!-- ══ UPPER BOWL / 300 LEVEL ══ -->
-  <rect x="55" y="36"  width="690" height="32" rx="4" fill="#090e22" stroke="#111830" stroke-width="1"/>
-  <rect x="55" y="472" width="690" height="32" rx="4" fill="#090e22" stroke="#111830" stroke-width="1"/>
-  <rect x="25" y="68"  width="30"  height="404" rx="3" fill="#090e22" stroke="#111830" stroke-width="1"/>
-  <rect x="745" y="68" width="30"  height="404" rx="3" fill="#090e22" stroke="#111830" stroke-width="1"/>
-  <!-- 300 level section striping (N) -->
-  <g stroke="#0e1428" stroke-width="0.6" opacity="0.8">
-    <line x1="145" y1="36" x2="145" y2="68"/><line x1="235" y1="36" x2="235" y2="68"/>
-    <line x1="325" y1="36" x2="325" y2="68"/><line x1="400" y1="36" x2="400" y2="68"/>
-    <line x1="475" y1="36" x2="475" y2="68"/><line x1="565" y1="36" x2="565" y2="68"/>
-    <line x1="655" y1="36" x2="655" y2="68"/>
+  <!-- ══ CORNER TOWER STRUCTURES (parking ramps) ══ -->
+  <circle cx="88"  cy="80"  r="52" fill="#080c1a" stroke="#0d1428" stroke-width="1.5"/>
+  <circle cx="712" cy="80"  r="52" fill="#080c1a" stroke="#0d1428" stroke-width="1.5"/>
+  <circle cx="88"  cy="480" r="52" fill="#080c1a" stroke="#0d1428" stroke-width="1.5"/>
+  <circle cx="712" cy="480" r="52" fill="#080c1a" stroke="#0d1428" stroke-width="1.5"/>
+  <circle cx="88"  cy="80"  r="38" fill="none" stroke="#0c1028" stroke-width="0.8"/>
+  <circle cx="712" cy="80"  r="38" fill="none" stroke="#0c1028" stroke-width="0.8"/>
+  <circle cx="88"  cy="480" r="38" fill="none" stroke="#0c1028" stroke-width="0.8"/>
+  <circle cx="712" cy="480" r="38" fill="none" stroke="#0c1028" stroke-width="0.8"/>
+  <g stroke="#0b1026" stroke-width="0.8">
+    <line x1="88"  y1="44"  x2="88"  y2="116"/><line x1="50"  y1="80"  x2="126" y2="80"/>
+    <line x1="712" y1="44"  x2="712" y2="116"/><line x1="674" y1="80"  x2="750" y2="80"/>
+    <line x1="88"  y1="444" x2="88"  y2="516"/><line x1="50"  y1="480" x2="126" y2="480"/>
+    <line x1="712" y1="444" x2="712" y2="516"/><line x1="674" y1="480" x2="750" y2="480"/>
   </g>
-  <text x="400" y="55"  text-anchor="middle" fill="#1a2545" font-size="6.5" font-family="'JetBrains Mono',monospace" letter-spacing="3">300 LEVEL NORTH</text>
-  <text x="400" y="491" text-anchor="middle" fill="#1a2545" font-size="6.5" font-family="'JetBrains Mono',monospace" letter-spacing="3">300 LEVEL SOUTH</text>
-  <text x="40"  y="270" text-anchor="middle" fill="#1a2545" font-size="6"   font-family="'JetBrains Mono',monospace" transform="rotate(-90,40,270)">300W</text>
-  <text x="760" y="270" text-anchor="middle" fill="#1a2545" font-size="6"   font-family="'JetBrains Mono',monospace" transform="rotate(90,760,270)">300E</text>
 
-  <!-- ══ UPPER CONCOURSE CONNECTOR (300→200) ══ -->
-  <rect x="55"  y="68"  width="690" height="16" fill="#0b1230" stroke="#131e42" stroke-width="0.5"/>
-  <rect x="55"  y="456" width="690" height="16" fill="#0b1230" stroke="#131e42" stroke-width="0.5"/>
-  <rect x="55"  y="84"  width="22"  height="372" fill="#0b1230" stroke="#131e42" stroke-width="0.5"/>
-  <rect x="723" y="84"  width="22"  height="372" fill="#0b1230" stroke="#131e42" stroke-width="0.5"/>
+  <!-- ══ HARD ROCK STADIUM SHELL (octagonal) ══ -->
+  <polygon points="163,24 637,24 776,138 776,422 637,536 163,536 24,422 24,138" fill="#050819" stroke="#101630" stroke-width="2"/>
 
-  <!-- ══ CLUB / 200 LEVEL SEATING ══ -->
-  <rect x="77"  y="84"  width="646" height="28" rx="3" fill="#0d1535" stroke="#141f48" stroke-width="1"/>
-  <rect x="77"  y="428" width="646" height="28" rx="3" fill="#0d1535" stroke="#141f48" stroke-width="1"/>
-  <rect x="77"  y="112" width="40"  height="316" rx="2" fill="#0d1535" stroke="#141f48" stroke-width="1"/>
-  <!-- East / VIP Suite side (press box — slightly highlighted) -->
-  <rect x="683" y="112" width="40"  height="316" rx="2" fill="#101840" stroke="#1c2860" stroke-width="1.5"/>
-  <!-- Suite dividers on east -->
-  <g stroke="#141d4a" stroke-width="0.6">
-    <line x1="683" y1="160" x2="723" y2="160"/><line x1="683" y1="210" x2="723" y2="210"/>
-    <line x1="683" y1="260" x2="723" y2="260"/><line x1="683" y1="310" x2="723" y2="310"/>
-    <line x1="683" y1="360" x2="723" y2="360"/><line x1="683" y1="378" x2="723" y2="378"/>
+  <!-- ══ 300 LEVEL — UPPER BOWL ══ -->
+  <!-- North (313-324) teal accent -->
+  <polygon points="163,24 637,24 620,80 180,80" fill="#06111a" stroke="#091e28" stroke-width="1"/>
+  <g stroke="#0a1e28" stroke-width="0.7" opacity="0.8">
+    <line x1="210" y1="24" x2="212" y2="80"/><line x1="258" y1="24" x2="258" y2="80"/>
+    <line x1="306" y1="24" x2="305" y2="80"/><line x1="354" y1="24" x2="352" y2="80"/>
+    <line x1="400" y1="24" x2="400" y2="80"/><line x1="446" y1="24" x2="448" y2="80"/>
+    <line x1="494" y1="24" x2="495" y2="80"/><line x1="542" y1="24" x2="542" y2="80"/>
+    <line x1="590" y1="24" x2="588" y2="80"/>
   </g>
-  <text x="703" y="98"  text-anchor="middle" fill="#1e2e62" font-size="5.5" font-family="'JetBrains Mono',monospace">VIP/SUITE</text>
-
-  <!-- ══ MAIN CONCOURSE — PRIMARY OPERATIONAL CORRIDORS ══ -->
-  <!-- North concourse: Zone B -->
-  <rect x="117" y="112" width="566" height="38" rx="2" fill="#0f1e40" stroke="#182e60" stroke-width="1.2"/>
-  <!-- South concourse: Zone D -->
-  <rect x="117" y="390" width="566" height="38" rx="2" fill="#0f1e40" stroke="#182e60" stroke-width="1.2"/>
-  <!-- West concourse: Zone A -->
-  <rect x="77"  y="150" width="40"  height="240" rx="2" fill="#0f1e40" stroke="#182e60" stroke-width="1.2"/>
-  <!-- East concourse: Zone C -->
-  <rect x="683" y="150" width="40"  height="240" rx="2" fill="#0f1e40" stroke="#182e60" stroke-width="1.2"/>
-
-  <!-- Concourse walkway striping (pedestrian lanes) -->
-  <g stroke="#0d1835" stroke-width="1" stroke-dasharray="4,6">
-    <!-- North conc horizontal lanes -->
-    <line x1="117" y1="125" x2="683" y2="125"/>
-    <line x1="117" y1="138" x2="683" y2="138"/>
-    <!-- South conc -->
-    <line x1="117" y1="403" x2="683" y2="403"/>
-    <line x1="117" y1="416" x2="683" y2="416"/>
-    <!-- West conc vertical lanes -->
-    <line x1="89"  y1="150" x2="89"  y2="390"/>
-    <line x1="103" y1="150" x2="103" y2="390"/>
-    <!-- East conc vertical lanes -->
-    <line x1="697" y1="150" x2="697" y2="390"/>
-    <line x1="710" y1="150" x2="710" y2="390"/>
+  <text x="232" y="46" text-anchor="middle" fill="#0b3040" font-size="5" font-family="'JetBrains Mono',monospace">313</text>
+  <text x="279" y="46" text-anchor="middle" fill="#0b3040" font-size="5" font-family="'JetBrains Mono',monospace">314</text>
+  <text x="328" y="46" text-anchor="middle" fill="#0b3040" font-size="5" font-family="'JetBrains Mono',monospace">315-317</text>
+  <text x="400" y="46" text-anchor="middle" fill="#0d4050" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">318</text>
+  <text x="472" y="46" text-anchor="middle" fill="#0b3040" font-size="5" font-family="'JetBrains Mono',monospace">319-321</text>
+  <text x="520" y="46" text-anchor="middle" fill="#0b3040" font-size="5" font-family="'JetBrains Mono',monospace">322</text>
+  <text x="569" y="46" text-anchor="middle" fill="#0b3040" font-size="5" font-family="'JetBrains Mono',monospace">323-324</text>
+  <text x="400" y="70" text-anchor="middle" fill="#0c2e3c" font-size="5.5" font-family="'JetBrains Mono',monospace" letter-spacing="2">NORTH · 300 LEVEL</text>
+  <!-- South (340-356) green accent -->
+  <polygon points="180,480 620,480 637,536 163,536" fill="#060e0c" stroke="#091a12" stroke-width="1"/>
+  <g stroke="#0a1a12" stroke-width="0.6" opacity="0.8">
+    <line x1="210" y1="536" x2="213" y2="480"/><line x1="248" y1="536" x2="250" y2="480"/>
+    <line x1="286" y1="536" x2="287" y2="480"/><line x1="324" y1="536" x2="323" y2="480"/>
+    <line x1="362" y1="536" x2="360" y2="480"/><line x1="400" y1="536" x2="400" y2="480"/>
+    <line x1="438" y1="536" x2="440" y2="480"/><line x1="476" y1="536" x2="477" y2="480"/>
+    <line x1="514" y1="536" x2="513" y2="480"/><line x1="552" y1="536" x2="550" y2="480"/>
+    <line x1="590" y1="536" x2="587" y2="480"/>
   </g>
-  <!-- Concourse corner junction fills -->
-  <rect x="77"  y="112" width="40" height="38" rx="1" fill="#0e1c3c" stroke="#162850" stroke-width="0.5"/>
-  <rect x="683" y="112" width="40" height="38" rx="1" fill="#0e1c3c" stroke="#162850" stroke-width="0.5"/>
-  <rect x="77"  y="390" width="40" height="38" rx="1" fill="#0e1c3c" stroke="#162850" stroke-width="0.5"/>
-  <rect x="683" y="390" width="40" height="38" rx="1" fill="#0e1c3c" stroke="#162850" stroke-width="0.5"/>
-
-  <!-- Concourse labels -->
-  <text x="400"  y="104" text-anchor="middle" fill="#1f3260" font-size="6" font-family="'JetBrains Mono',monospace" letter-spacing="2.5">ZONE B — NORTH CONCOURSE · 100-LEVEL</text>
-  <text x="400"  y="437" text-anchor="middle" fill="#1f3260" font-size="6" font-family="'JetBrains Mono',monospace" letter-spacing="2.5">ZONE D — SOUTH CONCOURSE · 100-LEVEL</text>
-  <text x="97"   y="270" text-anchor="middle" fill="#1f3260" font-size="6" font-family="'JetBrains Mono',monospace" transform="rotate(-90,97,270)" letter-spacing="2">ZONE A — WEST</text>
-  <text x="703"  y="270" text-anchor="middle" fill="#1f3260" font-size="6" font-family="'JetBrains Mono',monospace" transform="rotate(90,703,270)"  letter-spacing="2">ZONE C — EAST</text>
-
-  <!-- ══ SERVICE TUNNELS (staff-only) ══ -->
-  <!-- Behind north seating (access from field to concourse) -->
-  <rect x="244" y="185" width="312" height="9" fill="#080c1c" stroke="#0f1528" stroke-width="0.5"/>
-  <!-- Behind south seating -->
-  <rect x="244" y="346" width="312" height="9" fill="#080c1c" stroke="#0f1528" stroke-width="0.5"/>
-  <!-- Left side (west) vertical service tunnel -->
-  <rect x="191" y="194" width="9" height="152" fill="#080c1c" stroke="#0f1528" stroke-width="0.5"/>
-  <!-- Right side (east) vertical service tunnel -->
-  <rect x="600" y="194" width="9" height="152" fill="#080c1c" stroke="#0f1528" stroke-width="0.5"/>
-  <!-- Service tunnel markers -->
-  <text x="400" y="192" text-anchor="middle" fill="#0d1530" font-size="5" font-family="'JetBrains Mono',monospace" letter-spacing="2">— SERVICE TUNNEL —</text>
-  <text x="400" y="354" text-anchor="middle" fill="#0d1530" font-size="5" font-family="'JetBrains Mono',monospace" letter-spacing="2">— SERVICE TUNNEL —</text>
-
-  <!-- ══ LOWER BOWL / 100-LEVEL SEATING ══ -->
-  <!-- North lower seating -->
-  <rect x="200" y="150" width="400" height="44" rx="2" fill="#0c1530" stroke="#121e42" stroke-width="1"/>
-  <!-- South lower seating -->
-  <rect x="200" y="346" width="400" height="44" rx="2" fill="#0c1530" stroke="#121e42" stroke-width="1"/>
-  <!-- West lower seating (corners + west side) -->
-  <rect x="117" y="194" width="83" height="152" rx="2" fill="#0c1530" stroke="#121e42" stroke-width="1"/>
-  <!-- East lower seating -->
-  <rect x="600" y="194" width="83" height="152" rx="2" fill="#0c1530" stroke="#121e42" stroke-width="1"/>
-  <!-- Section numbers on seating -->
-  <text x="400" y="176" text-anchor="middle" fill="#162040" font-size="7" font-family="'JetBrains Mono',monospace" letter-spacing="1.5">SECTIONS 111 — 125</text>
-  <text x="400" y="364" text-anchor="middle" fill="#162040" font-size="7" font-family="'JetBrains Mono',monospace" letter-spacing="1.5">SECTIONS 141 — 155</text>
-  <text x="158" y="270" text-anchor="middle" fill="#162040" font-size="7" font-family="'JetBrains Mono',monospace" transform="rotate(-90,158,270)">101-110</text>
-  <text x="642" y="270" text-anchor="middle" fill="#162040" font-size="7" font-family="'JetBrains Mono',monospace" transform="rotate(90,642,270)">131-140</text>
-
-  <!-- Seat row lines on lower bowl (N) -->
-  <g stroke="#0f1938" stroke-width="0.5" opacity="0.7">
-    <line x1="200" y1="158" x2="600" y2="158"/><line x1="200" y1="165" x2="600" y2="165"/>
-    <line x1="200" y1="172" x2="600" y2="172"/><line x1="200" y1="179" x2="600" y2="179"/>
-    <line x1="200" y1="186" x2="600" y2="186"/>
+  <text x="400" y="516" text-anchor="middle" fill="#0c2218" font-size="5.5" font-family="'JetBrains Mono',monospace" letter-spacing="1.5">SOUTH · 300 LEVEL · 340-356</text>
+  <!-- West (301-309) green accent -->
+  <polygon points="24,138 82,182 82,378 24,422" fill="#060e0c" stroke="#091a12" stroke-width="1"/>
+  <g stroke="#0a1a12" stroke-width="0.5">
+    <line x1="24" y1="182" x2="82" y2="200"/><line x1="24" y1="226" x2="82" y2="228"/>
+    <line x1="24" y1="270" x2="82" y2="270"/><line x1="24" y1="314" x2="82" y2="312"/>
+    <line x1="24" y1="358" x2="82" y2="340"/>
   </g>
-  <!-- Seat row lines (S) -->
-  <g stroke="#0f1938" stroke-width="0.5" opacity="0.7">
-    <line x1="200" y1="354" x2="600" y2="354"/><line x1="200" y1="361" x2="600" y2="361"/>
-    <line x1="200" y1="368" x2="600" y2="368"/><line x1="200" y1="375" x2="600" y2="375"/>
-    <line x1="200" y1="382" x2="600" y2="382"/>
+  <text x="53" y="280" text-anchor="middle" fill="#0c2218" font-size="5.5" font-family="'JetBrains Mono',monospace" transform="rotate(-90,53,280)">301-309 · WEST</text>
+  <!-- East (327-337) green accent -->
+  <polygon points="718,182 776,138 776,422 718,378" fill="#060e0c" stroke="#091a12" stroke-width="1"/>
+  <g stroke="#0a1a12" stroke-width="0.5">
+    <line x1="776" y1="182" x2="718" y2="200"/><line x1="776" y1="226" x2="718" y2="228"/>
+    <line x1="776" y1="270" x2="718" y2="270"/><line x1="776" y1="314" x2="718" y2="312"/>
+    <line x1="776" y1="358" x2="718" y2="340"/>
   </g>
+  <text x="747" y="280" text-anchor="middle" fill="#0c2218" font-size="5.5" font-family="'JetBrains Mono',monospace" transform="rotate(90,747,280)">327-337 · EAST</text>
+  <!-- Corner fillers (video board areas) -->
+  <polygon points="163,24 82,80 180,80" fill="#060914" stroke="#0d1428" stroke-width="0.6"/>
+  <polygon points="24,138 82,80 82,182" fill="#060914" stroke="#0d1428" stroke-width="0.6"/>
+  <polygon points="637,24 620,80 718,80" fill="#060914" stroke="#0d1428" stroke-width="0.6"/>
+  <polygon points="776,138 718,80 718,182" fill="#060914" stroke="#0d1428" stroke-width="0.6"/>
+  <polygon points="163,536 180,480 82,480" fill="#060914" stroke="#0d1428" stroke-width="0.6"/>
+  <polygon points="24,422 82,480 82,378" fill="#060914" stroke="#0d1428" stroke-width="0.6"/>
+  <polygon points="637,536 718,480 620,480" fill="#060914" stroke="#0d1428" stroke-width="0.6"/>
+  <polygon points="776,422 718,378 718,480" fill="#060914" stroke="#0d1428" stroke-width="0.6"/>
+
+  <!-- ══ VIDEO BOARD MARKERS ══ -->
+  <rect x="150" y="74" width="32" height="12" rx="2" fill="#080c18" stroke="#1a2448" stroke-width="1"/>
+  <text x="166" y="83" text-anchor="middle" fill="#222e58" font-size="5" font-family="'JetBrains Mono',monospace">VIDEO</text>
+  <rect x="618" y="74" width="32" height="12" rx="2" fill="#080c18" stroke="#1a2448" stroke-width="1"/>
+  <text x="634" y="83" text-anchor="middle" fill="#222e58" font-size="5" font-family="'JetBrains Mono',monospace">VIDEO</text>
+  <rect x="150" y="474" width="32" height="12" rx="2" fill="#080c18" stroke="#1a2448" stroke-width="1"/>
+  <text x="166" y="483" text-anchor="middle" fill="#222e58" font-size="5" font-family="'JetBrains Mono',monospace">VIDEO</text>
+  <rect x="618" y="474" width="32" height="12" rx="2" fill="#080c18" stroke="#1a2448" stroke-width="1"/>
+  <text x="634" y="483" text-anchor="middle" fill="#222e58" font-size="5" font-family="'JetBrains Mono',monospace">VIDEO</text>
+
+  <!-- ══ GATE MARKERS ══ -->
+  <rect x="356" y="13" width="88" height="12" rx="3" fill="#06091a" stroke="#182248" stroke-width="1.2"/>
+  <text x="400" y="22" text-anchor="middle" fill="#28408a" font-size="6" font-family="'JetBrains Mono',monospace" letter-spacing="1">NORTH GATE</text>
+  <rect x="356" y="535" width="88" height="12" rx="3" fill="#06091a" stroke="#182248" stroke-width="1.2"/>
+  <text x="400" y="544" text-anchor="middle" fill="#28408a" font-size="6" font-family="'JetBrains Mono',monospace" letter-spacing="1">SOUTH GATE</text>
+  <rect x="6" y="264" width="12" height="32" rx="3" fill="#06091a" stroke="#182248" stroke-width="1"/>
+  <text x="12" y="280" text-anchor="middle" fill="#28408a" font-size="5" font-family="'JetBrains Mono',monospace" transform="rotate(-90,12,280)">W GATE</text>
+  <rect x="782" y="264" width="12" height="32" rx="3" fill="#06091a" stroke="#182248" stroke-width="1"/>
+  <text x="788" y="280" text-anchor="middle" fill="#28408a" font-size="5" font-family="'JetBrains Mono',monospace" transform="rotate(90,788,280)">E GATE</text>
+  <rect x="116" y="34" width="38" height="10" rx="2" fill="#05070f" stroke="#111c36" stroke-width="0.8"/>
+  <text x="135" y="42" text-anchor="middle" fill="#1c2850" font-size="4.8" font-family="'JetBrains Mono',monospace">NW GATE</text>
+  <rect x="646" y="34" width="38" height="10" rx="2" fill="#05070f" stroke="#111c36" stroke-width="0.8"/>
+  <text x="665" y="42" text-anchor="middle" fill="#1c2850" font-size="4.8" font-family="'JetBrains Mono',monospace">NE GATE</text>
+  <rect x="116" y="516" width="38" height="10" rx="2" fill="#05070f" stroke="#111c36" stroke-width="0.8"/>
+  <text x="135" y="524" text-anchor="middle" fill="#1c2850" font-size="4.8" font-family="'JetBrains Mono',monospace">SW GATE</text>
+  <rect x="646" y="516" width="38" height="10" rx="2" fill="#05070f" stroke="#111c36" stroke-width="0.8"/>
+  <text x="665" y="524" text-anchor="middle" fill="#1c2850" font-size="4.8" font-family="'JetBrains Mono',monospace">SE GATE</text>
+
+  <!-- ══ 200 LEVEL — CLUB / CONCOURSE ══ -->
+  <polygon points="210,80 590,80 718,182 718,378 590,480 210,480 82,378 82,182" fill="#07091e" stroke="#0e1538" stroke-width="1"/>
+  <!-- North 200 (213-222) amber accent -->
+  <polygon points="210,80 590,80 568,134 232,134" fill="#0d0f05" stroke="#181804" stroke-width="0.8"/>
+  <g stroke="#161604" stroke-width="0.6" opacity="0.8">
+    <line x1="266" y1="80" x2="266" y2="134"/><line x1="322" y1="80" x2="321" y2="134"/>
+    <line x1="378" y1="80" x2="376" y2="134"/><line x1="400" y1="80" x2="400" y2="134"/>
+    <line x1="422" y1="80" x2="424" y2="134"/><line x1="478" y1="80" x2="479" y2="134"/>
+    <line x1="534" y1="80" x2="534" y2="134"/>
+  </g>
+  <text x="244" y="105" text-anchor="middle" fill="#262408" font-size="5" font-family="'JetBrains Mono',monospace">213-214</text>
+  <text x="294" y="105" text-anchor="middle" fill="#262408" font-size="5" font-family="'JetBrains Mono',monospace">215-216</text>
+  <text x="344" y="105" text-anchor="middle" fill="#262408" font-size="5" font-family="'JetBrains Mono',monospace">217</text>
+  <text x="400" y="105" text-anchor="middle" fill="#2c2c0c" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">218</text>
+  <text x="456" y="105" text-anchor="middle" fill="#262408" font-size="5" font-family="'JetBrains Mono',monospace">219</text>
+  <text x="506" y="105" text-anchor="middle" fill="#262408" font-size="5" font-family="'JetBrains Mono',monospace">220-221</text>
+  <text x="556" y="105" text-anchor="middle" fill="#262408" font-size="5" font-family="'JetBrains Mono',monospace">222-223</text>
+  <!-- South 200 (241-250) amber/brown -->
+  <polygon points="232,426 568,426 590,480 210,480" fill="#0c0d06" stroke="#161504" stroke-width="0.8"/>
+  <text x="400" y="458" text-anchor="middle" fill="#222008" font-size="5.5" font-family="'JetBrains Mono',monospace" letter-spacing="1">200 SOUTH · 241-250</text>
+  <!-- West 200 -->
+  <polygon points="82,182 140,204 140,356 82,378" fill="#080a1c" stroke="#0e1230" stroke-width="0.8"/>
+  <text x="111" y="280" text-anchor="middle" fill="#14183a" font-size="5" font-family="'JetBrains Mono',monospace" transform="rotate(-90,111,280)">200W</text>
+  <!-- East 200 (228-232) gold accent + VIP suites -->
+  <polygon points="660,204 718,182 718,378 660,356" fill="#0e1008" stroke="#1a1806" stroke-width="0.8"/>
+  <g stroke="#181604" stroke-width="0.6">
+    <line x1="660" y1="232" x2="718" y2="218"/><line x1="660" y1="260" x2="718" y2="248"/>
+    <line x1="660" y1="280" x2="718" y2="280"/><line x1="660" y1="300" x2="718" y2="312"/>
+    <line x1="660" y1="328" x2="718" y2="342"/>
+  </g>
+  <text x="689" y="280" text-anchor="middle" fill="#22220a" font-size="5" font-family="'JetBrains Mono',monospace" transform="rotate(90,689,280)">VIP SUITES · 228-232</text>
+
+  <!-- ══ INNER CONCOURSE RING ══ -->
+  <polygon points="252,134 548,134 660,204 660,356 548,426 252,426 140,356 140,204" fill="#09102a" stroke="#121a40" stroke-width="1.2"/>
+
+  <!-- ══ 100 LEVEL — LOWER BOWL ══ -->
+  <!-- North (111-125) BLUE — club seats -->
+  <polygon points="252,134 548,134 532,182 268,182" fill="#06091e" stroke="#0c1038" stroke-width="1"/>
+  <g stroke="#0c1030" stroke-width="0.6" opacity="0.7">
+    <line x1="280" y1="134" x2="280" y2="182"/><line x1="314" y1="134" x2="314" y2="182"/>
+    <line x1="348" y1="134" x2="348" y2="182"/><line x1="382" y1="134" x2="382" y2="182"/>
+    <line x1="400" y1="134" x2="400" y2="182"/><line x1="418" y1="134" x2="418" y2="182"/>
+    <line x1="452" y1="134" x2="452" y2="182"/><line x1="486" y1="134" x2="486" y2="182"/>
+    <line x1="520" y1="134" x2="520" y2="182"/>
+  </g>
+  <!-- Seat row lines North -->
+  <g stroke="#0d1432" stroke-width="0.5" opacity="0.6">
+    <line x1="268" y1="146" x2="532" y2="146"/>
+    <line x1="268" y1="158" x2="532" y2="158"/>
+    <line x1="268" y1="170" x2="532" y2="170"/>
+  </g>
+  <text x="264" y="155" text-anchor="middle" fill="#162048" font-size="5" font-family="'JetBrains Mono',monospace">111</text>
+  <text x="298" y="155" text-anchor="middle" fill="#162048" font-size="5" font-family="'JetBrains Mono',monospace">113</text>
+  <text x="332" y="155" text-anchor="middle" fill="#162048" font-size="5" font-family="'JetBrains Mono',monospace">115</text>
+  <text x="366" y="155" text-anchor="middle" fill="#162048" font-size="5" font-family="'JetBrains Mono',monospace">117</text>
+  <text x="400" y="155" text-anchor="middle" fill="#1c2a58" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">118</text>
+  <text x="434" y="155" text-anchor="middle" fill="#162048" font-size="5" font-family="'JetBrains Mono',monospace">119</text>
+  <text x="468" y="155" text-anchor="middle" fill="#162048" font-size="5" font-family="'JetBrains Mono',monospace">121</text>
+  <text x="502" y="155" text-anchor="middle" fill="#162048" font-size="5" font-family="'JetBrains Mono',monospace">122</text>
+  <text x="534" y="155" text-anchor="middle" fill="#162048" font-size="5" font-family="'JetBrains Mono',monospace">125</text>
+
+  <!-- South (138-154) teal/multi — The 72 Club zone -->
+  <polygon points="268,378 532,378 548,426 252,426" fill="#050d0c" stroke="#0a1618" stroke-width="1"/>
+  <g stroke="#0a1618" stroke-width="0.6">
+    <line x1="296" y1="378" x2="294" y2="426"/><line x1="330" y1="378" x2="326" y2="426"/>
+    <line x1="364" y1="378" x2="358" y2="426"/><line x1="400" y1="378" x2="400" y2="426"/>
+    <line x1="436" y1="378" x2="442" y2="426"/><line x1="470" y1="378" x2="474" y2="426"/>
+    <line x1="504" y1="378" x2="506" y2="426"/>
+  </g>
+  <g stroke="#0d1c1a" stroke-width="0.5" opacity="0.6">
+    <line x1="268" y1="390" x2="532" y2="390"/>
+    <line x1="268" y1="402" x2="532" y2="402"/>
+    <line x1="268" y1="414" x2="532" y2="414"/>
+  </g>
+  <text x="282" y="406" text-anchor="middle" fill="#0c2224" font-size="4.8" font-family="'JetBrains Mono',monospace">138-139</text>
+  <text x="348" y="406" text-anchor="middle" fill="#0c2224" font-size="4.8" font-family="'JetBrains Mono',monospace">142-144</text>
+  <text x="400" y="406" text-anchor="middle" fill="#102c2e" font-size="5.5" font-family="'JetBrains Mono',monospace" font-weight="700">72 CLUB</text>
+  <text x="452" y="406" text-anchor="middle" fill="#0c2224" font-size="4.8" font-family="'JetBrains Mono',monospace">147-149</text>
+  <text x="518" y="406" text-anchor="middle" fill="#0c2224" font-size="4.8" font-family="'JetBrains Mono',monospace">153-154</text>
+
+  <!-- West endzone / LIV Club (101-110) ZONE A -->
+  <polygon points="140,204 218,182 218,378 140,356" fill="#0c0812" stroke="#1a1028" stroke-width="1"/>
+  <!-- LIV Club highlight block (west midfield) -->
+  <rect x="142" y="246" width="74" height="68" rx="2" fill="#0a0610" stroke="#1c0e30" stroke-width="1"/>
+  <text x="179" y="283" text-anchor="middle" fill="#1c0c30" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700" transform="rotate(-90,179,283)">LIV CLUB</text>
   <!-- West seat rows -->
-  <g stroke="#0f1938" stroke-width="0.5" opacity="0.7">
-    <line x1="126" y1="194" x2="126" y2="346"/><line x1="135" y1="194" x2="135" y2="346"/>
-    <line x1="145" y1="194" x2="145" y2="346"/><line x1="155" y1="194" x2="155" y2="346"/>
-    <line x1="165" y1="194" x2="165" y2="346"/>
+  <g stroke="#180e28" stroke-width="0.5" opacity="0.6">
+    <line x1="152" y1="204" x2="152" y2="356"/>
+    <line x1="166" y1="200" x2="166" y2="360"/>
+    <line x1="180" y1="196" x2="180" y2="364"/>
+    <line x1="194" y1="192" x2="194" y2="368"/>
+    <line x1="208" y1="188" x2="208" y2="372"/>
   </g>
-  <!-- East seat rows -->
-  <g stroke="#0f1938" stroke-width="0.5" opacity="0.7">
-    <line x1="610" y1="194" x2="610" y2="346"/><line x1="620" y1="194" x2="620" y2="346"/>
-    <line x1="630" y1="194" x2="630" y2="346"/><line x1="645" y1="194" x2="645" y2="346"/>
-    <line x1="657" y1="194" x2="657" y2="346"/>
+  <text x="158" y="214" text-anchor="middle" fill="#1c0e28" font-size="5" font-family="'JetBrains Mono',monospace">101</text>
+  <text x="158" y="348" text-anchor="middle" fill="#1c0e28" font-size="5" font-family="'JetBrains Mono',monospace">110</text>
+  <text x="198" y="196" text-anchor="middle" fill="#1c0e28" font-size="4.8" font-family="'JetBrains Mono',monospace" transform="rotate(-90,198,196)">W.EZ</text>
+
+  <!-- East (129-135) gold/yellow ZONE C -->
+  <polygon points="582,182 660,204 660,356 582,378" fill="#0d0d06" stroke="#1c1c08" stroke-width="1"/>
+  <g stroke="#181808" stroke-width="0.5" opacity="0.6">
+    <line x1="598" y1="186" x2="598" y2="374"/>
+    <line x1="616" y1="190" x2="616" y2="370"/>
+    <line x1="634" y1="196" x2="634" y2="364"/>
+    <line x1="650" y1="202" x2="650" y2="358"/>
   </g>
+  <text x="616" y="280" text-anchor="middle" fill="#262606" font-size="5.5" font-family="'JetBrains Mono',monospace" transform="rotate(90,616,280)">129-135</text>
+  <text x="648" y="196" text-anchor="middle" fill="#1c1c06" font-size="4.8" font-family="'JetBrains Mono',monospace" transform="rotate(90,648,196)">E.EZ</text>
 
   <!-- ══ PLAYING FIELD ══ -->
-  <!-- End zones -->
-  <rect x="200" y="194" width="44"  height="152" fill="#0b1a0c"/>
-  <rect x="556" y="194" width="44"  height="152" fill="#0b1a0c"/>
+  <!-- West end zone (green) -->
+  <rect x="218" y="182" width="50" height="196" fill="#061408"/>
+  <!-- East end zone (green) -->
+  <rect x="532" y="182" width="50" height="196" fill="#061408"/>
   <!-- Playing surface -->
-  <rect x="244" y="194" width="312" height="152" fill="#0e2010"/>
+  <rect x="268" y="182" width="264" height="196" fill="#081808"/>
   <!-- Field border -->
-  <rect x="200" y="194" width="400" height="152" fill="none" stroke="#142818" stroke-width="1.5"/>
-  <!-- Yard lines (every 10 yards shown) -->
-  <g stroke="#122016" stroke-width="0.6" fill="none">
-    <line x1="276" y1="194" x2="276" y2="346"/>
-    <line x1="308" y1="194" x2="308" y2="346"/>
-    <line x1="340" y1="194" x2="340" y2="346"/>
-    <line x1="372" y1="194" x2="372" y2="346"/>
-    <!-- 50-yard line -->
-    <line x1="400" y1="194" x2="400" y2="346" stroke="#182e1a" stroke-width="1.2"/>
-    <line x1="428" y1="194" x2="428" y2="346"/>
-    <line x1="460" y1="194" x2="460" y2="346"/>
-    <line x1="492" y1="194" x2="492" y2="346"/>
-    <line x1="524" y1="194" x2="524" y2="346"/>
+  <rect x="218" y="182" width="364" height="196" fill="none" stroke="#0e2210" stroke-width="1.5"/>
+  <!-- 50-yard line -->
+  <line x1="400" y1="182" x2="400" y2="378" stroke="#122416" stroke-width="1.4"/>
+  <!-- Yard lines -->
+  <g stroke="#0c1c0c" stroke-width="0.7">
+    <line x1="295" y1="182" x2="295" y2="378"/>
+    <line x1="322" y1="182" x2="322" y2="378"/>
+    <line x1="349" y1="182" x2="349" y2="378"/>
+    <line x1="376" y1="182" x2="376" y2="378"/>
+    <line x1="424" y1="182" x2="424" y2="378"/>
+    <line x1="451" y1="182" x2="451" y2="378"/>
+    <line x1="478" y1="182" x2="478" y2="378"/>
+    <line x1="505" y1="182" x2="505" y2="378"/>
   </g>
-  <!-- Field labels -->
-  <text x="222"  y="270" text-anchor="middle" fill="#102012" font-size="7.5" font-family="'JetBrains Mono',monospace" transform="rotate(-90,222,270)">DOLPHINS</text>
-  <text x="578"  y="270" text-anchor="middle" fill="#102012" font-size="7.5" font-family="'JetBrains Mono',monospace" transform="rotate(90,578,270)">END ZONE</text>
-  <text x="400"  y="273" text-anchor="middle" fill="#152818" font-size="9"   font-family="'JetBrains Mono',monospace" font-weight="700">50</text>
-  <text x="310"  y="273" text-anchor="middle" fill="#112015" font-size="7"   font-family="'JetBrains Mono',monospace">30</text>
-  <text x="490"  y="273" text-anchor="middle" fill="#112015" font-size="7"   font-family="'JetBrains Mono',monospace">30</text>
+  <!-- Yard markers — top sideline -->
+  <text x="295" y="196" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">10</text>
+  <text x="322" y="196" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">20</text>
+  <text x="349" y="196" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">30</text>
+  <text x="376" y="196" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">40</text>
+  <text x="400" y="196" text-anchor="middle" fill="#102810" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">50</text>
+  <text x="424" y="196" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">40</text>
+  <text x="451" y="196" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">30</text>
+  <text x="478" y="196" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">20</text>
+  <text x="505" y="196" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">10</text>
+  <!-- Yard markers — bottom sideline -->
+  <text x="295" y="372" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">10</text>
+  <text x="322" y="372" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">20</text>
+  <text x="349" y="372" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">30</text>
+  <text x="376" y="372" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">40</text>
+  <text x="400" y="372" text-anchor="middle" fill="#102810" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">50</text>
+  <text x="424" y="372" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">40</text>
+  <text x="451" y="372" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">30</text>
+  <text x="478" y="372" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">20</text>
+  <text x="505" y="372" text-anchor="middle" fill="#0c1c0c" font-size="5.5" font-family="'JetBrains Mono',monospace">10</text>
+  <!-- MIAMI field text -->
+  <text x="243" y="280" text-anchor="middle" fill="#0a1e08" font-size="8" font-family="'JetBrains Mono',monospace" font-weight="700" transform="rotate(-90,243,280)">MIAMI</text>
+  <text x="557" y="280" text-anchor="middle" fill="#0a1e08" font-size="8" font-family="'JetBrains Mono',monospace" font-weight="700" transform="rotate(90,557,280)">MIAMI</text>
+  <!-- Dolphins logo center -->
+  <circle cx="400" cy="280" r="20" fill="none" stroke="#0e2412" stroke-width="1"/>
+  <circle cx="400" cy="280" r="5" fill="#0c1e0e"/>
+  <text x="400" y="285" text-anchor="middle" fill="#0e2412" font-size="7" font-family="'JetBrains Mono',monospace" font-weight="700">●</text>
 
-  <!-- ══ STAIRWELL / ACCESS POINTS (operational) ══ -->
-  <!-- West concourse stairwells -->
-  <rect x="77"  y="164" width="10" height="20" rx="1" fill="#060912" stroke="#1a2856" stroke-width="1"/>
-  <text x="82"  y="177" text-anchor="middle" fill="#253a62" font-size="5" font-family="'JetBrains Mono',monospace">S</text>
-  <rect x="77"  y="210" width="10" height="20" rx="1" fill="#060912" stroke="#1a2856" stroke-width="1"/>
-  <text x="82"  y="223" text-anchor="middle" fill="#253a62" font-size="5" font-family="'JetBrains Mono',monospace">S</text>
-  <rect x="77"  y="320" width="10" height="20" rx="1" fill="#060912" stroke="#1a2856" stroke-width="1"/>
-  <text x="82"  y="333" text-anchor="middle" fill="#253a62" font-size="5" font-family="'JetBrains Mono',monospace">S</text>
-  <rect x="77"  y="366" width="10" height="20" rx="1" fill="#060912" stroke="#1a2856" stroke-width="1"/>
-  <text x="82"  y="379" text-anchor="middle" fill="#253a62" font-size="5" font-family="'JetBrains Mono',monospace">S</text>
-  <!-- East concourse stairwells -->
-  <rect x="713" y="164" width="10" height="20" rx="1" fill="#060912" stroke="#1a2856" stroke-width="1"/>
-  <text x="718" y="177" text-anchor="middle" fill="#253a62" font-size="5" font-family="'JetBrains Mono',monospace">S</text>
-  <rect x="713" y="210" width="10" height="20" rx="1" fill="#060912" stroke="#1a2856" stroke-width="1"/>
-  <text x="718" y="223" text-anchor="middle" fill="#253a62" font-size="5" font-family="'JetBrains Mono',monospace">S</text>
-  <rect x="713" y="320" width="10" height="20" rx="1" fill="#060912" stroke="#1a2856" stroke-width="1"/>
-  <text x="718" y="333" text-anchor="middle" fill="#253a62" font-size="5" font-family="'JetBrains Mono',monospace">S</text>
-  <rect x="713" y="366" width="10" height="20" rx="1" fill="#060912" stroke="#1a2856" stroke-width="1"/>
-  <text x="718" y="379" text-anchor="middle" fill="#253a62" font-size="5" font-family="'JetBrains Mono',monospace">S</text>
-
-  <!-- ══ BAR / CONCESSION STATIONS ══ -->
-  <!-- Zone A (West) -->
-  <rect x="77"  y="148" width="40" height="14" rx="2" fill="#12030a" stroke="#FF4466" stroke-width="1.2"/>
-  <text x="97"  y="158" text-anchor="middle" fill="#FF4466" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR A1</text>
-  <rect x="77"  y="388" width="40" height="14" rx="2" fill="#12030a" stroke="#FF4466" stroke-width="1.2"/>
-  <text x="97"  y="398" text-anchor="middle" fill="#FF4466" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR A2</text>
-  <!-- Zone B (North) -->
-  <rect x="200" y="128" width="44" height="14" rx="2" fill="#130d00" stroke="#FFba38" stroke-width="1.2"/>
-  <text x="222" y="138" text-anchor="middle" fill="#FFba38" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR B1</text>
-  <rect x="556" y="128" width="44" height="14" rx="2" fill="#130d00" stroke="#FFba38" stroke-width="1.2"/>
-  <text x="578" y="138" text-anchor="middle" fill="#FFba38" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR B2</text>
-  <!-- Zone C (East) -->
-  <rect x="683" y="148" width="40" height="14" rx="2" fill="#00041a" stroke="#5AA5FF" stroke-width="1.2"/>
-  <text x="703" y="158" text-anchor="middle" fill="#5AA5FF" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR C1</text>
-  <rect x="683" y="388" width="40" height="14" rx="2" fill="#00041a" stroke="#5AA5FF" stroke-width="1.2"/>
-  <text x="703" y="398" text-anchor="middle" fill="#5AA5FF" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR C2</text>
-  <!-- Zone D (South) -->
-  <rect x="200" y="398" width="44" height="14" rx="2" fill="#00110a" stroke="#00e87a" stroke-width="1.2"/>
-  <text x="222" y="408" text-anchor="middle" fill="#00e87a" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR D1</text>
-  <rect x="556" y="398" width="44" height="14" rx="2" fill="#00110a" stroke="#00e87a" stroke-width="1.2"/>
-  <text x="578" y="408" text-anchor="middle" fill="#00e87a" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR D2</text>
-  <!-- VIP Bars (East Suite Level) -->
-  <rect x="683" y="170" width="40" height="14" rx="2" fill="#100018" stroke="#a855f7" stroke-width="1.2"/>
-  <text x="703" y="180" text-anchor="middle" fill="#a855f7" font-size="5.5" font-family="'JetBrains Mono',monospace" font-weight="700">VIP BAR 1</text>
-  <rect x="683" y="368" width="40" height="14" rx="2" fill="#100018" stroke="#a855f7" stroke-width="1.2"/>
-  <text x="703" y="378" text-anchor="middle" fill="#a855f7" font-size="5.5" font-family="'JetBrains Mono',monospace" font-weight="700">VIP BAR 2</text>
-  <!-- Upper Bowl bars -->
-  <rect x="200" y="46"  width="44" height="14" rx="2" fill="#070b1e" stroke="#06b6d4" stroke-width="1"/>
-  <text x="222" y="56"  text-anchor="middle" fill="#06b6d4" font-size="5.5" font-family="'JetBrains Mono',monospace" font-weight="700">BAR U1</text>
-  <rect x="556" y="46"  width="44" height="14" rx="2" fill="#070b1e" stroke="#06b6d4" stroke-width="1"/>
-  <text x="578" y="56"  text-anchor="middle" fill="#06b6d4" font-size="5.5" font-family="'JetBrains Mono',monospace" font-weight="700">BAR U2</text>
+  <!-- ══ BAR STATIONS ══ -->
+  <!-- Zone A West -->
+  <rect x="82" y="228" width="58" height="14" rx="2" fill="#120208" stroke="#FF4466" stroke-width="1.2"/>
+  <text x="111" y="238" text-anchor="middle" fill="#FF4466" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR A1</text>
+  <rect x="82" y="318" width="58" height="14" rx="2" fill="#120208" stroke="#FF4466" stroke-width="1.2"/>
+  <text x="111" y="328" text-anchor="middle" fill="#FF4466" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR A2</text>
+  <!-- Zone B North -->
+  <rect x="268" y="137" width="58" height="14" rx="2" fill="#120d00" stroke="#FFba38" stroke-width="1.2"/>
+  <text x="297" y="147" text-anchor="middle" fill="#FFba38" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR B1</text>
+  <rect x="474" y="137" width="58" height="14" rx="2" fill="#120d00" stroke="#FFba38" stroke-width="1.2"/>
+  <text x="503" y="147" text-anchor="middle" fill="#FFba38" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR B2</text>
+  <!-- Zone C East -->
+  <rect x="660" y="228" width="58" height="14" rx="2" fill="#000418" stroke="#5AA5FF" stroke-width="1.2"/>
+  <text x="689" y="238" text-anchor="middle" fill="#5AA5FF" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR C1</text>
+  <rect x="660" y="318" width="58" height="14" rx="2" fill="#000418" stroke="#5AA5FF" stroke-width="1.2"/>
+  <text x="689" y="328" text-anchor="middle" fill="#5AA5FF" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR C2</text>
+  <!-- Zone D South -->
+  <rect x="268" y="429" width="58" height="14" rx="2" fill="#001008" stroke="#00e87a" stroke-width="1.2"/>
+  <text x="297" y="439" text-anchor="middle" fill="#00e87a" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR D1</text>
+  <rect x="474" y="429" width="58" height="14" rx="2" fill="#001008" stroke="#00e87a" stroke-width="1.2"/>
+  <text x="503" y="439" text-anchor="middle" fill="#00e87a" font-size="6" font-family="'JetBrains Mono',monospace" font-weight="700">BAR D2</text>
+  <!-- VIP Bars -->
+  <rect x="660" y="182" width="58" height="14" rx="2" fill="#100018" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="689" y="192" text-anchor="middle" fill="#a855f7" font-size="5.5" font-family="'JetBrains Mono',monospace" font-weight="700">VIP BAR 1</text>
+  <rect x="660" y="362" width="58" height="14" rx="2" fill="#100018" stroke="#a855f7" stroke-width="1.2"/>
+  <text x="689" y="372" text-anchor="middle" fill="#a855f7" font-size="5.5" font-family="'JetBrains Mono',monospace" font-weight="700">VIP BAR 2</text>
+  <!-- Upper 300 bars -->
+  <rect x="268" y="48" width="58" height="14" rx="2" fill="#060a1c" stroke="#06b6d4" stroke-width="1"/>
+  <text x="297" y="58" text-anchor="middle" fill="#06b6d4" font-size="5.5" font-family="'JetBrains Mono',monospace" font-weight="700">BAR U1</text>
+  <rect x="474" y="48" width="58" height="14" rx="2" fill="#060a1c" stroke="#06b6d4" stroke-width="1"/>
+  <text x="503" y="58" text-anchor="middle" fill="#06b6d4" font-size="5.5" font-family="'JetBrains Mono',monospace" font-weight="700">BAR U2</text>
 
   <!-- ══ INVENTORY HUBS ══ -->
-  <!-- Hub West (Zone A) -->
+  <!-- Hub A (West/Zone A) -->
   <g filter="url(#fg-sm)">
-    <rect x="77" y="255" width="40" height="22" rx="4" fill="#180308" stroke="#FF4466" stroke-width="1.8"/>
-    <circle cx="97" cy="251" r="4" fill="#FF4466" opacity="0.7"><animate attributeName="r" values="4;8;4" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0;0.7" dur="2s" repeatCount="indefinite"/></circle>
-    <text x="97" y="269" text-anchor="middle" fill="#FF4466" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">HUB A</text>
+    <rect x="82" y="263" width="58" height="22" rx="4" fill="#180308" stroke="#FF4466" stroke-width="1.8"/>
+    <circle cx="111" cy="259" r="4" fill="#FF4466" opacity="0.7"><animate attributeName="r" values="4;8;4" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0;0.7" dur="2s" repeatCount="indefinite"/></circle>
+    <text x="111" y="277" text-anchor="middle" fill="#FF4466" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">HUB A</text>
   </g>
-  <!-- Hub North (Zone B) -->
+  <!-- Hub B (North/Zone B) -->
   <g>
-    <rect x="380" y="118" width="40" height="22" rx="4" fill="#130d00" stroke="#FFba38" stroke-width="1.6"/>
-    <circle cx="400" cy="114" r="3.5" fill="#FFba38" opacity="0.7"><animate attributeName="r" values="3.5;7;3.5" dur="3.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0;0.7" dur="3.5s" repeatCount="indefinite"/></circle>
-    <text x="400" y="133" text-anchor="middle" fill="#FFba38" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">HUB B</text>
+    <rect x="371" y="120" width="58" height="22" rx="4" fill="#130d00" stroke="#FFba38" stroke-width="1.6"/>
+    <circle cx="400" cy="116" r="3.5" fill="#FFba38" opacity="0.7"><animate attributeName="r" values="3.5;7;3.5" dur="3.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0;0.7" dur="3.5s" repeatCount="indefinite"/></circle>
+    <text x="400" y="135" text-anchor="middle" fill="#FFba38" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">HUB B</text>
   </g>
-  <!-- Hub East (Zone C) -->
+  <!-- Hub C (East/Zone C) -->
   <g filter="url(#fg-sm)">
-    <rect x="683" y="255" width="40" height="22" rx="4" fill="#00041a" stroke="#5AA5FF" stroke-width="1.8"/>
-    <circle cx="703" cy="251" r="4" fill="#5AA5FF" opacity="0.7"><animate attributeName="r" values="4;8;4" dur="2.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0;0.7" dur="2.8s" repeatCount="indefinite"/></circle>
-    <text x="703" y="269" text-anchor="middle" fill="#5AA5FF" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">HUB C</text>
+    <rect x="660" y="263" width="58" height="22" rx="4" fill="#00041a" stroke="#5AA5FF" stroke-width="1.8"/>
+    <circle cx="689" cy="259" r="4" fill="#5AA5FF" opacity="0.7"><animate attributeName="r" values="4;8;4" dur="2.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0;0.7" dur="2.8s" repeatCount="indefinite"/></circle>
+    <text x="689" y="277" text-anchor="middle" fill="#5AA5FF" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">HUB C</text>
   </g>
-  <!-- Hub South (Zone D) -->
+  <!-- Hub D (South/Zone D) -->
   <g>
-    <rect x="380" y="396" width="40" height="22" rx="4" fill="#00100a" stroke="#00e87a" stroke-width="1.6"/>
-    <circle cx="400" cy="413" r="3" fill="#00e87a" opacity="0.6"><animate attributeName="r" values="3;6;3" dur="4.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="4.5s" repeatCount="indefinite"/></circle>
-    <text x="400" y="411" text-anchor="middle" fill="#00e87a" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">HUB D</text>
+    <rect x="371" y="440" width="58" height="22" rx="4" fill="#00100a" stroke="#00e87a" stroke-width="1.6"/>
+    <circle cx="400" cy="456" r="3" fill="#00e87a" opacity="0.6"><animate attributeName="r" values="3;6;3" dur="4.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;0;0.6" dur="4.5s" repeatCount="indefinite"/></circle>
+    <text x="400" y="455" text-anchor="middle" fill="#00e87a" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">HUB D</text>
   </g>
-  <!-- VIP Hub (East Suite) -->
+  <!-- VIP Hub -->
   <g>
-    <rect x="683" y="174" width="40" height="22" rx="4" fill="#0e0018" stroke="#a855f7" stroke-width="1.6"/>
-    <circle cx="703" cy="170" r="3.5" fill="#a855f7" opacity="0.7"><animate attributeName="r" values="3.5;7;3.5" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0;0.7" dur="1.8s" repeatCount="indefinite"/></circle>
-    <text x="703" y="189" text-anchor="middle" fill="#a855f7" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">VIP HUB</text>
+    <rect x="660" y="188" width="58" height="22" rx="4" fill="#0e0018" stroke="#a855f7" stroke-width="1.6"/>
+    <circle cx="689" cy="184" r="3.5" fill="#a855f7" opacity="0.7"><animate attributeName="r" values="3.5;7;3.5" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;0;0.7" dur="1.8s" repeatCount="indefinite"/></circle>
+    <text x="689" y="203" text-anchor="middle" fill="#a855f7" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">VIP HUB</text>
   </g>
-  <!-- Central Storage (South / Loading Dock) -->
+  <!-- Central Storage (loading dock, south service road) -->
   <g filter="url(#fg)">
-    <rect x="340" y="496" width="120" height="30" rx="5" fill="#001808" stroke="#00e87a" stroke-width="2"/>
-    <text x="400" y="508" text-anchor="middle" fill="#00e87a" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">★ CENTRAL STORAGE</text>
-    <text x="400" y="520" text-anchor="middle" fill="#00e87a" font-size="5.5" font-family="'JetBrains Mono',monospace" opacity="0.7">LOADING DOCK — SOUTH</text>
+    <rect x="340" y="490" width="120" height="28" rx="5" fill="#001808" stroke="#00e87a" stroke-width="2"/>
+    <text x="400" y="501" text-anchor="middle" fill="#00e87a" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">★ CENTRAL STORAGE</text>
+    <text x="400" y="513" text-anchor="middle" fill="#00e87a" font-size="5.5" font-family="'JetBrains Mono',monospace" opacity="0.7">LOADING DOCK — SOUTH</text>
     <animate attributeName="opacity" values="1;0.85;1" dur="3s" repeatCount="indefinite"/>
   </g>
-  <!-- Service road to loading dock -->
-  <line x1="400" y1="472" x2="400" y2="496" stroke="#0e1c28" stroke-width="6" stroke-linecap="round"/>
-  <line x1="340" y1="496" x2="460" y2="496" stroke="#0e1c28" stroke-width="2"/>
-
-  <!-- ══ ENTRY GATES ══ -->
-  <rect x="316" y="22" width="68" height="14" rx="3" fill="#04060e" stroke="#1e2e50" stroke-width="1"/>
-  <text x="350" y="32" text-anchor="middle" fill="#3a5280" font-size="7" font-family="'JetBrains Mono',monospace">GATE 1</text>
-  <rect x="416" y="22" width="68" height="14" rx="3" fill="#04060e" stroke="#1e2e50" stroke-width="1"/>
-  <text x="450" y="32" text-anchor="middle" fill="#3a5280" font-size="7" font-family="'JetBrains Mono',monospace">GATE 2</text>
-  <rect x="20"  y="244" width="14" height="52" rx="3" fill="#04060e" stroke="#1e2e50" stroke-width="1"/>
-  <text x="27" y="274" text-anchor="middle" fill="#3a5280" font-size="6" font-family="'JetBrains Mono',monospace" transform="rotate(-90,27,274)">GATE 3</text>
-  <rect x="766" y="244" width="14" height="52" rx="3" fill="#04060e" stroke="#1e2e50" stroke-width="1"/>
-  <text x="773" y="274" text-anchor="middle" fill="#3a5280" font-size="6" font-family="'JetBrains Mono',monospace" transform="rotate(90,773,274)">GATE 4</text>
-  <rect x="316" y="504" width="68" height="14" rx="3" fill="#04060e" stroke="#1e2e50" stroke-width="1"/>
-  <text x="350" y="514" text-anchor="middle" fill="#3a5280" font-size="7" font-family="'JetBrains Mono',monospace">GATE 5</text>
-  <rect x="416" y="504" width="68" height="14" rx="3" fill="#04060e" stroke="#1e2e50" stroke-width="1"/>
-  <text x="450" y="514" text-anchor="middle" fill="#3a5280" font-size="7" font-family="'JetBrains Mono',monospace">GATE 6</text>
-
-  <!-- ══ COMPASS / MAP INFO ══ -->
-  <g transform="translate(752,502)">
-    <circle cx="0" cy="0" r="14" fill="#060912" stroke="#1a2545" stroke-width="1"/>
-    <polygon points="0,-10 -4,2 0,-1 4,2" fill="#3a5280"/>
-    <polygon points="0,10 -4,-2 0,1 4,-2" fill="#1a2545"/>
-    <text x="0" y="-13" text-anchor="middle" fill="#3a5280" font-size="6" font-family="'JetBrains Mono',monospace">N</text>
-    <text x="0" y="22" text-anchor="middle" fill="#1a2545" font-size="5" font-family="'JetBrains Mono',monospace">HRS</text>
-  </g>
+  <line x1="400" y1="480" x2="400" y2="490" stroke="#0e1c28" stroke-width="6" stroke-linecap="round"/>
 
   <!-- ══ ZONE PRESSURE BREATHING ══ -->
   <g id="stad-pressure-layer">
-    <!-- Zone A — West concourse breathing -->
-    <rect id="pres-A"   x="77"  y="150" width="40"  height="240" rx="2" fill="#FF4466" pointer-events="none">
-      <animate attributeName="opacity" values="0.08;0.28;0.08" dur="2s"   repeatCount="indefinite"/>
-    </rect>
-    <!-- Zone B — North concourse breathing -->
-    <rect id="pres-B"   x="117" y="112" width="566" height="38"  rx="2" fill="#FFba38" pointer-events="none">
+    <!-- Zone A — West (LIV + west concourse) -->
+    <polygon id="pres-A" points="82,182 218,182 218,378 82,378" fill="#FF4466" pointer-events="none">
+      <animate attributeName="opacity" values="0.08;0.28;0.08" dur="2s" repeatCount="indefinite"/>
+    </polygon>
+    <!-- Zone B — North concourse (100 level) -->
+    <polygon id="pres-B" points="252,134 548,134 532,182 268,182" fill="#FFba38" pointer-events="none">
       <animate attributeName="opacity" values="0.05;0.16;0.05" dur="4.2s" repeatCount="indefinite"/>
-    </rect>
-    <!-- Zone C — East concourse breathing -->
-    <rect id="pres-C"   x="683" y="150" width="40"  height="240" rx="2" fill="#5AA5FF" pointer-events="none">
+    </polygon>
+    <!-- Zone C — East (129-135 + VIP east) -->
+    <polygon id="pres-C" points="582,182 660,204 660,356 582,378" fill="#5AA5FF" pointer-events="none">
       <animate attributeName="opacity" values="0.07;0.22;0.07" dur="2.3s" repeatCount="indefinite"/>
-    </rect>
-    <!-- Zone D — South concourse breathing -->
-    <rect id="pres-D"   x="117" y="390" width="566" height="38"  rx="2" fill="#00e87a" pointer-events="none">
+    </polygon>
+    <!-- Zone D — South concourse (100 level) -->
+    <polygon id="pres-D" points="268,378 532,378 548,426 252,426" fill="#00e87a" pointer-events="none">
       <animate attributeName="opacity" values="0.04;0.14;0.04" dur="5.5s" repeatCount="indefinite"/>
-    </rect>
-    <!-- VIP — East suite level -->
-    <rect id="pres-VIP" x="683" y="112" width="40"  height="316" rx="2" fill="#a855f7" pointer-events="none">
-      <animate attributeName="opacity" values="0.05;0.16;0.05" dur="3.2s" repeatCount="indefinite"/>
-    </rect>
-    <!-- Upper Bowl 300s breathing (CRITICAL — fastest) -->
-    <rect id="pres-UPP" x="55"  y="36"  width="690" height="32"  rx="4" fill="#06b6d4" pointer-events="none">
+    </polygon>
+    <!-- VIP — East suites (200 east level) -->
+    <polygon id="pres-VIP" points="660,182 718,182 718,378 660,378" fill="#a855f7" pointer-events="none">
+      <animate attributeName="opacity" values="0.05;0.18;0.05" dur="3.2s" repeatCount="indefinite"/>
+    </polygon>
+    <!-- Upper Bowl 300s North (CRITICAL — fastest) -->
+    <polygon id="pres-UPP" points="210,80 590,80 568,134 232,134" fill="#06b6d4" pointer-events="none">
       <animate attributeName="opacity" values="0.08;0.32;0.08" dur="1.5s" repeatCount="indefinite"/>
-    </rect>
+    </polygon>
   </g>
 
-  <!-- ══ ZONE CLICK TARGETS (transparent, interactive) ══ -->
-  <rect id="stad-zA"   x="77"  y="150" width="40"  height="240" fill="none" stroke="#FF4466" stroke-width="0" rx="2" style="cursor:pointer" onclick="stadSelectZone('A',null)"/>
-  <rect id="stad-zB"   x="117" y="112" width="566" height="38"  fill="none" stroke="#FFba38" stroke-width="0" rx="2" style="cursor:pointer" onclick="stadSelectZone('B',null)"/>
-  <rect id="stad-zC"   x="683" y="150" width="40"  height="240" fill="none" stroke="#5AA5FF" stroke-width="0" rx="2" style="cursor:pointer" onclick="stadSelectZone('C',null)"/>
-  <rect id="stad-zD"   x="117" y="390" width="566" height="38"  fill="none" stroke="#00e87a" stroke-width="0" rx="2" style="cursor:pointer" onclick="stadSelectZone('D',null)"/>
-  <rect id="stad-zVIP" x="683" y="112" width="40"  height="316" fill="none" stroke="#a855f7" stroke-width="0" rx="2" style="cursor:pointer" onclick="stadSelectZone('VIP',null)"/>
-  <rect id="stad-zUPP" x="55"  y="36"  width="690" height="32"  fill="none" stroke="#06b6d4" stroke-width="0" rx="4" style="cursor:pointer" onclick="stadSelectZone('UPP',null)"/>
+  <!-- ══ ZONE CLICK TARGETS (interactive, transparent) ══ -->
+  <polygon id="stad-zA"   points="82,182 218,182 218,378 82,378"             fill="none" style="cursor:pointer" onclick="stadSelectZone('A',null)"/>
+  <polygon id="stad-zB"   points="252,134 548,134 532,182 268,182"           fill="none" style="cursor:pointer" onclick="stadSelectZone('B',null)"/>
+  <polygon id="stad-zC"   points="582,182 660,204 660,356 582,378"           fill="none" style="cursor:pointer" onclick="stadSelectZone('C',null)"/>
+  <polygon id="stad-zD"   points="268,378 532,378 548,426 252,426"           fill="none" style="cursor:pointer" onclick="stadSelectZone('D',null)"/>
+  <polygon id="stad-zVIP" points="660,182 718,182 718,378 660,378"           fill="none" style="cursor:pointer" onclick="stadSelectZone('VIP',null)"/>
+  <polygon id="stad-zUPP" points="210,80 590,80 568,134 232,134"             fill="none" style="cursor:pointer" onclick="stadSelectZone('UPP',null)"/>
 
   <!-- ══ SUPPLY CHAIN INFRASTRUCTURE LAYER ══ -->
   <g id="stad-infra-layer">
-    <!-- Primary routes: Central Storage → Zone Hubs (thick, color-coded) -->
-    <!-- → Hub A West (CRITICAL) -->
-    <polyline points="400,496 400,456 97,428 97,270" fill="none" stroke="#FF4466" stroke-width="2" stroke-dasharray="8,5" stroke-opacity="0.5" class="sl-fast"/>
-    <!-- → Hub B North -->
-    <polyline points="400,496 400,390 400,131" fill="none" stroke="#FFba38" stroke-width="1.8" stroke-dasharray="8,5" stroke-opacity="0.42" class="sl-anim"/>
-    <!-- → Hub C East -->
-    <polyline points="400,496 400,456 703,428 703,270" fill="none" stroke="#5AA5FF" stroke-width="2" stroke-dasharray="8,5" stroke-opacity="0.45" class="sl-anim"/>
-    <!-- → Hub D South (short run) -->
-    <polyline points="400,496 400,409" fill="none" stroke="#00e87a" stroke-width="1.5" stroke-dasharray="6,5" stroke-opacity="0.35" class="sl-slow"/>
-    <!-- → VIP Hub (priority route) -->
-    <polyline points="400,496 703,490 703,185" fill="none" stroke="#a855f7" stroke-width="2" stroke-dasharray="6,4" stroke-opacity="0.5" class="sl-vip"/>
-
-    <!-- Secondary routes: Hub → Bar Stations (thinner) -->
-    <!-- Hub A → Bar A1/A2 (along west concourse) -->
-    <polyline points="97,255 97,150 200,131" fill="none" stroke="#FF4466" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.28"/>
-    <polyline points="97,277 97,390 200,409" fill="none" stroke="#FF4466" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.28"/>
-    <!-- Hub B → Bar B1/B2 (along north concourse) -->
-    <polyline points="380,131 250,131 200,150" fill="none" stroke="#FFba38" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.25"/>
-    <polyline points="420,131 550,131 600,150" fill="none" stroke="#FFba38" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.25"/>
-    <!-- Hub C → Bar C1/C2 (along east concourse) -->
-    <polyline points="703,255 703,150 600,131" fill="none" stroke="#5AA5FF" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.28"/>
-    <polyline points="703,277 703,390 600,409" fill="none" stroke="#5AA5FF" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.28"/>
-    <!-- Hub D → Bar D1/D2 (along south concourse) -->
-    <polyline points="380,409 250,409 200,390" fill="none" stroke="#00e87a" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.22"/>
-    <polyline points="420,409 550,409 600,390" fill="none" stroke="#00e87a" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.22"/>
+    <!-- Central → Hub A WEST (CRITICAL) -->
+    <polyline points="400,490 400,460 110,440 110,280" fill="none" stroke="#FF4466" stroke-width="2" stroke-dasharray="8,5" stroke-opacity="0.5" class="sl-fast"/>
+    <!-- Central → Hub B NORTH -->
+    <polyline points="400,490 400,135" fill="none" stroke="#FFba38" stroke-width="1.8" stroke-dasharray="8,5" stroke-opacity="0.42" class="sl-anim"/>
+    <!-- Central → Hub C EAST -->
+    <polyline points="400,490 400,460 690,440 690,280" fill="none" stroke="#5AA5FF" stroke-width="2" stroke-dasharray="8,5" stroke-opacity="0.45" class="sl-anim"/>
+    <!-- Central → Hub D SOUTH -->
+    <polyline points="400,490 400,450" fill="none" stroke="#00e87a" stroke-width="1.5" stroke-dasharray="6,5" stroke-opacity="0.35" class="sl-slow"/>
+    <!-- VIP priority route -->
+    <polyline points="400,490 690,475 690,195" fill="none" stroke="#a855f7" stroke-width="2" stroke-dasharray="6,4" stroke-opacity="0.5" class="sl-vip"/>
+    <!-- Hub A → Bar A1/A2 -->
+    <polyline points="111,263 111,242" fill="none" stroke="#FF4466" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.28"/>
+    <polyline points="111,285 111,332" fill="none" stroke="#FF4466" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.28"/>
+    <!-- Hub B → Bar B1/B2 -->
+    <polyline points="371,130 297,144" fill="none" stroke="#FFba38" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.25"/>
+    <polyline points="429,130 503,144" fill="none" stroke="#FFba38" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.25"/>
+    <!-- Hub C → Bar C1/C2 -->
+    <polyline points="689,263 689,242" fill="none" stroke="#5AA5FF" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.28"/>
+    <polyline points="689,285 689,332" fill="none" stroke="#5AA5FF" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.28"/>
+    <!-- Hub D → Bar D1/D2 -->
+    <polyline points="371,450 297,436" fill="none" stroke="#00e87a" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.22"/>
+    <polyline points="429,450 503,436" fill="none" stroke="#00e87a" stroke-width="1" stroke-dasharray="4,5" stroke-opacity="0.22"/>
     <!-- VIP Hub → VIP Bars -->
-    <line x1="703" y1="196" x2="703" y2="170" stroke="#a855f7" stroke-width="1.2" stroke-dasharray="3,4" stroke-opacity="0.4" class="sl-vip"/>
-    <line x1="703" y1="196" x2="703" y2="368" stroke="#a855f7" stroke-width="1.2" stroke-dasharray="3,4" stroke-opacity="0.4" class="sl-vip"/>
-    <!-- Upper bowl routes (from hub B to upper level bars) -->
-    <polyline points="350,118 222,118 222,60" fill="none" stroke="#06b6d4" stroke-width="0.8" stroke-dasharray="3,5" stroke-opacity="0.2" class="sl-slow"/>
-    <polyline points="450,118 578,118 578,60" fill="none" stroke="#06b6d4" stroke-width="0.8" stroke-dasharray="3,5" stroke-opacity="0.2" class="sl-slow"/>
+    <line x1="689" y1="210" x2="689" y2="196" stroke="#a855f7" stroke-width="1.2" stroke-dasharray="3,4" stroke-opacity="0.4" class="sl-vip"/>
+    <line x1="689" y1="210" x2="689" y2="362" stroke="#a855f7" stroke-width="1.2" stroke-dasharray="3,4" stroke-opacity="0.4" class="sl-vip"/>
+    <!-- Upper 300 routes -->
+    <polyline points="371,120 297,55" fill="none" stroke="#06b6d4" stroke-width="0.8" stroke-dasharray="3,5" stroke-opacity="0.2" class="sl-slow"/>
+    <polyline points="429,120 503,55" fill="none" stroke="#06b6d4" stroke-width="0.8" stroke-dasharray="3,5" stroke-opacity="0.2" class="sl-slow"/>
   </g>
 
-  <!-- ══ INVENTORY FLOW PACKETS (animateMotion along real routes) ══ -->
+  <!-- ══ INVENTORY FLOW PACKETS (animateMotion) ══ -->
   <g id="stad-flow-layer">
-    <!-- Zone A — CRITICAL (3 packets, fast) -->
+    <!-- Zone A CRITICAL (3 packets) -->
     <circle r="6" fill="#FF4466" filter="url(#fg)">
       <animateMotion dur="4.2s" repeatCount="indefinite" begin="0s" rotate="auto"><mpath href="#lane-ca"/></animateMotion>
     </circle>
@@ -4402,73 +4451,57 @@ BarPass/<br>
     <circle r="2.5" fill="#FF4466" opacity="0.5">
       <animateMotion dur="4.2s" repeatCount="indefinite" begin="-2.8s" rotate="auto"><mpath href="#lane-ca"/></animateMotion>
     </circle>
-    <!-- Zone B — NORMAL (2 packets) -->
+    <!-- Zone B NORMAL (2 packets) -->
     <circle r="4.8" fill="#FFba38" filter="url(#fg-sm)">
       <animateMotion dur="5.5s" repeatCount="indefinite" begin="0s" rotate="auto"><mpath href="#lane-cb"/></animateMotion>
     </circle>
     <circle r="3" fill="#FFba38" opacity="0.62">
       <animateMotion dur="5.5s" repeatCount="indefinite" begin="-2.75s" rotate="auto"><mpath href="#lane-cb"/></animateMotion>
     </circle>
-    <!-- Zone C — NORMAL (2 packets) -->
+    <!-- Zone C NORMAL (2 packets) -->
     <circle r="5" fill="#5AA5FF" filter="url(#fg-sm)">
       <animateMotion dur="4.8s" repeatCount="indefinite" begin="-0.8s" rotate="auto"><mpath href="#lane-cc"/></animateMotion>
     </circle>
     <circle r="3" fill="#5AA5FF" opacity="0.6">
       <animateMotion dur="4.8s" repeatCount="indefinite" begin="-2.4s" rotate="auto"><mpath href="#lane-cc"/></animateMotion>
     </circle>
-    <!-- Zone D — STABLE (1 packet, slow) -->
+    <!-- Zone D STABLE (1 packet) -->
     <circle r="3.8" fill="#00e87a" filter="url(#fg-sm)">
       <animateMotion dur="2.2s" repeatCount="indefinite" begin="0s" rotate="auto"><mpath href="#lane-cd"/></animateMotion>
     </circle>
-    <!-- VIP — PRIORITY (2 packets, fast) -->
+    <!-- VIP PRIORITY (2 packets) -->
     <circle r="5.2" fill="#a855f7" filter="url(#fg)">
       <animateMotion dur="3.5s" repeatCount="indefinite" begin="0s" rotate="auto"><mpath href="#lane-cvip"/></animateMotion>
     </circle>
     <circle r="3" fill="#a855f7" opacity="0.68">
       <animateMotion dur="3.5s" repeatCount="indefinite" begin="-1.75s" rotate="auto"><mpath href="#lane-cvip"/></animateMotion>
     </circle>
-    <!-- Secondary flows (hub to bar) -->
-    <circle r="2.8" fill="#FF4466" opacity="0.7">
-      <animateMotion dur="3.2s" repeatCount="indefinite" begin="0s"><mpath href="#lane-a1"/></animateMotion>
-    </circle>
-    <circle r="2.8" fill="#FF4466" opacity="0.7">
-      <animateMotion dur="3.2s" repeatCount="indefinite" begin="-1.6s"><mpath href="#lane-a2"/></animateMotion>
-    </circle>
-    <circle r="2.5" fill="#FFba38" opacity="0.65">
-      <animateMotion dur="3.8s" repeatCount="indefinite" begin="0s"><mpath href="#lane-b1"/></animateMotion>
-    </circle>
-    <circle r="2.5" fill="#FFba38" opacity="0.65">
-      <animateMotion dur="3.8s" repeatCount="indefinite" begin="-1.9s"><mpath href="#lane-b2"/></animateMotion>
-    </circle>
-    <circle r="2.8" fill="#5AA5FF" opacity="0.7">
-      <animateMotion dur="3.2s" repeatCount="indefinite" begin="0s"><mpath href="#lane-c1"/></animateMotion>
-    </circle>
-    <circle r="2.8" fill="#5AA5FF" opacity="0.7">
-      <animateMotion dur="3.2s" repeatCount="indefinite" begin="-1.6s"><mpath href="#lane-c2"/></animateMotion>
-    </circle>
-    <circle r="2.2" fill="#a855f7" opacity="0.75">
-      <animateMotion dur="1.4s" repeatCount="indefinite" begin="0s"><mpath href="#lane-vip1"/></animateMotion>
-    </circle>
-    <circle r="2.2" fill="#a855f7" opacity="0.75">
-      <animateMotion dur="2.8s" repeatCount="indefinite" begin="0s"><mpath href="#lane-vip2"/></animateMotion>
-    </circle>
+    <!-- Secondary hub→bar flows -->
+    <circle r="2.8" fill="#FF4466" opacity="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="0s"><mpath href="#lane-a1"/></animateMotion></circle>
+    <circle r="2.8" fill="#FF4466" opacity="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="-1.6s"><mpath href="#lane-a2"/></animateMotion></circle>
+    <circle r="2.5" fill="#FFba38" opacity="0.65"><animateMotion dur="3.8s" repeatCount="indefinite" begin="0s"><mpath href="#lane-b1"/></animateMotion></circle>
+    <circle r="2.5" fill="#FFba38" opacity="0.65"><animateMotion dur="3.8s" repeatCount="indefinite" begin="-1.9s"><mpath href="#lane-b2"/></animateMotion></circle>
+    <circle r="2.8" fill="#5AA5FF" opacity="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="0s"><mpath href="#lane-c1"/></animateMotion></circle>
+    <circle r="2.8" fill="#5AA5FF" opacity="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="-1.6s"><mpath href="#lane-c2"/></animateMotion></circle>
+    <circle r="2.2" fill="#a855f7" opacity="0.75"><animateMotion dur="1.4s" repeatCount="indefinite" begin="0s"><mpath href="#lane-vip1"/></animateMotion></circle>
+    <circle r="2.2" fill="#a855f7" opacity="0.75"><animateMotion dur="2.8s" repeatCount="indefinite" begin="0s"><mpath href="#lane-vip2"/></animateMotion></circle>
   </g>
 
   <!-- ══ COMMAND OVERLAY ══ -->
   <g id="stad-ai-overlay" style="display:none">
-    <polyline id="ai-route-path" points="400,496 400,456 97,428 97,270" fill="none" stroke="#5AA5FF" stroke-width="3.5" opacity="0.92" class="ai-route-line" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle id="ai-ring-1" cx="97"  cy="270" r="22" fill="none" stroke="#5AA5FF" stroke-width="2.5" class="ai-pulse-ring"/>
-    <circle id="ai-ring-2" cx="97"  cy="270" r="22" fill="none" stroke="#5AA5FF" stroke-width="1.5" class="ai-pulse-ring-2"/>
-    <rect id="ai-label-bg" x="27" y="252" width="140" height="14" rx="3" fill="rgba(4,6,14,.92)" stroke="#5AA5FF" stroke-width="0.8"/>
-    <text id="ai-action-label" x="97" y="262" text-anchor="middle" fill="#5AA5FF" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">COMMAND ROUTE ACTIVE</text>
+    <polyline id="ai-route-path" points="400,490 400,460 110,440 110,280" fill="none" stroke="#5AA5FF" stroke-width="3.5" opacity="0.92" class="ai-route-line" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle id="ai-ring-1" cx="110" cy="280" r="22" fill="none" stroke="#5AA5FF" stroke-width="2.5" class="ai-pulse-ring"/>
+    <circle id="ai-ring-2" cx="110" cy="280" r="22" fill="none" stroke="#5AA5FF" stroke-width="1.5" class="ai-pulse-ring-2"/>
+    <rect id="ai-label-bg" x="40" y="265" width="140" height="14" rx="3" fill="rgba(4,6,14,.92)" stroke="#5AA5FF" stroke-width="0.8"/>
+    <text id="ai-action-label" x="110" y="275" text-anchor="middle" fill="#5AA5FF" font-size="6.5" font-family="'JetBrains Mono',monospace" font-weight="700">COMMAND ROUTE ACTIVE</text>
   </g>
 
   <!-- ══ RISK OVERLAY ══ -->
   <g id="stad-risk-overlay">
-    <rect id="risk-A" x="77" y="150" width="40" height="240" rx="2" fill="none" stroke="#FF4466" stroke-width="2" class="risk-ring-anim" opacity="0.65"/>
-    <rect id="risk-UPP" x="55" y="36" width="690" height="32" rx="4" fill="none" stroke="#FF4466" stroke-width="1.2" opacity="0">
+    <polygon id="risk-A"   points="82,182 218,182 218,378 82,378" fill="none" stroke="#FF4466" stroke-width="2" class="risk-ring-anim" opacity="0.65"/>
+    <polygon id="risk-UPP" points="210,80 590,80 568,134 232,134" fill="none" stroke="#FF4466" stroke-width="1.2" opacity="0">
       <animate attributeName="opacity" values="0;0.7;0" dur="2.2s" repeatCount="indefinite"/>
-    </rect>
+    </polygon>
   </g>
 
   <!-- Scan line -->
@@ -8483,12 +8516,12 @@ function stockDisplay(s) { return s >= 999 ? '∞ units' : s + ' units'; }
 const STAD_CX=400, STAD_CY=272;
 
 const STAD_ZONES={
-  A:{name:'West Concourse',sections:'101–120',a1:120,a2:240,rx1:210,ry1:138,rx2:326,ry2:216,color:'#FF4466',heatX:96,heatY:272,heatR:80,staff:42,revenue:48200,inv:67,queue:8.2,staffNames:['Carlos','Diego','Mia','Elena','Tom']},
-  B:{name:'North End Zone',sections:'121–135',a1:240,a2:300,rx1:210,ry1:138,rx2:326,ry2:216,color:'#FFba38',heatX:280,heatY:82,heatR:70,staff:28,revenue:31500,inv:82,queue:6.1,staffNames:['Ana','Luis','Bea']},
-  C:{name:'East Concourse',sections:'136–155',a1:300,a2:60,rx1:210,ry1:138,rx2:326,ry2:216,color:'#5AA5FF',heatX:704,heatY:272,heatR:80,staff:45,revenue:52100,inv:71,queue:9.8,staffNames:['Sofia','Mike','Rafa','Jess','Pat']},
-  D:{name:'South End Zone',sections:'156–170',a1:60,a2:120,rx1:210,ry1:138,rx2:326,ry2:216,color:'#00e87a',heatX:520,heatY:462,heatR:70,staff:36,revenue:28900,inv:88,queue:5.4,staffNames:['Val','Nico','Sara']},
-  VIP:{name:'VIP Suites',sections:'Suites 200–224',a1:null,a2:null,rx1:null,ry1:null,rx2:null,ry2:null,color:'#a855f7',heatX:400,heatY:188,heatR:55,staff:28,revenue:62800,inv:95,queue:2.1,staffNames:['James','Lucia']},
-  UPP:{name:'Upper Bowl 300s',sections:'301–347',a1:0,a2:360,rx1:326,ry1:216,rx2:352,ry2:234,color:'#06b6d4',heatX:400,heatY:272,heatR:160,staff:58,revenue:41020,inv:60,queue:11.3,staffNames:['Kim','Raj','Al','Bo','Sam','Dan']},
+  A:{name:'West Concourse · LIV Club',sections:'101–110',a1:120,a2:240,rx1:210,ry1:138,rx2:326,ry2:216,color:'#FF4466',heatX:150,heatY:280,heatR:70,staff:42,revenue:48200,inv:67,queue:8.2,staffNames:['Carlos','Diego','Mia','Elena','Tom']},
+  B:{name:'North Concourse',sections:'111–125 · 213–222 · 313–324',a1:240,a2:300,rx1:210,ry1:138,rx2:326,ry2:216,color:'#FFba38',heatX:400,heatY:107,heatR:70,staff:28,revenue:31500,inv:82,queue:6.1,staffNames:['Ana','Luis','Bea']},
+  C:{name:'East Concourse',sections:'129–135 · 228–232 · 327–337',a1:300,a2:60,rx1:210,ry1:138,rx2:326,ry2:216,color:'#5AA5FF',heatX:620,heatY:280,heatR:60,staff:45,revenue:52100,inv:71,queue:9.8,staffNames:['Sofia','Mike','Rafa','Jess','Pat']},
+  D:{name:'South Concourse · The 72 Club',sections:'138–154 · 241–250 · 340–356',a1:60,a2:120,rx1:210,ry1:138,rx2:326,ry2:216,color:'#00e87a',heatX:400,heatY:402,heatR:70,staff:36,revenue:28900,inv:88,queue:5.4,staffNames:['Val','Nico','Sara']},
+  VIP:{name:'VIP Suites · Press Box',sections:'Suites 228–232',a1:null,a2:null,rx1:null,ry1:null,rx2:null,ry2:null,color:'#a855f7',heatX:689,heatY:280,heatR:50,staff:28,revenue:62800,inv:95,queue:2.1,staffNames:['James','Lucia']},
+  UPP:{name:'Upper Bowl 300s North',sections:'313–324',a1:0,a2:360,rx1:326,ry1:216,rx2:352,ry2:234,color:'#06b6d4',heatX:400,heatY:107,heatR:100,staff:58,revenue:41020,inv:60,queue:11.3,staffNames:['Kim','Raj','Al','Bo','Sam','Dan']},
 };
 
 const STAD_AI_RECS=[
@@ -8559,26 +8592,26 @@ function stadToggleLayer(layer, btn){
   }
 }
 
-// Entity data — real concourse coordinates matching the Hard Rock Stadium layout
+// Entity data — Hard Rock Stadium real concourse coordinates (SVG 800×560)
 const STAD_ENTITIES=[
-  // Zone A — West Concourse (SVG x≈77-117, y≈150-390)
-  {id:'e1', role:'manager',   name:'Maria R.', task:'Zone A Ops Lead',   eta:'',    zone:'A',  x:97,  y:200, color:'#FF4466'},
-  {id:'e2', role:'bartender', name:'Carlos M.',task:'Bar A1 — serving',  eta:'3m',  zone:'A',  x:97,  y:162, color:'#5AA5FF'},
-  {id:'e3', role:'runner',    name:'Diego L.', task:'Resupply A1→A2',    eta:'2m',  zone:'A',  x:97,  y:340, color:'#00e87a'},
-  // Zone B — North Concourse (SVG x≈117-683, y≈112-150)
-  {id:'e4', role:'supervisor',name:'Lena K.',  task:'North conc. lead',  eta:'',    zone:'B',  x:270, y:131, color:'#FFba38'},
-  {id:'e5', role:'bartender', name:'Ana P.',   task:'Bar B1 — service',  eta:'5m',  zone:'B',  x:222, y:131, color:'#5AA5FF'},
-  {id:'e6', role:'runner',    name:'Tom S.',   task:'Pickup → Hub B',    eta:'4m',  zone:'B',  x:470, y:131, color:'#00e87a'},
-  // Zone C — East Concourse (SVG x≈683-723, y≈150-390)
-  {id:'e7', role:'supervisor',name:'Raj N.',   task:'East conc. cmd',    eta:'',    zone:'C',  x:703, y:220, color:'#FFba38'},
-  {id:'e8', role:'bartender', name:'Sofia V.', task:'Bar C2 — VIP rush', eta:'1m',  zone:'C',  x:703, y:365, color:'#5AA5FF'},
-  {id:'e9', role:'runner',    name:'Marcus J.',task:'CRITICAL resupply',  eta:'NOW', zone:'C',  x:703, y:295, color:'#FF4466'},
-  // Zone D — South Concourse (SVG x≈117-683, y≈390-428)
-  {id:'e10',role:'bartender', name:'Priya D.', task:'Bar D1 — service',  eta:'6m',  zone:'D',  x:222, y:409, color:'#5AA5FF'},
-  {id:'e11',role:'runner',    name:'Jake W.',  task:'Idle → resupply',   eta:'3m',  zone:'D',  x:520, y:409, color:'#00e87a'},
-  // VIP — East Suite Level (SVG x≈683-723, y≈112-428)
-  {id:'e12',role:'manager',   name:'Elena C.', task:'VIP Suite 218',     eta:'',    zone:'VIP',x:703, y:185, color:'#a855f7'},
-  {id:'e13',role:'bartender', name:'Ivan B.',  task:'VIP Bar — service', eta:'2m',  zone:'VIP',x:703, y:375, color:'#5AA5FF'},
+  // Zone A — West Concourse / LIV Club (SVG x≈82-218, y≈182-378)
+  {id:'e1', role:'manager',   name:'Maria R.', task:'Zone A Ops Lead',   eta:'',    zone:'A',  x:148, y:230, color:'#FF4466'},
+  {id:'e2', role:'bartender', name:'Carlos M.',task:'Bar A1 — serving',  eta:'3m',  zone:'A',  x:111, y:242, color:'#5AA5FF'},
+  {id:'e3', role:'runner',    name:'Diego L.', task:'Resupply A1→A2',    eta:'2m',  zone:'A',  x:111, y:330, color:'#00e87a'},
+  // Zone B — North Concourse (SVG x≈252-548, y≈134-182)
+  {id:'e4', role:'supervisor',name:'Lena K.',  task:'North conc. lead',  eta:'',    zone:'B',  x:340, y:155, color:'#FFba38'},
+  {id:'e5', role:'bartender', name:'Ana P.',   task:'Bar B1 — service',  eta:'5m',  zone:'B',  x:290, y:150, color:'#5AA5FF'},
+  {id:'e6', role:'runner',    name:'Tom S.',   task:'Pickup → Hub B',    eta:'4m',  zone:'B',  x:490, y:150, color:'#00e87a'},
+  // Zone C — East Concourse (SVG x≈582-660, y≈182-378)
+  {id:'e7', role:'supervisor',name:'Raj N.',   task:'East conc. cmd',    eta:'',    zone:'C',  x:612, y:228, color:'#FFba38'},
+  {id:'e8', role:'bartender', name:'Sofia V.', task:'Bar C2 — VIP rush', eta:'1m',  zone:'C',  x:612, y:360, color:'#5AA5FF'},
+  {id:'e9', role:'runner',    name:'Marcus J.',task:'CRITICAL resupply',  eta:'NOW', zone:'C',  x:612, y:290, color:'#FF4466'},
+  // Zone D — South Concourse (SVG x≈268-532, y≈378-426)
+  {id:'e10',role:'bartender', name:'Priya D.', task:'Bar D1 — service',  eta:'6m',  zone:'D',  x:295, y:405, color:'#5AA5FF'},
+  {id:'e11',role:'runner',    name:'Jake W.',  task:'Idle → resupply',   eta:'3m',  zone:'D',  x:498, y:405, color:'#00e87a'},
+  // VIP — East Suite Level (SVG x≈660-718, y≈182-378)
+  {id:'e12',role:'manager',   name:'Elena C.', task:'VIP Suite 228',     eta:'',    zone:'VIP',x:686, y:195, color:'#a855f7'},
+  {id:'e13',role:'bartender', name:'Ivan B.',  task:'VIP Bar — service', eta:'2m',  zone:'VIP',x:686, y:368, color:'#5AA5FF'},
 ];
 
 function stadRenderEntities(){
@@ -8591,7 +8624,7 @@ function stadRenderEntities(){
     div.className=`op-entity`;
     div.dataset.role=e.role;
     div.dataset.id=e.id;
-    div.style.cssText=`left:${(e.x/800*100).toFixed(2)}%;top:${(e.y/540*100).toFixed(2)}%;`;
+    div.style.cssText=`left:${(e.x/800*100).toFixed(2)}%;top:${(e.y/560*100).toFixed(2)}%;`;
     const alertCls=e.eta==='NOW'?' alert':'';
     div.innerHTML=`<span class="op-icon ${e.role}${alertCls}">${roleIcon[e.role]||'●'}</span><span class="op-name">${e.name}</span><span class="op-task">${e.task}</span>${e.eta?`<span class="op-eta${e.eta==='NOW'?' alert':''}">${e.eta}</span>`:''}`;
     layer.appendChild(div);
@@ -8601,7 +8634,7 @@ function stadRenderEntities(){
 function stadTickEntities(){
   // Subtle position drift to simulate movement — keep entities in their zone regions
   // Zone regions match the real concourse positions in the new stadium layout
-  const zoneRegions={A:{x:[77,117],y:[150,390]},B:{x:[120,680],y:[112,150]},C:{x:[683,720],y:[150,390]},D:{x:[120,680],y:[390,428]},VIP:{x:[683,720],y:[112,428]},UPP:{x:[58,742],y:[36,68]}};
+  const zoneRegions={A:{x:[82,218],y:[182,378]},B:{x:[252,548],y:[134,182]},C:{x:[582,660],y:[182,378]},D:{x:[268,532],y:[378,426]},VIP:{x:[660,718],y:[182,378]},UPP:{x:[163,637],y:[24,80]}};
   STAD_ENTITIES.forEach(e=>{
     const reg=zoneRegions[e.zone];
     if(!reg)return;
@@ -8611,7 +8644,7 @@ function stadTickEntities(){
     const el=document.querySelector(`.op-entity[data-id="${e.id}"]`);
     if(el){
       el.style.left=(e.x/800*100).toFixed(2)+'%';
-      el.style.top=(e.y/540*100).toFixed(2)+'%';
+      el.style.top=(e.y/560*100).toFixed(2)+'%';
     }
   });
 }

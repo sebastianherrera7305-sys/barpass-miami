@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+
+    <!-- Near-black background, pure and deep -->
+    <radialGradient id="bg" cx="50%" cy="42%" r="68%">
+      <stop offset="0%"  stop-color="#111010"/>
+      <stop offset="100%" stop-color="#060606"/>
+    </radialGradient>
+
+    <!--
+      Gold gradient — flows top-left (bright highlight) → bottom-right (warm shadow).
+      Anchored to the B bounding box in user space for consistent reads across shapes.
+      Palette: near-white gold → rich amber → deep shadow gold.
+    -->
+    <linearGradient id="gold"
+      x1="367" y1="232" x2="657" y2="752"
+      gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#fef6c8"/>
+      <stop offset="22%"  stop-color="#f0c040"/>
+      <stop offset="55%"  stop-color="#c8900c"/>
+      <stop offset="100%" stop-color="#7c5608"/>
+    </linearGradient>
+
+    <!-- Wordmark uses a slightly lighter gradient so it reads at small size -->
+    <linearGradient id="goldText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#e8b830"/>
+      <stop offset="50%"  stop-color="#f5d060"/>
+      <stop offset="100%" stop-color="#c49020"/>
+    </linearGradient>
+
+    <!-- Thin highlight sheen: horizontal white band top-to-mid of the B -->
+    <linearGradient id="sheen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.20"/>
+      <stop offset="35%"  stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Warm gold atmospheric glow behind the B mark -->
+    <filter id="glow" x="-28%" y="-22%" width="156%" height="144%">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1   0.72 0.1 0 0
+                0.6 0.4  0   0 0
+                0   0    0   0 0
+                0   0    0   0.32 0" result="goldGlow"/>
+      <feMerge>
+        <feMergeNode in="goldGlow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <clipPath id="clip">
+      <rect width="1024" height="1024" rx="224" ry="224"/>
+    </clipPath>
+
+  </defs>
+
+  <!-- ── BACKGROUND ── -->
+  <rect width="1024" height="1024" rx="224" ry="224" fill="url(#bg)"/>
+
+  <!-- Very faint warm center bloom (adds warmth without visible shape) -->
+  <radialGradient id="bloom" cx="50%" cy="46%" r="38%">
+    <stop offset="0%"   stop-color="#3a2800" stop-opacity="0.55"/>
+    <stop offset="100%" stop-color="#060606" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="1024" height="1024" rx="224" ry="224" fill="url(#bloom)"/>
+
+  <!-- ── B LETTERFORM ──
+    Geometry (centered at x=512, y=492):
+      Spine:        x=367–457  (90 px wide), y=232–752
+      Upper bump:   outer A 175 120, inner A 105 50  — frame 70 px
+                    both centered at y=352; outer right x=632, inner x=562
+      Lower bump:   outer A 200 140, inner A 130 70  — frame 70 px
+                    both centered at y=612; outer right x=657, inner x=587
+      Total B:      x=367–657 (290 px wide), y=232–752 (520 px tall)
+      Center:       x=512 ✓, y=492
+  -->
+  <g filter="url(#glow)" clip-path="url(#clip)">
+
+    <!-- Spine -->
+    <rect x="367" y="232" width="90" height="520" rx="4" fill="url(#gold)"/>
+
+    <!-- Upper bump: outer D minus inner hole via evenodd -->
+    <path fill-rule="evenodd" fill="url(#gold)" d="
+      M 457 232 A 175 120 0 0 1 457 472 L 457 232 Z
+      M 457 302 A 105  50 0 0 1 457 402 L 457 302 Z
+    "/>
+
+    <!-- Lower bump: wider for classic B proportion -->
+    <path fill-rule="evenodd" fill="url(#gold)" d="
+      M 457 472 A 200 140 0 0 1 457 752 L 457 472 Z
+      M 457 542 A 130  70 0 0 1 457 682 L 457 542 Z
+    "/>
+
+
+  </g>
+
+  <!-- ── WORDMARK ── -->
+  <!-- Thin gold separator rule -->
+  <line x1="300" y1="810" x2="724" y2="810"
+        stroke="url(#goldText)" stroke-width="0.8" opacity="0.35"/>
+
+  <!-- BARPASS — light weight, wide tracking, luxury typographic feel -->
+  <text
+    x="512" y="868"
+    text-anchor="middle"
+    font-family="'Helvetica Neue', 'Arial', sans-serif"
+    font-weight="200"
+    font-size="52"
+    letter-spacing="20"
+    fill="url(#goldText)"
+    opacity="0.90">BARPASS</text>
+
+</svg>
