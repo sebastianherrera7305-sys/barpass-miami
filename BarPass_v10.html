@@ -2238,6 +2238,158 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
 .op-eta.alert{color:#FF4466;animation:opAlertPulse .7s ease infinite;}
 
 /* ══════════════════════════════════════════════════════
+   STADIUM POS — LIGHT THEME OVERRIDES
+   All stadium colors are hardcoded dark; these rules
+   override them when [data-theme="light"] is active.
+   ══════════════════════════════════════════════════════ */
+
+/* ── Outer shell ── */
+[data-theme="light"] #view-stadium{background:#f0f5fc;}
+
+/* ── Header ── */
+[data-theme="light"] .stad-header{background:#ffffff;border-bottom:1px solid rgba(30,60,150,.1);box-shadow:0 1px 6px rgba(30,60,150,.07);}
+[data-theme="light"] .stad-logo-name{color:#1a2848;}
+[data-theme="light"] .stad-venue-chip{background:#e8f0fb;border-color:rgba(30,60,150,.15);color:#5a6a90;}
+[data-theme="light"] .stad-kpi-top-item{background:#eef4fd;border-color:rgba(30,60,150,.1);}
+[data-theme="light"] .stad-kpi-label{color:#7080a8;}
+[data-theme="light"] .stad-kpi-val.sg{color:#007744;text-shadow:none;}
+[data-theme="light"] .stad-kpi-val.sa{color:#906000;text-shadow:none;}
+[data-theme="light"] .stad-kpi-val.sr{color:#cc1133;text-shadow:none;}
+[data-theme="light"] .stad-kpi-val.sb{color:#1155cc;text-shadow:none;}
+[data-theme="light"] .stad-kpi-val.sw{color:#1a2848;}
+[data-theme="light"] .stad-ai-btn{background:#e8f0fc;border-color:rgba(30,100,220,.25);color:#1155cc;}
+[data-theme="light"] .stad-ai-btn:hover{background:#dce8f8;border-color:#3377dd;}
+[data-theme="light"] .stad-ai-btn.active{background:#d0e2f8;border-color:#1155cc;color:#0033aa;box-shadow:0 0 12px rgba(30,100,220,.15);}
+[data-theme="light"] .stad-ai-dot{background:#cccccc;}
+[data-theme="light"] .stad-ai-dot.on{background:#1155cc;box-shadow:0 0 8px rgba(30,100,220,.5);}
+[data-theme="light"] .xls-export-btn{background:#f0fff8;border-color:rgba(0,110,60,.3);color:#007744;}
+[data-theme="light"] .xls-export-btn:hover{background:rgba(0,119,68,.08);border-color:rgba(0,110,60,.6);}
+
+/* ── Layer bar ── */
+[data-theme="light"] .stad-layers{background:#f5f9ff;border-bottom:1px solid rgba(30,60,150,.1);}
+[data-theme="light"] .layer-btn{background:#eef4fd;border-color:rgba(30,60,150,.12);color:#7080a8;}
+[data-theme="light"] .layer-btn:hover{color:#1a2848;border-color:rgba(30,60,150,.3);}
+[data-theme="light"] .layer-btn.on{background:#dce8f8;color:#1a2848;}
+[data-theme="light"] .layer-btn.on.ls .lb-dot{background:#1155cc;}
+[data-theme="light"] .layer-btn.on.li .lb-dot{background:#007744;}
+[data-theme="light"] .layer-btn.on.lr .lb-dot{background:#cc1133;}
+[data-theme="light"] .layer-btn.on.lc .lb-dot{background:#906000;}
+[data-theme="light"] .focus-mode-group{border-left-color:rgba(30,60,150,.12);}
+[data-theme="light"] .focus-btn{background:#eef4fd;border-color:rgba(30,60,150,.12);color:#7080a8;}
+[data-theme="light"] .focus-btn:hover{color:#1a2848;border-color:rgba(30,60,150,.3);}
+[data-theme="light"] .focus-btn.active{background:#d0e2f8;border-color:#1155cc;color:#0033aa;box-shadow:none;}
+
+/* ── Map area — keep dark (tactical map) ── */
+[data-theme="light"] .stad-map-wrap{background:#141e38;}
+
+/* ── Zone bar ── */
+[data-theme="light"] .stad-zone-bar{background:#f5f9ff;border-top:1px solid rgba(30,60,150,.1);}
+[data-theme="light"] .stad-zone-tab{background:#eef4fd;border-color:rgba(30,60,150,.12);color:#7080a8;}
+[data-theme="light"] .stad-zone-tab:hover{color:#1a2848;}
+[data-theme="light"] .stad-zone-tab.active{background:#d0e2f8;border-color:#1155cc;color:#0033aa;}
+
+/* ── Drag resizer ── */
+[data-theme="light"] .stad-resizer{background:#dce8f5;}
+[data-theme="light"] .stad-resizer:hover,.stad-resizer.dragging{background:#c8d8ec;}
+[data-theme="light"] .stad-resizer::after{background:#b8c8de;}
+[data-theme="light"] .stad-resizer:hover::after{background:#7090b8;box-shadow:none;}
+
+/* ── Sidebar ── */
+[data-theme="light"] .stad-sidebar{background:#ffffff;border-left:1px solid rgba(30,60,150,.1);scrollbar-color:#c8d8ec #ffffff;}
+[data-theme="light"] .stad-sidebar::-webkit-scrollbar-track{background:#ffffff;}
+[data-theme="light"] .stad-sidebar::-webkit-scrollbar-thumb{background:#c8d8ec;}
+[data-theme="light"] .stad-sidebar::-webkit-scrollbar-thumb:hover{background:#8090b8;}
+[data-theme="light"] .stad-panel{border-bottom:1px solid rgba(30,60,150,.08);}
+[data-theme="light"] .stad-panel-head{background:#f5f9ff;color:#7080a8;}
+
+/* ── Zone detail ── */
+[data-theme="light"] .sdz-name{color:#1a2848;}
+[data-theme="light"] .sdz-sec{color:#7080a8;}
+[data-theme="light"] .sdz-m{background:#eef4fd;border-color:rgba(30,60,150,.1);}
+[data-theme="light"] .sdz-ml{color:#8090b0;}
+[data-theme="light"] .sdz-mv.sg{color:#007744;}
+[data-theme="light"] .sdz-mv.sa{color:#906000;}
+[data-theme="light"] .sdz-mv.sr{color:#cc1133;}
+[data-theme="light"] .sdz-mv.sb{color:#1155cc;}
+[data-theme="light"] .sdz-bar-label{color:#8090b0;}
+[data-theme="light"] .sdz-bar-track{background:#d8e8f5;}
+
+/* ── Supply chain nodes ── */
+[data-theme="light"] .snode-name{color:#1a2848;}
+[data-theme="light"] .snode-sub{color:#7080a8;}
+[data-theme="light"] .snode-bar{background:#d8e8f5;}
+[data-theme="light"] .snode-connector{background:linear-gradient(rgba(30,60,150,.12),transparent);}
+[data-theme="light"] .snode-arrow{color:#9090b0;}
+
+/* ── Alert stream ── */
+[data-theme="light"] .salert.cr{background:rgba(204,17,51,.06);border-color:rgba(204,17,51,.28);color:#aa1122;}
+[data-theme="light"] .salert.wa{background:rgba(140,90,0,.06);border-color:rgba(140,90,0,.25);color:#7a5000;}
+[data-theme="light"] .salert.ok{background:rgba(0,110,60,.06);border-color:rgba(0,110,60,.22);color:#005533;}
+[data-theme="light"] .salert.ai{background:rgba(20,80,200,.06);border-color:rgba(20,80,200,.22);color:#0044aa;}
+
+/* ── Alert filter chips ── */
+[data-theme="light"] .saf-btn{background:#eef4fd;border-color:rgba(30,60,150,.12);color:#7080a8;}
+[data-theme="light"] .saf-btn:hover{color:#1a2848;}
+[data-theme="light"] .saf-btn.active{background:#d0e2f8;border-color:#1155cc;color:#0033aa;}
+[data-theme="light"] .saf-btn.cr.active{border-color:#cc1133;color:#aa0022;background:rgba(204,17,51,.08);}
+[data-theme="light"] .saf-btn.wa.active{border-color:#906000;color:#7a5000;background:rgba(140,90,0,.08);}
+[data-theme="light"] .saf-btn.ok.active{border-color:#007744;color:#005533;background:rgba(0,110,60,.08);}
+[data-theme="light"] .saf-btn.ai.active{border-color:#1155cc;color:#0033aa;background:rgba(20,80,200,.08);}
+
+/* ── AI / Command panel ── */
+[data-theme="light"] .sai-rec{background:#eef4ff;border-color:rgba(20,80,220,.18);}
+[data-theme="light"] .sai-rec-head{color:#1155cc;}
+[data-theme="light"] .sai-rec-body{color:#2a3a6a;}
+[data-theme="light"] .sai-rec-impact{color:#007744;}
+[data-theme="light"] .sai-btn{border-color:rgba(20,80,220,.2);background:rgba(20,80,220,.06);color:#1155cc;}
+[data-theme="light"] .sai-btn:hover{background:rgba(20,80,220,.12);}
+[data-theme="light"] .sai-btn.dis{border-color:rgba(204,17,51,.2);background:rgba(204,17,51,.05);color:#cc1133;}
+[data-theme="light"] .sai-mode-on{background:rgba(20,80,220,.06);border-color:rgba(20,80,220,.15);color:#1155cc;}
+
+/* ── Bottom KPI strip ── */
+[data-theme="light"] .stad-strip{background:#f5f9ff;border-top:1px solid rgba(30,60,150,.1);}
+[data-theme="light"] .stad-strip-item{border-right-color:rgba(30,60,150,.08);}
+[data-theme="light"] .sstrip-label{color:#7080a8;}
+[data-theme="light"] .sstrip-val{/* keep neon colors — they adapt via .sg/.sa/.sr/.sb text-shadow: remove */}
+[data-theme="light"] .sstrip-delta{/* keep colors */}
+
+/* ── Export modal in light theme ── */
+[data-theme="light"] .xls-modal{background:#ffffff;border-color:rgba(30,60,150,.15);box-shadow:0 8px 48px rgba(30,60,150,.15);}
+[data-theme="light"] .xls-modal-head{border-bottom-color:rgba(30,60,150,.1);}
+[data-theme="light"] .xls-modal-title{color:#1a2848;}
+[data-theme="light"] .xls-modal-sub{color:#7080a8;}
+[data-theme="light"] .xls-modal-close{border-color:rgba(30,60,150,.15);color:#7080a8;}
+[data-theme="light"] .xls-modal-close:hover{color:#cc1133;border-color:rgba(204,17,51,.3);background:rgba(204,17,51,.06);}
+[data-theme="light"] .xls-section{border-bottom-color:rgba(30,60,150,.07);}
+[data-theme="light"] .xls-sec-label{color:#8090b0;}
+[data-theme="light"] .xls-opt{background:#eef4fd;border-color:rgba(30,60,150,.12);color:#7080a8;}
+[data-theme="light"] .xls-opt:hover{color:#1a2848;border-color:rgba(30,60,150,.3);}
+[data-theme="light"] .xls-opt.active{background:#d0e2f8;border-color:#1155cc;color:#0033aa;}
+[data-theme="light"] .xls-zone-tag{background:#eef4fd;border-color:rgba(30,60,150,.12);}
+[data-theme="light"] .xls-check{background:#eef4fd;border-color:rgba(30,60,150,.12);color:#2a3a6a;}
+[data-theme="light"] .xls-check:hover{background:#dce8f8;border-color:rgba(30,60,150,.25);}
+[data-theme="light"] .xls-progress-wrap{background:#dce8f5;}
+[data-theme="light"] .xls-cancel-btn{background:#eef4fd;border-color:rgba(30,60,150,.15);color:#7080a8;}
+[data-theme="light"] .xls-cancel-btn:hover{border-color:rgba(204,17,51,.3);color:#cc1133;}
+[data-theme="light"] .xls-overlay{background:rgba(180,190,220,.55);}
+
+/* ── Operational staff dots — text labels ── */
+[data-theme="light"] .op-dot-label{color:#1a2848;background:rgba(240,245,255,.92);border-color:rgba(30,60,150,.2);}
+[data-theme="light"] .op-entity{background:rgba(240,246,255,.94);border-color:rgba(30,60,150,.25);}
+[data-theme="light"] .op-name{color:#1a2848;}
+[data-theme="light"] .op-task{color:#5a6a90;}
+
+/* ── Bottom KPI strip values (override neon glow for light) ── */
+[data-theme="light"] .sstrip-val{text-shadow:none;}
+[data-theme="light"] .sstrip-val.sg{color:#006633;}
+[data-theme="light"] .sstrip-val.sa{color:#906000;}
+[data-theme="light"] .sstrip-val.sr{color:#cc1133;}
+[data-theme="light"] .sstrip-val.sb{color:#1155cc;}
+
+/* ── Layer indicator dots in light mode ── */
+[data-theme="light"] .lb-dot{opacity:.8;}
+
+/* ══════════════════════════════════════════════════════
    EXCEL EXPORT SYSTEM
    ══════════════════════════════════════════════════════ */
 /* Export button in stadium header */
