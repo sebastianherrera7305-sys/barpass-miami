@@ -3934,50 +3934,50 @@ BarPass/<br>
     </div>
     <div class="stad-kpi-top">
       <div class="stad-kpi-top-item">
-        <div class="stad-kpi-label">REV</div>
+        <div class="stad-kpi-label" data-i18n="stad.kpi.rev">REV</div>
         <div class="stad-kpi-val sg" id="stad-rev">$284K</div>
       </div>
       <div class="stad-kpi-top-item">
-        <div class="stad-kpi-label">CROWD</div>
+        <div class="stad-kpi-label" data-i18n="stad.kpi.crowd">CROWD</div>
         <div class="stad-kpi-val sa" id="stad-crowd">87%</div>
       </div>
       <div class="stad-kpi-top-item">
-        <div class="stad-kpi-label">INV RISK</div>
+        <div class="stad-kpi-label" data-i18n="stad.kpi.invRisk">INV RISK</div>
         <div class="stad-kpi-val sr" id="stad-irisk">HIGH</div>
       </div>
       <div class="stad-kpi-top-item">
-        <div class="stad-kpi-label">STAFF</div>
+        <div class="stad-kpi-label" data-i18n="stad.kpi.staff">STAFF</div>
         <div class="stad-kpi-val sb" id="stad-staff-count">247</div>
       </div>
       <div class="stad-kpi-top-item">
-        <div class="stad-kpi-label">CLOCK</div>
+        <div class="stad-kpi-label" data-i18n="stad.kpi.clock">CLOCK</div>
         <div class="stad-kpi-val sw" id="stad-gameclock">Q2 8:42</div>
       </div>
     </div>
     <div class="stad-header-r">
       <button class="xls-export-btn" onclick="showExportModal()" title="Export Operations Report">
         <span class="xls-export-dot"></span>
-        EXPORT XLSX
+        <span data-i18n="stad.btn.export">EXPORT XLSX</span>
       </button>
       <button class="stad-ai-btn" id="stad-ai-btn" onclick="stadToggleAI()">
         <span class="stad-ai-dot" id="stad-ai-dot"></span>
-        COMMAND
+        <span data-i18n="stad.btn.command">COMMAND</span>
       </button>
     </div>
   </div>
 
   <!-- Layer Toggle Bar -->
   <div class="stad-layers">
-    <button class="layer-btn on ls" data-layer="staff" onclick="stadToggleLayer('staff',this)"><span class="lb-dot"></span>STAFF</button>
-    <button class="layer-btn on li" data-layer="inventory" onclick="stadToggleLayer('inventory',this)"><span class="lb-dot"></span>INV FLOW</button>
-    <button class="layer-btn on" data-layer="infra" onclick="stadToggleLayer('infra',this)"><span class="lb-dot"></span>INFRA</button>
-    <button class="layer-btn la" data-layer="ai" onclick="stadToggleLayer('ai',this)"><span class="lb-dot"></span>INTEL</button>
-    <button class="layer-btn on lr" data-layer="risk" onclick="stadToggleLayer('risk',this)"><span class="lb-dot"></span>RISK</button>
-    <button class="layer-btn on lc" data-layer="crowd" onclick="stadToggleLayer('crowd',this)"><span class="lb-dot"></span>CROWD</button>
+    <button class="layer-btn on ls" data-layer="staff" onclick="stadToggleLayer('staff',this)"><span class="lb-dot"></span><span data-i18n="stad.layer.staff">STAFF</span></button>
+    <button class="layer-btn on li" data-layer="inventory" onclick="stadToggleLayer('inventory',this)"><span class="lb-dot"></span><span data-i18n="stad.layer.invFlow">INV FLOW</span></button>
+    <button class="layer-btn on" data-layer="infra" onclick="stadToggleLayer('infra',this)"><span class="lb-dot"></span><span data-i18n="stad.layer.infra">INFRA</span></button>
+    <button class="layer-btn la" data-layer="ai" onclick="stadToggleLayer('ai',this)"><span class="lb-dot"></span><span data-i18n="stad.layer.intel">INTEL</span></button>
+    <button class="layer-btn on lr" data-layer="risk" onclick="stadToggleLayer('risk',this)"><span class="lb-dot"></span><span data-i18n="stad.layer.risk">RISK</span></button>
+    <button class="layer-btn on lc" data-layer="crowd" onclick="stadToggleLayer('crowd',this)"><span class="lb-dot"></span><span data-i18n="stad.layer.crowd">CROWD</span></button>
     <div class="focus-mode-group">
-      <button class="focus-btn active" id="focus-btn-split" onclick="stadSetFocus('split',this)" title="Split View">SPLIT</button>
-      <button class="focus-btn" id="focus-btn-map" onclick="stadSetFocus('map',this)" title="Map Only">MAP</button>
-      <button class="focus-btn" id="focus-btn-data" onclick="stadSetFocus('telem',this)" title="Data Only">DATA</button>
+      <button class="focus-btn active" id="focus-btn-split" onclick="stadSetFocus('split',this)" title="Split View"><span data-i18n="stad.focus.split">SPLIT</span></button>
+      <button class="focus-btn" id="focus-btn-map" onclick="stadSetFocus('map',this)" title="Map Only"><span data-i18n="stad.focus.map">MAP</span></button>
+      <button class="focus-btn" id="focus-btn-data" onclick="stadSetFocus('telem',this)" title="Data Only"><span data-i18n="stad.focus.data">DATA</span></button>
     </div>
   </div>
 
@@ -4517,13 +4517,13 @@ BarPass/<br>
       </div>
       <!-- Zone selector bar -->
       <div class="stad-zone-bar">
-        <div class="stad-zone-tab active" onclick="stadSelectZone('ALL',this)">ALL ZONES</div>
-        <div class="stad-zone-tab" onclick="stadSelectZone('A',this)" style="border-color:rgba(255,68,102,.3);color:rgba(255,68,102,.7);">ZONE A · WEST</div>
-        <div class="stad-zone-tab" onclick="stadSelectZone('B',this)" style="border-color:rgba(255,186,56,.3);color:rgba(255,186,56,.7);">ZONE B · NORTH</div>
-        <div class="stad-zone-tab" onclick="stadSelectZone('C',this)" style="border-color:rgba(90,165,255,.3);color:rgba(90,165,255,.7);">ZONE C · EAST</div>
-        <div class="stad-zone-tab" onclick="stadSelectZone('D',this)" style="border-color:rgba(0,232,122,.3);color:rgba(0,232,122,.7);">ZONE D · SOUTH</div>
-        <div class="stad-zone-tab" onclick="stadSelectZone('VIP',this)" style="border-color:rgba(168,85,247,.3);color:rgba(168,85,247,.7);">VIP SUITES</div>
-        <div class="stad-zone-tab" onclick="stadSelectZone('UPP',this)" style="border-color:rgba(6,182,212,.3);color:rgba(6,182,212,.7);">UPPER 300s</div>
+        <div class="stad-zone-tab active" onclick="stadSelectZone('ALL',this)" data-i18n="stad.zone.all">ALL ZONES</div>
+        <div class="stad-zone-tab" onclick="stadSelectZone('A',this)" style="border-color:rgba(255,68,102,.3);color:rgba(255,68,102,.7);" data-i18n="stad.zone.a">ZONE A · WEST</div>
+        <div class="stad-zone-tab" onclick="stadSelectZone('B',this)" style="border-color:rgba(255,186,56,.3);color:rgba(255,186,56,.7);" data-i18n="stad.zone.b">ZONE B · NORTH</div>
+        <div class="stad-zone-tab" onclick="stadSelectZone('C',this)" style="border-color:rgba(90,165,255,.3);color:rgba(90,165,255,.7);" data-i18n="stad.zone.c">ZONE C · EAST</div>
+        <div class="stad-zone-tab" onclick="stadSelectZone('D',this)" style="border-color:rgba(0,232,122,.3);color:rgba(0,232,122,.7);" data-i18n="stad.zone.d">ZONE D · SOUTH</div>
+        <div class="stad-zone-tab" onclick="stadSelectZone('VIP',this)" style="border-color:rgba(168,85,247,.3);color:rgba(168,85,247,.7);" data-i18n="stad.zone.vip">VIP SUITES</div>
+        <div class="stad-zone-tab" onclick="stadSelectZone('UPP',this)" style="border-color:rgba(6,182,212,.3);color:rgba(6,182,212,.7);" data-i18n="stad.zone.upp">UPPER 300s</div>
       </div>
     </div>
 
@@ -4535,8 +4535,8 @@ BarPass/<br>
       <!-- AI Panel (hidden by default) -->
       <div class="stad-panel" id="stad-ai-panel" style="display:none;">
         <div class="stad-panel-head">
-          <span>COMMAND MODE</span>
-          <span style="color:#5AA5FF;font-size:8px;" id="stad-ai-conf">92% CONFIDENCE</span>
+          <span data-i18n="stad.panel.command">COMMAND MODE</span>
+          <span style="color:#5AA5FF;font-size:8px;" id="stad-ai-conf">92%<span data-i18n="stad.d.confidence"> CONFIDENCE</span></span>
         </div>
         <div class="stad-ai-panel" id="stad-ai-recs"></div>
       </div>
@@ -4544,7 +4544,7 @@ BarPass/<br>
       <!-- Zone Detail -->
       <div class="stad-panel" id="stad-zone-panel">
         <div class="stad-panel-head">
-          <span id="stad-zone-head">ZONE OVERVIEW</span>
+          <span id="stad-zone-head" data-i18n="stad.panel.zoneOverview">ZONE OVERVIEW</span>
           <span class="nav-live" style="margin-left:4px;"></span>
         </div>
         <div class="stad-panel-body">
@@ -4554,7 +4554,7 @@ BarPass/<br>
 
       <!-- Node Graph -->
       <div class="stad-panel">
-        <div class="stad-panel-head">SUPPLY CHAIN NODES</div>
+        <div class="stad-panel-head" data-i18n="stad.panel.supply">SUPPLY CHAIN NODES</div>
         <div class="stad-panel-body">
           <div class="snodes" id="stad-nodes"></div>
         </div>
@@ -4564,15 +4564,15 @@ BarPass/<br>
       <div class="stad-panel grow">
         <div class="stad-panel-head" style="flex-direction:column;align-items:flex-start;">
           <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-            <span>ALERT STREAM</span>
-            <span style="color:#FF4466;font-size:8px;font-weight:700;" id="stad-alert-count">0 ACTIVE</span>
+            <span data-i18n="stad.panel.alerts">ALERT STREAM</span>
+            <span style="color:#FF4466;font-size:8px;font-weight:700;" id="stad-alert-count">0 <span data-i18n="stad.alert.active">ACTIVE</span></span>
           </div>
           <div class="stad-alert-filters">
-            <button class="saf-btn active" onclick="stadFilterAlerts('all',this)">ALL</button>
-            <button class="saf-btn cr" onclick="stadFilterAlerts('cr',this)">CRITICAL</button>
-            <button class="saf-btn wa" onclick="stadFilterAlerts('wa',this)">WARNING</button>
-            <button class="saf-btn ok" onclick="stadFilterAlerts('ok',this)">RESOLVED</button>
-            <button class="saf-btn ai" onclick="stadFilterAlerts('ai',this)">INTEL</button>
+            <button class="saf-btn active" onclick="stadFilterAlerts('all',this)" data-i18n="stad.filter.all">ALL</button>
+            <button class="saf-btn cr" onclick="stadFilterAlerts('cr',this)" data-i18n="stad.filter.critical">CRITICAL</button>
+            <button class="saf-btn wa" onclick="stadFilterAlerts('wa',this)" data-i18n="stad.filter.warning">WARNING</button>
+            <button class="saf-btn ok" onclick="stadFilterAlerts('ok',this)" data-i18n="stad.filter.resolved">RESOLVED</button>
+            <button class="saf-btn ai" onclick="stadFilterAlerts('ai',this)" data-i18n="stad.filter.intel">INTEL</button>
           </div>
         </div>
         <div class="stad-panel-body">
@@ -4585,33 +4585,33 @@ BarPass/<br>
   <!-- Bottom KPI Strip -->
   <div class="stad-strip">
     <div class="stad-strip-item">
-      <div class="sstrip-label">REV / SECTION</div>
+      <div class="sstrip-label" data-i18n="stad.strip.revSec">REV / SECTION</div>
       <div class="sstrip-val sg" id="sstrip-revsec">$1,847</div>
       <div class="sstrip-delta sg">▲ +12%</div>
     </div>
     <div class="stad-strip-item">
-      <div class="sstrip-label">INV BURN RATE</div>
+      <div class="sstrip-label" data-i18n="stad.strip.burnRate">INV BURN RATE</div>
       <div class="sstrip-val sa" id="sstrip-burn">847 u/hr</div>
-      <div class="sstrip-delta sr">▲ HIGH</div>
+      <div class="sstrip-delta sr">▲ <span data-i18n="stad.d.invHigh">HIGH</span></div>
     </div>
     <div class="stad-strip-item">
-      <div class="sstrip-label">STAFF EFFICIENCY</div>
+      <div class="sstrip-label" data-i18n="stad.strip.staffEff">STAFF EFFICIENCY</div>
       <div class="sstrip-val sb" id="sstrip-eff">78.4%</div>
       <div class="sstrip-delta sg">▲ +4%</div>
     </div>
     <div class="stad-strip-item">
-      <div class="sstrip-label">AVG SERVICE TIME</div>
+      <div class="sstrip-label" data-i18n="stad.strip.svcTime">AVG SERVICE TIME</div>
       <div class="sstrip-val sw" id="sstrip-svc">2m 14s</div>
       <div class="sstrip-delta sa">▲ +18s</div>
     </div>
     <div class="stad-strip-item">
-      <div class="sstrip-label">QUEUE CONGESTION</div>
+      <div class="sstrip-label" data-i18n="stad.strip.queueCong">QUEUE CONGESTION</div>
       <div class="sstrip-val sr" id="sstrip-queue">8.4 / 10</div>
-      <div class="sstrip-delta sr">▲ CRITICAL</div>
+      <div class="sstrip-delta sr">▲ <span data-i18n="stad.d.invCritical">CRITICAL</span></div>
     </div>
     <div class="stad-strip-item">
-      <div class="sstrip-label">OPERATIONAL RISKS</div>
-      <div class="sstrip-val sr" id="sstrip-risks">7 ACTIVE</div>
+      <div class="sstrip-label" data-i18n="stad.strip.opRisks">OPERATIONAL RISKS</div>
+      <div class="sstrip-val sr" id="sstrip-risks">7 <span data-i18n="stad.alert.active">ACTIVE</span></div>
       <div class="sstrip-delta sr">▲ +3 new</div>
     </div>
   </div>
@@ -5089,51 +5089,51 @@ const CUSTOMERS={
    AUTH & RBAC
 ═══════════════════════════════════════════════════════════ */
 const VIEWS={
-  bartender:[
-    {id:'station',label:'Mi Estación'},
-    {section:'Sistema'},
-    {id:'settings',label:'Configuración'},
-  ],
-  inventory:[
-    {id:'inv',label:'Inventario'},
-    {id:'warehouse',label:'Bodega'},
-    {id:'runners',label:'Runners'},
-    {id:'audit',label:'Auditoría'},
-    {section:'Sistema'},
-    {id:'settings',label:'Configuración'},
-  ],
-  manager:[
-    {id:'manager',label:'Dashboard'},
-    {id:'station',label:'Estación'},
-    {section:'Seguridad'},
+  get bartender(){return[
+    {id:'station',label:_t('nav.myStation')},
+    {section:_t('nav.system')},
+    {id:'settings',label:_t('nav.config')},
+  ];},
+  get inventory(){return[
+    {id:'inv',label:_t('nav.invSection')},
+    {id:'warehouse',label:_t('nav.warehouse')},
+    {id:'runners',label:_t('nav.runners')},
+    {id:'audit',label:_t('nav.audit')},
+    {section:_t('nav.system')},
+    {id:'settings',label:_t('nav.config')},
+  ];},
+  get manager(){return[
+    {id:'manager',label:_t('nav.dashboard')},
+    {id:'station',label:_t('nav.station')},
+    {section:_t('nav.secSection')},
     {id:'risk',label:'Risk'},
-    {id:'team',label:'Equipo'},
-    {section:'Inventario'},
-    {id:'inv',label:'Inventario'},
-    {id:'products',label:'Productos'},
-    {section:'Analítica'},
-    {id:'reports',label:'Reportes'},
-    {section:'Sistema'},
-    {id:'settings',label:'Configuración'},
-  ],
-  owner:[
-    {id:'manager',label:'Dashboard'},
+    {id:'team',label:_t('nav.team')},
+    {section:_t('nav.invSection')},
+    {id:'inv',label:_t('nav.invSection')},
+    {id:'products',label:_t('nav.products')},
+    {section:_t('nav.analytics')},
+    {id:'reports',label:_t('nav.reports')},
+    {section:_t('nav.system')},
+    {id:'settings',label:_t('nav.config')},
+  ];},
+  get owner(){return[
+    {id:'manager',label:_t('nav.dashboard')},
     {id:'owner',label:'Owner'},
     {id:'stadium',label:'Stadium POS'},
-    {id:'station',label:'Estación'},
-    {section:'Seguridad'},
+    {id:'station',label:_t('nav.station')},
+    {section:_t('nav.secSection')},
     {id:'risk',label:'Risk'},
-    {id:'team',label:'Equipo'},
-    {section:'Inventario'},
-    {id:'inv',label:'Inventario'},
-    {id:'products',label:'Productos'},
-    {section:'Analítica'},
-    {id:'intel',label:'Inteligencia'},
-    {id:'reports',label:'Reportes'},
-    {section:'Sistema'},
-    {id:'settings',label:'Configuración'},
-  ],
-  customer:[{id:'guest',label:'Mi Experiencia'}],
+    {id:'team',label:_t('nav.team')},
+    {section:_t('nav.invSection')},
+    {id:'inv',label:_t('nav.invSection')},
+    {id:'products',label:_t('nav.products')},
+    {section:_t('nav.analytics')},
+    {id:'intel',label:_t('nav.intelligence')},
+    {id:'reports',label:_t('nav.reports')},
+    {section:_t('nav.system')},
+    {id:'settings',label:_t('nav.config')},
+  ];},
+  get customer(){return[{id:'guest',label:_t('nav.guestExp')}];},
 };
 const ROLE_BY_PIN={'1234':'bartender','2847':'manager','9999':'owner','5566':'inventory','0000':'customer'};
 const ROLE_ICONS={bartender:'🍹',manager:'📊',owner:'👑',inventory:'📦',customer:'✨'};
@@ -5275,7 +5275,7 @@ function buildNav(role){
     });
     // Add Rating de Bartenders for manager and owner
     if(role==='manager'||role==='owner'){
-      html+=`<div class="ndrop-section">Rating</div>
+      html+=`<div class="ndrop-section">${_t('nav.ratingSection')}</div>
       <div class="ndrop-item rating-item" onclick="openRatingPanel();document.getElementById('nav-dropdown').classList.remove('open');document.getElementById('nav-ham-btn').classList.remove('open');">
         <div class="ndrop-dot" style="background:var(--amber)"></div>⭐ Bartenders
       </div>`;
@@ -7580,6 +7580,53 @@ const i18n = (() => {
     'cmd.goInventory':'Inteligencia de Inventario','cmd.goInventorySub':'RFID · merma · zonas',
     'cmd.goReports':'Reportes & Analítica','cmd.goReportsSub':'Desempeño · tendencias · exportar',
     'cmd.enableDiscounts':'Habilitar Descuentos','cmd.enableDiscountsSub':'Autorizar códigos para bartenders',
+    /* ── Navegación ── */
+    'nav.myStation':'Mi Estación','nav.system':'Sistema','nav.config':'Configuración',
+    'nav.dashboard':'Dashboard','nav.station':'Estación','nav.secSection':'Seguridad',
+    'nav.invSection':'Inventario','nav.analytics':'Analítica','nav.reports':'Reportes',
+    'nav.products':'Productos','nav.team':'Equipo','nav.intelligence':'Inteligencia',
+    'nav.warehouse':'Bodega','nav.runners':'Runners','nav.audit':'Auditoría',
+    'nav.ratingSection':'Rating','nav.guestExp':'Mi Experiencia',
+    /* ── Stadium POS — UI estático ── */
+    'stad.kpi.rev':'REV','stad.kpi.crowd':'AFLUENCIA','stad.kpi.invRisk':'RIESGO INV',
+    'stad.kpi.staff':'PERSONAL','stad.kpi.clock':'RELOJ',
+    'stad.btn.export':'EXPORTAR XLSX','stad.btn.command':'COMANDO',
+    'stad.layer.staff':'PERSONAL','stad.layer.invFlow':'FLUJO INV','stad.layer.infra':'INFRAEST',
+    'stad.layer.intel':'INTEL','stad.layer.risk':'RIESGO','stad.layer.crowd':'AFLUENCIA',
+    'stad.focus.split':'DIVIDIR','stad.focus.map':'MAPA','stad.focus.data':'DATOS',
+    'stad.zone.all':'TODAS LAS ZONAS','stad.zone.a':'ZONA A · OESTE',
+    'stad.zone.b':'ZONA B · NORTE','stad.zone.c':'ZONA C · ESTE',
+    'stad.zone.d':'ZONA D · SUR','stad.zone.vip':'SUITES VIP','stad.zone.upp':'TRIBUNA 300s',
+    'stad.panel.command':'MODO COMANDO','stad.panel.zoneOverview':'RESUMEN DE ZONA',
+    'stad.panel.supply':'NODOS CADENA SUMINISTRO','stad.panel.alerts':'FLUJO DE ALERTAS',
+    'stad.alert.active':'ACTIVAS',
+    'stad.filter.all':'TODAS','stad.filter.critical':'CRÍTICO','stad.filter.warning':'ALERTA',
+    'stad.filter.resolved':'RESUELTO','stad.filter.intel':'INTEL',
+    'stad.strip.revSec':'ING / SECCIÓN','stad.strip.burnRate':'TASA CONSUMO INV',
+    'stad.strip.staffEff':'EFICIENCIA PERSONAL','stad.strip.svcTime':'TIEMPO SERVICIO PROM',
+    'stad.strip.queueCong':'CONGESTIÓN FILA','stad.strip.opRisks':'RIESGOS OPERATIVOS',
+    /* ── Stadium POS — contenido dinámico ── */
+    'stad.d.overview':'RESUMEN DEL ESTADIO','stad.d.allZones':'Todas las Zonas',
+    'stad.d.staffActive':'personal activo','stad.d.totalRev':'ING TOTAL',
+    'stad.d.activeStaff':'PERSONAL ACTIVO','stad.d.avgInv':'INV PROMEDIO',
+    'stad.d.avgQueue':'FILA PROM','stad.d.invHealth':'SALUD INV GENERAL',
+    'stad.d.staffEff':'EFICIENCIA PERSONAL',
+    'stad.d.zoneDetail':'ZONA {{zone}} DETALLE','stad.d.sections':'Secciones',
+    'stad.d.revenue':'INGRESOS','stad.d.staff':'PERSONAL','stad.d.inventory':'INVENTARIO',
+    'stad.d.queueScore':'PUNTAJE FILA','stad.d.invLevel':'NIVEL INVENTARIO',
+    'stad.d.staffFloor':'PERSONAL EN PISO',
+    'stad.d.commandActive':'🤖 MODO COMANDO ACTIVO',
+    'stad.d.analyzing':'Analizando 247 personal · 6 zonas · tiempo real',
+    'stad.d.apply':'▶ APLICAR','stad.d.skip':'✕ OMITIR','stad.d.confidence':'% CONFIANZA',
+    'stad.d.tagCritical':'CRÍTICO','stad.d.tagWarning':'ALERTA',
+    'stad.d.tagResolved':'RESUELTO','stad.d.tagIntel':'INTEL','stad.d.tagInfo':'INFO',
+    'stad.d.invCritical':'CRÍTICO','stad.d.invHigh':'ALTO','stad.d.invModerate':'MODERADO',
+    /* ── Stadium POS — nodos de suministro ── */
+    'stad.node.central':'Almacén Central','stad.node.centralSub':'Hub Alpha · 94% capacidad',
+    'stad.node.hubWest':'Hub Zona Oeste','stad.node.hubWestSub':'Sirviendo A+B · 67% inv',
+    'stad.node.hubEast':'Hub Zona Este','stad.node.hubEastSub':'Sirviendo C+D · 71% inv',
+    'stad.node.vip':'Distribución VIP','stad.node.vipSub':'Suites 200s · 95% inv',
+    'stad.node.upper':'Hub Tribuna Alta','stad.node.upperSub':'Nivel 300 · 60% inv',
   },
   /* ════════════════ ENGLISH ════════════════ */
   en: {
@@ -7721,6 +7768,53 @@ const i18n = (() => {
     'cmd.goInventory':'Inventory Intelligence','cmd.goInventorySub':'RFID · shrinkage · zones',
     'cmd.goReports':'Reports & Analytics','cmd.goReportsSub':'Performance · trends · export',
     'cmd.enableDiscounts':'Enable Discounts','cmd.enableDiscountsSub':'Authorize codes for bartenders',
+    /* ── Navigation ── */
+    'nav.myStation':'My Station','nav.system':'System','nav.config':'Settings',
+    'nav.dashboard':'Dashboard','nav.station':'Station','nav.secSection':'Security',
+    'nav.invSection':'Inventory','nav.analytics':'Analytics','nav.reports':'Reports',
+    'nav.products':'Products','nav.team':'Team','nav.intelligence':'Intelligence',
+    'nav.warehouse':'Warehouse','nav.runners':'Runners','nav.audit':'Audit',
+    'nav.ratingSection':'Rating','nav.guestExp':'My Experience',
+    /* ── Stadium POS — static UI ── */
+    'stad.kpi.rev':'REV','stad.kpi.crowd':'CROWD','stad.kpi.invRisk':'INV RISK',
+    'stad.kpi.staff':'STAFF','stad.kpi.clock':'CLOCK',
+    'stad.btn.export':'EXPORT XLSX','stad.btn.command':'COMMAND',
+    'stad.layer.staff':'STAFF','stad.layer.invFlow':'INV FLOW','stad.layer.infra':'INFRA',
+    'stad.layer.intel':'INTEL','stad.layer.risk':'RISK','stad.layer.crowd':'CROWD',
+    'stad.focus.split':'SPLIT','stad.focus.map':'MAP','stad.focus.data':'DATA',
+    'stad.zone.all':'ALL ZONES','stad.zone.a':'ZONE A · WEST',
+    'stad.zone.b':'ZONE B · NORTH','stad.zone.c':'ZONE C · EAST',
+    'stad.zone.d':'ZONE D · SOUTH','stad.zone.vip':'VIP SUITES','stad.zone.upp':'UPPER 300s',
+    'stad.panel.command':'COMMAND MODE','stad.panel.zoneOverview':'ZONE OVERVIEW',
+    'stad.panel.supply':'SUPPLY CHAIN NODES','stad.panel.alerts':'ALERT STREAM',
+    'stad.alert.active':'ACTIVE',
+    'stad.filter.all':'ALL','stad.filter.critical':'CRITICAL','stad.filter.warning':'WARNING',
+    'stad.filter.resolved':'RESOLVED','stad.filter.intel':'INTEL',
+    'stad.strip.revSec':'REV / SECTION','stad.strip.burnRate':'INV BURN RATE',
+    'stad.strip.staffEff':'STAFF EFFICIENCY','stad.strip.svcTime':'AVG SERVICE TIME',
+    'stad.strip.queueCong':'QUEUE CONGESTION','stad.strip.opRisks':'OPERATIONAL RISKS',
+    /* ── Stadium POS — dynamic content ── */
+    'stad.d.overview':'STADIUM OVERVIEW','stad.d.allZones':'All Zones',
+    'stad.d.staffActive':'staff active','stad.d.totalRev':'TOTAL REV',
+    'stad.d.activeStaff':'ACTIVE STAFF','stad.d.avgInv':'AVG INVENTORY',
+    'stad.d.avgQueue':'AVG QUEUE','stad.d.invHealth':'OVERALL INV HEALTH',
+    'stad.d.staffEff':'STAFF EFFICIENCY',
+    'stad.d.zoneDetail':'ZONE {{zone}} DETAIL','stad.d.sections':'Sections',
+    'stad.d.revenue':'REVENUE','stad.d.staff':'STAFF','stad.d.inventory':'INVENTORY',
+    'stad.d.queueScore':'QUEUE SCORE','stad.d.invLevel':'INVENTORY LEVEL',
+    'stad.d.staffFloor':'STAFF ON FLOOR',
+    'stad.d.commandActive':'🤖 COMMAND MODE ACTIVE',
+    'stad.d.analyzing':'Analyzing 247 staff · 6 zones · real-time',
+    'stad.d.apply':'▶ APPLY','stad.d.skip':'✕ SKIP','stad.d.confidence':'% CONFIDENCE',
+    'stad.d.tagCritical':'CRITICAL','stad.d.tagWarning':'WARNING',
+    'stad.d.tagResolved':'RESOLVED','stad.d.tagIntel':'INTEL','stad.d.tagInfo':'INFO',
+    'stad.d.invCritical':'CRITICAL','stad.d.invHigh':'HIGH','stad.d.invModerate':'MODERATE',
+    /* ── Stadium POS — supply nodes ── */
+    'stad.node.central':'Central Storage','stad.node.centralSub':'Hub Alpha · 94% capacity',
+    'stad.node.hubWest':'Zone Hub West','stad.node.hubWestSub':'Serving A+B · 67% inv',
+    'stad.node.hubEast':'Zone Hub East','stad.node.hubEastSub':'Serving C+D · 71% inv',
+    'stad.node.vip':'VIP Distribution','stad.node.vipSub':'Suites 200s · 95% inv',
+    'stad.node.upper':'Upper Bowl Hub','stad.node.upperSub':'Level 300 · 60% inv',
   },
   /* ════════════════ PORTUGUÊS ════════════════ */
   pt: {
@@ -7856,6 +7950,53 @@ const i18n = (() => {
     'cmd.goInventory':'Inteligência de Estoque','cmd.goInventorySub':'RFID · quebra · zonas',
     'cmd.goReports':'Relatórios & Análise','cmd.goReportsSub':'Desempenho · tendências · exportar',
     'cmd.enableDiscounts':'Ativar Descontos','cmd.enableDiscountsSub':'Autorizar códigos para bartenders',
+    /* ── Navegação ── */
+    'nav.myStation':'Minha Estação','nav.system':'Sistema','nav.config':'Configurações',
+    'nav.dashboard':'Painel','nav.station':'Estação','nav.secSection':'Segurança',
+    'nav.invSection':'Estoque','nav.analytics':'Análise','nav.reports':'Relatórios',
+    'nav.products':'Produtos','nav.team':'Equipe','nav.intelligence':'Inteligência',
+    'nav.warehouse':'Depósito','nav.runners':'Entregadores','nav.audit':'Auditoria',
+    'nav.ratingSection':'Avaliação','nav.guestExp':'Minha Experiência',
+    /* ── Stadium POS — UI estático ── */
+    'stad.kpi.rev':'REC','stad.kpi.crowd':'LOTAÇÃO','stad.kpi.invRisk':'RISCO EST',
+    'stad.kpi.staff':'EQUIPE','stad.kpi.clock':'RELÓGIO',
+    'stad.btn.export':'EXPORTAR XLSX','stad.btn.command':'COMANDO',
+    'stad.layer.staff':'EQUIPE','stad.layer.invFlow':'FLUXO EST','stad.layer.infra':'INFRA',
+    'stad.layer.intel':'INTEL','stad.layer.risk':'RISCO','stad.layer.crowd':'LOTAÇÃO',
+    'stad.focus.split':'DIVIDIR','stad.focus.map':'MAPA','stad.focus.data':'DADOS',
+    'stad.zone.all':'TODAS AS ZONAS','stad.zone.a':'ZONA A · OESTE',
+    'stad.zone.b':'ZONA B · NORTE','stad.zone.c':'ZONA C · LESTE',
+    'stad.zone.d':'ZONA D · SUL','stad.zone.vip':'CAMAROTES VIP','stad.zone.upp':'SUPERIOR 300s',
+    'stad.panel.command':'MODO COMANDO','stad.panel.zoneOverview':'VISÃO DA ZONA',
+    'stad.panel.supply':'NÓS DE SUPRIMENTOS','stad.panel.alerts':'FLUXO DE ALERTAS',
+    'stad.alert.active':'ATIVAS',
+    'stad.filter.all':'TODAS','stad.filter.critical':'CRÍTICO','stad.filter.warning':'ALERTA',
+    'stad.filter.resolved':'RESOLVIDO','stad.filter.intel':'INTEL',
+    'stad.strip.revSec':'REC / SEÇÃO','stad.strip.burnRate':'TAXA CONSUMO EST',
+    'stad.strip.staffEff':'EFICIÊNCIA EQUIPE','stad.strip.svcTime':'TEMPO SERVIÇO MÉD',
+    'stad.strip.queueCong':'CONGESTIONAMENTO','stad.strip.opRisks':'RISCOS OPERATIVOS',
+    /* ── Stadium POS — conteúdo dinâmico ── */
+    'stad.d.overview':'VISÃO DO ESTÁDIO','stad.d.allZones':'Todas as Zonas',
+    'stad.d.staffActive':'equipe ativa','stad.d.totalRev':'REC TOTAL',
+    'stad.d.activeStaff':'EQUIPE ATIVA','stad.d.avgInv':'EST MÉDIO',
+    'stad.d.avgQueue':'FILA MÉD','stad.d.invHealth':'SAÚDE EST GERAL',
+    'stad.d.staffEff':'EFICIÊNCIA EQUIPE',
+    'stad.d.zoneDetail':'ZONA {{zone}} DETALHE','stad.d.sections':'Seções',
+    'stad.d.revenue':'RECEITA','stad.d.staff':'EQUIPE','stad.d.inventory':'ESTOQUE',
+    'stad.d.queueScore':'PONTUAÇÃO FILA','stad.d.invLevel':'NÍVEL ESTOQUE',
+    'stad.d.staffFloor':'EQUIPE NO ANDAR',
+    'stad.d.commandActive':'🤖 MODO COMANDO ATIVO',
+    'stad.d.analyzing':'Analisando 247 equipe · 6 zonas · tempo real',
+    'stad.d.apply':'▶ APLICAR','stad.d.skip':'✕ PULAR','stad.d.confidence':'% CONFIANÇA',
+    'stad.d.tagCritical':'CRÍTICO','stad.d.tagWarning':'ALERTA',
+    'stad.d.tagResolved':'RESOLVIDO','stad.d.tagIntel':'INTEL','stad.d.tagInfo':'INFO',
+    'stad.d.invCritical':'CRÍTICO','stad.d.invHigh':'ALTO','stad.d.invModerate':'MODERADO',
+    /* ── Stadium POS — nós de suprimentos ── */
+    'stad.node.central':'Armazém Central','stad.node.centralSub':'Hub Alpha · 94% capacidade',
+    'stad.node.hubWest':'Hub Zona Oeste','stad.node.hubWestSub':'Servindo A+B · 67% est',
+    'stad.node.hubEast':'Hub Zona Leste','stad.node.hubEastSub':'Servindo C+D · 71% est',
+    'stad.node.vip':'Distribuição VIP','stad.node.vipSub':'Camarotes 200s · 95% est',
+    'stad.node.upper':'Hub Nível Superior','stad.node.upperSub':'Nível 300 · 60% est',
   },
   /* ════════════════ FRANÇAIS ════════════════ */
   fr: {
@@ -7991,6 +8132,53 @@ const i18n = (() => {
     'cmd.goInventory':'Intelligence Inventaire','cmd.goInventorySub':'RFID · démarque · zones',
     'cmd.goReports':'Rapports & Analyses','cmd.goReportsSub':'Performance · tendances · export',
     'cmd.enableDiscounts':'Activer Remises','cmd.enableDiscountsSub':'Autoriser codes pour bartenders',
+    /* ── Navigation ── */
+    'nav.myStation':'Ma Station','nav.system':'Système','nav.config':'Paramètres',
+    'nav.dashboard':'Tableau de bord','nav.station':'Station','nav.secSection':'Sécurité',
+    'nav.invSection':'Inventaire','nav.analytics':'Analytique','nav.reports':'Rapports',
+    'nav.products':'Produits','nav.team':'Équipe','nav.intelligence':'Intelligence',
+    'nav.warehouse':'Entrepôt','nav.runners':'Coursiers','nav.audit':'Audit',
+    'nav.ratingSection':'Évaluation','nav.guestExp':'Mon Expérience',
+    /* ── Stadium POS — UI statique ── */
+    'stad.kpi.rev':'REV','stad.kpi.crowd':'FOULE','stad.kpi.invRisk':'RISQUE INV',
+    'stad.kpi.staff':'ÉQUIPE','stad.kpi.clock':'HORLOGE',
+    'stad.btn.export':'EXPORTER XLSX','stad.btn.command':'COMMANDE',
+    'stad.layer.staff':'ÉQUIPE','stad.layer.invFlow':'FLUX INV','stad.layer.infra':'INFRA',
+    'stad.layer.intel':'INTEL','stad.layer.risk':'RISQUE','stad.layer.crowd':'FOULE',
+    'stad.focus.split':'PARTAGER','stad.focus.map':'CARTE','stad.focus.data':'DONNÉES',
+    'stad.zone.all':'TOUTES ZONES','stad.zone.a':'ZONE A · OUEST',
+    'stad.zone.b':'ZONE B · NORD','stad.zone.c':'ZONE C · EST',
+    'stad.zone.d':'ZONE D · SUD','stad.zone.vip':'SUITES VIP','stad.zone.upp':'HAUT 300s',
+    'stad.panel.command':'MODE COMMANDE','stad.panel.zoneOverview':'VUE DE ZONE',
+    'stad.panel.supply':'NŒUDS CHAÎNE SUPPLY','stad.panel.alerts':'FLUX D\'ALERTES',
+    'stad.alert.active':'ACTIVES',
+    'stad.filter.all':'TOUTES','stad.filter.critical':'CRITIQUE','stad.filter.warning':'AVERTISSEMENT',
+    'stad.filter.resolved':'RÉSOLU','stad.filter.intel':'INTEL',
+    'stad.strip.revSec':'REV / SECT.','stad.strip.burnRate':'TAUX CONSO INV',
+    'stad.strip.staffEff':'EFFICACITÉ ÉQUIPE','stad.strip.svcTime':'TEMPS SERVICE MOY',
+    'stad.strip.queueCong':'CONGESTION FILE','stad.strip.opRisks':'RISQUES OPÉRAT.',
+    /* ── Stadium POS — contenu dynamique ── */
+    'stad.d.overview':'VUE STADE','stad.d.allZones':'Toutes les Zones',
+    'stad.d.staffActive':'personnel actif','stad.d.totalRev':'REV TOTAL',
+    'stad.d.activeStaff':'ÉQUIPE ACTIVE','stad.d.avgInv':'INV MOY',
+    'stad.d.avgQueue':'FILE MOY','stad.d.invHealth':'SANTÉ INV GLOBALE',
+    'stad.d.staffEff':'EFFICACITÉ ÉQUIPE',
+    'stad.d.zoneDetail':'ZONE {{zone}} DÉTAIL','stad.d.sections':'Sections',
+    'stad.d.revenue':'REVENUS','stad.d.staff':'ÉQUIPE','stad.d.inventory':'INVENTAIRE',
+    'stad.d.queueScore':'SCORE FILE','stad.d.invLevel':'NIVEAU INVENTAIRE',
+    'stad.d.staffFloor':'PERSONNEL AU SOL',
+    'stad.d.commandActive':'🤖 MODE COMMANDE ACTIF',
+    'stad.d.analyzing':'Analyse 247 personnel · 6 zones · temps réel',
+    'stad.d.apply':'▶ APPLIQUER','stad.d.skip':'✕ IGNORER','stad.d.confidence':'% CONFIANCE',
+    'stad.d.tagCritical':'CRITIQUE','stad.d.tagWarning':'AVERTISSEMENT',
+    'stad.d.tagResolved':'RÉSOLU','stad.d.tagIntel':'INTEL','stad.d.tagInfo':'INFO',
+    'stad.d.invCritical':'CRITIQUE','stad.d.invHigh':'ÉLEVÉ','stad.d.invModerate':'MODÉRÉ',
+    /* ── Stadium POS — nœuds de supply ── */
+    'stad.node.central':'Stockage Central','stad.node.centralSub':'Hub Alpha · 94% capacité',
+    'stad.node.hubWest':'Hub Zone Ouest','stad.node.hubWestSub':'Servant A+B · 67% inv',
+    'stad.node.hubEast':'Hub Zone Est','stad.node.hubEastSub':'Servant C+D · 71% inv',
+    'stad.node.vip':'Distribution VIP','stad.node.vipSub':'Suites 200s · 95% inv',
+    'stad.node.upper':'Hub Tribune Haute','stad.node.upperSub':'Niveau 300 · 60% inv',
   },
   };/* END TRANSLATIONS */
 
@@ -8074,7 +8262,33 @@ const i18n = (() => {
 })();
 
 /* i18n bridge — required for onclick= handlers in HTML */
-function setLang(code, el) { i18n.setLang(code, el); }
+function setLang(code, el) {
+  i18n.setLang(code, el);
+  /* Re-render JS-built content that can't use data-i18n */
+  // 1. Rebuild navigation labels without losing active view
+  if(typeof currentRole==='string' && currentRole){
+    const activeViewId=document.querySelector('.view.active')?.id?.replace('view-','');
+    buildNav(currentRole);
+    if(activeViewId){
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      const vEl=document.getElementById('view-'+activeViewId);
+      if(vEl)vEl.classList.add('active');
+      document.querySelectorAll('.ntab').forEach(t=>{
+        const oc=t.getAttribute('onclick')||'';
+        t.classList.toggle('active',oc.includes("'"+activeViewId+"'"));
+      });
+      document.querySelectorAll('.ndrop-item').forEach(i=>{
+        i.classList.toggle('active',i.getAttribute('data-view')===activeViewId);
+      });
+    }
+  }
+  // 2. Re-render Stadium POS dynamic content
+  if(typeof stadActive!=='undefined'&&stadActive){
+    if(typeof stadCurrentZone!=='undefined') stadRenderZoneDetail(stadCurrentZone);
+    if(typeof stadRenderNodes==='function') stadRenderNodes();
+    if(typeof stadAIMode!=='undefined'&&stadAIMode&&typeof stadRenderAI==='function') stadRenderAI();
+  }
+}
 function toggleLangMenu() {
   const dd = document.getElementById('lang-dropdown');
   if (dd) dd.classList.toggle('open');
@@ -8529,29 +8743,109 @@ const STAD_ZONES={
   UPP:{name:'Upper Bowl 300s North',sections:'313–324',a1:0,a2:360,rx1:326,ry1:216,rx2:352,ry2:234,color:'#06b6d4',heatX:400,heatY:107,heatR:100,staff:58,revenue:41020,inv:60,queue:11.3,staffNames:['Kim','Raj','Al','Bo','Sam','Dan']},
 };
 
-const STAD_AI_RECS=[
-  {head:'STAFF REALLOCATION',zone:'A',body:'Move 3 runners from Zone D to Zone A.\nZone A queue is 2.8× stadium average.',impact:'Expected: +18% efficiency · +$4,200 rev'},
-  {head:'INVENTORY CRITICAL',zone:'C',body:'Zone C tequila stock at 23%.\nProjected stockout in 14 minutes at current burn.',impact:'Dispatch resupply immediately · Risk: $8,400'},
-  {head:'HALFTIME SURGE ALERT',zone:'B',body:'Halftime demand spike in ~8 min.\nZone B + Zone D historically peak 340%.',impact:'Suggest: +4 staff on Level 300 now'},
-  {head:'VIP OPPORTUNITY',zone:'VIP',body:'Suite 218 wait time 14 min above SLA.\n2 servers available in Zone D now.',impact:'Reassign → +$1,800 incremental rev'},
-  {head:'REVENUE OPTIMIZATION',zone:'A',body:'Zone A underperforming by 22% vs avg.\nUpsell conversion rate dropped 6% last 20 min.',impact:'Coach Carlos · Expected +$3,100 recovery'},
-  {head:'CONGESTION RELIEF',zone:'D',body:'Club Level Bar 7 handling 3× normal load.\nPredicted service failure in 9 minutes.',impact:'Reroute to Bar 5 · Redistribute inventory'},
-];
+/* ── Translated AI recommendations pool ── */
+function getStadAIRecs(){
+  const lang=typeof i18n!=='undefined'?i18n.lang:'en';
+  const pools={
+    en:[
+      {head:'STAFF REALLOCATION',zone:'A',body:'Move 3 runners from Zone D to Zone A.\nZone A queue is 2.8× stadium average.',impact:'Expected: +18% efficiency · +$4,200 rev'},
+      {head:'INVENTORY CRITICAL',zone:'C',body:'Zone C tequila stock at 23%.\nProjected stockout in 14 minutes at current burn.',impact:'Dispatch resupply immediately · Risk: $8,400'},
+      {head:'HALFTIME SURGE ALERT',zone:'B',body:'Halftime demand spike in ~8 min.\nZone B + Zone D historically peak 340%.',impact:'Suggest: +4 staff on Level 300 now'},
+      {head:'VIP OPPORTUNITY',zone:'VIP',body:'Suite 218 wait time 14 min above SLA.\n2 servers available in Zone D now.',impact:'Reassign → +$1,800 incremental rev'},
+      {head:'REVENUE OPTIMIZATION',zone:'A',body:'Zone A underperforming by 22% vs avg.\nUpsell conversion rate dropped 6% last 20 min.',impact:'Coach Carlos · Expected +$3,100 recovery'},
+      {head:'CONGESTION RELIEF',zone:'D',body:'Club Level Bar 7 handling 3× normal load.\nPredicted service failure in 9 minutes.',impact:'Reroute to Bar 5 · Redistribute inventory'},
+    ],
+    es:[
+      {head:'REASIGNACIÓN DE PERSONAL',zone:'A',body:'Mover 3 runners de Zona D a Zona A.\nFila en Zona A es 2.8× el promedio del estadio.',impact:'Esperado: +18% eficiencia · +$4,200 ing'},
+      {head:'INVENTARIO CRÍTICO',zone:'C',body:'Stock de tequila Zona C al 23%.\nAgotamiento proyectado en 14 minutos al ritmo actual.',impact:'Despachar reabastecimiento inmediato · Riesgo: $8,400'},
+      {head:'ALERTA PICO DE INTERMEDIO',zone:'B',body:'Pico de demanda en intermedio en ~8 min.\nZona B + Zona D históricamente suben 340%.',impact:'Sugerencia: +4 personal en Nivel 300 ahora'},
+      {head:'OPORTUNIDAD VIP',zone:'VIP',body:'Suite 218 tiempo de espera 14 min sobre SLA.\n2 servidores disponibles en Zona D ahora.',impact:'Reasignar → +$1,800 ingreso incremental'},
+      {head:'OPTIMIZACIÓN DE INGRESOS',zone:'A',body:'Zona A rinde 22% bajo el promedio.\nTasa de conversión upsell bajó 6% en los últimos 20 min.',impact:'Instruir a Carlos · Recuperación esperada +$3,100'},
+      {head:'ALIVIO DE CONGESTIÓN',zone:'D',body:'Bar 7 Nivel Club manejando 3× carga normal.\nFalla de servicio predicha en 9 minutos.',impact:'Redirigir al Bar 5 · Redistribuir inventario'},
+    ],
+    pt:[
+      {head:'REALOCAÇÃO DE PESSOAL',zone:'A',body:'Mover 3 entregadores da Zona D para Zona A.\nFila na Zona A é 2.8× a média do estádio.',impact:'Esperado: +18% eficiência · +$4,200 rec'},
+      {head:'ESTOQUE CRÍTICO',zone:'C',body:'Estoque de tequila Zona C em 23%.\nEsgotamento previsto em 14 minutos ao ritmo atual.',impact:'Despachar reabastecimento imediato · Risco: $8,400'},
+      {head:'ALERTA PICO INTERVALO',zone:'B',body:'Pico de demanda no intervalo em ~8 min.\nZona B + Zona D historicamente sobem 340%.',impact:'Sugestão: +4 equipe no Nível 300 agora'},
+      {head:'OPORTUNIDADE VIP',zone:'VIP',body:'Suite 218 tempo de espera 14 min acima do SLA.\n2 servidores disponíveis na Zona D agora.',impact:'Realocar → +$1,800 receita incremental'},
+      {head:'OTIMIZAÇÃO DE RECEITA',zone:'A',body:'Zona A abaixo 22% da média.\nTaxa de conversão upsell caiu 6% nos últimos 20 min.',impact:'Orientar Carlos · Recuperação esperada +$3,100'},
+      {head:'ALÍVIO DE CONGESTIONAMENTO',zone:'D',body:'Bar 7 Nível Club com 3× carga normal.\nFalha de serviço prevista em 9 minutos.',impact:'Redirecionar ao Bar 5 · Redistribuir estoque'},
+    ],
+    fr:[
+      {head:'RÉAFFECTATION DU PERSONNEL',zone:'A',body:'Déplacer 3 coursiers de Zone D vers Zone A.\nFile Zone A est 2.8× la moyenne du stade.',impact:'Prévu: +18% efficacité · +$4,200 rev'},
+      {head:'INVENTAIRE CRITIQUE',zone:'C',body:'Stock tequila Zone C à 23%.\nRupture prévue dans 14 minutes au rythme actuel.',impact:'Réapprovisionner immédiatement · Risque: $8,400'},
+      {head:'ALERTE SURGE MI-TEMPS',zone:'B',body:'Pic de demande mi-temps dans ~8 min.\nZone B + Zone D historiquement +340%.',impact:'Suggestion: +4 personnel Niveau 300 maintenant'},
+      {head:'OPPORTUNITÉ VIP',zone:'VIP',body:'Suite 218 temps d\'attente 14 min au-dessus SLA.\n2 serveurs disponibles en Zone D maintenant.',impact:'Réaffecter → +$1,800 revenus supplémentaires'},
+      {head:'OPTIMISATION REVENUS',zone:'A',body:'Zone A sous-performante de 22% vs moy.\nTaux upsell baissé 6% ces 20 dernières min.',impact:'Coaching Carlos · Récupération attendue +$3,100'},
+      {head:'SOULAGEMENT CONGESTION',zone:'D',body:'Bar 7 Niveau Club: 3× charge normale.\nÉchec service prévu dans 9 minutes.',impact:'Rediriger vers Bar 5 · Redistribuer inventaire'},
+    ],
+  };
+  return pools[lang]||pools.en;
+}
 
-const STAD_ALERT_POOL=[
-  {type:'cr',msg:'⚠ Zone C tequila CRITICAL — 23% remaining · ETA stockout 14 min'},
-  {type:'cr',msg:'⚠ VIP Suite 218 service time exceeded SLA by 14 min'},
-  {type:'cr',msg:'⚠ Club Level Bar 7 overload — queue 22 people · Staff needed'},
-  {type:'wa',msg:'⚡ Zone A inventory imbalance — restock from Hub B recommended'},
-  {type:'wa',msg:'⚡ Staff efficiency drop 6% — West Concourse past 20 min'},
-  {type:'wa',msg:'⚡ Halftime surge predicted — 7 min · Pre-position staff now'},
-  {type:'ok',msg:'✓ Relocated 2 runners to Zone C — service time improved 18%'},
-  {type:'ok',msg:'✓ Zone D restocked from Hub A — 88% inventory restored'},
-  {type:'ok',msg:'✓ Revenue milestone: $280K exceeded at 8:42 of Q2'},
-  {type:'ai',msg:'🤖 COMMAND: Predicted demand +34% in next 12 min · Zone B'},
-  {type:'ai',msg:'🔮 PREDICTION: Q2 halftime in 7 min — surge 340% above baseline'},
-  {type:'wa',msg:'⚡ Runner delay causing 18% slowdown in Upper Bowl 300s'},
-];
+/* ── Translated alert pool ── */
+function getStadAlertPool(){
+  const lang=typeof i18n!=='undefined'?i18n.lang:'en';
+  const pools={
+    en:[
+      {type:'cr',msg:'⚠ Zone C tequila CRITICAL — 23% remaining · ETA stockout 14 min'},
+      {type:'cr',msg:'⚠ VIP Suite 218 service time exceeded SLA by 14 min'},
+      {type:'cr',msg:'⚠ Club Level Bar 7 overload — queue 22 people · Staff needed'},
+      {type:'wa',msg:'⚡ Zone A inventory imbalance — restock from Hub B recommended'},
+      {type:'wa',msg:'⚡ Staff efficiency drop 6% — West Concourse past 20 min'},
+      {type:'wa',msg:'⚡ Halftime surge predicted — 7 min · Pre-position staff now'},
+      {type:'ok',msg:'✓ Relocated 2 runners to Zone C — service time improved 18%'},
+      {type:'ok',msg:'✓ Zone D restocked from Hub A — 88% inventory restored'},
+      {type:'ok',msg:'✓ Revenue milestone: $280K exceeded at 8:42 of Q2'},
+      {type:'ai',msg:'🤖 COMMAND: Predicted demand +34% in next 12 min · Zone B'},
+      {type:'ai',msg:'🔮 PREDICTION: Q2 halftime in 7 min — surge 340% above baseline'},
+      {type:'wa',msg:'⚡ Runner delay causing 18% slowdown in Upper Bowl 300s'},
+    ],
+    es:[
+      {type:'cr',msg:'⚠ Tequila Zona C CRÍTICO — 23% restante · ETA agotamiento 14 min'},
+      {type:'cr',msg:'⚠ Suite VIP 218 tiempo de servicio excedió SLA por 14 min'},
+      {type:'cr',msg:'⚠ Bar 7 Nivel Club sobrecargado — 22 personas en fila · Se necesita personal'},
+      {type:'wa',msg:'⚡ Desequilibrio de inventario Zona A — restock desde Hub B recomendado'},
+      {type:'wa',msg:'⚡ Eficiencia del personal bajó 6% — Concurso Oeste último 20 min'},
+      {type:'wa',msg:'⚡ Pico de intermedio predicho — 7 min · Posicionar personal ahora'},
+      {type:'ok',msg:'✓ 2 runners reubicados a Zona C — tiempo de servicio mejoró 18%'},
+      {type:'ok',msg:'✓ Zona D reabastecida desde Hub A — 88% inventario restaurado'},
+      {type:'ok',msg:'✓ Hito de ingresos: $280K superado a 8:42 del Q2'},
+      {type:'ai',msg:'🤖 COMANDO: Demanda predicha +34% en próximos 12 min · Zona B'},
+      {type:'ai',msg:'🔮 PREDICCIÓN: Intermedio Q2 en 7 min — pico 340% sobre línea base'},
+      {type:'wa',msg:'⚡ Retraso de runner causando 18% de lentitud en Tribuna 300s'},
+    ],
+    pt:[
+      {type:'cr',msg:'⚠ Tequila Zona C CRÍTICO — 23% restante · ETA esgotamento 14 min'},
+      {type:'cr',msg:'⚠ Suite VIP 218 tempo de serviço excedeu SLA em 14 min'},
+      {type:'cr',msg:'⚠ Bar 7 Nível Club sobrecarregado — 22 pessoas na fila · Equipe necessária'},
+      {type:'wa',msg:'⚡ Desequilíbrio de estoque Zona A — reabastecimento do Hub B recomendado'},
+      {type:'wa',msg:'⚡ Eficiência da equipe caiu 6% — Corredor Oeste últimos 20 min'},
+      {type:'wa',msg:'⚡ Pico de intervalo previsto — 7 min · Posicionar equipe agora'},
+      {type:'ok',msg:'✓ 2 entregadores realocados para Zona C — tempo de serviço melhorou 18%'},
+      {type:'ok',msg:'✓ Zona D reabastecida do Hub A — 88% estoque restaurado'},
+      {type:'ok',msg:'✓ Marco de receita: $280K superado às 8:42 do Q2'},
+      {type:'ai',msg:'🤖 COMANDO: Demanda prevista +34% nos próximos 12 min · Zona B'},
+      {type:'ai',msg:'🔮 PREVISÃO: Intervalo Q2 em 7 min — pico 340% acima da linha base'},
+      {type:'wa',msg:'⚡ Atraso de entregador causando 18% de lentidão no Superior 300s'},
+    ],
+    fr:[
+      {type:'cr',msg:'⚠ Tequila Zone C CRITIQUE — 23% restant · ETA rupture 14 min'},
+      {type:'cr',msg:'⚠ Suite VIP 218 délai service dépassé SLA de 14 min'},
+      {type:'cr',msg:'⚠ Bar 7 Niveau Club surchargé — 22 personnes en file · Personnel requis'},
+      {type:'wa',msg:'⚡ Déséquilibre inventaire Zone A — réappro depuis Hub B recommandé'},
+      {type:'wa',msg:'⚡ Efficacité personnel -6% — Concourse Ouest ces 20 dernières min'},
+      {type:'wa',msg:'⚡ Pic mi-temps prédit — 7 min · Positionner personnel maintenant'},
+      {type:'ok',msg:'✓ 2 coursiers réaffectés Zone C — temps service amélioré 18%'},
+      {type:'ok',msg:'✓ Zone D réapprovisionnée Hub A — 88% inventaire restauré'},
+      {type:'ok',msg:'✓ Objectif revenus: $280K dépassé à 8:42 du Q2'},
+      {type:'ai',msg:'🤖 COMMANDE: Demande prévue +34% dans 12 min · Zone B'},
+      {type:'ai',msg:'🔮 PRÉVISION: Mi-temps Q2 dans 7 min — pic 340% au-dessus référence'},
+      {type:'wa',msg:'⚡ Retard coursier causant 18% ralentissement Haut 300s'},
+    ],
+  };
+  return pools[lang]||pools.en;
+}
 
 let stadActive=false, stadAIMode=false, stadCurrentZone='ALL';
 let stadAlertCount=0, stadIntervals=[], stadAIIndex=0, stadAlertFilter='all';
@@ -8660,24 +8954,24 @@ function stadRenderZoneDetail(zoneKey){
   if(!detail)return;
 
   if(zoneKey==='ALL'){
-    if(head)head.textContent='STADIUM OVERVIEW';
+    if(head){head.textContent=_t('stad.d.overview');head.removeAttribute('data-i18n');}
     const total={staff:0,revenue:0,inv:0,queue:0,count:0};
     Object.values(STAD_ZONES).forEach(z=>{total.staff+=z.staff;total.revenue+=z.revenue;total.inv+=z.inv;total.queue+=z.queue;total.count++;});
     detail.innerHTML=`
-      <div class="sdz-name">All Zones</div>
-      <div class="sdz-sec">Hard Rock Stadium — ${total.staff} staff active</div>
+      <div class="sdz-name">${_t('stad.d.allZones')}</div>
+      <div class="sdz-sec">Hard Rock Stadium — ${total.staff} ${_t('stad.d.staffActive')}</div>
       <div class="sdz-grid">
-        <div class="sdz-m"><div class="sdz-ml">TOTAL REV</div><div class="sdz-mv sg">$${(total.revenue/1000).toFixed(0)}K</div></div>
-        <div class="sdz-m"><div class="sdz-ml">ACTIVE STAFF</div><div class="sdz-mv sb">${total.staff}</div></div>
-        <div class="sdz-m"><div class="sdz-ml">AVG INVENTORY</div><div class="sdz-mv ${total.inv/total.count>70?'sg':'sa'}">${(total.inv/total.count).toFixed(0)}%</div></div>
-        <div class="sdz-m"><div class="sdz-ml">AVG QUEUE</div><div class="sdz-mv ${total.queue/total.count>8?'sr':'sa'}">${(total.queue/total.count).toFixed(1)}</div></div>
+        <div class="sdz-m"><div class="sdz-ml">${_t('stad.d.totalRev')}</div><div class="sdz-mv sg">$${(total.revenue/1000).toFixed(0)}K</div></div>
+        <div class="sdz-m"><div class="sdz-ml">${_t('stad.d.activeStaff')}</div><div class="sdz-mv sb">${total.staff}</div></div>
+        <div class="sdz-m"><div class="sdz-ml">${_t('stad.d.avgInv')}</div><div class="sdz-mv ${total.inv/total.count>70?'sg':'sa'}">${(total.inv/total.count).toFixed(0)}%</div></div>
+        <div class="sdz-m"><div class="sdz-ml">${_t('stad.d.avgQueue')}</div><div class="sdz-mv ${total.queue/total.count>8?'sr':'sa'}">${(total.queue/total.count).toFixed(1)}</div></div>
       </div>
       <div class="sdz-bar-wrap">
-        <div class="sdz-bar-label"><span>OVERALL INV HEALTH</span><span>${(total.inv/total.count).toFixed(0)}%</span></div>
+        <div class="sdz-bar-label"><span>${_t('stad.d.invHealth')}</span><span>${(total.inv/total.count).toFixed(0)}%</span></div>
         <div class="sdz-bar-track"><div class="sdz-bar-fill" style="width:${total.inv/total.count}%;background:#00e87a;"></div></div>
       </div>
       <div class="sdz-bar-wrap">
-        <div class="sdz-bar-label"><span>STAFF EFFICIENCY</span><span>78%</span></div>
+        <div class="sdz-bar-label"><span>${_t('stad.d.staffEff')}</span><span>78%</span></div>
         <div class="sdz-bar-track"><div class="sdz-bar-fill" style="width:78%;background:#5AA5FF;"></div></div>
       </div>`;
     return;
@@ -8685,25 +8979,25 @@ function stadRenderZoneDetail(zoneKey){
 
   const z=STAD_ZONES[zoneKey];
   if(!z)return;
-  if(head)head.textContent=`ZONE ${zoneKey} DETAIL`;
+  if(head){head.textContent=_t('stad.d.zoneDetail',{zone:zoneKey});head.removeAttribute('data-i18n');}
   const inv=Math.round(z.inv), q=Math.min(10,z.queue).toFixed(1);
   const invColor=inv>75?'sg':inv>50?'sa':'sr';
   const qColor=parseFloat(q)<6?'sg':parseFloat(q)<9?'sa':'sr';
   detail.innerHTML=`
     <div class="sdz-name" style="color:${z.color}">${z.name}</div>
-    <div class="sdz-sec">Sections ${z.sections} · ${z.staff} staff active</div>
+    <div class="sdz-sec">${_t('stad.d.sections')} ${z.sections} · ${z.staff} ${_t('stad.d.staffActive')}</div>
     <div class="sdz-grid">
-      <div class="sdz-m"><div class="sdz-ml">REVENUE</div><div class="sdz-mv sg">$${(z.revenue/1000).toFixed(1)}K</div></div>
-      <div class="sdz-m"><div class="sdz-ml">STAFF</div><div class="sdz-mv sb">${z.staff}</div></div>
-      <div class="sdz-m"><div class="sdz-ml">INVENTORY</div><div class="sdz-mv ${invColor}">${inv}%</div></div>
-      <div class="sdz-m"><div class="sdz-ml">QUEUE SCORE</div><div class="sdz-mv ${qColor}">${q}</div></div>
+      <div class="sdz-m"><div class="sdz-ml">${_t('stad.d.revenue')}</div><div class="sdz-mv sg">$${(z.revenue/1000).toFixed(1)}K</div></div>
+      <div class="sdz-m"><div class="sdz-ml">${_t('stad.d.staff')}</div><div class="sdz-mv sb">${z.staff}</div></div>
+      <div class="sdz-m"><div class="sdz-ml">${_t('stad.d.inventory')}</div><div class="sdz-mv ${invColor}">${inv}%</div></div>
+      <div class="sdz-m"><div class="sdz-ml">${_t('stad.d.queueScore')}</div><div class="sdz-mv ${qColor}">${q}</div></div>
     </div>
     <div class="sdz-bar-wrap">
-      <div class="sdz-bar-label"><span>INVENTORY LEVEL</span><span>${inv}%</span></div>
+      <div class="sdz-bar-label"><span>${_t('stad.d.invLevel')}</span><span>${inv}%</span></div>
       <div class="sdz-bar-track"><div class="sdz-bar-fill" style="width:${inv}%;background:${inv>75?'#00e87a':inv>50?'#FFba38':'#FF4466'};"></div></div>
     </div>
     <div class="sdz-bar-wrap" style="margin-top:6px">
-      <div class="sdz-bar-label"><span>STAFF ON FLOOR</span><span>${z.staffNames.join(', ')}</span></div>
+      <div class="sdz-bar-label"><span>${_t('stad.d.staffFloor')}</span><span>${z.staffNames.join(', ')}</span></div>
       <div class="sdz-bar-track"><div class="sdz-bar-fill" style="width:${Math.min(100,(z.staff/60)*100)}%;background:${z.color};"></div></div>
     </div>`;
 }
@@ -8743,7 +9037,7 @@ function stadToggleAI(){
 }
 
 function stadUpdateAIRoute(){
-  const rec=STAD_AI_RECS[stadAIIndex%STAD_AI_RECS.length];
+  const rec=getStadAIRecs()[stadAIIndex%getStadAIRecs().length];
   // Hub coordinates match the new realistic stadium layout
   const zoneHubs={A:{x:97,y:270},B:{x:400,y:131},C:{x:703,y:270},D:{x:400,y:409},VIP:{x:703,y:185},UPP:{x:400,y:52}};
   const target=rec.zone||'A';
@@ -8774,23 +9068,25 @@ function stadUpdateAIRoute(){
 function stadRenderAI(){
   const container=document.getElementById('stad-ai-recs');
   if(!container)return;
-  const rec=STAD_AI_RECS[stadAIIndex%STAD_AI_RECS.length];
+  const recs=getStadAIRecs();
+  const rec=recs[stadAIIndex%recs.length];
   container.innerHTML=`
-    <div class="sai-mode-on">🤖 COMMAND MODE ACTIVE<br>Analyzing 247 staff · 6 zones · real-time</div>
+    <div class="sai-mode-on">${_t('stad.d.commandActive')}<br>${_t('stad.d.analyzing')}</div>
     <div class="sai-rec">
       <div class="sai-rec-head">${rec.head}</div>
       <div class="sai-rec-body">${rec.body.replace(/\n/g,'<br>')}</div>
       <div class="sai-rec-impact">${rec.impact}</div>
       <div class="sai-btns">
-        <div class="sai-btn" onclick="stadApplyAI()">▶ APPLY</div>
-        <div class="sai-btn dis" onclick="stadDismissAI()">✕ SKIP</div>
+        <div class="sai-btn" onclick="stadApplyAI()">${_t('stad.d.apply')}</div>
+        <div class="sai-btn dis" onclick="stadDismissAI()">${_t('stad.d.skip')}</div>
       </div>
     </div>`;
 }
 
 function stadApplyAI(){
   stadAIIndex++;
-  stadAddAlert('ok','✓ COMMAND APPLIED — '+STAD_AI_RECS[(stadAIIndex-1)%STAD_AI_RECS.length].head);
+  const _recs=getStadAIRecs();
+  stadAddAlert('ok','✓ '+_t('stad.panel.command')+' APPLIED — '+_recs[(stadAIIndex-1)%_recs.length].head);
   stadRenderAI();
   if(stadAIMode)stadUpdateAIRoute();
 }
@@ -8806,10 +9102,10 @@ function stadAddAlert(type, msg){
   if(!stream)return;
   stadAlertCount++;
   const countEl=document.getElementById('stad-alert-count');
-  if(countEl)countEl.textContent=stadAlertCount+' ACTIVE';
+  if(countEl)countEl.textContent=stadAlertCount+' '+_t('stad.alert.active');
   const now=new Date();
   const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
-  const tag={cr:'CRITICAL',wa:'WARNING',ok:'RESOLVED',ai:'INTEL'}[type]||'INFO';
+  const tag={cr:_t('stad.d.tagCritical'),wa:_t('stad.d.tagWarning'),ok:_t('stad.d.tagResolved'),ai:_t('stad.d.tagIntel')}[type]||_t('stad.d.tagInfo');
   const div=document.createElement('div');
   div.className=`salert ${type}`;
   div.setAttribute('onclick',"this.classList.toggle('expanded')");
@@ -8900,11 +9196,11 @@ function stadRenderNodes(){
   const container=document.getElementById('stad-nodes');
   if(!container)return;
   const nodes=[
-    {name:'Central Storage',sub:'Hub Alpha · 94% capacity',pct:94,color:'#00e87a'},
-    {name:'Zone Hub West',sub:'Serving A+B · 67% inv',pct:67,color:'#FFba38'},
-    {name:'Zone Hub East',sub:'Serving C+D · 71% inv',pct:71,color:'#5AA5FF'},
-    {name:'VIP Distribution',sub:'Suites 200s · 95% inv',pct:95,color:'#a855f7'},
-    {name:'Upper Bowl Hub',sub:'Level 300 · 60% inv',pct:60,color:'#06b6d4'},
+    {name:_t('stad.node.central'),sub:_t('stad.node.centralSub'),pct:94,color:'#00e87a'},
+    {name:_t('stad.node.hubWest'),sub:_t('stad.node.hubWestSub'),pct:67,color:'#FFba38'},
+    {name:_t('stad.node.hubEast'),sub:_t('stad.node.hubEastSub'),pct:71,color:'#5AA5FF'},
+    {name:_t('stad.node.vip'),sub:_t('stad.node.vipSub'),pct:95,color:'#a855f7'},
+    {name:_t('stad.node.upper'),sub:_t('stad.node.upperSub'),pct:60,color:'#06b6d4'},
   ];
   container.innerHTML=nodes.map((n,i)=>`
     ${i>0?`<div class="snode-arrow">↓</div>`:''}
@@ -8946,12 +9242,12 @@ function stadFluctuateKPIs(){
   // Update inv risk badge
   const avgInv=Object.values(STAD_ZONES).reduce((a,z)=>a+z.inv,0)/Object.keys(STAD_ZONES).length;
   const riskEl=document.getElementById('stad-irisk');
-  if(riskEl){riskEl.textContent=avgInv<50?'CRITICAL':avgInv<70?'HIGH':'MODERATE';riskEl.className='stad-kpi-val '+(avgInv<50?'sr':avgInv<70?'sa':'sg');}
+  if(riskEl){riskEl.textContent=avgInv<50?_t('stad.d.invCritical'):avgInv<70?_t('stad.d.invHigh'):_t('stad.d.invModerate');riskEl.className='stad-kpi-val '+(avgInv<50?'sr':avgInv<70?'sa':'sg');}
   if(stadCurrentZone)stadRenderZoneDetail(stadCurrentZone);
 }
 
 function stadTriggerRandomAlert(){
-  const pool=STAD_ALERT_POOL;
+  const pool=getStadAlertPool();
   const alert=pool[Math.floor(Math.random()*pool.length)];
   stadAddAlert(alert.type,alert.msg);
 }
@@ -8966,7 +9262,7 @@ function initStadium(){
   stadRenderZoneDetail('ALL');
   // Seed initial alerts
   ['cr','wa','ai','ok','wa'].forEach((t,i)=>{
-    const pool=STAD_ALERT_POOL.filter(a=>a.type===t);
+    const pool=getStadAlertPool().filter(a=>a.type===t);
     if(pool.length)setTimeout(()=>stadAddAlert(t,pool[0].msg),(i+1)*400);
   });
   stadIntervals.push(setInterval(stadTickEntities,7000));
