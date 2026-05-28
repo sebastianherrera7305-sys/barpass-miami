@@ -379,32 +379,113 @@ body.after-hours .credit-pill{box-shadow:0 0 20px rgba(245,158,11,.25);}
 .auth-terms{font-size:11px;color:var(--cream4);text-align:center;line-height:1.6;margin-top:16px;}
 .auth-terms a{color:var(--gold2);}
 
-/* ── ONBOARDING ── */
-#onboarding{position:fixed;inset:0;z-index:8500;background:var(--ink);display:none;flex-direction:column;overflow:hidden;}
-.ob-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(245,158,11,.1) 0%,transparent 65%),radial-gradient(ellipse 50% 35% at 0% 100%,rgba(251,113,133,.07) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 100% 55%,rgba(45,212,191,.05) 0%,transparent 60%);}
-.ob-float-map{position:absolute;top:70px;left:0;right:0;height:360px;overflow:hidden;pointer-events:none;}
-.ob-bubble{position:absolute;border-radius:18px;background:rgba(15,13,15,.95);border:1px solid var(--border2);padding:12px 16px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(24px);animation:floatBubble linear infinite;box-shadow:0 8px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,248,235,.06);}
-.ob-bubble-emoji{font-size:22px;}
-.ob-bubble-name{font-size:12px;font-weight:700;}
-.ob-bubble-dist{font-size:10px;color:var(--cream3);margin-top:1px;}
-.ob-bubble-live{font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px;}
-.ob-bubble-live::before{content:'';width:5px;height:5px;border-radius:50%;display:inline-block;}
-.live-green::before{background:var(--green);}
-.live-gold::before{background:var(--gold);}
-.ob-slides{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:0 0 20px;position:relative;z-index:2;}
-.ob-slide{display:none;padding:0 28px;animation:slideUp .5s var(--ease) both;}
-.ob-slide.active{display:block;}
-.ob-eyebrow{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:14px;}
-.ob-headline{font-family:'Instrument Serif',serif;font-size:46px;line-height:1.02;color:var(--cream);margin-bottom:18px;font-style:italic;letter-spacing:-.02em;}
-.ob-headline em{background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
-.ob-body{font-size:15px;color:var(--cream3);line-height:1.65;max-width:310px;}
-.ob-dots{display:flex;gap:6px;padding:28px 28px 0;position:relative;z-index:2;}
-.ob-dot{height:4px;border-radius:2px;background:var(--smoke3);transition:all .35s var(--ease);width:20px;}
-.ob-dot.active{width:32px;background:var(--gold);}
-.ob-cta{padding:20px 20px 28px;position:relative;z-index:2;display:flex;flex-direction:column;gap:10px;}
-.ob-next{width:100%;padding:19px;border-radius:var(--r4);border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:var(--ink);transition:all .2s;box-shadow:0 8px 36px var(--gold-glow);}
+/* ── CONVERSATIONAL ONBOARDING v2 ── */
+#onboarding{position:fixed;inset:0;z-index:8500;background:#050308;display:none;flex-direction:column;overflow:hidden;}
+.ob-ambient{position:absolute;inset:0;pointer-events:none;z-index:0;}
+.ob-amb-g1{position:absolute;top:-100px;left:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(100,0,200,.25),transparent 70%);transition:background 1s ease;}
+.ob-amb-g2{position:absolute;bottom:-60px;right:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(212,160,23,.12),transparent 70%);}
+.ob-amb-g3{position:absolute;top:40%;left:20%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,59,122,.1),transparent 70%);transition:background 1.5s ease;}
+/* Progress bar */
+.ob-progress{display:flex;gap:5px;padding:56px 24px 0;position:relative;z-index:3;flex-shrink:0;}
+.ob-prog-seg{height:3px;border-radius:2px;flex:1;background:rgba(255,255,255,.1);overflow:hidden;}
+.ob-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#6600cc,#8b00ff);width:0%;transition:width .5s ease;}
+.ob-prog-seg.done .ob-prog-fill{width:100%;}
+.ob-prog-seg.active .ob-prog-fill{width:100%;background:linear-gradient(90deg,#8b00ff,#bf40ff);}
+/* Back button */
+.ob-back{position:absolute;top:48px;left:20px;z-index:4;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;color:rgba(255,255,255,.45);transition:all .2s;line-height:1;}
+.ob-back:active{background:rgba(255,255,255,.12);}
+/* Steps */
+.ob-steps{flex:1;display:flex;overflow:hidden;position:relative;z-index:2;}
+.ob-step{position:absolute;inset:0;display:flex;flex-direction:column;padding:16px 24px 0;opacity:0;pointer-events:none;transform:translateX(40px);transition:opacity .38s ease,transform .38s var(--ease);}
+.ob-step.ob-active{opacity:1;pointer-events:all;transform:translateX(0);}
+.ob-step.ob-exit{opacity:0;transform:translateX(-40px);}
+/* Step typography */
+.ob-step-eyebrow{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:rgba(139,0,255,.9);font-weight:700;margin-bottom:8px;margin-top:10px;}
+.ob-step-q{font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;color:#fff;line-height:1.18;margin-bottom:6px;}
+.ob-step-q em{background:linear-gradient(135deg,#c8880a,#f5c842);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
+.ob-step-sub{font-size:12px;color:rgba(255,255,255,.38);line-height:1.5;margin-bottom:16px;}
+/* Grid */
+.ob-grid{display:grid;gap:9px;overflow-y:auto;flex:1;padding-bottom:6px;scrollbar-width:none;}
+.ob-grid::-webkit-scrollbar{display:none;}
+.ob-grid.cols-2{grid-template-columns:1fr 1fr;}
+.ob-grid.cols-1{grid-template-columns:1fr;}
+/* Standard tile */
+.ob-tile{padding:13px 14px;border-radius:16px;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);display:flex;align-items:center;gap:11px;cursor:pointer;position:relative;overflow:hidden;transition:all .2s ease;-webkit-tap-highlight-color:transparent;}
+.ob-tile:active{transform:scale(.97);}
+.ob-tile.selected{border-color:rgba(139,0,255,.55);background:rgba(100,0,200,.13);}
+.ob-tile-emo{font-size:22px;line-height:1;flex-shrink:0;}
+.ob-tile-body{flex:1;min-width:0;}
+.ob-tile-lbl{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);}
+.ob-tile-sub{font-size:10px;color:rgba(255,255,255,.32);margin-top:2px;}
+.ob-tile-check{width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(255,255,255,.14);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;transition:all .2s;}
+.ob-tile.selected .ob-tile-check{background:linear-gradient(135deg,#6600cc,#8b00ff);border-color:transparent;color:#fff;}
+/* Energy tiles */
+.ob-energy-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;overflow-y:auto;flex:1;padding-bottom:6px;scrollbar-width:none;}
+.ob-energy-grid::-webkit-scrollbar{display:none;}
+.ob-etile{padding:16px 12px;border-radius:20px;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;cursor:pointer;transition:all .25s;-webkit-tap-highlight-color:transparent;}
+.ob-etile:active{transform:scale(.96);}
+.ob-etile.selected{border-color:var(--ec,rgba(139,0,255,.6));background:var(--eb,rgba(100,0,200,.12));}
+.ob-etile-emo{font-size:28px;line-height:1;}
+.ob-etile-lbl{font-size:13px;font-weight:700;color:rgba(255,255,255,.9);}
+.ob-etile-sub{font-size:10px;color:rgba(255,255,255,.33);line-height:1.3;}
+/* Mode reveal */
+.ob-mode-reveal{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 4px;flex:1;justify-content:center;overflow-y:auto;}
+.ob-mode-icon{font-size:62px;margin-bottom:14px;animation:modeIconPop .6s var(--ease) .2s both;}
+@keyframes modeIconPop{0%{transform:scale(0) rotate(-20deg);opacity:0}70%{transform:scale(1.15) rotate(5deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+.ob-mode-tag{font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:rgba(139,0,255,.9);font-weight:700;margin-bottom:6px;}
+.ob-mode-name{font-family:'Instrument Serif',serif;font-size:34px;font-style:italic;color:#fff;line-height:1.1;margin-bottom:8px;}
+.ob-mode-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.6;max-width:270px;margin:0 auto 20px;}
+.ob-mode-card{width:100%;border-radius:18px;padding:16px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.04);backdrop-filter:blur(16px);position:relative;overflow:hidden;}
+.ob-mode-card::before{content:'';position:absolute;top:-1px;left:25px;right:25px;height:1px;background:linear-gradient(90deg,transparent,var(--mc,rgba(139,0,255,.5)),transparent);}
+.ob-mode-features{display:flex;flex-direction:column;gap:9px;}
+.ob-mf{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.7);}
+.ob-mf-ico{font-size:15px;width:26px;text-align:center;}
+/* Venue preview */
+.ob-venue-preview{flex:1;display:flex;flex-direction:column;gap:9px;overflow-y:auto;padding-bottom:6px;scrollbar-width:none;}
+.ob-venue-preview::-webkit-scrollbar{display:none;}
+.ob-vpcard{border-radius:16px;padding:13px 14px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);display:flex;align-items:center;gap:13px;opacity:0;transform:translateY(18px);transition:opacity .38s ease,transform .38s var(--ease);}
+.ob-vpcard.show{opacity:1;transform:translateY(0);}
+.ob-vpc-left{width:50px;height:50px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.ob-vpc-info{flex:1;min-width:0;}
+.ob-vpc-name{font-size:14px;font-weight:700;color:#fff;margin-bottom:3px;}
+.ob-vpc-meta{font-size:10px;color:rgba(255,255,255,.38);}
+.ob-vpc-badge{padding:3px 9px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.06em;color:#fff;flex-shrink:0;text-transform:uppercase;}
+.ob-vpc-badge.hot{background:linear-gradient(90deg,#ff3b30,#ff6040);}
+.ob-vpc-badge.vip{background:linear-gradient(90deg,#6600cc,#8b00ff);}
+.ob-vpc-badge.new{background:linear-gradient(90deg,#00a86b,#00d68f);}
+.ob-vpc-badge.match{background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#1a0800;}
+/* CTA */
+.ob-cta{padding:14px 24px 32px;position:relative;z-index:3;display:flex;flex-direction:column;gap:9px;flex-shrink:0;}
+.ob-next{width:100%;padding:17px;border-radius:50px;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:700;background:linear-gradient(135deg,#6600cc,#8b00ff);color:#fff;box-shadow:0 8px 28px rgba(100,0,200,.4);transition:all .2s;position:relative;overflow:hidden;}
+.ob-next::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18),transparent 60%);border-radius:inherit;}
 .ob-next:active{transform:scale(.97);}
-.ob-skip{background:none;border:none;color:var(--cream4);font-size:13px;cursor:pointer;padding:8px;font-family:inherit;}
+.ob-next:disabled{opacity:.35;cursor:not-allowed;}
+.ob-skip{background:none;border:none;color:rgba(255,255,255,.22);font-size:11px;cursor:pointer;padding:6px;font-family:inherit;letter-spacing:.1em;text-transform:uppercase;}
+/* Natural VIP upsell sheet */
+#vip-sheet{position:fixed;bottom:0;left:0;right:0;z-index:9500;transform:translateY(110%);transition:transform .5s var(--ease);pointer-events:none;}
+#vip-sheet.vs-open{transform:translateY(0);pointer-events:all;}
+.vs-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);z-index:-1;opacity:0;transition:opacity .4s ease;}
+#vip-sheet.vs-open .vs-backdrop{opacity:1;}
+.vs-sheet{background:linear-gradient(180deg,#0e0818 0%,#080410 100%);border-radius:28px 28px 0 0;border:1px solid rgba(100,0,200,.2);border-bottom:none;padding:0 0 32px;position:relative;overflow:hidden;}
+.vs-sheet::before{content:'';position:absolute;top:0;left:25%;right:25%;height:1px;background:linear-gradient(90deg,transparent,rgba(139,0,255,.65),transparent);}
+.vs-glow{position:absolute;top:-70px;left:50%;transform:translateX(-50%);width:200px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(100,0,200,.3),transparent 70%);pointer-events:none;}
+.vs-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);margin:14px auto 18px;}
+.vs-content{padding:0 20px;}
+.vs-eyebrow{font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:rgba(139,0,255,.9);font-weight:700;text-align:center;margin-bottom:8px;}
+.vs-headline{font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:#fff;text-align:center;line-height:1.2;margin-bottom:5px;}
+.vs-sub{font-size:12px;color:rgba(255,255,255,.38);text-align:center;margin-bottom:16px;line-height:1.5;}
+.vs-feats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px;}
+.vs-feat{display:flex;align-items:center;gap:7px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);font-size:11px;color:rgba(255,255,255,.65);}
+.vs-feat-ico{font-size:15px;flex-shrink:0;}
+.vs-price-row{display:flex;align-items:baseline;justify-content:center;gap:5px;margin-bottom:5px;}
+.vs-price-amt{font-size:34px;font-weight:800;color:#fff;letter-spacing:-.02em;}
+.vs-price-per{font-size:13px;color:rgba(255,255,255,.38);}
+.vs-trial{font-size:11px;color:rgba(57,230,0,.85);font-weight:600;text-align:center;margin-bottom:14px;letter-spacing:.04em;}
+.vs-btn-primary{width:100%;padding:16px;border-radius:50px;border:none;cursor:pointer;background:linear-gradient(135deg,#6600cc,#8b00ff);color:#fff;font-size:14px;font-weight:700;letter-spacing:.1em;box-shadow:0 8px 32px rgba(100,0,200,.45);margin-bottom:9px;position:relative;overflow:hidden;animation:vsGlow 2s ease-in-out infinite;}
+.vs-btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent 60%);border-radius:inherit;}
+@keyframes vsGlow{0%,100%{box-shadow:0 8px 32px rgba(100,0,200,.45)}50%{box-shadow:0 10px 48px rgba(100,0,200,.75),0 0 0 1px rgba(212,160,23,.15)}}
+.vs-btn-secondary{width:100%;padding:12px;border-radius:50px;border:none;background:transparent;color:rgba(255,255,255,.28);font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:.1em;text-transform:uppercase;}
+.vs-legal{text-align:center;font-size:9px;color:rgba(255,255,255,.14);padding-top:8px;line-height:1.5;}
 
 /* ── MAIN APP ── */
 #app{display:none;flex-direction:column;height:100%;position:relative;z-index:1;min-height:0;}
@@ -1107,50 +1188,19 @@ body::after{
     radial-gradient(ellipse 75% 45% at 50% 110%, rgba(245,158,11,.07) 0%, transparent 50%) !important;
 }
 
-/* ── ONBOARDING: safe area + layout fixes ── */
-.ob-float-map{
-  top: max(78px, calc(env(safe-area-inset-top,0px) + 68px)) !important;
-  height: min(340px, 46vh) !important;
-  z-index: 1;
+/* ── ONBOARDING v2: safe area fixes ── */
+.ob-progress{
+  padding-top: max(52px, calc(env(safe-area-inset-top,0px) + 44px)) !important;
 }
-.ob-bubble{
-  max-width: min(210px, 68vw);
-  box-sizing: border-box;
+.ob-back{
+  top: max(44px, calc(env(safe-area-inset-top,0px) + 38px)) !important;
 }
-/* Slide text sits above the floating bubbles */
-.ob-slides{
-  z-index: 4;
-  min-height: 0;
-  flex-shrink: 1;
-}
-.ob-slide{
-  padding: 0 28px 4px;
-}
-/* Responsive headline — scales on SE to Pro Max */
-.ob-headline{
-  font-size: clamp(30px, 10vw, 44px) !important;
-  line-height: 1.06 !important;
-  margin-bottom: 12px !important;
-}
-.ob-body{
-  font-size: clamp(13px, 3.5vw, 15px) !important;
-  color: rgba(255,248,235,.5) !important;
-  line-height: 1.6 !important;
-  max-width: 290px;
-}
-/* CTA: respect iPhone home indicator */
 .ob-cta{
-  z-index: 4;
-  padding-top: 14px !important;
-  padding-bottom: max(28px, calc(env(safe-area-inset-bottom,0px) + 18px)) !important;
+  padding-bottom: max(28px, calc(env(safe-area-inset-bottom,0px) + 16px)) !important;
 }
-.ob-dots{ z-index: 4; padding-top: 20px !important; }
-.ob-bg{
-  background:
-    radial-gradient(ellipse 85% 60% at 50% 0%, rgba(245,158,11,.13) 0%, transparent 65%),
-    radial-gradient(ellipse 55% 40% at 0% 100%, rgba(251,113,133,.08) 0%, transparent 60%),
-    radial-gradient(ellipse 45% 35% at 100% 55%, rgba(45,212,191,.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(245,158,11,.05) 0%, transparent 50%) !important;
+.ob-step-q{ font-size: clamp(24px, 7vw, 30px) !important; }
+#vip-sheet .vs-sheet{
+  padding-bottom: max(28px, calc(env(safe-area-inset-bottom,0px) + 16px)) !important;
 }
 
 /* ── AUTH: safe area at top ── */
@@ -2090,100 +2140,12 @@ body::after{
     </div>
   </div>
 
-  <!-- ── PHASE 2: Paywall / Conversion offer ── -->
-  <div class="lo-offer" id="lo-offer">
-    <div class="lo-offer-glow"></div>
-
-    <!-- Teaser: blurred premium cards -->
-    <div class="lo-teaser">
-      <!-- Free: visible -->
-      <div class="lo-tcard">
-        <div class="lo-tc-bg"></div><div class="lo-tc-overlay"></div>
-        <div class="lo-tc-badge free">Free</div>
-        <div class="lo-tc-free">
-          <div class="lo-tc-emo">🗺️</div>
-          <div class="lo-tc-name">Basic Map</div>
-          <div class="lo-tc-cap">Limited venues</div>
-        </div>
-      </div>
-      <!-- Locked: VIP heatmap -->
-      <div class="lo-tcard">
-        <div class="lo-tc-bg"></div><div class="lo-tc-overlay"></div>
-        <div class="lo-tc-badge vip">VIP</div>
-        <div class="lo-tc-lock">
-          <div class="lo-tc-lock-ico">🔥</div>
-          <div class="lo-tc-lock-lbl">Live Heatmap</div>
-        </div>
-      </div>
-      <!-- Locked: Table invites -->
-      <div class="lo-tcard">
-        <div class="lo-tc-bg"></div><div class="lo-tc-overlay"></div>
-        <div class="lo-tc-badge vip">VIP</div>
-        <div class="lo-tc-lock">
-          <div class="lo-tc-lock-ico">🥂</div>
-          <div class="lo-tc-lock-lbl">Table Invites</div>
-        </div>
-      </div>
-      <!-- Locked: AI intel -->
-      <div class="lo-tcard">
-        <div class="lo-tc-bg"></div><div class="lo-tc-overlay"></div>
-        <div class="lo-tc-badge vip">VIP</div>
-        <div class="lo-tc-lock">
-          <div class="lo-tc-lock-ico">🤖</div>
-          <div class="lo-tc-lock-lbl">AI Intel</div>
-        </div>
-      </div>
-      <!-- Locked: Networking -->
-      <div class="lo-tcard">
-        <div class="lo-tc-bg"></div><div class="lo-tc-overlay"></div>
-        <div class="lo-tc-badge vip">VIP</div>
-        <div class="lo-tc-lock">
-          <div class="lo-tc-lock-ico">⚡</div>
-          <div class="lo-tc-lock-lbl">Elite Network</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="lo-unlock-nudge">
-      <span id="lo-nudge-txt">4 features locked.</span> Unlock everything with VIP.
-    </div>
-
-    <!-- VIP Plan card -->
-    <div class="lo-plan-card">
-      <div class="lo-plan-header">
-        <div class="lo-plan-name">BarPass VIP</div>
-        <div class="lo-plan-badge">Most Popular</div>
-      </div>
-      <div class="lo-plan-price">
-        <div class="lo-plan-amt">$9.99</div>
-        <div class="lo-plan-per">/month</div>
-      </div>
-      <div class="lo-plan-trial">✓ 7 days free — cancel anytime</div>
-      <div class="lo-plan-feats">
-        <div class="lo-pf"><div class="lo-pf-check">✓</div>Live Heatmaps</div>
-        <div class="lo-pf"><div class="lo-pf-check">✓</div>VIP Table Access</div>
-        <div class="lo-pf"><div class="lo-pf-check">✓</div>AI Recommendations</div>
-        <div class="lo-pf"><div class="lo-pf-check">✓</div>Elite Networking</div>
-        <div class="lo-pf"><div class="lo-pf-check">✓</div>Priority Entry</div>
-        <div class="lo-pf"><div class="lo-pf-check">✓</div>Private Groups</div>
-        <div class="lo-pf"><div class="lo-pf-check">✓</div>Premium Intel</div>
-        <div class="lo-pf"><div class="lo-pf-check">✓</div>Afterparty Map</div>
-      </div>
-    </div>
-
-    <!-- CTAs -->
-    <div class="lo-cta-stack">
-      <button class="lo-btn-primary" onclick="launchVIP()">🔓 Start 7-Day Free Trial</button>
-      <button class="lo-btn-secondary" onclick="dismissLaunch()">Continue with Free</button>
-    </div>
-    <div class="lo-offer-legal">No charge today. $9.99/month after trial. Cancel anytime.</div>
+  <!-- Get Started CTA — shown after cinematic -->
+  <div id="lo-getstarted" style="position:absolute;bottom:44px;left:0;right:0;padding:0 28px;opacity:0;pointer-events:none;transition:opacity .6s ease;z-index:6;">
+    <button class="lo-btn-primary" onclick="dismissLaunch()">Get Started →</button>
+    <div style="text-align:center;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:12px;cursor:pointer;" onclick="dismissLaunch()">Already have an account? Sign in</div>
   </div>
 
-  <!-- Progress dots -->
-  <div class="lo-progress" id="lo-progress">
-    <div class="lo-prog-dot lo-pd-active" id="lo-pd-0"></div>
-    <div class="lo-prog-dot" id="lo-pd-1"></div>
-  </div>
 </div><!-- /#launch-overlay -->
 
 <!-- ══ SPLASH ══ -->
@@ -2232,19 +2194,153 @@ body::after{
 
 <!-- ══ ONBOARDING ══ -->
 <div id="onboarding" style="display:none;">
-  <div class="ob-bg"></div>
-  <div class="ios-bar" style="position:relative;z-index:2;"><span class="ios-time" id="ob-clock">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
-  <div class="ob-float-map" id="ob-map"></div>
-  <div class="ob-dots"><div class="ob-dot active" id="dot-0"></div><div class="ob-dot" id="dot-1"></div><div class="ob-dot" id="dot-2"></div><div class="ob-dot" id="dot-3"></div></div>
-  <div class="ob-slides">
-    <div class="ob-slide active" id="slide-0"><div class="ob-eyebrow">BarPass Miami · AI Intelligence</div><div class="ob-headline">50+ venues.<br><em>One</em><br>platform.</div><div class="ob-body">The most complete nightlife intelligence system in Miami. AI-powered. Real-time. Luxurious.</div></div>
-    <div class="ob-slide" id="slide-1"><div class="ob-eyebrow">Skip every line</div><div class="ob-headline">Walk in.<br>Order.<br><em>Live it.</em></div><div class="ob-body">Express Pass gives you instant entry at LIV, E11EVEN, Komodo, and 47 more Miami venues.</div></div>
-    <div class="ob-slide" id="slide-2"><div class="ob-eyebrow">Night Wallet ✦ New</div><div class="ob-headline">Pay once.<br><em>Spend</em><br>all night.</div><div class="ob-body">Load consumable credit at entry. Every drink auto-deducted. Watch your balance live.</div></div>
-    <div class="ob-slide" id="slide-3"><div class="ob-eyebrow">AI Drink Intelligence</div><div class="ob-headline">200+<br><em>cocktails.</em><br>All Miami.</div><div class="ob-body">AI-curated drink recommendations from every venue's real signature menu.</div></div>
+  <!-- Ambient gradients -->
+  <div class="ob-ambient">
+    <div class="ob-amb-g1" id="ob-amb-g1"></div>
+    <div class="ob-amb-g2"></div>
+    <div class="ob-amb-g3" id="ob-amb-g3"></div>
   </div>
+  <!-- iOS status bar -->
+  <div class="ios-bar" style="position:relative;z-index:4;background:transparent;"><span class="ios-time" id="ob-clock">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
+  <!-- Progress bar -->
+  <div class="ob-progress" id="ob-progress">
+    <div class="ob-prog-seg" id="ob-ps-0"><div class="ob-prog-fill"></div></div>
+    <div class="ob-prog-seg" id="ob-ps-1"><div class="ob-prog-fill"></div></div>
+    <div class="ob-prog-seg" id="ob-ps-2"><div class="ob-prog-fill"></div></div>
+    <div class="ob-prog-seg" id="ob-ps-3"><div class="ob-prog-fill"></div></div>
+    <div class="ob-prog-seg" id="ob-ps-4"><div class="ob-prog-fill"></div></div>
+  </div>
+  <!-- Back button -->
+  <div class="ob-back" id="ob-back" onclick="obBack()" style="display:none;">‹</div>
+  <!-- Steps container -->
+  <div class="ob-steps">
+
+    <!-- STEP 0: Welcome -->
+    <div class="ob-step ob-active" id="ob-step-0">
+      <div class="ob-step-eyebrow">Welcome to BarPass</div>
+      <div class="ob-step-q">Hey, <em id="ob-first-name">there</em> 👋</div>
+      <div class="ob-step-sub">We'll ask a few questions to build your personal social experience — venues, people, and moments made for you.</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 0;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;">
+          <div style="border-radius:20px;height:118px;background:linear-gradient(155deg,#1a003a,#5500b0);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px;gap:4px;border:1px solid rgba(255,255,255,.05);">
+            <span style="font-size:26px;">🥂</span><span style="font-size:8px;color:rgba(255,255,255,.45);letter-spacing:.12em;text-transform:uppercase;">VIP</span>
+          </div>
+          <div style="border-radius:20px;height:138px;background:linear-gradient(155deg,#1a0800,#5c2200);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px;gap:4px;margin-top:-10px;border:1px solid rgba(255,255,255,.05);">
+            <span style="font-size:26px;">🔥</span><span style="font-size:8px;color:rgba(255,255,255,.45);letter-spacing:.12em;text-transform:uppercase;">Live</span>
+          </div>
+          <div style="border-radius:20px;height:118px;background:linear-gradient(155deg,#001020,#003060);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px;gap:4px;border:1px solid rgba(255,255,255,.05);">
+            <span style="font-size:26px;">🤝</span><span style="font-size:8px;color:rgba(255,255,255,.45);letter-spacing:.12em;text-transform:uppercase;">Network</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: What brings you out? -->
+    <div class="ob-step" id="ob-step-1">
+      <div class="ob-step-eyebrow">Step 1 of 4</div>
+      <div class="ob-step-q">What brings you out <em>most nights?</em></div>
+      <div class="ob-step-sub">Select all that apply.</div>
+      <div class="ob-grid cols-2" id="ob-grid-1">
+        <div class="ob-tile" data-val="party" onclick="obSelect(this,1)"><div class="ob-tile-emo">🎉</div><div class="ob-tile-body"><div class="ob-tile-lbl">Going out</div><div class="ob-tile-sub">Parties & clubs</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="network" onclick="obSelect(this,1)"><div class="ob-tile-emo">🤝</div><div class="ob-tile-body"><div class="ob-tile-lbl">Networking</div><div class="ob-tile-sub">Business & deals</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="sports" onclick="obSelect(this,1)"><div class="ob-tile-emo">🏆</div><div class="ob-tile-body"><div class="ob-tile-lbl">Sports</div><div class="ob-tile-sub">Games & fans</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="dating" onclick="obSelect(this,1)"><div class="ob-tile-emo">💋</div><div class="ob-tile-body"><div class="ob-tile-lbl">Meeting people</div><div class="ob-tile-sub">Dating & socializing</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="music" onclick="obSelect(this,1)"><div class="ob-tile-emo">🎵</div><div class="ob-tile-body"><div class="ob-tile-lbl">Live music</div><div class="ob-tile-sub">Shows & events</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="vip" onclick="obSelect(this,1)"><div class="ob-tile-emo">🥂</div><div class="ob-tile-body"><div class="ob-tile-lbl">VIP & luxury</div><div class="ob-tile-sub">Premium experiences</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="explore" onclick="obSelect(this,1)"><div class="ob-tile-emo">🌴</div><div class="ob-tile-body"><div class="ob-tile-lbl">Exploring</div><div class="ob-tile-sub">New spots</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="creator" onclick="obSelect(this,1)"><div class="ob-tile-emo">🎨</div><div class="ob-tile-body"><div class="ob-tile-lbl">Creator scene</div><div class="ob-tile-sub">Content & culture</div></div><div class="ob-tile-check">✓</div></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: What energy? -->
+    <div class="ob-step" id="ob-step-2">
+      <div class="ob-step-eyebrow">Step 2 of 4</div>
+      <div class="ob-step-q">What kind of <em>energy</em> tonight?</div>
+      <div class="ob-step-sub">Pick one — this calibrates everything.</div>
+      <div class="ob-energy-grid" id="ob-grid-2">
+        <div class="ob-etile" data-val="intense" style="--ec:rgba(255,59,48,.55);--eb:rgba(180,0,0,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">🔥</div><div class="ob-etile-lbl">Intense</div><div class="ob-etile-sub">Wild & unforgettable</div></div>
+        <div class="ob-etile" data-val="upscale" style="--ec:rgba(212,160,23,.55);--eb:rgba(140,90,0,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">✨</div><div class="ob-etile-lbl">Upscale</div><div class="ob-etile-sub">Luxury & exclusive</div></div>
+        <div class="ob-etile" data-val="chill" style="--ec:rgba(45,212,191,.55);--eb:rgba(0,110,90,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">🌊</div><div class="ob-etile-lbl">Chill</div><div class="ob-etile-sub">Relaxed & social</div></div>
+        <div class="ob-etile" data-val="electric" style="--ec:rgba(100,0,255,.55);--eb:rgba(70,0,180,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">⚡</div><div class="ob-etile-lbl">Electric</div><div class="ob-etile-sub">High energy & alive</div></div>
+        <div class="ob-etile" data-val="latenight" style="--ec:rgba(100,0,180,.55);--eb:rgba(50,0,100,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">🌙</div><div class="ob-etile-lbl">Late night</div><div class="ob-etile-sub">Underground & deep</div></div>
+        <div class="ob-etile" data-val="cultural" style="--ec:rgba(255,107,53,.55);--eb:rgba(150,50,0,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">🎶</div><div class="ob-etile-lbl">Cultural</div><div class="ob-etile-sub">Music-driven & artistic</div></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: What matters? -->
+    <div class="ob-step" id="ob-step-3">
+      <div class="ob-step-eyebrow">Step 3 of 4</div>
+      <div class="ob-step-q">What makes a night <em>unforgettable?</em></div>
+      <div class="ob-step-sub">Pick up to 2.</div>
+      <div class="ob-grid cols-1" id="ob-grid-3">
+        <div class="ob-tile" data-val="people" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">🤝</div><div class="ob-tile-body"><div class="ob-tile-lbl">Meeting the right people</div><div class="ob-tile-sub">Connections that actually matter</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="premium" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">🥂</div><div class="ob-tile-body"><div class="ob-tile-lbl">Premium experiences</div><div class="ob-tile-sub">Tables, bottles, VIP access</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="atmosphere" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">🎵</div><div class="ob-tile-body"><div class="ob-tile-lbl">The vibe & atmosphere</div><div class="ob-tile-sub">Music, energy, environment</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="chaos" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">😂</div><div class="ob-tile-body"><div class="ob-tile-lbl">Unexpected moments</div><div class="ob-tile-sub">The chaos that becomes stories</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="content" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">📸</div><div class="ob-tile-body"><div class="ob-tile-lbl">Moments worth sharing</div><div class="ob-tile-sub">Photos, videos, memories</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="access" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">🔑</div><div class="ob-tile-body"><div class="ob-tile-lbl">Access nobody else has</div><div class="ob-tile-sub">Exclusive & invite-only</div></div><div class="ob-tile-check">✓</div></div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Social mode reveal -->
+    <div class="ob-step" id="ob-step-4">
+      <div class="ob-mode-reveal">
+        <div class="ob-step-eyebrow">Step 4 of 4 · Your Social Profile</div>
+        <div class="ob-mode-icon" id="ob-mode-icon">🎉</div>
+        <div class="ob-mode-tag">YOU'RE IN</div>
+        <div class="ob-mode-name" id="ob-mode-name">Party Mode</div>
+        <div class="ob-mode-desc" id="ob-mode-desc">We'll surface the hottest venues, live events, and social moments around you right now.</div>
+        <div class="ob-mode-card" id="ob-mode-card">
+          <div class="ob-mode-features" id="ob-mode-features">
+            <div class="ob-mf"><div class="ob-mf-ico">🗺️</div>Live venue heatmap near you</div>
+            <div class="ob-mf"><div class="ob-mf-ico">⚡</div>Real-time energy levels</div>
+            <div class="ob-mf"><div class="ob-mf-ico">🤖</div>AI-powered night planner</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Venue preview -->
+    <div class="ob-step" id="ob-step-5">
+      <div class="ob-step-eyebrow">Live Now · Miami</div>
+      <div class="ob-step-q"><em id="ob-venue-count">3 venues</em> match your vibe tonight</div>
+      <div class="ob-step-sub">Curated for you — updated live every few minutes.</div>
+      <div class="ob-venue-preview" id="ob-venue-preview"></div>
+    </div>
+
+  </div><!-- /ob-steps -->
+
+  <!-- Bottom CTA -->
   <div class="ob-cta">
-    <button class="ob-next" id="ob-next-btn" onclick="obNext()">Explore Miami →</button>
-    <button class="ob-skip" onclick="enterApp()">Skip intro</button>
+    <button class="ob-next" id="ob-next-btn" onclick="obNext()">Let's Go →</button>
+    <button class="ob-skip" id="ob-skip-btn" onclick="enterApp()">Skip →</button>
+  </div>
+</div>
+
+<!-- ══ NATURAL VIP UPSELL SHEET ══ -->
+<div id="vip-sheet">
+  <div class="vs-backdrop" onclick="closeVIPSheet()"></div>
+  <div class="vs-sheet">
+    <div class="vs-glow"></div>
+    <div class="vs-handle"></div>
+    <div class="vs-content">
+      <div class="vs-eyebrow">You've unlocked the basics</div>
+      <div class="vs-headline">Ready to access the full<br>social network?</div>
+      <div class="vs-sub">Join the people who see everything before anyone else does.</div>
+      <div class="vs-feats">
+        <div class="vs-feat"><div class="vs-feat-ico">🔥</div>Live Heatmaps</div>
+        <div class="vs-feat"><div class="vs-feat-ico">🥂</div>Table Invites</div>
+        <div class="vs-feat"><div class="vs-feat-ico">🤖</div>AI Planner</div>
+        <div class="vs-feat"><div class="vs-feat-ico">⚡</div>Elite Network</div>
+        <div class="vs-feat"><div class="vs-feat-ico">🔑</div>Priority Entry</div>
+        <div class="vs-feat"><div class="vs-feat-ico">🗺️</div>Afterparty Map</div>
+      </div>
+      <div class="vs-price-row"><div class="vs-price-amt">$9.99</div><div class="vs-price-per">/month</div></div>
+      <div class="vs-trial">✓ 7-day free trial — no charge today</div>
+      <button class="vs-btn-primary" onclick="startVIPTrial()">Start Free Trial</button>
+      <button class="vs-btn-secondary" onclick="closeVIPSheet()">Continue Free</button>
+      <div class="vs-legal">$9.99/month after trial · Cancel anytime · No commitment</div>
+    </div>
   </div>
 </div>
 
@@ -4105,8 +4201,8 @@ function skipSplash(){
 }
 
 /* ══════════════════════════════════════════════
-   CONVERSION LAUNCH — JS ENGINE
-   Phase 1: Cinematic hook (4s) → Phase 2: Paywall offer
+   CINEMATIC LAUNCH ENGINE — Pure brand hook
+   No paywall. Emotional first. Premium later.
 ══════════════════════════════════════════════ */
 (function(){
   var LO = document.getElementById('launch-overlay');
@@ -4115,13 +4211,10 @@ function skipSplash(){
   var _bg = document.getElementById('lo-bg');
   var _autoTimer = null;
   var _launched = false;
-  var _nudgeTimer = null;
 
-  // Spawn ambient particles
   function spawnParticles(){
-    var c = document.getElementById('lo-particles');
-    if(!c) return;
-    var colors = ['rgba(100,0,200,.55)','rgba(212,160,23,.5)','rgba(255,59,122,.45)','rgba(0,195,255,.35)','rgba(255,255,255,.3)'];
+    var c=document.getElementById('lo-particles');if(!c)return;
+    var colors=['rgba(100,0,200,.55)','rgba(212,160,23,.5)','rgba(255,59,122,.45)','rgba(0,195,255,.35)','rgba(255,255,255,.3)'];
     for(var i=0;i<22;i++){
       var d=document.createElement('div');d.className='lo-pt';
       var sz=Math.random()*2.2+1.2;
@@ -4129,122 +4222,45 @@ function skipSplash(){
       c.appendChild(d);
     }
   }
-
   function setBg(cls){ if(_bg) _bg.className='lo-bg '+(cls||''); }
-
-  // Animated counter
   function animateCounter(target,duration){
-    var el=document.getElementById('lo-cnt-num');
-    if(!el)return;
+    var el=document.getElementById('lo-cnt-num');if(!el)return;
     var startTime=null;
-    function tick(ts){
-      if(!startTime)startTime=ts;
-      var p=Math.min((ts-startTime)/duration,1);
-      var e=p<.5?2*p*p:-1+(4-2*p)*p;
-      el.textContent=Math.floor(e*target).toLocaleString();
-      if(p<1)requestAnimationFrame(tick);
-    }
+    function tick(ts){if(!startTime)startTime=ts;var p=Math.min((ts-startTime)/duration,1);var e=p<.5?2*p*p:-1+(4-2*p)*p;el.textContent=Math.floor(e*target).toLocaleString();if(p<1)requestAnimationFrame(tick);}
     requestAnimationFrame(tick);
   }
 
-  // Nudge text cycling (urgency on paywall)
-  var NUDGES=['4 features locked.','VIP tables filling up.','3 invitations waiting.','Limited spots tonight.'];
-  var _nIdx=0;
-  function cycleNudge(){
-    var el=document.getElementById('lo-nudge-txt');
-    if(!el)return;
-    _nIdx=(_nIdx+1)%NUDGES.length;
-    el.style.opacity='0';
-    setTimeout(function(){ el.textContent=NUDGES[_nIdx]; el.style.opacity='1'; el.style.transition='opacity .4s ease'; },300);
-  }
-
-  // Progress dots (2 phases)
-  function setDot(idx){
-    for(var i=0;i<2;i++){
-      var d=document.getElementById('lo-pd-'+i);
-      if(d) d.className='lo-prog-dot'+(i<idx?' lo-pd-done':i===idx?' lo-pd-active':'');
-    }
-  }
-
-  // ── SHOW PAYWALL (phase 2) ──
-  function showOffer(){
-    var p1=document.getElementById('lo-phase1');
-    var p2=document.getElementById('lo-offer');
-    if(p1){ p1.style.transition='opacity .5s ease'; p1.style.opacity='0'; p1.style.pointerEvents='none'; }
-    setBg('s-final');
-    setDot(1);
-    setTimeout(function(){
-      if(p1) p1.style.display='none';
-      if(p2) p2.classList.add('lo-offer-on');
-      nativeHaptic && nativeHaptic('medium');
-      _nudgeTimer = setInterval(cycleNudge, 2200);
-      // Auto dismiss to free after 30s if no action
-      _autoTimer = setTimeout(function(){ dismissLaunch(); }, 30000);
-    }, 500);
-  }
-
-  // ── MAIN TIMELINE ──────────────────────────────
+  // ── TIMELINE: 5s cinematic → Get Started ──
   function runLaunch(){
     if(_launched)return;
     _launched=true;
     spawnParticles();
-
-    // Open letterbox + logo
-    setTimeout(function(){ LO.classList.add('lo-open'); },50);
-    setTimeout(function(){ LO.classList.add('lo-logo-on'); setDot(0); },350);
-
-    // Beams + club bg
+    setTimeout(function(){LO.classList.add('lo-open');},50);
+    setTimeout(function(){LO.classList.add('lo-logo-on');},350);
+    setTimeout(function(){LO.classList.add('lo-beams-on');setBg('s-club');},1200);
+    setTimeout(function(){var s=document.getElementById('lo-scenes-row');if(s)s.classList.add('lo-scenes-on');setBg('s-vip');},2400);
+    setTimeout(function(){var cnt=document.getElementById('lo-counter');if(cnt)cnt.classList.add('lo-cnt-on');animateCounter(1247,1500);setBg('s-final');},3600);
+    // Show CTA at 5s
     setTimeout(function(){
-      LO.classList.add('lo-beams-on');
-      setBg('s-club');
-    },1200);
-
-    // Venue cards appear
-    setTimeout(function(){
-      var s=document.getElementById('lo-scenes-row');
-      if(s) s.classList.add('lo-scenes-on');
-      setBg('s-vip');
-    },2400);
-
-    // Counter
-    setTimeout(function(){
-      var cnt=document.getElementById('lo-counter');
-      if(cnt) cnt.classList.add('lo-cnt-on');
-      animateCounter(1247,1600);
-    },3600);
-
-    // Transition to paywall at 5.5s
-    setTimeout(showOffer, 5500);
+      var cta=document.getElementById('lo-getstarted');
+      if(cta){cta.style.opacity='1';cta.style.pointerEvents='all';}
+      nativeHaptic && nativeHaptic('light');
+    },5000);
+    // Auto-advance at 12s
+    _autoTimer=setTimeout(function(){dismissLaunch();},12000);
   }
 
-  // ── DISMISS (free) ──
   window.dismissLaunch = function(){
-    if(_nudgeTimer) clearInterval(_nudgeTimer);
-    if(_autoTimer) clearTimeout(_autoTimer);
+    if(_autoTimer)clearTimeout(_autoTimer);
     LO.classList.add('lo-exit');
     nativeHaptic && nativeHaptic('light');
-    setTimeout(function(){ LO.style.display='none'; showAuth(); }, 900);
-  };
-
-  // ── VIP CTA ──
-  window.launchVIP = function(){
-    if(_nudgeTimer) clearInterval(_nudgeTimer);
-    if(_autoTimer) clearTimeout(_autoTimer);
-    nativeHaptic && nativeHaptic('medium');
-    LO.classList.add('lo-exit');
-    setTimeout(function(){
-      LO.style.display='none';
-      showAuth();
-      // After auth, flag that user intends VIP
-      localStorage.setItem('barpass_intent_vip','1');
-      // Show VIP plan modal after login (handled in showScreen)
-    }, 900);
+    setTimeout(function(){LO.style.display='none';showAuth();},900);
   };
 
   window._startLaunch = runLaunch;
 })();
 
-/* Scripts loaded — start conversion launch */
+/* Scripts loaded — start cinematic launch */
 _startLaunch();
 
 function switchAuthTab(tab){
@@ -4325,37 +4341,226 @@ function doSignup(){
   });
 }
 
-let obSlide=0;
+/* ══════════════════════════════════════════════
+   CONVERSATIONAL ONBOARDING ENGINE v2
+   5 steps · emotional · personalized
+══════════════════════════════════════════════ */
+var OB = {
+  step:0, firstName:'',
+  selections:{ nights:[], energy:null, moments:[] },
+  socialMode:null
+};
+
+var SOCIAL_MODES = {
+  networking:{name:'Networking Mode',emoji:'🤝',desc:'We\'ll surface business events, elite lounges, and the right people to meet — curated for your goals tonight.',features:['🏢 Business event alerts near you','👥 Entrepreneur & investor circles','🥃 High-end networking venues'],mc:'rgba(0,120,255,.5)'},
+  vip:{name:'VIP Mode',emoji:'🥂',desc:'You get the full luxury experience — table access, priority entry, and exclusive events nobody else knows about.',features:['🥂 VIP table invitations','🔑 Priority venue access','💎 Luxury event alerts'],mc:'rgba(212,160,23,.5)'},
+  party:{name:'Party Mode',emoji:'🎉',desc:'We\'ll find the hottest venues, wildest energy, and the crowd that\'s turning tonight into a story.',features:['🔥 Hottest venue alerts live','⚡ Real-time crowd energy','🎉 Afterparty tracker'],mc:'rgba(255,59,122,.5)'},
+  sports:{name:'Sports Mode',emoji:'🏆',desc:'Stadium energy, fan meetups, sports bars — we\'ve got the full game-day social experience for you.',features:['🏟️ Stadium & arena live maps','📺 Fan zone & watch party alerts','🍺 Best sports bars near you'],mc:'rgba(34,197,94,.5)'},
+  dating:{name:'Social Mode',emoji:'💋',desc:'We\'ll put you in the right rooms with the right energy — the venues and moments where real connections happen.',features:['💋 High-energy social spots','🌴 Discovery mode activated','👥 People nearby alerts'],mc:'rgba(255,107,53,.5)'},
+  chill:{name:'Chill Mode',emoji:'🌊',desc:'Curated rooftops, craft cocktail bars, and low-key spots where the vibe is always right.',features:['🌊 Relaxed venue recommendations','🍸 Craft cocktail bar finder','🌆 Best rooftops tonight'],mc:'rgba(45,212,191,.5)'},
+  creator:{name:'Creator Mode',emoji:'🎨',desc:'Art, culture, music, and the people making it — your social map filtered for creative energy.',features:['🎵 Live music & cultural events','🎨 Art & creative scene tonight','📸 Content-worthy moments nearby'],mc:'rgba(168,85,247,.5)'}
+};
+
+var VENUE_SETS = {
+  networking:[
+    {emo:'🏢',name:'Komodo Lounge',meta:'Brickell · Business crowd · 12 min wait',badge:'match',grad:'linear-gradient(135deg,#001430,#003080)'},
+    {emo:'🥃',name:"Dante's HiFi",meta:'Wynwood · Investors & founders tonight',badge:'hot',grad:'linear-gradient(135deg,#200040,#500090)'},
+    {emo:'🌆',name:'Sugar Rooftop',meta:'0.3 mi away · Luxury atmosphere',badge:'vip',grad:'linear-gradient(135deg,#1a0a00,#402200)'}
+  ],
+  vip:[
+    {emo:'🥂',name:'LIV Miami',meta:'Miami Beach · 99% full · VIP tables',badge:'vip',grad:'linear-gradient(135deg,#1a0800,#4d2500)'},
+    {emo:'🦢',name:'Swan Upstairs',meta:'Design District · Elite crowd tonight',badge:'match',grad:'linear-gradient(135deg,#0a0020,#280060)'},
+    {emo:'🐟',name:'Sexy Fish',meta:'Miami Beach · Most exclusive tonight',badge:'hot',grad:'linear-gradient(135deg,#001818,#004040)'}
+  ],
+  party:[
+    {emo:'🚀',name:'Space Miami',meta:'Downtown · 12 DJs tonight · Electric',badge:'hot',grad:'linear-gradient(135deg,#08001a,#180060)'},
+    {emo:'🔥',name:'E11EVEN Miami',meta:'Open 24/7 · Peak energy right now',badge:'hot',grad:'linear-gradient(135deg,#1a0a00,#4a2000)'},
+    {emo:'🏖',name:'Nikki Beach Club',meta:'Miami Beach · Iconic energy tonight',badge:'match',grad:'linear-gradient(135deg,#001a08,#003d18)'}
+  ],
+  sports:[
+    {emo:'🏟️',name:'Hard Rock Stadium',meta:'8 mi · Game night · Huge crowd',badge:'hot',grad:'linear-gradient(135deg,#001a00,#004000)'},
+    {emo:'📺',name:'Riverside Bar & Grill',meta:'Brickell · Best game-day crowd',badge:'match',grad:'linear-gradient(135deg,#001000,#003000)'},
+    {emo:'🍺',name:'Blackbird Ordinary',meta:'0.5 mi · No wait · Sports screens',badge:'new',grad:'linear-gradient(135deg,#0a0a1a,#201e40)'}
+  ],
+  dating:[
+    {emo:'🌸',name:'Mila Lounge',meta:'Miami Beach · Social crowd tonight',badge:'match',grad:'linear-gradient(135deg,#1a0010,#3d0030)'},
+    {emo:'🌆',name:'Sugar Rooftop',meta:'0.3 mi · Best atmosphere in Miami',badge:'hot',grad:'linear-gradient(135deg,#0a0800,#2a1800)'},
+    {emo:'🐉',name:'Komodo Lounge',meta:'0.4 mi · 12 min wait · Mixed crowd',badge:'new',grad:'linear-gradient(135deg,#001a00,#003800)'}
+  ],
+  chill:[
+    {emo:'🌸',name:'Rosa Sky',meta:'Brickell · Rooftop sunset vibes',badge:'match',grad:'linear-gradient(135deg,#1a0010,#350028)'},
+    {emo:'🎵',name:"Dante's HiFi",meta:'Wynwood · World-class craft cocktails',badge:'vip',grad:'linear-gradient(135deg,#080820,#141430)'},
+    {emo:'🐰',name:'Dirty Rabbit',meta:'Wynwood · Chill · No wait right now',badge:'new',grad:'linear-gradient(135deg,#0a0a00,#1a1800)'}
+  ],
+  creator:[
+    {emo:'🌮',name:'Bodega',meta:'Wynwood · Creative crowd · Hidden gem',badge:'match',grad:'linear-gradient(135deg,#1a0800,#3c1400)'},
+    {emo:'🎵',name:"Dante's HiFi",meta:'Wynwood · Music & culture scene',badge:'hot',grad:'linear-gradient(135deg,#001020,#001f3f)'},
+    {emo:'🐰',name:'Dirty Rabbit',meta:'Wynwood · Artist crowd tonight',badge:'new',grad:'linear-gradient(135deg,#080018,#150030)'}
+  ]
+};
+
 function showOnboarding(){
   document.getElementById('auth').style.display='none';
   document.getElementById('onboarding').style.display='flex';
-  buildOnboardingMap();
+  OB.step=0;
+  OB.firstName=(S.user&&S.user.name)?S.user.name.split(' ')[0]:'there';
+  var fnEl=document.getElementById('ob-first-name');
+  if(fnEl) fnEl.textContent=OB.firstName;
+  _obGoto(0);
 }
-function buildOnboardingMap(){
-  const map=document.getElementById('ob-map');
-  const bubbles=[
-    {name:'LIV Miami Beach',emoji:'🔥',dist:'0.8 mi',live:'95% full · HOT',cls:'live-gold',top:'18%',left:'30%',delay:'0s',dur:'9s'},
-    {name:'E11EVEN Miami',emoji:'✨',dist:'1.2 mi',live:'Open 24/7',cls:'live-green',top:'22%',left:'3%',delay:'1.5s',dur:'8s'},
-    {name:'Sugar Rooftop',emoji:'🌆',dist:'0.3 mi',live:'8 min wait',cls:'live-gold',top:'50%',left:'38%',delay:'3s',dur:'7s'},
-    {name:'Komodo Lounge',emoji:'🐉',dist:'0.4 mi',live:'12 min wait',cls:'live-gold',top:'66%',left:'4%',delay:'2s',dur:'10s'},
-    {name:'Night Wallet',emoji:'🪙',dist:'$80 loaded',live:'Credit active',cls:'live-green',top:'36%',left:'26%',delay:'4s',dur:'8s'},
-  ];
-  map.innerHTML=bubbles.map(function(b){
-    return '<div class="ob-bubble" style="top:'+b.top+';left:'+b.left+';animation-delay:'+b.delay+';animation-duration:'+b.dur+';">'+
-      '<div class="ob-bubble-emoji">'+b.emoji+'</div>'+
-      '<div><div class="ob-bubble-name">'+b.name+'</div><div class="ob-bubble-dist">'+b.dist+'</div><div class="ob-bubble-live '+b.cls+'">'+b.live+'</div></div>'+
-      '</div>';
-  }.bind(this)).join('');
+
+function _obGoto(step){
+  document.querySelectorAll('.ob-step').forEach(function(s){s.className='ob-step';});
+  var back=document.getElementById('ob-back');
+  if(back) back.style.display=step>0?'flex':'none';
+  var target=document.getElementById('ob-step-'+step);
+  if(target) setTimeout(function(){target.classList.add('ob-active');},40);
+  _obUpdateProgress(step);
+  _obUpdateBtn(step);
+  _obAmbient(step);
 }
+
+function _obUpdateProgress(step){
+  for(var i=0;i<5;i++){
+    var seg=document.getElementById('ob-ps-'+i);
+    if(seg) seg.className='ob-prog-seg'+(i<step?' done':i===step?' active':'');
+  }
+}
+
+function _obUpdateBtn(step){
+  var btn=document.getElementById('ob-next-btn');
+  var skip=document.getElementById('ob-skip-btn');
+  if(!btn)return;
+  var labels=["Let's Go →","Continue →","Continue →","Continue →","See What's Waiting →","Enter BarPass →"];
+  btn.textContent=labels[step]||"Continue →";
+  btn.disabled=(step===1||step===2||step===3);
+  btn.style.opacity=btn.disabled?'.35':'';
+  if(skip) skip.style.display=step>=5?'none':'';
+}
+
+function _obAmbient(step){
+  var g1=document.getElementById('ob-amb-g1');
+  var colors=['rgba(100,0,200,.25)','rgba(139,0,255,.3)','rgba(255,59,122,.2)','rgba(212,160,23,.2)','rgba(100,0,200,.3)','rgba(34,197,94,.15)'];
+  if(g1) g1.style.background='radial-gradient(circle,'+colors[step%colors.length]+',transparent 70%)';
+}
+
+function obSelect(tile,step,maxSelect){
+  maxSelect=maxSelect||99;
+  var grid=document.getElementById('ob-grid-'+step);
+  var isSelected=tile.classList.contains('selected');
+  if(isSelected){
+    tile.classList.remove('selected');
+  } else {
+    var sel=grid?grid.querySelectorAll('.selected').length:0;
+    if(sel>=maxSelect){tile.style.transform='scale(.94)';setTimeout(function(){tile.style.transform='';},120);return;}
+    tile.classList.add('selected');
+  }
+  nativeHaptic&&nativeHaptic('select');
+  var hasAny=grid&&grid.querySelector('.selected');
+  var btn=document.getElementById('ob-next-btn');
+  if(btn){btn.disabled=!hasAny;btn.style.opacity=hasAny?'':'.35';}
+}
+
+function obSelectEnergy(tile){
+  var grid=document.getElementById('ob-grid-2');
+  if(grid) grid.querySelectorAll('.ob-etile').forEach(function(t){t.classList.remove('selected');});
+  tile.classList.add('selected');
+  OB.selections.energy=tile.dataset.val;
+  nativeHaptic&&nativeHaptic('select');
+  var btn=document.getElementById('ob-next-btn');
+  if(btn){btn.disabled=false;btn.style.opacity='';}
+}
+
 function obNext(){
-  nativeHaptic('select');
-  obSlide++;
-  if(obSlide>=4){enterApp();return;}
-  document.querySelectorAll('.ob-slide').forEach(function(s,i){s.classList.toggle('active',i===obSlide);});
-  document.querySelectorAll('.ob-dot').forEach(function(d,i){d.classList.toggle('active',i===obSlide);});
-  var labels=['Explore Miami →','Night Wallet →','Drink Intel →',"Let's Go →"];
-  document.getElementById('ob-next-btn').textContent=labels[obSlide];
+  nativeHaptic&&nativeHaptic('light');
+  var step=OB.step;
+  // Collect
+  if(step===1){var tiles=document.querySelectorAll('#ob-grid-1 .ob-tile.selected');OB.selections.nights=Array.from(tiles).map(function(t){return t.dataset.val;});}
+  if(step===2){var et=document.querySelector('#ob-grid-2 .ob-etile.selected');OB.selections.energy=et?et.dataset.val:'party';}
+  if(step===3){var tiles=document.querySelectorAll('#ob-grid-3 .ob-tile.selected');OB.selections.moments=Array.from(tiles).map(function(t){return t.dataset.val;});}
+  // Special steps
+  if(step===3){OB.socialMode=_obComputeMode();_obShowModeReveal();OB.step=4;_obGoto(4);return;}
+  if(step===4){_obBuildVenuePreview();OB.step=5;_obGoto(5);return;}
+  if(step>=5){enterApp();return;}
+  OB.step++;_obGoto(OB.step);
 }
+
+function obBack(){
+  if(OB.step>0){
+    var cur=document.getElementById('ob-step-'+OB.step);
+    if(cur){cur.classList.add('ob-exit');setTimeout(function(){cur.className='ob-step';},400);}
+    OB.step--;_obGoto(OB.step);nativeHaptic&&nativeHaptic('select');
+  }
+}
+
+function _obComputeMode(){
+  var n=OB.selections.nights,e=OB.selections.energy;
+  if(n.indexOf('network')>=0) return 'networking';
+  if(n.indexOf('vip')>=0||e==='upscale') return 'vip';
+  if(n.indexOf('sports')>=0) return 'sports';
+  if(n.indexOf('dating')>=0) return 'dating';
+  if(e==='chill') return 'chill';
+  if(n.indexOf('creator')>=0) return 'creator';
+  return 'party';
+}
+
+function _obShowModeReveal(){
+  var mode=SOCIAL_MODES[OB.socialMode]||SOCIAL_MODES.party;
+  var el=function(id){return document.getElementById(id);};
+  if(el('ob-mode-icon'))el('ob-mode-icon').textContent=mode.emoji;
+  if(el('ob-mode-name'))el('ob-mode-name').textContent=mode.name;
+  if(el('ob-mode-desc'))el('ob-mode-desc').textContent=mode.desc;
+  if(el('ob-mode-features'))el('ob-mode-features').innerHTML=mode.features.map(function(f){
+    return '<div class="ob-mf"><div class="ob-mf-ico">'+f.substring(0,2)+'</div>'+f.substring(3)+'</div>';
+  }).join('');
+  var card=document.getElementById('ob-mode-card');
+  if(card) card.style.setProperty('--mc',mode.mc);
+  if(S&&S.user) S.user.socialMode=OB.socialMode;
+  localStorage&&localStorage.setItem('barpass_social_mode',OB.socialMode);
+}
+
+function _obBuildVenuePreview(){
+  var venues=(VENUE_SETS[OB.socialMode]||VENUE_SETS.party);
+  var c=document.getElementById('ob-venue-preview');
+  if(!c) return;
+  c.innerHTML=venues.map(function(v,i){
+    return '<div class="ob-vpcard" id="ob-vpc-'+i+'">' +
+      '<div class="ob-vpc-left" style="background:'+v.grad+'">'+v.emo+'</div>' +
+      '<div class="ob-vpc-info"><div class="ob-vpc-name">'+v.name+'</div><div class="ob-vpc-meta">'+v.meta+'</div></div>' +
+      '<div class="ob-vpc-badge '+v.badge+'">'+v.badge.toUpperCase()+'</div>' +
+    '</div>';
+  }).join('');
+  [0,1,2].forEach(function(i){setTimeout(function(){var card=document.getElementById('ob-vpc-'+i);if(card)card.classList.add('show');},180+i*140);});
+}
+
+/* ── NATURAL VIP UPSELL (fires 45s after entering app) ── */
+var _vipShownOnce=false;
+var _vipTimer=null;
+function scheduleVIPUpsell(){
+  if(_vipShownOnce||localStorage.getItem('barpass_vip_trial')) return;
+  _vipTimer=setTimeout(function(){if(!_vipShownOnce)showVIPSheet();},45000);
+}
+function showVIPSheet(){
+  _vipShownOnce=true;
+  var s=document.getElementById('vip-sheet');
+  if(s) s.classList.add('vs-open');
+  nativeHaptic&&nativeHaptic('medium');
+}
+function closeVIPSheet(){
+  var s=document.getElementById('vip-sheet');
+  if(s) s.classList.remove('vs-open');
+}
+function startVIPTrial(){
+  closeVIPSheet();
+  nativeHaptic&&nativeHaptic('success');
+  localStorage.setItem('barpass_vip_trial','1');
+  toast('🎉 7-day VIP trial started!','success');
+  setTimeout(function(){openPlansModal();},800);
+}
+
+// Backwards compat stub
+function obSlide(){}
+function buildOnboardingMap(){}
 function enterApp(){
   nativeHaptic('success');
   document.getElementById('onboarding').style.display='none';
@@ -4402,11 +4607,8 @@ function enterApp(){
   },5000);
   /* Games badge always on */
   var gb=document.getElementById('games-badge');if(gb)gb.style.display='block';
-  /* If user tapped VIP trial on launch, open plans immediately */
-  if(localStorage.getItem('barpass_intent_vip')==='1'){
-    localStorage.removeItem('barpass_intent_vip');
-    setTimeout(function(){ openPlansModal(); },1200);
-  }
+  /* Schedule natural VIP upsell (45s after entering) */
+  scheduleVIPUpsell();
 }
 
 var insightIdx=0;
