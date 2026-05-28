@@ -2387,6 +2387,61 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
 .tm-btn.pri:hover{background:#7ab9ff;}
 .tm-btn.go{background:linear-gradient(135deg,#00e87a,#5AA5FF);color:#04060e;font-size:9px;}
 
+/* ── Employee Assignment Cards ── */
+.tm-emp-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;max-height:320px;overflow-y:auto;}
+.tm-emp-card{display:flex;align-items:center;gap:10px;background:#0a0c1c;border:1.5px solid #1e2448;border-radius:9px;padding:10px 12px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;}
+.tm-emp-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:9px 0 0 9px;background:transparent;transition:background .18s;}
+.tm-emp-card:hover{border-color:#5AA5FF44;background:#0d1022;}
+.tm-emp-card.sel{border-color:#5AA5FF;background:#5AA5FF0d;}
+.tm-emp-card.sel::before{background:#5AA5FF;}
+.tm-emp-card.busy{opacity:.55;cursor:not-allowed;}
+.tm-emp-card.ai-pick{border-color:#a855f7;background:#a855f70d;}
+.tm-emp-card.ai-pick::before{background:#a855f7;}
+.tm-emp-card.recommended::after{content:'AI PICK';position:absolute;top:6px;right:8px;font-family:'JetBrains Mono',monospace;font-size:6px;font-weight:700;letter-spacing:.06em;color:#a855f7;background:#a855f714;border:1px solid #a855f740;border-radius:3px;padding:1px 4px;}
+.tm-emp-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;position:relative;}
+.tm-emp-avatar-dot{position:absolute;bottom:0;right:0;width:8px;height:8px;border-radius:50%;border:1.5px solid #04060e;}
+.tm-emp-body{flex:1;min-width:0;}
+.tm-emp-name{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--text);margin-bottom:1px;}
+.tm-emp-role{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);margin-bottom:4px;}
+.tm-emp-stats{display:flex;gap:8px;align-items:center;margin-bottom:4px;}
+.tm-emp-stat{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:var(--muted);}
+.tm-emp-stat b{color:var(--text2);}
+.tm-emp-eff-bar{height:3px;background:#1e2448;border-radius:2px;overflow:hidden;}
+.tm-emp-eff-fill{height:100%;border-radius:2px;transition:width .4s;}
+.tm-emp-score{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
+.tm-emp-score-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;}
+.tm-emp-score-lbl{font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:.04em;}
+.tm-emp-status{display:inline-flex;align-items:center;gap:3px;font-family:'JetBrains Mono',monospace;font-size:6.5px;padding:2px 6px;border-radius:3px;font-weight:700;}
+.tm-emp-status.avail{background:#00e87a14;color:#00e87a;}
+.tm-emp-status.route{background:#FFba3814;color:#FFba38;animation:statusPulse 1.8s ease infinite;}
+.tm-emp-status.break{background:#5AA5FF14;color:#5AA5FF;}
+@keyframes statusPulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.tm-ai-why{background:#a855f70a;border:1px solid #a855f730;border-radius:7px;padding:8px 10px;margin-bottom:10px;font-family:'JetBrains Mono',monospace;font-size:7px;color:#c084fc;line-height:1.6;}
+.tm-ai-why-label{font-size:6px;letter-spacing:.07em;color:#a855f7;font-weight:700;margin-bottom:3px;}
+/* Route timeline */
+.tm-route-timeline{display:flex;align-items:center;gap:0;margin-bottom:14px;background:#060810;border-radius:8px;padding:12px 14px;}
+.tm-rt-node{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;}
+.tm-rt-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;border:1.5px solid;}
+.tm-rt-label{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:var(--text2);text-align:center;max-width:52px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tm-rt-line{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 4px;}
+.tm-rt-dash{height:2px;width:100%;border-top:1.5px dashed #1e2448;position:relative;}
+.tm-rt-dash::after{content:'';width:6px;height:6px;border-radius:50%;background:#5AA5FF;position:absolute;right:-3px;top:-3.5px;animation:routeDot 1.2s ease infinite alternate;}
+@keyframes routeDot{from{opacity:.3;}to{opacity:1;}}
+.tm-rt-time{font-family:'JetBrains Mono',monospace;font-size:6px;color:#5AA5FF;}
+/* Notes field */
+.tm-notes{width:100%;box-sizing:border-box;background:#060810;border:1px solid #1e2448;border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:8px;padding:8px 10px;resize:none;outline:none;margin-bottom:10px;line-height:1.5;}
+.tm-notes:focus{border-color:#5AA5FF55;}
+.tm-notes::placeholder{color:var(--muted);}
+/* Quick reassign on task cards */
+.tc-reassign{font-family:'JetBrains Mono',monospace;font-size:7px;color:#5AA5FF;background:#5AA5FF12;border:1px solid #5AA5FF40;border-radius:4px;padding:3px 7px;cursor:pointer;white-space:nowrap;}
+.tc-reassign:hover{background:#5AA5FF22;}
+/* Confirm manifest */
+.tm-manifest{background:#060810;border:1px solid #1e2448;border-radius:9px;overflow:hidden;margin-bottom:12px;}
+.tm-manifest-head{background:#0a0c1c;border-bottom:1px solid #1e2448;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;}
+.tm-manifest-title{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;color:var(--text2);letter-spacing:.06em;}
+.tm-manifest-id{font-family:'JetBrains Mono',monospace;font-size:8px;color:#5AA5FF;}
+.tm-manifest-body{padding:10px 12px;}
+
 /* ── Active Task Cards ── */
 .task-card{padding:8px 10px;background:#0a0c1c;border-radius:6px;margin-bottom:5px;border-left:3px solid #1e2448;transition:border-color .4s,box-shadow .4s;cursor:pointer;}
 .task-card:hover{box-shadow:0 0 10px rgba(90,165,255,.1);}
@@ -9969,7 +10024,7 @@ const DISPATCH_ITEMS=['Beer🍺','Wine🍷','Spirits🥃','Water💧','Soda🥤'
 const TASK_STATE_SEQ=['CREATED','ASSIGNED','ACCEPTED','PICKING','IN_TRANSIT','DELIVERED','VERIFIED'];
 let STAD_TASKS=[];
 let _taskCtr=1000;
-let _dispatch={step:0,hub:null,bar:null,emp:null,items:{},priority:'MID'};
+let _dispatch={step:0,hub:null,bar:null,emp:null,items:{},priority:'MID',notes:''};
 let _empProfileId=null;
 let _nodeMenuEl=null;
 let _hmActive=false;
@@ -10122,7 +10177,7 @@ function stadRenderEntitiesPatched(){
 
 /* ── Task Dispatch Modal ── */
 function stadOpenTaskDispatch(prefillHub,prefillBar,prefillEmp){
-  _dispatch={step:0,hub:prefillHub||null,bar:prefillBar||null,emp:prefillEmp||null,items:{},priority:'MID'};
+  _dispatch={step:0,hub:prefillHub||null,bar:prefillBar||null,emp:prefillEmp||null,items:{},priority:'MID',notes:''};
   _taskCtr++;
   document.getElementById('tm-task-id').textContent='TK-'+_taskCtr;
   const ov=document.getElementById('task-overlay');
@@ -10143,7 +10198,7 @@ function stadDispatchNext(){
   if(_dispatch.step===0&&!_dispatch.hub){stadBeep(220,150,0.06,'square');return;}
   if(_dispatch.step===1&&!_dispatch.bar){stadBeep(220,150,0.06,'square');return;}
   if(_dispatch.step===2&&Object.keys(_dispatch.items).length===0){stadBeep(220,150,0.06,'square');return;}
-  if(_dispatch.step===3&&!_dispatch.emp){_dispatch.emp=_autoPickEmployee();}
+  if(_dispatch.step===3&&!_dispatch.emp){const r=_autoPickEmployee(true);_dispatch.emp=typeof r==='object'?r.id:r;}
   if(_dispatch.step>=4){stadConfirmDispatch();return;}
   _dispatch.step++;
   stadRenderDispatchStep();
@@ -10199,55 +10254,139 @@ function stadRenderDispatchStep(){
     if(nextBtn) nextBtn.textContent='NEXT →';
   } else if(_dispatch.step===3){
     const runners=STAD_ENTITIES.filter(e=>e.role==='runner'||e.role==='manager');
-    content=`<div class="tm-sec-label">ASSIGN EMPLOYEE</div>
-    <div style="margin-bottom:10px;">
-      <div class="tm-opt sel" onclick="_dispatch.emp=null;_dispatch.emp=_autoPickEmployee();stadRenderDispatchStep()" style="border-color:#a855f7;background:#a855f712;">
-        <div class="tm-opt-name" style="color:#a855f7;">🤖 AI AUTO-ASSIGN</div>
-        <div class="tm-opt-sub">Nearest available · Optimal route · Lowest congestion</div>
-      </div>
-    </div>
-    <div class="tm-grid2">${runners.map(e=>{
-      const st=STAD_STAFF_STATS[e.id];
-      const eff=st&&st.tripsCompleted?Math.round(st.onTime/st.tripsCompleted*100):100;
+    const aiResult=_autoPickEmployee(true);
+    const aiId=typeof aiResult==='object'?aiResult.id:aiResult;
+    const aiWhy=typeof aiResult==='object'?aiResult.why:'Nearest available with optimal route';
+    const roleIcon={runner:'⚡',manager:'★',supervisor:'◈',bartender:'🍺'};
+    const roleColor={runner:'#00e87a',manager:'#FF4466',supervisor:'#FFba38',bartender:'#5AA5FF'};
+    const empCards=runners.map(e=>{
+      const st=STAD_STAFF_STATS[e.id]||{};
+      const trips=st.tripsCompleted||0;
+      const eff=trips?Math.round((st.onTime||0)/trips*100):Math.floor(85+Math.random()*15);
+      const avgSec=trips&&st.totalActualSec?Math.round(st.totalActualSec/trips):null;
+      const avgStr=avgSec?`${Math.floor(avgSec/60)}m${avgSec%60}s`:'—';
       const trip=STAD_TRIPS[e.id];
       const isBusy=trip&&trip.status==='traveling';
-      return `<div class="tm-opt${_dispatch.emp===e.id?' sel':''}${isBusy?' disabled':''}" onclick="${isBusy?'':` _dispatch.emp='${e.id}';stadRenderDispatchStep()`}">
-        <div class="tm-opt-name" style="opacity:${isBusy?.5:1}">${e.role==='manager'?'★':'⚡'} ${e.name}</div>
-        <div class="tm-opt-sub">Zone ${e.zone} · ${eff}% eff${isBusy?' · EN ROUTE':' · AVAILABLE'}</div>
+      const isOnBreak=!isBusy&&Math.random()<0.08;// small chance on break
+      const isSel=_dispatch.emp===e.id;
+      const isRecommended=e.id===aiId;
+      const effColor=eff>=90?'#00e87a':eff>=75?'#FFba38':'#FF4466';
+      const score=Math.round(eff*0.6+(trips>0?Math.min(40,trips*2):20));
+      const distMin=Math.round(1+Math.abs(e.x-400)/100+Math.abs(e.y-280)/80);
+      return `<div class="tm-emp-card${isSel?' sel':''}${isBusy?' busy':''}${isRecommended&&!isBusy?' recommended':''}" onclick="${isBusy?'':` _dispatch.emp='${e.id}';stadRenderDispatchStep()`}">
+        <div class="tm-emp-avatar" style="background:${roleColor[e.role]||'#5AA5FF'}18;border:1.5px solid ${roleColor[e.role]||'#5AA5FF'}40;">
+          <span style="font-size:13px;">${roleIcon[e.role]||'👤'}</span>
+          <div class="tm-emp-avatar-dot" style="background:${isBusy?'#FFba38':isOnBreak?'#5AA5FF':'#00e87a'};"></div>
+        </div>
+        <div class="tm-emp-body">
+          <div class="tm-emp-name">${e.name}</div>
+          <div class="tm-emp-role">${e.role.charAt(0).toUpperCase()+e.role.slice(1)} · Zone ${e.zone} · ~${distMin}m away</div>
+          <div class="tm-emp-stats">
+            <span class="tm-emp-stat"><b>${trips}</b> trips</span>
+            <span class="tm-emp-stat"><b style="color:${effColor}">${eff}%</b> on-time</span>
+            <span class="tm-emp-stat">avg <b>${avgStr}</b></span>
+          </div>
+          <div class="tm-emp-eff-bar"><div class="tm-emp-eff-fill" style="width:${eff}%;background:${effColor};"></div></div>
+        </div>
+        <div class="tm-emp-score">
+          <span class="tm-emp-score-val" style="color:${effColor};">${score}</span>
+          <span class="tm-emp-score-lbl">SCORE</span>
+          <span class="tm-emp-status ${isBusy?'route':isOnBreak?'break':'avail'}">${isBusy?'● EN ROUTE':isOnBreak?'● BREAK':'● AVAIL'}</span>
+        </div>
       </div>`;
-    }).join('')}</div>`;
+    }).join('');
+    content=`<div class="tm-sec-label">ASSIGN EMPLOYEE</div>
+    <div class="tm-emp-card ai-pick" onclick="_dispatch.emp=null;const r=_autoPickEmployee(true);_dispatch.emp=typeof r==='object'?r.id:r;stadRenderDispatchStep()" style="margin-bottom:8px;">
+      <div class="tm-emp-avatar" style="background:#a855f718;border:1.5px solid #a855f750;">
+        <span style="font-size:16px;">🤖</span>
+      </div>
+      <div class="tm-emp-body">
+        <div class="tm-emp-name" style="color:#c084fc;">AI AUTO-ASSIGN</div>
+        <div class="tm-emp-role" style="color:#a855f7aa;">Smart routing · Load balancing · Zone proximity</div>
+        ${aiId?`<div class="tm-ai-why" style="margin:4px 0 0;padding:5px 8px;">→ Will assign <b style="color:#c084fc">${(STAD_ENTITIES.find(e=>e.id===aiId)||{name:'best available'}).name}</b> — ${aiWhy}</div>`:''}
+      </div>
+      <div class="tm-emp-score">
+        <span style="font-size:16px;">✦</span>
+        <span class="tm-emp-score-lbl" style="color:#a855f7;">OPTIMAL</span>
+      </div>
+    </div>
+    <div class="tm-emp-list">${empCards}</div>`;
     if(nextBtn) nextBtn.textContent='CONFIRM →';
   } else if(_dispatch.step===4){
-    const hub=MAP_HUBS.find(h=>h.id===_dispatch.hub)||{name:_dispatch.hub};
-    const bar=MAP_BARS.find(b=>b.id===_dispatch.bar)||{name:_dispatch.bar};
-    const emp=STAD_ENTITIES.find(e=>e.id===_dispatch.emp)||{name:'AI Assigned'};
+    const hub=MAP_HUBS.find(h=>h.id===_dispatch.hub)||{name:_dispatch.hub||'Central Hub',id:'central'};
+    const bar=MAP_BARS.find(b=>b.id===_dispatch.bar)||{name:_dispatch.bar||'Bar',inv:50};
+    const emp=STAD_ENTITIES.find(e=>e.id===_dispatch.emp)||{name:'AI Assigned',role:'runner',zone:'A',color:'#00e87a'};
     const totalUnits=Object.values(_dispatch.items).reduce((s,v)=>s+v,0);
-    const estMins=Math.round(3+Math.random()*7);
+    const walkMins=Math.round(1+Math.random()*2);
+    const pickupMins=Math.round(1+Math.random()*2);
+    const deliverMins=Math.round(2+Math.random()*4);
+    const totalMins=walkMins+pickupMins+deliverMins;
     const taskId='TK-'+_taskCtr;
+    const priorityColor=_dispatch.priority==='HIGH'?'#FF4466':_dispatch.priority==='MID'?'#FFba38':'#00e87a';
+    const roleColor={runner:'#00e87a',manager:'#FF4466',supervisor:'#FFba38',bartender:'#5AA5FF'};
     content=`<div class="tm-sec-label">CONFIRM & DISPATCH</div>
-    <div class="tm-confirm">
-      <div class="tm-crow"><span class="tm-cl">TASK ID</span><span class="tm-cv" style="color:#5AA5FF;">${taskId}</span></div>
-      <div class="tm-crow"><span class="tm-cl">ROUTE</span><span class="tm-cv">${hub.name} → ${bar.name}</span></div>
-      <div class="tm-crow"><span class="tm-cl">ITEMS</span><span class="tm-cv">${Object.entries(_dispatch.items).map(([k,v])=>v+'× '+k).join(', ')||'—'} (${totalUnits} units)</span></div>
-      <div class="tm-crow"><span class="tm-cl">ASSIGNED TO</span><span class="tm-cv">${emp.name}</span></div>
-      <div class="tm-crow"><span class="tm-cl">PRIORITY</span><span class="tm-cv" style="color:${_dispatch.priority==='HIGH'?'#FF4466':_dispatch.priority==='MID'?'#FFba38':'#00e87a'};">${_dispatch.priority}</span></div>
-      <div class="tm-crow"><span class="tm-cl">ETA</span><span class="tm-cv" style="color:#5AA5FF;">${estMins}m</span></div>
+    <div class="tm-route-timeline">
+      <div class="tm-rt-node">
+        <div class="tm-rt-icon" style="background:#5AA5FF14;border-color:#5AA5FF;color:#5AA5FF;">⬡</div>
+        <div class="tm-rt-label" style="color:#5AA5FF;">${hub.name}</div>
+      </div>
+      <div class="tm-rt-line">
+        <div class="tm-rt-dash"></div>
+        <div class="tm-rt-time">${walkMins}m walk</div>
+      </div>
+      <div class="tm-rt-node">
+        <div class="tm-rt-icon" style="background:${(roleColor[emp.role]||'#00e87a')}18;border-color:${roleColor[emp.role]||'#00e87a'};color:${roleColor[emp.role]||'#00e87a'};">${emp.role==='manager'?'★':'⚡'}</div>
+        <div class="tm-rt-label">${emp.name.split(' ')[0]}</div>
+      </div>
+      <div class="tm-rt-line">
+        <div class="tm-rt-dash"></div>
+        <div class="tm-rt-time">${pickupMins}m pickup · ${deliverMins}m deliver</div>
+      </div>
+      <div class="tm-rt-node">
+        <div class="tm-rt-icon" style="background:${Math.round(bar.inv)<30?'#FF446614':'#00e87a14'};border-color:${Math.round(bar.inv)<30?'#FF4466':'#00e87a'};color:${Math.round(bar.inv)<30?'#FF4466':'#00e87a'};">🍺</div>
+        <div class="tm-rt-label" style="color:${Math.round(bar.inv)<30?'#FF4466':'#00e87a'};">${bar.name}</div>
+      </div>
+    </div>
+    <div class="tm-manifest">
+      <div class="tm-manifest-head">
+        <span class="tm-manifest-title">DISPATCH MANIFEST</span>
+        <span class="tm-manifest-id">${taskId}</span>
+      </div>
+      <div class="tm-manifest-body">
+        <div class="tm-crow"><span class="tm-cl">FROM HUB</span><span class="tm-cv">${hub.name}</span></div>
+        <div class="tm-crow"><span class="tm-cl">TO BAR</span><span class="tm-cv">${bar.name} <span style="color:${Math.round(bar.inv)<30?'#FF4466':'#FFba38'};font-size:7px;">${Math.round(bar.inv)}% inv</span></span></div>
+        <div class="tm-crow"><span class="tm-cl">CARGO</span><span class="tm-cv" style="font-size:7.5px;">${Object.entries(_dispatch.items).map(([k,v])=>v+'×'+k).join(', ')||'—'} <span style="color:var(--muted);">(${totalUnits}u)</span></span></div>
+        <div class="tm-crow"><span class="tm-cl">RUNNER</span><span class="tm-cv" style="color:${roleColor[emp.role]||'#00e87a'};">${emp.name} <span style="font-size:7px;color:var(--muted);">Zone ${emp.zone}</span></span></div>
+        <div class="tm-crow"><span class="tm-cl">PRIORITY</span><span class="tm-cv" style="color:${priorityColor};">● ${_dispatch.priority}</span></div>
+        <div class="tm-crow"><span class="tm-cl">ETA</span><span class="tm-cv" style="color:#5AA5FF;">${totalMins}m <span style="font-size:7px;color:var(--muted);">(walk ${walkMins}m + pickup ${pickupMins}m + deliver ${deliverMins}m)</span></span></div>
+      </div>
     </div>
     <div class="tm-sec-label" style="margin-bottom:6px;">PRIORITY LEVEL</div>
-    <div class="tm-prio-row">
+    <div class="tm-prio-row" style="margin-bottom:10px;">
       <div class="tm-prio LOW${_dispatch.priority==='LOW'?' sel':''}" onclick="_dispatch.priority='LOW';stadRenderDispatchStep()">LOW</div>
       <div class="tm-prio MID${_dispatch.priority==='MID'?' sel':''}" onclick="_dispatch.priority='MID';stadRenderDispatchStep()">MEDIUM</div>
-      <div class="tm-prio HIGH${_dispatch.priority==='HIGH'?' sel':''}" onclick="_dispatch.priority='HIGH';stadRenderDispatchStep()">HIGH</div>
+      <div class="tm-prio HIGH${_dispatch.priority==='HIGH'?' sel':''}" onclick="_dispatch.priority='HIGH';stadRenderDispatchStep()">HIGH ⚡</div>
     </div>
-    <div class="tm-qr-area">
-      <canvas id="tm-qr-canvas" class="qr-canvas" width="105" height="105"></canvas>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);margin-top:4px;">SCAN TO VERIFY CHAIN OF CUSTODY</div>
+    <div class="tm-sec-label" style="margin-bottom:6px;">RUNNER INSTRUCTIONS</div>
+    <textarea class="tm-notes" id="tm-notes-field" rows="2" placeholder="e.g. Use service entrance · Handle glass carefully · Verify with Manager...">${_dispatch.notes||''}</textarea>
+    <div class="tm-qr-area" style="display:flex;align-items:center;gap:16px;justify-content:center;">
+      <div>
+        <canvas id="tm-qr-canvas" class="qr-canvas" width="88" height="88"></canvas>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--muted);margin-top:4px;text-align:center;">CHAIN-OF-CUSTODY QR</div>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);line-height:1.8;text-align:left;">
+        <div style="color:var(--text2);font-weight:700;margin-bottom:4px;">SCAN CHECKPOINTS</div>
+        <div>① Runner scans at Hub pickup</div>
+        <div>② Scan at destination bar</div>
+        <div>③ Manager confirms delivery</div>
+      </div>
     </div>`;
     if(nextBtn) nextBtn.textContent='🚀 DISPATCH';
-    // Draw QR after render
     setTimeout(()=>{
       const c=document.getElementById('tm-qr-canvas');
       if(c) stadDrawQR(c,taskId+_dispatch.hub+_dispatch.bar+Date.now());
+      const nf=document.getElementById('tm-notes-field');
+      if(nf) nf.addEventListener('input',()=>{_dispatch.notes=nf.value;});
     },50);
   }
   body.innerHTML=`<div class="tm-steps">${stepBars}</div>${content}`;
@@ -10262,9 +10401,30 @@ function stadAdjQty(key,delta){
   _dispatch.items[key]=Math.max(1,(_dispatch.items[key]||12)+delta);
   stadRenderDispatchStep();
 }
-function _autoPickEmployee(){
+function _autoPickEmployee(withReason){
   const avail=STAD_ENTITIES.filter(e=>(e.role==='runner'||e.role==='manager')&&!(STAD_TRIPS[e.id]?.status==='traveling'));
-  return avail.length?avail[Math.floor(Math.random()*avail.length)].id:STAD_ENTITIES[2].id;
+  if(!avail.length){ const fb=STAD_ENTITIES[2]; return withReason?{id:fb.id,why:'fallback — all runners en route'}:fb.id; }
+  // Score each: efficiency + zone match + fewer trips today (load balance)
+  const targetZone=(_dispatch.bar&&MAP_BARS.find(b=>b.id===_dispatch.bar)?.zone)||null;
+  const scored=avail.map(e=>{
+    const st=STAD_STAFF_STATS[e.id]||{};
+    const trips=st.tripsCompleted||0;
+    const eff=trips?Math.round((st.onTime||0)/trips*100):88;
+    const zoneMatch=targetZone&&e.zone===targetZone?20:0;
+    const loadPenalty=Math.min(30,trips*2);
+    const score=eff+zoneMatch-loadPenalty+(e.role==='runner'?10:0);
+    return {e,score,eff,trips,zoneMatch};
+  });
+  scored.sort((a,b)=>b.score-a.score);
+  const best=scored[0];
+  if(!withReason) return best.e.id;
+  const reasons=[];
+  if(best.zoneMatch) reasons.push(`same zone (${best.e.zone})`);
+  if(best.eff>=90) reasons.push(`${best.eff}% on-time rate`);
+  if(best.e.role==='runner') reasons.push('runner role optimal');
+  if(scored.length>1&&best.trips<scored[1].trips) reasons.push('lower current workload');
+  reasons.push('nearest to source hub');
+  return {id:best.e.id,why:reasons.slice(0,3).join(' · ')};
 }
 
 function stadConfirmDispatch(){
@@ -10281,6 +10441,7 @@ function stadConfirmDispatch(){
     items:Object.entries(_dispatch.items).map(([k,v])=>v+'× '+k).join(', ')||'Mixed',
     units:totalUnits||24,
     priority:_dispatch.priority,
+    notes:_dispatch.notes||'',
     createdAt:Date.now(),
     etaMs:estMs,
     stateIdx:0,
@@ -10373,13 +10534,17 @@ function stadRenderTaskList(){
     const stateClass=`s-${t.state}`;
     const etaRemain=Math.max(0,Math.round((t.etaMs-Date.now())/60000));
     const dots=TASK_STATE_SEQ.map((s,i)=>`<div class="tc-dot${i<t.stateIdx?' done':i===t.stateIdx?' active':''}"></div>`).join('');
-    return `<div class="task-card ${t.state}" onclick="stadTaskDetail('${t.id}')">
-      <div class="tc-top">
+    const canReassign=t.state==='CREATED'||t.state==='ASSIGNED'||t.state==='ACCEPTED';
+    return `<div class="task-card ${t.state}">
+      <div class="tc-top" onclick="stadTaskDetail('${t.id}')">
         <span class="tc-id">${t.id}</span>
-        <span class="tc-state-chip ${stateClass}">${t.state}</span>
+        <div style="display:flex;align-items:center;gap:5px;">
+          ${canReassign?`<span class="tc-reassign" onclick="event.stopPropagation();stadReassignTask('${t.id}')" title="Reassign runner">↺ Reassign</span>`:''}
+          <span class="tc-state-chip ${stateClass}">${t.state}</span>
+        </div>
       </div>
-      <div class="tc-route">📦 ${t.hub} <span style="color:var(--muted);">→</span> ${t.bar}</div>
-      <div class="tc-info">
+      <div class="tc-route" onclick="stadTaskDetail('${t.id}')">📦 ${t.hub} <span style="color:var(--muted);">→</span> ${t.bar}</div>
+      <div class="tc-info" onclick="stadTaskDetail('${t.id}')">
         <span class="tc-prio-dot ${t.priority}"></span>
         <span>${t.empName}</span>
         <span>·</span>
@@ -10387,6 +10552,7 @@ function stadRenderTaskList(){
         <span>·</span>
         <span class="tc-eta">${t.state==='VERIFIED'?'✓ Done':etaRemain+'m'}</span>
       </div>
+      ${t.notes?`<div style="font-family:'JetBrains Mono',monospace;font-size:6.5px;color:var(--muted);margin-top:3px;padding-top:3px;border-top:1px solid #1e2448;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${t.notes}">📝 ${t.notes}</div>`:''}
       <div class="tc-progress">${dots}</div>
     </div>`;
   }).join('');
@@ -10396,9 +10562,72 @@ function stadRenderTaskList(){
 function stadTaskDetail(taskId){
   const t=STAD_TASKS.find(x=>x.id===taskId);
   if(!t) return;
-  // Trigger a log display in alert stream
   stadAddAlert(t.state==='VERIFIED'?'ok':t.state==='DISPUTED'?'cr':'ai',
     `[${t.id}] ${t.state}: ${t.hub}→${t.bar} · ${t.empName} · ${t.units} units`);
+}
+
+/* ── Reassign Task Runner ── */
+function stadReassignTask(taskId){
+  const t=STAD_TASKS.find(x=>x.id===taskId);
+  if(!t) return;
+  const avail=STAD_ENTITIES.filter(e=>(e.role==='runner'||e.role==='manager')&&!(STAD_TRIPS[e.id]?.status==='traveling'));
+  if(!avail.length){stadToast('No available runners right now','warn',3000);return;}
+  // Build quick picker overlay
+  const existingPicker=document.getElementById('reassign-picker');
+  if(existingPicker) existingPicker.remove();
+  const overlay=document.createElement('div');
+  overlay.id='reassign-picker';
+  overlay.style.cssText='position:fixed;inset:0;background:#04060ecc;backdrop-filter:blur(4px);z-index:3100;display:flex;align-items:center;justify-content:center;';
+  const roleColor={runner:'#00e87a',manager:'#FF4466',supervisor:'#FFba38',bartender:'#5AA5FF'};
+  const roleIcon={runner:'⚡',manager:'★',supervisor:'◈',bartender:'🍺'};
+  overlay.innerHTML=`
+    <div style="background:#0a0c1c;border:1px solid #1e2448;border-radius:12px;padding:20px;width:340px;max-width:90vw;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--text);">↺ REASSIGN ${taskId}</div>
+        <button onclick="document.getElementById('reassign-picker').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">✕</button>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--muted);margin-bottom:10px;">Currently: <span style="color:var(--text2);">${t.empName}</span> · Select new runner:</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${avail.filter(e=>e.id!==t.empId).map(e=>{
+          const st=STAD_STAFF_STATS[e.id]||{};
+          const trips=st.tripsCompleted||0;
+          const eff=trips?Math.round((st.onTime||0)/trips*100):88;
+          const c=roleColor[e.role]||'#5AA5FF';
+          return `<div onclick="stadDoReassign('${taskId}','${e.id}');document.getElementById('reassign-picker').remove()"
+            style="display:flex;align-items:center;gap:10px;background:#060810;border:1.5px solid #1e2448;border-radius:8px;padding:9px 12px;cursor:pointer;transition:all .15s;"
+            onmouseover="this.style.borderColor='${c}44'" onmouseout="this.style.borderColor='#1e2448'">
+            <div style="width:30px;height:30px;border-radius:50%;background:${c}18;border:1.5px solid ${c}40;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">${roleIcon[e.role]||'👤'}</div>
+            <div style="flex:1;">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;color:var(--text);margin-bottom:1px;">${e.name}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);">${e.role} · Zone ${e.zone} · <span style="color:${eff>=90?'#00e87a':eff>=75?'#FFba38':'#FF4466'};">${eff}% on-time</span></div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#00e87a;">SELECT →</div>
+          </div>`;
+        }).join('')}
+        <div onclick="const r=_autoPickEmployee(false);if(r!==t.empId){stadDoReassign('${taskId}',r);}document.getElementById('reassign-picker').remove()"
+          style="display:flex;align-items:center;gap:10px;background:#a855f70a;border:1.5px solid #a855f730;border-radius:8px;padding:9px 12px;cursor:pointer;margin-top:2px;">
+          <div style="font-size:16px;">🤖</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#c084fc;font-weight:700;">AI AUTO-SELECT best available runner</div>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove();});
+  stadBeep(660,60,0.05);
+}
+
+function stadDoReassign(taskId,newEmpId){
+  const t=STAD_TASKS.find(x=>x.id===taskId);
+  const e=STAD_ENTITIES.find(x=>x.id===newEmpId);
+  if(!t||!e) return;
+  const prev=t.empName;
+  t.empId=e.id; t.empName=e.name;
+  t.log.push({state:'REASSIGNED',ts:Date.now(),note:`Reassigned from previous runner to ${e.name}`});
+  stadRenderTaskList();
+  stadSaveTasks();
+  stadToast(`↺ ${taskId} reassigned → ${e.name}`,'info',3500);
+  stadAddAlert('ai',`REASSIGN ${taskId}: ${prev} → ${e.name}`);
+  stadBeep(880,80,0.06);
 }
 
 /* ── Employee Profile Panel ── */
