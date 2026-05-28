@@ -10570,9 +10570,8 @@ function stadTaskDetail(taskId){
 function stadReassignTask(taskId){
   const t=STAD_TASKS.find(x=>x.id===taskId);
   if(!t) return;
-  const avail=STAD_ENTITIES.filter(e=>(e.role==='runner'||e.role==='manager')&&!(STAD_TRIPS[e.id]?.status==='traveling'));
-  if(!avail.length){stadToast('No available runners right now','warn',3000);return;}
-  // Build quick picker overlay
+  // Show ALL runners (available + busy) so manager always has options
+  const allRunners=STAD_ENTITIES.filter(e=>(e.role==='runner'||e.role==='manager')&&e.id!==t.empId);
   const existingPicker=document.getElementById('reassign-picker');
   if(existingPicker) existingPicker.remove();
   const overlay=document.createElement('div');
@@ -10581,32 +10580,45 @@ function stadReassignTask(taskId){
   const roleColor={runner:'#00e87a',manager:'#FF4466',supervisor:'#FFba38',bartender:'#5AA5FF'};
   const roleIcon={runner:'⚡',manager:'★',supervisor:'◈',bartender:'🍺'};
   overlay.innerHTML=`
-    <div style="background:#0a0c1c;border:1px solid #1e2448;border-radius:12px;padding:20px;width:340px;max-width:90vw;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div style="background:#0a0c1c;border:1px solid #1e2448;border-radius:12px;padding:20px;width:360px;max-width:92vw;max-height:80vh;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--text);">↺ REASSIGN ${taskId}</div>
-        <button onclick="document.getElementById('reassign-picker').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">✕</button>
+        <button onclick="document.getElementById('reassign-picker').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;">✕</button>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--muted);margin-bottom:10px;">Currently: <span style="color:var(--text2);">${t.empName}</span> · Select new runner:</div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        ${avail.filter(e=>e.id!==t.empId).map(e=>{
+      <div style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--muted);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1e2448;">
+        Current runner: <span style="color:#FFba38;">${t.empName}</span> · Route: ${t.hub} → ${t.bar}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;overflow-y:auto;flex:1;">
+        ${allRunners.map(e=>{
           const st=STAD_STAFF_STATS[e.id]||{};
           const trips=st.tripsCompleted||0;
-          const eff=trips?Math.round((st.onTime||0)/trips*100):88;
+          const eff=trips?Math.round((st.onTime||0)/trips*100):Math.floor(82+Math.random()*18);
+          const isBusy=STAD_TRIPS[e.id]?.status==='traveling';
           const c=roleColor[e.role]||'#5AA5FF';
+          const statusLabel=isBusy?'EN ROUTE':'AVAILABLE';
+          const statusColor=isBusy?'#FFba38':'#00e87a';
           return `<div onclick="stadDoReassign('${taskId}','${e.id}');document.getElementById('reassign-picker').remove()"
-            style="display:flex;align-items:center;gap:10px;background:#060810;border:1.5px solid #1e2448;border-radius:8px;padding:9px 12px;cursor:pointer;transition:all .15s;"
-            onmouseover="this.style.borderColor='${c}44'" onmouseout="this.style.borderColor='#1e2448'">
-            <div style="width:30px;height:30px;border-radius:50%;background:${c}18;border:1.5px solid ${c}40;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">${roleIcon[e.role]||'👤'}</div>
-            <div style="flex:1;">
-              <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;color:var(--text);margin-bottom:1px;">${e.name}</div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);">${e.role} · Zone ${e.zone} · <span style="color:${eff>=90?'#00e87a':eff>=75?'#FFba38':'#FF4466'};">${eff}% on-time</span></div>
+            style="display:flex;align-items:center;gap:10px;background:#060810;border:1.5px solid ${isBusy?'#FFba3820':'#1e2448'};border-radius:8px;padding:9px 12px;cursor:pointer;transition:all .15s;"
+            onmouseover="this.style.borderColor='${c}55'" onmouseout="this.style.borderColor='${isBusy?'#FFba3820':'#1e2448'}'">
+            <div style="position:relative;width:32px;height:32px;flex-shrink:0;">
+              <div style="width:32px;height:32px;border-radius:50%;background:${c}18;border:1.5px solid ${c}40;display:flex;align-items:center;justify-content:center;font-size:13px;">${roleIcon[e.role]||'👤'}</div>
+              <div style="position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:${statusColor};border:1.5px solid #04060e;"></div>
             </div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#00e87a;">SELECT →</div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;color:var(--text);">${e.name}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:6px;color:${statusColor};background:${statusColor}15;padding:1px 5px;border-radius:3px;font-weight:700;">● ${statusLabel}</span>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);">${e.role} · Zone ${e.zone} · <span style="color:${eff>=90?'#00e87a':eff>=75?'#FFba38':'#FF4466'};">${eff}% on-time</span> · ${trips} trips</div>
+              ${isBusy?`<div style="font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#FFba38;margin-top:2px;">⚠ Currently en route — will complete before pickup</div>`:''}
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:${c};flex-shrink:0;">→</div>
           </div>`;
         }).join('')}
-        <div onclick="const r=_autoPickEmployee(false);if(r!==t.empId){stadDoReassign('${taskId}',r);}document.getElementById('reassign-picker').remove()"
-          style="display:flex;align-items:center;gap:10px;background:#a855f70a;border:1.5px solid #a855f730;border-radius:8px;padding:9px 12px;cursor:pointer;margin-top:2px;">
-          <div style="font-size:16px;">🤖</div>
+        <div onclick="const r=_autoPickEmployee(false);stadDoReassign('${taskId}',r);document.getElementById('reassign-picker').remove()"
+          style="display:flex;align-items:center;gap:10px;background:#a855f70a;border:1.5px solid #a855f740;border-radius:8px;padding:9px 12px;cursor:pointer;margin-top:4px;"
+          onmouseover="this.style.borderColor='#a855f7'" onmouseout="this.style.borderColor='#a855f740'">
+          <div style="font-size:18px;line-height:1;">🤖</div>
           <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#c084fc;font-weight:700;">AI AUTO-SELECT best available runner</div>
         </div>
       </div>
