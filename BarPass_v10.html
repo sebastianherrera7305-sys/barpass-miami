@@ -2462,6 +2462,71 @@ canvas.qr-canvas{image-rendering:pixelated;border:3px solid #fff;border-radius:3
 [data-theme="light"] .emp-profile{background:#f5f9ff;border-left-color:#dde4f5;}
 [data-theme="light"] .nm-m,[data-theme="light"] .tm-opt,[data-theme="light"] .tm-confirm,[data-theme="light"] .task-card,[data-theme="light"] .ep-kpi{background:#eef2fb;}
 
+/* ── Toast Notification System ── */
+.toast-container{position:fixed;bottom:24px;right:20px;z-index:999999;display:flex;flex-direction:column;gap:7px;pointer-events:none;max-width:320px;}
+.bp-toast{background:#07091a;border:1px solid #1e2448;border-radius:8px;padding:10px 13px;pointer-events:all;animation:toastSlide .25s cubic-bezier(.18,.89,.32,1.1);box-shadow:0 8px 28px rgba(0,0,0,.75);}
+@keyframes toastSlide{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
+@keyframes toastFade{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(24px);}}
+.bp-toast.cr{border-left:3px solid #FF4466;}
+.bp-toast.ok{border-left:3px solid #00e87a;}
+.bp-toast.wa{border-left:3px solid #FFba38;}
+.bp-toast.ai{border-left:3px solid #5AA5FF;}
+.bp-toast.pu{border-left:3px solid #a855f7;}
+.toast-inner{display:flex;align-items:flex-start;gap:9px;}
+.toast-icon{font-size:13px;flex-shrink:0;margin-top:1px;}
+.toast-msg{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--text);line-height:1.4;}
+.toast-ts{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);margin-top:3px;}
+
+/* ── Live Command Ticker ── */
+.cmd-ticker{height:26px;background:#04060e;border-bottom:1px solid #111428;display:flex;align-items:center;overflow:hidden;flex-shrink:0;gap:0;}
+.cmd-ticker-badge{font-family:'JetBrains Mono',monospace;font-size:7px;color:#5AA5FF;background:#5AA5FF18;border-right:1px solid #1e2448;padding:0 10px;height:100%;display:flex;align-items:center;letter-spacing:.08em;flex-shrink:0;white-space:nowrap;}
+.cmd-ticker-wrap{flex:1;overflow:hidden;position:relative;}
+.cmd-ticker-track{display:flex;gap:32px;animation:tickerRoll 40s linear infinite;white-space:nowrap;will-change:transform;}
+@keyframes tickerRoll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.cmd-tick{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--muted);display:inline-flex;align-items:center;gap:5px;flex-shrink:0;}
+.cmd-tick .ct-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;}
+.cmd-tick .ct-dot.cr{background:#FF4466;}
+.cmd-tick .ct-dot.ok{background:#00e87a;}
+.cmd-tick .ct-dot.wa{background:#FFba38;}
+.cmd-tick .ct-dot.ai{background:#5AA5FF;}
+[data-theme="light"] .cmd-ticker{background:#eef2fb;border-bottom-color:rgba(30,60,150,.1);}
+[data-theme="light"] .cmd-ticker-badge{background:#dde4f5;border-right-color:rgba(30,60,150,.1);}
+
+/* ── Node Hover Tooltip ── */
+.map-tooltip{position:fixed;z-index:99990;background:#07091a;border:1px solid #1e2448;border-radius:6px;padding:8px 11px;pointer-events:none;box-shadow:0 6px 24px rgba(0,0,0,.75);animation:tooltipIn .1s ease;}
+@keyframes tooltipIn{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:scale(1);}}
+.mt-title{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:var(--text);margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.mt-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;}
+.mt-item{background:#0a0c1c;border-radius:3px;padding:2px 5px;}
+.mt-lbl{font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.mt-val{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;}
+.mt-hint{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:var(--muted);margin-top:4px;letter-spacing:.04em;}
+
+/* ── SVG Route Lines ── */
+.task-route-line{stroke-dasharray:6 4;animation:routeDash 1.2s linear infinite;}
+@keyframes routeDash{to{stroke-dashoffset:-10;}}
+.task-route-dot{filter:drop-shadow(0 0 3px #00e87a);}
+
+/* ── Keyboard Help ── */
+.kbd-help{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#07091a;border:1px solid #1e2448;border-radius:10px;padding:12px 20px;z-index:999990;box-shadow:0 12px 40px rgba(0,0,0,.85);animation:toastSlide .2s ease;min-width:340px;}
+.kbd-help-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--text);margin-bottom:8px;text-align:center;letter-spacing:.06em;}
+.kbd-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.kbd-row{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text2);}
+.kbd-key{background:#1e2448;border:1px solid #2e3568;border-radius:3px;padding:2px 6px;font-size:7.5px;color:var(--text);font-weight:700;min-width:22px;text-align:center;}
+
+/* ── Sidebar panel resizer ── */
+.stad-sidebar-resizer{width:4px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .15s;}
+.stad-sidebar-resizer:hover{background:#5AA5FF44;}
+.stad-sidebar-resizer.dragging{background:#5AA5FF;}
+
+/* ── Inventory depletion warning pulse on nodes ── */
+@keyframes invWarn{0%,100%{box-shadow:0 0 0 0 #FFba3800;}50%{box-shadow:0 0 0 5px #FFba3844;}}
+.map-node.inv-warn .map-node-pin{animation:invWarn 1.5s ease infinite;}
+
+/* ── Revenue tick on verified task ── */
+.rev-tick{position:fixed;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#00e87a;pointer-events:none;z-index:99999;animation:revFloat 1.4s ease forwards;}
+@keyframes revFloat{0%{opacity:1;transform:translateY(0) scale(1);}100%{opacity:0;transform:translateY(-60px) scale(1.2);}}
+
 /* ══════════════════════════════════════════════════════
    STADIUM POS — LIGHT THEME OVERRIDES
    All stadium colors are hardcoded dark; these rules
@@ -4207,6 +4272,19 @@ BarPass/<br>
     </div>
   </div>
 
+  <!-- Live Command Ticker -->
+  <div class="cmd-ticker" id="cmd-ticker">
+    <div class="cmd-ticker-badge">⚡ LIVE OPS</div>
+    <div class="cmd-ticker-wrap"><div class="cmd-ticker-track" id="cmd-ticker-track">
+      <span class="cmd-tick"><span class="ct-dot ok"></span>System initialized — all zones nominal</span>
+      <span class="cmd-tick"><span class="ct-dot ai"></span>Trip engine active — 6 runners tracked</span>
+      <span class="cmd-tick"><span class="ct-dot wa"></span>Zone C: Bar C2 inventory at 23% — monitor</span>
+      <span class="cmd-tick"><span class="ct-dot ok"></span>System initialized — all zones nominal</span>
+      <span class="cmd-tick"><span class="ct-dot ai"></span>Trip engine active — 6 runners tracked</span>
+      <span class="cmd-tick"><span class="ct-dot wa"></span>Zone C: Bar C2 inventory at 23% — monitor</span>
+    </div></div>
+  </div>
+
   <!-- Body -->
   <div class="stad-body">
     <!-- Map Panel -->
@@ -4737,6 +4815,8 @@ BarPass/<br>
 
   <!-- Scan line -->
   <line x1="0" y1="0" x2="800" y2="0" stroke="rgba(90,165,255,.08)" stroke-width="2" class="stad-scan-line"/>
+  <!-- Task route animation layer -->
+  <g id="stad-routes-layer"></g>
 </svg>
         <!-- Operational staff entity layer -->
         <div id="stad-staff-layer" style="pointer-events:none;"></div>
@@ -9822,16 +9902,41 @@ function initStadium(){
   /* Trip engine — 1s tick for real-time tracking */
   stadIntervals.push(setInterval(stadTickTrips,1000));
   stadInitTrips();
-  /* Command Center engine */
+  /* Command Center v2.0 */
   stadRenderMapNodes();
   stadRenderHeatmap();
+  stadInitKeyboard();
+  stadInitResizer();
+  stadLoadTasks();
   stadIntervals.push(setInterval(stadTickTasks,3000));
   stadIntervals.push(setInterval(stadFluctuateBarMetrics,8000));
-  /* Close any open menus on outside click */
-  document.addEventListener('click', e=>{
+  stadIntervals.push(setInterval(stadTickInventory,12000));
+  // Hover tooltip wiring — re-applied after each node render
+  setTimeout(()=>{
+    document.querySelectorAll('.map-node').forEach(el=>{
+      const nid=el.dataset.nid,ntype=el.dataset.ntype;
+      el.addEventListener('mouseenter',e=>stadNodeHover(e,nid,ntype));
+      el.addEventListener('mouseleave',stadNodeLeave);
+    });
+    // Staff entity click wiring
+    document.querySelectorAll('.op-entity').forEach(el=>{
+      const id=el.dataset.id;
+      if(id){el.style.cursor='pointer';el.onclick=(ev)=>{ev.stopPropagation();stadOpenEmployeeProfile(id);};}
+    });
+  },500);
+  /* Close menus on outside click */
+  document.addEventListener('click',e=>{
     if(!e.target.closest('.node-menu')&&!e.target.closest('.map-node')) stadCloseNodeMenu();
-    if(!e.target.closest('.emp-profile')&&!e.target.closest('.map-node')&&!e.target.closest('.ep-btn')) {/* keep open */}
+    if(!e.target.closest('.map-tooltip')&&!e.target.closest('.map-node')) stadNodeLeave();
+    if(!e.target.closest('.kbd-help')&&e.key!=='?') stadHideKbdHelp();
   });
+  // Seed initial ticker events
+  setTimeout(()=>{
+    stadTickerPush('All systems operational — Command Center v2.0 active','ok');
+    stadTickerPush(`${MAP_BARS.length} bar nodes · ${MAP_HUBS.length} hubs · ${STAD_ENTITIES.length} staff tracked`,'ai');
+    stadTickerPush('Inventory depletion AI armed — auto-restock enabled','ai');
+    stadToast('Command Center v2.0 online — press ? for keyboard shortcuts','ai',5000);
+  },1200);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -9929,7 +10034,7 @@ function stadRenderMapNodes(){
       title="${n.name}">
       <div class="map-node-pin">${icon}</div>
       <div class="map-node-label">${n.name}</div>
-      <div class="map-node-inv" style="background:${color}25;color:${color};">${inv}%</div>
+      <div class="map-node-inv" style="background:${color}25;color:${color};">${Math.round(inv)}%</div>
     </div>`;
   }).join('');
 }
@@ -9963,12 +10068,12 @@ function stadNodeClick(e,nid,ntype){
   const metricBar=n=>`
     <div class="nm-metrics">
       ${n.type==='bar'?`
-        <div class="nm-m"><div class="nm-ml">INVENTORY</div><div class="nm-mv" style="color:${n.inv<30?'#FF4466':n.inv<60?'#FFba38':'#00e87a'};">${n.inv}%</div></div>
-        <div class="nm-m"><div class="nm-ml">QUEUE</div><div class="nm-mv" style="color:${n.queue>8?'#FF4466':'#FFba38'};">${n.queue} min</div></div>
+        <div class="nm-m"><div class="nm-ml">INVENTORY</div><div class="nm-mv" style="color:${n.inv<30?'#FF4466':n.inv<60?'#FFba38':'#00e87a'};">${Math.round(n.inv)}%</div></div>
+        <div class="nm-m"><div class="nm-ml">QUEUE</div><div class="nm-mv" style="color:${n.queue>8?'#FF4466':'#FFba38'};">${Math.round(n.queue)} min</div></div>
         <div class="nm-m"><div class="nm-ml">AVG SVC</div><div class="nm-mv">${n.svc}</div></div>
-        <div class="nm-m"><div class="nm-ml">RISK</div><div class="nm-mv" style="color:${n.risk>60?'#FF4466':n.risk>35?'#FFba38':'#00e87a'};">${n.risk}</div></div>
+        <div class="nm-m"><div class="nm-ml">RISK</div><div class="nm-mv" style="color:${n.risk>60?'#FF4466':n.risk>35?'#FFba38':'#00e87a'};">${Math.round(n.risk)}</div></div>
       `:`
-        <div class="nm-m"><div class="nm-ml">CAPACITY</div><div class="nm-mv" style="color:${n.cap<50?'#FF4466':'#00e87a'};">${n.cap}%</div></div>
+        <div class="nm-m"><div class="nm-ml">CAPACITY</div><div class="nm-mv" style="color:${n.cap<50?'#FF4466':'#00e87a'};">${Math.round(n.cap)}%</div></div>
         <div class="nm-m"><div class="nm-ml">THROUGHPUT</div><div class="nm-mv">${n.throughput}/h</div></div>
         <div class="nm-m"><div class="nm-ml">PENDING</div><div class="nm-mv" style="color:${n.pending>5?'#FFba38':'#00e87a'};">${n.pending}</div></div>
         <div class="nm-m"><div class="nm-ml">DELAYS</div><div class="nm-mv" style="color:${n.delay>0?'#FFba38':'#00e87a'};">${n.delay}</div></div>
@@ -10069,7 +10174,7 @@ function stadRenderDispatchStep(){
     <div class="tm-grid2">${MAP_BARS.map(b=>`
       <div class="tm-opt${_dispatch.bar===b.id?' sel':''}" onclick="_dispatch.bar='${b.id}';stadRenderDispatchStep()">
         <div class="tm-opt-name" style="color:${b.inv<30?'#FF4466':b.inv<60?'#FFba38':'inherit'}">🍺 ${b.name}</div>
-        <div class="tm-opt-sub">Zone ${b.zone} · ${b.inv}% inv · Queue ${b.queue}min</div>
+        <div class="tm-opt-sub">Zone ${b.zone} · ${Math.round(b.inv)}% inv · Queue ${Math.round(b.queue)}min</div>
       </div>`).join('')}</div>`;
     if(nextBtn) nextBtn.textContent='NEXT →';
   } else if(_dispatch.step===2){
@@ -10185,7 +10290,14 @@ function stadConfirmDispatch(){
   if(STAD_TASKS.length>20) STAD_TASKS.length=20;
   stadCloseTaskModal();
   stadRenderTaskList();
-  stadAddAlert('ai',`Dispatch ${task.id}: ${task.units} units → ${task.bar} via ${task.empName}`);
+  // Draw animated route line on map
+  stadDrawRoute(task.id, _dispatch.hub||'central', _dispatch.bar||'barC1', _dispatch.priority==='HIGH'?'#FF4466':'#5AA5FF');
+  const alertMsg=`Dispatch ${task.id}: ${task.units} units → ${task.bar} via ${task.empName} [${task.priority}]`;
+  stadAddAlert('ai',alertMsg);
+  stadToast(`🚀 ${task.id} dispatched → ${task.bar} · ${task.units} units · ETA ${Math.round((task.etaMs-Date.now())/60000)}m`,'pu',4500);
+  stadTickerPush(`${task.id} DISPATCHED: ${hub.name}→${bar.name} · ${task.units}u · ${task.empName}`,'ai');
+  stadSaveTasks();
+  STAD_BUS.emit('task:created',task);
   stadBeep(880,120,0.07);
   setTimeout(()=>stadBeep(1100,80,0.06),130);
 }
@@ -10210,9 +10322,34 @@ function stadTickTasks(){
       t.stateIdx++;
       t.state=TASK_STATE_SEQ[t.stateIdx];
       t.log.push({state:t.state,ts:Date.now()});
-      if(t.state==='DELIVERED') stadBeep(1047,150,0.06);
+      // Toast + ticker per state
+      const stateToasts={
+        ASSIGNED:`📋 ${t.id} assigned to ${t.empName}`,
+        ACCEPTED:`✅ ${t.empName} accepted task ${t.id}`,
+        PICKING:`📦 ${t.empName} picking items at ${t.hub}`,
+        IN_TRANSIT:`🚚 ${t.id} in transit → ${t.bar}`,
+        DELIVERED:`📬 ${t.id} delivered to ${t.bar}`,
+        VERIFIED:`✅ ${t.id} VERIFIED — ${t.units} units confirmed`,
+      };
+      if(stateToasts[t.state]){
+        const type=t.state==='VERIFIED'?'ok':t.state==='IN_TRANSIT'?'pu':'ai';
+        if(t.state!=='ASSIGNED'&&t.state!=='ACCEPTED') stadToast(stateToasts[t.state],type,3500);
+        stadTickerPush(stateToasts[t.state],type==='ok'?'ok':'ai');
+      }
+      if(t.state==='DELIVERED'){
+        stadBeep(1047,150,0.06);
+        stadTickerPush(`DELIVERY: ${t.bar} received ${t.units} units — inventory restocked`,'ok');
+      }
       if(t.state==='VERIFIED'){
         stadAddAlert('ok',`VERIFIED: ${t.id} delivered to ${t.bar} · ${t.units} units confirmed`);
+        stadRemoveRoute(t.id);
+        // Revenue float animation
+        const barEl=document.querySelector(`.map-node[data-nid="${t.bar?.toLowerCase().replace(/\s/g,'')||'barC1'}"]`);
+        if(barEl){const r=barEl.getBoundingClientRect();stadRevFloat(r.left,r.top-20,Math.round(t.units*3.5));}
+        // Restock the bar inventory
+        const barData=MAP_BARS.find(b=>b.name===t.bar);
+        if(barData) barData.inv=Math.min(99,barData.inv+Math.round(t.units*0.8));
+        stadSaveTasks();
         stadBeep(880,100,0.06); setTimeout(()=>stadBeep(1100,100,0.06),120);
       }
       changed=true;
@@ -10404,6 +10541,270 @@ function stadFluctuateBarMetrics(){
     }
   });
   stadRenderHeatmap();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BACKEND / FRONTEND UPGRADES v2.0
+   Event Bus · Toasts · Ticker · Inventory AI · Route Lines
+   Keyboard Shortcuts · Hover Tooltips · LocalStorage
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Event Bus ── */
+const STAD_BUS={
+  _L:{},
+  on(ev,fn){(this._L[ev]=this._L[ev]||[]).push(fn);},
+  emit(ev,d){(this._L[ev]||[]).forEach(fn=>fn(d));}
+};
+
+/* ── Toast System ── */
+const TOAST_ICONS={cr:'🚨',wa:'⚠️',ok:'✅',ai:'⚡',pu:'🔮'};
+function stadToast(msg,type='ai',dur=4200){
+  const container=document.getElementById('toast-container');
+  if(!container)return;
+  const t=document.createElement('div');
+  t.className=`bp-toast ${type}`;
+  t.innerHTML=`<div class="toast-inner"><span class="toast-icon">${TOAST_ICONS[type]||'ℹ'}</span><div><div class="toast-msg">${msg}</div><div class="toast-ts">${new Date().toLocaleTimeString('en',{hour12:false})}</div></div></div>`;
+  container.appendChild(t);
+  STAD_BUS.emit('toast',{msg,type});
+  const remove=()=>{t.style.animation='toastFade .25s ease forwards';setTimeout(()=>t.remove(),250);};
+  setTimeout(remove,dur);
+  t.onclick=remove;
+}
+
+/* ── Command Ticker ── */
+const _tickerEvents=[];
+function stadTickerPush(msg,type='ai'){
+  _tickerEvents.push({msg,type,ts:Date.now()});
+  if(_tickerEvents.length>40)_tickerEvents.shift();
+  _renderTicker();
+}
+function _renderTicker(){
+  const track=document.getElementById('cmd-ticker-track');
+  if(!track)return;
+  // Double the array so the animation loops seamlessly
+  const items=[..._tickerEvents,..._tickerEvents];
+  track.innerHTML=items.map(e=>`<span class="cmd-tick"><span class="ct-dot ${e.type}"></span>${e.msg}</span>`).join('');
+}
+
+/* ── Node Hover Tooltip ── */
+let _tooltip=null,_tooltipTimer=null;
+function stadNodeHover(e,nid,ntype){
+  clearTimeout(_tooltipTimer);
+  _tooltipTimer=setTimeout(()=>{
+    if(_tooltip)_tooltip.remove();
+    const node=ntype==='bar'?MAP_BARS.find(b=>b.id===nid):MAP_HUBS.find(h=>h.id===nid);
+    if(!node)return;
+    const t=document.createElement('div');
+    t.className='map-tooltip';
+    t.id='map-tooltip-active';
+    if(ntype==='bar'){
+      const c=node.inv<30?'#FF4466':node.inv<60?'#FFba38':'#00e87a';
+      t.innerHTML=`<div class="mt-title">🍺 ${node.name}</div>
+        <div class="mt-grid">
+          <div class="mt-item"><div class="mt-lbl">INV</div><div class="mt-val" style="color:${c};">${Math.round(node.inv)}%</div></div>
+          <div class="mt-item"><div class="mt-lbl">QUEUE</div><div class="mt-val" style="color:${node.queue>8?'#FF4466':'#FFba38'};">${Math.round(node.queue)}m</div></div>
+          <div class="mt-item"><div class="mt-lbl">SVC TIME</div><div class="mt-val">${node.svc}</div></div>
+          <div class="mt-item"><div class="mt-lbl">RISK</div><div class="mt-val" style="color:${node.risk>60?'#FF4466':node.risk>35?'#FFba38':'#00e87a'};">${Math.round(node.risk)}</div></div>
+        </div>
+        <div class="mt-hint">Click to open actions</div>`;
+    } else {
+      t.innerHTML=`<div class="mt-title">⬡ ${node.name}</div>
+        <div class="mt-grid">
+          <div class="mt-item"><div class="mt-lbl">CAP</div><div class="mt-val" style="color:${node.cap<60?'#FFba38':'#00e87a'};">${Math.round(node.cap)}%</div></div>
+          <div class="mt-item"><div class="mt-lbl">PENDING</div><div class="mt-val" style="color:${node.pending>5?'#FFba38':'#00e87a'};">${node.pending}</div></div>
+          <div class="mt-item"><div class="mt-lbl">FLOW</div><div class="mt-val">${node.throughput}/h</div></div>
+          <div class="mt-item"><div class="mt-lbl">DELAYS</div><div class="mt-val" style="color:${node.delay>0?'#FFba38':'#00e87a'};">${node.delay}</div></div>
+        </div>
+        <div class="mt-hint">Click to dispatch</div>`;
+    }
+    document.body.appendChild(t);
+    _tooltip=t;
+    // Position tooltip
+    const bnd=e.currentTarget.getBoundingClientRect();
+    let tx=bnd.right+8,ty=bnd.top-10;
+    if(tx+180>window.innerWidth)tx=bnd.left-188;
+    if(ty+160>window.innerHeight)ty=window.innerHeight-165;
+    t.style.left=Math.max(4,tx)+'px';
+    t.style.top=Math.max(4,ty)+'px';
+  },320);
+}
+function stadNodeLeave(){
+  clearTimeout(_tooltipTimer);
+  if(_tooltip){_tooltip.remove();_tooltip=null;}
+}
+
+/* ── SVG Route Line Animation ── */
+const _activeRoutes={};
+function stadDrawRoute(taskId,fromId,toId,color='#5AA5FF'){
+  const routeLayer=document.getElementById('stad-routes-layer');
+  if(!routeLayer)return;
+  // Find positions from STAD_WAYPOINTS, MAP_HUBS, or MAP_BARS
+  const allPos={...STAD_WAYPOINTS};
+  MAP_HUBS.forEach(h=>allPos[h.id]=h);
+  MAP_BARS.forEach(b=>allPos[b.id]=b);
+  const from=allPos[fromId],to=allPos[toId];
+  if(!from||!to)return;
+  const ns='http://www.w3.org/2000/svg';
+  // Remove existing route for this task
+  document.querySelectorAll(`[data-rtask="${taskId}"]`).forEach(el=>el.remove());
+  // Animated dashed line
+  const line=document.createElementNS(ns,'line');
+  line.setAttribute('x1',from.x);line.setAttribute('y1',from.y);
+  line.setAttribute('x2',to.x);line.setAttribute('y2',to.y);
+  line.setAttribute('stroke',color);line.setAttribute('stroke-width','1.5');
+  line.setAttribute('stroke-dasharray','6 4');line.setAttribute('opacity','.65');
+  line.setAttribute('class','task-route-line');line.dataset.rtask=taskId;
+  routeLayer.appendChild(line);
+  // Moving delivery dot with SVG animateMotion
+  const pathId='rp-'+taskId;
+  const rpath=document.createElementNS(ns,'path');
+  rpath.setAttribute('id',pathId);
+  rpath.setAttribute('d',`M${from.x},${from.y} L${to.x},${to.y}`);
+  rpath.setAttribute('fill','none');rpath.dataset.rtask=taskId;
+  routeLayer.appendChild(rpath);
+  const dot=document.createElementNS(ns,'circle');
+  dot.setAttribute('r','3.5');dot.setAttribute('fill','#00e87a');
+  dot.setAttribute('class','task-route-dot');dot.dataset.rtask=taskId;
+  const anim=document.createElementNS(ns,'animateMotion');
+  anim.setAttribute('dur','5s');anim.setAttribute('repeatCount','indefinite');
+  const mpath=document.createElementNS(ns,'mpath');
+  mpath.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href','#'+pathId);
+  anim.appendChild(mpath);dot.appendChild(anim);
+  routeLayer.appendChild(dot);
+  _activeRoutes[taskId]={line,rpath,dot};
+}
+function stadRemoveRoute(taskId){
+  document.querySelectorAll(`[data-rtask="${taskId}"]`).forEach(el=>el.remove());
+  delete _activeRoutes[taskId];
+}
+
+/* ── Revenue Float Animation ── */
+function stadRevFloat(x,y,amount){
+  const el=document.createElement('div');
+  el.className='rev-tick';
+  el.textContent='+$'+(amount||Math.round(150+Math.random()*350));
+  el.style.left=x+'px';el.style.top=y+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1500);
+}
+
+/* ── Inventory Depletion + Auto-Restock AI ── */
+function stadTickInventory(){
+  MAP_BARS.forEach(b=>{
+    // Deplete based on queue intensity
+    const rate=(b.queue/20)*1.8;
+    b.inv=Math.max(8,b.inv-rate);
+    // Warn state
+    const node=document.querySelector(`.map-node[data-nid="${b.id}"]`);
+    if(node) node.classList.toggle('inv-warn',b.inv<40&&b.inv>=25);
+    // Auto-dispatch when critical + no active task for this bar
+    if(b.inv<22){
+      const hasTask=STAD_TASKS.some(t=>t.bar===b.name&&!['VERIFIED','CANCELLED','DISPUTED'].includes(t.state));
+      if(!hasTask&&Math.random()<0.35) stadAutoRestock(b);
+    }
+  });
+}
+function stadAutoRestock(bar){
+  const nearest=MAP_HUBS.reduce((best,h)=>{
+    const d=Math.hypot(h.x-bar.x,h.y-bar.y);
+    return !best||d<best.d?{h,d}:{...best};
+  },{h:MAP_HUBS[0],d:9999}).h;
+  const empId=_autoPickEmployee()||'e3';
+  const emp=STAD_ENTITIES.find(e=>e.id===empId)||{name:'Runner',id:empId};
+  _taskCtr++;
+  const task={
+    id:'TK-'+_taskCtr, state:'CREATED',
+    hub:nearest.name, bar:bar.name,
+    empId,empName:emp.name,
+    items:'AUTO RESTOCK (48 units)',units:48,priority:'HIGH',
+    createdAt:Date.now(),etaMs:Date.now()+5*60000,
+    stateIdx:0,log:[{state:'CREATED',ts:Date.now()}],auto:true,
+  };
+  STAD_TASKS.unshift(task);
+  if(STAD_TASKS.length>20)STAD_TASKS.length=20;
+  stadRenderTaskList();
+  // Draw route immediately
+  const barWp=STAD_WAYPOINTS[bar.id]||bar;
+  stadDrawRoute(task.id, nearest.id||'central', bar.id, '#FF4466');
+  const msg=`🤖 AUTO-DISPATCH: ${bar.name} (${Math.round(bar.inv)}%) → TK-${_taskCtr} via ${nearest.name}`;
+  stadToast(msg,'cr',5000);
+  stadAddAlert('cr',msg);
+  stadTickerPush(msg,'cr');
+  stadBeep(440,300,0.09,'square');
+  stadSaveTasks();
+}
+
+/* ── localStorage Persistence ── */
+function stadSaveTasks(){
+  try{localStorage.setItem('bp_tasks_v2',JSON.stringify(STAD_TASKS.filter(t=>t.state!=='VERIFIED').slice(0,12)));}catch(e){}
+}
+function stadLoadTasks(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('bp_tasks_v2')||'[]');
+    if(saved.length){
+      STAD_TASKS=[...saved,...STAD_TASKS];
+      if(STAD_TASKS.length>20)STAD_TASKS.length=20;
+      stadRenderTaskList();
+      stadTickerPush(`Restored ${saved.length} task(s) from last session`,'ai');
+    }
+  }catch(e){}
+}
+
+/* ── Keyboard Shortcuts ── */
+let _kbdHelpOpen=false;
+function stadInitKeyboard(){
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.isContentEditable)return;
+    switch(e.key){
+      case 'd':case 'D': stadOpenTaskDispatch(); break;
+      case 'h':case 'H': stadToggleHeatmap(document.getElementById('hm-btn')); break;
+      case 'a':case 'A': document.querySelector('.stad-panel-head[id]')?.scrollIntoView({behavior:'smooth'}); break;
+      case 'r':case 'R': stadRenderMapNodes(); stadToast('Map nodes refreshed','ai',2000); break;
+      case 'Escape':
+        stadCloseNodeMenu();stadNodeLeave();
+        stadCloseTaskModal();stadCloseEmployeeProfile();
+        stadHideKbdHelp();
+        break;
+      case '?':
+        _kbdHelpOpen?stadHideKbdHelp():stadShowKbdHelp();
+        break;
+    }
+  });
+}
+function stadShowKbdHelp(){
+  _kbdHelpOpen=true;
+  const el=document.getElementById('kbd-help');
+  if(el)el.style.display='block';
+}
+function stadHideKbdHelp(){
+  _kbdHelpOpen=false;
+  const el=document.getElementById('kbd-help');
+  if(el)el.style.display='none';
+}
+
+/* ── Sidebar Resizer ── */
+function stadInitResizer(){
+  const sidebar=document.querySelector('.stad-sidebar');
+  if(!sidebar)return;
+  // Insert resizer handle
+  const resizer=document.createElement('div');
+  resizer.className='stad-sidebar-resizer';
+  sidebar.parentNode.insertBefore(resizer,sidebar);
+  let _drag=false,_startX=0,_startW=0;
+  resizer.addEventListener('mousedown',e=>{
+    _drag=true;_startX=e.clientX;_startW=sidebar.offsetWidth;
+    resizer.classList.add('dragging');
+    document.body.style.userSelect='none';
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!_drag)return;
+    const delta=_startX-e.clientX;
+    const w=Math.max(280,Math.min(600,_startW+delta));
+    sidebar.style.width=w+'px';
+  });
+  document.addEventListener('mouseup',()=>{
+    if(_drag){_drag=false;resizer.classList.remove('dragging');document.body.style.userSelect='';}
+  });
 }
 
 /* ── Boot i18n on DOM ready ───────────────────────── */
@@ -11087,6 +11488,20 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <!-- Node action menu placeholder (created dynamically) -->
 <div id="node-menu-container"></div>
+<!-- Toast notification container -->
+<div id="toast-container" class="toast-container"></div>
+<!-- Keyboard shortcut help overlay -->
+<div id="kbd-help" class="kbd-help" style="display:none;">
+  <div class="kbd-help-title">⌨ KEYBOARD SHORTCUTS</div>
+  <div class="kbd-grid">
+    <div class="kbd-row"><span class="kbd-key">D</span>Dispatch Task</div>
+    <div class="kbd-row"><span class="kbd-key">H</span>Toggle Heatmap</div>
+    <div class="kbd-row"><span class="kbd-key">Esc</span>Close / Cancel</div>
+    <div class="kbd-row"><span class="kbd-key">?</span>This help menu</div>
+    <div class="kbd-row"><span class="kbd-key">A</span>Toggle Alerts</div>
+    <div class="kbd-row"><span class="kbd-key">R</span>Reload nodes</div>
+  </div>
+</div>
 
 </body>
 </html>
