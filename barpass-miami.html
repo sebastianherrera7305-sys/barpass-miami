@@ -1636,9 +1636,378 @@ body::after{
 @keyframes pointsFly{0%{opacity:0;transform:translateY(0) scale(.5)}20%{opacity:1;transform:translateY(-20px) scale(1.2)}80%{opacity:1;transform:translateY(-60px) scale(1)}100%{opacity:0;transform:translateY(-100px) scale(.8)}}
 .points-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;font-size:32px;font-weight:800;color:var(--gold);text-shadow:0 4px 20px rgba(245,158,11,.4);pointer-events:none;animation:pointsFly 1.8s ease-out forwards;}
 
+/* ══════════════════════════════════════════════
+   CINEMATIC LAUNCH EXPERIENCE
+══════════════════════════════════════════════ */
+#launch-overlay{
+  position:fixed;inset:0;z-index:20000;
+  background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+  opacity:1;
+  transition:opacity 1s cubic-bezier(.4,0,.2,1);
+}
+#launch-overlay.lo-exit{opacity:0;pointer-events:none;}
+
+/* ── Dynamic background ── */
+.lo-bg{
+  position:absolute;inset:0;
+  background:#000;
+  transition:background 1.5s ease;
+  z-index:0;
+}
+.lo-bg.s-club{background:radial-gradient(ellipse 80% 60% at 25% 40%,rgba(100,0,200,.45) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 75% 55%,rgba(200,0,100,.25) 0%,transparent 55%),#04020c;}
+.lo-bg.s-vip{background:radial-gradient(ellipse 70% 55% at 35% 40%,rgba(160,100,0,.35) 0%,transparent 60%),radial-gradient(ellipse 45% 35% at 68% 65%,rgba(212,160,23,.2) 0%,transparent 50%),#060400;}
+.lo-bg.s-stadium{background:radial-gradient(ellipse 90% 55% at 50% 20%,rgba(0,80,200,.35) 0%,transparent 60%),radial-gradient(ellipse 55% 40% at 20% 80%,rgba(0,180,255,.18) 0%,transparent 50%),#00060f;}
+.lo-bg.s-final{background:radial-gradient(ellipse 100% 80% at 50% 50%,rgba(80,0,180,.2) 0%,rgba(160,100,0,.1) 50%,transparent 70%),#030108;}
+
+/* ── Letterbox bars ── */
+.lo-bar{position:absolute;left:0;right:0;background:#000;z-index:3;transition:height .8s cubic-bezier(.4,0,.2,1);}
+.lo-bar-t{top:0;height:70px;}
+.lo-bar-b{bottom:0;height:70px;}
+#launch-overlay.lo-open .lo-bar-t,#launch-overlay.lo-open .lo-bar-b{height:0;}
+
+/* ── Light beams ── */
+.lo-beams{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease;z-index:1;pointer-events:none;}
+#launch-overlay.lo-beams-on .lo-beams{opacity:1;}
+.lo-beam{
+  position:absolute;width:1px;top:-10%;height:130%;
+  transform-origin:top center;
+  background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,.03) 20%,rgba(255,255,255,.07) 50%,rgba(255,255,255,.03) 80%,transparent 100%);
+}
+.lo-beam:nth-child(1){left:18%;transform:rotate(-18deg);background:linear-gradient(180deg,transparent,rgba(100,0,200,.09),rgba(100,0,200,.14),transparent);animation:beamDrift 5s ease-in-out infinite;}
+.lo-beam:nth-child(2){left:35%;transform:rotate(-6deg);animation:beamDrift 4s ease-in-out .6s infinite;}
+.lo-beam:nth-child(3){left:52%;transform:rotate(4deg);background:linear-gradient(180deg,transparent,rgba(212,160,23,.06),rgba(212,160,23,.1),transparent);animation:beamDrift 6s ease-in-out 1.2s infinite;}
+.lo-beam:nth-child(4){left:70%;transform:rotate(14deg);animation:beamDrift 4.5s ease-in-out 1.8s infinite;}
+.lo-beam:nth-child(5){left:85%;transform:rotate(22deg);background:linear-gradient(180deg,transparent,rgba(100,0,200,.07),rgba(100,0,200,.12),transparent);animation:beamDrift 5.5s ease-in-out 2.4s infinite;}
+@keyframes beamDrift{0%,100%{transform:rotate(-18deg) scaleY(1)}50%{transform:rotate(-12deg) scaleY(1.04)}}
+.lo-beam:nth-child(3){animation-name:beamDrift3;}
+@keyframes beamDrift3{0%,100%{transform:rotate(4deg)}50%{transform:rotate(9deg)}}
+.lo-beam:nth-child(5){animation-name:beamDrift5;}
+@keyframes beamDrift5{0%,100%{transform:rotate(22deg)}50%{transform:rotate(16deg)}}
+
+/* ── Scan line ── */
+.lo-scan{
+  position:absolute;left:0;right:0;height:1px;top:-1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(100,0,200,.4) 20%,rgba(212,160,23,.6) 50%,rgba(100,0,200,.4) 80%,transparent 100%);
+  z-index:4;opacity:0;pointer-events:none;
+  animation:loScan 4s linear infinite;
+}
+#launch-overlay.lo-beams-on .lo-scan{opacity:1;}
+@keyframes loScan{0%{top:-1px;opacity:0}5%{opacity:.7}95%{opacity:.7}100%{top:100%;opacity:0}}
+
+/* ── Particles ── */
+.lo-particles{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 2s ease;}
+#launch-overlay.lo-beams-on .lo-particles{opacity:1;}
+.lo-pt{position:absolute;border-radius:50%;animation:ptFloat var(--d,4s) ease-in-out var(--dl,0s) infinite;}
+@keyframes ptFloat{0%,100%{transform:translateY(0) scale(1);opacity:var(--op,.3)}50%{transform:translateY(-18px) scale(1.6);opacity:calc(var(--op,.3)*2.5)}}
+
+/* ── Content layer ── */
+.lo-content{position:relative;z-index:5;display:flex;flex-direction:column;align-items:center;width:100%;padding:0 28px;text-align:center;}
+
+/* ── Logo ── */
+.lo-logo-wrap{
+  margin-bottom:8px;
+  opacity:0;transform:translateY(24px) scale(.88);
+  transition:opacity 1s ease,transform 1s var(--ease);
+}
+#launch-overlay.lo-logo-on .lo-logo-wrap{opacity:1;transform:translateY(0) scale(1);}
+.lo-logo-icon{font-size:56px;display:block;margin-bottom:10px;
+  filter:drop-shadow(0 0 24px rgba(212,160,23,.5));
+  animation:iconPulse 2.5s ease-in-out infinite;}
+@keyframes iconPulse{0%,100%{filter:drop-shadow(0 0 20px rgba(212,160,23,.45))}50%{filter:drop-shadow(0 0 40px rgba(212,160,23,.85)) drop-shadow(0 0 70px rgba(100,0,200,.35));}}
+.lo-wordmark{
+  font-family:'Instrument Serif',serif;font-size:52px;font-style:italic;letter-spacing:.04em;
+  background:linear-gradient(135deg,#a06808 0%,#d4a017 25%,#f5c842 50%,#d4a017 75%,#a06808 100%);
+  background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 3s ease infinite;line-height:1;}
+.lo-wordmark-tag{font-size:8px;letter-spacing:.55em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-top:6px;font-weight:300;}
+
+/* ── Cycling tagline ── */
+.lo-tagline{
+  height:18px;overflow:hidden;margin-bottom:28px;
+  opacity:0;transition:opacity .6s ease .3s;
+}
+#launch-overlay.lo-logo-on .lo-tagline{opacity:1;}
+.lo-tag-txt{
+  font-size:10px;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(255,255,255,.38);font-weight:300;
+  animation:tagCycle 10s ease-in-out infinite;
+}
+@keyframes tagCycle{
+  0%,18%{opacity:1;transform:translateY(0)}
+  20%,38%{opacity:0;transform:translateY(-10px)}
+  40%,58%{opacity:1;transform:translateY(0)}
+  60%,78%{opacity:0;transform:translateY(-10px)}
+  80%,100%{opacity:1;transform:translateY(0)}
+}
+
+/* ── Venue scene cards ── */
+.lo-scenes-row{
+  display:flex;gap:10px;align-items:center;
+  margin-bottom:24px;
+  opacity:0;transform:translateY(28px);
+  transition:opacity .8s ease,transform .8s var(--ease);
+}
+#launch-overlay.lo-scenes-on .lo-scenes-row{opacity:1;transform:translateY(0);}
+.lo-sc{
+  border-radius:18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  position:relative;flex-shrink:0;
+  transition:transform .6s var(--ease);
+}
+.lo-sc-a{width:76px;height:106px;transform:scale(.92) rotate(-2deg);}
+.lo-sc-b{width:88px;height:122px;transform:scale(1);}
+.lo-sc-c{width:76px;height:106px;transform:scale(.92) rotate(2deg);}
+#launch-overlay.lo-scenes-on .lo-sc-a{transform:scale(.96) rotate(-2deg);}
+#launch-overlay.lo-scenes-on .lo-sc-b{transform:scale(1.04);}
+#launch-overlay.lo-scenes-on .lo-sc-c{transform:scale(.96) rotate(2deg);}
+
+.lo-sc-fill{position:absolute;inset:0;}
+.lo-sc-a .lo-sc-fill{background:linear-gradient(160deg,#160028 0%,#3d0080 55%,#6600b0 100%);}
+.lo-sc-b .lo-sc-fill{background:linear-gradient(160deg,#0a0800 0%,#3d2800 45%,#7a4f00 100%);}
+.lo-sc-c .lo-sc-fill{background:linear-gradient(160deg,#000814 0%,#001840 50%,#003080 100%);}
+
+.lo-sc-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.75) 0%,transparent 45%);}
+.lo-sc-live{
+  position:absolute;top:7px;right:7px;
+  background:rgba(255,45,40,.88);border-radius:5px;padding:2px 5px;
+  font-size:6px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#fff;
+}
+.lo-sc-emo{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:22px;line-height:1;}
+.lo-sc-nm{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:500;}
+
+.lo-sc-ppl{
+  position:absolute;top:8px;left:8px;
+  font-size:7px;color:rgba(255,255,255,.6);letter-spacing:.06em;
+}
+.lo-sc-bar{position:absolute;bottom:28px;left:8px;right:8px;height:2px;border-radius:1px;background:rgba(255,255,255,.12);overflow:hidden;}
+.lo-sc-bar-f{height:100%;border-radius:1px;animation:scBarAnim 1.8s ease-in-out infinite;}
+.lo-sc-a .lo-sc-bar-f{width:94%;background:linear-gradient(90deg,#7000cc,#b040ff);}
+.lo-sc-b .lo-sc-bar-f{width:80%;background:linear-gradient(90deg,#c8880a,#fbbf24);}
+.lo-sc-c .lo-sc-bar-f{width:87%;background:linear-gradient(90deg,#0066cc,#40b0ff);}
+@keyframes scBarAnim{0%,100%{opacity:.7}50%{opacity:1;filter:brightness(1.4);}}
+
+/* ── Feature pills ── */
+.lo-feats{
+  display:flex;flex-wrap:wrap;gap:7px;justify-content:center;
+  max-width:310px;margin-bottom:24px;
+}
+.lo-fpill{
+  display:flex;align-items:center;gap:6px;padding:7px 13px;
+  border-radius:40px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.04);
+  backdrop-filter:blur(14px);
+  font-size:10px;letter-spacing:.05em;color:rgba(255,255,255,.65);font-weight:500;
+  opacity:0;transform:scale(.75) translateY(8px);
+  transition:opacity .35s ease,transform .35s var(--ease);
+}
+.lo-fpill.lo-fp-on{opacity:1;transform:scale(1) translateY(0);}
+.lo-fd{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.lo-fpill:nth-child(1) .lo-fd{background:#8b00ff;box-shadow:0 0 6px rgba(139,0,255,.8);}
+.lo-fpill:nth-child(2) .lo-fd{background:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,.8);}
+.lo-fpill:nth-child(3) .lo-fd{background:#ff3b7a;box-shadow:0 0 6px rgba(255,59,122,.8);}
+.lo-fpill:nth-child(4) .lo-fd{background:#00c3ff;box-shadow:0 0 6px rgba(0,195,255,.8);}
+.lo-fpill:nth-child(5) .lo-fd{background:#39e600;box-shadow:0 0 6px rgba(57,230,0,.8);}
+.lo-fpill:nth-child(6) .lo-fd{background:#ff6b35;box-shadow:0 0 6px rgba(255,107,53,.8);}
+
+/* ── Live counter ── */
+.lo-counter{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 18px;border-radius:40px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);backdrop-filter:blur(20px);
+  margin-bottom:28px;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .7s ease,transform .7s var(--ease);
+}
+.lo-counter.lo-cnt-on{opacity:1;transform:translateY(0);}
+.lo-lv-ring{width:22px;height:22px;border-radius:50%;background:rgba(255,45,40,.12);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;}
+.lo-lv-ring::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(255,45,40,.5);animation:lvRingPulse 1.6s ease-out infinite;}
+@keyframes lvRingPulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.2);opacity:0}}
+.lo-lv-dot{width:7px;height:7px;border-radius:50%;background:#ff3b30;box-shadow:0 0 10px rgba(255,59,48,.9);}
+.lo-cnt-txt{font-size:11px;letter-spacing:.04em;color:rgba(255,255,255,.55);}
+.lo-cnt-num{font-size:14px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+
+/* ── Final message ── */
+.lo-final{
+  text-align:center;margin-bottom:32px;
+  opacity:0;
+  transition:opacity .9s ease;
+}
+.lo-final.lo-fin-on{opacity:1;}
+.lo-fin-line1{
+  font-size:13px;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,.42);font-weight:300;margin-bottom:6px;
+  transform:translateY(18px);transition:transform .9s var(--ease);
+}
+.lo-fin-line2{
+  font-family:'Instrument Serif',serif;font-size:36px;font-style:italic;line-height:1.05;
+  background:linear-gradient(135deg,#a06808,#d4a017,#f5c842,#d4a017,#a06808);
+  background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 3s ease infinite;
+  transform:translateY(18px);transition:transform .9s var(--ease) .1s;
+}
+.lo-final.lo-fin-on .lo-fin-line1,.lo-final.lo-fin-on .lo-fin-line2{transform:translateY(0);}
+.lo-fin-brand{margin-top:14px;font-size:7.5px;letter-spacing:.55em;text-transform:uppercase;color:rgba(255,255,255,.16);font-weight:300;}
+
+/* ── CTA ── */
+.lo-cta{
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  opacity:0;transform:translateY(18px);
+  transition:opacity .7s ease,transform .7s var(--ease);
+}
+.lo-cta.lo-cta-on{opacity:1;transform:translateY(0);}
+.lo-enter-btn{
+  padding:19px 60px;border-radius:50px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#6600cc,#8b00ff);
+  color:#fff;font-size:12px;letter-spacing:.3em;text-transform:uppercase;font-weight:700;
+  position:relative;overflow:hidden;
+  box-shadow:0 10px 40px rgba(100,0,200,.45),0 2px 10px rgba(0,0,0,.5);
+  animation:enterGlow 2.2s ease-in-out infinite;
+  transition:transform .15s ease;
+}
+.lo-enter-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.18),transparent 50%,rgba(255,255,255,.06));
+  border-radius:inherit;
+}
+.lo-enter-btn:active{transform:scale(.96);}
+@keyframes enterGlow{
+  0%,100%{box-shadow:0 10px 40px rgba(100,0,200,.45),0 2px 10px rgba(0,0,0,.5)}
+  50%{box-shadow:0 12px 60px rgba(100,0,200,.75),0 4px 20px rgba(212,160,23,.2),0 0 0 1px rgba(212,160,23,.15)}
+}
+.lo-skip-btn{
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(255,255,255,.2);cursor:pointer;padding:8px 20px;
+  transition:color .25s;
+}
+.lo-skip-btn:active{color:rgba(255,255,255,.5);}
+
+/* ── Progress indicator (bottom) ── */
+.lo-progress{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;z-index:6;
+}
+.lo-prog-dot{width:4px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);transition:all .4s ease;}
+.lo-prog-dot.lo-pd-active{width:16px;background:rgba(212,160,23,.7);}
+.lo-prog-dot.lo-pd-done{background:rgba(255,255,255,.3);}
+
 </style>
 </head>
 <body>
+
+<!-- ══ CINEMATIC LAUNCH OVERLAY ══ -->
+<div id="launch-overlay">
+  <!-- Dynamic background -->
+  <div class="lo-bg" id="lo-bg"></div>
+
+  <!-- Light beams -->
+  <div class="lo-beams">
+    <div class="lo-beam"></div>
+    <div class="lo-beam"></div>
+    <div class="lo-beam"></div>
+    <div class="lo-beam"></div>
+    <div class="lo-beam"></div>
+  </div>
+
+  <!-- Scan line -->
+  <div class="lo-scan"></div>
+
+  <!-- Particles -->
+  <div class="lo-particles" id="lo-particles"></div>
+
+  <!-- Letterbox bars -->
+  <div class="lo-bar lo-bar-t"></div>
+  <div class="lo-bar lo-bar-b"></div>
+
+  <!-- Main content -->
+  <div class="lo-content">
+
+    <!-- Logo -->
+    <div class="lo-logo-wrap">
+      <span class="lo-logo-icon">🌆</span>
+      <div class="lo-wordmark">BarPass</div>
+      <div class="lo-wordmark-tag">Miami · Social OS</div>
+    </div>
+
+    <!-- Cycling tagline -->
+    <div class="lo-tagline">
+      <div class="lo-tag-txt" id="lo-tagline-txt">The city is alive tonight.</div>
+    </div>
+
+    <!-- Venue scene cards -->
+    <div class="lo-scenes-row" id="lo-scenes-row">
+      <div class="lo-sc lo-sc-a">
+        <div class="lo-sc-fill"></div>
+        <div class="lo-sc-overlay"></div>
+        <div class="lo-sc-live">LIVE</div>
+        <div class="lo-sc-ppl">🔥 847 in</div>
+        <div class="lo-sc-bar"><div class="lo-sc-bar-f"></div></div>
+        <div class="lo-sc-emo">🏟️</div>
+        <div class="lo-sc-nm">Stadium</div>
+      </div>
+      <div class="lo-sc lo-sc-b">
+        <div class="lo-sc-fill"></div>
+        <div class="lo-sc-overlay"></div>
+        <div class="lo-sc-live">VIP</div>
+        <div class="lo-sc-ppl">⚡ 99% cap</div>
+        <div class="lo-sc-bar"><div class="lo-sc-bar-f"></div></div>
+        <div class="lo-sc-emo">🥂</div>
+        <div class="lo-sc-nm">LIV Miami</div>
+      </div>
+      <div class="lo-sc lo-sc-c">
+        <div class="lo-sc-fill"></div>
+        <div class="lo-sc-overlay"></div>
+        <div class="lo-sc-live">LIVE</div>
+        <div class="lo-sc-ppl">🎵 12 DJs</div>
+        <div class="lo-sc-bar"><div class="lo-sc-bar-f"></div></div>
+        <div class="lo-sc-emo">🚀</div>
+        <div class="lo-sc-nm">Space</div>
+      </div>
+    </div>
+
+    <!-- Feature pills -->
+    <div class="lo-feats" id="lo-feats">
+      <div class="lo-fpill"><div class="lo-fd"></div>Live Heatmaps</div>
+      <div class="lo-fpill"><div class="lo-fd"></div>VIP Access</div>
+      <div class="lo-fpill"><div class="lo-fd"></div>Real-Time Networking</div>
+      <div class="lo-fpill"><div class="lo-fd"></div>AI Recommendations</div>
+      <div class="lo-fpill"><div class="lo-fd"></div>Table Invitations</div>
+      <div class="lo-fpill"><div class="lo-fd"></div>Social Intelligence</div>
+    </div>
+
+    <!-- Live counter -->
+    <div class="lo-counter" id="lo-counter">
+      <div class="lo-lv-ring"><div class="lo-lv-dot"></div></div>
+      <div class="lo-cnt-txt"><span class="lo-cnt-num" id="lo-cnt-num">0</span> people connected near you</div>
+    </div>
+
+    <!-- Final message -->
+    <div class="lo-final" id="lo-final">
+      <div class="lo-fin-line1">Don't just go out.</div>
+      <div class="lo-fin-line2">Enter the network.</div>
+      <div class="lo-fin-brand">BarPass · The Future of Real-World Social Life</div>
+    </div>
+
+    <!-- CTA -->
+    <div class="lo-cta" id="lo-cta">
+      <button class="lo-enter-btn" onclick="dismissLaunch()">ENTER</button>
+      <div class="lo-skip-btn" onclick="dismissLaunch()">Skip intro</div>
+    </div>
+
+  </div><!-- /lo-content -->
+
+  <!-- Progress dots -->
+  <div class="lo-progress" id="lo-progress">
+    <div class="lo-prog-dot lo-pd-active" id="lo-pd-0"></div>
+    <div class="lo-prog-dot" id="lo-pd-1"></div>
+    <div class="lo-prog-dot" id="lo-pd-2"></div>
+    <div class="lo-prog-dot" id="lo-pd-3"></div>
+    <div class="lo-prog-dot" id="lo-pd-4"></div>
+  </div>
+</div><!-- /#launch-overlay -->
 
 <!-- ══ SPLASH ══ -->
 <div id="splash" onclick="skipSplash()">
@@ -3558,8 +3927,183 @@ function skipSplash(){
   showAuth();
 }
 
-/* Splash was visible while scripts loaded. Transition now. */
-showAuth();
+/* ══════════════════════════════════════════════
+   CINEMATIC LAUNCH EXPERIENCE — JS ENGINE
+══════════════════════════════════════════════ */
+(function(){
+  var LO = document.getElementById('launch-overlay');
+  if(!LO) return;
+
+  // Taglines that cycle
+  var TAGS = [
+    'The city is alive tonight.',
+    'Where the night begins.',
+    'Not everyone gets in.',
+    'Your network is already here.'
+  ];
+  var _tagIdx = 0;
+  var _tagEl = document.getElementById('lo-tagline-txt');
+  var _tagTimer = null;
+
+  function cycleTag(){
+    if(!_tagEl) return;
+    _tagIdx = (_tagIdx + 1) % TAGS.length;
+    _tagEl.style.opacity = '0';
+    _tagEl.style.transform = 'translateY(-8px)';
+    setTimeout(function(){
+      _tagEl.textContent = TAGS[_tagIdx];
+      _tagEl.style.opacity = '';
+      _tagEl.style.transform = '';
+      _tagEl.style.transition = 'opacity .5s ease, transform .5s ease';
+    }, 350);
+  }
+
+  // Spawn ambient particles
+  function spawnParticles(){
+    var c = document.getElementById('lo-particles');
+    if(!c) return;
+    var colors = ['rgba(139,0,255,.6)','rgba(212,160,23,.5)','rgba(255,59,122,.5)','rgba(0,195,255,.4)','rgba(255,255,255,.35)'];
+    for(var i=0;i<28;i++){
+      var d = document.createElement('div');
+      d.className = 'lo-pt';
+      var size = Math.random()*2.5+1.5;
+      d.style.cssText = 'left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;width:'+size+'px;height:'+size+'px;background:'+colors[i%colors.length]+';--d:'+(Math.random()*3+3)+'s;--dl:'+(Math.random()*4)+'s;--op:'+(Math.random()*.4+.15)+';';
+      c.appendChild(d);
+    }
+  }
+
+  // Animated counter
+  function animateCounter(target, duration){
+    var el = document.getElementById('lo-cnt-num');
+    if(!el) return;
+    var start = 0, step = target/60, curr = 0;
+    var startTime = null;
+    function tick(ts){
+      if(!startTime) startTime = ts;
+      var prog = Math.min((ts - startTime)/duration, 1);
+      var eased = prog < .5 ? 2*prog*prog : -1+(4-2*prog)*prog;
+      var val = Math.floor(eased * target);
+      if(el) el.textContent = val.toLocaleString();
+      if(prog < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // Progress dot update
+  function setDot(idx){
+    for(var i=0;i<5;i++){
+      var d = document.getElementById('lo-pd-'+i);
+      if(!d) continue;
+      d.className = 'lo-prog-dot' + (i < idx ? ' lo-pd-done' : i === idx ? ' lo-pd-active' : '');
+    }
+  }
+
+  // Background scene switcher
+  var _bg = document.getElementById('lo-bg');
+  function setBg(cls){
+    if(!_bg) return;
+    _bg.className = 'lo-bg ' + cls;
+  }
+
+  // Feature pills stagger
+  function showFeats(){
+    var pills = document.querySelectorAll('.lo-fpill');
+    pills.forEach(function(p,i){
+      setTimeout(function(){ p.classList.add('lo-fp-on'); }, i * 90);
+    });
+  }
+
+  // ── TIMELINE ──────────────────────────────────
+  var _autoTimer = null;
+  var _launched = false;
+
+  function runLaunch(){
+    if(_launched) return;
+    _launched = true;
+
+    spawnParticles();
+
+    // Phase 0 → open letterbox + show logo
+    setTimeout(function(){
+      LO.classList.add('lo-open');
+      setBg('');
+    }, 50);
+
+    setTimeout(function(){
+      LO.classList.add('lo-logo-on');
+      setDot(0);
+    }, 300);
+
+    // Phase 1 → light beams + club scene
+    setTimeout(function(){
+      LO.classList.add('lo-beams-on');
+      setBg('s-club');
+      setDot(1);
+      _tagTimer = setInterval(cycleTag, 2200);
+    }, 1400);
+
+    // Phase 2 → venue scene cards
+    setTimeout(function(){
+      document.getElementById('lo-scenes-row').classList.add('lo-scenes-on');
+      setBg('s-vip');
+      setDot(2);
+    }, 3000);
+
+    // Phase 3 → feature pills
+    setTimeout(function(){
+      showFeats();
+      setBg('s-stadium');
+      setDot(3);
+    }, 4800);
+
+    // Phase 4 → live counter
+    setTimeout(function(){
+      document.getElementById('lo-counter').classList.add('lo-cnt-on');
+      animateCounter(1247, 1800);
+      setBg('s-final');
+      setDot(4);
+    }, 6400);
+
+    // Phase 5 → hide pills + show final message
+    setTimeout(function(){
+      var featsEl = document.querySelector('.lo-feats');
+      if(featsEl){ featsEl.style.transition='opacity .5s ease'; featsEl.style.opacity='0'; featsEl.style.height='0'; featsEl.style.marginBottom='0'; featsEl.style.overflow='hidden'; }
+      var scEl = document.getElementById('lo-scenes-row');
+      if(scEl){ scEl.style.transition='opacity .5s ease'; scEl.style.opacity='0'; scEl.style.height='0'; scEl.style.marginBottom='0'; scEl.style.overflow='hidden'; }
+      var cntEl = document.getElementById('lo-counter');
+      if(cntEl){ cntEl.style.transition='opacity .5s ease'; cntEl.style.opacity='0'; cntEl.style.height='0'; cntEl.style.marginBottom='0'; cntEl.style.overflow='hidden'; }
+    }, 8200);
+
+    setTimeout(function(){
+      document.getElementById('lo-final').classList.add('lo-fin-on');
+      nativeHaptic && nativeHaptic('medium');
+    }, 8700);
+
+    // Phase 6 → CTA
+    setTimeout(function(){
+      document.getElementById('lo-cta').classList.add('lo-cta-on');
+    }, 9800);
+
+    // Auto dismiss after 15s
+    _autoTimer = setTimeout(function(){ dismissLaunch(); }, 15000);
+  }
+
+  window.dismissLaunch = function(){
+    if(_tagTimer) clearInterval(_tagTimer);
+    if(_autoTimer) clearTimeout(_autoTimer);
+    LO.classList.add('lo-exit');
+    nativeHaptic && nativeHaptic('medium');
+    setTimeout(function(){
+      LO.style.display = 'none';
+      showAuth();
+    }, 900);
+  };
+
+  window._startLaunch = runLaunch;
+})();
+
+/* Splash was visible while scripts loaded. Launch cinematic now. */
+_startLaunch();
 
 function switchAuthTab(tab){
   document.getElementById('tab-login').classList.toggle('active',tab==='login');
