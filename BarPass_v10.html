@@ -2283,6 +2283,185 @@ body.stad-mode #perf,body.stad-mode #demo-bar{display:none!important;}
 [data-theme="light"] .sdl-stat{background:#eef2fb;}
 [data-theme="light"] .sdl-ontime-bar{background:#dde4f5;}
 
+/* ══════════════════════════════════════════════════════════
+   COMMAND CENTER — Interactive nodes, dispatch, profiles
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Interactive Map Nodes ── */
+.map-node{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:15;transition:transform .15s;user-select:none;}
+.map-node:hover{transform:translate(-50%,-50%) scale(1.3);}
+.map-node-pin{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid;position:relative;}
+.map-node-pin::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1.5px solid currentColor;opacity:.35;animation:nodeRipple 2.2s ease-in-out infinite;}
+@keyframes nodeRipple{0%,100%{transform:scale(1);opacity:.35;}50%{transform:scale(1.5);opacity:0;}}
+.map-node.bar .map-node-pin{background:#5AA5FF18;border-color:#5AA5FF;color:#5AA5FF;}
+.map-node.hub .map-node-pin{background:#FFba3818;border-color:#FFba38;color:#FFba38;}
+.map-node.critical .map-node-pin{background:#FF446618;border-color:#FF4466;color:#FF4466;}
+.map-node.critical .map-node-pin::after{animation:critRipple .7s ease-in-out infinite;}
+@keyframes critRipple{0%,100%{transform:scale(1);opacity:.5;}50%{transform:scale(1.6);opacity:0;}}
+.map-node-label{position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--muted);background:rgba(4,6,14,.9);padding:1px 4px;border-radius:2px;pointer-events:none;}
+.map-node-inv{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:6.5px;font-weight:800;padding:1px 5px;border-radius:2px;pointer-events:none;white-space:nowrap;}
+
+/* ── Heatmap Overlay ── */
+.heatmap-layer{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;transition:opacity .6s;}
+.heatmap-layer.active{opacity:1;}
+.hm-blob{position:absolute;transform:translate(-50%,-50%);border-radius:50%;mix-blend-mode:screen;animation:hmBreath 3s ease-in-out infinite;}
+@keyframes hmBreath{0%,100%{transform:translate(-50%,-50%) scale(1);}50%{transform:translate(-50%,-50%) scale(1.12);}}
+.hm-btn{padding:5px 10px;background:#a855f722;border:1px solid #a855f744;border-radius:4px;color:#a855f7;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .15s;}
+.hm-btn.active{background:#a855f7;color:#fff;}
+
+/* ── Node Action Menu ── */
+.node-menu{position:fixed;z-index:99999;background:#07091a;border:1px solid #1e2448;border-radius:10px;padding:4px;min-width:190px;box-shadow:0 12px 40px rgba(0,0,0,.85),0 0 0 1px rgba(90,165,255,.08);animation:menuPop .12s cubic-bezier(.18,.89,.32,1.1);}
+@keyframes menuPop{from{opacity:0;transform:scale(.9) translateY(-6px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.nm-head{padding:7px 10px 5px;border-bottom:1px solid #1e2448;margin-bottom:3px;}
+.nm-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;color:var(--text);}
+.nm-sub{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);margin-top:1px;display:flex;gap:8px;}
+.nm-item{display:flex;align-items:center;gap:7px;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text2);transition:background .1s,color .1s;}
+.nm-item:hover{background:#0d1020;color:var(--text);}
+.nm-item.primary:hover{background:#5AA5FF15;color:#5AA5FF;}
+.nm-item.danger{color:#FF4466;}
+.nm-item.danger:hover{background:#FF446615;}
+.nm-icon{width:16px;text-align:center;font-size:11px;flex-shrink:0;}
+.nm-sep{height:1px;background:#111428;margin:3px 5px;}
+.nm-metrics{padding:6px 10px;border-top:1px solid #111428;margin-top:2px;display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.nm-m{background:#0a0c1c;border-radius:3px;padding:3px 6px;}
+.nm-ml{font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+.nm-mv{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;margin-top:1px;}
+
+/* ── Task Dispatch Modal ── */
+.task-overlay{position:fixed;inset:0;background:rgba(4,6,14,.88);z-index:99998;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);animation:overlayIn .15s ease;}
+@keyframes overlayIn{from{opacity:0;}to{opacity:1;}}
+.task-modal{background:#07091a;border:1px solid #1e2448;border-radius:12px;width:min(540px,96vw);max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.9),0 0 0 1px rgba(90,165,255,.08);animation:modalUp .2s cubic-bezier(.18,.89,.32,1.1);}
+@keyframes modalUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.tm-head{padding:16px 20px 12px;border-bottom:1px solid #1e2448;display:flex;align-items:center;justify-content:space-between;}
+.tm-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);}
+.tm-badge{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#00e87a;letter-spacing:.1em;background:#00e87a18;padding:2px 8px;border-radius:3px;}
+.tm-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;padding:2px 7px;border-radius:3px;line-height:1;}
+.tm-close:hover{background:#1e2448;color:var(--text);}
+.tm-body{padding:16px 20px;}
+.tm-steps{display:flex;gap:3px;margin-bottom:18px;align-items:center;}
+.tm-step-item{display:flex;align-items:center;gap:6px;flex:1;}
+.tm-step-bar{flex:1;height:3px;border-radius:2px;background:#1e2448;transition:background .3s;}
+.tm-step-bar.done{background:#00e87a;}
+.tm-step-bar.active{background:#5AA5FF;}
+.tm-step-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;border:1.5px solid #1e2448;color:var(--muted);transition:all .3s;flex-shrink:0;}
+.tm-step-num.done{border-color:#00e87a;color:#00e87a;background:#00e87a18;}
+.tm-step-num.active{border-color:#5AA5FF;color:#5AA5FF;background:#5AA5FF18;}
+.tm-sec-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.tm-sec-label::after{content:'';flex:1;height:1px;background:#1e2448;}
+.tm-grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;}
+.tm-opt{background:#0a0c1c;border:1.5px solid #1e2448;border-radius:7px;padding:9px 11px;cursor:pointer;transition:all .15s;}
+.tm-opt:hover{border-color:#5AA5FF55;background:#0d1020;}
+.tm-opt.sel{border-color:#5AA5FF;background:#5AA5FF12;}
+.tm-opt-name{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.tm-opt-sub{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);}
+.tm-opt.sel .tm-opt-name{color:#5AA5FF;}
+.tm-items-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px;}
+.tm-item-chip{background:#0a0c1c;border:1px solid #1e2448;border-radius:5px;padding:5px;text-align:center;cursor:pointer;transition:all .15s;}
+.tm-item-chip:hover,.tm-item-chip.sel{border-color:#5AA5FF;background:#5AA5FF12;}
+.tm-item-chip.sel{border-color:#00e87a;background:#00e87a12;}
+.tm-item-emoji{font-size:14px;display:block;margin-bottom:2px;}
+.tm-item-name{font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--muted);}
+.tm-item-chip.sel .tm-item-name{color:#00e87a;}
+.tm-qty-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.tm-qty-block{display:flex;align-items:center;gap:5px;background:#0a0c1c;border-radius:5px;padding:4px 8px;}
+.tm-qty-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);}
+.tm-qty-ctrl{display:flex;align-items:center;gap:4px;}
+.tm-qty-btn{background:#1e2448;border:none;border-radius:3px;width:20px;height:20px;color:var(--text);cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;}
+.tm-qty-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--text);min-width:22px;text-align:center;}
+.tm-prio-row{display:flex;gap:6px;margin-bottom:14px;}
+.tm-prio{flex:1;padding:7px;background:#0a0c1c;border:1.5px solid #1e2448;border-radius:5px;text-align:center;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.04em;transition:all .15s;}
+.tm-prio.LOW.sel{border-color:#00e87a;color:#00e87a;background:#00e87a12;}
+.tm-prio.MID.sel{border-color:#FFba38;color:#FFba38;background:#FFba3812;}
+.tm-prio.HIGH.sel{border-color:#FF4466;color:#FF4466;background:#FF446612;}
+.tm-confirm{background:#0a0c1c;border:1px solid #1e2448;border-radius:8px;padding:12px;margin-bottom:12px;}
+.tm-crow{display:flex;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 0;border-bottom:1px solid #111428;}
+.tm-crow:last-child{border-bottom:none;}
+.tm-cl{color:var(--muted);}
+.tm-cv{color:var(--text2);font-weight:700;}
+.tm-qr-area{text-align:center;padding:8px 0;}
+.tm-footer{display:flex;gap:8px;justify-content:flex-end;padding:12px 20px;border-top:1px solid #1e2448;}
+.tm-btn{padding:8px 20px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.06em;cursor:pointer;border:none;transition:all .15s;}
+.tm-btn.sec{background:#1e2448;color:var(--muted);}
+.tm-btn.sec:hover{background:#252b4a;color:var(--text);}
+.tm-btn.pri{background:#5AA5FF;color:#04060e;}
+.tm-btn.pri:hover{background:#7ab9ff;}
+.tm-btn.go{background:linear-gradient(135deg,#00e87a,#5AA5FF);color:#04060e;font-size:9px;}
+
+/* ── Active Task Cards ── */
+.task-card{padding:8px 10px;background:#0a0c1c;border-radius:6px;margin-bottom:5px;border-left:3px solid #1e2448;transition:border-color .4s,box-shadow .4s;cursor:pointer;}
+.task-card:hover{box-shadow:0 0 10px rgba(90,165,255,.1);}
+.task-card.CREATED{border-left-color:#5AA5FF;}
+.task-card.ASSIGNED,.task-card.ACCEPTED{border-left-color:#FFba38;}
+.task-card.PICKING,.task-card.IN_TRANSIT{border-left-color:#a855f7;}
+.task-card.DELIVERED,.task-card.VERIFIED{border-left-color:#00e87a;}
+.task-card.DISPUTED,.task-card.CANCELLED{border-left-color:#FF4466;}
+.tc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.tc-id{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);}
+.tc-state-chip{font-family:'JetBrains Mono',monospace;font-size:6.5px;font-weight:700;padding:1.5px 5px;border-radius:3px;letter-spacing:.06em;}
+.s-CREATED{background:#5AA5FF22;color:#5AA5FF;}
+.s-ASSIGNED,.s-ACCEPTED{background:#FFba3822;color:#FFba38;}
+.s-PICKING,.s-IN_TRANSIT{background:#a855f722;color:#a855f7;}
+.s-DELIVERED,.s-VERIFIED{background:#00e87a22;color:#00e87a;}
+.s-DISPUTED,.s-CANCELLED{background:#FF446622;color:#FF4466;}
+.tc-route{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:4px;}
+.tc-info{display:flex;gap:8px;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);align-items:center;}
+.tc-prio-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.tc-prio-dot.LOW{background:#00e87a;}
+.tc-prio-dot.MID{background:#FFba38;}
+.tc-prio-dot.HIGH{background:#FF4466;animation:dotPulse .7s ease infinite;}
+.tc-eta{color:#5AA5FF;}
+.tc-progress{display:flex;gap:2px;margin-top:4px;}
+.tc-dot{width:7px;height:3px;border-radius:1px;background:#1e2448;transition:background .3s;}
+.tc-dot.done{background:#00e87a;}
+.tc-dot.active{background:#5AA5FF;animation:dotPulse .8s ease infinite;}
+@keyframes dotPulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+.dispatch-fab{position:fixed;bottom:80px;right:20px;z-index:9990;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#00e87a,#5AA5FF);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(0,232,122,.35);transition:transform .15s,box-shadow .15s;}
+.dispatch-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(0,232,122,.5);}
+
+/* ── Employee Profile Panel ── */
+.emp-profile{position:fixed;right:0;top:0;height:100vh;width:min(360px,92vw);background:#07091a;border-left:1px solid #1e2448;z-index:99999;overflow-y:auto;box-shadow:-20px 0 70px rgba(0,0,0,.8),0 0 0 1px rgba(90,165,255,.06);transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);}
+.emp-profile.open{transform:translateX(0);}
+.ep-head{padding:14px 16px;border-bottom:1px solid #1e2448;display:flex;align-items:flex-start;gap:12px;position:sticky;top:0;background:#07091a;z-index:2;}
+.ep-avatar{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;font-family:'Syne',sans-serif;border:2.5px solid;flex-shrink:0;}
+.ep-info{flex:1;min-width:0;}
+.ep-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);}
+.ep-role-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:7px;padding:2px 7px;border-radius:3px;font-weight:700;letter-spacing:.08em;margin:3px 0;}
+.ep-status{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.ep-status-dot{width:6px;height:6px;border-radius:50%;}
+.ep-close{background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;padding:2px 6px;border-radius:3px;flex-shrink:0;line-height:1;}
+.ep-close:hover{background:#1e2448;color:var(--text);}
+.ep-section{padding:12px 16px;border-bottom:1px solid #1e2448;}
+.ep-stitle{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.ep-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.ep-kpi{background:#0a0c1c;border-radius:5px;padding:7px;text-align:center;}
+.ep-kv{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;}
+.ep-kl{font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--muted);margin-top:1px;letter-spacing:.04em;}
+.ep-score-row{display:flex;align-items:center;gap:10px;}
+.ep-score-num{font-family:'Syne',sans-serif;font-size:34px;font-weight:700;}
+.ep-score-meta{flex:1;}
+.ep-score-lbl{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--muted);margin-bottom:4px;}
+.ep-score-bar{height:4px;background:#0d1020;border-radius:2px;overflow:hidden;}
+.ep-score-fill{height:100%;border-radius:2px;transition:width .7s ease;}
+.ep-leg-list{display:flex;flex-direction:column;gap:2px;}
+.ep-leg{display:flex;gap:7px;padding:5px 0;border-bottom:1px solid #0d1020;font-family:'JetBrains Mono',monospace;font-size:7.5px;align-items:center;}
+.ep-leg:last-child{border-bottom:none;}
+.ep-leg-t{color:var(--muted);width:40px;flex-shrink:0;}
+.ep-leg-r{flex:1;color:var(--text2);}
+.ep-leg-d.ok{color:#00e87a;font-weight:700;}
+.ep-leg-d.delay{color:#FFba38;font-weight:700;}
+.ep-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:12px 16px;border-top:1px solid #1e2448;position:sticky;bottom:0;background:#07091a;}
+.ep-btn{padding:8px;background:#0d1020;border:1px solid #1e2448;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s;}
+.ep-btn:hover{border-color:#5AA5FF55;color:#5AA5FF;}
+.ep-btn.warn:hover{border-color:#FF446655;color:#FF4466;}
+
+/* ── QR Code ── */
+canvas.qr-canvas{image-rendering:pixelated;border:3px solid #fff;border-radius:3px;}
+
+/* Light mode fixes */
+[data-theme="light"] .node-menu,.task-modal.lt{background:#f5f9ff;border-color:#dde4f5;}
+[data-theme="light"] .emp-profile{background:#f5f9ff;border-left-color:#dde4f5;}
+[data-theme="light"] .nm-m,[data-theme="light"] .tm-opt,[data-theme="light"] .tm-confirm,[data-theme="light"] .task-card,[data-theme="light"] .ep-kpi{background:#eef2fb;}
+
 /* ══════════════════════════════════════════════════════
    STADIUM POS — LIGHT THEME OVERRIDES
    All stadium colors are hardcoded dark; these rules
@@ -4019,6 +4198,8 @@ BarPass/<br>
     <button class="layer-btn la" data-layer="ai" onclick="stadToggleLayer('ai',this)"><span class="lb-dot"></span><span data-i18n="stad.layer.intel">INTEL</span></button>
     <button class="layer-btn on lr" data-layer="risk" onclick="stadToggleLayer('risk',this)"><span class="lb-dot"></span><span data-i18n="stad.layer.risk">RISK</span></button>
     <button class="layer-btn on lc" data-layer="crowd" onclick="stadToggleLayer('crowd',this)"><span class="lb-dot"></span><span data-i18n="stad.layer.crowd">CROWD</span></button>
+    <button class="hm-btn" id="hm-btn" onclick="stadToggleHeatmap(this)">🌡 HEAT</button>
+    <button class="hm-btn" style="background:#00e87a22;border-color:#00e87a44;color:#00e87a;" onclick="stadOpenTaskDispatch()">＋ DISPATCH</button>
     <div class="focus-mode-group">
       <button class="focus-btn active" id="focus-btn-split" onclick="stadSetFocus('split',this)" title="Split View"><span data-i18n="stad.focus.split">SPLIT</span></button>
       <button class="focus-btn" id="focus-btn-map" onclick="stadSetFocus('map',this)" title="Map Only"><span data-i18n="stad.focus.map">MAP</span></button>
@@ -4559,6 +4740,10 @@ BarPass/<br>
 </svg>
         <!-- Operational staff entity layer -->
         <div id="stad-staff-layer" style="pointer-events:none;"></div>
+        <!-- Interactive map node layer (bars + hubs) -->
+        <div id="stad-nodes-layer" style="position:absolute;inset:0;pointer-events:none;z-index:14;"></div>
+        <!-- Heatmap congestion overlay -->
+        <div id="stad-heatmap-layer" class="heatmap-layer"></div>
       </div>
       <!-- Zone selector bar -->
       <div class="stad-zone-bar">
@@ -4633,6 +4818,20 @@ BarPass/<br>
         </div>
         <div class="stad-panel-body" style="padding:8px 12px;">
           <div id="stad-trip-log"></div>
+        </div>
+      </div>
+
+      <!-- Active Task Dispatch -->
+      <div class="stad-panel">
+        <div class="stad-panel-head">
+          <span>ACTIVE TASKS</span>
+          <span style="color:#5AA5FF;font-size:8px;font-weight:700;display:flex;align-items:center;gap:6px;">
+            <span id="stad-tasks-count" style="background:#5AA5FF22;padding:1px 6px;border-radius:3px;">0</span>
+            <button onclick="stadOpenTaskDispatch()" style="background:#00e87a;border:none;border-radius:3px;color:#04060e;font-family:'JetBrains Mono',monospace;font-size:7px;font-weight:700;padding:2px 7px;cursor:pointer;letter-spacing:.04em;">+ NEW</button>
+          </span>
+        </div>
+        <div class="stad-panel-body" style="padding:8px 12px;">
+          <div id="stad-task-list"><div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);padding:4px 0;">No active tasks — tap + NEW to dispatch</div></div>
         </div>
       </div>
 
@@ -9623,6 +9822,588 @@ function initStadium(){
   /* Trip engine — 1s tick for real-time tracking */
   stadIntervals.push(setInterval(stadTickTrips,1000));
   stadInitTrips();
+  /* Command Center engine */
+  stadRenderMapNodes();
+  stadRenderHeatmap();
+  stadIntervals.push(setInterval(stadTickTasks,3000));
+  stadIntervals.push(setInterval(stadFluctuateBarMetrics,8000));
+  /* Close any open menus on outside click */
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('.node-menu')&&!e.target.closest('.map-node')) stadCloseNodeMenu();
+    if(!e.target.closest('.emp-profile')&&!e.target.closest('.map-node')&&!e.target.closest('.ep-btn')) {/* keep open */}
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COMMAND CENTER ENGINE v1.0
+   Interactive nodes · Task dispatch · QR chain-of-custody
+   Employee profiles · Heatmap · Operational telemetry
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Map Node Definitions ── */
+const MAP_BARS=[
+  {id:'barA1',  name:'Bar A1',    zone:'A',  x:111,y:242, inv:82, queue:4,  svc:'1m45s', orders:12, risk:18},
+  {id:'barA2',  name:'Bar A2',    zone:'A',  x:111,y:330, inv:61, queue:7,  svc:'2m10s', orders:9,  risk:42},
+  {id:'barB1',  name:'Bar B1',    zone:'B',  x:290,y:150, inv:75, queue:5,  svc:'1m55s', orders:14, risk:25},
+  {id:'barB2',  name:'Bar B2',    zone:'B',  x:420,y:150, inv:48, queue:9,  svc:'2m30s', orders:11, risk:55},
+  {id:'barC1',  name:'Bar C1',    zone:'C',  x:614,y:228, inv:88, queue:3,  svc:'1m30s', orders:16, risk:12},
+  {id:'barC2',  name:'Bar C2',    zone:'C',  x:614,y:360, inv:23, queue:11, svc:'3m05s', orders:8,  risk:78},
+  {id:'barD1',  name:'Bar D1',    zone:'D',  x:295,y:405, inv:70, queue:6,  svc:'2m00s', orders:10, risk:30},
+  {id:'barD2',  name:'Bar D2',    zone:'D',  x:498,y:405, inv:55, queue:8,  svc:'2m20s', orders:7,  risk:45},
+  {id:'vipBar', name:'VIP Bar',   zone:'VIP',x:686,y:280, inv:95, queue:2,  svc:'1m10s', orders:6,  risk:8},
+  {id:'upperB', name:'Upper Bar', zone:'UPP',x:400,y:52,  inv:60, queue:5,  svc:'2m15s', orders:8,  risk:35},
+];
+const MAP_HUBS=[
+  {id:'central', name:'Central Hub', x:400,y:280, cap:94, throughput:247, pending:3,  delay:0},
+  {id:'hubWest', name:'Hub West',    x:148,y:280, cap:67, throughput:89,  pending:7,  delay:2},
+  {id:'hubEast', name:'Hub East',    x:630,y:290, cap:71, throughput:112, pending:4,  delay:1},
+];
+const DISPATCH_ITEMS=['Beer🍺','Wine🍷','Spirits🥃','Water💧','Soda🥤','Hotdog🌭','Nachos🧀','Burger🍔'];
+
+/* ── Task Engine State ── */
+const TASK_STATE_SEQ=['CREATED','ASSIGNED','ACCEPTED','PICKING','IN_TRANSIT','DELIVERED','VERIFIED'];
+let STAD_TASKS=[];
+let _taskCtr=1000;
+let _dispatch={step:0,hub:null,bar:null,emp:null,items:{},priority:'MID'};
+let _empProfileId=null;
+let _nodeMenuEl=null;
+let _hmActive=false;
+
+/* ── Audio Buzzer (Web Audio API) ── */
+function stadBeep(freq=440,dur=120,vol=0.08,type='sine'){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type=type;osc.frequency.value=freq;
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur/1000);
+    osc.start();osc.stop(ctx.currentTime+dur/1000);
+  }catch(e){}
+}
+
+/* ── QR Canvas Generator ── */
+function stadDrawQR(canvas,data){
+  const S=21, cell=Math.floor(canvas.width/S);
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  let h=0; for(let i=0;i<data.length;i++) h=((h<<5)-h)+data.charCodeAt(i);
+  h=Math.abs(h);
+  const sq=(r,c,s,fill='#000',hole='#fff',inner='#000')=>{
+    ctx.fillStyle=fill; ctx.fillRect(c*cell,r*cell,s*cell,s*cell);
+    if(hole){ctx.fillStyle=hole; ctx.fillRect((c+1)*cell,(r+1)*cell,(s-2)*cell,(s-2)*cell);}
+    if(inner){ctx.fillStyle=inner; ctx.fillRect((c+2)*cell,(r+2)*cell,(s-4)*cell,(s-4)*cell);}
+  };
+  sq(0,0,7); sq(0,14,7); sq(14,0,7); // position detection squares
+  // timing
+  for(let i=8;i<13;i++){
+    ctx.fillStyle=i%2===0?'#000':'#fff';
+    ctx.fillRect(i*cell,6*cell,cell,cell);
+    ctx.fillRect(6*cell,i*cell,cell,cell);
+  }
+  // data modules
+  ctx.fillStyle='#000';
+  for(let r=0;r<S;r++) for(let c=0;c<S;c++){
+    if((r<9&&c<9)||(r<9&&c>12)||(r>12&&c<9)||r===6||c===6) continue;
+    if((h>>((r*S+c)%31))&1) ctx.fillRect(c*cell,r*cell,cell,cell);
+  }
+}
+
+/* ── Render Interactive Map Nodes ── */
+function stadRenderMapNodes(){
+  const layer=document.getElementById('stad-nodes-layer');
+  if(!layer) return;
+  layer.style.pointerEvents='all';
+  const all=[...MAP_BARS.map(b=>({...b,type:'bar'})),...MAP_HUBS.map(h=>({...h,type:'hub'}))];
+  layer.innerHTML=all.map(n=>{
+    const lx=(n.x/800*100).toFixed(2), ly=(n.y/560*100).toFixed(2);
+    const isCrit=n.inv!==undefined&&n.inv<30;
+    const inv=n.type==='bar'?n.inv:n.cap;
+    const color=inv<30?'#FF4466':inv<60?'#FFba38':'#00e87a';
+    const icon=n.type==='bar'?'🍺':'⬡';
+    return `<div class="map-node ${n.type}${isCrit?' critical':''}"
+      style="left:${lx}%;top:${ly}%;pointer-events:all;"
+      data-nid="${n.id}" data-ntype="${n.type}"
+      onclick="stadNodeClick(event,'${n.id}','${n.type}')"
+      title="${n.name}">
+      <div class="map-node-pin">${icon}</div>
+      <div class="map-node-label">${n.name}</div>
+      <div class="map-node-inv" style="background:${color}25;color:${color};">${inv}%</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Node Click → Context Menu ── */
+function stadNodeClick(e,nid,ntype){
+  e.stopPropagation();
+  stadCloseNodeMenu();
+  const node=ntype==='bar'?MAP_BARS.find(b=>b.id===nid):MAP_HUBS.find(h=>h.id===nid);
+  if(!node) return;
+  const rect=e.currentTarget.getBoundingClientRect();
+  const menuEl=document.createElement('div');
+  menuEl.className='node-menu';
+  menuEl.id='node-menu-active';
+  const barItems=`
+    <div class="nm-item primary" onclick="stadOpenTaskDispatch('${nid==='barA1'?'hubWest':'central'}','${nid}');stadCloseNodeMenu()"><span class="nm-icon">📦</span>Request Restock</div>
+    <div class="nm-item" onclick="stadOpenTaskDispatch(null,'${nid}');stadCloseNodeMenu()"><span class="nm-icon">⚡</span>Assign Runner</div>
+    <div class="nm-sep"></div>
+    <div class="nm-item" onclick="stadZoomZone('${node.zone}');stadCloseNodeMenu()"><span class="nm-icon">📊</span>Queue Analytics</div>
+    <div class="nm-item" onclick="stadSelectZone('${node.zone}',null);stadCloseNodeMenu()"><span class="nm-icon">🗺</span>View Zone</div>
+    <div class="nm-item" onclick="stadInventoryScan('${nid}');stadCloseNodeMenu()"><span class="nm-icon">📷</span>Inventory Scan</div>
+    <div class="nm-sep"></div>
+    <div class="nm-item danger" onclick="stadEmergencyAlert('${nid}');stadCloseNodeMenu()"><span class="nm-icon">🚨</span>Emergency Alert</div>`;
+  const hubItems=`
+    <div class="nm-item primary" onclick="stadOpenTaskDispatch('${nid}',null);stadCloseNodeMenu()"><span class="nm-icon">🚀</span>Dispatch Order</div>
+    <div class="nm-item" onclick="stadOpenTaskDispatch('${nid}',null);stadCloseNodeMenu()"><span class="nm-icon">📤</span>Redistribute Inventory</div>
+    <div class="nm-sep"></div>
+    <div class="nm-item" onclick="stadCloseNodeMenu()"><span class="nm-icon">📈</span>View Burn Rate</div>
+    <div class="nm-item" onclick="stadCloseNodeMenu()"><span class="nm-icon">🔄</span>Open Logistics Queue</div>
+    <div class="nm-item" onclick="stadCloseNodeMenu()"><span class="nm-icon">👔</span>Assign Manager</div>`;
+  const metricBar=n=>`
+    <div class="nm-metrics">
+      ${n.type==='bar'?`
+        <div class="nm-m"><div class="nm-ml">INVENTORY</div><div class="nm-mv" style="color:${n.inv<30?'#FF4466':n.inv<60?'#FFba38':'#00e87a'};">${n.inv}%</div></div>
+        <div class="nm-m"><div class="nm-ml">QUEUE</div><div class="nm-mv" style="color:${n.queue>8?'#FF4466':'#FFba38'};">${n.queue} min</div></div>
+        <div class="nm-m"><div class="nm-ml">AVG SVC</div><div class="nm-mv">${n.svc}</div></div>
+        <div class="nm-m"><div class="nm-ml">RISK</div><div class="nm-mv" style="color:${n.risk>60?'#FF4466':n.risk>35?'#FFba38':'#00e87a'};">${n.risk}</div></div>
+      `:`
+        <div class="nm-m"><div class="nm-ml">CAPACITY</div><div class="nm-mv" style="color:${n.cap<50?'#FF4466':'#00e87a'};">${n.cap}%</div></div>
+        <div class="nm-m"><div class="nm-ml">THROUGHPUT</div><div class="nm-mv">${n.throughput}/h</div></div>
+        <div class="nm-m"><div class="nm-ml">PENDING</div><div class="nm-mv" style="color:${n.pending>5?'#FFba38':'#00e87a'};">${n.pending}</div></div>
+        <div class="nm-m"><div class="nm-ml">DELAYS</div><div class="nm-mv" style="color:${n.delay>0?'#FFba38':'#00e87a'};">${n.delay}</div></div>
+      `}
+    </div>`;
+  menuEl.innerHTML=`
+    <div class="nm-head">
+      <div class="nm-title">${ntype==='bar'?'🍺':'⬡'} ${node.name}</div>
+      <div class="nm-sub">
+        <span style="color:${ntype==='bar'&&node.inv<30?'#FF4466':'#00e87a'};">● LIVE</span>
+        <span>Zone ${node.zone||nid.replace('hub','')}</span>
+      </div>
+    </div>
+    ${ntype==='bar'?barItems:hubItems}
+    ${metricBar(node)}`;
+  document.body.appendChild(menuEl);
+  _nodeMenuEl=menuEl;
+  // Position: prefer right of node, flip if off-screen
+  let x=rect.right+6, y=rect.top-10;
+  if(x+200>window.innerWidth) x=rect.left-200;
+  if(y+300>window.innerHeight) y=window.innerHeight-310;
+  menuEl.style.left=x+'px';
+  menuEl.style.top=Math.max(10,y)+'px';
+  stadBeep(880,60,0.05);
+}
+function stadCloseNodeMenu(){
+  if(_nodeMenuEl){_nodeMenuEl.remove();_nodeMenuEl=null;}
+}
+
+/* ── Staff Node Click → Employee Profile ── */
+function stadStaffClick(eId){
+  stadCloseNodeMenu();
+  stadOpenEmployeeProfile(eId);
+}
+
+/* ── Staff entity click wiring (patch render) ── */
+const _origRenderEntities=typeof stadRenderEntities==='function'?stadRenderEntities:null;
+function stadRenderEntitiesPatched(){
+  if(_origRenderEntities) _origRenderEntities();
+  document.querySelectorAll('.op-entity').forEach(el=>{
+    const id=el.dataset.id;
+    if(id) el.style.cursor='pointer';
+    el.onclick=(ev)=>{ev.stopPropagation();stadOpenEmployeeProfile(id);};
+  });
+}
+
+/* ── Task Dispatch Modal ── */
+function stadOpenTaskDispatch(prefillHub,prefillBar,prefillEmp){
+  _dispatch={step:0,hub:prefillHub||null,bar:prefillBar||null,emp:prefillEmp||null,items:{},priority:'MID'};
+  _taskCtr++;
+  document.getElementById('tm-task-id').textContent='TK-'+_taskCtr;
+  const ov=document.getElementById('task-overlay');
+  if(ov){ov.style.display='flex';}
+  stadRenderDispatchStep();
+  stadBeep(660,80,0.05);
+}
+function stadCloseTaskModal(){
+  const ov=document.getElementById('task-overlay');
+  if(ov) ov.style.display='none';
+}
+function stadDispatchBack(){
+  if(_dispatch.step>0){_dispatch.step--;stadRenderDispatchStep();}
+  else stadCloseTaskModal();
+}
+function stadDispatchNext(){
+  // Validate current step
+  if(_dispatch.step===0&&!_dispatch.hub){stadBeep(220,150,0.06,'square');return;}
+  if(_dispatch.step===1&&!_dispatch.bar){stadBeep(220,150,0.06,'square');return;}
+  if(_dispatch.step===2&&Object.keys(_dispatch.items).length===0){stadBeep(220,150,0.06,'square');return;}
+  if(_dispatch.step===3&&!_dispatch.emp){_dispatch.emp=_autoPickEmployee();}
+  if(_dispatch.step>=4){stadConfirmDispatch();return;}
+  _dispatch.step++;
+  stadRenderDispatchStep();
+  stadBeep(660,60,0.04);
+}
+
+function stadRenderDispatchStep(){
+  const body=document.getElementById('tm-body');
+  const nextBtn=document.getElementById('tm-next-btn');
+  if(!body) return;
+  const steps=['SOURCE HUB','DESTINATION','ITEMS','ASSIGN','CONFIRM'];
+  const stepBars=steps.map((s,i)=>`
+    <div class="tm-step-item">
+      <div class="tm-step-num ${i<_dispatch.step?'done':i===_dispatch.step?'active':''}">${i<_dispatch.step?'✓':(i+1)}</div>
+      ${i<steps.length-1?`<div class="tm-step-bar ${i<_dispatch.step?'done':i===_dispatch.step?'active':''}"></div>`:''}
+    </div>`).join('');
+  let content='';
+  if(_dispatch.step===0){
+    content=`<div class="tm-sec-label">SELECT SOURCE HUB</div>
+    <div class="tm-grid2">${MAP_HUBS.map(h=>`
+      <div class="tm-opt${_dispatch.hub===h.id?' sel':''}" onclick="_dispatch.hub='${h.id}';stadRenderDispatchStep()">
+        <div class="tm-opt-name">⬡ ${h.name}</div>
+        <div class="tm-opt-sub">${h.cap}% capacity · ${h.pending} pending · ${h.throughput}/h</div>
+      </div>`).join('')}</div>`;
+    if(nextBtn) nextBtn.textContent='NEXT →';
+  } else if(_dispatch.step===1){
+    content=`<div class="tm-sec-label">SELECT DESTINATION BAR</div>
+    <div class="tm-grid2">${MAP_BARS.map(b=>`
+      <div class="tm-opt${_dispatch.bar===b.id?' sel':''}" onclick="_dispatch.bar='${b.id}';stadRenderDispatchStep()">
+        <div class="tm-opt-name" style="color:${b.inv<30?'#FF4466':b.inv<60?'#FFba38':'inherit'}">🍺 ${b.name}</div>
+        <div class="tm-opt-sub">Zone ${b.zone} · ${b.inv}% inv · Queue ${b.queue}min</div>
+      </div>`).join('')}</div>`;
+    if(nextBtn) nextBtn.textContent='NEXT →';
+  } else if(_dispatch.step===2){
+    content=`<div class="tm-sec-label">SELECT ITEMS & QUANTITIES</div>
+    <div class="tm-items-grid">${DISPATCH_ITEMS.map(item=>{
+      const key=item.replace(/[^a-z]/gi,'');
+      const isSel=!!_dispatch.items[key];
+      return `<div class="tm-item-chip${isSel?' sel':''}" onclick="stadToggleItem('${key}','${item}')">
+        <span class="tm-item-emoji">${item.match(/[\u{1F300}-\u{1FAFF}]/u)?.[0]||'📦'}</span>
+        <span class="tm-item-name">${item.replace(/[^\w\s]/g,'').trim()}</span>
+      </div>`;
+    }).join('')}</div>
+    <div class="tm-qty-row">${Object.entries(_dispatch.items).map(([k,v])=>`
+      <div class="tm-qty-block">
+        <span class="tm-qty-lbl">${k.toUpperCase()}</span>
+        <div class="tm-qty-ctrl">
+          <button class="tm-qty-btn" onclick="stadAdjQty('${k}',-1)">−</button>
+          <span class="tm-qty-val">${v}</span>
+          <button class="tm-qty-btn" onclick="stadAdjQty('${k}',1)">+</button>
+        </div>
+      </div>`).join('')||'<span style="font-family:JetBrains Mono,monospace;font-size:8px;color:var(--muted);">Select items above</span>'}</div>`;
+    if(nextBtn) nextBtn.textContent='NEXT →';
+  } else if(_dispatch.step===3){
+    const runners=STAD_ENTITIES.filter(e=>e.role==='runner'||e.role==='manager');
+    content=`<div class="tm-sec-label">ASSIGN EMPLOYEE</div>
+    <div style="margin-bottom:10px;">
+      <div class="tm-opt sel" onclick="_dispatch.emp=null;_dispatch.emp=_autoPickEmployee();stadRenderDispatchStep()" style="border-color:#a855f7;background:#a855f712;">
+        <div class="tm-opt-name" style="color:#a855f7;">🤖 AI AUTO-ASSIGN</div>
+        <div class="tm-opt-sub">Nearest available · Optimal route · Lowest congestion</div>
+      </div>
+    </div>
+    <div class="tm-grid2">${runners.map(e=>{
+      const st=STAD_STAFF_STATS[e.id];
+      const eff=st&&st.tripsCompleted?Math.round(st.onTime/st.tripsCompleted*100):100;
+      const trip=STAD_TRIPS[e.id];
+      const isBusy=trip&&trip.status==='traveling';
+      return `<div class="tm-opt${_dispatch.emp===e.id?' sel':''}${isBusy?' disabled':''}" onclick="${isBusy?'':` _dispatch.emp='${e.id}';stadRenderDispatchStep()`}">
+        <div class="tm-opt-name" style="opacity:${isBusy?.5:1}">${e.role==='manager'?'★':'⚡'} ${e.name}</div>
+        <div class="tm-opt-sub">Zone ${e.zone} · ${eff}% eff${isBusy?' · EN ROUTE':' · AVAILABLE'}</div>
+      </div>`;
+    }).join('')}</div>`;
+    if(nextBtn) nextBtn.textContent='CONFIRM →';
+  } else if(_dispatch.step===4){
+    const hub=MAP_HUBS.find(h=>h.id===_dispatch.hub)||{name:_dispatch.hub};
+    const bar=MAP_BARS.find(b=>b.id===_dispatch.bar)||{name:_dispatch.bar};
+    const emp=STAD_ENTITIES.find(e=>e.id===_dispatch.emp)||{name:'AI Assigned'};
+    const totalUnits=Object.values(_dispatch.items).reduce((s,v)=>s+v,0);
+    const estMins=Math.round(3+Math.random()*7);
+    const taskId='TK-'+_taskCtr;
+    content=`<div class="tm-sec-label">CONFIRM & DISPATCH</div>
+    <div class="tm-confirm">
+      <div class="tm-crow"><span class="tm-cl">TASK ID</span><span class="tm-cv" style="color:#5AA5FF;">${taskId}</span></div>
+      <div class="tm-crow"><span class="tm-cl">ROUTE</span><span class="tm-cv">${hub.name} → ${bar.name}</span></div>
+      <div class="tm-crow"><span class="tm-cl">ITEMS</span><span class="tm-cv">${Object.entries(_dispatch.items).map(([k,v])=>v+'× '+k).join(', ')||'—'} (${totalUnits} units)</span></div>
+      <div class="tm-crow"><span class="tm-cl">ASSIGNED TO</span><span class="tm-cv">${emp.name}</span></div>
+      <div class="tm-crow"><span class="tm-cl">PRIORITY</span><span class="tm-cv" style="color:${_dispatch.priority==='HIGH'?'#FF4466':_dispatch.priority==='MID'?'#FFba38':'#00e87a'};">${_dispatch.priority}</span></div>
+      <div class="tm-crow"><span class="tm-cl">ETA</span><span class="tm-cv" style="color:#5AA5FF;">${estMins}m</span></div>
+    </div>
+    <div class="tm-sec-label" style="margin-bottom:6px;">PRIORITY LEVEL</div>
+    <div class="tm-prio-row">
+      <div class="tm-prio LOW${_dispatch.priority==='LOW'?' sel':''}" onclick="_dispatch.priority='LOW';stadRenderDispatchStep()">LOW</div>
+      <div class="tm-prio MID${_dispatch.priority==='MID'?' sel':''}" onclick="_dispatch.priority='MID';stadRenderDispatchStep()">MEDIUM</div>
+      <div class="tm-prio HIGH${_dispatch.priority==='HIGH'?' sel':''}" onclick="_dispatch.priority='HIGH';stadRenderDispatchStep()">HIGH</div>
+    </div>
+    <div class="tm-qr-area">
+      <canvas id="tm-qr-canvas" class="qr-canvas" width="105" height="105"></canvas>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);margin-top:4px;">SCAN TO VERIFY CHAIN OF CUSTODY</div>
+    </div>`;
+    if(nextBtn) nextBtn.textContent='🚀 DISPATCH';
+    // Draw QR after render
+    setTimeout(()=>{
+      const c=document.getElementById('tm-qr-canvas');
+      if(c) stadDrawQR(c,taskId+_dispatch.hub+_dispatch.bar+Date.now());
+    },50);
+  }
+  body.innerHTML=`<div class="tm-steps">${stepBars}</div>${content}`;
+}
+
+function stadToggleItem(key,label){
+  if(_dispatch.items[key]) delete _dispatch.items[key];
+  else _dispatch.items[key]=12;
+  stadRenderDispatchStep();
+}
+function stadAdjQty(key,delta){
+  _dispatch.items[key]=Math.max(1,(_dispatch.items[key]||12)+delta);
+  stadRenderDispatchStep();
+}
+function _autoPickEmployee(){
+  const avail=STAD_ENTITIES.filter(e=>(e.role==='runner'||e.role==='manager')&&!(STAD_TRIPS[e.id]?.status==='traveling'));
+  return avail.length?avail[Math.floor(Math.random()*avail.length)].id:STAD_ENTITIES[2].id;
+}
+
+function stadConfirmDispatch(){
+  const hub=MAP_HUBS.find(h=>h.id===_dispatch.hub)||{name:_dispatch.hub||'Central'};
+  const bar=MAP_BARS.find(b=>b.id===_dispatch.bar)||{name:_dispatch.bar||'Bar'};
+  const emp=STAD_ENTITIES.find(e=>e.id===_dispatch.emp)||{name:'Runner',id:'e3'};
+  const totalUnits=Object.values(_dispatch.items).reduce((s,v)=>s+v,0);
+  const estMs=Date.now()+(3+Math.random()*7)*60000;
+  const task={
+    id:'TK-'+_taskCtr,
+    state:'CREATED',
+    hub:hub.name, bar:bar.name,
+    empId:emp.id, empName:emp.name,
+    items:Object.entries(_dispatch.items).map(([k,v])=>v+'× '+k).join(', ')||'Mixed',
+    units:totalUnits||24,
+    priority:_dispatch.priority,
+    createdAt:Date.now(),
+    etaMs:estMs,
+    stateIdx:0,
+    log:[{state:'CREATED',ts:Date.now()}],
+  };
+  STAD_TASKS.unshift(task);
+  if(STAD_TASKS.length>20) STAD_TASKS.length=20;
+  stadCloseTaskModal();
+  stadRenderTaskList();
+  stadAddAlert('ai',`Dispatch ${task.id}: ${task.units} units → ${task.bar} via ${task.empName}`);
+  stadBeep(880,120,0.07);
+  setTimeout(()=>stadBeep(1100,80,0.06),130);
+}
+
+/* ── Tick Task States ── */
+function stadTickTasks(){
+  let changed=false;
+  STAD_TASKS.forEach(t=>{
+    if(t.stateIdx>=TASK_STATE_SEQ.length-1||t.state==='CANCELLED'||t.state==='DISPUTED') return;
+    // Auto advance each step after delay
+    const delays=[3,5,4,6,15,5,0]; // seconds between states (multiplied by tick 3s)
+    const elapsed=(Date.now()-t.log[t.log.length-1].ts)/1000;
+    const needed=delays[t.stateIdx]*(2+Math.random());
+    if(elapsed>needed){
+      // 4% chance of dispute
+      if(t.stateIdx===4&&Math.random()<0.04){
+        t.state='DISPUTED'; t.log.push({state:'DISPUTED',ts:Date.now()});
+        stadAddAlert('cr',`DISPUTE: Task ${t.id} — delivery could not be verified at ${t.bar}`);
+        stadBeep(220,400,0.1,'sawtooth');
+        changed=true; return;
+      }
+      t.stateIdx++;
+      t.state=TASK_STATE_SEQ[t.stateIdx];
+      t.log.push({state:t.state,ts:Date.now()});
+      if(t.state==='DELIVERED') stadBeep(1047,150,0.06);
+      if(t.state==='VERIFIED'){
+        stadAddAlert('ok',`VERIFIED: ${t.id} delivered to ${t.bar} · ${t.units} units confirmed`);
+        stadBeep(880,100,0.06); setTimeout(()=>stadBeep(1100,100,0.06),120);
+      }
+      changed=true;
+    }
+  });
+  if(changed) stadRenderTaskList();
+}
+
+/* ── Render Active Task List ── */
+function stadRenderTaskList(){
+  const container=document.getElementById('stad-task-list');
+  const badge=document.getElementById('stad-tasks-count');
+  if(!container) return;
+  const active=STAD_TASKS.filter(t=>t.state!=='VERIFIED'&&t.state!=='CANCELLED').length;
+  if(badge) badge.textContent=active;
+  if(STAD_TASKS.length===0){
+    container.innerHTML='<div style="font-family:\'JetBrains Mono\',monospace;font-size:8px;color:var(--muted);padding:4px 0;">No active tasks — tap + NEW to dispatch</div>';
+    return;
+  }
+  container.innerHTML=STAD_TASKS.slice(0,8).map(t=>{
+    const stateClass=`s-${t.state}`;
+    const etaRemain=Math.max(0,Math.round((t.etaMs-Date.now())/60000));
+    const dots=TASK_STATE_SEQ.map((s,i)=>`<div class="tc-dot${i<t.stateIdx?' done':i===t.stateIdx?' active':''}"></div>`).join('');
+    return `<div class="task-card ${t.state}" onclick="stadTaskDetail('${t.id}')">
+      <div class="tc-top">
+        <span class="tc-id">${t.id}</span>
+        <span class="tc-state-chip ${stateClass}">${t.state}</span>
+      </div>
+      <div class="tc-route">📦 ${t.hub} <span style="color:var(--muted);">→</span> ${t.bar}</div>
+      <div class="tc-info">
+        <span class="tc-prio-dot ${t.priority}"></span>
+        <span>${t.empName}</span>
+        <span>·</span>
+        <span>${t.items}</span>
+        <span>·</span>
+        <span class="tc-eta">${t.state==='VERIFIED'?'✓ Done':etaRemain+'m'}</span>
+      </div>
+      <div class="tc-progress">${dots}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Task Detail (click on task card) ── */
+function stadTaskDetail(taskId){
+  const t=STAD_TASKS.find(x=>x.id===taskId);
+  if(!t) return;
+  // Trigger a log display in alert stream
+  stadAddAlert(t.state==='VERIFIED'?'ok':t.state==='DISPUTED'?'cr':'ai',
+    `[${t.id}] ${t.state}: ${t.hub}→${t.bar} · ${t.empName} · ${t.units} units`);
+}
+
+/* ── Employee Profile Panel ── */
+function stadOpenEmployeeProfile(eId){
+  _empProfileId=eId;
+  const e=STAD_ENTITIES.find(x=>x.id===eId);
+  if(!e) return;
+  const st=STAD_STAFF_STATS[eId]||{tripsCompleted:0,totalActualSec:0,onTime:0,late:0,bestSec:null,worstSec:null,legs:[]};
+  const trip=STAD_TRIPS[eId];
+  const eff=st.tripsCompleted?Math.round(st.onTime/st.tripsCompleted*100):100;
+  const score=Math.min(100,Math.round(eff*0.6+(st.tripsCompleted>0?Math.min(40,st.tripsCompleted*4):0)));
+  const scoreColor=score>=80?'#00e87a':score>=60?'#FFba38':'#FF4466';
+  const roleColors={manager:'#FF4466',runner:'#00e87a',supervisor:'#FFba38',bartender:'#5AA5FF'};
+  const roleIcons={manager:'★',runner:'⚡',supervisor:'◆',bartender:'🍹'};
+  const rc=roleColors[e.role]||'#5AA5FF';
+  // Avatar
+  const avEl=document.getElementById('ep-avatar');
+  if(avEl){avEl.textContent=roleIcons[e.role]||'?'; avEl.style.borderColor=rc; avEl.style.color=rc; avEl.style.background=rc+'18';}
+  document.getElementById('ep-name').textContent=e.name;
+  const rt=document.getElementById('ep-role-tag');
+  if(rt){rt.textContent=e.role.toUpperCase(); rt.style.background=rc+'22'; rt.style.color=rc;}
+  const statusTxt=trip?.status==='traveling'?'EN ROUTE':'AVAILABLE';
+  const dot=document.getElementById('ep-dot');
+  if(dot) dot.style.background=trip?.status==='traveling'?'#5AA5FF':'#00e87a';
+  document.getElementById('ep-status-txt').textContent=`${statusTxt} · Zone ${e.zone}`;
+  // KPIs
+  const avgSec=st.tripsCompleted?Math.round(st.totalActualSec/st.tripsCompleted):0;
+  document.getElementById('ep-kpis').innerHTML=`
+    <div class="ep-kpi"><div class="ep-kv" style="color:#5AA5FF;">${st.tripsCompleted}</div><div class="ep-kl">TRIPS</div></div>
+    <div class="ep-kpi"><div class="ep-kv" style="color:${scoreColor};">${eff}%</div><div class="ep-kl">ON TIME</div></div>
+    <div class="ep-kpi"><div class="ep-kv">${avgSec?stadFmtTime(avgSec):'—'}</div><div class="ep-kl">AVG TIME</div></div>
+    <div class="ep-kpi"><div class="ep-kv" style="color:#00e87a;">${Math.floor(st.totalActualSec/60)}m</div><div class="ep-kl">ACTIVE</div></div>
+    <div class="ep-kpi"><div class="ep-kv" style="color:#00e87a;">${st.onTime}</div><div class="ep-kl">ON TIME</div></div>
+    <div class="ep-kpi"><div class="ep-kv" style="color:${st.late>0?'#FFba38':'#00e87a'};">${st.late}</div><div class="ep-kl">LATE</div></div>`;
+  // Score
+  document.getElementById('ep-score-num').textContent=score;
+  document.getElementById('ep-score-num').style.color=scoreColor;
+  document.getElementById('ep-score-fill').style.width=score+'%';
+  document.getElementById('ep-score-fill').style.background=scoreColor;
+  // Legs
+  const legsEl=document.getElementById('ep-legs');
+  if(legsEl){
+    if(!st.legs.length){legsEl.innerHTML='<div style="font-family:JetBrains Mono,monospace;font-size:8px;color:var(--muted);">No completed routes yet</div>';}
+    else{legsEl.innerHTML=st.legs.slice(0,8).map(l=>{
+      const d=stadFmtDiff(l.actualSec,l.estSec);
+      const t=new Date(l.ts); const ts=(t.getHours()+'').padStart(2,'0')+':'+(t.getMinutes()+'').padStart(2,'0');
+      return `<div class="ep-leg"><span class="ep-leg-t">${ts}</span><span class="ep-leg-r">${l.fromName}→${l.toName}</span><span class="ep-leg-d ${d.cls}">${d.txt}</span></div>`;
+    }).join('');}
+  }
+  // Open panel
+  const panel=document.getElementById('emp-profile');
+  if(panel) panel.classList.add('open');
+  stadBeep(660,60,0.04);
+}
+function stadCloseEmployeeProfile(){
+  _empProfileId=null;
+  const panel=document.getElementById('emp-profile');
+  if(panel) panel.classList.remove('open');
+}
+
+/* ── Employee Action Stubs ── */
+function stadReroute(eId){
+  const e=STAD_ENTITIES.find(x=>x.id===eId);
+  if(!e) return;
+  stadAddAlert('ai',`Rerouting ${e.name} — recalculating optimal path…`);
+  stadBeep(880,80,0.05);
+}
+function stadMessage(eId){
+  const e=STAD_ENTITIES.find(x=>x.id===eId);
+  if(!e) return;
+  stadAddAlert('ai',`Message sent to ${e.name} ✓`);
+}
+function stadEscalate(eId){
+  const e=STAD_ENTITIES.find(x=>x.id===eId);
+  if(!e) return;
+  stadAddAlert('cr',`ESCALATION: ${e.name} flagged for supervisor review`);
+  stadBeep(330,300,0.08,'square');
+}
+
+/* ── Heatmap ── */
+function stadRenderHeatmap(){
+  const layer=document.getElementById('stad-heatmap-layer');
+  if(!layer) return;
+  const blobs=[
+    ...MAP_BARS.map(b=>({x:b.x,y:b.y,r:60,intensity:b.queue/12,color:b.queue>8?'255,68,102':b.queue>5?'255,186,56':'90,165,255'})),
+    ...MAP_HUBS.map(h=>({x:h.x,y:h.y,r:80,intensity:(100-h.cap)/100,color:'168,85,247'})),
+  ];
+  layer.innerHTML=blobs.map(b=>`
+    <div class="hm-blob" style="
+      left:${(b.x/800*100).toFixed(1)}%;top:${(b.y/560*100).toFixed(1)}%;
+      width:${b.r*2}px;height:${b.r*2}px;
+      background:radial-gradient(circle,rgba(${b.color},${(b.intensity*0.5+0.05).toFixed(2)}) 0%,transparent 70%);
+      animation-delay:${Math.random()*2}s;
+    "></div>`).join('');
+}
+function stadToggleHeatmap(btn){
+  _hmActive=!_hmActive;
+  const layer=document.getElementById('stad-heatmap-layer');
+  if(layer) layer.classList.toggle('active',_hmActive);
+  if(btn) btn.classList.toggle('active',_hmActive);
+  stadBeep(_hmActive?880:440,80,0.04);
+}
+
+/* ── Node-specific actions ── */
+function stadInventoryScan(barId){
+  const bar=MAP_BARS.find(b=>b.id===barId);
+  if(!bar) return;
+  stadAddAlert('ai',`Inventory scan initiated at ${bar.name} — awaiting QR confirmation`);
+  stadBeep(1047,100,0.05);
+}
+function stadEmergencyAlert(barId){
+  const bar=MAP_BARS.find(b=>b.id===barId);
+  if(!bar) return;
+  stadAddAlert('cr',`⚠ EMERGENCY at ${bar.name} — all available runners redirected immediately`);
+  stadBeep(220,600,0.12,'sawtooth');
+}
+function stadZoomZone(zone){
+  const tabEl=document.querySelector(`.stad-zone-tab[onclick*="'${zone}'"]`);
+  if(tabEl) tabEl.click();
+}
+
+/* ── Fluctuate bar inventory metrics ── */
+function stadFluctuateBarMetrics(){
+  MAP_BARS.forEach(b=>{
+    b.inv=Math.max(15,Math.min(99,b.inv+(Math.random()-0.55)*5));
+    b.queue=Math.max(1,Math.min(15,b.queue+(Math.random()-0.45)*2));
+    b.risk=Math.round(Math.max(5,Math.min(95,(100-b.inv)*0.6+b.queue*3)));
+    // Re-render node metric badge
+    const el=document.querySelector(`.map-node[data-nid="${b.id}"] .map-node-inv`);
+    if(el){
+      const color=b.inv<30?'#FF4466':b.inv<60?'#FFba38':'#00e87a';
+      el.textContent=Math.round(b.inv)+'%';
+      el.style.color=color; el.style.background=color+'25';
+    }
+    // Flag critical
+    const node=document.querySelector(`.map-node[data-nid="${b.id}"]`);
+    if(node){
+      node.classList.toggle('critical',b.inv<30);
+      if(b.inv<30&&Math.random()<0.3) stadAddAlert('cr',`CRITICAL: ${b.name} inventory at ${Math.round(b.inv)}% — immediate restock required`);
+    }
+  });
+  stadRenderHeatmap();
 }
 
 /* ── Boot i18n on DOM ready ───────────────────────── */
@@ -10236,5 +11017,76 @@ document.addEventListener('DOMContentLoaded',function(){
 
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════════
+     TASK DISPATCH MODAL
+     ══════════════════════════════════════════════════════= -->
+<div id="task-overlay" class="task-overlay" style="display:none;" onclick="if(event.target===this)stadCloseTaskModal()">
+  <div class="task-modal" onclick="event.stopPropagation()">
+    <div class="tm-head">
+      <div>
+        <div class="tm-title">⚡ DISPATCH TASK</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="tm-badge" id="tm-task-id">TK-1000</span>
+        <button class="tm-close" onclick="stadCloseTaskModal()">✕</button>
+      </div>
+    </div>
+    <div class="tm-body" id="tm-body">
+      <!-- Dynamically rendered by stadRenderDispatchStep() -->
+    </div>
+    <div class="tm-footer" id="tm-footer">
+      <button class="tm-btn sec" onclick="stadDispatchBack()">← BACK</button>
+      <button class="tm-btn pri" id="tm-next-btn" onclick="stadDispatchNext()">NEXT →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     EMPLOYEE PROFILE SLIDE-OVER
+     ══════════════════════════════════════════════════════= -->
+<div id="emp-profile" class="emp-profile">
+  <div class="ep-head">
+    <div id="ep-avatar" class="ep-avatar">?</div>
+    <div class="ep-info">
+      <div id="ep-name" class="ep-name">—</div>
+      <span id="ep-role-tag" class="ep-role-tag">—</span>
+      <div id="ep-status" class="ep-status"><span class="ep-status-dot" id="ep-dot" style="background:#00e87a;"></span><span id="ep-status-txt">Active</span></div>
+    </div>
+    <button class="ep-close" onclick="stadCloseEmployeeProfile()">✕</button>
+  </div>
+  <!-- KPIs -->
+  <div class="ep-section">
+    <div class="ep-stitle">TODAY'S PERFORMANCE</div>
+    <div class="ep-kpi-grid" id="ep-kpis"></div>
+  </div>
+  <!-- Efficiency Score -->
+  <div class="ep-section">
+    <div class="ep-stitle">EFFICIENCY SCORE</div>
+    <div class="ep-score-row">
+      <div id="ep-score-num" class="ep-score-num" style="color:#00e87a;">—</div>
+      <div class="ep-score-meta">
+        <div class="ep-score-lbl">Operational Rating</div>
+        <div class="ep-score-bar"><div id="ep-score-fill" class="ep-score-fill" style="width:0%;background:#00e87a;"></div></div>
+      </div>
+    </div>
+  </div>
+  <!-- Trip History -->
+  <div class="ep-section">
+    <div class="ep-stitle">ROUTE HISTORY TODAY</div>
+    <div id="ep-legs" class="ep-leg-list"></div>
+  </div>
+  <!-- Actions -->
+  <div class="ep-btn-row">
+    <button class="ep-btn" onclick="stadOpenTaskDispatch(null,null,_empProfileId)">📋 Assign Task</button>
+    <button class="ep-btn" onclick="stadReroute(_empProfileId)">🔀 Reroute</button>
+    <button class="ep-btn" onclick="stadMessage(_empProfileId)">💬 Message</button>
+    <button class="ep-btn warn" onclick="stadEscalate(_empProfileId)">🚨 Escalate</button>
+  </div>
+</div>
+
+<!-- Node action menu placeholder (created dynamically) -->
+<div id="node-menu-container"></div>
+
 </body>
 </html>
