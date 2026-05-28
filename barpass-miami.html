@@ -1637,7 +1637,7 @@ body::after{
 .points-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;font-size:32px;font-weight:800;color:var(--gold);text-shadow:0 4px 20px rgba(245,158,11,.4);pointer-events:none;animation:pointsFly 1.8s ease-out forwards;}
 
 /* ══════════════════════════════════════════════
-   CINEMATIC LAUNCH EXPERIENCE
+   CONVERSION LAUNCH — CINEMATIC ONBOARDING FUNNEL
 ══════════════════════════════════════════════ */
 #launch-overlay{
   position:fixed;inset:0;z-index:20000;
@@ -1894,54 +1894,173 @@ body::after{
 .lo-prog-dot.lo-pd-active{width:16px;background:rgba(212,160,23,.7);}
 .lo-prog-dot.lo-pd-done{background:rgba(255,255,255,.3);}
 
+/* ── CONVERSION STEP — Paywall Offer ── */
+.lo-offer{
+  position:absolute;inset:0;z-index:10;
+  display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#06030f 0%,#0a0416 60%,#030208 100%);
+  opacity:0;pointer-events:none;
+  transition:opacity .7s ease;
+  overflow:hidden;
+}
+.lo-offer.lo-offer-on{opacity:1;pointer-events:all;}
+
+/* top glow */
+.lo-offer-glow{
+  position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(100,0,220,.35) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* lock teaser strip */
+.lo-teaser{
+  display:flex;gap:8px;padding:20px 16px 0;
+  overflow-x:auto;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  flex-shrink:0;
+}
+.lo-teaser::-webkit-scrollbar{display:none;}
+.lo-tcard{
+  min-width:100px;height:130px;border-radius:16px;
+  position:relative;overflow:hidden;flex-shrink:0;
+  border:1px solid rgba(255,255,255,.06);
+}
+.lo-tc-bg{position:absolute;inset:0;}
+.lo-tcard:nth-child(1) .lo-tc-bg{background:linear-gradient(155deg,#1a003a,#5500b0);}
+.lo-tcard:nth-child(2) .lo-tc-bg{background:linear-gradient(155deg,#0d1a00,#1a4400);}
+.lo-tcard:nth-child(3) .lo-tc-bg{background:linear-gradient(155deg,#1a0800,#5c2200);}
+.lo-tcard:nth-child(4) .lo-tc-bg{background:linear-gradient(155deg,#00101a,#003355);}
+.lo-tcard:nth-child(5) .lo-tc-bg{background:linear-gradient(155deg,#1a001a,#440044);}
+.lo-tc-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.7) 0%,transparent 50%);}
+
+/* blur/lock on teaser cards */
+.lo-tc-lock{
+  position:absolute;inset:0;
+  backdrop-filter:blur(6px);
+  background:rgba(0,0,0,.45);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  border-radius:inherit;
+}
+.lo-tc-lock-ico{font-size:18px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
+.lo-tc-lock-lbl{font-size:7px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.45);font-weight:600;}
+.lo-tc-free{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
+  padding:8px;
+}
+.lo-tc-emo{font-size:26px;line-height:1;margin-bottom:2px;}
+.lo-tc-name{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:600;}
+.lo-tc-cap{font-size:8px;color:rgba(255,255,255,.35);}
+.lo-tc-badge{
+  position:absolute;top:7px;left:7px;
+  padding:2px 7px;border-radius:20px;
+  font-size:7px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+}
+.lo-tc-badge.free{background:rgba(255,255,255,.1);color:rgba(255,255,255,.5);}
+.lo-tc-badge.vip{background:linear-gradient(90deg,#8b00ff,#b040ff);color:#fff;}
+
+/* "unlock" nudge label */
+.lo-unlock-nudge{
+  text-align:center;padding:12px 20px 0;
+  font-size:11px;letter-spacing:.04em;
+  color:rgba(255,255,255,.38);flex-shrink:0;
+}
+.lo-unlock-nudge span{color:rgba(212,160,23,.9);font-weight:600;}
+
+/* plan card */
+.lo-plan-card{
+  margin:12px 16px 0;border-radius:20px;
+  background:linear-gradient(135deg,rgba(100,0,200,.18) 0%,rgba(212,160,23,.08) 100%);
+  border:1px solid rgba(100,0,200,.35);
+  padding:16px 18px;flex-shrink:0;
+  position:relative;overflow:hidden;
+}
+.lo-plan-card::before{
+  content:'';position:absolute;top:-1px;left:20px;right:20px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(212,160,23,.6),transparent);
+}
+.lo-plan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.lo-plan-name{
+  font-size:15px;font-weight:700;letter-spacing:.05em;
+  background:linear-gradient(90deg,#c8880a,#f5c842);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.lo-plan-badge{
+  background:linear-gradient(90deg,#6600cc,#8b00ff);
+  color:#fff;font-size:8px;font-weight:700;letter-spacing:.12em;
+  padding:3px 10px;border-radius:20px;text-transform:uppercase;
+}
+.lo-plan-price{display:flex;align-items:baseline;gap:4px;margin-bottom:14px;}
+.lo-plan-amt{font-size:32px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.02em;}
+.lo-plan-per{font-size:12px;color:rgba(255,255,255,.4);font-weight:400;}
+.lo-plan-trial{font-size:10px;color:rgba(57,230,0,.85);font-weight:600;letter-spacing:.04em;margin-bottom:14px;}
+.lo-plan-feats{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.lo-pf{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(255,255,255,.7);}
+.lo-pf-check{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#6600cc,#8b00ff);display:flex;align-items:center;justify-content:center;font-size:7px;flex-shrink:0;}
+
+/* CTA buttons */
+.lo-cta-stack{padding:14px 16px 8px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
+.lo-btn-primary{
+  width:100%;padding:17px;border-radius:50px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#6600cc,#8b00ff);
+  color:#fff;font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 32px rgba(100,0,200,.5),0 2px 8px rgba(0,0,0,.4);
+  animation:primBtnGlow 2s ease-in-out infinite;
+  transition:transform .15s;
+}
+.lo-btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent 60%,rgba(255,255,255,.05));border-radius:inherit;}
+.lo-btn-primary:active{transform:scale(.97);}
+@keyframes primBtnGlow{
+  0%,100%{box-shadow:0 8px 32px rgba(100,0,200,.5),0 2px 8px rgba(0,0,0,.4)}
+  50%{box-shadow:0 10px 48px rgba(100,0,200,.8),0 4px 16px rgba(212,160,23,.25),0 0 0 1px rgba(212,160,23,.2)}
+}
+.lo-btn-secondary{
+  width:100%;padding:13px;border-radius:50px;border:1px solid rgba(255,255,255,.1);
+  background:transparent;cursor:pointer;
+  color:rgba(255,255,255,.35);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  transition:color .2s,border-color .2s;
+}
+.lo-btn-secondary:active{color:rgba(255,255,255,.6);}
+.lo-offer-legal{
+  text-align:center;padding:0 20px 12px;
+  font-size:9px;color:rgba(255,255,255,.18);line-height:1.5;flex-shrink:0;
+}
+
 </style>
 </head>
 <body>
 
-<!-- ══ CINEMATIC LAUNCH OVERLAY ══ -->
+<!-- ══ CONVERSION LAUNCH OVERLAY ══ -->
 <div id="launch-overlay">
   <!-- Dynamic background -->
   <div class="lo-bg" id="lo-bg"></div>
 
   <!-- Light beams -->
   <div class="lo-beams">
-    <div class="lo-beam"></div>
-    <div class="lo-beam"></div>
-    <div class="lo-beam"></div>
-    <div class="lo-beam"></div>
+    <div class="lo-beam"></div><div class="lo-beam"></div>
+    <div class="lo-beam"></div><div class="lo-beam"></div>
     <div class="lo-beam"></div>
   </div>
-
-  <!-- Scan line -->
   <div class="lo-scan"></div>
-
-  <!-- Particles -->
   <div class="lo-particles" id="lo-particles"></div>
-
-  <!-- Letterbox bars -->
   <div class="lo-bar lo-bar-t"></div>
   <div class="lo-bar lo-bar-b"></div>
 
-  <!-- Main content -->
-  <div class="lo-content">
-
-    <!-- Logo -->
+  <!-- ── PHASE 1: Cinematic brand hook ── -->
+  <div class="lo-content" id="lo-phase1">
     <div class="lo-logo-wrap">
       <span class="lo-logo-icon">🌆</span>
       <div class="lo-wordmark">BarPass</div>
       <div class="lo-wordmark-tag">Miami · Social OS</div>
     </div>
-
-    <!-- Cycling tagline -->
     <div class="lo-tagline">
-      <div class="lo-tag-txt" id="lo-tagline-txt">The city is alive tonight.</div>
+      <div class="lo-tag-txt" id="lo-tagline-txt">Tonight, 1,247 people near you are already connected.</div>
     </div>
-
-    <!-- Venue scene cards -->
     <div class="lo-scenes-row" id="lo-scenes-row">
       <div class="lo-sc lo-sc-a">
-        <div class="lo-sc-fill"></div>
-        <div class="lo-sc-overlay"></div>
+        <div class="lo-sc-fill"></div><div class="lo-sc-overlay"></div>
         <div class="lo-sc-live">LIVE</div>
         <div class="lo-sc-ppl">🔥 847 in</div>
         <div class="lo-sc-bar"><div class="lo-sc-bar-f"></div></div>
@@ -1949,17 +2068,15 @@ body::after{
         <div class="lo-sc-nm">Stadium</div>
       </div>
       <div class="lo-sc lo-sc-b">
-        <div class="lo-sc-fill"></div>
-        <div class="lo-sc-overlay"></div>
+        <div class="lo-sc-fill"></div><div class="lo-sc-overlay"></div>
         <div class="lo-sc-live">VIP</div>
-        <div class="lo-sc-ppl">⚡ 99% cap</div>
+        <div class="lo-sc-ppl">⚡ 99% full</div>
         <div class="lo-sc-bar"><div class="lo-sc-bar-f"></div></div>
         <div class="lo-sc-emo">🥂</div>
         <div class="lo-sc-nm">LIV Miami</div>
       </div>
       <div class="lo-sc lo-sc-c">
-        <div class="lo-sc-fill"></div>
-        <div class="lo-sc-overlay"></div>
+        <div class="lo-sc-fill"></div><div class="lo-sc-overlay"></div>
         <div class="lo-sc-live">LIVE</div>
         <div class="lo-sc-ppl">🎵 12 DJs</div>
         <div class="lo-sc-bar"><div class="lo-sc-bar-f"></div></div>
@@ -1967,45 +2084,105 @@ body::after{
         <div class="lo-sc-nm">Space</div>
       </div>
     </div>
-
-    <!-- Feature pills -->
-    <div class="lo-feats" id="lo-feats">
-      <div class="lo-fpill"><div class="lo-fd"></div>Live Heatmaps</div>
-      <div class="lo-fpill"><div class="lo-fd"></div>VIP Access</div>
-      <div class="lo-fpill"><div class="lo-fd"></div>Real-Time Networking</div>
-      <div class="lo-fpill"><div class="lo-fd"></div>AI Recommendations</div>
-      <div class="lo-fpill"><div class="lo-fd"></div>Table Invitations</div>
-      <div class="lo-fpill"><div class="lo-fd"></div>Social Intelligence</div>
-    </div>
-
-    <!-- Live counter -->
     <div class="lo-counter" id="lo-counter">
       <div class="lo-lv-ring"><div class="lo-lv-dot"></div></div>
-      <div class="lo-cnt-txt"><span class="lo-cnt-num" id="lo-cnt-num">0</span> people connected near you</div>
+      <div class="lo-cnt-txt"><span class="lo-cnt-num" id="lo-cnt-num">0</span> people connected near you right now</div>
+    </div>
+  </div>
+
+  <!-- ── PHASE 2: Paywall / Conversion offer ── -->
+  <div class="lo-offer" id="lo-offer">
+    <div class="lo-offer-glow"></div>
+
+    <!-- Teaser: blurred premium cards -->
+    <div class="lo-teaser">
+      <!-- Free: visible -->
+      <div class="lo-tcard">
+        <div class="lo-tc-bg"></div><div class="lo-tc-overlay"></div>
+        <div class="lo-tc-badge free">Free</div>
+        <div class="lo-tc-free">
+          <div class="lo-tc-emo">🗺️</div>
+          <div class="lo-tc-name">Basic Map</div>
+          <div class="lo-tc-cap">Limited venues</div>
+        </div>
+      </div>
+      <!-- Locked: VIP heatmap -->
+      <div class="lo-tcard">
+        <div class="lo-tc-bg"></div><div class="lo-tc-overlay"></div>
+        <div class="lo-tc-badge vip">VIP</div>
+        <div class="lo-tc-lock">
+          <div class="lo-tc-lock-ico">🔥</div>
+          <div class="lo-tc-lock-lbl">Live Heatmap</div>
+        </div>
+      </div>
+      <!-- Locked: Table invites -->
+      <div class="lo-tcard">
+        <div class="lo-tc-bg"></div><div class="lo-tc-overlay"></div>
+        <div class="lo-tc-badge vip">VIP</div>
+        <div class="lo-tc-lock">
+          <div class="lo-tc-lock-ico">🥂</div>
+          <div class="lo-tc-lock-lbl">Table Invites</div>
+        </div>
+      </div>
+      <!-- Locked: AI intel -->
+      <div class="lo-tcard">
+        <div class="lo-tc-bg"></div><div class="lo-tc-overlay"></div>
+        <div class="lo-tc-badge vip">VIP</div>
+        <div class="lo-tc-lock">
+          <div class="lo-tc-lock-ico">🤖</div>
+          <div class="lo-tc-lock-lbl">AI Intel</div>
+        </div>
+      </div>
+      <!-- Locked: Networking -->
+      <div class="lo-tcard">
+        <div class="lo-tc-bg"></div><div class="lo-tc-overlay"></div>
+        <div class="lo-tc-badge vip">VIP</div>
+        <div class="lo-tc-lock">
+          <div class="lo-tc-lock-ico">⚡</div>
+          <div class="lo-tc-lock-lbl">Elite Network</div>
+        </div>
+      </div>
     </div>
 
-    <!-- Final message -->
-    <div class="lo-final" id="lo-final">
-      <div class="lo-fin-line1">Don't just go out.</div>
-      <div class="lo-fin-line2">Enter the network.</div>
-      <div class="lo-fin-brand">BarPass · The Future of Real-World Social Life</div>
+    <div class="lo-unlock-nudge">
+      <span id="lo-nudge-txt">4 features locked.</span> Unlock everything with VIP.
     </div>
 
-    <!-- CTA -->
-    <div class="lo-cta" id="lo-cta">
-      <button class="lo-enter-btn" onclick="dismissLaunch()">ENTER</button>
-      <div class="lo-skip-btn" onclick="dismissLaunch()">Skip intro</div>
+    <!-- VIP Plan card -->
+    <div class="lo-plan-card">
+      <div class="lo-plan-header">
+        <div class="lo-plan-name">BarPass VIP</div>
+        <div class="lo-plan-badge">Most Popular</div>
+      </div>
+      <div class="lo-plan-price">
+        <div class="lo-plan-amt">$9.99</div>
+        <div class="lo-plan-per">/month</div>
+      </div>
+      <div class="lo-plan-trial">✓ 7 days free — cancel anytime</div>
+      <div class="lo-plan-feats">
+        <div class="lo-pf"><div class="lo-pf-check">✓</div>Live Heatmaps</div>
+        <div class="lo-pf"><div class="lo-pf-check">✓</div>VIP Table Access</div>
+        <div class="lo-pf"><div class="lo-pf-check">✓</div>AI Recommendations</div>
+        <div class="lo-pf"><div class="lo-pf-check">✓</div>Elite Networking</div>
+        <div class="lo-pf"><div class="lo-pf-check">✓</div>Priority Entry</div>
+        <div class="lo-pf"><div class="lo-pf-check">✓</div>Private Groups</div>
+        <div class="lo-pf"><div class="lo-pf-check">✓</div>Premium Intel</div>
+        <div class="lo-pf"><div class="lo-pf-check">✓</div>Afterparty Map</div>
+      </div>
     </div>
 
-  </div><!-- /lo-content -->
+    <!-- CTAs -->
+    <div class="lo-cta-stack">
+      <button class="lo-btn-primary" onclick="launchVIP()">🔓 Start 7-Day Free Trial</button>
+      <button class="lo-btn-secondary" onclick="dismissLaunch()">Continue with Free</button>
+    </div>
+    <div class="lo-offer-legal">No charge today. $9.99/month after trial. Cancel anytime.</div>
+  </div>
 
   <!-- Progress dots -->
   <div class="lo-progress" id="lo-progress">
     <div class="lo-prog-dot lo-pd-active" id="lo-pd-0"></div>
     <div class="lo-prog-dot" id="lo-pd-1"></div>
-    <div class="lo-prog-dot" id="lo-pd-2"></div>
-    <div class="lo-prog-dot" id="lo-pd-3"></div>
-    <div class="lo-prog-dot" id="lo-pd-4"></div>
   </div>
 </div><!-- /#launch-overlay -->
 
@@ -3928,181 +4105,146 @@ function skipSplash(){
 }
 
 /* ══════════════════════════════════════════════
-   CINEMATIC LAUNCH EXPERIENCE — JS ENGINE
+   CONVERSION LAUNCH — JS ENGINE
+   Phase 1: Cinematic hook (4s) → Phase 2: Paywall offer
 ══════════════════════════════════════════════ */
 (function(){
   var LO = document.getElementById('launch-overlay');
   if(!LO) return;
 
-  // Taglines that cycle
-  var TAGS = [
-    'The city is alive tonight.',
-    'Where the night begins.',
-    'Not everyone gets in.',
-    'Your network is already here.'
-  ];
-  var _tagIdx = 0;
-  var _tagEl = document.getElementById('lo-tagline-txt');
-  var _tagTimer = null;
-
-  function cycleTag(){
-    if(!_tagEl) return;
-    _tagIdx = (_tagIdx + 1) % TAGS.length;
-    _tagEl.style.opacity = '0';
-    _tagEl.style.transform = 'translateY(-8px)';
-    setTimeout(function(){
-      _tagEl.textContent = TAGS[_tagIdx];
-      _tagEl.style.opacity = '';
-      _tagEl.style.transform = '';
-      _tagEl.style.transition = 'opacity .5s ease, transform .5s ease';
-    }, 350);
-  }
+  var _bg = document.getElementById('lo-bg');
+  var _autoTimer = null;
+  var _launched = false;
+  var _nudgeTimer = null;
 
   // Spawn ambient particles
   function spawnParticles(){
     var c = document.getElementById('lo-particles');
     if(!c) return;
-    var colors = ['rgba(139,0,255,.6)','rgba(212,160,23,.5)','rgba(255,59,122,.5)','rgba(0,195,255,.4)','rgba(255,255,255,.35)'];
-    for(var i=0;i<28;i++){
-      var d = document.createElement('div');
-      d.className = 'lo-pt';
-      var size = Math.random()*2.5+1.5;
-      d.style.cssText = 'left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;width:'+size+'px;height:'+size+'px;background:'+colors[i%colors.length]+';--d:'+(Math.random()*3+3)+'s;--dl:'+(Math.random()*4)+'s;--op:'+(Math.random()*.4+.15)+';';
+    var colors = ['rgba(100,0,200,.55)','rgba(212,160,23,.5)','rgba(255,59,122,.45)','rgba(0,195,255,.35)','rgba(255,255,255,.3)'];
+    for(var i=0;i<22;i++){
+      var d=document.createElement('div');d.className='lo-pt';
+      var sz=Math.random()*2.2+1.2;
+      d.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;width:'+sz+'px;height:'+sz+'px;background:'+colors[i%colors.length]+';--d:'+(Math.random()*3+3)+'s;--dl:'+(Math.random()*4)+'s;--op:'+(Math.random()*.35+.12)+';';
       c.appendChild(d);
     }
   }
 
+  function setBg(cls){ if(_bg) _bg.className='lo-bg '+(cls||''); }
+
   // Animated counter
-  function animateCounter(target, duration){
-    var el = document.getElementById('lo-cnt-num');
-    if(!el) return;
-    var start = 0, step = target/60, curr = 0;
-    var startTime = null;
+  function animateCounter(target,duration){
+    var el=document.getElementById('lo-cnt-num');
+    if(!el)return;
+    var startTime=null;
     function tick(ts){
-      if(!startTime) startTime = ts;
-      var prog = Math.min((ts - startTime)/duration, 1);
-      var eased = prog < .5 ? 2*prog*prog : -1+(4-2*prog)*prog;
-      var val = Math.floor(eased * target);
-      if(el) el.textContent = val.toLocaleString();
-      if(prog < 1) requestAnimationFrame(tick);
+      if(!startTime)startTime=ts;
+      var p=Math.min((ts-startTime)/duration,1);
+      var e=p<.5?2*p*p:-1+(4-2*p)*p;
+      el.textContent=Math.floor(e*target).toLocaleString();
+      if(p<1)requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
   }
 
-  // Progress dot update
+  // Nudge text cycling (urgency on paywall)
+  var NUDGES=['4 features locked.','VIP tables filling up.','3 invitations waiting.','Limited spots tonight.'];
+  var _nIdx=0;
+  function cycleNudge(){
+    var el=document.getElementById('lo-nudge-txt');
+    if(!el)return;
+    _nIdx=(_nIdx+1)%NUDGES.length;
+    el.style.opacity='0';
+    setTimeout(function(){ el.textContent=NUDGES[_nIdx]; el.style.opacity='1'; el.style.transition='opacity .4s ease'; },300);
+  }
+
+  // Progress dots (2 phases)
   function setDot(idx){
-    for(var i=0;i<5;i++){
-      var d = document.getElementById('lo-pd-'+i);
-      if(!d) continue;
-      d.className = 'lo-prog-dot' + (i < idx ? ' lo-pd-done' : i === idx ? ' lo-pd-active' : '');
+    for(var i=0;i<2;i++){
+      var d=document.getElementById('lo-pd-'+i);
+      if(d) d.className='lo-prog-dot'+(i<idx?' lo-pd-done':i===idx?' lo-pd-active':'');
     }
   }
 
-  // Background scene switcher
-  var _bg = document.getElementById('lo-bg');
-  function setBg(cls){
-    if(!_bg) return;
-    _bg.className = 'lo-bg ' + cls;
+  // ── SHOW PAYWALL (phase 2) ──
+  function showOffer(){
+    var p1=document.getElementById('lo-phase1');
+    var p2=document.getElementById('lo-offer');
+    if(p1){ p1.style.transition='opacity .5s ease'; p1.style.opacity='0'; p1.style.pointerEvents='none'; }
+    setBg('s-final');
+    setDot(1);
+    setTimeout(function(){
+      if(p1) p1.style.display='none';
+      if(p2) p2.classList.add('lo-offer-on');
+      nativeHaptic && nativeHaptic('medium');
+      _nudgeTimer = setInterval(cycleNudge, 2200);
+      // Auto dismiss to free after 30s if no action
+      _autoTimer = setTimeout(function(){ dismissLaunch(); }, 30000);
+    }, 500);
   }
 
-  // Feature pills stagger
-  function showFeats(){
-    var pills = document.querySelectorAll('.lo-fpill');
-    pills.forEach(function(p,i){
-      setTimeout(function(){ p.classList.add('lo-fp-on'); }, i * 90);
-    });
-  }
-
-  // ── TIMELINE ──────────────────────────────────
-  var _autoTimer = null;
-  var _launched = false;
-
+  // ── MAIN TIMELINE ──────────────────────────────
   function runLaunch(){
-    if(_launched) return;
-    _launched = true;
-
+    if(_launched)return;
+    _launched=true;
     spawnParticles();
 
-    // Phase 0 → open letterbox + show logo
-    setTimeout(function(){
-      LO.classList.add('lo-open');
-      setBg('');
-    }, 50);
+    // Open letterbox + logo
+    setTimeout(function(){ LO.classList.add('lo-open'); },50);
+    setTimeout(function(){ LO.classList.add('lo-logo-on'); setDot(0); },350);
 
-    setTimeout(function(){
-      LO.classList.add('lo-logo-on');
-      setDot(0);
-    }, 300);
-
-    // Phase 1 → light beams + club scene
+    // Beams + club bg
     setTimeout(function(){
       LO.classList.add('lo-beams-on');
       setBg('s-club');
-      setDot(1);
-      _tagTimer = setInterval(cycleTag, 2200);
-    }, 1400);
+    },1200);
 
-    // Phase 2 → venue scene cards
+    // Venue cards appear
     setTimeout(function(){
-      document.getElementById('lo-scenes-row').classList.add('lo-scenes-on');
+      var s=document.getElementById('lo-scenes-row');
+      if(s) s.classList.add('lo-scenes-on');
       setBg('s-vip');
-      setDot(2);
-    }, 3000);
+    },2400);
 
-    // Phase 3 → feature pills
+    // Counter
     setTimeout(function(){
-      showFeats();
-      setBg('s-stadium');
-      setDot(3);
-    }, 4800);
+      var cnt=document.getElementById('lo-counter');
+      if(cnt) cnt.classList.add('lo-cnt-on');
+      animateCounter(1247,1600);
+    },3600);
 
-    // Phase 4 → live counter
-    setTimeout(function(){
-      document.getElementById('lo-counter').classList.add('lo-cnt-on');
-      animateCounter(1247, 1800);
-      setBg('s-final');
-      setDot(4);
-    }, 6400);
-
-    // Phase 5 → hide pills + show final message
-    setTimeout(function(){
-      var featsEl = document.querySelector('.lo-feats');
-      if(featsEl){ featsEl.style.transition='opacity .5s ease'; featsEl.style.opacity='0'; featsEl.style.height='0'; featsEl.style.marginBottom='0'; featsEl.style.overflow='hidden'; }
-      var scEl = document.getElementById('lo-scenes-row');
-      if(scEl){ scEl.style.transition='opacity .5s ease'; scEl.style.opacity='0'; scEl.style.height='0'; scEl.style.marginBottom='0'; scEl.style.overflow='hidden'; }
-      var cntEl = document.getElementById('lo-counter');
-      if(cntEl){ cntEl.style.transition='opacity .5s ease'; cntEl.style.opacity='0'; cntEl.style.height='0'; cntEl.style.marginBottom='0'; cntEl.style.overflow='hidden'; }
-    }, 8200);
-
-    setTimeout(function(){
-      document.getElementById('lo-final').classList.add('lo-fin-on');
-      nativeHaptic && nativeHaptic('medium');
-    }, 8700);
-
-    // Phase 6 → CTA
-    setTimeout(function(){
-      document.getElementById('lo-cta').classList.add('lo-cta-on');
-    }, 9800);
-
-    // Auto dismiss after 15s
-    _autoTimer = setTimeout(function(){ dismissLaunch(); }, 15000);
+    // Transition to paywall at 5.5s
+    setTimeout(showOffer, 5500);
   }
 
+  // ── DISMISS (free) ──
   window.dismissLaunch = function(){
-    if(_tagTimer) clearInterval(_tagTimer);
+    if(_nudgeTimer) clearInterval(_nudgeTimer);
     if(_autoTimer) clearTimeout(_autoTimer);
     LO.classList.add('lo-exit');
+    nativeHaptic && nativeHaptic('light');
+    setTimeout(function(){ LO.style.display='none'; showAuth(); }, 900);
+  };
+
+  // ── VIP CTA ──
+  window.launchVIP = function(){
+    if(_nudgeTimer) clearInterval(_nudgeTimer);
+    if(_autoTimer) clearTimeout(_autoTimer);
     nativeHaptic && nativeHaptic('medium');
+    LO.classList.add('lo-exit');
     setTimeout(function(){
-      LO.style.display = 'none';
+      LO.style.display='none';
       showAuth();
+      // After auth, flag that user intends VIP
+      localStorage.setItem('barpass_intent_vip','1');
+      // Show VIP plan modal after login (handled in showScreen)
     }, 900);
   };
 
   window._startLaunch = runLaunch;
 })();
 
-/* Splash was visible while scripts loaded. Launch cinematic now. */
+/* Scripts loaded — start conversion launch */
 _startLaunch();
 
 function switchAuthTab(tab){
@@ -4260,6 +4402,11 @@ function enterApp(){
   },5000);
   /* Games badge always on */
   var gb=document.getElementById('games-badge');if(gb)gb.style.display='block';
+  /* If user tapped VIP trial on launch, open plans immediately */
+  if(localStorage.getItem('barpass_intent_vip')==='1'){
+    localStorage.removeItem('barpass_intent_vip');
+    setTimeout(function(){ openPlansModal(); },1200);
+  }
 }
 
 var insightIdx=0;
