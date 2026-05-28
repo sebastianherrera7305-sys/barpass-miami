@@ -1682,6 +1682,24 @@ body::after{
 .vp-val{font-size:12px;font-weight:700;color:var(--gold2);font-family:'JetBrains Mono',monospace;}
 .vp-badge{font-size:9px;padding:3px 8px;border-radius:100px;background:var(--gold4);color:var(--gold);}
 
+/* ── Hospitality Layer ── */
+/* Personal greeting under logo */
+.header-greeting{font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.01em;display:none;}
+.header-greeting em{color:rgba(212,160,23,.85);font-style:normal;font-weight:600;}
+/* Concierge card on home */
+.concierge-card{margin:0 20px 14px;border-radius:18px;background:linear-gradient(135deg,rgba(212,160,23,.05),rgba(100,0,200,.05));border:1px solid rgba(212,160,23,.15);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.concierge-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(212,160,23,.35),transparent);}
+.concierge-card:active{transform:scale(.99);}
+.cc-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,rgba(212,160,23,.2),rgba(212,160,23,.08));border:1px solid rgba(212,160,23,.18);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.cc-body{flex:1;min-width:0;}
+.cc-label{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(212,160,23,.7);font-weight:700;margin-bottom:4px;}
+.cc-text{font-size:13px;color:rgba(255,255,255,.78);line-height:1.4;font-weight:500;transition:opacity .4s ease;}
+.cc-arrow{color:rgba(212,160,23,.4);font-size:22px;flex-shrink:0;line-height:1;}
+/* Venue concierge note */
+.vd-concierge{background:rgba(212,160,23,.04);border:1px solid rgba(212,160,23,.13);border-radius:14px;padding:12px 14px;margin-bottom:14px;display:none;}
+.vd-conc-label{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(212,160,23,.7);font-weight:700;margin-bottom:6px;}
+.vd-conc-text{font-size:13px;color:rgba(255,255,255,.62);line-height:1.55;}
+
 /* ── Points Toast ── */
 @keyframes pointsFly{0%{opacity:0;transform:translateY(0) scale(.5)}20%{opacity:1;transform:translateY(-20px) scale(1.2)}80%{opacity:1;transform:translateY(-60px) scale(1)}100%{opacity:0;transform:translateY(-100px) scale(.8)}}
 .points-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;font-size:32px;font-weight:800;color:var(--gold);text-shadow:0 4px 20px rgba(245,158,11,.4);pointer-events:none;animation:pointsFly 1.8s ease-out forwards;}
@@ -2352,6 +2370,7 @@ body::after{
       <div>
         <div class="header-logo" data-i18n="app_name">BarPass</div>
         <div class="header-loc"><div class="loc-dot"></div><span id="loc-label">Miami, FL</span></div>
+        <div class="header-greeting" id="header-greeting"></div>
       </div>
       <div class="header-right">
         <div class="credit-pill" id="credit-pill" onclick="openScreen('wallet-screen')" style="display:none;">
@@ -2424,6 +2443,16 @@ body::after{
         <div class="ai-arrow">›</div>
       </div>
       <div class="ai-energy"></div>
+    </div>
+
+    <!-- Concierge Card -->
+    <div class="concierge-card" id="concierge-card" style="display:none;" onclick="openScreen('ai-screen')">
+      <div class="cc-icon">🎩</div>
+      <div class="cc-body">
+        <div class="cc-label">Your Concierge · Tonight</div>
+        <div class="cc-text" id="cc-text">Reading Miami for you…</div>
+      </div>
+      <div class="cc-arrow">›</div>
     </div>
 
     <!-- Express Banner -->
@@ -2539,6 +2568,10 @@ body::after{
     <div class="vd-ai-rec" id="vd-ai-rec">
       <div class="vd-ai-ico">🧠</div>
       <div><div class="vd-ai-label">AI Insight</div><div class="vd-ai-text" id="vd-ai-text">Loading AI analysis…</div></div>
+    </div>
+    <div class="vd-concierge" id="vd-concierge">
+      <div class="vd-conc-label">🎩 Concierge Note</div>
+      <div class="vd-conc-text" id="vd-conc-text"></div>
     </div>
     <div class="cap-wrap">
       <div class="cap-lbl"><span>Crowd Level</span><span id="vd-cap-txt">72%</span></div>
@@ -4561,6 +4594,170 @@ function startVIPTrial(){
 // Backwards compat stub
 function obSlide(){}
 function buildOnboardingMap(){}
+
+/* ══════════════════════════════════════════════
+   HOSPITALITY LAYER
+   Personal concierge experience — warm, human, anticipatory
+══════════════════════════════════════════════ */
+
+/* Time-aware greeting in header */
+function _buildHeaderGreeting(){
+  var el = document.getElementById('header-greeting');
+  if(!el || !S.user) return;
+  var fn = S.user.name.split(' ')[0];
+  var h = new Date().getHours();
+  var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 23 ? 'Good evening' : 'Still going strong';
+  var mode = localStorage.getItem('barpass_social_mode');
+  var modeMap = {networking:'Networking',vip:'VIP',party:'Party',sports:'Sports',dating:'Social',chill:'Chill',creator:'Creator'};
+  var modeLabel = modeMap[mode] || 'Nightlife';
+  el.innerHTML = g + ', <em>' + fn + '</em> &nbsp;·&nbsp; ' + modeLabel + ' Mode';
+  el.style.display = '';
+}
+
+/* Warm welcome toast (personal, time-aware) */
+function _welcomeToast(){
+  if(!S.user) return;
+  var fn = S.user.name.split(' ')[0];
+  var h = new Date().getHours();
+  var msgs = [
+    h < 12 ? 'Good morning, ' + fn + '. Let\'s plan a great night.' :
+    h < 17 ? 'Afternoon, ' + fn + '. Miami starts waking up at sunset.' :
+    h < 20 ? 'Good evening, ' + fn + '. The city is warming up for you.' :
+    h < 23 ? 'The night is yours, ' + fn + '. Let\'s make it count.' :
+             fn + ', Miami doesn\'t sleep. Neither do we. 🌙'
+  ];
+  toast(msgs[0], 'info');
+}
+
+/* Personalized concierge card on home feed */
+var _conciergeRotateTimer = null;
+function buildConciergeCard(){
+  var card = document.getElementById('concierge-card');
+  var txt = document.getElementById('cc-text');
+  if(!card || !txt) return;
+
+  var mode = localStorage.getItem('barpass_social_mode') || 'party';
+  var h = new Date().getHours();
+
+  var tips = {
+    networking:[
+      'Komodo Brickell is running a business crowd tonight — prime window 9–11PM.',
+      'Sugar Rooftop has 3 fintech founders in tonight. Good timing.',
+      'Best networking window in Miami right now: E11EVEN\'s Skybar until midnight.',
+      'High-value crowd at Swan Upstairs. Arrives around 10PM. Go early.',
+      'Dante\'s HiFi is quiet enough to actually have a real conversation tonight.'
+    ],
+    vip:[
+      'Two VIP tables just opened at LIV. This window closes fast.',
+      'E11EVEN is at 88% — peak atmosphere but still accessible. Now.',
+      'Sexy Fish has the best crowd-to-space ratio in Miami right now.',
+      'Priority access moment at Komodo: 8–9PM is the sweet spot.',
+      'Nikki Beach VIP cabanas are still available for tonight.'
+    ],
+    party:[
+      'Space Miami hits its real peak at 1AM. Plan your arrival.',
+      'E11EVEN just hit 95% — this is peak energy. Go now or wait it out.',
+      'Three afterparties confirmed in Wynwood after 2AM. We\'ll notify you.',
+      'LIV\'s main room is at maximum energy. DJ set starts in 20 minutes.',
+      'Bodega crowd just shifted from dinner to party. Perfect window.'
+    ],
+    sports:[
+      'Game starts in 2 hours. Best watch parties: Blackbird Ordinary, Bodega.',
+      'Stadium energy is building fast. Pre-game crowd peaks in 45 minutes.',
+      'Riverside Bar is already packed for the game. Get there now.',
+      'Post-game crowd hits Brickell around 11PM. Prime social window.',
+      'Fan meetup confirmed at Dirty Rabbit if the team wins tonight.'
+    ],
+    dating:[
+      'Best social energy in Miami right now: Mila Lounge, no hesitation.',
+      'Sugar Rooftop\'s golden hour crowd is the most social of the week.',
+      'Komodo crowd skews young and mixed right now — ideal timing.',
+      'E11EVEN\'s bar level (not VIP) is the most social floor tonight.',
+      'Rosa Sky: the most balanced crowd in Miami at this hour.'
+    ],
+    chill:[
+      'Rosa Sky rooftop at 35% capacity — perfect atmosphere right now.',
+      'Golden hour at Sugar Rooftop in 20 minutes. You don\'t want to miss it.',
+      'Dante\'s HiFi: no wait, world-class cocktails, the right energy.',
+      'Dirty Rabbit is exactly the right vibe for tonight\'s energy. Trust us.',
+      'Blackbird Ordinary: craft cocktails, zero pretension, real conversation.'
+    ],
+    creator:[
+      'Wynwood is electric tonight. Bodega has the creative crowd.',
+      'Dante\'s HiFi just got named one of the world\'s 50 best bars. Go tonight.',
+      'Dirty Rabbit has Miami\'s strongest creative energy at this exact hour.',
+      'Art Basel crowd is still lingering in Wynwood this week. Good energy.',
+      'Swan Upstairs has a photography exhibition opening tonight at 9PM.'
+    ]
+  };
+
+  var modeTips = tips[mode] || tips.party;
+  var idx = Math.floor(Math.random() * modeTips.length);
+
+  function setTip(i){
+    txt.style.opacity = '0';
+    setTimeout(function(){
+      txt.textContent = modeTips[i % modeTips.length];
+      txt.style.opacity = '1';
+    }, txt.style.opacity === '0' ? 0 : 300);
+  }
+
+  txt.textContent = modeTips[idx];
+  card.style.display = 'flex';
+
+  // Rotate every 35s
+  if(_conciergeRotateTimer) clearInterval(_conciergeRotateTimer);
+  _conciergeRotateTimer = setInterval(function(){
+    idx = (idx + 1) % modeTips.length;
+    txt.style.transition = 'opacity .3s ease';
+    txt.style.opacity = '0';
+    setTimeout(function(){ txt.textContent = modeTips[idx]; txt.style.opacity = '1'; }, 320);
+  }, 35000);
+}
+
+/* Venue concierge note — warm, specific, personal */
+function _buildVenueConcierge(v){
+  var el = document.getElementById('vd-concierge');
+  var txt = document.getElementById('vd-conc-text');
+  if(!el || !txt || !v) return;
+
+  var h = new Date().getHours();
+  var fn = (S.user && S.user.name) ? S.user.name.split(' ')[0] : '';
+  var mode = localStorage.getItem('barpass_social_mode') || 'party';
+
+  // Build a warm, specific note based on venue data
+  var notes = [];
+
+  // Timing advice
+  if(v.cap >= 90) notes.push('This venue is near capacity — if you\'re going tonight, move now.');
+  else if(v.cap >= 75 && h < 22) notes.push('Arriving before ' + (h < 21 ? '10' : '11') + 'PM gives you the best access before it fills.');
+  else if(v.cap < 50) notes.push('Crowd is still building — perfect timing to get a great spot before it gets busy.');
+
+  // Mode-specific tip
+  var modeTips = {
+    networking: 'For networking: the bar area and outdoor terrace tend to draw the most connected crowd.',
+    vip: 'For VIP access: mention BarPass at the entrance and ask for table availability — there\'s often more than they advertise.',
+    party: 'Energy peaks about an hour after doors open — that\'s your sweet spot.',
+    sports: 'The bar area gets the most game-day energy. Arrive 30 minutes before tip-off.',
+    dating: 'The best conversations happen at the bar or outdoor areas, not the main floor.',
+    chill: 'Find a spot near the bar — the energy is relaxed enough to actually talk here.',
+    creator: 'The crowd here tends to be creative and open. Don\'t hesitate to start a conversation.'
+  };
+  if(modeTips[mode]) notes.push(modeTips[mode]);
+
+  // Dress code reminder if strict
+  if(v.dress === 'Upscale' || v.dress === 'Chic') notes.push('Dress code is enforced — come sharp.');
+
+  // Best night
+  if(v.bestNight) notes.push('Best nights here: ' + v.bestNight + '.');
+
+  // AI tip already shown, so make this complementary — personal and warm
+  var note = notes.slice(0,2).join(' ');
+  if(!note) note = v.aiTip; // fallback to AI tip if nothing else
+
+  txt.textContent = note;
+  el.style.display = 'block';
+}
 function enterApp(){
   nativeHaptic('success');
   document.getElementById('onboarding').style.display='none';
@@ -4574,6 +4771,7 @@ function enterApp(){
   document.getElementById('p-prefs').textContent=u.prefs;
   document.getElementById('ai-section-title').textContent='For '+fn+' tonight';
   S.currentCat='all';
+  _buildHeaderGreeting();
   buildAIBanner();buildDrinkRecs('all');buildViralDrinks();
   buildVenueCards();buildLuxuryCards();buildEventCards();buildVenueList();
   refreshCreditUI();refreshWalletUI();
@@ -4595,6 +4793,10 @@ function enterApp(){
     if(document.getElementById('stat-wait'))document.getElementById('stat-wait').textContent=Math.floor(Math.random()*10+4)+'m';
     if(document.getElementById('stat-energy'))document.getElementById('stat-energy').textContent=['🔥','⚡','🚀'][Math.floor(Math.random()*3)];
   },4000);
+  /* Warm welcome toast at 1.5s */
+  setTimeout(function(){ _welcomeToast(); }, 1500);
+  /* Concierge card at 2s */
+  setTimeout(function(){ buildConciergeCard(); }, 2000);
   /* Show social badge notification after 3s */
   setTimeout(function(){
     var sb=document.getElementById('social-badge');
@@ -5742,6 +5944,7 @@ function openVenue(id){
   document.getElementById('vd-meta').innerHTML='<span>⭐ '+v.rating+'</span><span>·</span><span>'+v.price+'</span><span>·</span><span>'+v.dist+'</span><span>·</span><span>👗 '+v.dress+'</span>';
   document.getElementById('vd-tags-row').innerHTML=v.cat.map(function(c){return '<span class="vd-tag">'+c+'</span>';}).join('')+'<span class="vd-tag">🎵 '+v.music.split('·')[0].trim()+'</span><span class="vd-tag">🗓 '+v.bestNight+'</span>';
   document.getElementById('vd-ai-text').textContent=v.aiTip;
+  _buildVenueConcierge(v);
   var capColor=v.cap<60?'var(--green)':v.cap<80?'var(--gold)':'var(--coral)';
   document.getElementById('vd-cap-fill').style.width=v.cap+'%';
   document.getElementById('vd-cap-fill').style.background=capColor;
