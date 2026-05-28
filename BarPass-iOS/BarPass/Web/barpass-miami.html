@@ -379,32 +379,113 @@ body.after-hours .credit-pill{box-shadow:0 0 20px rgba(245,158,11,.25);}
 .auth-terms{font-size:11px;color:var(--cream4);text-align:center;line-height:1.6;margin-top:16px;}
 .auth-terms a{color:var(--gold2);}
 
-/* ── ONBOARDING ── */
-#onboarding{position:fixed;inset:0;z-index:8500;background:var(--ink);display:none;flex-direction:column;overflow:hidden;}
-.ob-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 55% at 50% 0%,rgba(245,158,11,.1) 0%,transparent 65%),radial-gradient(ellipse 50% 35% at 0% 100%,rgba(251,113,133,.07) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 100% 55%,rgba(45,212,191,.05) 0%,transparent 60%);}
-.ob-float-map{position:absolute;top:70px;left:0;right:0;height:360px;overflow:hidden;pointer-events:none;}
-.ob-bubble{position:absolute;border-radius:18px;background:rgba(15,13,15,.95);border:1px solid var(--border2);padding:12px 16px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(24px);animation:floatBubble linear infinite;box-shadow:0 8px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,248,235,.06);}
-.ob-bubble-emoji{font-size:22px;}
-.ob-bubble-name{font-size:12px;font-weight:700;}
-.ob-bubble-dist{font-size:10px;color:var(--cream3);margin-top:1px;}
-.ob-bubble-live{font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px;}
-.ob-bubble-live::before{content:'';width:5px;height:5px;border-radius:50%;display:inline-block;}
-.live-green::before{background:var(--green);}
-.live-gold::before{background:var(--gold);}
-.ob-slides{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:0 0 20px;position:relative;z-index:2;}
-.ob-slide{display:none;padding:0 28px;animation:slideUp .5s var(--ease) both;}
-.ob-slide.active{display:block;}
-.ob-eyebrow{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:14px;}
-.ob-headline{font-family:'Instrument Serif',serif;font-size:46px;line-height:1.02;color:var(--cream);margin-bottom:18px;font-style:italic;letter-spacing:-.02em;}
-.ob-headline em{background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
-.ob-body{font-size:15px;color:var(--cream3);line-height:1.65;max-width:310px;}
-.ob-dots{display:flex;gap:6px;padding:28px 28px 0;position:relative;z-index:2;}
-.ob-dot{height:4px;border-radius:2px;background:var(--smoke3);transition:all .35s var(--ease);width:20px;}
-.ob-dot.active{width:32px;background:var(--gold);}
-.ob-cta{padding:20px 20px 28px;position:relative;z-index:2;display:flex;flex-direction:column;gap:10px;}
-.ob-next{width:100%;padding:19px;border-radius:var(--r4);border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:var(--ink);transition:all .2s;box-shadow:0 8px 36px var(--gold-glow);}
+/* ── CONVERSATIONAL ONBOARDING v2 ── */
+#onboarding{position:fixed;inset:0;z-index:8500;background:#050308;display:none;flex-direction:column;overflow:hidden;}
+.ob-ambient{position:absolute;inset:0;pointer-events:none;z-index:0;}
+.ob-amb-g1{position:absolute;top:-100px;left:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(100,0,200,.25),transparent 70%);transition:background 1s ease;}
+.ob-amb-g2{position:absolute;bottom:-60px;right:-80px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(212,160,23,.12),transparent 70%);}
+.ob-amb-g3{position:absolute;top:40%;left:20%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(255,59,122,.1),transparent 70%);transition:background 1.5s ease;}
+/* Progress bar */
+.ob-progress{display:flex;gap:5px;padding:56px 24px 0;position:relative;z-index:3;flex-shrink:0;}
+.ob-prog-seg{height:3px;border-radius:2px;flex:1;background:rgba(255,255,255,.1);overflow:hidden;}
+.ob-prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#6600cc,#8b00ff);width:0%;transition:width .5s ease;}
+.ob-prog-seg.done .ob-prog-fill{width:100%;}
+.ob-prog-seg.active .ob-prog-fill{width:100%;background:linear-gradient(90deg,#8b00ff,#bf40ff);}
+/* Back button */
+.ob-back{position:absolute;top:48px;left:20px;z-index:4;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;color:rgba(255,255,255,.45);transition:all .2s;line-height:1;}
+.ob-back:active{background:rgba(255,255,255,.12);}
+/* Steps */
+.ob-steps{flex:1;display:flex;overflow:hidden;position:relative;z-index:2;}
+.ob-step{position:absolute;inset:0;display:flex;flex-direction:column;padding:16px 24px 0;opacity:0;pointer-events:none;transform:translateX(40px);transition:opacity .38s ease,transform .38s var(--ease);}
+.ob-step.ob-active{opacity:1;pointer-events:all;transform:translateX(0);}
+.ob-step.ob-exit{opacity:0;transform:translateX(-40px);}
+/* Step typography */
+.ob-step-eyebrow{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:rgba(139,0,255,.9);font-weight:700;margin-bottom:8px;margin-top:10px;}
+.ob-step-q{font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;color:#fff;line-height:1.18;margin-bottom:6px;}
+.ob-step-q em{background:linear-gradient(135deg,#c8880a,#f5c842);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
+.ob-step-sub{font-size:12px;color:rgba(255,255,255,.38);line-height:1.5;margin-bottom:16px;}
+/* Grid */
+.ob-grid{display:grid;gap:9px;overflow-y:auto;flex:1;padding-bottom:6px;scrollbar-width:none;}
+.ob-grid::-webkit-scrollbar{display:none;}
+.ob-grid.cols-2{grid-template-columns:1fr 1fr;}
+.ob-grid.cols-1{grid-template-columns:1fr;}
+/* Standard tile */
+.ob-tile{padding:13px 14px;border-radius:16px;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);display:flex;align-items:center;gap:11px;cursor:pointer;position:relative;overflow:hidden;transition:all .2s ease;-webkit-tap-highlight-color:transparent;}
+.ob-tile:active{transform:scale(.97);}
+.ob-tile.selected{border-color:rgba(139,0,255,.55);background:rgba(100,0,200,.13);}
+.ob-tile-emo{font-size:22px;line-height:1;flex-shrink:0;}
+.ob-tile-body{flex:1;min-width:0;}
+.ob-tile-lbl{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);}
+.ob-tile-sub{font-size:10px;color:rgba(255,255,255,.32);margin-top:2px;}
+.ob-tile-check{width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(255,255,255,.14);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;transition:all .2s;}
+.ob-tile.selected .ob-tile-check{background:linear-gradient(135deg,#6600cc,#8b00ff);border-color:transparent;color:#fff;}
+/* Energy tiles */
+.ob-energy-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;overflow-y:auto;flex:1;padding-bottom:6px;scrollbar-width:none;}
+.ob-energy-grid::-webkit-scrollbar{display:none;}
+.ob-etile{padding:16px 12px;border-radius:20px;border:1.5px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;cursor:pointer;transition:all .25s;-webkit-tap-highlight-color:transparent;}
+.ob-etile:active{transform:scale(.96);}
+.ob-etile.selected{border-color:var(--ec,rgba(139,0,255,.6));background:var(--eb,rgba(100,0,200,.12));}
+.ob-etile-emo{font-size:28px;line-height:1;}
+.ob-etile-lbl{font-size:13px;font-weight:700;color:rgba(255,255,255,.9);}
+.ob-etile-sub{font-size:10px;color:rgba(255,255,255,.33);line-height:1.3;}
+/* Mode reveal */
+.ob-mode-reveal{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 4px;flex:1;justify-content:center;overflow-y:auto;}
+.ob-mode-icon{font-size:62px;margin-bottom:14px;animation:modeIconPop .6s var(--ease) .2s both;}
+@keyframes modeIconPop{0%{transform:scale(0) rotate(-20deg);opacity:0}70%{transform:scale(1.15) rotate(5deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+.ob-mode-tag{font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:rgba(139,0,255,.9);font-weight:700;margin-bottom:6px;}
+.ob-mode-name{font-family:'Instrument Serif',serif;font-size:34px;font-style:italic;color:#fff;line-height:1.1;margin-bottom:8px;}
+.ob-mode-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.6;max-width:270px;margin:0 auto 20px;}
+.ob-mode-card{width:100%;border-radius:18px;padding:16px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.04);backdrop-filter:blur(16px);position:relative;overflow:hidden;}
+.ob-mode-card::before{content:'';position:absolute;top:-1px;left:25px;right:25px;height:1px;background:linear-gradient(90deg,transparent,var(--mc,rgba(139,0,255,.5)),transparent);}
+.ob-mode-features{display:flex;flex-direction:column;gap:9px;}
+.ob-mf{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.7);}
+.ob-mf-ico{font-size:15px;width:26px;text-align:center;}
+/* Venue preview */
+.ob-venue-preview{flex:1;display:flex;flex-direction:column;gap:9px;overflow-y:auto;padding-bottom:6px;scrollbar-width:none;}
+.ob-venue-preview::-webkit-scrollbar{display:none;}
+.ob-vpcard{border-radius:16px;padding:13px 14px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);display:flex;align-items:center;gap:13px;opacity:0;transform:translateY(18px);transition:opacity .38s ease,transform .38s var(--ease);}
+.ob-vpcard.show{opacity:1;transform:translateY(0);}
+.ob-vpc-left{width:50px;height:50px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.ob-vpc-info{flex:1;min-width:0;}
+.ob-vpc-name{font-size:14px;font-weight:700;color:#fff;margin-bottom:3px;}
+.ob-vpc-meta{font-size:10px;color:rgba(255,255,255,.38);}
+.ob-vpc-badge{padding:3px 9px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.06em;color:#fff;flex-shrink:0;text-transform:uppercase;}
+.ob-vpc-badge.hot{background:linear-gradient(90deg,#ff3b30,#ff6040);}
+.ob-vpc-badge.vip{background:linear-gradient(90deg,#6600cc,#8b00ff);}
+.ob-vpc-badge.new{background:linear-gradient(90deg,#00a86b,#00d68f);}
+.ob-vpc-badge.match{background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#1a0800;}
+/* CTA */
+.ob-cta{padding:14px 24px 32px;position:relative;z-index:3;display:flex;flex-direction:column;gap:9px;flex-shrink:0;}
+.ob-next{width:100%;padding:17px;border-radius:50px;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:700;background:linear-gradient(135deg,#6600cc,#8b00ff);color:#fff;box-shadow:0 8px 28px rgba(100,0,200,.4);transition:all .2s;position:relative;overflow:hidden;}
+.ob-next::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18),transparent 60%);border-radius:inherit;}
 .ob-next:active{transform:scale(.97);}
-.ob-skip{background:none;border:none;color:var(--cream4);font-size:13px;cursor:pointer;padding:8px;font-family:inherit;}
+.ob-next:disabled{opacity:.35;cursor:not-allowed;}
+.ob-skip{background:none;border:none;color:rgba(255,255,255,.22);font-size:11px;cursor:pointer;padding:6px;font-family:inherit;letter-spacing:.1em;text-transform:uppercase;}
+/* Natural VIP upsell sheet */
+#vip-sheet{position:fixed;bottom:0;left:0;right:0;z-index:9500;transform:translateY(110%);transition:transform .5s var(--ease);pointer-events:none;}
+#vip-sheet.vs-open{transform:translateY(0);pointer-events:all;}
+.vs-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);z-index:-1;opacity:0;transition:opacity .4s ease;}
+#vip-sheet.vs-open .vs-backdrop{opacity:1;}
+.vs-sheet{background:linear-gradient(180deg,#0e0818 0%,#080410 100%);border-radius:28px 28px 0 0;border:1px solid rgba(100,0,200,.2);border-bottom:none;padding:0 0 32px;position:relative;overflow:hidden;}
+.vs-sheet::before{content:'';position:absolute;top:0;left:25%;right:25%;height:1px;background:linear-gradient(90deg,transparent,rgba(139,0,255,.65),transparent);}
+.vs-glow{position:absolute;top:-70px;left:50%;transform:translateX(-50%);width:200px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(100,0,200,.3),transparent 70%);pointer-events:none;}
+.vs-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);margin:14px auto 18px;}
+.vs-content{padding:0 20px;}
+.vs-eyebrow{font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:rgba(139,0,255,.9);font-weight:700;text-align:center;margin-bottom:8px;}
+.vs-headline{font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:#fff;text-align:center;line-height:1.2;margin-bottom:5px;}
+.vs-sub{font-size:12px;color:rgba(255,255,255,.38);text-align:center;margin-bottom:16px;line-height:1.5;}
+.vs-feats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px;}
+.vs-feat{display:flex;align-items:center;gap:7px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);font-size:11px;color:rgba(255,255,255,.65);}
+.vs-feat-ico{font-size:15px;flex-shrink:0;}
+.vs-price-row{display:flex;align-items:baseline;justify-content:center;gap:5px;margin-bottom:5px;}
+.vs-price-amt{font-size:34px;font-weight:800;color:#fff;letter-spacing:-.02em;}
+.vs-price-per{font-size:13px;color:rgba(255,255,255,.38);}
+.vs-trial{font-size:11px;color:rgba(57,230,0,.85);font-weight:600;text-align:center;margin-bottom:14px;letter-spacing:.04em;}
+.vs-btn-primary{width:100%;padding:16px;border-radius:50px;border:none;cursor:pointer;background:linear-gradient(135deg,#6600cc,#8b00ff);color:#fff;font-size:14px;font-weight:700;letter-spacing:.1em;box-shadow:0 8px 32px rgba(100,0,200,.45);margin-bottom:9px;position:relative;overflow:hidden;animation:vsGlow 2s ease-in-out infinite;}
+.vs-btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent 60%);border-radius:inherit;}
+@keyframes vsGlow{0%,100%{box-shadow:0 8px 32px rgba(100,0,200,.45)}50%{box-shadow:0 10px 48px rgba(100,0,200,.75),0 0 0 1px rgba(212,160,23,.15)}}
+.vs-btn-secondary{width:100%;padding:12px;border-radius:50px;border:none;background:transparent;color:rgba(255,255,255,.28);font-size:11px;cursor:pointer;font-family:inherit;letter-spacing:.1em;text-transform:uppercase;}
+.vs-legal{text-align:center;font-size:9px;color:rgba(255,255,255,.14);padding-top:8px;line-height:1.5;}
 
 /* ── MAIN APP ── */
 #app{display:none;flex-direction:column;height:100%;position:relative;z-index:1;min-height:0;}
@@ -1107,50 +1188,19 @@ body::after{
     radial-gradient(ellipse 75% 45% at 50% 110%, rgba(245,158,11,.07) 0%, transparent 50%) !important;
 }
 
-/* ── ONBOARDING: safe area + layout fixes ── */
-.ob-float-map{
-  top: max(78px, calc(env(safe-area-inset-top,0px) + 68px)) !important;
-  height: min(340px, 46vh) !important;
-  z-index: 1;
+/* ── ONBOARDING v2: safe area fixes ── */
+.ob-progress{
+  padding-top: max(52px, calc(env(safe-area-inset-top,0px) + 44px)) !important;
 }
-.ob-bubble{
-  max-width: min(210px, 68vw);
-  box-sizing: border-box;
+.ob-back{
+  top: max(44px, calc(env(safe-area-inset-top,0px) + 38px)) !important;
 }
-/* Slide text sits above the floating bubbles */
-.ob-slides{
-  z-index: 4;
-  min-height: 0;
-  flex-shrink: 1;
-}
-.ob-slide{
-  padding: 0 28px 4px;
-}
-/* Responsive headline — scales on SE to Pro Max */
-.ob-headline{
-  font-size: clamp(30px, 10vw, 44px) !important;
-  line-height: 1.06 !important;
-  margin-bottom: 12px !important;
-}
-.ob-body{
-  font-size: clamp(13px, 3.5vw, 15px) !important;
-  color: rgba(255,248,235,.5) !important;
-  line-height: 1.6 !important;
-  max-width: 290px;
-}
-/* CTA: respect iPhone home indicator */
 .ob-cta{
-  z-index: 4;
-  padding-top: 14px !important;
-  padding-bottom: max(28px, calc(env(safe-area-inset-bottom,0px) + 18px)) !important;
+  padding-bottom: max(28px, calc(env(safe-area-inset-bottom,0px) + 16px)) !important;
 }
-.ob-dots{ z-index: 4; padding-top: 20px !important; }
-.ob-bg{
-  background:
-    radial-gradient(ellipse 85% 60% at 50% 0%, rgba(245,158,11,.13) 0%, transparent 65%),
-    radial-gradient(ellipse 55% 40% at 0% 100%, rgba(251,113,133,.08) 0%, transparent 60%),
-    radial-gradient(ellipse 45% 35% at 100% 55%, rgba(45,212,191,.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(245,158,11,.05) 0%, transparent 50%) !important;
+.ob-step-q{ font-size: clamp(24px, 7vw, 30px) !important; }
+#vip-sheet .vs-sheet{
+  padding-bottom: max(28px, calc(env(safe-area-inset-bottom,0px) + 16px)) !important;
 }
 
 /* ── AUTH: safe area at top ── */
@@ -1632,13 +1682,489 @@ body::after{
 .vp-val{font-size:12px;font-weight:700;color:var(--gold2);font-family:'JetBrains Mono',monospace;}
 .vp-badge{font-size:9px;padding:3px 8px;border-radius:100px;background:var(--gold4);color:var(--gold);}
 
+/* ── Hospitality Layer ── */
+/* Personal greeting under logo */
+.header-greeting{font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.01em;display:none;}
+.header-greeting em{color:rgba(212,160,23,.85);font-style:normal;font-weight:600;}
+/* Concierge card on home */
+.concierge-card{margin:0 20px 14px;border-radius:18px;background:linear-gradient(135deg,rgba(212,160,23,.05),rgba(100,0,200,.05));border:1px solid rgba(212,160,23,.15);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.concierge-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(212,160,23,.35),transparent);}
+.concierge-card:active{transform:scale(.99);}
+.cc-icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,rgba(212,160,23,.2),rgba(212,160,23,.08));border:1px solid rgba(212,160,23,.18);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.cc-body{flex:1;min-width:0;}
+.cc-label{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(212,160,23,.7);font-weight:700;margin-bottom:4px;}
+.cc-text{font-size:13px;color:rgba(255,255,255,.78);line-height:1.4;font-weight:500;transition:opacity .4s ease;}
+.cc-arrow{color:rgba(212,160,23,.4);font-size:22px;flex-shrink:0;line-height:1;}
+/* Venue concierge note */
+.vd-concierge{background:rgba(212,160,23,.04);border:1px solid rgba(212,160,23,.13);border-radius:14px;padding:12px 14px;margin-bottom:14px;display:none;}
+.vd-conc-label{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(212,160,23,.7);font-weight:700;margin-bottom:6px;}
+.vd-conc-text{font-size:13px;color:rgba(255,255,255,.62);line-height:1.55;}
+
 /* ── Points Toast ── */
 @keyframes pointsFly{0%{opacity:0;transform:translateY(0) scale(.5)}20%{opacity:1;transform:translateY(-20px) scale(1.2)}80%{opacity:1;transform:translateY(-60px) scale(1)}100%{opacity:0;transform:translateY(-100px) scale(.8)}}
 .points-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;font-size:32px;font-weight:800;color:var(--gold);text-shadow:0 4px 20px rgba(245,158,11,.4);pointer-events:none;animation:pointsFly 1.8s ease-out forwards;}
 
+/* ══════════════════════════════════════════════
+   CONVERSION LAUNCH — CINEMATIC ONBOARDING FUNNEL
+══════════════════════════════════════════════ */
+#launch-overlay{
+  position:fixed;inset:0;z-index:20000;
+  background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+  opacity:1;
+  transition:opacity 1s cubic-bezier(.4,0,.2,1);
+}
+#launch-overlay.lo-exit{opacity:0;pointer-events:none;}
+
+/* ── Dynamic background ── */
+.lo-bg{
+  position:absolute;inset:0;
+  background:#000;
+  transition:background 1.5s ease;
+  z-index:0;
+}
+.lo-bg.s-club{background:radial-gradient(ellipse 80% 60% at 25% 40%,rgba(100,0,200,.45) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 75% 55%,rgba(200,0,100,.25) 0%,transparent 55%),#04020c;}
+.lo-bg.s-vip{background:radial-gradient(ellipse 70% 55% at 35% 40%,rgba(160,100,0,.35) 0%,transparent 60%),radial-gradient(ellipse 45% 35% at 68% 65%,rgba(212,160,23,.2) 0%,transparent 50%),#060400;}
+.lo-bg.s-stadium{background:radial-gradient(ellipse 90% 55% at 50% 20%,rgba(0,80,200,.35) 0%,transparent 60%),radial-gradient(ellipse 55% 40% at 20% 80%,rgba(0,180,255,.18) 0%,transparent 50%),#00060f;}
+.lo-bg.s-final{background:radial-gradient(ellipse 100% 80% at 50% 50%,rgba(80,0,180,.2) 0%,rgba(160,100,0,.1) 50%,transparent 70%),#030108;}
+
+/* ── Letterbox bars ── */
+.lo-bar{position:absolute;left:0;right:0;background:#000;z-index:3;transition:height .8s cubic-bezier(.4,0,.2,1);}
+.lo-bar-t{top:0;height:70px;}
+.lo-bar-b{bottom:0;height:70px;}
+#launch-overlay.lo-open .lo-bar-t,#launch-overlay.lo-open .lo-bar-b{height:0;}
+
+/* ── Light beams ── */
+.lo-beams{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease;z-index:1;pointer-events:none;}
+#launch-overlay.lo-beams-on .lo-beams{opacity:1;}
+.lo-beam{
+  position:absolute;width:1px;top:-10%;height:130%;
+  transform-origin:top center;
+  background:linear-gradient(180deg,transparent 0%,rgba(255,255,255,.03) 20%,rgba(255,255,255,.07) 50%,rgba(255,255,255,.03) 80%,transparent 100%);
+}
+.lo-beam:nth-child(1){left:18%;transform:rotate(-18deg);background:linear-gradient(180deg,transparent,rgba(100,0,200,.09),rgba(100,0,200,.14),transparent);animation:beamDrift 5s ease-in-out infinite;}
+.lo-beam:nth-child(2){left:35%;transform:rotate(-6deg);animation:beamDrift 4s ease-in-out .6s infinite;}
+.lo-beam:nth-child(3){left:52%;transform:rotate(4deg);background:linear-gradient(180deg,transparent,rgba(212,160,23,.06),rgba(212,160,23,.1),transparent);animation:beamDrift 6s ease-in-out 1.2s infinite;}
+.lo-beam:nth-child(4){left:70%;transform:rotate(14deg);animation:beamDrift 4.5s ease-in-out 1.8s infinite;}
+.lo-beam:nth-child(5){left:85%;transform:rotate(22deg);background:linear-gradient(180deg,transparent,rgba(100,0,200,.07),rgba(100,0,200,.12),transparent);animation:beamDrift 5.5s ease-in-out 2.4s infinite;}
+@keyframes beamDrift{0%,100%{transform:rotate(-18deg) scaleY(1)}50%{transform:rotate(-12deg) scaleY(1.04)}}
+.lo-beam:nth-child(3){animation-name:beamDrift3;}
+@keyframes beamDrift3{0%,100%{transform:rotate(4deg)}50%{transform:rotate(9deg)}}
+.lo-beam:nth-child(5){animation-name:beamDrift5;}
+@keyframes beamDrift5{0%,100%{transform:rotate(22deg)}50%{transform:rotate(16deg)}}
+
+/* ── Scan line ── */
+.lo-scan{
+  position:absolute;left:0;right:0;height:1px;top:-1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(100,0,200,.4) 20%,rgba(212,160,23,.6) 50%,rgba(100,0,200,.4) 80%,transparent 100%);
+  z-index:4;opacity:0;pointer-events:none;
+  animation:loScan 4s linear infinite;
+}
+#launch-overlay.lo-beams-on .lo-scan{opacity:1;}
+@keyframes loScan{0%{top:-1px;opacity:0}5%{opacity:.7}95%{opacity:.7}100%{top:100%;opacity:0}}
+
+/* ── Particles ── */
+.lo-particles{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 2s ease;}
+#launch-overlay.lo-beams-on .lo-particles{opacity:1;}
+.lo-pt{position:absolute;border-radius:50%;animation:ptFloat var(--d,4s) ease-in-out var(--dl,0s) infinite;}
+@keyframes ptFloat{0%,100%{transform:translateY(0) scale(1);opacity:var(--op,.3)}50%{transform:translateY(-18px) scale(1.6);opacity:calc(var(--op,.3)*2.5)}}
+
+/* ── Content layer ── */
+.lo-content{position:relative;z-index:5;display:flex;flex-direction:column;align-items:center;width:100%;padding:0 28px;text-align:center;}
+
+/* ── Logo ── */
+.lo-logo-wrap{
+  margin-bottom:8px;
+  opacity:0;transform:translateY(24px) scale(.88);
+  transition:opacity 1s ease,transform 1s var(--ease);
+}
+#launch-overlay.lo-logo-on .lo-logo-wrap{opacity:1;transform:translateY(0) scale(1);}
+.lo-logo-icon{font-size:56px;display:block;margin-bottom:10px;
+  filter:drop-shadow(0 0 24px rgba(212,160,23,.5));
+  animation:iconPulse 2.5s ease-in-out infinite;}
+@keyframes iconPulse{0%,100%{filter:drop-shadow(0 0 20px rgba(212,160,23,.45))}50%{filter:drop-shadow(0 0 40px rgba(212,160,23,.85)) drop-shadow(0 0 70px rgba(100,0,200,.35));}}
+.lo-wordmark{
+  font-family:'Instrument Serif',serif;font-size:52px;font-style:italic;letter-spacing:.04em;
+  background:linear-gradient(135deg,#a06808 0%,#d4a017 25%,#f5c842 50%,#d4a017 75%,#a06808 100%);
+  background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 3s ease infinite;line-height:1;}
+.lo-wordmark-tag{font-size:8px;letter-spacing:.55em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-top:6px;font-weight:300;}
+
+/* ── Cycling tagline ── */
+.lo-tagline{
+  height:18px;overflow:hidden;margin-bottom:28px;
+  opacity:0;transition:opacity .6s ease .3s;
+}
+#launch-overlay.lo-logo-on .lo-tagline{opacity:1;}
+.lo-tag-txt{
+  font-size:10px;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(255,255,255,.38);font-weight:300;
+  animation:tagCycle 10s ease-in-out infinite;
+}
+@keyframes tagCycle{
+  0%,18%{opacity:1;transform:translateY(0)}
+  20%,38%{opacity:0;transform:translateY(-10px)}
+  40%,58%{opacity:1;transform:translateY(0)}
+  60%,78%{opacity:0;transform:translateY(-10px)}
+  80%,100%{opacity:1;transform:translateY(0)}
+}
+
+/* ── Venue scene cards ── */
+.lo-scenes-row{
+  display:flex;gap:10px;align-items:center;
+  margin-bottom:24px;
+  opacity:0;transform:translateY(28px);
+  transition:opacity .8s ease,transform .8s var(--ease);
+}
+#launch-overlay.lo-scenes-on .lo-scenes-row{opacity:1;transform:translateY(0);}
+.lo-sc{
+  border-radius:18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+  position:relative;flex-shrink:0;
+  transition:transform .6s var(--ease);
+}
+.lo-sc-a{width:76px;height:106px;transform:scale(.92) rotate(-2deg);}
+.lo-sc-b{width:88px;height:122px;transform:scale(1);}
+.lo-sc-c{width:76px;height:106px;transform:scale(.92) rotate(2deg);}
+#launch-overlay.lo-scenes-on .lo-sc-a{transform:scale(.96) rotate(-2deg);}
+#launch-overlay.lo-scenes-on .lo-sc-b{transform:scale(1.04);}
+#launch-overlay.lo-scenes-on .lo-sc-c{transform:scale(.96) rotate(2deg);}
+
+.lo-sc-fill{position:absolute;inset:0;}
+.lo-sc-a .lo-sc-fill{background:linear-gradient(160deg,#160028 0%,#3d0080 55%,#6600b0 100%);}
+.lo-sc-b .lo-sc-fill{background:linear-gradient(160deg,#0a0800 0%,#3d2800 45%,#7a4f00 100%);}
+.lo-sc-c .lo-sc-fill{background:linear-gradient(160deg,#000814 0%,#001840 50%,#003080 100%);}
+
+.lo-sc-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.75) 0%,transparent 45%);}
+.lo-sc-live{
+  position:absolute;top:7px;right:7px;
+  background:rgba(255,45,40,.88);border-radius:5px;padding:2px 5px;
+  font-size:6px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#fff;
+}
+.lo-sc-emo{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:22px;line-height:1;}
+.lo-sc-nm{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:500;}
+
+.lo-sc-ppl{
+  position:absolute;top:8px;left:8px;
+  font-size:7px;color:rgba(255,255,255,.6);letter-spacing:.06em;
+}
+.lo-sc-bar{position:absolute;bottom:28px;left:8px;right:8px;height:2px;border-radius:1px;background:rgba(255,255,255,.12);overflow:hidden;}
+.lo-sc-bar-f{height:100%;border-radius:1px;animation:scBarAnim 1.8s ease-in-out infinite;}
+.lo-sc-a .lo-sc-bar-f{width:94%;background:linear-gradient(90deg,#7000cc,#b040ff);}
+.lo-sc-b .lo-sc-bar-f{width:80%;background:linear-gradient(90deg,#c8880a,#fbbf24);}
+.lo-sc-c .lo-sc-bar-f{width:87%;background:linear-gradient(90deg,#0066cc,#40b0ff);}
+@keyframes scBarAnim{0%,100%{opacity:.7}50%{opacity:1;filter:brightness(1.4);}}
+
+/* ── Feature pills ── */
+.lo-feats{
+  display:flex;flex-wrap:wrap;gap:7px;justify-content:center;
+  max-width:310px;margin-bottom:24px;
+}
+.lo-fpill{
+  display:flex;align-items:center;gap:6px;padding:7px 13px;
+  border-radius:40px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.04);
+  backdrop-filter:blur(14px);
+  font-size:10px;letter-spacing:.05em;color:rgba(255,255,255,.65);font-weight:500;
+  opacity:0;transform:scale(.75) translateY(8px);
+  transition:opacity .35s ease,transform .35s var(--ease);
+}
+.lo-fpill.lo-fp-on{opacity:1;transform:scale(1) translateY(0);}
+.lo-fd{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.lo-fpill:nth-child(1) .lo-fd{background:#8b00ff;box-shadow:0 0 6px rgba(139,0,255,.8);}
+.lo-fpill:nth-child(2) .lo-fd{background:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,.8);}
+.lo-fpill:nth-child(3) .lo-fd{background:#ff3b7a;box-shadow:0 0 6px rgba(255,59,122,.8);}
+.lo-fpill:nth-child(4) .lo-fd{background:#00c3ff;box-shadow:0 0 6px rgba(0,195,255,.8);}
+.lo-fpill:nth-child(5) .lo-fd{background:#39e600;box-shadow:0 0 6px rgba(57,230,0,.8);}
+.lo-fpill:nth-child(6) .lo-fd{background:#ff6b35;box-shadow:0 0 6px rgba(255,107,53,.8);}
+
+/* ── Live counter ── */
+.lo-counter{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 18px;border-radius:40px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);backdrop-filter:blur(20px);
+  margin-bottom:28px;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .7s ease,transform .7s var(--ease);
+}
+.lo-counter.lo-cnt-on{opacity:1;transform:translateY(0);}
+.lo-lv-ring{width:22px;height:22px;border-radius:50%;background:rgba(255,45,40,.12);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;}
+.lo-lv-ring::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(255,45,40,.5);animation:lvRingPulse 1.6s ease-out infinite;}
+@keyframes lvRingPulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.2);opacity:0}}
+.lo-lv-dot{width:7px;height:7px;border-radius:50%;background:#ff3b30;box-shadow:0 0 10px rgba(255,59,48,.9);}
+.lo-cnt-txt{font-size:11px;letter-spacing:.04em;color:rgba(255,255,255,.55);}
+.lo-cnt-num{font-size:14px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+
+/* ── Final message ── */
+.lo-final{
+  text-align:center;margin-bottom:32px;
+  opacity:0;
+  transition:opacity .9s ease;
+}
+.lo-final.lo-fin-on{opacity:1;}
+.lo-fin-line1{
+  font-size:13px;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,.42);font-weight:300;margin-bottom:6px;
+  transform:translateY(18px);transition:transform .9s var(--ease);
+}
+.lo-fin-line2{
+  font-family:'Instrument Serif',serif;font-size:36px;font-style:italic;line-height:1.05;
+  background:linear-gradient(135deg,#a06808,#d4a017,#f5c842,#d4a017,#a06808);
+  background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 3s ease infinite;
+  transform:translateY(18px);transition:transform .9s var(--ease) .1s;
+}
+.lo-final.lo-fin-on .lo-fin-line1,.lo-final.lo-fin-on .lo-fin-line2{transform:translateY(0);}
+.lo-fin-brand{margin-top:14px;font-size:7.5px;letter-spacing:.55em;text-transform:uppercase;color:rgba(255,255,255,.16);font-weight:300;}
+
+/* ── CTA ── */
+.lo-cta{
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  opacity:0;transform:translateY(18px);
+  transition:opacity .7s ease,transform .7s var(--ease);
+}
+.lo-cta.lo-cta-on{opacity:1;transform:translateY(0);}
+.lo-enter-btn{
+  padding:19px 60px;border-radius:50px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#6600cc,#8b00ff);
+  color:#fff;font-size:12px;letter-spacing:.3em;text-transform:uppercase;font-weight:700;
+  position:relative;overflow:hidden;
+  box-shadow:0 10px 40px rgba(100,0,200,.45),0 2px 10px rgba(0,0,0,.5);
+  animation:enterGlow 2.2s ease-in-out infinite;
+  transition:transform .15s ease;
+}
+.lo-enter-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.18),transparent 50%,rgba(255,255,255,.06));
+  border-radius:inherit;
+}
+.lo-enter-btn:active{transform:scale(.96);}
+@keyframes enterGlow{
+  0%,100%{box-shadow:0 10px 40px rgba(100,0,200,.45),0 2px 10px rgba(0,0,0,.5)}
+  50%{box-shadow:0 12px 60px rgba(100,0,200,.75),0 4px 20px rgba(212,160,23,.2),0 0 0 1px rgba(212,160,23,.15)}
+}
+.lo-skip-btn{
+  font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(255,255,255,.2);cursor:pointer;padding:8px 20px;
+  transition:color .25s;
+}
+.lo-skip-btn:active{color:rgba(255,255,255,.5);}
+
+/* ── Progress indicator (bottom) ── */
+.lo-progress{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;z-index:6;
+}
+.lo-prog-dot{width:4px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);transition:all .4s ease;}
+.lo-prog-dot.lo-pd-active{width:16px;background:rgba(212,160,23,.7);}
+.lo-prog-dot.lo-pd-done{background:rgba(255,255,255,.3);}
+
+/* ── CONVERSION STEP — Paywall Offer ── */
+.lo-offer{
+  position:absolute;inset:0;z-index:10;
+  display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#06030f 0%,#0a0416 60%,#030208 100%);
+  opacity:0;pointer-events:none;
+  transition:opacity .7s ease;
+  overflow:hidden;
+}
+.lo-offer.lo-offer-on{opacity:1;pointer-events:all;}
+
+/* top glow */
+.lo-offer-glow{
+  position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+  width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(100,0,220,.35) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* lock teaser strip */
+.lo-teaser{
+  display:flex;gap:8px;padding:20px 16px 0;
+  overflow-x:auto;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  flex-shrink:0;
+}
+.lo-teaser::-webkit-scrollbar{display:none;}
+.lo-tcard{
+  min-width:100px;height:130px;border-radius:16px;
+  position:relative;overflow:hidden;flex-shrink:0;
+  border:1px solid rgba(255,255,255,.06);
+}
+.lo-tc-bg{position:absolute;inset:0;}
+.lo-tcard:nth-child(1) .lo-tc-bg{background:linear-gradient(155deg,#1a003a,#5500b0);}
+.lo-tcard:nth-child(2) .lo-tc-bg{background:linear-gradient(155deg,#0d1a00,#1a4400);}
+.lo-tcard:nth-child(3) .lo-tc-bg{background:linear-gradient(155deg,#1a0800,#5c2200);}
+.lo-tcard:nth-child(4) .lo-tc-bg{background:linear-gradient(155deg,#00101a,#003355);}
+.lo-tcard:nth-child(5) .lo-tc-bg{background:linear-gradient(155deg,#1a001a,#440044);}
+.lo-tc-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.7) 0%,transparent 50%);}
+
+/* blur/lock on teaser cards */
+.lo-tc-lock{
+  position:absolute;inset:0;
+  backdrop-filter:blur(6px);
+  background:rgba(0,0,0,.45);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  border-radius:inherit;
+}
+.lo-tc-lock-ico{font-size:18px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));}
+.lo-tc-lock-lbl{font-size:7px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.45);font-weight:600;}
+.lo-tc-free{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
+  padding:8px;
+}
+.lo-tc-emo{font-size:26px;line-height:1;margin-bottom:2px;}
+.lo-tc-name{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:600;}
+.lo-tc-cap{font-size:8px;color:rgba(255,255,255,.35);}
+.lo-tc-badge{
+  position:absolute;top:7px;left:7px;
+  padding:2px 7px;border-radius:20px;
+  font-size:7px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+}
+.lo-tc-badge.free{background:rgba(255,255,255,.1);color:rgba(255,255,255,.5);}
+.lo-tc-badge.vip{background:linear-gradient(90deg,#8b00ff,#b040ff);color:#fff;}
+
+/* "unlock" nudge label */
+.lo-unlock-nudge{
+  text-align:center;padding:12px 20px 0;
+  font-size:11px;letter-spacing:.04em;
+  color:rgba(255,255,255,.38);flex-shrink:0;
+}
+.lo-unlock-nudge span{color:rgba(212,160,23,.9);font-weight:600;}
+
+/* plan card */
+.lo-plan-card{
+  margin:12px 16px 0;border-radius:20px;
+  background:linear-gradient(135deg,rgba(100,0,200,.18) 0%,rgba(212,160,23,.08) 100%);
+  border:1px solid rgba(100,0,200,.35);
+  padding:16px 18px;flex-shrink:0;
+  position:relative;overflow:hidden;
+}
+.lo-plan-card::before{
+  content:'';position:absolute;top:-1px;left:20px;right:20px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(212,160,23,.6),transparent);
+}
+.lo-plan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.lo-plan-name{
+  font-size:15px;font-weight:700;letter-spacing:.05em;
+  background:linear-gradient(90deg,#c8880a,#f5c842);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.lo-plan-badge{
+  background:linear-gradient(90deg,#6600cc,#8b00ff);
+  color:#fff;font-size:8px;font-weight:700;letter-spacing:.12em;
+  padding:3px 10px;border-radius:20px;text-transform:uppercase;
+}
+.lo-plan-price{display:flex;align-items:baseline;gap:4px;margin-bottom:14px;}
+.lo-plan-amt{font-size:32px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.02em;}
+.lo-plan-per{font-size:12px;color:rgba(255,255,255,.4);font-weight:400;}
+.lo-plan-trial{font-size:10px;color:rgba(57,230,0,.85);font-weight:600;letter-spacing:.04em;margin-bottom:14px;}
+.lo-plan-feats{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.lo-pf{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(255,255,255,.7);}
+.lo-pf-check{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#6600cc,#8b00ff);display:flex;align-items:center;justify-content:center;font-size:7px;flex-shrink:0;}
+
+/* CTA buttons */
+.lo-cta-stack{padding:14px 16px 8px;display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
+.lo-btn-primary{
+  width:100%;padding:17px;border-radius:50px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#6600cc,#8b00ff);
+  color:#fff;font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 32px rgba(100,0,200,.5),0 2px 8px rgba(0,0,0,.4);
+  animation:primBtnGlow 2s ease-in-out infinite;
+  transition:transform .15s;
+}
+.lo-btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent 60%,rgba(255,255,255,.05));border-radius:inherit;}
+.lo-btn-primary:active{transform:scale(.97);}
+@keyframes primBtnGlow{
+  0%,100%{box-shadow:0 8px 32px rgba(100,0,200,.5),0 2px 8px rgba(0,0,0,.4)}
+  50%{box-shadow:0 10px 48px rgba(100,0,200,.8),0 4px 16px rgba(212,160,23,.25),0 0 0 1px rgba(212,160,23,.2)}
+}
+.lo-btn-secondary{
+  width:100%;padding:13px;border-radius:50px;border:1px solid rgba(255,255,255,.1);
+  background:transparent;cursor:pointer;
+  color:rgba(255,255,255,.35);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  transition:color .2s,border-color .2s;
+}
+.lo-btn-secondary:active{color:rgba(255,255,255,.6);}
+.lo-offer-legal{
+  text-align:center;padding:0 20px 12px;
+  font-size:9px;color:rgba(255,255,255,.18);line-height:1.5;flex-shrink:0;
+}
+
 </style>
 </head>
 <body>
+
+<!-- ══ CONVERSION LAUNCH OVERLAY ══ -->
+<div id="launch-overlay">
+  <!-- Dynamic background -->
+  <div class="lo-bg" id="lo-bg"></div>
+
+  <!-- Light beams -->
+  <div class="lo-beams">
+    <div class="lo-beam"></div><div class="lo-beam"></div>
+    <div class="lo-beam"></div><div class="lo-beam"></div>
+    <div class="lo-beam"></div>
+  </div>
+  <div class="lo-scan"></div>
+  <div class="lo-particles" id="lo-particles"></div>
+  <div class="lo-bar lo-bar-t"></div>
+  <div class="lo-bar lo-bar-b"></div>
+
+  <!-- ── PHASE 1: Cinematic brand hook ── -->
+  <div class="lo-content" id="lo-phase1">
+    <div class="lo-logo-wrap">
+      <span class="lo-logo-icon">🌆</span>
+      <div class="lo-wordmark">BarPass</div>
+      <div class="lo-wordmark-tag">Miami · Social OS</div>
+    </div>
+    <div class="lo-tagline">
+      <div class="lo-tag-txt" id="lo-tagline-txt">Tonight, 1,247 people near you are already connected.</div>
+    </div>
+    <div class="lo-scenes-row" id="lo-scenes-row">
+      <div class="lo-sc lo-sc-a">
+        <div class="lo-sc-fill"></div><div class="lo-sc-overlay"></div>
+        <div class="lo-sc-live">LIVE</div>
+        <div class="lo-sc-ppl">🔥 847 in</div>
+        <div class="lo-sc-bar"><div class="lo-sc-bar-f"></div></div>
+        <div class="lo-sc-emo">🏟️</div>
+        <div class="lo-sc-nm">Stadium</div>
+      </div>
+      <div class="lo-sc lo-sc-b">
+        <div class="lo-sc-fill"></div><div class="lo-sc-overlay"></div>
+        <div class="lo-sc-live">VIP</div>
+        <div class="lo-sc-ppl">⚡ 99% full</div>
+        <div class="lo-sc-bar"><div class="lo-sc-bar-f"></div></div>
+        <div class="lo-sc-emo">🥂</div>
+        <div class="lo-sc-nm">LIV Miami</div>
+      </div>
+      <div class="lo-sc lo-sc-c">
+        <div class="lo-sc-fill"></div><div class="lo-sc-overlay"></div>
+        <div class="lo-sc-live">LIVE</div>
+        <div class="lo-sc-ppl">🎵 12 DJs</div>
+        <div class="lo-sc-bar"><div class="lo-sc-bar-f"></div></div>
+        <div class="lo-sc-emo">🚀</div>
+        <div class="lo-sc-nm">Space</div>
+      </div>
+    </div>
+    <div class="lo-counter" id="lo-counter">
+      <div class="lo-lv-ring"><div class="lo-lv-dot"></div></div>
+      <div class="lo-cnt-txt"><span class="lo-cnt-num" id="lo-cnt-num">0</span> people connected near you right now</div>
+    </div>
+  </div>
+
+  <!-- Get Started CTA — shown after cinematic -->
+  <div id="lo-getstarted" style="position:absolute;bottom:44px;left:0;right:0;padding:0 28px;opacity:0;pointer-events:none;transition:opacity .6s ease;z-index:6;">
+    <button class="lo-btn-primary" onclick="dismissLaunch()">Get Started →</button>
+    <div style="text-align:center;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:12px;cursor:pointer;" onclick="dismissLaunch()">Already have an account? Sign in</div>
+  </div>
+
+</div><!-- /#launch-overlay -->
 
 <!-- ══ SPLASH ══ -->
 <div id="splash" onclick="skipSplash()">
@@ -1686,19 +2212,153 @@ body::after{
 
 <!-- ══ ONBOARDING ══ -->
 <div id="onboarding" style="display:none;">
-  <div class="ob-bg"></div>
-  <div class="ios-bar" style="position:relative;z-index:2;"><span class="ios-time" id="ob-clock">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
-  <div class="ob-float-map" id="ob-map"></div>
-  <div class="ob-dots"><div class="ob-dot active" id="dot-0"></div><div class="ob-dot" id="dot-1"></div><div class="ob-dot" id="dot-2"></div><div class="ob-dot" id="dot-3"></div></div>
-  <div class="ob-slides">
-    <div class="ob-slide active" id="slide-0"><div class="ob-eyebrow">BarPass Miami · AI Intelligence</div><div class="ob-headline">50+ venues.<br><em>One</em><br>platform.</div><div class="ob-body">The most complete nightlife intelligence system in Miami. AI-powered. Real-time. Luxurious.</div></div>
-    <div class="ob-slide" id="slide-1"><div class="ob-eyebrow">Skip every line</div><div class="ob-headline">Walk in.<br>Order.<br><em>Live it.</em></div><div class="ob-body">Express Pass gives you instant entry at LIV, E11EVEN, Komodo, and 47 more Miami venues.</div></div>
-    <div class="ob-slide" id="slide-2"><div class="ob-eyebrow">Night Wallet ✦ New</div><div class="ob-headline">Pay once.<br><em>Spend</em><br>all night.</div><div class="ob-body">Load consumable credit at entry. Every drink auto-deducted. Watch your balance live.</div></div>
-    <div class="ob-slide" id="slide-3"><div class="ob-eyebrow">AI Drink Intelligence</div><div class="ob-headline">200+<br><em>cocktails.</em><br>All Miami.</div><div class="ob-body">AI-curated drink recommendations from every venue's real signature menu.</div></div>
+  <!-- Ambient gradients -->
+  <div class="ob-ambient">
+    <div class="ob-amb-g1" id="ob-amb-g1"></div>
+    <div class="ob-amb-g2"></div>
+    <div class="ob-amb-g3" id="ob-amb-g3"></div>
   </div>
+  <!-- iOS status bar -->
+  <div class="ios-bar" style="position:relative;z-index:4;background:transparent;"><span class="ios-time" id="ob-clock">9:41</span><div class="ios-icons"><span>📶</span><span>🔋</span></div></div>
+  <!-- Progress bar -->
+  <div class="ob-progress" id="ob-progress">
+    <div class="ob-prog-seg" id="ob-ps-0"><div class="ob-prog-fill"></div></div>
+    <div class="ob-prog-seg" id="ob-ps-1"><div class="ob-prog-fill"></div></div>
+    <div class="ob-prog-seg" id="ob-ps-2"><div class="ob-prog-fill"></div></div>
+    <div class="ob-prog-seg" id="ob-ps-3"><div class="ob-prog-fill"></div></div>
+    <div class="ob-prog-seg" id="ob-ps-4"><div class="ob-prog-fill"></div></div>
+  </div>
+  <!-- Back button -->
+  <div class="ob-back" id="ob-back" onclick="obBack()" style="display:none;">‹</div>
+  <!-- Steps container -->
+  <div class="ob-steps">
+
+    <!-- STEP 0: Welcome -->
+    <div class="ob-step ob-active" id="ob-step-0">
+      <div class="ob-step-eyebrow">Welcome to BarPass</div>
+      <div class="ob-step-q">Hey, <em id="ob-first-name">there</em> 👋</div>
+      <div class="ob-step-sub">Takes 30 seconds. Totally worth it.</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 0;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;">
+          <div style="border-radius:20px;height:118px;background:linear-gradient(155deg,#1a003a,#5500b0);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px;gap:4px;border:1px solid rgba(255,255,255,.05);">
+            <span style="font-size:26px;">🥂</span><span style="font-size:8px;color:rgba(255,255,255,.45);letter-spacing:.12em;text-transform:uppercase;">VIP</span>
+          </div>
+          <div style="border-radius:20px;height:138px;background:linear-gradient(155deg,#1a0800,#5c2200);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px;gap:4px;margin-top:-10px;border:1px solid rgba(255,255,255,.05);">
+            <span style="font-size:26px;">🔥</span><span style="font-size:8px;color:rgba(255,255,255,.45);letter-spacing:.12em;text-transform:uppercase;">Live</span>
+          </div>
+          <div style="border-radius:20px;height:118px;background:linear-gradient(155deg,#001020,#003060);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px;gap:4px;border:1px solid rgba(255,255,255,.05);">
+            <span style="font-size:26px;">🤝</span><span style="font-size:8px;color:rgba(255,255,255,.45);letter-spacing:.12em;text-transform:uppercase;">Network</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: What brings you out? -->
+    <div class="ob-step" id="ob-step-1">
+      <div class="ob-step-eyebrow">Step 1 of 4</div>
+      <div class="ob-step-q">What brings you out <em>most nights?</em></div>
+      <div class="ob-step-sub">Pick everything that sounds like you.</div>
+      <div class="ob-grid cols-2" id="ob-grid-1">
+        <div class="ob-tile" data-val="party" onclick="obSelect(this,1)"><div class="ob-tile-emo">🎉</div><div class="ob-tile-body"><div class="ob-tile-lbl">Going out</div><div class="ob-tile-sub">Parties & clubs</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="network" onclick="obSelect(this,1)"><div class="ob-tile-emo">🤝</div><div class="ob-tile-body"><div class="ob-tile-lbl">Networking</div><div class="ob-tile-sub">Business & deals</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="sports" onclick="obSelect(this,1)"><div class="ob-tile-emo">🏆</div><div class="ob-tile-body"><div class="ob-tile-lbl">Sports</div><div class="ob-tile-sub">Games & fans</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="dating" onclick="obSelect(this,1)"><div class="ob-tile-emo">💋</div><div class="ob-tile-body"><div class="ob-tile-lbl">Meeting people</div><div class="ob-tile-sub">Dating & socializing</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="music" onclick="obSelect(this,1)"><div class="ob-tile-emo">🎵</div><div class="ob-tile-body"><div class="ob-tile-lbl">Live music</div><div class="ob-tile-sub">Shows & events</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="vip" onclick="obSelect(this,1)"><div class="ob-tile-emo">🥂</div><div class="ob-tile-body"><div class="ob-tile-lbl">VIP & luxury</div><div class="ob-tile-sub">Premium experiences</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="explore" onclick="obSelect(this,1)"><div class="ob-tile-emo">🌴</div><div class="ob-tile-body"><div class="ob-tile-lbl">Exploring</div><div class="ob-tile-sub">New spots</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="creator" onclick="obSelect(this,1)"><div class="ob-tile-emo">🎨</div><div class="ob-tile-body"><div class="ob-tile-lbl">Creator scene</div><div class="ob-tile-sub">Content & culture</div></div><div class="ob-tile-check">✓</div></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: What energy? -->
+    <div class="ob-step" id="ob-step-2">
+      <div class="ob-step-eyebrow">Step 2 of 4</div>
+      <div class="ob-step-q">What kind of <em>energy</em> tonight?</div>
+      <div class="ob-step-sub">Be honest — this is just for you.</div>
+      <div class="ob-energy-grid" id="ob-grid-2">
+        <div class="ob-etile" data-val="intense" style="--ec:rgba(255,59,48,.55);--eb:rgba(180,0,0,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">🔥</div><div class="ob-etile-lbl">Intense</div><div class="ob-etile-sub">Wild & unforgettable</div></div>
+        <div class="ob-etile" data-val="upscale" style="--ec:rgba(212,160,23,.55);--eb:rgba(140,90,0,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">✨</div><div class="ob-etile-lbl">Upscale</div><div class="ob-etile-sub">Luxury & exclusive</div></div>
+        <div class="ob-etile" data-val="chill" style="--ec:rgba(45,212,191,.55);--eb:rgba(0,110,90,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">🌊</div><div class="ob-etile-lbl">Chill</div><div class="ob-etile-sub">Relaxed & social</div></div>
+        <div class="ob-etile" data-val="electric" style="--ec:rgba(100,0,255,.55);--eb:rgba(70,0,180,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">⚡</div><div class="ob-etile-lbl">Electric</div><div class="ob-etile-sub">High energy & alive</div></div>
+        <div class="ob-etile" data-val="latenight" style="--ec:rgba(100,0,180,.55);--eb:rgba(50,0,100,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">🌙</div><div class="ob-etile-lbl">Late night</div><div class="ob-etile-sub">Underground & deep</div></div>
+        <div class="ob-etile" data-val="cultural" style="--ec:rgba(255,107,53,.55);--eb:rgba(150,50,0,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">🎶</div><div class="ob-etile-lbl">Cultural</div><div class="ob-etile-sub">Music-driven & artistic</div></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: What matters? -->
+    <div class="ob-step" id="ob-step-3">
+      <div class="ob-step-eyebrow">Step 3 of 4</div>
+      <div class="ob-step-q">What makes a night <em>unforgettable?</em></div>
+      <div class="ob-step-sub">Just the honest ones. Max 2.</div>
+      <div class="ob-grid cols-1" id="ob-grid-3">
+        <div class="ob-tile" data-val="people" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">🤝</div><div class="ob-tile-body"><div class="ob-tile-lbl">Meeting the right people</div><div class="ob-tile-sub">Connections that actually matter</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="premium" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">🥂</div><div class="ob-tile-body"><div class="ob-tile-lbl">Premium experiences</div><div class="ob-tile-sub">Tables, bottles, VIP access</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="atmosphere" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">🎵</div><div class="ob-tile-body"><div class="ob-tile-lbl">The vibe & atmosphere</div><div class="ob-tile-sub">Music, energy, environment</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="chaos" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">😂</div><div class="ob-tile-body"><div class="ob-tile-lbl">Unexpected moments</div><div class="ob-tile-sub">The chaos that becomes stories</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="content" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">📸</div><div class="ob-tile-body"><div class="ob-tile-lbl">Moments worth sharing</div><div class="ob-tile-sub">Photos, videos, memories</div></div><div class="ob-tile-check">✓</div></div>
+        <div class="ob-tile" data-val="access" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">🔑</div><div class="ob-tile-body"><div class="ob-tile-lbl">Access nobody else has</div><div class="ob-tile-sub">Exclusive & invite-only</div></div><div class="ob-tile-check">✓</div></div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Social mode reveal -->
+    <div class="ob-step" id="ob-step-4">
+      <div class="ob-mode-reveal">
+        <div class="ob-step-eyebrow">Step 4 of 4 · Your Social Profile</div>
+        <div class="ob-mode-icon" id="ob-mode-icon">🎉</div>
+        <div class="ob-mode-tag">YOU'RE IN</div>
+        <div class="ob-mode-name" id="ob-mode-name">Party Mode</div>
+        <div class="ob-mode-desc" id="ob-mode-desc">We'll surface the hottest venues, live events, and social moments around you right now.</div>
+        <div class="ob-mode-card" id="ob-mode-card">
+          <div class="ob-mode-features" id="ob-mode-features">
+            <div class="ob-mf"><div class="ob-mf-ico">🗺️</div>Live venue map — what's happening now</div>
+            <div class="ob-mf"><div class="ob-mf-ico">⚡</div>Real-time crowd levels</div>
+            <div class="ob-mf"><div class="ob-mf-ico">🎯</div>Picks that match your vibe tonight</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Venue preview -->
+    <div class="ob-step" id="ob-step-5">
+      <div class="ob-step-eyebrow">Live Now · Miami</div>
+      <div class="ob-step-q"><em id="ob-venue-count">3 venues</em> match your vibe tonight</div>
+      <div class="ob-step-sub">These are live. Go check them out.</div>
+      <div class="ob-venue-preview" id="ob-venue-preview"></div>
+    </div>
+
+  </div><!-- /ob-steps -->
+
+  <!-- Bottom CTA -->
   <div class="ob-cta">
-    <button class="ob-next" id="ob-next-btn" onclick="obNext()">Explore Miami →</button>
-    <button class="ob-skip" onclick="enterApp()">Skip intro</button>
+    <button class="ob-next" id="ob-next-btn" onclick="obNext()">Let's Go →</button>
+    <button class="ob-skip" id="ob-skip-btn" onclick="enterApp()">Skip →</button>
+  </div>
+</div>
+
+<!-- ══ NATURAL VIP UPSELL SHEET ══ -->
+<div id="vip-sheet">
+  <div class="vs-backdrop" onclick="closeVIPSheet()"></div>
+  <div class="vs-sheet">
+    <div class="vs-glow"></div>
+    <div class="vs-handle"></div>
+    <div class="vs-content">
+      <div class="vs-eyebrow">You've unlocked the basics</div>
+      <div class="vs-headline">Ready to access the full<br>social network?</div>
+      <div class="vs-sub">Join the people who see everything before anyone else does.</div>
+      <div class="vs-feats">
+        <div class="vs-feat"><div class="vs-feat-ico">🔥</div>Live Heatmaps</div>
+        <div class="vs-feat"><div class="vs-feat-ico">🥂</div>Table Invites</div>
+        <div class="vs-feat"><div class="vs-feat-ico">🤖</div>AI Planner</div>
+        <div class="vs-feat"><div class="vs-feat-ico">⚡</div>Elite Network</div>
+        <div class="vs-feat"><div class="vs-feat-ico">🔑</div>Priority Entry</div>
+        <div class="vs-feat"><div class="vs-feat-ico">🗺️</div>Afterparty Map</div>
+      </div>
+      <div class="vs-price-row"><div class="vs-price-amt">$9.99</div><div class="vs-price-per">/month</div></div>
+      <div class="vs-trial">✓ 7-day free trial — no charge today</div>
+      <button class="vs-btn-primary" onclick="startVIPTrial()">Start Free Trial</button>
+      <button class="vs-btn-secondary" onclick="closeVIPSheet()">Continue Free</button>
+      <div class="vs-legal">$9.99/month after trial · Cancel anytime · No commitment</div>
+    </div>
   </div>
 </div>
 
@@ -1710,6 +2370,7 @@ body::after{
       <div>
         <div class="header-logo" data-i18n="app_name">BarPass</div>
         <div class="header-loc"><div class="loc-dot"></div><span id="loc-label">Miami, FL</span></div>
+        <div class="header-greeting" id="header-greeting"></div>
       </div>
       <div class="header-right">
         <div class="credit-pill" id="credit-pill" onclick="openScreen('wallet-screen')" style="display:none;">
@@ -1782,6 +2443,16 @@ body::after{
         <div class="ai-arrow">›</div>
       </div>
       <div class="ai-energy"></div>
+    </div>
+
+    <!-- Concierge Card -->
+    <div class="concierge-card" id="concierge-card" style="display:none;" onclick="openScreen('ai-screen')">
+      <div class="cc-icon">🎩</div>
+      <div class="cc-body">
+        <div class="cc-label">What's good right now</div>
+        <div class="cc-text" id="cc-text">Reading Miami for you…</div>
+      </div>
+      <div class="cc-arrow">›</div>
     </div>
 
     <!-- Express Banner -->
@@ -1897,6 +2568,10 @@ body::after{
     <div class="vd-ai-rec" id="vd-ai-rec">
       <div class="vd-ai-ico">🧠</div>
       <div><div class="vd-ai-label">AI Insight</div><div class="vd-ai-text" id="vd-ai-text">Loading AI analysis…</div></div>
+    </div>
+    <div class="vd-concierge" id="vd-concierge">
+      <div class="vd-conc-label">📍 Heads up</div>
+      <div class="vd-conc-text" id="vd-conc-text"></div>
     </div>
     <div class="cap-wrap">
       <div class="cap-lbl"><span>Crowd Level</span><span id="vd-cap-txt">72%</span></div>
@@ -3558,8 +4233,68 @@ function skipSplash(){
   showAuth();
 }
 
-/* Splash was visible while scripts loaded. Transition now. */
-showAuth();
+/* ══════════════════════════════════════════════
+   CINEMATIC LAUNCH ENGINE — Pure brand hook
+   No paywall. Emotional first. Premium later.
+══════════════════════════════════════════════ */
+(function(){
+  var LO = document.getElementById('launch-overlay');
+  if(!LO) return;
+
+  var _bg = document.getElementById('lo-bg');
+  var _autoTimer = null;
+  var _launched = false;
+
+  function spawnParticles(){
+    var c=document.getElementById('lo-particles');if(!c)return;
+    var colors=['rgba(100,0,200,.55)','rgba(212,160,23,.5)','rgba(255,59,122,.45)','rgba(0,195,255,.35)','rgba(255,255,255,.3)'];
+    for(var i=0;i<22;i++){
+      var d=document.createElement('div');d.className='lo-pt';
+      var sz=Math.random()*2.2+1.2;
+      d.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;width:'+sz+'px;height:'+sz+'px;background:'+colors[i%colors.length]+';--d:'+(Math.random()*3+3)+'s;--dl:'+(Math.random()*4)+'s;--op:'+(Math.random()*.35+.12)+';';
+      c.appendChild(d);
+    }
+  }
+  function setBg(cls){ if(_bg) _bg.className='lo-bg '+(cls||''); }
+  function animateCounter(target,duration){
+    var el=document.getElementById('lo-cnt-num');if(!el)return;
+    var startTime=null;
+    function tick(ts){if(!startTime)startTime=ts;var p=Math.min((ts-startTime)/duration,1);var e=p<.5?2*p*p:-1+(4-2*p)*p;el.textContent=Math.floor(e*target).toLocaleString();if(p<1)requestAnimationFrame(tick);}
+    requestAnimationFrame(tick);
+  }
+
+  // ── TIMELINE: 5s cinematic → Get Started ──
+  function runLaunch(){
+    if(_launched)return;
+    _launched=true;
+    spawnParticles();
+    setTimeout(function(){LO.classList.add('lo-open');},50);
+    setTimeout(function(){LO.classList.add('lo-logo-on');},350);
+    setTimeout(function(){LO.classList.add('lo-beams-on');setBg('s-club');},1200);
+    setTimeout(function(){var s=document.getElementById('lo-scenes-row');if(s)s.classList.add('lo-scenes-on');setBg('s-vip');},2400);
+    setTimeout(function(){var cnt=document.getElementById('lo-counter');if(cnt)cnt.classList.add('lo-cnt-on');animateCounter(1247,1500);setBg('s-final');},3600);
+    // Show CTA at 5s
+    setTimeout(function(){
+      var cta=document.getElementById('lo-getstarted');
+      if(cta){cta.style.opacity='1';cta.style.pointerEvents='all';}
+      nativeHaptic && nativeHaptic('light');
+    },5000);
+    // Auto-advance at 12s
+    _autoTimer=setTimeout(function(){dismissLaunch();},12000);
+  }
+
+  window.dismissLaunch = function(){
+    if(_autoTimer)clearTimeout(_autoTimer);
+    LO.classList.add('lo-exit');
+    nativeHaptic && nativeHaptic('light');
+    setTimeout(function(){LO.style.display='none';showAuth();},900);
+  };
+
+  window._startLaunch = runLaunch;
+})();
+
+/* Scripts loaded — start cinematic launch */
+_startLaunch();
 
 function switchAuthTab(tab){
   document.getElementById('tab-login').classList.toggle('active',tab==='login');
@@ -3639,36 +4374,388 @@ function doSignup(){
   });
 }
 
-let obSlide=0;
+/* ══════════════════════════════════════════════
+   CONVERSATIONAL ONBOARDING ENGINE v2
+   5 steps · emotional · personalized
+══════════════════════════════════════════════ */
+var OB = {
+  step:0, firstName:'',
+  selections:{ nights:[], energy:null, moments:[] },
+  socialMode:null
+};
+
+var SOCIAL_MODES = {
+  networking:{name:'Networking Mode',emoji:'🤝',desc:'Komodo, Sugar, Swan — the rooms where Miami business actually happens. We\'ll put you there.',features:['🥃 The crowd that shows up to talk','🏙️ Brickell & Design District picks','🤝 Quiet enough to talk, alive enough to vibe'],mc:'rgba(0,120,255,.5)'},
+  vip:{name:'VIP Mode',emoji:'🥂',desc:'Tables, bottles, the whole thing. If you\'re going to go out, go out right.',features:['🥂 Open tables at the right places','🔑 Walk in without the wait','✨ The crowd worth being around'],mc:'rgba(212,160,23,.5)'},
+  party:{name:'Party Mode',emoji:'🎉',desc:'The places that are actually on tonight. We\'ll tell you where the energy is, right now.',features:['🔥 What\'s at peak capacity now','🎵 Where the DJs are','🌙 Afterparties as they drop'],mc:'rgba(255,59,122,.5)'},
+  sports:{name:'Sports Mode',emoji:'🏆',desc:'Game day in Miami. We\'ve got the spots, the crowds, and the watch parties worth going to.',features:['🏟️ Stadium maps & fan meetups','🍺 Best sports bars right now','🎉 Post-game spots nearby'],mc:'rgba(34,197,94,.5)'},
+  dating:{name:'Social Mode',emoji:'💋',desc:'The rooms where people actually talk. Good energy, the right crowd, no pretension.',features:['💋 High social energy venues','🌴 Where Miami actually mixes tonight','🤝 Spots worth staying at'],mc:'rgba(255,107,53,.5)'},
+  chill:{name:'Chill Mode',emoji:'🌊',desc:'Not every night needs to be loud. The rooftops and cocktail bars that are actually worth it.',features:['🌆 Best rooftops tonight','🍸 Craft bars with no wait','🌊 Quiet enough to breathe'],mc:'rgba(45,212,191,.5)'},
+  creator:{name:'Creator Mode',emoji:'🎨',desc:'Wynwood, the right rooms, the people actually doing things. We know where they are.',features:['🎵 Art, music & culture tonight','🎨 Where the creative crowd is','📸 Bars worth going to'],mc:'rgba(168,85,247,.5)'}
+};
+
+var VENUE_SETS = {
+  networking:[
+    {emo:'🏢',name:'Komodo Lounge',meta:'Brickell · Business crowd · 12 min wait',badge:'match',grad:'linear-gradient(135deg,#001430,#003080)'},
+    {emo:'🥃',name:"Dante's HiFi",meta:'Wynwood · Investors & founders tonight',badge:'hot',grad:'linear-gradient(135deg,#200040,#500090)'},
+    {emo:'🌆',name:'Sugar Rooftop',meta:'0.3 mi away · Luxury atmosphere',badge:'vip',grad:'linear-gradient(135deg,#1a0a00,#402200)'}
+  ],
+  vip:[
+    {emo:'🥂',name:'LIV Miami',meta:'Miami Beach · 99% full · VIP tables',badge:'vip',grad:'linear-gradient(135deg,#1a0800,#4d2500)'},
+    {emo:'🦢',name:'Swan Upstairs',meta:'Design District · Elite crowd tonight',badge:'match',grad:'linear-gradient(135deg,#0a0020,#280060)'},
+    {emo:'🐟',name:'Sexy Fish',meta:'Miami Beach · Most exclusive tonight',badge:'hot',grad:'linear-gradient(135deg,#001818,#004040)'}
+  ],
+  party:[
+    {emo:'🚀',name:'Space Miami',meta:'Downtown · 12 DJs tonight · Electric',badge:'hot',grad:'linear-gradient(135deg,#08001a,#180060)'},
+    {emo:'🔥',name:'E11EVEN Miami',meta:'Open 24/7 · Peak energy right now',badge:'hot',grad:'linear-gradient(135deg,#1a0a00,#4a2000)'},
+    {emo:'🏖',name:'Nikki Beach Club',meta:'Miami Beach · Iconic energy tonight',badge:'match',grad:'linear-gradient(135deg,#001a08,#003d18)'}
+  ],
+  sports:[
+    {emo:'🏟️',name:'Hard Rock Stadium',meta:'8 mi · Game night · Huge crowd',badge:'hot',grad:'linear-gradient(135deg,#001a00,#004000)'},
+    {emo:'📺',name:'Riverside Bar & Grill',meta:'Brickell · Best game-day crowd',badge:'match',grad:'linear-gradient(135deg,#001000,#003000)'},
+    {emo:'🍺',name:'Blackbird Ordinary',meta:'0.5 mi · No wait · Sports screens',badge:'new',grad:'linear-gradient(135deg,#0a0a1a,#201e40)'}
+  ],
+  dating:[
+    {emo:'🌸',name:'Mila Lounge',meta:'Miami Beach · Social crowd tonight',badge:'match',grad:'linear-gradient(135deg,#1a0010,#3d0030)'},
+    {emo:'🌆',name:'Sugar Rooftop',meta:'0.3 mi · Best atmosphere in Miami',badge:'hot',grad:'linear-gradient(135deg,#0a0800,#2a1800)'},
+    {emo:'🐉',name:'Komodo Lounge',meta:'0.4 mi · 12 min wait · Mixed crowd',badge:'new',grad:'linear-gradient(135deg,#001a00,#003800)'}
+  ],
+  chill:[
+    {emo:'🌸',name:'Rosa Sky',meta:'Brickell · Rooftop sunset vibes',badge:'match',grad:'linear-gradient(135deg,#1a0010,#350028)'},
+    {emo:'🎵',name:"Dante's HiFi",meta:'Wynwood · World-class craft cocktails',badge:'vip',grad:'linear-gradient(135deg,#080820,#141430)'},
+    {emo:'🐰',name:'Dirty Rabbit',meta:'Wynwood · Chill · No wait right now',badge:'new',grad:'linear-gradient(135deg,#0a0a00,#1a1800)'}
+  ],
+  creator:[
+    {emo:'🌮',name:'Bodega',meta:'Wynwood · Creative crowd · Hidden gem',badge:'match',grad:'linear-gradient(135deg,#1a0800,#3c1400)'},
+    {emo:'🎵',name:"Dante's HiFi",meta:'Wynwood · Music & culture scene',badge:'hot',grad:'linear-gradient(135deg,#001020,#001f3f)'},
+    {emo:'🐰',name:'Dirty Rabbit',meta:'Wynwood · Artist crowd tonight',badge:'new',grad:'linear-gradient(135deg,#080018,#150030)'}
+  ]
+};
+
 function showOnboarding(){
   document.getElementById('auth').style.display='none';
   document.getElementById('onboarding').style.display='flex';
-  buildOnboardingMap();
+  OB.step=0;
+  OB.firstName=(S.user&&S.user.name)?S.user.name.split(' ')[0]:'there';
+  var fnEl=document.getElementById('ob-first-name');
+  if(fnEl) fnEl.textContent=OB.firstName;
+  _obGoto(0);
 }
-function buildOnboardingMap(){
-  const map=document.getElementById('ob-map');
-  const bubbles=[
-    {name:'LIV Miami Beach',emoji:'🔥',dist:'0.8 mi',live:'95% full · HOT',cls:'live-gold',top:'18%',left:'30%',delay:'0s',dur:'9s'},
-    {name:'E11EVEN Miami',emoji:'✨',dist:'1.2 mi',live:'Open 24/7',cls:'live-green',top:'22%',left:'3%',delay:'1.5s',dur:'8s'},
-    {name:'Sugar Rooftop',emoji:'🌆',dist:'0.3 mi',live:'8 min wait',cls:'live-gold',top:'50%',left:'38%',delay:'3s',dur:'7s'},
-    {name:'Komodo Lounge',emoji:'🐉',dist:'0.4 mi',live:'12 min wait',cls:'live-gold',top:'66%',left:'4%',delay:'2s',dur:'10s'},
-    {name:'Night Wallet',emoji:'🪙',dist:'$80 loaded',live:'Credit active',cls:'live-green',top:'36%',left:'26%',delay:'4s',dur:'8s'},
-  ];
-  map.innerHTML=bubbles.map(function(b){
-    return '<div class="ob-bubble" style="top:'+b.top+';left:'+b.left+';animation-delay:'+b.delay+';animation-duration:'+b.dur+';">'+
-      '<div class="ob-bubble-emoji">'+b.emoji+'</div>'+
-      '<div><div class="ob-bubble-name">'+b.name+'</div><div class="ob-bubble-dist">'+b.dist+'</div><div class="ob-bubble-live '+b.cls+'">'+b.live+'</div></div>'+
-      '</div>';
-  }.bind(this)).join('');
+
+function _obGoto(step){
+  document.querySelectorAll('.ob-step').forEach(function(s){s.className='ob-step';});
+  var back=document.getElementById('ob-back');
+  if(back) back.style.display=step>0?'flex':'none';
+  var target=document.getElementById('ob-step-'+step);
+  if(target) setTimeout(function(){target.classList.add('ob-active');},40);
+  _obUpdateProgress(step);
+  _obUpdateBtn(step);
+  _obAmbient(step);
 }
+
+function _obUpdateProgress(step){
+  for(var i=0;i<5;i++){
+    var seg=document.getElementById('ob-ps-'+i);
+    if(seg) seg.className='ob-prog-seg'+(i<step?' done':i===step?' active':'');
+  }
+}
+
+function _obUpdateBtn(step){
+  var btn=document.getElementById('ob-next-btn');
+  var skip=document.getElementById('ob-skip-btn');
+  if(!btn)return;
+  var labels=["Let's Go →","Continue →","Continue →","Continue →","See What's Waiting →","Enter BarPass →"];
+  btn.textContent=labels[step]||"Continue →";
+  btn.disabled=(step===1||step===2||step===3);
+  btn.style.opacity=btn.disabled?'.35':'';
+  if(skip) skip.style.display=step>=5?'none':'';
+}
+
+function _obAmbient(step){
+  var g1=document.getElementById('ob-amb-g1');
+  var colors=['rgba(100,0,200,.25)','rgba(139,0,255,.3)','rgba(255,59,122,.2)','rgba(212,160,23,.2)','rgba(100,0,200,.3)','rgba(34,197,94,.15)'];
+  if(g1) g1.style.background='radial-gradient(circle,'+colors[step%colors.length]+',transparent 70%)';
+}
+
+function obSelect(tile,step,maxSelect){
+  maxSelect=maxSelect||99;
+  var grid=document.getElementById('ob-grid-'+step);
+  var isSelected=tile.classList.contains('selected');
+  if(isSelected){
+    tile.classList.remove('selected');
+  } else {
+    var sel=grid?grid.querySelectorAll('.selected').length:0;
+    if(sel>=maxSelect){tile.style.transform='scale(.94)';setTimeout(function(){tile.style.transform='';},120);return;}
+    tile.classList.add('selected');
+  }
+  nativeHaptic&&nativeHaptic('select');
+  var hasAny=grid&&grid.querySelector('.selected');
+  var btn=document.getElementById('ob-next-btn');
+  if(btn){btn.disabled=!hasAny;btn.style.opacity=hasAny?'':'.35';}
+}
+
+function obSelectEnergy(tile){
+  var grid=document.getElementById('ob-grid-2');
+  if(grid) grid.querySelectorAll('.ob-etile').forEach(function(t){t.classList.remove('selected');});
+  tile.classList.add('selected');
+  OB.selections.energy=tile.dataset.val;
+  nativeHaptic&&nativeHaptic('select');
+  var btn=document.getElementById('ob-next-btn');
+  if(btn){btn.disabled=false;btn.style.opacity='';}
+}
+
 function obNext(){
-  nativeHaptic('select');
-  obSlide++;
-  if(obSlide>=4){enterApp();return;}
-  document.querySelectorAll('.ob-slide').forEach(function(s,i){s.classList.toggle('active',i===obSlide);});
-  document.querySelectorAll('.ob-dot').forEach(function(d,i){d.classList.toggle('active',i===obSlide);});
-  var labels=['Explore Miami →','Night Wallet →','Drink Intel →',"Let's Go →"];
-  document.getElementById('ob-next-btn').textContent=labels[obSlide];
+  nativeHaptic&&nativeHaptic('light');
+  var step=OB.step;
+  // Collect
+  if(step===1){var tiles=document.querySelectorAll('#ob-grid-1 .ob-tile.selected');OB.selections.nights=Array.from(tiles).map(function(t){return t.dataset.val;});}
+  if(step===2){var et=document.querySelector('#ob-grid-2 .ob-etile.selected');OB.selections.energy=et?et.dataset.val:'party';}
+  if(step===3){var tiles=document.querySelectorAll('#ob-grid-3 .ob-tile.selected');OB.selections.moments=Array.from(tiles).map(function(t){return t.dataset.val;});}
+  // Special steps
+  if(step===3){OB.socialMode=_obComputeMode();_obShowModeReveal();OB.step=4;_obGoto(4);return;}
+  if(step===4){_obBuildVenuePreview();OB.step=5;_obGoto(5);return;}
+  if(step>=5){enterApp();return;}
+  OB.step++;_obGoto(OB.step);
+}
+
+function obBack(){
+  if(OB.step>0){
+    var cur=document.getElementById('ob-step-'+OB.step);
+    if(cur){cur.classList.add('ob-exit');setTimeout(function(){cur.className='ob-step';},400);}
+    OB.step--;_obGoto(OB.step);nativeHaptic&&nativeHaptic('select');
+  }
+}
+
+function _obComputeMode(){
+  var n=OB.selections.nights,e=OB.selections.energy;
+  if(n.indexOf('network')>=0) return 'networking';
+  if(n.indexOf('vip')>=0||e==='upscale') return 'vip';
+  if(n.indexOf('sports')>=0) return 'sports';
+  if(n.indexOf('dating')>=0) return 'dating';
+  if(e==='chill') return 'chill';
+  if(n.indexOf('creator')>=0) return 'creator';
+  return 'party';
+}
+
+function _obShowModeReveal(){
+  var mode=SOCIAL_MODES[OB.socialMode]||SOCIAL_MODES.party;
+  var el=function(id){return document.getElementById(id);};
+  if(el('ob-mode-icon'))el('ob-mode-icon').textContent=mode.emoji;
+  if(el('ob-mode-name'))el('ob-mode-name').textContent=mode.name;
+  if(el('ob-mode-desc'))el('ob-mode-desc').textContent=mode.desc;
+  if(el('ob-mode-features'))el('ob-mode-features').innerHTML=mode.features.map(function(f){
+    return '<div class="ob-mf"><div class="ob-mf-ico">'+f.substring(0,2)+'</div>'+f.substring(3)+'</div>';
+  }).join('');
+  var card=document.getElementById('ob-mode-card');
+  if(card) card.style.setProperty('--mc',mode.mc);
+  if(S&&S.user) S.user.socialMode=OB.socialMode;
+  localStorage&&localStorage.setItem('barpass_social_mode',OB.socialMode);
+}
+
+function _obBuildVenuePreview(){
+  var venues=(VENUE_SETS[OB.socialMode]||VENUE_SETS.party);
+  var c=document.getElementById('ob-venue-preview');
+  if(!c) return;
+  c.innerHTML=venues.map(function(v,i){
+    return '<div class="ob-vpcard" id="ob-vpc-'+i+'">' +
+      '<div class="ob-vpc-left" style="background:'+v.grad+'">'+v.emo+'</div>' +
+      '<div class="ob-vpc-info"><div class="ob-vpc-name">'+v.name+'</div><div class="ob-vpc-meta">'+v.meta+'</div></div>' +
+      '<div class="ob-vpc-badge '+v.badge+'">'+v.badge.toUpperCase()+'</div>' +
+    '</div>';
+  }).join('');
+  [0,1,2].forEach(function(i){setTimeout(function(){var card=document.getElementById('ob-vpc-'+i);if(card)card.classList.add('show');},180+i*140);});
+}
+
+/* ── NATURAL VIP UPSELL (fires 45s after entering app) ── */
+var _vipShownOnce=false;
+var _vipTimer=null;
+function scheduleVIPUpsell(){
+  if(_vipShownOnce||localStorage.getItem('barpass_vip_trial')) return;
+  _vipTimer=setTimeout(function(){if(!_vipShownOnce)showVIPSheet();},45000);
+}
+function showVIPSheet(){
+  _vipShownOnce=true;
+  var s=document.getElementById('vip-sheet');
+  if(s) s.classList.add('vs-open');
+  nativeHaptic&&nativeHaptic('medium');
+}
+function closeVIPSheet(){
+  var s=document.getElementById('vip-sheet');
+  if(s) s.classList.remove('vs-open');
+}
+function startVIPTrial(){
+  closeVIPSheet();
+  nativeHaptic&&nativeHaptic('success');
+  localStorage.setItem('barpass_vip_trial','1');
+  toast('🎉 7-day VIP trial started!','success');
+  setTimeout(function(){openPlansModal();},800);
+}
+
+// Backwards compat stub
+function obSlide(){}
+function buildOnboardingMap(){}
+
+/* ══════════════════════════════════════════════
+   HOSPITALITY LAYER
+   Personal concierge experience — warm, human, anticipatory
+══════════════════════════════════════════════ */
+
+/* Time-aware greeting in header */
+function _buildHeaderGreeting(){
+  var el = document.getElementById('header-greeting');
+  if(!el || !S.user) return;
+  var fn = S.user.name.split(' ')[0];
+  var h = new Date().getHours();
+  var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 23 ? 'Good evening' : 'Still going strong';
+  var mode = localStorage.getItem('barpass_social_mode');
+  var modeMap = {networking:'Networking',vip:'VIP',party:'Party',sports:'Sports',dating:'Social',chill:'Chill',creator:'Creator'};
+  var modeLabel = modeMap[mode] || 'Nightlife';
+  el.innerHTML = g + ', <em>' + fn + '</em> &nbsp;·&nbsp; ' + modeLabel + ' Mode';
+  el.style.display = '';
+}
+
+/* Warm welcome toast (personal, time-aware) */
+function _welcomeToast(){
+  if(!S.user) return;
+  var fn = S.user.name.split(' ')[0];
+  var h = new Date().getHours();
+  var msgs = [
+    h < 12 ? 'Morning, ' + fn + '. Tonight\'s going to be a good one.' :
+    h < 17 ? 'Hey ' + fn + '. Miami wakes up at sunset — we\'re getting ready.' :
+    h < 20 ? fn + ', it\'s starting to get good out there. Let\'s find your spot.' :
+    h < 23 ? fn + ', the city is alive right now. Don\'t miss it.' :
+             'Still going, ' + fn + '? Miami at this hour hits different. 🌙'
+  ];
+  toast(msgs[0], 'info');
+}
+
+/* Personalized concierge card on home feed */
+var _conciergeRotateTimer = null;
+function buildConciergeCard(){
+  var card = document.getElementById('concierge-card');
+  var txt = document.getElementById('cc-text');
+  if(!card || !txt) return;
+
+  var mode = localStorage.getItem('barpass_social_mode') || 'party';
+  var h = new Date().getHours();
+
+  var tips = {
+    networking:[
+      'Komodo tonight? Business crowd, the real kind. Go before 10 before it turns into a scene.',
+      'Sugar rooftop has a solid mix right now. Get there before it fills.',
+      'E11EVEN Skybar is the move if you want to talk to someone worth talking to. Until midnight.',
+      'Swan Upstairs crowd usually lands around 10. Worth being there early.',
+      'Dante\'s HiFi — surprisingly good for this. Quiet enough to actually have a conversation.'
+    ],
+    vip:[
+      'LIV has room right now. That won\'t last long.',
+      'E11EVEN is packed but not slammed yet. This is the sweet spot.',
+      'Sexy Fish is probably the best room in Miami tonight. No contest.',
+      'Komodo before 9 is actually a solid call. You\'ll feel like you own the place.',
+      'Nikki Beach tonight. If you haven\'t gone in a minute, it\'s worth it.'
+    ],
+    party:[
+      'Space doesn\'t really start until 1. Plan for that.',
+      'E11EVEN just hit peak. Like, right now. Go or wait it out — there\'s no in-between.',
+      'Wynwood has multiple spots going after 2. We\'ll keep you posted.',
+      'LIV\'s DJ set starts in 20. Main room is already there.',
+      'Bodega switched gears. Dinner crowd is out, it\'s a party now.'
+    ],
+    sports:[
+      'Game in 2 hours. Blackbird or Bodega for the watch party — both solid.',
+      'Stadium crowd is building. If you\'re going pre-game, leave now.',
+      'Riverside is already loud. Don\'t say we didn\'t warn you.',
+      'Post-game hits Brickell around 11. That\'s when it actually gets fun.',
+      'If they win tonight, Dirty Rabbit. Fan meetup confirmed.'
+    ],
+    dating:[
+      'Mila Lounge right now, no hesitation. Trust.',
+      'Sugar during golden hour has the best crowd of the week. Go.',
+      'Komodo bar level — not VIP, not the main room. Bar level. That\'s where the good stuff happens.',
+      'Rosa Sky has an even crowd right now. Easy energy, no pressure.',
+      'Best spot to actually talk to someone in Miami at this hour: Komodo terrace.'
+    ],
+    chill:[
+      'Rosa Sky is barely at a third right now. Basically yours.',
+      'Golden hour hits Sugar in about 20. Don\'t wait too long.',
+      'Dante\'s HiFi — no wait, great drinks, nobody trying too hard. Go.',
+      'Dirty Rabbit is exactly the vibe for a night like this.',
+      'Blackbird Ordinary. Real cocktails, zero attitude, actual conversation. Underrated.'
+    ],
+    creator:[
+      'Wynwood is doing something tonight. Bodega has the crowd you\'re looking for.',
+      'Dante\'s HiFi just made the world\'s 50 best bars list. Tonight\'s a good night.',
+      'Dirty Rabbit has the creative energy right now. Like, actually.',
+      'Art Basel crowd hasn\'t fully left Wynwood yet. Still good this week.',
+      'Swan Upstairs has a photo exhibition opening at 9. Worth seeing.'
+    ]
+  };
+
+  var modeTips = tips[mode] || tips.party;
+  var idx = Math.floor(Math.random() * modeTips.length);
+
+  function setTip(i){
+    txt.style.opacity = '0';
+    setTimeout(function(){
+      txt.textContent = modeTips[i % modeTips.length];
+      txt.style.opacity = '1';
+    }, txt.style.opacity === '0' ? 0 : 300);
+  }
+
+  txt.textContent = modeTips[idx];
+  card.style.display = 'flex';
+
+  // Rotate every 35s
+  if(_conciergeRotateTimer) clearInterval(_conciergeRotateTimer);
+  _conciergeRotateTimer = setInterval(function(){
+    idx = (idx + 1) % modeTips.length;
+    txt.style.transition = 'opacity .3s ease';
+    txt.style.opacity = '0';
+    setTimeout(function(){ txt.textContent = modeTips[idx]; txt.style.opacity = '1'; }, 320);
+  }, 35000);
+}
+
+/* Venue concierge note — warm, specific, personal */
+function _buildVenueConcierge(v){
+  var el = document.getElementById('vd-concierge');
+  var txt = document.getElementById('vd-conc-text');
+  if(!el || !txt || !v) return;
+
+  var h = new Date().getHours();
+  var fn = (S.user && S.user.name) ? S.user.name.split(' ')[0] : '';
+  var mode = localStorage.getItem('barpass_social_mode') || 'party';
+
+  // Build a warm, specific note based on venue data
+  var notes = [];
+
+  // Timing advice
+  if(v.cap >= 90) notes.push('It\'s busy. If you\'re going, go now — this one fills up fast.');
+  else if(v.cap >= 75 && h < 22) notes.push('Starting to fill. Get there by ' + (h < 21 ? '10' : '11') + ' and you\'ll be fine.');
+  else if(v.cap < 50) notes.push('Good timing. Crowd\'s building but it\'s still easy to get in.');
+
+  // Mode-specific tip
+  var modeTips = {
+    networking: 'Bar area or the terrace — that\'s where the actual conversations happen here.',
+    vip: 'Say BarPass at the door and ask about tables. They usually have more than they show.',
+    party: 'It gets real about an hour in. That\'s your window.',
+    sports: 'Sit at the bar — you\'ll be right in the middle of it. Get there before tip-off.',
+    dating: 'Skip the main floor. Bar or outside — way easier to actually talk.',
+    chill: 'Find a spot near the bar. Relaxed enough here to just exist for a minute.',
+    creator: 'Open crowd. Don\'t overthink it — just start talking.'
+  };
+  if(modeTips[mode]) notes.push(modeTips[mode]);
+
+  // Dress code reminder if strict
+  if(v.dress === 'Upscale' || v.dress === 'Chic') notes.push('Dress code is enforced. Come sharp.');
+
+  // Best night
+  if(v.bestNight) notes.push('Best nights here: ' + v.bestNight + '.');
+
+  var note = notes.slice(0,2).join(' ');
+  if(!note) note = v.aiTip; // fallback to AI tip if nothing else
+
+  txt.textContent = note;
+  el.style.display = 'block';
 }
 function enterApp(){
   nativeHaptic('success');
@@ -3683,6 +4770,7 @@ function enterApp(){
   document.getElementById('p-prefs').textContent=u.prefs;
   document.getElementById('ai-section-title').textContent='For '+fn+' tonight';
   S.currentCat='all';
+  _buildHeaderGreeting();
   buildAIBanner();buildDrinkRecs('all');buildViralDrinks();
   buildVenueCards();buildLuxuryCards();buildEventCards();buildVenueList();
   refreshCreditUI();refreshWalletUI();
@@ -3704,6 +4792,10 @@ function enterApp(){
     if(document.getElementById('stat-wait'))document.getElementById('stat-wait').textContent=Math.floor(Math.random()*10+4)+'m';
     if(document.getElementById('stat-energy'))document.getElementById('stat-energy').textContent=['🔥','⚡','🚀'][Math.floor(Math.random()*3)];
   },4000);
+  /* Warm welcome toast at 1.5s */
+  setTimeout(function(){ _welcomeToast(); }, 1500);
+  /* Concierge card at 2s */
+  setTimeout(function(){ buildConciergeCard(); }, 2000);
   /* Show social badge notification after 3s */
   setTimeout(function(){
     var sb=document.getElementById('social-badge');
@@ -3716,6 +4808,8 @@ function enterApp(){
   },5000);
   /* Games badge always on */
   var gb=document.getElementById('games-badge');if(gb)gb.style.display='block';
+  /* Schedule natural VIP upsell (45s after entering) */
+  scheduleVIPUpsell();
 }
 
 var insightIdx=0;
@@ -4849,6 +5943,7 @@ function openVenue(id){
   document.getElementById('vd-meta').innerHTML='<span>⭐ '+v.rating+'</span><span>·</span><span>'+v.price+'</span><span>·</span><span>'+v.dist+'</span><span>·</span><span>👗 '+v.dress+'</span>';
   document.getElementById('vd-tags-row').innerHTML=v.cat.map(function(c){return '<span class="vd-tag">'+c+'</span>';}).join('')+'<span class="vd-tag">🎵 '+v.music.split('·')[0].trim()+'</span><span class="vd-tag">🗓 '+v.bestNight+'</span>';
   document.getElementById('vd-ai-text').textContent=v.aiTip;
+  _buildVenueConcierge(v);
   var capColor=v.cap<60?'var(--green)':v.cap<80?'var(--gold)':'var(--coral)';
   document.getElementById('vd-cap-fill').style.width=v.cap+'%';
   document.getElementById('vd-cap-fill').style.background=capColor;

@@ -2237,7 +2237,7 @@ body::after{
     <div class="ob-step ob-active" id="ob-step-0">
       <div class="ob-step-eyebrow">Welcome to BarPass</div>
       <div class="ob-step-q">Hey, <em id="ob-first-name">there</em> 👋</div>
-      <div class="ob-step-sub">We'll ask a few questions to build your personal social experience — venues, people, and moments made for you.</div>
+      <div class="ob-step-sub">Takes 30 seconds. Totally worth it.</div>
       <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 0;">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;">
           <div style="border-radius:20px;height:118px;background:linear-gradient(155deg,#1a003a,#5500b0);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px;gap:4px;border:1px solid rgba(255,255,255,.05);">
@@ -2257,7 +2257,7 @@ body::after{
     <div class="ob-step" id="ob-step-1">
       <div class="ob-step-eyebrow">Step 1 of 4</div>
       <div class="ob-step-q">What brings you out <em>most nights?</em></div>
-      <div class="ob-step-sub">Select all that apply.</div>
+      <div class="ob-step-sub">Pick everything that sounds like you.</div>
       <div class="ob-grid cols-2" id="ob-grid-1">
         <div class="ob-tile" data-val="party" onclick="obSelect(this,1)"><div class="ob-tile-emo">🎉</div><div class="ob-tile-body"><div class="ob-tile-lbl">Going out</div><div class="ob-tile-sub">Parties & clubs</div></div><div class="ob-tile-check">✓</div></div>
         <div class="ob-tile" data-val="network" onclick="obSelect(this,1)"><div class="ob-tile-emo">🤝</div><div class="ob-tile-body"><div class="ob-tile-lbl">Networking</div><div class="ob-tile-sub">Business & deals</div></div><div class="ob-tile-check">✓</div></div>
@@ -2274,7 +2274,7 @@ body::after{
     <div class="ob-step" id="ob-step-2">
       <div class="ob-step-eyebrow">Step 2 of 4</div>
       <div class="ob-step-q">What kind of <em>energy</em> tonight?</div>
-      <div class="ob-step-sub">Pick one — this calibrates everything.</div>
+      <div class="ob-step-sub">Be honest — this is just for you.</div>
       <div class="ob-energy-grid" id="ob-grid-2">
         <div class="ob-etile" data-val="intense" style="--ec:rgba(255,59,48,.55);--eb:rgba(180,0,0,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">🔥</div><div class="ob-etile-lbl">Intense</div><div class="ob-etile-sub">Wild & unforgettable</div></div>
         <div class="ob-etile" data-val="upscale" style="--ec:rgba(212,160,23,.55);--eb:rgba(140,90,0,.1);" onclick="obSelectEnergy(this)"><div class="ob-etile-emo">✨</div><div class="ob-etile-lbl">Upscale</div><div class="ob-etile-sub">Luxury & exclusive</div></div>
@@ -2289,7 +2289,7 @@ body::after{
     <div class="ob-step" id="ob-step-3">
       <div class="ob-step-eyebrow">Step 3 of 4</div>
       <div class="ob-step-q">What makes a night <em>unforgettable?</em></div>
-      <div class="ob-step-sub">Pick up to 2.</div>
+      <div class="ob-step-sub">Just the honest ones. Max 2.</div>
       <div class="ob-grid cols-1" id="ob-grid-3">
         <div class="ob-tile" data-val="people" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">🤝</div><div class="ob-tile-body"><div class="ob-tile-lbl">Meeting the right people</div><div class="ob-tile-sub">Connections that actually matter</div></div><div class="ob-tile-check">✓</div></div>
         <div class="ob-tile" data-val="premium" onclick="obSelect(this,3,2)"><div class="ob-tile-emo">🥂</div><div class="ob-tile-body"><div class="ob-tile-lbl">Premium experiences</div><div class="ob-tile-sub">Tables, bottles, VIP access</div></div><div class="ob-tile-check">✓</div></div>
@@ -2310,9 +2310,9 @@ body::after{
         <div class="ob-mode-desc" id="ob-mode-desc">We'll surface the hottest venues, live events, and social moments around you right now.</div>
         <div class="ob-mode-card" id="ob-mode-card">
           <div class="ob-mode-features" id="ob-mode-features">
-            <div class="ob-mf"><div class="ob-mf-ico">🗺️</div>Live venue heatmap near you</div>
-            <div class="ob-mf"><div class="ob-mf-ico">⚡</div>Real-time energy levels</div>
-            <div class="ob-mf"><div class="ob-mf-ico">🤖</div>AI-powered night planner</div>
+            <div class="ob-mf"><div class="ob-mf-ico">🗺️</div>Live venue map — what's happening now</div>
+            <div class="ob-mf"><div class="ob-mf-ico">⚡</div>Real-time crowd levels</div>
+            <div class="ob-mf"><div class="ob-mf-ico">🎯</div>Picks that match your vibe tonight</div>
           </div>
         </div>
       </div>
@@ -2322,7 +2322,7 @@ body::after{
     <div class="ob-step" id="ob-step-5">
       <div class="ob-step-eyebrow">Live Now · Miami</div>
       <div class="ob-step-q"><em id="ob-venue-count">3 venues</em> match your vibe tonight</div>
-      <div class="ob-step-sub">Curated for you — updated live every few minutes.</div>
+      <div class="ob-step-sub">These are live. Go check them out.</div>
       <div class="ob-venue-preview" id="ob-venue-preview"></div>
     </div>
 
@@ -2449,7 +2449,7 @@ body::after{
     <div class="concierge-card" id="concierge-card" style="display:none;" onclick="openScreen('ai-screen')">
       <div class="cc-icon">🎩</div>
       <div class="cc-body">
-        <div class="cc-label">Your Concierge · Tonight</div>
+        <div class="cc-label">What's good right now</div>
         <div class="cc-text" id="cc-text">Reading Miami for you…</div>
       </div>
       <div class="cc-arrow">›</div>
@@ -2570,7 +2570,7 @@ body::after{
       <div><div class="vd-ai-label">AI Insight</div><div class="vd-ai-text" id="vd-ai-text">Loading AI analysis…</div></div>
     </div>
     <div class="vd-concierge" id="vd-concierge">
-      <div class="vd-conc-label">🎩 Concierge Note</div>
+      <div class="vd-conc-label">📍 Heads up</div>
       <div class="vd-conc-text" id="vd-conc-text"></div>
     </div>
     <div class="cap-wrap">
@@ -4385,13 +4385,13 @@ var OB = {
 };
 
 var SOCIAL_MODES = {
-  networking:{name:'Networking Mode',emoji:'🤝',desc:'We\'ll surface business events, elite lounges, and the right people to meet — curated for your goals tonight.',features:['🏢 Business event alerts near you','👥 Entrepreneur & investor circles','🥃 High-end networking venues'],mc:'rgba(0,120,255,.5)'},
-  vip:{name:'VIP Mode',emoji:'🥂',desc:'You get the full luxury experience — table access, priority entry, and exclusive events nobody else knows about.',features:['🥂 VIP table invitations','🔑 Priority venue access','💎 Luxury event alerts'],mc:'rgba(212,160,23,.5)'},
-  party:{name:'Party Mode',emoji:'🎉',desc:'We\'ll find the hottest venues, wildest energy, and the crowd that\'s turning tonight into a story.',features:['🔥 Hottest venue alerts live','⚡ Real-time crowd energy','🎉 Afterparty tracker'],mc:'rgba(255,59,122,.5)'},
-  sports:{name:'Sports Mode',emoji:'🏆',desc:'Stadium energy, fan meetups, sports bars — we\'ve got the full game-day social experience for you.',features:['🏟️ Stadium & arena live maps','📺 Fan zone & watch party alerts','🍺 Best sports bars near you'],mc:'rgba(34,197,94,.5)'},
-  dating:{name:'Social Mode',emoji:'💋',desc:'We\'ll put you in the right rooms with the right energy — the venues and moments where real connections happen.',features:['💋 High-energy social spots','🌴 Discovery mode activated','👥 People nearby alerts'],mc:'rgba(255,107,53,.5)'},
-  chill:{name:'Chill Mode',emoji:'🌊',desc:'Curated rooftops, craft cocktail bars, and low-key spots where the vibe is always right.',features:['🌊 Relaxed venue recommendations','🍸 Craft cocktail bar finder','🌆 Best rooftops tonight'],mc:'rgba(45,212,191,.5)'},
-  creator:{name:'Creator Mode',emoji:'🎨',desc:'Art, culture, music, and the people making it — your social map filtered for creative energy.',features:['🎵 Live music & cultural events','🎨 Art & creative scene tonight','📸 Content-worthy moments nearby'],mc:'rgba(168,85,247,.5)'}
+  networking:{name:'Networking Mode',emoji:'🤝',desc:'Komodo, Sugar, Swan — the rooms where Miami business actually happens. We\'ll put you there.',features:['🥃 The crowd that shows up to talk','🏙️ Brickell & Design District picks','🤝 Quiet enough to talk, alive enough to vibe'],mc:'rgba(0,120,255,.5)'},
+  vip:{name:'VIP Mode',emoji:'🥂',desc:'Tables, bottles, the whole thing. If you\'re going to go out, go out right.',features:['🥂 Open tables at the right places','🔑 Walk in without the wait','✨ The crowd worth being around'],mc:'rgba(212,160,23,.5)'},
+  party:{name:'Party Mode',emoji:'🎉',desc:'The places that are actually on tonight. We\'ll tell you where the energy is, right now.',features:['🔥 What\'s at peak capacity now','🎵 Where the DJs are','🌙 Afterparties as they drop'],mc:'rgba(255,59,122,.5)'},
+  sports:{name:'Sports Mode',emoji:'🏆',desc:'Game day in Miami. We\'ve got the spots, the crowds, and the watch parties worth going to.',features:['🏟️ Stadium maps & fan meetups','🍺 Best sports bars right now','🎉 Post-game spots nearby'],mc:'rgba(34,197,94,.5)'},
+  dating:{name:'Social Mode',emoji:'💋',desc:'The rooms where people actually talk. Good energy, the right crowd, no pretension.',features:['💋 High social energy venues','🌴 Where Miami actually mixes tonight','🤝 Spots worth staying at'],mc:'rgba(255,107,53,.5)'},
+  chill:{name:'Chill Mode',emoji:'🌊',desc:'Not every night needs to be loud. The rooftops and cocktail bars that are actually worth it.',features:['🌆 Best rooftops tonight','🍸 Craft bars with no wait','🌊 Quiet enough to breathe'],mc:'rgba(45,212,191,.5)'},
+  creator:{name:'Creator Mode',emoji:'🎨',desc:'Wynwood, the right rooms, the people actually doing things. We know where they are.',features:['🎵 Art, music & culture tonight','🎨 Where the creative crowd is','📸 Bars worth going to'],mc:'rgba(168,85,247,.5)'}
 };
 
 var VENUE_SETS = {
@@ -4620,11 +4620,11 @@ function _welcomeToast(){
   var fn = S.user.name.split(' ')[0];
   var h = new Date().getHours();
   var msgs = [
-    h < 12 ? 'Good morning, ' + fn + '. Let\'s plan a great night.' :
-    h < 17 ? 'Afternoon, ' + fn + '. Miami starts waking up at sunset.' :
-    h < 20 ? 'Good evening, ' + fn + '. The city is warming up for you.' :
-    h < 23 ? 'The night is yours, ' + fn + '. Let\'s make it count.' :
-             fn + ', Miami doesn\'t sleep. Neither do we. 🌙'
+    h < 12 ? 'Morning, ' + fn + '. Tonight\'s going to be a good one.' :
+    h < 17 ? 'Hey ' + fn + '. Miami wakes up at sunset — we\'re getting ready.' :
+    h < 20 ? fn + ', it\'s starting to get good out there. Let\'s find your spot.' :
+    h < 23 ? fn + ', the city is alive right now. Don\'t miss it.' :
+             'Still going, ' + fn + '? Miami at this hour hits different. 🌙'
   ];
   toast(msgs[0], 'info');
 }
@@ -4641,53 +4641,53 @@ function buildConciergeCard(){
 
   var tips = {
     networking:[
-      'Komodo Brickell is running a business crowd tonight — prime window 9–11PM.',
-      'Sugar Rooftop has 3 fintech founders in tonight. Good timing.',
-      'Best networking window in Miami right now: E11EVEN\'s Skybar until midnight.',
-      'High-value crowd at Swan Upstairs. Arrives around 10PM. Go early.',
-      'Dante\'s HiFi is quiet enough to actually have a real conversation tonight.'
+      'Komodo tonight? Business crowd, the real kind. Go before 10 before it turns into a scene.',
+      'Sugar rooftop has a solid mix right now. Get there before it fills.',
+      'E11EVEN Skybar is the move if you want to talk to someone worth talking to. Until midnight.',
+      'Swan Upstairs crowd usually lands around 10. Worth being there early.',
+      'Dante\'s HiFi — surprisingly good for this. Quiet enough to actually have a conversation.'
     ],
     vip:[
-      'Two VIP tables just opened at LIV. This window closes fast.',
-      'E11EVEN is at 88% — peak atmosphere but still accessible. Now.',
-      'Sexy Fish has the best crowd-to-space ratio in Miami right now.',
-      'Priority access moment at Komodo: 8–9PM is the sweet spot.',
-      'Nikki Beach VIP cabanas are still available for tonight.'
+      'LIV has room right now. That won\'t last long.',
+      'E11EVEN is packed but not slammed yet. This is the sweet spot.',
+      'Sexy Fish is probably the best room in Miami tonight. No contest.',
+      'Komodo before 9 is actually a solid call. You\'ll feel like you own the place.',
+      'Nikki Beach tonight. If you haven\'t gone in a minute, it\'s worth it.'
     ],
     party:[
-      'Space Miami hits its real peak at 1AM. Plan your arrival.',
-      'E11EVEN just hit 95% — this is peak energy. Go now or wait it out.',
-      'Three afterparties confirmed in Wynwood after 2AM. We\'ll notify you.',
-      'LIV\'s main room is at maximum energy. DJ set starts in 20 minutes.',
-      'Bodega crowd just shifted from dinner to party. Perfect window.'
+      'Space doesn\'t really start until 1. Plan for that.',
+      'E11EVEN just hit peak. Like, right now. Go or wait it out — there\'s no in-between.',
+      'Wynwood has multiple spots going after 2. We\'ll keep you posted.',
+      'LIV\'s DJ set starts in 20. Main room is already there.',
+      'Bodega switched gears. Dinner crowd is out, it\'s a party now.'
     ],
     sports:[
-      'Game starts in 2 hours. Best watch parties: Blackbird Ordinary, Bodega.',
-      'Stadium energy is building fast. Pre-game crowd peaks in 45 minutes.',
-      'Riverside Bar is already packed for the game. Get there now.',
-      'Post-game crowd hits Brickell around 11PM. Prime social window.',
-      'Fan meetup confirmed at Dirty Rabbit if the team wins tonight.'
+      'Game in 2 hours. Blackbird or Bodega for the watch party — both solid.',
+      'Stadium crowd is building. If you\'re going pre-game, leave now.',
+      'Riverside is already loud. Don\'t say we didn\'t warn you.',
+      'Post-game hits Brickell around 11. That\'s when it actually gets fun.',
+      'If they win tonight, Dirty Rabbit. Fan meetup confirmed.'
     ],
     dating:[
-      'Best social energy in Miami right now: Mila Lounge, no hesitation.',
-      'Sugar Rooftop\'s golden hour crowd is the most social of the week.',
-      'Komodo crowd skews young and mixed right now — ideal timing.',
-      'E11EVEN\'s bar level (not VIP) is the most social floor tonight.',
-      'Rosa Sky: the most balanced crowd in Miami at this hour.'
+      'Mila Lounge right now, no hesitation. Trust.',
+      'Sugar during golden hour has the best crowd of the week. Go.',
+      'Komodo bar level — not VIP, not the main room. Bar level. That\'s where the good stuff happens.',
+      'Rosa Sky has an even crowd right now. Easy energy, no pressure.',
+      'Best spot to actually talk to someone in Miami at this hour: Komodo terrace.'
     ],
     chill:[
-      'Rosa Sky rooftop at 35% capacity — perfect atmosphere right now.',
-      'Golden hour at Sugar Rooftop in 20 minutes. You don\'t want to miss it.',
-      'Dante\'s HiFi: no wait, world-class cocktails, the right energy.',
-      'Dirty Rabbit is exactly the right vibe for tonight\'s energy. Trust us.',
-      'Blackbird Ordinary: craft cocktails, zero pretension, real conversation.'
+      'Rosa Sky is barely at a third right now. Basically yours.',
+      'Golden hour hits Sugar in about 20. Don\'t wait too long.',
+      'Dante\'s HiFi — no wait, great drinks, nobody trying too hard. Go.',
+      'Dirty Rabbit is exactly the vibe for a night like this.',
+      'Blackbird Ordinary. Real cocktails, zero attitude, actual conversation. Underrated.'
     ],
     creator:[
-      'Wynwood is electric tonight. Bodega has the creative crowd.',
-      'Dante\'s HiFi just got named one of the world\'s 50 best bars. Go tonight.',
-      'Dirty Rabbit has Miami\'s strongest creative energy at this exact hour.',
-      'Art Basel crowd is still lingering in Wynwood this week. Good energy.',
-      'Swan Upstairs has a photography exhibition opening tonight at 9PM.'
+      'Wynwood is doing something tonight. Bodega has the crowd you\'re looking for.',
+      'Dante\'s HiFi just made the world\'s 50 best bars list. Tonight\'s a good night.',
+      'Dirty Rabbit has the creative energy right now. Like, actually.',
+      'Art Basel crowd hasn\'t fully left Wynwood yet. Still good this week.',
+      'Swan Upstairs has a photo exhibition opening at 9. Worth seeing.'
     ]
   };
 
@@ -4729,29 +4729,28 @@ function _buildVenueConcierge(v){
   var notes = [];
 
   // Timing advice
-  if(v.cap >= 90) notes.push('This venue is near capacity — if you\'re going tonight, move now.');
-  else if(v.cap >= 75 && h < 22) notes.push('Arriving before ' + (h < 21 ? '10' : '11') + 'PM gives you the best access before it fills.');
-  else if(v.cap < 50) notes.push('Crowd is still building — perfect timing to get a great spot before it gets busy.');
+  if(v.cap >= 90) notes.push('It\'s busy. If you\'re going, go now — this one fills up fast.');
+  else if(v.cap >= 75 && h < 22) notes.push('Starting to fill. Get there by ' + (h < 21 ? '10' : '11') + ' and you\'ll be fine.');
+  else if(v.cap < 50) notes.push('Good timing. Crowd\'s building but it\'s still easy to get in.');
 
   // Mode-specific tip
   var modeTips = {
-    networking: 'For networking: the bar area and outdoor terrace tend to draw the most connected crowd.',
-    vip: 'For VIP access: mention BarPass at the entrance and ask for table availability — there\'s often more than they advertise.',
-    party: 'Energy peaks about an hour after doors open — that\'s your sweet spot.',
-    sports: 'The bar area gets the most game-day energy. Arrive 30 minutes before tip-off.',
-    dating: 'The best conversations happen at the bar or outdoor areas, not the main floor.',
-    chill: 'Find a spot near the bar — the energy is relaxed enough to actually talk here.',
-    creator: 'The crowd here tends to be creative and open. Don\'t hesitate to start a conversation.'
+    networking: 'Bar area or the terrace — that\'s where the actual conversations happen here.',
+    vip: 'Say BarPass at the door and ask about tables. They usually have more than they show.',
+    party: 'It gets real about an hour in. That\'s your window.',
+    sports: 'Sit at the bar — you\'ll be right in the middle of it. Get there before tip-off.',
+    dating: 'Skip the main floor. Bar or outside — way easier to actually talk.',
+    chill: 'Find a spot near the bar. Relaxed enough here to just exist for a minute.',
+    creator: 'Open crowd. Don\'t overthink it — just start talking.'
   };
   if(modeTips[mode]) notes.push(modeTips[mode]);
 
   // Dress code reminder if strict
-  if(v.dress === 'Upscale' || v.dress === 'Chic') notes.push('Dress code is enforced — come sharp.');
+  if(v.dress === 'Upscale' || v.dress === 'Chic') notes.push('Dress code is enforced. Come sharp.');
 
   // Best night
   if(v.bestNight) notes.push('Best nights here: ' + v.bestNight + '.');
 
-  // AI tip already shown, so make this complementary — personal and warm
   var note = notes.slice(0,2).join(' ');
   if(!note) note = v.aiTip; // fallback to AI tip if nothing else
 
