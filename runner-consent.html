@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BarPass — Runner Task</title>
+<style>
+  :root {
+    --bg: #04060e;
+    --surface: #080c1a;
+    --card: #0c1022;
+    --border: #1a2040;
+    --text: #e8eaf6;
+    --muted: #4a5380;
+    --green: #00e87a;
+    --amber: #FFba38;
+    --red: #FF4466;
+    --blue: #5AA5FF;
+    --purple: #a855f7;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, 'SF Pro Display', 'Inter', sans-serif; }
+
+  /* ── Phone Shell ── */
+  .phone {
+    max-width: 420px;
+    min-height: 100vh;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Status Bar ── */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px 6px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .status-live { color: var(--green); display: flex; align-items: center; gap: 4px; }
+  .status-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+  /* ── Screens ── */
+  .screen { display: none; flex-direction: column; flex: 1; animation: slideIn .3s ease; }
+  .screen.active { display: flex; }
+  @keyframes slideIn { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+
+  /* ── Header ── */
+  .hdr {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .hdr-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .hdr-logo { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; color: var(--muted); }
+  .hdr-badge { font-family: var(--mono); font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 4px; letter-spacing: .06em; }
+  .badge-incoming { background: var(--amber); color: #04060e; }
+  .badge-accepted { background: var(--blue); color: #04060e; }
+  .badge-picking  { background: var(--purple); color: #fff; }
+  .badge-transit  { background: var(--amber); color: #04060e; animation: badgePulse 1.5s ease infinite; }
+  .badge-delivered{ background: var(--green); color: #04060e; }
+  .badge-verified { background: var(--green); color: #04060e; }
+  @keyframes badgePulse { 0%,100%{opacity:1;} 50%{opacity:.65;} }
+  .hdr-title { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+  .hdr-sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Scroll body ── */
+  .body { flex: 1; overflow-y: auto; padding: 0 16px 100px; -webkit-overflow-scrolling: touch; }
+  .body::-webkit-scrollbar { display: none; }
+
+  /* ── Runner card ── */
+  .runner-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin: 14px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .runner-avatar {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: linear-gradient(135deg, #00e87a20, #5AA5FF20);
+    border: 2px solid var(--green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0; position: relative;
+  }
+  .runner-online {
+    position: absolute; bottom: 1px; right: 1px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--green); border: 2px solid var(--bg);
+  }
+  .runner-name { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+  .runner-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .runner-zone { color: var(--green); font-weight: 700; }
+
+  /* ── Section label ── */
+  .sec-lbl {
+    font-family: var(--mono); font-size: 9px; letter-spacing: .1em;
+    color: var(--muted); text-transform: uppercase; margin: 18px 0 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sec-lbl::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* ── Manifest card ── */
+  .manifest {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .manifest-head {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .manifest-id { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--blue); }
+  .manifest-ts { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+  .manifest-body { padding: 14px 16px; }
+  .mrow {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 8px 0; border-bottom: 1px solid #0f1428;
+  }
+  .mrow:last-child { border-bottom: none; }
+  .mlbl { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .mval { font-family: var(--mono); font-size: 10px; font-weight: 700; text-align: right; max-width: 60%; }
+
+  /* ── Route visual ── */
+  .route-viz {
+    display: flex; align-items: center; gap: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 18px;
+    margin-bottom: 12px; position: relative; overflow: hidden;
+  }
+  .route-viz::before {
+    content:''; position:absolute; top:0; left:0; right:0; bottom:0;
+    background: linear-gradient(135deg, #5AA5FF08, #00e87a08);
+    pointer-events:none;
+  }
+  .rnode { display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0; }
+  .ricon {
+    width:38px;height:38px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;border:2px solid;
+  }
+  .rlbl { font-family:var(--mono);font-size:9px;text-align:center;max-width:60px;line-height:1.3; }
+  .rline { flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 6px; }
+  .rdash { width:100%;border-top:2px dashed var(--border);position:relative; }
+  .rdash-dot {
+    width:8px;height:8px;border-radius:50%;background:var(--blue);
+    position:absolute;top:-4px;animation:slideDot 2s linear infinite;
+  }
+  @keyframes slideDot { from{left:0;} to{left:calc(100% - 8px);} }
+  .rtime { font-family:var(--mono);font-size:8px;color:var(--blue); }
+
+  /* ── Cargo items ── */
+  .cargo-grid {
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;
+  }
+  .cargo-item {
+    background:var(--card);border:1px solid var(--border);border-radius:10px;
+    padding:10px 8px;text-align:center;
+  }
+  .cargo-emoji { font-size:20px;display:block;margin-bottom:4px; }
+  .cargo-qty { font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text); }
+  .cargo-name { font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:1px; }
+
+  /* ── Notes ── */
+  .notes-box {
+    background:var(--card);border:1px solid #FFba3830;border-radius:10px;
+    padding:12px 14px;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start;
+  }
+  .notes-icon { font-size:16px;flex-shrink:0;margin-top:1px; }
+  .notes-text { font-family:var(--mono);font-size:10px;color:var(--amber);line-height:1.6; }
+  .notes-label { font-size:8px;color:var(--muted);letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase; }
+
+  /* ── Consent box ── */
+  .consent-box {
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:16px;margin-bottom:14px;
+  }
+  .consent-title { font-size:14px;font-weight:700;margin-bottom:8px; }
+  .consent-text { font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.7;margin-bottom:14px; }
+  .consent-text b { color:var(--text); }
+  .consent-items { display:flex;flex-direction:column;gap:6px;margin-bottom:14px; }
+  .consent-item {
+    display:flex;align-items:flex-start;gap:8px;
+    font-family:var(--mono);font-size:9px;color:var(--text);
+  }
+  .consent-check {
+    width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);
+    flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:all .2s;
+  }
+  .consent-check.checked { background:var(--green);border-color:var(--green); }
+  .consent-check.checked::after { content:'✓';font-size:10px;color:#04060e;font-weight:700; }
+
+  /* ── Signature canvas ── */
+  .sig-area {
+    background:#060810;border:1.5px dashed var(--border);border-radius:10px;
+    position:relative;overflow:hidden;margin-bottom:10px;touch-action:none;
+  }
+  .sig-placeholder {
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:10px;color:var(--muted);pointer-events:none;
+    flex-direction:column;gap:6px;
+  }
+  .sig-placeholder span { font-size:24px; }
+  .sig-canvas { width:100%;display:block; }
+  .sig-clear {
+    font-family:var(--mono);font-size:9px;color:var(--muted);
+    background:none;border:none;cursor:pointer;padding:4px 0;
+    text-decoration:underline;display:block;
+  }
+
+  /* ── Priority banner ── */
+  .prio-banner {
+    border-radius:10px;padding:12px 14px;margin-bottom:12px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .prio-banner.HIGH { background:#FF446614;border:1px solid #FF446640; }
+  .prio-banner.MID  { background:#FFba3814;border:1px solid #FFba3840; }
+  .prio-banner.LOW  { background:#00e87a14;border:1px solid #00e87a40; }
+  .prio-icon { font-size:20px;flex-shrink:0; }
+  .prio-title { font-family:var(--mono);font-size:10px;font-weight:700; }
+  .prio-sub { font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px; }
+  .HIGH .prio-title { color:var(--red); }
+  .MID  .prio-title { color:var(--amber); }
+  .LOW  .prio-title { color:var(--green); }
+
+  /* ── Inventory warning ── */
+  .inv-warn {
+    background:#FF446610;border:1px solid #FF446630;border-radius:10px;
+    padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;
+  }
+  .inv-warn-bar { flex:1; }
+  .inv-warn-label { font-family:var(--mono);font-size:9px;color:var(--red);font-weight:700;margin-bottom:4px; }
+  .inv-warn-track { height:4px;background:#1a2040;border-radius:2px;overflow:hidden; }
+  .inv-warn-fill { height:100%;border-radius:2px;background:var(--red);transition:width .4s; }
+  .inv-warn-pct { font-family:var(--mono);font-size:14px;font-weight:700;color:var(--red);flex-shrink:0; }
+
+  /* ── Timer ── */
+  .timer-block {
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:20px;text-align:center;margin-bottom:12px;position:relative;overflow:hidden;
+  }
+  .timer-block::before {
+    content:'';position:absolute;inset:0;
+    background:conic-gradient(var(--amber) var(--pct,0%), transparent 0%);
+    opacity:.06;
+  }
+  .timer-label { font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em;margin-bottom:8px; }
+  .timer-val { font-family:var(--mono);font-size:40px;font-weight:700;color:var(--amber);letter-spacing:-.02em;line-height:1; }
+  .timer-sub { font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px; }
+
+  /* ── Checkpoint steps ── */
+  .checkpoints { display:flex;flex-direction:column;gap:0;margin-bottom:14px; }
+  .cp {
+    display:flex;align-items:flex-start;gap:12px;
+    padding:12px 0;position:relative;
+  }
+  .cp:not(:last-child)::after {
+    content:'';position:absolute;left:17px;top:44px;
+    width:2px;height:calc(100% - 32px);background:var(--border);
+  }
+  .cp.done::after { background:var(--green); }
+  .cp-num {
+    width:34px;height:34px;border-radius:50%;border:2px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:11px;font-weight:700;
+    flex-shrink:0;transition:all .3s;background:var(--card);
+    position:relative;z-index:1;
+  }
+  .cp.done .cp-num { background:var(--green);border-color:var(--green);color:#04060e; }
+  .cp.active .cp-num { border-color:var(--amber);color:var(--amber);box-shadow:0 0 0 4px #FFba3820; }
+  .cp-body { flex:1;padding-top:6px; }
+  .cp-title { font-size:13px;font-weight:600;margin-bottom:2px; }
+  .cp.done .cp-title { color:var(--green); }
+  .cp.active .cp-title { color:var(--amber); }
+  .cp.pending .cp-title { color:var(--muted); }
+  .cp-sub { font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.5; }
+  .cp-ts { font-family:var(--mono);font-size:8px;color:var(--green);margin-top:3px; }
+  .cp-action {
+    margin-top:8px;padding:8px 14px;border-radius:8px;
+    font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;
+    cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;
+    transition:all .18s;
+  }
+  .cp-action.scan { background:#5AA5FF18;color:var(--blue);border:1px solid #5AA5FF40; }
+  .cp-action.scan:hover { background:#5AA5FF30; }
+  .cp-action.confirm { background:var(--green);color:#04060e; }
+
+  /* ── QR scanner mock ── */
+  .qr-scan-area {
+    background:#060810;border:1.5px solid var(--border);border-radius:12px;
+    padding:20px;text-align:center;margin-bottom:12px;position:relative;overflow:hidden;
+  }
+  .qr-frame {
+    width:160px;height:160px;margin:0 auto 12px;position:relative;
+  }
+  .qr-frame::before,.qr-frame::after {
+    content:'';position:absolute;width:24px;height:24px;
+    border:3px solid var(--green);
+  }
+  .qr-frame::before { top:0;left:0;border-right:none;border-bottom:none;border-radius:4px 0 0 0; }
+  .qr-frame::after  { bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 4px 0; }
+  .qr-inner { position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center; }
+  .qr-inner::before,.qr-inner::after {
+    content:'';position:absolute;width:24px;height:24px;border:3px solid var(--green);
+  }
+  .qr-inner::before { top:0;right:0;border-left:none;border-bottom:none;border-radius:0 4px 0 0; }
+  .qr-inner::after  { bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 4px; }
+  .qr-scan-line {
+    position:absolute;left:8px;right:8px;height:2px;
+    background:linear-gradient(90deg,transparent,var(--green),transparent);
+    animation:scanLine 2s ease infinite;
+    box-shadow:0 0 8px var(--green);
+  }
+  @keyframes scanLine { 0%{top:8px;opacity:0;} 10%{opacity:1;} 90%{opacity:1;} 100%{top:calc(100% - 8px);opacity:0;} }
+  .qr-emoji { font-size:48px; }
+  .qr-hint { font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.6; }
+  .qr-btn-mock {
+    display:inline-flex;align-items:center;gap:6px;
+    margin-top:10px;background:var(--green);color:#04060e;
+    border:none;border-radius:8px;padding:10px 20px;
+    font-family:var(--mono);font-size:10px;font-weight:700;
+    cursor:pointer;letter-spacing:.04em;transition:all .18s;
+  }
+  .qr-btn-mock:hover { background:#00ff88; }
+
+  /* ── Map mini ── */
+  .map-mini {
+    background:#060810;border:1px solid var(--border);border-radius:12px;
+    height:120px;position:relative;overflow:hidden;margin-bottom:12px;
+  }
+  .map-mini-bg {
+    position:absolute;inset:0;
+    background:
+      repeating-linear-gradient(0deg,transparent,transparent 19px,#1a204015 20px),
+      repeating-linear-gradient(90deg,transparent,transparent 19px,#1a204015 20px);
+  }
+  .map-dot {
+    position:absolute;width:10px;height:10px;border-radius:50%;
+    transform:translate(-50%,-50%);
+  }
+  .map-dot.hub { background:var(--blue);box-shadow:0 0 8px var(--blue); }
+  .map-dot.bar { background:var(--green);box-shadow:0 0 8px var(--green); }
+  .map-dot.runner {
+    background:var(--amber);box-shadow:0 0 12px var(--amber);
+    width:12px;height:12px;
+    animation:runnerMove 4s ease infinite;
+  }
+  @keyframes runnerMove {
+    0%  { left:25%; top:50%; }
+    50% { left:50%; top:40%; }
+    100%{ left:75%; top:55%; }
+  }
+  .map-path {
+    position:absolute;top:50%;left:25%;right:25%;
+    height:2px;background:linear-gradient(90deg,var(--blue),var(--green));
+    transform:translateY(-50%);opacity:.4;
+  }
+  .map-lbl { position:absolute;font-family:var(--mono);font-size:7px;color:var(--muted); }
+
+  /* ── CTA buttons ── */
+  .cta-area {
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+    width:100%;max-width:420px;padding:12px 16px 24px;
+    background:linear-gradient(to top,var(--bg) 60%,transparent);
+    z-index:100;
+  }
+  .btn-main {
+    width:100%;padding:16px;border-radius:14px;border:none;cursor:pointer;
+    font-size:15px;font-weight:700;letter-spacing:.02em;
+    transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn-main.accept {
+    background:linear-gradient(135deg,var(--green),#00c96a);
+    color:#04060e;box-shadow:0 4px 24px #00e87a30;
+  }
+  .btn-main.accept:hover { transform:translateY(-1px);box-shadow:0 6px 28px #00e87a40; }
+  .btn-main.accept:disabled { opacity:.4;transform:none;cursor:not-allowed; }
+  .btn-main.danger { background:#FF446618;color:var(--red);border:1.5px solid #FF446630;margin-top:8px; }
+  .btn-main.danger:hover { background:#FF446628; }
+  .btn-main.blue { background:linear-gradient(135deg,var(--blue),#3d8fe0);color:#04060e; }
+  .btn-main.amber { background:linear-gradient(135deg,var(--amber),#e0a020);color:#04060e; }
+  .btn-main.purple { background:linear-gradient(135deg,var(--purple),#8b3fd1);color:#fff; }
+  .btn-main.done { background:linear-gradient(135deg,var(--green),#00c96a);color:#04060e; }
+  .btn-sub {
+    width:100%;padding:12px;border-radius:12px;border:none;cursor:pointer;
+    font-size:13px;font-weight:600;letter-spacing:.01em;
+    background:none;color:var(--muted);margin-top:6px;
+    transition:color .2s;
+  }
+  .btn-sub:hover { color:var(--text); }
+
+  /* ── Success screen ── */
+  .success-hero {
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:40px 24px;text-align:center;gap:16px;
+  }
+  .success-icon {
+    width:80px;height:80px;border-radius:50%;
+    background:linear-gradient(135deg,var(--green),#00c96a);
+    display:flex;align-items:center;justify-content:center;font-size:36px;
+    box-shadow:0 0 40px #00e87a40;animation:successPop .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes successPop { from{transform:scale(0);opacity:0;} to{transform:scale(1);opacity:1;} }
+  .success-title { font-size:26px;font-weight:700;margin-top:8px; }
+  .success-sub { font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7;max-width:280px; }
+  .success-stats {
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:8px;
+  }
+  .stat-box {
+    background:var(--card);border:1px solid var(--border);border-radius:10px;
+    padding:12px;text-align:center;
+  }
+  .stat-val { font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green); }
+  .stat-lbl { font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:2px; }
+
+  /* ── Decline screen ── */
+  .decline-reason { display:flex;flex-direction:column;gap:8px;margin-bottom:14px; }
+  .reason-opt {
+    background:var(--card);border:1.5px solid var(--border);border-radius:10px;
+    padding:12px 14px;cursor:pointer;transition:all .15s;
+    font-family:var(--mono);font-size:10px;display:flex;align-items:center;gap:10px;
+  }
+  .reason-opt:hover,.reason-opt.sel { border-color:var(--red);color:var(--red);background:#FF446610; }
+  .reason-icon { font-size:16px; }
+
+  /* ── Misc ── */
+  .divider { height:1px;background:var(--border);margin:16px 0; }
+  .tag {
+    display:inline-flex;align-items:center;gap:4px;
+    font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.05em;
+    padding:3px 8px;border-radius:4px;
+  }
+  .tag.high { background:#FF446618;color:var(--red);border:1px solid #FF446635; }
+  .tag.mid  { background:#FFba3818;color:var(--amber);border:1px solid #FFba3835; }
+  .tag.low  { background:#00e87a18;color:var(--green);border:1px solid #00e87a35; }
+
+  /* Light theme override */
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f0f2f8; --surface:#fff; --card:#f8faff; --border:#dde2f0; --text:#0f1225; --muted:#8090b0; }
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="status-live">BARPASS LIVE</span>
+    <span id="sb-time">16:42</span>
+    <span>Hard Rock Stadium</span>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 1 — INCOMING TASK
+  ══════════════════════════════════════ -->
+  <div class="screen active" id="screen-incoming">
+    <div class="hdr">
+      <div class="hdr-top">
+        <span class="hdr-logo">BARPASS OPS</span>
+        <span class="hdr-badge badge-incoming">⚡ INCOMING</span>
+      </div>
+      <div class="hdr-title">New Task Assigned</div>
+      <div class="hdr-sub" id="hdr-taskid">Task TK-1002 · Dispatched 16:41</div>
+    </div>
+    <div class="body">
+
+      <!-- Runner identity -->
+      <div class="runner-card">
+        <div class="runner-avatar">
+          ⚡
+          <div class="runner-online"></div>
+        </div>
+        <div>
+          <div class="runner-name" id="runner-name">Diego L.</div>
+          <div class="runner-meta">Runner · <span class="runner-zone">Zone A</span> · On shift 3h 22m</div>
+        </div>
+      </div>
+
+      <!-- Priority banner -->
+      <div class="prio-banner MID" id="prio-banner">
+        <div class="prio-icon">📦</div>
+        <div>
+          <div class="prio-title">MEDIUM PRIORITY</div>
+          <div class="prio-sub">Standard delivery — complete within ETA</div>
+        </div>
+      </div>
+
+      <!-- Route visual -->
+      <div class="sec-lbl">Route</div>
+      <div class="route-viz">
+        <div class="rnode">
+          <div class="ricon" style="background:#5AA5FF14;border-color:#5AA5FF;color:#5AA5FF;">⬡</div>
+          <div class="rlbl" style="color:#5AA5FF;" id="hub-name">Hub West</div>
+        </div>
+        <div class="rline">
+          <div class="rdash"><div class="rdash-dot"></div></div>
+          <div class="rtime" id="route-time">~9 min</div>
+        </div>
+        <div class="rnode">
+          <div class="ricon" style="background:#00e87a14;border-color:#00e87a;color:#00e87a;">🍺</div>
+          <div class="rlbl" style="color:#00e87a;" id="bar-name">Bar C2</div>
+        </div>
+      </div>
+
+      <!-- Inventory warning -->
+      <div class="inv-warn" id="inv-warn">
+        <div class="inv-warn-bar">
+          <div class="inv-warn-label">⚠ BAR C2 INVENTORY CRITICAL</div>
+          <div class="inv-warn-track">
+            <div class="inv-warn-fill" style="width:23%"></div>
+          </div>
+        </div>
+        <div class="inv-warn-pct" id="inv-pct">23%</div>
+      </div>
+
+      <!-- Manifest -->
+      <div class="sec-lbl">Dispatch Manifest</div>
+      <div class="manifest">
+        <div class="manifest-head">
+          <span class="manifest-id" id="manifest-id">TK-1002</span>
+          <span class="manifest-ts" id="manifest-ts">Today · 16:41</span>
+        </div>
+        <div class="manifest-body">
+          <div class="mrow">
+            <span class="mlbl">FROM HUB</span>
+            <span class="mval" id="m-hub">Hub West</span>
+          </div>
+          <div class="mrow">
+            <span class="mlbl">TO BAR</span>
+            <span class="mval" id="m-bar">Bar C2 <span style="color:var(--red);font-size:8px;">23% inv</span></span>
+          </div>
+          <div class="mrow">
+            <span class="mlbl">CARGO</span>
+            <span class="mval" id="m-cargo">12×Spirits, 12×Water,<br>12×Nachos, 12×Burger</span>
+          </div>
+          <div class="mrow">
+            <span class="mlbl">TOTAL UNITS</span>
+            <span class="mval" id="m-units">48 units</span>
+          </div>
+          <div class="mrow">
+            <span class="mlbl">DISPATCHED BY</span>
+            <span class="mval" id="m-by">Elena C. · Manager VIP</span>
+          </div>
+          <div class="mrow">
+            <span class="mlbl">ETA</span>
+            <span class="mval" style="color:var(--amber);" id="m-eta">9 min</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cargo items -->
+      <div class="sec-lbl">Cargo Items</div>
+      <div class="cargo-grid" id="cargo-grid">
+        <div class="cargo-item"><span class="cargo-emoji">🥃</span><span class="cargo-qty">×12</span><div class="cargo-name">Spirits</div></div>
+        <div class="cargo-item"><span class="cargo-emoji">💧</span><span class="cargo-qty">×12</span><div class="cargo-name">Water</div></div>
+        <div class="cargo-item"><span class="cargo-emoji">🌮</span><span class="cargo-qty">×12</span><div class="cargo-name">Nachos</div></div>
+        <div class="cargo-item"><span class="cargo-emoji">🍔</span><span class="cargo-qty">×12</span><div class="cargo-name">Burger</div></div>
+      </div>
+
+      <!-- Notes -->
+      <div class="notes-box" id="notes-box" style="display:none;">
+        <div class="notes-icon">📋</div>
+        <div>
+          <div class="notes-label">Runner Instructions</div>
+          <div class="notes-text" id="notes-text"></div>
+        </div>
+      </div>
+
+      <!-- Consent -->
+      <div class="sec-lbl">Acceptance & Consent</div>
+      <div class="consent-box">
+        <div class="consent-title">Task Acceptance Agreement</div>
+        <div class="consent-text">
+          By accepting this task you confirm that you:<br>
+          <b>understand the route and cargo requirements</b>,
+          will complete delivery within the estimated time,
+          and will follow all safety and chain-of-custody protocols.
+        </div>
+        <div class="consent-items">
+          <div class="consent-item">
+            <div class="consent-check" id="chk1" onclick="toggleCheck('chk1')"></div>
+            <span>I confirm cargo count at Hub pickup before departing</span>
+          </div>
+          <div class="consent-item">
+            <div class="consent-check" id="chk2" onclick="toggleCheck('chk2')"></div>
+            <span>I will scan QR at destination to confirm delivery</span>
+          </div>
+          <div class="consent-item">
+            <div class="consent-check" id="chk3" onclick="toggleCheck('chk3')"></div>
+            <span>I understand this task is time-sensitive</span>
+          </div>
+        </div>
+        <div class="sec-lbl" style="margin-top:0;">Digital Signature</div>
+        <div class="sig-area" id="sig-area">
+          <div class="sig-placeholder" id="sig-placeholder">
+            <span>✍️</span>
+            Sign here to confirm
+          </div>
+          <canvas class="sig-canvas" id="sig-canvas" height="90"></canvas>
+        </div>
+        <button class="sig-clear" onclick="clearSignature()">Clear signature</button>
+      </div>
+
+      <div style="height:160px;"></div>
+    </div>
+    <div class="cta-area">
+      <button class="btn-main accept" id="btn-accept" onclick="acceptTask()" disabled>
+        ✓ Accept Task
+      </button>
+      <button class="btn-sub" onclick="goScreen('screen-decline')">Can't complete this task</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 2 — PICKING (at hub)
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screen-picking">
+    <div class="hdr">
+      <div class="hdr-top">
+        <span class="hdr-logo">BARPASS OPS</span>
+        <span class="hdr-badge badge-picking">📦 PICKING</span>
+      </div>
+      <div class="hdr-title">Go to Hub · Pick Up</div>
+      <div class="hdr-sub">TK-1002 · Accepted <span id="accepted-ts"></span></div>
+    </div>
+    <div class="body">
+
+      <!-- Timer -->
+      <div class="timer-block">
+        <div class="timer-label">TIME SINCE ACCEPTANCE</div>
+        <div class="timer-val" id="timer-picking">00:00</div>
+        <div class="timer-sub">ETA: 9 min total · Get to hub ASAP</div>
+      </div>
+
+      <!-- Mini map -->
+      <div class="sec-lbl">Your Route</div>
+      <div class="map-mini">
+        <div class="map-mini-bg"></div>
+        <div class="map-path"></div>
+        <div class="map-dot hub" style="left:25%;top:50%;"></div>
+        <div class="map-dot bar" style="left:75%;top:55%;"></div>
+        <div class="map-dot runner"></div>
+        <div class="map-lbl" style="left:18%;top:60%;">Hub West</div>
+        <div class="map-lbl" style="left:68%;top:65%;">Bar C2</div>
+      </div>
+
+      <!-- Checkpoints -->
+      <div class="sec-lbl">Chain of Custody Steps</div>
+      <div class="checkpoints">
+        <div class="cp active" id="cp1">
+          <div class="cp-num">1</div>
+          <div class="cp-body">
+            <div class="cp-title">Go to Hub West</div>
+            <div class="cp-sub">Walk to Hub West and locate your cargo manifest<br>Cart #3 · Section B · Aisle 2</div>
+            <button class="cp-action scan" onclick="goScreen('screen-scan-hub')">📷 Scan Hub QR</button>
+          </div>
+        </div>
+        <div class="cp pending" id="cp2">
+          <div class="cp-num">2</div>
+          <div class="cp-body">
+            <div class="cp-title">Verify &amp; Load Cargo</div>
+            <div class="cp-sub">Count all items before leaving the hub</div>
+          </div>
+        </div>
+        <div class="cp pending" id="cp3">
+          <div class="cp-num">3</div>
+          <div class="cp-body">
+            <div class="cp-title">Transit to Bar C2</div>
+            <div class="cp-sub">Use service corridor B · Do not stop</div>
+          </div>
+        </div>
+        <div class="cp pending" id="cp4">
+          <div class="cp-num">4</div>
+          <div class="cp-body">
+            <div class="cp-title">Scan at Bar C2</div>
+            <div class="cp-sub">Scan delivery QR · Get manager confirmation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cargo reminder -->
+      <div class="sec-lbl">Cargo Checklist</div>
+      <div id="cargo-checklist"></div>
+
+      <div style="height:100px;"></div>
+    </div>
+    <div class="cta-area">
+      <button class="btn-main blue" onclick="goScreen('screen-scan-hub')">
+        📷 Scan Hub QR to Start
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 3 — HUB QR SCAN
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screen-scan-hub">
+    <div class="hdr">
+      <div class="hdr-top">
+        <span class="hdr-logo">BARPASS OPS</span>
+        <span class="hdr-badge badge-picking" style="background:var(--blue);color:#04060e;">📷 SCAN HUB</span>
+      </div>
+      <div class="hdr-title">Scan Hub QR Code</div>
+      <div class="hdr-sub">Point camera at Hub West QR · TK-1002</div>
+    </div>
+    <div class="body">
+      <div class="qr-scan-area" style="margin-top:14px;">
+        <div class="qr-frame">
+          <div class="qr-inner">
+            <div class="qr-emoji">⬡</div>
+            <div class="qr-scan-line"></div>
+          </div>
+        </div>
+        <div class="qr-hint">
+          Position the Hub West QR code within the frame<br>
+          <span style="color:var(--text);font-weight:700;">HUB-WEST-TK1002</span>
+        </div>
+        <br>
+        <button class="qr-btn-mock" onclick="hubScanned()">
+          ✓ Simulate Successful Scan
+        </button>
+      </div>
+
+      <div class="notes-box">
+        <div class="notes-icon">📍</div>
+        <div>
+          <div class="notes-label">Hub Location</div>
+          <div class="notes-text" style="color:var(--text2,#ccd);">Hub West · Section B · Cart #3 · Look for the orange cone marker</div>
+        </div>
+      </div>
+    </div>
+    <div class="cta-area">
+      <button class="btn-sub" onclick="goScreen('screen-picking')">← Back</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 4 — IN TRANSIT
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screen-transit">
+    <div class="hdr">
+      <div class="hdr-top">
+        <span class="hdr-logo">BARPASS OPS</span>
+        <span class="hdr-badge badge-transit">🚶 IN TRANSIT</span>
+      </div>
+      <div class="hdr-title">En Route · Bar C2</div>
+      <div class="hdr-sub">TK-1002 · Hub confirmed <span id="hub-ts"></span></div>
+    </div>
+    <div class="body">
+      <!-- Timer -->
+      <div class="timer-block">
+        <div class="timer-label">TIME IN TRANSIT</div>
+        <div class="timer-val" id="timer-transit">00:00</div>
+        <div class="timer-sub">ETA: Bar C2 · Use service corridor B</div>
+      </div>
+
+      <!-- Live map -->
+      <div class="sec-lbl">Live Position</div>
+      <div class="map-mini" style="height:140px;">
+        <div class="map-mini-bg"></div>
+        <div class="map-path" style="opacity:.5;background:linear-gradient(90deg,var(--green),var(--amber));"></div>
+        <div class="map-dot hub" style="left:25%;top:50%;opacity:.5;"></div>
+        <div class="map-dot bar" style="left:75%;top:55%;"></div>
+        <div class="map-dot runner" style="animation-name:runnerTransit;"></div>
+        <div class="map-lbl" style="left:18%;top:62%;">Hub West ✓</div>
+        <div class="map-lbl" style="left:68%;top:65%;color:var(--amber);">Bar C2 ← TARGET</div>
+      </div>
+      <style>
+        @keyframes runnerTransit {
+          0%  { left:30%; top:50%; }
+          50% { left:55%; top:43%; }
+          100%{ left:70%; top:50%; }
+        }
+      </style>
+
+      <!-- Status -->
+      <div class="checkpoints">
+        <div class="cp done">
+          <div class="cp-num">✓</div>
+          <div class="cp-body">
+            <div class="cp-title">Hub West Scanned ✓</div>
+            <div class="cp-sub">Cargo confirmed · 48 units loaded</div>
+            <div class="cp-ts" id="transit-hub-ts">✓ Confirmed 16:43</div>
+          </div>
+        </div>
+        <div class="cp active">
+          <div class="cp-num">→</div>
+          <div class="cp-body">
+            <div class="cp-title">En Route to Bar C2</div>
+            <div class="cp-sub">Use service corridor B · Priority cargo<br>Do not stop · Bar at 23% inventory</div>
+          </div>
+        </div>
+        <div class="cp pending">
+          <div class="cp-num">3</div>
+          <div class="cp-body">
+            <div class="cp-title">Scan at Bar C2</div>
+            <div class="cp-sub">Manager verification required</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Urgent note -->
+      <div class="notes-box" style="border-color:#FF446630;">
+        <div class="notes-icon">⚠️</div>
+        <div>
+          <div class="notes-label" style="color:var(--red);">Urgent Delivery</div>
+          <div class="notes-text" style="color:var(--amber);">Bar C2 is at 23% inventory — service disruption imminent. Complete delivery immediately.</div>
+        </div>
+      </div>
+
+      <div style="height:100px;"></div>
+    </div>
+    <div class="cta-area">
+      <button class="btn-main amber" onclick="goScreen('screen-scan-bar')">
+        📷 I've Arrived · Scan Bar QR
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 5 — BAR QR SCAN
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screen-scan-bar">
+    <div class="hdr">
+      <div class="hdr-top">
+        <span class="hdr-logo">BARPASS OPS</span>
+        <span class="hdr-badge badge-delivered">📷 SCAN BAR</span>
+      </div>
+      <div class="hdr-title">Scan Bar C2 QR</div>
+      <div class="hdr-sub">Confirm delivery · Request manager sign-off</div>
+    </div>
+    <div class="body">
+      <div class="qr-scan-area" style="margin-top:14px;">
+        <div class="qr-frame">
+          <div class="qr-inner">
+            <div class="qr-emoji">🍺</div>
+            <div class="qr-scan-line"></div>
+          </div>
+        </div>
+        <div class="qr-hint">
+          Point camera at Bar C2 delivery QR<br>
+          <span style="color:var(--text);font-weight:700;">BAR-C2-DELIVERY-TK1002</span>
+        </div>
+        <br>
+        <button class="qr-btn-mock" onclick="barScanned()">
+          ✓ Simulate Delivery Scan
+        </button>
+      </div>
+
+      <div class="notes-box">
+        <div class="notes-icon">👤</div>
+        <div>
+          <div class="notes-label">Manager Verification</div>
+          <div class="notes-text" style="color:var(--text2,#ccd);">After scanning, hand device to bar manager for final confirmation signature</div>
+        </div>
+      </div>
+    </div>
+    <div class="cta-area">
+      <button class="btn-sub" onclick="goScreen('screen-transit')">← Back to Transit</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 6 — MANAGER SIGN-OFF
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screen-manager">
+    <div class="hdr">
+      <div class="hdr-top">
+        <span class="hdr-logo">BARPASS OPS</span>
+        <span class="hdr-badge badge-delivered">✓ MANAGER</span>
+      </div>
+      <div class="hdr-title">Manager Sign-Off</div>
+      <div class="hdr-sub">Bar C2 delivery verification · TK-1002</div>
+    </div>
+    <div class="body">
+
+      <div class="notes-box" style="border-color:#5AA5FF30;margin-top:14px;">
+        <div class="notes-icon">📋</div>
+        <div>
+          <div class="notes-label" style="color:var(--blue);">Hand to Bar Manager</div>
+          <div class="notes-text" style="color:var(--blue)88;">Ask the bar manager to verify cargo count and sign below to confirm receipt</div>
+        </div>
+      </div>
+
+      <!-- Delivery summary -->
+      <div class="manifest" style="margin-bottom:12px;">
+        <div class="manifest-head">
+          <span class="manifest-id">DELIVERY RECEIPT</span>
+          <span class="manifest-ts">TK-1002</span>
+        </div>
+        <div class="manifest-body">
+          <div class="mrow">
+            <span class="mlbl">DELIVERED TO</span>
+            <span class="mval" style="color:var(--green);">Bar C2</span>
+          </div>
+          <div class="mrow">
+            <span class="mlbl">RUNNER</span>
+            <span class="mval" id="mgr-runner">Diego L.</span>
+          </div>
+          <div class="mrow">
+            <span class="mlbl">CARGO</span>
+            <span class="mval" style="font-size:9px;">48 units · 4 item types</span>
+          </div>
+          <div class="mrow">
+            <span class="mlbl">DELIVERY TIME</span>
+            <span class="mval" style="color:var(--amber);" id="mgr-time">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cargo verification checkboxes -->
+      <div class="sec-lbl">Manager — Verify Cargo Received</div>
+      <div class="consent-items" style="margin-bottom:14px;">
+        <div class="consent-item">
+          <div class="consent-check" id="mgr-chk1" onclick="toggleCheck('mgr-chk1')"></div>
+          <span>12× Spirits received and counted</span>
+        </div>
+        <div class="consent-item">
+          <div class="consent-check" id="mgr-chk2" onclick="toggleCheck('mgr-chk2')"></div>
+          <span>12× Water received and counted</span>
+        </div>
+        <div class="consent-item">
+          <div class="consent-check" id="mgr-chk3" onclick="toggleCheck('mgr-chk3')"></div>
+          <span>12× Nachos received in good condition</span>
+        </div>
+        <div class="consent-item">
+          <div class="consent-check" id="mgr-chk4" onclick="toggleCheck('mgr-chk4')"></div>
+          <span>12× Burger received in good condition</span>
+        </div>
+        <div class="consent-item">
+          <div class="consent-check" id="mgr-chk5" onclick="toggleCheck('mgr-chk5')"></div>
+          <span>No damage or discrepancy observed</span>
+        </div>
+      </div>
+
+      <!-- Manager signature -->
+      <div class="sec-lbl">Manager Signature</div>
+      <div class="consent-box">
+        <div class="consent-title" style="font-size:12px;color:var(--muted);">BAR C2 MANAGER</div>
+        <div class="sig-area" id="mgr-sig-area" style="margin-top:10px;">
+          <div class="sig-placeholder" id="mgr-sig-placeholder">
+            <span>✍️</span>
+            Manager signs here
+          </div>
+          <canvas class="sig-canvas" id="mgr-sig-canvas" height="90"></canvas>
+        </div>
+        <button class="sig-clear" onclick="clearSignature('mgr-sig-canvas','mgr-sig-placeholder')">Clear</button>
+      </div>
+
+      <div style="height:120px;"></div>
+    </div>
+    <div class="cta-area">
+      <button class="btn-main done" id="btn-verify" onclick="verifyDelivery()" disabled>
+        ✓ Confirm Delivery Complete
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 7 — VERIFIED / SUCCESS
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screen-verified">
+    <div class="hdr">
+      <div class="hdr-top">
+        <span class="hdr-logo">BARPASS OPS</span>
+        <span class="hdr-badge badge-verified">✓ VERIFIED</span>
+      </div>
+      <div class="hdr-title">Delivery Complete</div>
+      <div class="hdr-sub">Task TK-1002 · Chain of custody closed</div>
+    </div>
+    <div class="success-hero">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Delivered!</div>
+      <div class="success-sub">
+        48 units delivered to Bar C2<br>
+        Chain of custody verified · Manager signed off<br>
+        <span style="color:var(--green);">Great work — on time!</span>
+      </div>
+      <div class="success-stats">
+        <div class="stat-box">
+          <div class="stat-val" id="stat-time">7m 34s</div>
+          <div class="stat-lbl">TOTAL TIME</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--green);">✓</div>
+          <div class="stat-lbl">ON TIME</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">48</div>
+          <div class="stat-lbl">UNITS DELIVERED</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:var(--amber);">+2</div>
+          <div class="stat-lbl">TODAY'S TRIPS</div>
+        </div>
+      </div>
+    </div>
+    <div class="cta-area">
+      <button class="btn-main accept" onclick="goScreen('screen-incoming');resetFlow()">
+        Ready for Next Task
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 8 — DECLINE
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screen-decline">
+    <div class="hdr">
+      <div class="hdr-top">
+        <span class="hdr-logo">BARPASS OPS</span>
+        <span class="hdr-badge" style="background:#FF446620;color:var(--red);border:1px solid #FF446640;">DECLINE</span>
+      </div>
+      <div class="hdr-title">Decline Task</div>
+      <div class="hdr-sub">Select a reason — task will be reassigned</div>
+    </div>
+    <div class="body">
+      <div class="sec-lbl" style="margin-top:14px;">Reason for Declining</div>
+      <div class="decline-reason" id="decline-reasons">
+        <div class="reason-opt" onclick="selectReason(this)"><span class="reason-icon">🚶</span>Currently completing another task</div>
+        <div class="reason-opt" onclick="selectReason(this)"><span class="reason-icon">🤕</span>Injury or physical limitation</div>
+        <div class="reason-opt" onclick="selectReason(this)"><span class="reason-icon">🛒</span>Cannot handle this cargo volume</div>
+        <div class="reason-opt" onclick="selectReason(this)"><span class="reason-icon">📍</span>Too far from hub location</div>
+        <div class="reason-opt" onclick="selectReason(this)"><span class="reason-icon">⏰</span>End of shift approaching</div>
+        <div class="reason-opt" onclick="selectReason(this)"><span class="reason-icon">💬</span>Other (explain to supervisor)</div>
+      </div>
+      <div style="height:100px;"></div>
+    </div>
+    <div class="cta-area">
+      <button class="btn-main danger" id="btn-decline-confirm" onclick="confirmDecline()" disabled>
+        Decline &amp; Notify Supervisor
+      </button>
+      <button class="btn-sub" onclick="goScreen('screen-incoming')">← Go Back</button>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+// ── Task data (URL params override defaults) ──
+const params = new URLSearchParams(location.search);
+const TASK = {
+  id:       params.get('id')       || 'TK-1002',
+  hub:      params.get('hub')      || 'Hub West',
+  bar:      params.get('bar')      || 'Bar C2',
+  runner:   params.get('runner')   || 'Diego L.',
+  zone:     params.get('zone')     || 'A',
+  cargo:    params.get('cargo')    || '12×Spirits, 12×Water, 12×Nachos, 12×Burger',
+  units:    params.get('units')    || '48',
+  priority: params.get('priority') || 'MID',
+  inv:      params.get('inv')      || '23',
+  eta:      params.get('eta')      || '9',
+  by:       params.get('by')       || 'Elena C. · Manager VIP',
+  notes:    params.get('notes')    || '',
+};
+
+// ── Populate fields from TASK ──
+function populateTask(){
+  document.getElementById('hdr-taskid').textContent    = `Task ${TASK.id} · Dispatched ${fmtTime(new Date())}`;
+  document.getElementById('manifest-id').textContent   = TASK.id;
+  document.getElementById('manifest-ts').textContent   = `Today · ${fmtTime(new Date())}`;
+  document.getElementById('runner-name').textContent   = TASK.runner;
+  document.getElementById('hub-name').textContent      = TASK.hub;
+  document.getElementById('bar-name').textContent      = TASK.bar;
+  document.getElementById('route-time').textContent    = `~${TASK.eta} min`;
+  document.getElementById('m-hub').textContent         = TASK.hub;
+  document.getElementById('m-bar').innerHTML           = `${TASK.bar} <span style="color:var(--red);font-size:8px;">${TASK.inv}% inv</span>`;
+  document.getElementById('m-cargo').innerHTML         = TASK.cargo.replace(/,\s*/g, ',<br>');
+  document.getElementById('m-units').textContent       = TASK.units + ' units';
+  document.getElementById('m-by').textContent          = TASK.by;
+  document.getElementById('m-eta').textContent         = TASK.eta + ' min';
+  document.getElementById('inv-pct').textContent       = TASK.inv + '%';
+  document.getElementById('mgr-runner').textContent    = TASK.runner;
+  document.querySelector('.inv-warn-fill').style.width = TASK.inv + '%';
+  // Priority banner
+  const pb = document.getElementById('prio-banner');
+  const icons = {HIGH:'🚨',MID:'📦',LOW:'📋'};
+  const labels = {HIGH:'HIGH PRIORITY — CRITICAL DELIVERY',MID:'MEDIUM PRIORITY',LOW:'LOW PRIORITY'};
+  const subs   = {HIGH:'Immediate action required · Bar near empty',MID:'Standard delivery — complete within ETA',LOW:'Complete when available'};
+  pb.className = `prio-banner ${TASK.priority}`;
+  pb.querySelector('.prio-icon').textContent  = icons[TASK.priority]||'📦';
+  pb.querySelector('.prio-title').textContent = labels[TASK.priority]||labels.MID;
+  pb.querySelector('.prio-sub').textContent   = subs[TASK.priority]||subs.MID;
+  // Notes
+  if(TASK.notes){
+    document.getElementById('notes-box').style.display='flex';
+    document.getElementById('notes-text').textContent=TASK.notes;
+  }
+  // Cargo grid
+  buildCargoGrid();
+  buildCargoChecklist();
+  // Hide inv warn if not critical
+  if(parseInt(TASK.inv)>35) document.querySelector('.inv-warn').style.display='none';
+}
+
+function buildCargoGrid(){
+  const items = TASK.cargo.split(',').map(s=>s.trim());
+  const emojis = {'spirits':'🥃','water':'💧','beer':'🍺','wine':'🍷','nachos':'🌮','burger':'🍔','soda':'🥤','juice':'🧃','mixed':'📦'};
+  document.getElementById('cargo-grid').innerHTML = items.map(item=>{
+    const m = item.match(/^(\d+)×(.+)$/i);
+    const qty = m?m[1]:'?', name = m?m[2]:item;
+    const key = name.toLowerCase().replace(/[^a-z]/g,'');
+    const emoji = emojis[key]||'📦';
+    return `<div class="cargo-item"><span class="cargo-emoji">${emoji}</span><span class="cargo-qty">×${qty}</span><div class="cargo-name">${name}</div></div>`;
+  }).join('');
+}
+
+function buildCargoChecklist(){
+  const items = TASK.cargo.split(',').map(s=>s.trim());
+  document.getElementById('cargo-checklist').innerHTML = items.map((item,i)=>`
+    <div class="consent-item" style="padding:8px 0;border-bottom:1px solid var(--border);">
+      <div class="consent-check" id="cargo-chk-${i}" onclick="toggleCheck('cargo-chk-${i}')"></div>
+      <span style="font-family:var(--mono);font-size:10px;">${item} — loaded &amp; counted</span>
+    </div>`).join('');
+}
+
+// ── Screen navigation ──
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── Status bar clock ──
+function updateClock(){
+  const now = new Date();
+  document.getElementById('sb-time').textContent = fmtTime(now);
+}
+function fmtTime(d){ return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
+setInterval(updateClock,1000); updateClock();
+
+// ── Checkboxes ──
+const _checked = {};
+function toggleCheck(id){
+  _checked[id] = !_checked[id];
+  const el = document.getElementById(id);
+  if(_checked[id]) el.classList.add('checked'); else el.classList.remove('checked');
+  validateAccept();
+  validateManager();
+}
+
+function validateAccept(){
+  const all = _checked['chk1'] && _checked['chk2'] && _checked['chk3'] && _sigDone;
+  document.getElementById('btn-accept').disabled = !all;
+}
+
+function validateManager(){
+  const all = _checked['mgr-chk1'] && _checked['mgr-chk2'] &&
+              _checked['mgr-chk3'] && _checked['mgr-chk4'] &&
+              _checked['mgr-chk5'] && _mgrSigDone;
+  const btn = document.getElementById('btn-verify');
+  if(btn) btn.disabled = !all;
+}
+
+// ── Signature canvas ──
+let _sigDone = false, _mgrSigDone = false;
+function initCanvas(canvasId, phId, onDone){
+  const canvas = document.getElementById(canvasId);
+  const ph = document.getElementById(phId);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth || 340;
+  ctx.strokeStyle = '#00e87a';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  let drawing = false, hasDrawn = false;
+  const pos = (e) => {
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return {x:(src.clientX-r.left)*(canvas.width/r.width), y:(src.clientY-r.top)*(canvas.height/r.height)};
+  };
+  const start = (e)=>{ e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); };
+  const move  = (e)=>{ e.preventDefault(); if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); if(!hasDrawn){hasDrawn=true; ph.style.display='none';} };
+  const end   = ()=>{ drawing=false; if(hasDrawn){ onDone(); }};
+  canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move); canvas.addEventListener('mouseup',end);
+  canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); canvas.addEventListener('touchend',end);
+}
+
+function clearSignature(cid='sig-canvas', pid='sig-placeholder'){
+  const canvas = document.getElementById(cid);
+  const ph = document.getElementById(pid);
+  if(canvas){ canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height); }
+  if(ph) ph.style.display='flex';
+  if(cid==='sig-canvas'){ _sigDone=false; validateAccept(); }
+  else { _mgrSigDone=false; validateManager(); }
+}
+
+// ── Timers ──
+let _pickingStart=null, _transitStart=null;
+let _pickingTimer=null, _transitTimer=null;
+
+function startPickingTimer(){
+  _pickingStart = Date.now();
+  clearInterval(_pickingTimer);
+  _pickingTimer = setInterval(()=>{
+    const elapsed = Math.floor((Date.now()-_pickingStart)/1000);
+    document.getElementById('timer-picking').textContent = fmtSec(elapsed);
+  },1000);
+}
+
+function startTransitTimer(){
+  _transitStart = Date.now();
+  clearInterval(_transitTimer);
+  _transitTimer = setInterval(()=>{
+    const elapsed = Math.floor((Date.now()-_transitStart)/1000);
+    const el = document.getElementById('timer-transit');
+    if(el) el.textContent = fmtSec(elapsed);
+  },1000);
+}
+
+function fmtSec(s){ return Math.floor(s/60).toString().padStart(2,'0')+':'+( s%60).toString().padStart(2,'0'); }
+
+// ── Actions ──
+let _acceptTime = null;
+
+function acceptTask(){
+  _acceptTime = new Date();
+  document.getElementById('accepted-ts').textContent = fmtTime(_acceptTime);
+  goScreen('screen-picking');
+  startPickingTimer();
+}
+
+function hubScanned(){
+  const ts = fmtTime(new Date());
+  document.getElementById('hub-ts').textContent = ts;
+  document.getElementById('transit-hub-ts').textContent = `✓ Confirmed ${ts}`;
+  goScreen('screen-transit');
+  startTransitTimer();
+}
+
+function barScanned(){
+  goScreen('screen-manager');
+  const now = new Date();
+  const elapsed = _acceptTime ? Math.floor((now-_acceptTime)/1000) : 0;
+  document.getElementById('mgr-time').textContent = fmtSec(elapsed);
+  document.getElementById('stat-time').textContent = fmtSec(elapsed);
+  // re-init manager signature canvas
+  setTimeout(()=>{
+    initCanvas('mgr-sig-canvas','mgr-sig-placeholder',()=>{_mgrSigDone=true;validateManager();});
+  },100);
+}
+
+function verifyDelivery(){
+  clearInterval(_pickingTimer);
+  clearInterval(_transitTimer);
+  goScreen('screen-verified');
+}
+
+function resetFlow(){
+  _sigDone=false; _mgrSigDone=false; _acceptTime=null;
+  Object.keys(_checked).forEach(k=>{ _checked[k]=false; document.getElementById(k)?.classList.remove('checked'); });
+  clearSignature(); clearSignature('mgr-sig-canvas','mgr-sig-placeholder');
+  document.getElementById('btn-accept').disabled=true;
+  populateTask();
+}
+
+// Decline
+let _selectedReason = null;
+function selectReason(el){
+  document.querySelectorAll('.reason-opt').forEach(r=>r.classList.remove('sel'));
+  el.classList.add('sel');
+  _selectedReason = el.textContent.trim();
+  document.getElementById('btn-decline-confirm').disabled=false;
+}
+
+function confirmDecline(){
+  alert(`Task ${TASK.id} declined.\nReason: ${_selectedReason}\n\nA supervisor has been notified and the task will be reassigned.`);
+  goScreen('screen-incoming');
+}
+
+// ── Init ──
+window.addEventListener('DOMContentLoaded', ()=>{
+  populateTask();
+  // Init runner signature canvas
+  setTimeout(()=>{
+    initCanvas('sig-canvas','sig-placeholder',()=>{ _sigDone=true; validateAccept(); });
+  }, 200);
+});
+</script>
+</body>
+</html>
