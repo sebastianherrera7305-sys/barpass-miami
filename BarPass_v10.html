@@ -10067,7 +10067,7 @@ function stadNodeClick(e,nid,ntype){
     <div class="nm-item" onclick="stadCloseNodeMenu()"><span class="nm-icon">👔</span>Assign Manager</div>`;
   const metricBar=n=>`
     <div class="nm-metrics">
-      ${n.type==='bar'?`
+      ${ntype==='bar'?`
         <div class="nm-m"><div class="nm-ml">INVENTORY</div><div class="nm-mv" style="color:${n.inv<30?'#FF4466':n.inv<60?'#FFba38':'#00e87a'};">${Math.round(n.inv)}%</div></div>
         <div class="nm-m"><div class="nm-ml">QUEUE</div><div class="nm-mv" style="color:${n.queue>8?'#FF4466':'#FFba38'};">${Math.round(n.queue)} min</div></div>
         <div class="nm-m"><div class="nm-ml">AVG SVC</div><div class="nm-mv">${n.svc}</div></div>
