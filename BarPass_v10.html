@@ -3366,24 +3366,6 @@ canvas.qr-canvas{image-rendering:pixelated;border:3px solid #fff;border-radius:3
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     INTELLIGENCE VIEW
-═══════════════════════════════════════════════════════ -->
-<div class="view" id="view-intel">
-  <div class="grid g2" style="grid-template-rows:auto 1fr">
-    <div class="card" style="grid-column:span 2">
-      <div class="ch"><span class="ct">Competitive differentiation matrix</span><span class="badge bg">April 2026</span></div>
-      <div class="cb">
-        <table class="comp-matrix">
-          <thead><tr><th>Feature</th><th>Billfold</th><th>Advenue</th><th>Toast</th><th>Square</th><th style="color:var(--green)">BarPass ✅</th></tr></thead>
-          <tbody id="matrix-body"></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="card"><div class="ch"><span class="ct">Competitor valuations</span><span class="badge bb">Live</span></div><div class="cb" id="val-cards"></div></div>
-    <div class="card"><div class="ch"><span class="ct">14 lessons from failures</span><span class="badge ba">Auto-learning</span></div><div class="cb" id="lessons-feed"></div></div>
-  </div>
-</div>
 
 <!-- ═══════════════════════════════════════════════════════
      ARCHITECTURE VIEW
@@ -5082,8 +5064,8 @@ const Security = (() => {
   
   // ── RBAC permissions ────────────────────────────────────
   const _perms = {
-    owner:     ['station','manager','owner','intel','arch','discount_enable','reports_all','security_view'],
-    manager:   ['station','manager','intel','arch','discount_enable','reports_team'],
+    owner:     ['station','manager','owner','arch','discount_enable','reports_all','security_view'],
+    manager:   ['station','manager','arch','discount_enable','reports_team'],
     bartender: ['station'],
   };
 
@@ -5539,7 +5521,6 @@ const VIEWS={
     {id:'inv',label:_t('nav.invSection')},
     {id:'products',label:_t('nav.products')},
     {section:_t('nav.analytics')},
-    {id:'intel',label:_t('nav.intelligence')},
     {id:'reports',label:_t('nav.reports')},
     {section:_t('nav.system')},
     {id:'settings',label:_t('nav.config')},
@@ -5631,7 +5612,6 @@ function doLogin(){
   } else {
     initCharts();
     renderCatalog([],'cocktails');updateCatCountLabel();renderAddons();
-    buildIntelligence();
     if(role==='manager'||role==='owner')initRiskEngine();
     if(role==='owner')initStadium();
     if(role==='inventory'||role==='manager'||role==='owner')initInventory();
@@ -6212,69 +6192,6 @@ function updateCharts(){
   charts.upsell.update('none');
 }
 
-/* ═══════════════════════════════════════════════════════════
-   INTELLIGENCE
-═══════════════════════════════════════════════════════════ */
-function buildIntelligence(){
-  const MATRIX=[
-    ['Age verification (ID scan)','❌','❌','❌','❌','✅ Core feature'],
-    ['Biometric face match','❌','❌','❌','❌','✅ AWS Rekognition'],
-    ['No stored photos (vectors)','❌','❌','❌','❌','✅ Privacy-first'],
-    ['FastPass (returning members)','❌','❌','❌','❌','✅ Original'],
-    ['Offline mode','⚠️ RFID only','❌','❌','❌','✅ 4 hours full'],
-    ['6-layer fraud detection','❌','❌','❌','❌','✅ Built-in'],
-    ['Security Level 3','❌','❌','❌','❌','✅ JWT+CSRF+RBAC'],
-    ['Legal audit log','❌','❌','⚠️ Payments','⚠️ Payments','✅ Every action'],
-    ['SAP S/4HANA 2025','❌','❌','⚠️ Limited','❌','✅ OData v4'],
-    ['ML upsell feedback','❌','❌','❌','❌','✅ Original'],
-    ['Temperature system','❌','❌','❌','❌','✅ Original'],
-    ['Smart add-on engine','❌','❌','❌','❌','✅ Context-aware'],
-    ['Rate limiting + lockout','❌','❌','❌','❌','✅ 5 attempts'],
-    ['RBAC (3 roles)','❌','❌','⚠️ Basic','⚠️ Basic','✅ Granular'],
-  ];
-  const mb=document.getElementById('matrix-body');
-  if(mb)mb.innerHTML=MATRIX.map(row=>{
-    const c3=row[3]==='✅'?'yes':(row[3].includes('⚠')?'partial':'no');
-    const c4=row[4]==='✅'?'yes':(row[4].includes('⚠')?'partial':'no');
-    return `<tr><td style="font-weight:500">${Security.sanitize(row[0])}</td><td class="no">${row[1]}</td><td class="no">${row[2]}</td><td class="${c3}">${row[3]}</td><td class="${c4}">${row[4]}</td><td class="bp-col">${row[5]}</td></tr>`;
-  }).join('');
-  const VALS=[
-    {name:'Toast POS',emoji:'🍞',tag:'vc-pub',tagLabel:'Pública',val:'~$15.3B',founded:'2011',time:'10 años IPO',at:'Breach jul 2025 — SSNs',lc:'var(--red)',lesson:'⚠️ Breach julio 2025 — SSNs + cuentas bancarias. El mercado castiga la seguridad débil.'},
-    {name:'Square/Block',emoji:'🟩',tag:'vc-pub',tagLabel:'Pública',val:'~$35.9B',founded:'2009',time:'6 años IPO',at:'Jack Dorsey',lc:'var(--blue)',lesson:'💡 6 años de founder a IPO. Empezó con un lector USB.'},
-    {name:'Clover',emoji:'🍀',tag:'vc-acq',tagLabel:'Adquirida',val:'Parte de Fiserv $80B',founded:'2010',time:'2 años — comprada',at:'First Data → Fiserv $22B',lc:'var(--green)',lesson:'🚀 Comprada a los 2 AÑOS. BarPass puede seguir este camino.'},
-    {name:'Billfold',emoji:'💳',tag:'vc-priv',tagLabel:'Seed privada',val:'~$6-10M est.',founded:'2016',time:'8 años sin escalar',at:'$6.6M total, sin API',lc:'var(--amber)',lesson:'⚠️ Mercado equivocado (festivales vs bares).'},
-  ];
-  const vc=document.getElementById('val-cards');
-  if(vc)vc.innerHTML=VALS.map(v=>`<div class="val-card" style="margin-bottom:8px">
-    <div class="vc-name">${v.emoji} ${Security.sanitize(v.name)} <span class="vc-tag ${v.tag}">${v.tagLabel}</span></div>
-    <div class="vc-stats">
-      <div class="vc-s"><div class="vc-slbl">Valor hoy</div><div class="vc-sval" style="color:var(--green)">${v.val}</div></div>
-      <div class="vc-s"><div class="vc-slbl">Fundada</div><div class="vc-sval">${v.founded}</div></div>
-      <div class="vc-s"><div class="vc-slbl">Timeline</div><div class="vc-sval">${v.time}</div></div>
-      <div class="vc-s"><div class="vc-slbl">Contexto</div><div class="vc-sval" style="font-size:10px">${Security.sanitize(v.at)}</div></div>
-    </div>
-    <div class="vc-lesson" style="border-color:${v.lc}">${Security.sanitize(v.lesson)}</div>
-  </div>`).join('');
-  const LESSONS=[
-    {n:'Toast breach jul 2025',from:'Toast',fix:'BarPass: CERO SSNs. Solo vectores matemáticos.'},
-    {n:'Toast outages durante picos',from:'Toast',fix:'BarPass offline: 4h sin internet, SQLite queue.'},
-    {n:'Toast fee creep ($0.99)',from:'Toast',fix:'BarPass: $199/mo plano. Sin fees. Nunca.'},
-    {n:'Billfold sin API',from:'Billfold',fix:'BarPass: REST API abierta + WebSocket.'},
-    {n:'Billfold: mercado equivocado',from:'Billfold',fix:'BarPass: para bares desde el día 1.'},
-    {n:'Advenue: cero biometría',from:'Advenue',fix:'BarPass: face match es el core.'},
-    {n:'Square: account freezes',from:'Square',fix:'BarPass: identidad solamente. Sin pagos.'},
-    {n:'Clover: ecosistema fragmentado',from:'Clover',fix:'BarPass: verde o rojo. 0 training.'},
-    {n:'94% breaches = POS systems',from:'Industria',fix:'BarPass NO es POS. Superficie mínima.'},
-    {n:'Breach hospitality: $3.6M avg',from:'IBM 2025',fix:'BarPass ROI: $199/mo previene $3.6M.'},
-    {n:'Sin JWT/CSRF en competidores',from:'Mercado',fix:'BarPass: Security Level 3 desde el inicio.'},
-    {n:'Sin rate limiting en competidores',from:'Mercado',fix:'BarPass: lockout a los 5 intentos.'},
-  ];
-  const lf=document.getElementById('lessons-feed');
-  if(lf)lf.innerHTML=LESSONS.map((l,i)=>`<div class="insight">
-    <div class="ins-icon" style="background:rgba(255,186,56,.1);color:var(--amber);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i+1}</div>
-    <div><div class="ins-body"><strong>${Security.sanitize(l.n)}</strong> <span style="color:var(--muted);font-size:10px">[${Security.sanitize(l.from)}]</span></div><div class="ins-action">→ ${Security.sanitize(l.fix)}</div></div>
-  </div>`).join('');
-}
 
 /* ═══════════════════════════════════════════════════════════
    PERFORMANCE SIM
