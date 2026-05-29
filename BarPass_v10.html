@@ -10090,9 +10090,9 @@ function stadNodeClick(e,nid,ntype){
     <div class="nm-item primary" onclick="stadOpenTaskDispatch('${nid}',null);stadCloseNodeMenu()"><span class="nm-icon">🚀</span>Dispatch Order</div>
     <div class="nm-item" onclick="stadOpenTaskDispatch('${nid}',null);stadCloseNodeMenu()"><span class="nm-icon">📤</span>Redistribute Inventory</div>
     <div class="nm-sep"></div>
-    <div class="nm-item" onclick="stadCloseNodeMenu()"><span class="nm-icon">📈</span>View Burn Rate</div>
-    <div class="nm-item" onclick="stadCloseNodeMenu()"><span class="nm-icon">🔄</span>Open Logistics Queue</div>
-    <div class="nm-item" onclick="stadCloseNodeMenu()"><span class="nm-icon">👔</span>Assign Manager</div>`;
+    <div class="nm-item" onclick="stadViewBurnRate('${nid}');stadCloseNodeMenu()"><span class="nm-icon">📈</span>View Burn Rate</div>
+    <div class="nm-item" onclick="stadOpenLogisticsQueue('${nid}');stadCloseNodeMenu()"><span class="nm-icon">🔄</span>Open Logistics Queue</div>
+    <div class="nm-item" onclick="stadAssignManager('${nid}');stadCloseNodeMenu()"><span class="nm-icon">👔</span>Assign Manager</div>`;
   const metricBar=n=>`
     <div class="nm-metrics">
       ${ntype==='bar'?`
@@ -10730,18 +10730,158 @@ function stadToggleHeatmap(btn){
 }
 
 /* ── Node-specific actions ── */
+// ── Inventory Scan → real modal with BPDB levels + adjust ──
 function stadInventoryScan(barId){
   const bar=MAP_BARS.find(b=>b.id===barId);
   if(!bar) return;
-  stadAddAlert('ai',`Inventory scan initiated at ${bar.name} — awaiting QR confirmation`);
   stadBeep(1047,100,0.05);
+  // Map stadium bar ID to BPDB location ID
+  const bpId={'barA1':'bar-01','barA2':'bar-01','barB1':'bar-03','barB2':'bar-03','barC1':'bar-04','barC2':'bar-04','barD1':'bar-01','barD2':'bar-02','vipBar':'bar-02','upperB':'bar-04'}[barId]||'bar-01';
+  const loc=window.BPDB?BPDB.getInventory(bpId):null;
+  const items=loc?Object.entries(loc.items):[];
+  const rows=items.map(([skuId,sku])=>{
+    const pct=Math.round(sku.qty/sku.max*100);
+    const col=pct<10?'#FF4466':pct<25?'#FFba38':'#00e87a';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #1a2040;">
+      <span style="font-size:14px;">${sku.emoji||'📦'}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:11px;font-weight:500;">${sku.name}</div>
+        <div style="height:3px;background:#1a2040;border-radius:2px;margin-top:3px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:${col};border-radius:2px;"></div></div>
+      </div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:${col};min-width:36px;text-align:right;">${pct}%</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a5380;min-width:40px;text-align:right;">${sku.qty}/${sku.max}</span>
+      <button onclick="if(window.BPDB){BPDB.updateInventory('${bpId}','${skuId}',1,'SCAN_RECOUNT');this.textContent='✓';this.style.color='#00e87a';}"
+        style="padding:3px 8px;border-radius:5px;border:1px solid #1a2040;background:transparent;color:#4a5380;font-family:'JetBrains Mono',monospace;font-size:8px;cursor:pointer;">+1</button>
+      <button onclick="if(window.BPDB){BPDB.updateInventory('${bpId}','${skuId}',-1,'SCAN_RECOUNT');this.textContent='✓';this.style.color='#FFba38';}"
+        style="padding:3px 8px;border-radius:5px;border:1px solid #1a2040;background:transparent;color:#4a5380;font-family:'JetBrains Mono',monospace;font-size:8px;cursor:pointer;">-1</button>
+    </div>`;
+  }).join('');
+  _stadShowModal(`📷 Inventory Scan — ${bar.name}`,
+    `<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a5380;margin-bottom:12px;">REAL-TIME STOCK LEVELS · ${loc?.name||barId} · Tap +1/-1 to adjust</div>
+    <div style="max-height:340px;overflow-y:auto;">${rows||'<div style="color:#4a5380;text-align:center;padding:20px;">No inventory data</div>'}</div>`,
+    [{label:'✓ Scan Complete',action:`stadToast('Scan saved for ${bar.name}','ok',3000)`,primary:true},{label:'📦 Request Restock',action:`stadOpenTaskDispatch('central','${barId}')`}]);
+  stadAddAlert('ai',`Inventory scan completed at ${bar.name} — ${items.length} SKUs reviewed`);
 }
+
+// ── Emergency Alert → full protocol modal ──
 function stadEmergencyAlert(barId){
   const bar=MAP_BARS.find(b=>b.id===barId);
   if(!bar) return;
-  stadAddAlert('cr',`⚠ EMERGENCY at ${bar.name} — all available runners redirected immediately`);
-  stadBeep(220,600,0.12,'sawtooth');
+  stadBeep(220,800,0.15,'sawtooth');
+  stadAddAlert('cr',`🚨 EMERGENCY at ${bar.name} — protocol activated`);
+  let sec=10;
+  _stadShowModal(`🚨 EMERGENCY PROTOCOL — ${bar.name}`,
+    `<div style="background:#FF446618;border:1px solid #FF446640;border-radius:10px;padding:14px;margin-bottom:12px;text-align:center;">
+      <div style="color:#FF4466;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.05em;">EMERGENCY ACTIVE — ALL RUNNERS NOTIFIED</div>
+      <div id="emer-countdown" style="color:#FF4466;font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;margin:10px 0;">${sec}s</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a5380;">Auto-resolving in 10 seconds</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="background:#0c1022;border:1px solid #1a2040;border-radius:8px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;">
+        <span style="color:#FF4466;">⚡</span> All available runners → redirected to ${bar.name}
+      </div>
+      <div style="background:#0c1022;border:1px solid #1a2040;border-radius:8px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;">
+        <span style="color:#FFba38;">📢</span> Zone ${bar.zone} manager notified via push alert
+      </div>
+      <div style="background:#0c1022;border:1px solid #1a2040;border-radius:8px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:10px;">
+        <span style="color:#5AA5FF;">📋</span> Emergency task logged — chain of custody activated
+      </div>
+    </div>`,
+    [{label:'✓ Situation Resolved',action:`stadAddAlert('ok','${bar.name} emergency resolved — normal operations resumed')`,primary:true},{label:'📦 Emergency Restock',action:`stadOpenTaskDispatch('central','${barId}')`}]);
+  const cd=document.getElementById('emer-countdown');
+  const t=setInterval(()=>{sec--;if(cd)cd.textContent=sec+'s';if(sec<=0){clearInterval(t);}},1000);
 }
+
+// ── Burn Rate → consumption chart ──
+function stadViewBurnRate(hubId){
+  const hub=MAP_HUBS.find(h=>h.id===hubId)||{name:hubId,cap:70,throughput:120,pending:4,delay:1};
+  const hours=['6h ago','5h ago','4h ago','3h ago','2h ago','1h ago','Now'];
+  const rates=[45,62,78,91,88,96,hub.throughput];
+  const maxR=Math.max(...rates);
+  const bars=rates.map((r,i)=>{
+    const h=Math.round(r/maxR*80);
+    const col=r>80?'#00e87a':r>60?'#FFba38':'#FF4466';
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#4a5380;">${r}</div>
+      <div style="height:${h}px;width:100%;border-radius:3px 3px 0 0;background:${col};min-height:4px;"></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:#4a5380;text-align:center;">${hours[i]}</div>
+    </div>`;
+  }).join('');
+  _stadShowModal(`📈 Burn Rate — ${hub.name}`,
+    `<div style="margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <div style="background:#0c1022;border:1px solid #1a2040;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#00e87a;">${hub.throughput}<span style="font-size:10px;">/h</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#4a5380;margin-top:2px;">THROUGHPUT</div>
+      </div>
+      <div style="background:#0c1022;border:1px solid #1a2040;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:#FFba38;">${hub.pending}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#4a5380;margin-top:2px;">PENDING</div>
+      </div>
+      <div style="background:#0c1022;border:1px solid #1a2040;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:${hub.delay>0?'#FF4466':'#00e87a'};">${hub.delay}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#4a5380;margin-top:2px;">DELAYS</div>
+      </div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a5380;margin-bottom:8px;">THROUGHPUT TREND — UNITS/HOUR</div>
+    <div style="display:flex;align-items:flex-end;gap:4px;height:100px;">${bars}</div>`,
+    [{label:'📦 Dispatch Order',action:`stadOpenTaskDispatch('${hubId}',null)`,primary:true}]);
+}
+
+// ── Logistics Queue → navigate to runners tab ──
+function stadOpenLogisticsQueue(hubId){
+  stadCloseNodeMenu();
+  // Click the runners nav item
+  const navItem=document.querySelector('.nav-link[data-view="runners"]')||document.querySelector('[onclick*="runners"]');
+  if(navItem){navItem.click();}
+  else{
+    // Fallback: switch to runners view directly
+    if(typeof showView==='function') showView('runners');
+    else{document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));const rv=document.getElementById('view-runners');if(rv)rv.classList.add('active');}
+  }
+  stadToast(`Logistics queue open — ${hubId}`,'ok',2000);
+}
+
+// ── Assign Manager → open dispatch with manager assignment ──
+function stadAssignManager(hubId){
+  const hub=MAP_HUBS.find(h=>h.id===hubId)||{name:hubId};
+  const managers=STAD_ENTITIES.filter(e=>e.role==='manager');
+  const opts=managers.length
+    ? managers.map(m=>`<div onclick="_stadAssignMgrPick('${hubId}','${m.id}','${m.name}')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:#0c1022;border:1px solid #1a2040;cursor:pointer;margin-bottom:6px;transition:border-color .15s;" onmouseover="this.style.borderColor='#a855f7'" onmouseout="this.style.borderColor='#1a2040'">
+        <div style="width:32px;height:32px;border-radius:50%;background:#a855f720;border:2px solid #a855f7;display:flex;align-items:center;justify-content:center;font-size:14px;">${m.emoji||'👤'}</div>
+        <div><div style="font-size:12px;font-weight:500;">${m.name}</div><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#4a5380;">Manager · Zone ${m.zone||'ALL'}</div></div>
+      </div>`).join('')
+    : '<div style="color:#4a5380;text-align:center;padding:20px;font-family:JetBrains Mono,monospace;font-size:10px;">No managers available on shift</div>';
+  _stadShowModal(`👔 Assign Manager — ${hub.name}`,opts,[{label:'Cancel',action:''}]);
+}
+function _stadAssignMgrPick(hubId,mgrId,mgrName){
+  stadCloseStadModal();
+  const hub=MAP_HUBS.find(h=>h.id===hubId)||{name:hubId};
+  stadAddAlert('ok',`${mgrName} assigned to ${hub.name}`);
+  stadToast(`${mgrName} → ${hub.name}`,'ok',3000);
+}
+
+// ── Generic modal engine for node menu actions ──
+let _stadModalEl=null;
+function _stadShowModal(title,body,buttons=[]){
+  if(_stadModalEl){_stadModalEl.remove();_stadModalEl=null;}
+  const btns=buttons.map(b=>`<button onclick="stadCloseStadModal();${b.action||''}" style="padding:8px 16px;border-radius:8px;border:${b.primary?'none':'1px solid #1a2040'};background:${b.primary?'linear-gradient(135deg,#5AA5FF,#a855f7)':'transparent'};color:${b.primary?'#fff':'#8090b8'};font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;">${b.label}</button>`).join('');
+  const el=document.createElement('div');
+  el.id='stad-modal-ov';
+  el.style.cssText='position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px;';
+  el.onclick=e=>{if(e.target===el)stadCloseStadModal();};
+  el.innerHTML=`<div style="background:#080c1a;border:1px solid #1e2448;border-radius:14px;width:100%;max-width:440px;max-height:80vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.7);">
+    <div style="padding:14px 18px;border-bottom:1px solid #1a2040;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:13px;font-weight:700;">${title}</div>
+      <button onclick="stadCloseStadModal()" style="width:26px;height:26px;border-radius:6px;border:1px solid #1a2040;background:transparent;color:#4a5380;cursor:pointer;font-size:13px;">✕</button>
+    </div>
+    <div style="padding:16px 18px;">${body}</div>
+    ${btns?`<div style="padding:12px 18px;border-top:1px solid #1a2040;display:flex;gap:8px;justify-content:flex-end;">${btns}</div>`:''}
+  </div>`;
+  document.body.appendChild(el);
+  _stadModalEl=el;
+}
+function stadCloseStadModal(){if(_stadModalEl){_stadModalEl.remove();_stadModalEl=null;}}
+
 function stadZoomZone(zone){
   const tabEl=document.querySelector(`.stad-zone-tab[onclick*="'${zone}'"]`);
   if(tabEl) tabEl.click();
