@@ -10426,8 +10426,7 @@ function stadRenderDispatchStep(){
       if(c){
         // Build real runner-consent URL with all dispatch params
         const cargoStr=Object.entries(_dispatch.items).map(([k,v])=>v+'×'+k).join(',');
-        const origin=location.origin||'http://localhost:4321';
-        const consentUrl=`${origin}/runner-consent.html?id=${encodeURIComponent(taskId)}&hub=${encodeURIComponent(hub.name)}&bar=${encodeURIComponent(bar.name)}&runner=${encodeURIComponent(emp.name)}&priority=${encodeURIComponent(_dispatch.priority)}&inv=${Math.round(bar.inv)}&eta=${totalMins}&units=${totalUnits}&cargo=${encodeURIComponent(cargoStr)}&by=${encodeURIComponent(currentRole==='manager'?'Stadium Manager':'Stadium Ops')}${_dispatch.notes?'&notes='+encodeURIComponent(_dispatch.notes):''}`;
+        const consentUrl=`runner-consent.html?id=${encodeURIComponent(taskId)}&hub=${encodeURIComponent(hub.name)}&bar=${encodeURIComponent(bar.name)}&runner=${encodeURIComponent(emp.name)}&priority=${encodeURIComponent(_dispatch.priority)}&inv=${Math.round(bar.inv)}&eta=${totalMins}&units=${totalUnits}&cargo=${encodeURIComponent(cargoStr)}&by=${encodeURIComponent(currentRole==='manager'?'Stadium Manager':'Stadium Ops')}${_dispatch.notes?'&notes='+encodeURIComponent(_dispatch.notes):''}`;
         window._consentUrl=consentUrl;
         stadDrawQR(c,consentUrl);
         // Show clickable link
