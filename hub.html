@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarPass Enterprise Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="barpass-db.js"></script>
+<style>
+:root{--bg:#04060e;--surface:#080c1a;--card:#0c1022;--border:#1a2040;--text:#e8eaf6;--muted:#4a5380;--green:#00e87a;--amber:#FFba38;--red:#FF4466;--blue:#5AA5FF;--purple:#a855f7;--mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);}
+.hdr{padding:20px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-mark{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#5AA5FF,#a855f7);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:800;font-size:18px;color:#fff;box-shadow:0 0 30px #5AA5FF30;}
+.brand-name{font-size:22px;font-weight:800;letter-spacing:-.02em;}
+.brand-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.1em;}
+.hdr-right{display:flex;align-items:center;gap:14px;}
+.live-badge{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid #00e87a30;background:#00e87a08;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--green);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-clock{font-family:var(--mono);font-size:13px;color:var(--muted);}
+.ticker{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:8px 32px;display:flex;align-items:center;gap:14px;overflow:hidden;}
+.ticker-label{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--amber);flex-shrink:0;padding:2px 8px;border-radius:4px;border:1px solid #FFba3830;background:#FFba3810;}
+.ticker-inner{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;flex:1;}
+.hero{padding:48px 32px 28px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-40%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,#5AA5FF08 0%,transparent 70%);pointer-events:none;}
+.hero-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.15em;margin-bottom:16px;}
+.hero-title{font-size:42px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:14px;background:linear-gradient(135deg,var(--text) 40%,var(--muted));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:15px;color:var(--muted);max-width:520px;margin:0 auto 32px;line-height:1.6;}
+.live-stats{display:flex;justify-content:center;gap:32px;margin-bottom:40px;flex-wrap:wrap;}
+.lstat{text-align:center;}
+.lstat-val{font-family:var(--mono);font-size:28px;font-weight:700;}
+.lstat-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em;margin-top:4px;}
+.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:0 32px 48px;max-width:1100px;margin:0 auto;}
+.mod-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;text-decoration:none;color:inherit;display:block;}
+.mod-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ac);opacity:.7;transition:opacity .2s;}
+.mod-card:hover{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac),0 8px 28px rgba(0,0,0,.4);transform:translateY(-2px);}
+.mod-card:hover::before{opacity:1;}
+.mod-card.wide{grid-column:span 2;}
+.mod-icon{font-size:26px;margin-bottom:12px;display:block;}
+.mod-name{font-size:15px;font-weight:700;margin-bottom:4px;}
+.mod-desc{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.mod-features{display:flex;flex-direction:column;gap:3px;margin-bottom:12px;}
+.mod-feat{font-family:var(--mono);font-size:9px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.mod-feat::before{content:'→';color:var(--ac);}
+.mod-badge{position:absolute;top:14px;right:14px;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:8px;font-weight:700;}
+.mod-badge.new{background:#00e87a18;color:var(--green);border:1px solid #00e87a30;}
+.mod-badge.live{background:#FF446618;color:var(--red);border:1px solid #FF446630;animation:badgePulse 2s ease infinite;}
+@keyframes badgePulse{0%,100%{opacity:1}50%{opacity:.5}}
+.mod-stat{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;gap:18px;}
+.ms{display:flex;flex-direction:column;}
+.ms-val{font-family:var(--mono);font-size:15px;font-weight:700;}
+.ms-lbl{font-family:var(--mono);font-size:7px;color:var(--muted);margin-top:2px;}
+.bottom-links{display:flex;justify-content:center;gap:10px;padding:0 32px 32px;flex-wrap:wrap;}
+.bl{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;text-decoration:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.bl:hover{border-color:var(--text);color:var(--text);}
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:6px;}
+.toast{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tin .2s ease;max-width:300px;}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.toast-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+@media(max-width:768px){.modules{grid-template-columns:1fr;padding:0 16px 32px;}.mod-card.wide{grid-column:span 1;}.hero{padding:32px 16px;}.hero-title{font-size:28px;}.bottom-links{padding:0 16px 24px;}.live-stats{gap:20px;}.hdr{padding:14px 16px;}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="brand">
+    <div class="brand-mark">BP</div>
+    <div><div class="brand-name">BarPass</div><div class="brand-sub">ENTERPRISE OPERATIONS</div></div>
+  </div>
+  <div class="hdr-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div class="hdr-clock" id="hdr-clock">--:--:--</div>
+  </div>
+</header>
+
+<div class="ticker"><span class="ticker-label">LIVE</span><div class="ticker-inner" id="ticker"></div></div>
+
+<div class="hero">
+  <div class="hero-label" id="venue-label">Hard Rock Stadium · Miami, FL</div>
+  <div class="hero-title">Every operation,<br>one platform.</div>
+  <div class="hero-sub">Inventory, POS, sales, runners, and automation — connected in real time across all bars and zones.</div>
+  <div class="live-stats">
+    <div class="lstat"><div class="lstat-val" id="ls-rev" style="color:var(--green)">$0</div><div class="lstat-lbl">TODAY'S REVENUE</div></div>
+    <div class="lstat"><div class="lstat-val" id="ls-orders" style="color:var(--blue)">0</div><div class="lstat-lbl">ORDERS</div></div>
+    <div class="lstat"><div class="lstat-val" id="ls-alerts" style="color:var(--red)">0</div><div class="lstat-lbl">ALERTS</div></div>
+    <div class="lstat"><div class="lstat-val" id="ls-locations" style="color:var(--amber)">6</div><div class="lstat-lbl">LOCATIONS</div></div>
+    <div class="lstat"><div class="lstat-val" id="ls-rules" style="color:var(--purple)">0</div><div class="lstat-lbl">AUTO RULES</div></div>
+  </div>
+</div>
+
+<div class="modules">
+  <a class="mod-card wide" href="BarPass_v10.html" style="--ac:var(--green)">
+    <span class="mod-badge live">LIVE POS</span>
+    <span class="mod-icon">🍺</span>
+    <div class="mod-name">BarPass Command Center</div>
+    <div class="mod-desc">Core POS for bartenders and managers. Process orders, manage tabs, dispatch runners, monitor all operations.</div>
+    <div class="mod-features">
+      <div class="mod-feat">Point-of-Sale with real inventory sync</div>
+      <div class="mod-feat">Stadium map · queue · risk view</div>
+      <div class="mod-feat">Runner dispatch with QR chain of custody</div>
+      <div class="mod-feat">AI upsell · Enterprise SSO · multi-role</div>
+    </div>
+    <div class="mod-stat">
+      <div class="ms"><div class="ms-val" id="mc-rev" style="color:var(--green)">$0</div><div class="ms-lbl">TODAY REVENUE</div></div>
+      <div class="ms"><div class="ms-val" id="mc-orders" style="color:var(--blue)">0</div><div class="ms-lbl">ORDERS</div></div>
+      <div class="ms"><div class="ms-val" id="mc-avg" style="color:var(--amber)">$0</div><div class="ms-lbl">AVG ORDER</div></div>
+    </div>
+  </a>
+
+  <a class="mod-card" href="analytics.html" style="--ac:var(--blue)">
+    <span class="mod-icon">📊</span>
+    <div class="mod-name">Analytics</div>
+    <div class="mod-desc">Executive dashboard — revenue, top sellers, hourly trends, bar performance, CSV export.</div>
+    <div class="mod-features">
+      <div class="mod-feat">Revenue by hour chart</div>
+      <div class="mod-feat">Top sellers + bar comparison</div>
+      <div class="mod-feat">All-time transaction history</div>
+    </div>
+    <div class="mod-stat">
+      <div class="ms"><div class="ms-val" id="mc-txns" style="color:var(--blue)">0</div><div class="ms-lbl">TOTAL TXNS</div></div>
+    </div>
+  </a>
+
+  <a class="mod-card" href="inventory.html" style="--ac:var(--amber)">
+    <span class="mod-icon">📦</span>
+    <div class="mod-name">Inventory</div>
+    <div class="mod-desc">Full SKU management, restock orders, supplier tracking, stock transfers between locations.</div>
+    <div class="mod-features">
+      <div class="mod-feat">Real-time stock levels + alerts</div>
+      <div class="mod-feat">Restock order lifecycle</div>
+      <div class="mod-feat">Supplier management</div>
+    </div>
+    <div class="mod-stat">
+      <div class="ms"><div class="ms-val" id="mc-critical" style="color:var(--red)">0</div><div class="ms-lbl">CRITICAL</div></div>
+      <div class="ms"><div class="ms-val" id="mc-invval" style="color:var(--amber)">$0</div><div class="ms-lbl">STOCK VALUE</div></div>
+    </div>
+  </a>
+
+  <a class="mod-card" href="automation.html" style="--ac:var(--purple)">
+    <span class="mod-badge new">NEW</span>
+    <span class="mod-icon">⚙️</span>
+    <div class="mod-name">Automation</div>
+    <div class="mod-desc">Visual rule builder. Auto-dispatch runners, create restock orders, fire alerts — based on real triggers.</div>
+    <div class="mod-features">
+      <div class="mod-feat">5-step rule builder</div>
+      <div class="mod-feat">Auto-dispatch on critical stock</div>
+      <div class="mod-feat">Live event feed</div>
+    </div>
+    <div class="mod-stat">
+      <div class="ms"><div class="ms-val" id="mc-rules" style="color:var(--purple)">0</div><div class="ms-lbl">ACTIVE</div></div>
+      <div class="ms"><div class="ms-val" id="mc-fired" style="color:var(--green)">0</div><div class="ms-lbl">FIRED TODAY</div></div>
+    </div>
+  </a>
+
+  <a class="mod-card" href="staff.html" style="--ac:var(--amber)">
+    <span class="mod-icon">👥</span>
+    <div class="mod-name">Staff</div>
+    <div class="mod-desc">Roster, schedule, leaderboard, and individual performance — all staff in one view.</div>
+    <div class="mod-features">
+      <div class="mod-feat">Real-time status (online/break/off)</div>
+      <div class="mod-feat">Weekly schedule grid</div>
+      <div class="mod-feat">Revenue leaderboard</div>
+    </div>
+    <div class="mod-stat">
+      <div class="ms"><div class="ms-val" style="color:var(--green)">6</div><div class="ms-lbl">ON SHIFT</div></div>
+      <div class="ms"><div class="ms-val" style="color:var(--blue)">8</div><div class="ms-lbl">TOTAL</div></div>
+    </div>
+  </a>
+
+  <a class="mod-card" href="runner-consent.html" style="--ac:var(--green)">
+    <span class="mod-icon">🏃</span>
+    <div class="mod-name">Runner App</div>
+    <div class="mod-desc">Mobile runner interface — accept tasks, scan QR at pickup, transit tracking, delivery verification.</div>
+    <div class="mod-features">
+      <div class="mod-feat">Real camera QR scanner</div>
+      <div class="mod-feat">Chain of custody + signatures</div>
+      <div class="mod-feat">XP gamification</div>
+    </div>
+    <div class="mod-stat">
+      <div class="ms"><div class="ms-val" id="mc-dispatches" style="color:var(--green)">0</div><div class="ms-lbl">DISPATCHES</div></div>
+    </div>
+  </a>
+
+  <a class="mod-card" href="profile-setup.html" style="--ac:#06b6d4">
+    <span class="mod-icon">🪪</span>
+    <div class="mod-name">Staff Onboarding</div>
+    <div class="mod-desc">11-step onboarding. Personal info, certifications, availability, security guidelines, digital badge.</div>
+    <div class="mod-features">
+      <div class="mod-feat">Mandatory security guidelines</div>
+      <div class="mod-feat">Identity verification</div>
+      <div class="mod-feat">Digital badge generation</div>
+    </div>
+    <div class="mod-stat">
+      <div class="ms"><div class="ms-val" style="color:#06b6d4">11</div><div class="ms-lbl">STEPS</div></div>
+    </div>
+  </a>
+
+  <a class="mod-card wide" href="enterprise-auth.html" style="--ac:var(--blue)">
+    <span class="mod-icon">🔐</span>
+    <div class="mod-name">Enterprise Authentication</div>
+    <div class="mod-desc">14 authentication methods — email, Google, Apple, Microsoft, SSO, biometric, NFC badge, Face ID, hardware key. Trust score + device verification + role-based access.</div>
+    <div class="mod-features">
+      <div class="mod-feat">14 auth methods with live permission matrix</div>
+      <div class="mod-feat">Trust score + device fingerprinting</div>
+      <div class="mod-feat">Maps roles to BarPass access levels</div>
+    </div>
+    <div class="mod-stat">
+      <div class="ms"><div class="ms-val" style="color:var(--blue)">14</div><div class="ms-lbl">AUTH METHODS</div></div>
+    </div>
+  </a>
+</div>
+
+<div class="bottom-links">
+  <a class="bl" href="BarPass_v10.html">🍺 POS</a>
+  <a class="bl" href="analytics.html">📊 Analytics</a>
+  <a class="bl" href="inventory.html">📦 Inventory</a>
+  <a class="bl" href="automation.html">⚙️ Automation</a>
+  <a class="bl" href="staff.html">👥 Staff</a>
+  <a class="bl" href="runner-consent.html">🏃 Runner</a>
+  <a class="bl" href="profile-setup.html">🪪 Onboarding</a>
+  <a class="bl" href="enterprise-auth.html">🔐 Auth</a>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+setInterval(()=>{document.getElementById('hdr-clock').textContent=new Date().toLocaleTimeString('en-US',{hour12:false});},1000);
+document.getElementById('hdr-clock').textContent=new Date().toLocaleTimeString('en-US',{hour12:false});
+
+function toast(msg,type='info'){
+  const c={success:'#00e87a',error:'#FF4466',info:'#5AA5FF',warning:'#FFba38'};
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<div class="toast-dot" style="background:${c[type]||c.info}"></div>${msg}`;
+  document.getElementById('toasts').prepend(t);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),200);},4000);
+}
+
+function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+
+function renderAll(){
+  const today={from:new Date().setHours(0,0,0,0),to:Date.now()};
+  const m=BPDB.getSalesMetrics(today);
+  const alerts=BPDB.getAlerts({resolved:false});
+  const rules=BPDB.getRules().filter(r=>r.enabled);
+  const logT=BPDB.getAutomationLog({limit:500}).filter(l=>l.ts>=today.from);
+  const inv=BPDB.getAllInventory();
+  const settings=BPDB.getSettings();
+  let totalVal=0,critical=0;
+  Object.values(inv).forEach(l=>Object.values(l.items).forEach(s=>{totalVal+=s.qty*s.cost;if(s.qty/s.max<0.10)critical++;}));
+
+  setText('venue-label', settings.venue+' · Miami, FL');
+  setText('ls-rev',BPDB.fmt.currency(m.revenue));
+  setText('ls-orders',m.orders);
+  setText('ls-alerts',alerts.length);
+  setText('ls-rules',rules.length);
+  setText('mc-rev',BPDB.fmt.currency(m.revenue));
+  setText('mc-orders',m.orders);
+  setText('mc-avg',m.orders?BPDB.fmt.currency(m.avgOrder):'$0');
+  setText('mc-txns',BPDB.getTransactions({}).length);
+  setText('mc-critical',critical);
+  setText('mc-invval',BPDB.fmt.currency(totalVal));
+  setText('mc-rules',rules.length);
+  setText('mc-fired',logT.length);
+  setText('mc-dispatches',BPDB.getDispatches({}).length);
+
+  // Ticker
+  const items=[];
+  if(m.revenue>0)items.push(`💰 Revenue: ${BPDB.fmt.currency(m.revenue)} · ${m.orders} orders today`);
+  alerts.filter(a=>a.type==='CRITICAL').forEach(a=>items.push(`🔴 CRITICAL: ${a.barName} — ${a.skuName} ${a.pct}% stock`));
+  alerts.filter(a=>a.type==='LOW').forEach(a=>items.push(`🟡 LOW: ${a.barName} — ${a.skuName} ${a.pct}%`));
+  if(rules.length)items.push(`⚙️ ${rules.length} automation rules active · ${logT.length} fired today`);
+  items.push(`📍 ${settings.venue} · ${new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}`);
+  const full=items.join('     ·     ');
+  const el=document.getElementById('ticker');
+  if(el)el.textContent=full;
+}
+
+BPDB.on('alert:new',a=>{toast(`⚠ ${a.type}: ${a.barName} — ${a.skuName} at ${a.pct}%`,'error');renderAll();});
+BPDB.on('automation:fired',d=>{toast(`⚙️ Rule fired: ${d.rule?.name}`,'info');renderAll();});
+BPDB.on('transaction:new',()=>renderAll());
+BPDB.on('restock:created',r=>{toast(`📋 Restock ${r.id} created`,'warning');renderAll();});
+
+function init(){renderAll();}
+if(BPDB.ready)init();else BPDB.on('ready',init);
+setInterval(renderAll,15000);
+</script>
+</body>
+</html>
