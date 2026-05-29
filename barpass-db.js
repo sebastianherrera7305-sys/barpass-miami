@@ -7,6 +7,8 @@
 (function (global) {
 
   const STORE_KEY = 'bp_enterprise_v1';
+  const VERSION_PREFIX = 'bp_ver_';
+  const MAX_VERSIONS = 20;
   const STORE_VER = 4;
 
   // ── Default schema ──────────────────────────────────────────────────────────
@@ -41,6 +43,7 @@
       automationRules: defaultRules(),
       automationLog: [],
       suppliers: defaultSuppliers(),
+      versionIndex: [], // [{ id, name, ts, label, stats }] — metadata only; payload in separate keys
     };
   }
 
@@ -735,6 +738,152 @@
       const s = (this._d.suppliers || []).find(s => s.id === id);
       if (s) { Object.assign(s, patch); this._save(); this.emit('supplier:updated', s); }
       return s;
+    },
+
+    // ── VERSION SNAPSHOTS ─────────────────────────────────────────────────────
+    /**
+     * Save a named snapshot of the entire current state.
+     * Payload stored in a separate localStorage key to avoid bloating the main store.
+     * Returns the version metadata object.
+     */
+    saveVersion(name) {
+      const id = 'v-' + Date.now().toString(36).toUpperCase();
+      const ts = Date.now();
+      const label = name || ('Session ' + new Date(ts).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }));
+
+      // Build stats summary for display
+      const txns  = this._d.transactions || [];
+      const today = new Date().setHours(0, 0, 0, 0);
+      const stats = {
+        transactions: txns.length,
+        revenueToday: txns.filter(t => t.ts >= today).reduce((s, t) => s + t.total, 0),
+        alerts:       (this._d.alerts || []).filter(a => !a.resolved).length,
+        dispatches:   (this._d.dispatches || []).length,
+        restockOrders:(this._d.restockOrders || []).length,
+        rules:        (this._d.automationRules || []).filter(r => r.enabled).length,
+      };
+
+      // Snapshot payload — full deep copy excluding the versionIndex itself to avoid recursion
+      const payload = JSON.parse(JSON.stringify({ ...this._d, versionIndex: [] }));
+
+      // Store payload separately
+      try {
+        localStorage.setItem(VERSION_PREFIX + id, JSON.stringify(payload));
+      } catch (e) {
+        // Storage full — remove oldest version to make room
+        const oldest = (this._d.versionIndex || [])[0];
+        if (oldest) {
+          localStorage.removeItem(VERSION_PREFIX + oldest.id);
+          this._d.versionIndex = this._d.versionIndex.slice(1);
+        }
+        try { localStorage.setItem(VERSION_PREFIX + id, JSON.stringify(payload)); } catch(e2) {
+          console.error('[BPDB] Cannot save version — storage full:', e2);
+          return null;
+        }
+      }
+
+      // Add to index
+      this._d.versionIndex = this._d.versionIndex || [];
+      this._d.versionIndex.push({ id, name: label, ts, stats });
+
+      // Cap at MAX_VERSIONS — delete oldest if exceeded
+      if (this._d.versionIndex.length > MAX_VERSIONS) {
+        const removed = this._d.versionIndex.shift();
+        localStorage.removeItem(VERSION_PREFIX + removed.id);
+      }
+
+      this._save();
+      this.emit('version:saved', { id, name: label, ts, stats });
+      console.log('[BPDB] Version saved:', label, '→', id);
+      return { id, name: label, ts, stats };
+    },
+
+    /** Return all saved version metadata (newest first). */
+    getVersions() {
+      return [...(this._d.versionIndex || [])].reverse();
+    },
+
+    /** Load the full payload of a version without applying it. */
+    loadVersion(id) {
+      try {
+        const raw = localStorage.getItem(VERSION_PREFIX + id);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    },
+
+    /**
+     * Restore a saved version — replaces current state entirely.
+     * Saves the current state as "Auto-save before restore" first.
+     */
+    restoreVersion(id) {
+      const meta = (this._d.versionIndex || []).find(v => v.id === id);
+      if (!meta) { console.error('[BPDB] Version not found:', id); return false; }
+
+      // Auto-save current state before overwriting
+      this.saveVersion('Auto-save before restore · ' + meta.name);
+
+      const payload = this.loadVersion(id);
+      if (!payload) { console.error('[BPDB] Version payload missing:', id); return false; }
+
+      // Preserve the current versionIndex (with the auto-save) — merge it back in
+      const currentIndex = [...(this._d.versionIndex || [])];
+      this._d = { ...payload, versionIndex: currentIndex };
+      this._save();
+      this.emit('version:restored', { id, name: meta.name });
+      console.log('[BPDB] Version restored:', meta.name);
+      return true;
+    },
+
+    /** Delete a saved version. */
+    deleteVersion(id) {
+      this._d.versionIndex = (this._d.versionIndex || []).filter(v => v.id !== id);
+      localStorage.removeItem(VERSION_PREFIX + id);
+      this._save();
+      this.emit('version:deleted', { id });
+    },
+
+    /** Export a version as a downloadable JSON file. */
+    exportVersion(id) {
+      const meta  = (this._d.versionIndex || []).find(v => v.id === id);
+      const payload = this.loadVersion(id);
+      if (!payload) return;
+      const blob = new Blob([JSON.stringify({ meta, payload }, null, 2)], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `barpass-${(meta?.name || id).replace(/[^a-z0-9]/gi, '-')}-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+
+    /** Import a previously exported version JSON file. */
+    importVersionFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const { meta, payload } = JSON.parse(e.target.result);
+            const id = meta?.id || ('imp-' + Date.now().toString(36).toUpperCase());
+            const name = (meta?.name || 'Imported') + ' (imported)';
+            localStorage.setItem(VERSION_PREFIX + id, JSON.stringify(payload));
+            this._d.versionIndex = this._d.versionIndex || [];
+            this._d.versionIndex.push({ id, name, ts: Date.now(), stats: meta?.stats || {} });
+            this._save();
+            this.emit('version:imported', { id, name });
+            resolve({ id, name });
+          } catch (err) { reject(err); }
+        };
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+    },
+
+    /** Total bytes used by all versions in localStorage. */
+    versionsStorageUsed() {
+      return (this._d.versionIndex || []).reduce((sum, v) => {
+        const raw = localStorage.getItem(VERSION_PREFIX + v.id);
+        return sum + (raw ? raw.length * 2 : 0); // UTF-16 ≈ 2 bytes/char
+      }, 0);
     },
 
     // ── DEV UTILITIES ─────────────────────────────────────────────────────────
