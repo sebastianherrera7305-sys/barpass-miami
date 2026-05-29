@@ -239,6 +239,39 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);
 
 .char-count{font-size:10px;color:var(--muted);text-align:right;margin-top:4px;}
 
+/* SECURITY GUIDELINES */
+.sec-guideline-block{border:1.5px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:10px;
+  transition:border-color .2s;}
+.sec-guideline-block.done{border-color:#00e87a40;}
+.sgb-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
+  cursor:pointer;background:var(--surf2);user-select:none;transition:background .15s;}
+.sgb-head:hover{background:#0d1220;}
+.sgb-title{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;}
+.sgb-num{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--blue);
+  background:#5AA5FF14;border:1px solid #5AA5FF30;border-radius:4px;padding:2px 7px;letter-spacing:.06em;}
+.sec-guideline-block.done .sgb-num{background:#00e87a14;border-color:#00e87a30;color:var(--green);}
+.sgb-chevron{color:var(--muted);font-size:14px;transition:transform .2s;}
+.sgb-chevron.open{transform:rotate(180deg);}
+.sgb-body{display:none;padding:16px;border-top:1px solid var(--border);background:var(--surf);}
+.sgb-body.open{display:block;animation:fadeUp .2s ease;}
+.sgb-list{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:10px;}
+.sgb-list li{font-size:12px;color:var(--muted);line-height:1.6;padding-left:16px;position:relative;}
+.sgb-list li::before{content:'—';position:absolute;left:0;color:var(--border3);}
+.sgb-list li strong{color:var(--text);}
+.sgb-ack{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;
+  background:var(--surf2);border-radius:8px;border:1.5px solid var(--border2);
+  cursor:pointer;transition:all .18s;font-size:12px;color:var(--muted);}
+.sgb-ack:has(input:checked){border-color:var(--green);background:#00e87a08;color:var(--green);}
+.sgb-ack input{accent-color:var(--green);width:16px;height:16px;flex-shrink:0;margin-top:1px;cursor:pointer;}
+.sgb-progress-wrap{margin-top:20px;padding:14px 16px;background:var(--surf);
+  border:1px solid var(--border2);border-radius:10px;}
+.sgb-progress-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.sgb-progress-label{font-size:11px;color:var(--muted);letter-spacing:.04em;}
+.sgb-progress-count{font-size:13px;font-weight:700;color:var(--green);}
+.sgb-progress-track{height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
+.sgb-progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));
+  border-radius:4px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+
 /* TOAST */
 #toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:999;
   padding:10px 20px;border-radius:10px;font-size:12px;font-weight:600;
@@ -618,7 +651,132 @@ textarea.form-input{resize:vertical;min-height:90px;}
     </div>
   </div>
 
-  <!-- ══════════════════ SCREEN 9: REVIEW ══════════════════ -->
+  <!-- ══════════════════ SCREEN 9: SECURITY GUIDELINES ══════════════════ -->
+  <div class="screen" id="s-security">
+    <div class="step-eyebrow">Step 8 · Security Policy</div>
+    <div class="step-title">Security Guidelines</div>
+    <div class="step-sub">Read and acknowledge each section before your first shift. These are legally binding.</div>
+
+    <!-- SECTION A: Badge & Access -->
+    <div class="sec-guideline-block" id="sgb-badge">
+      <div class="sgb-head" onclick="toggleGuideline('badge')">
+        <div class="sgb-title"><span class="sgb-num">01</span>Badge &amp; Access Control</div>
+        <div class="sgb-chevron" id="sgc-badge">▾</div>
+      </div>
+      <div class="sgb-body" id="sgb-body-badge">
+        <ul class="sgb-list">
+          <li>Your digital badge is <strong>personal and non-transferable</strong>. Never share it, lend it, or allow others to scan in under your identity.</li>
+          <li>Report a <strong>lost or stolen badge immediately</strong> to your shift supervisor. Unauthorized use will result in suspension.</li>
+          <li>Only access areas <strong>designated for your role and zone</strong>. Entering restricted areas without authorization is a termination offense.</li>
+          <li>Badge must be <strong>visible at all times</strong> while on shift. Hiding or concealing your badge is prohibited.</li>
+        </ul>
+        <label class="sgb-ack" id="ack-badge">
+          <input type="checkbox" id="chk-badge" onchange="updateSecurityProgress()">
+          <span>I understand badge &amp; access control policies</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- SECTION B: Digital Security -->
+    <div class="sec-guideline-block" id="sgb-digital">
+      <div class="sgb-head" onclick="toggleGuideline('digital')">
+        <div class="sgb-title"><span class="sgb-num">02</span>Digital &amp; Device Security</div>
+        <div class="sgb-chevron" id="sgc-digital">▾</div>
+      </div>
+      <div class="sgb-body" id="sgb-body-digital">
+        <ul class="sgb-list">
+          <li>Never share your <strong>PIN, password, or login credentials</strong> with anyone, including supervisors. BarPass staff will never ask for your password.</li>
+          <li>Always <strong>lock your device</strong> when stepping away from a POS terminal or shared device. Leaving a session unattended is a policy violation.</li>
+          <li>Do not install <strong>unauthorized apps</strong> on BarPass-issued devices. Only approved software is permitted.</li>
+          <li>Report any <strong>suspected breach, phishing attempt, or unusual system behavior</strong> immediately to your manager or IT support.</li>
+          <li>Screenshots or recordings of <strong>POS screens, customer data, or internal dashboards</strong> are strictly prohibited.</li>
+        </ul>
+        <label class="sgb-ack" id="ack-digital">
+          <input type="checkbox" id="chk-digital" onchange="updateSecurityProgress()">
+          <span>I understand digital &amp; device security requirements</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- SECTION C: Customer Data -->
+    <div class="sec-guideline-block" id="sgb-data">
+      <div class="sgb-head" onclick="toggleGuideline('data')">
+        <div class="sgb-title"><span class="sgb-num">03</span>Customer Data &amp; Privacy</div>
+        <div class="sgb-chevron" id="sgc-data">▾</div>
+      </div>
+      <div class="sgb-body" id="sgb-body-data">
+        <ul class="sgb-list">
+          <li>Customer payment and personal data is <strong>AES-256 encrypted</strong>. You must never attempt to view, copy, or record this information.</li>
+          <li><strong>PCI-DSS compliance is mandatory</strong>: Never write down card numbers, CVVs, or PINs. Never handle a customer's card out of their sight.</li>
+          <li>All transaction disputes must be <strong>escalated to a supervisor</strong>. Do not attempt to process refunds or voids without authorization.</li>
+          <li>Customer data may not be used for <strong>any purpose outside of fulfilling their order</strong>. Misuse is a criminal offense.</li>
+        </ul>
+        <label class="sgb-ack" id="ack-data">
+          <input type="checkbox" id="chk-data" onchange="updateSecurityProgress()">
+          <span>I understand customer data &amp; privacy policies</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- SECTION D: Alcohol & Compliance -->
+    <div class="sec-guideline-block" id="sgb-alcohol">
+      <div class="sgb-head" onclick="toggleGuideline('alcohol')">
+        <div class="sgb-title"><span class="sgb-num">04</span>Alcohol Service &amp; Compliance</div>
+        <div class="sgb-chevron" id="sgc-alcohol">▾</div>
+      </div>
+      <div class="sgb-body" id="sgb-body-alcohol">
+        <ul class="sgb-list">
+          <li><strong>Always ID anyone who appears under 40</strong>. Serving alcohol to a minor carries criminal liability — when in doubt, card them.</li>
+          <li>Refuse service to visibly intoxicated guests. You have the <strong>right and legal obligation to decline</strong> service regardless of the customer's reaction.</li>
+          <li>Follow the <strong>one drink at a time</strong> policy for guests showing signs of impairment. Notify security if a guest becomes belligerent.</li>
+          <li>Never consume alcohol during your shift, including <strong>before or after service on venue property</strong>.</li>
+          <li>Alcohol inventory discrepancies must be reported. <strong>Unauthorized removal of product</strong> is grounds for immediate termination.</li>
+        </ul>
+        <label class="sgb-ack" id="ack-alcohol">
+          <input type="checkbox" id="chk-alcohol" onchange="updateSecurityProgress()">
+          <span>I understand alcohol service &amp; compliance requirements</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- SECTION E: Incident Reporting -->
+    <div class="sec-guideline-block" id="sgb-incident">
+      <div class="sgb-head" onclick="toggleGuideline('incident')">
+        <div class="sgb-title"><span class="sgb-num">05</span>Incident Reporting</div>
+        <div class="sgb-chevron" id="sgc-incident">▾</div>
+      </div>
+      <div class="sgb-body" id="sgb-body-incident">
+        <ul class="sgb-list">
+          <li>Report all incidents — accidents, theft, suspicious activity, or policy violations — <strong>within 30 minutes</strong> using the BarPass Incident module or by contacting your supervisor directly.</li>
+          <li><strong>Do not confront suspects directly</strong>. Alert security personnel immediately. Your safety comes first.</li>
+          <li>In a medical emergency: <strong>call 911 first</strong>, then notify your supervisor. Do not move an injured person unless they are in immediate danger.</li>
+          <li>Retaliation against anyone who files a good-faith report is <strong>strictly prohibited</strong> and grounds for termination.</li>
+        </ul>
+        <label class="sgb-ack" id="ack-incident">
+          <input type="checkbox" id="chk-incident" onchange="updateSecurityProgress()">
+          <span>I understand incident reporting obligations</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div class="sgb-progress-wrap">
+      <div class="sgb-progress-row">
+        <span class="sgb-progress-label">Sections acknowledged</span>
+        <span class="sgb-progress-count" id="sgb-count">0 / 5</span>
+      </div>
+      <div class="sgb-progress-track">
+        <div class="sgb-progress-fill" id="sgb-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top:16px;">
+      <div class="info-icon">⚖️</div>
+      <div class="info-text">By completing this profile you confirm that you have read, understood, and agree to comply with all BarPass security and operational policies. Violations may result in disciplinary action up to and including termination.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCREEN 10: REVIEW ══════════════════ -->
   <div class="screen" id="s-review">
     <div class="step-eyebrow">Step 8 · Review</div>
     <div class="step-title">Confirm your profile</div>
@@ -677,9 +835,9 @@ const P = {
 };
 
 const SCREENS=['s-welcome','s-personal','s-photo','s-role','s-certs',
-               's-avail','s-emergency','s-id','s-review','s-complete'];
+               's-avail','s-emergency','s-id','s-security','s-review','s-complete'];
 const STEP_LABELS=['Welcome','Personal Info','Photo','Role & Zone','Certifications',
-                   'Availability','Emergency','Identity','Review','Complete!'];
+                   'Availability','Emergency','Identity','Security','Review','Complete!'];
 let current=0;
 
 // ── PROGRESS ──────────────────────────────────────────────────────────────────────────
@@ -706,6 +864,7 @@ function goNext(){
   document.getElementById(SCREENS[current]).classList.remove('active');
   current++;
   document.getElementById(SCREENS[current]).classList.add('active');
+  if(SCREENS[current]==='s-security') openFirstGuideline();
   if(current===SCREENS.length-2) buildReview();
   if(current===SCREENS.length-1) buildComplete();
   window.scrollTo(0,0);
@@ -732,6 +891,7 @@ function canAdvance(){
   if(id==='s-avail') return true;
   if(id==='s-emergency') return !!(P.ecName&&P.ecPhone);
   if(id==='s-id') return true;
+  if(id==='s-security') return ['badge','digital','data','alcohol','incident'].every(k=>document.getElementById('chk-'+k)?.checked);
   if(id==='s-review') return true;
   return true;
 }
@@ -1031,6 +1191,51 @@ function formatInvite(inp){
   if(v.length>2) v=v.slice(0,2)+'-'+v.slice(2);
   if(v.length>7) v=v.slice(0,7)+'-'+v.slice(7,11);
   inp.value=v;
+}
+
+// ── SECURITY GUIDELINES ───────────────────────────────────────────────────────────────
+const SEC_SECTIONS=['badge','digital','data','alcohol','incident'];
+function toggleGuideline(key){
+  const body=document.getElementById('sgb-body-'+key);
+  const chev=document.getElementById('sgc-'+key);
+  const isOpen=body.classList.contains('open');
+  // Close all first
+  SEC_SECTIONS.forEach(k=>{
+    document.getElementById('sgb-body-'+k)?.classList.remove('open');
+    document.getElementById('sgc-'+k)?.classList.remove('open');
+  });
+  if(!isOpen){
+    body.classList.add('open');
+    chev.classList.add('open');
+  }
+}
+function openFirstGuideline(){
+  toggleGuideline('badge');
+  document.getElementById('btn-next').disabled=true;
+}
+function updateSecurityProgress(){
+  const done=SEC_SECTIONS.filter(k=>document.getElementById('chk-'+k)?.checked);
+  const count=done.length;
+  document.getElementById('sgb-count').textContent=`${count} / ${SEC_SECTIONS.length}`;
+  document.getElementById('sgb-fill').style.width=(count/SEC_SECTIONS.length*100)+'%';
+  // Mark block as done
+  SEC_SECTIONS.forEach(k=>{
+    const checked=document.getElementById('chk-'+k)?.checked;
+    document.getElementById('sgb-'+k)?.classList.toggle('done',checked);
+    // Auto-collapse checked section, open next unchecked
+    if(checked){
+      document.getElementById('sgb-body-'+k)?.classList.remove('open');
+      document.getElementById('sgc-'+k)?.classList.remove('open');
+    }
+  });
+  // Auto-open next unchecked section
+  const nextKey=SEC_SECTIONS.find(k=>!document.getElementById('chk-'+k)?.checked);
+  if(nextKey&&count>0){
+    document.getElementById('sgb-body-'+nextKey)?.classList.add('open');
+    document.getElementById('sgc-'+nextKey)?.classList.add('open');
+  }
+  if(count===SEC_SECTIONS.length) showToast('All guidelines acknowledged ✓','success');
+  validateCurrent();
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────────────────────────
