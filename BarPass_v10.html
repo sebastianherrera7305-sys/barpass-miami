@@ -8,6 +8,7 @@
 <title>BarPass v7 — Command Center</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="barpass-db.js"></script>
 <!-- ExcelJS loaded on-demand when user opens export modal -->
 <!-- RATING DE BARTENDERS PANEL — injected at top of body to be above everything -->
 <div id="rating-panel">
@@ -2901,6 +2902,7 @@ canvas.qr-canvas{image-rendering:pixelated;border:3px solid #fff;border-radius:3
     <div class="nav-role" id="nav-role"></div>
     <div class="theme-btn" onclick="toggleTheme()" title="Toggle theme"></div>
     <div class="nav-time" id="clock">--:--</div>
+    <button onclick="window.open('analytics.html','_blank')" style="padding:5px 10px;border-radius:7px;border:1px solid #a855f740;background:#a855f710;color:#a855f7;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;cursor:pointer;letter-spacing:.04em;margin-right:4px;transition:all .15s;" onmouseover="this.style.background='#a855f720'" onmouseout="this.style.background='#a855f710'" title="Open Analytics Dashboard">📊 Analytics</button>
     <button class="signout-btn" onclick="doLogout()" data-i18n="nav.signout">Sign out</button>
   </div>
 </nav>
@@ -5974,6 +5976,7 @@ function chargeOrder(){
   if(!state.orderItems.length)return;
   const sub=state.orderSub,disc=activeDiscount?sub*activeDiscount.pct/100:0;
   const total=(sub-disc)*1.07;
+  // ── In-memory state (unchanged) ──
   state.rev+=total;state.orders++;
   const h=new Date().getHours();state.hourly[h]+=total;
   state.sapQueue++;
@@ -5981,6 +5984,23 @@ function chargeOrder(){
   if(bt&&state.bartenders[bt]){const b=state.bartenders[bt];b.rev+=total;b.orders++;b.avg=b.rev/b.orders;b.drinkRev+=state.drinkRev;}
   state.tonight.push({name:state.currentCustomer?.name||'Guest',items:state.orderItems.length,total});
   renderTonightList();
+  // ── Persist to BarPassDB ──
+  if(window.BPDB && BPDB.ready){
+    try {
+      const sess = (() => { try { return JSON.parse(localStorage.getItem('bp_enterprise_session')||'{}'); } catch(e){return{};} })();
+      BPDB.recordTransaction({
+        barId:         'bar-01', // TODO: derive from active bar when multi-bar UI is added
+        staffId:       sess.email || currentRole || 'staff',
+        staffName:     sess.name  || state.currentCustomer?.bartender || 'Staff',
+        items:         state.orderItems.map(i=>({name:i.name,emoji:i.emoji||'📦',price:i.price,skuId:i.skuId||null,cat:i.dt||'other'})),
+        subtotal:      sub,
+        discount:      disc,
+        discountLabel: activeDiscount?.label||null,
+        paymentMethod: 'card',
+        customerName:  state.currentCustomer?.name||'Guest',
+      });
+    } catch(e){ console.warn('[BPDB] chargeOrder record failed:',e); }
+  }
   Security.log('info',currentRole,`Order charged: $${total.toFixed(2)} — ${state.orderItems.length} items`);
   toast(disc>0 ? i18n.t('toast.chargedDisc',{amount:total.toFixed(2),saved:disc.toFixed(2)}) : i18n.t('toast.charged',{amount:total.toFixed(2)}));
   state.orderItems=[];state.orderSub=0;activeDiscount=null;

@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BarPass Analytics — Executive Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="barpass-db.js"></script>
+<style>
+/* ─── Design Tokens ──────────────────────────────────────────────────────── */
+:root {
+  --bg:       #04060e;
+  --surface:  #080c1a;
+  --card:     #0c1022;
+  --card2:    #101428;
+  --border:   #1a2040;
+  --border2:  #242b4a;
+  --text:     #e8eaf6;
+  --text2:    #9ba3cc;
+  --muted:    #4a5380;
+  --green:    #00e87a;
+  --amber:    #FFba38;
+  --red:      #FF4466;
+  --blue:     #5AA5FF;
+  --purple:   #a855f7;
+  --teal:     #2dd4bf;
+
+  --glow-green:  rgba(0, 232, 122, 0.12);
+  --glow-amber:  rgba(255, 186, 56, 0.12);
+  --glow-red:    rgba(255, 68, 102, 0.12);
+  --glow-blue:   rgba(90, 165, 255, 0.12);
+  --glow-purple: rgba(168, 85, 247, 0.12);
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+::-webkit-scrollbar-track { background: transparent; }
+::selection { background: var(--glow-blue); }
+
+/* ─── Typography ─────────────────────────────────────────────────────────── */
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+#header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  backdrop-filter: blur(12px);
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.logo-mark {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  white-space: nowrap;
+}
+.logo-sub {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.header-venue {
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 500;
+  padding: 3px 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.header-live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+.header-spacer { flex: 1; }
+
+#header-clock {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text2);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+#header-updated {
+  font-size: 10px;
+  color: var(--muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+}
+.btn-back:hover {
+  background: var(--card2);
+  border-color: var(--border2);
+  color: var(--text);
+}
+
+/* ─── Main Layout ────────────────────────────────────────────────────────── */
+#main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 24px 60px;
+}
+
+/* ─── Period Selector ────────────────────────────────────────────────────── */
+#period-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.period-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+}
+.period-tab {
+  padding: 6px 16px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+  font-family: 'JetBrains Mono', monospace;
+  background: transparent;
+}
+.period-tab:hover { color: var(--text2); background: var(--surface); }
+.period-tab.active {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border2);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.btn-export {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--glow-green);
+  border: 1px solid rgba(0, 232, 122, 0.3);
+  border-radius: 8px;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.btn-export:hover {
+  background: rgba(0, 232, 122, 0.18);
+  border-color: var(--green);
+}
+
+/* ─── KPI Row ─────────────────────────────────────────────────────────────── */
+#kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 12px 12px 0 0;
+}
+.kpi-card.green::before  { background: var(--green); }
+.kpi-card.blue::before   { background: var(--blue); }
+.kpi-card.amber::before  { background: var(--amber); }
+.kpi-card.purple::before { background: var(--purple); }
+.kpi-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+
+.kpi-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.kpi-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 8px;
+  transition: color 0.2s;
+}
+.kpi-card.green  .kpi-value { color: var(--green); }
+.kpi-card.blue   .kpi-value { color: var(--blue); }
+.kpi-card.amber  .kpi-value { color: var(--amber); }
+.kpi-card.purple .kpi-value { color: var(--purple); }
+
+.kpi-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+.kpi-icon {
+  position: absolute;
+  top: 16px; right: 16px;
+  font-size: 22px;
+  opacity: 0.35;
+}
+
+/* ─── Section Headers ─────────────────────────────────────────────────────── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+.section-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
+}
+
+/* ─── Revenue by Hour Chart ───────────────────────────────────────────────── */
+#chart-section {
+  margin-bottom: 24px;
+}
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+#hour-chart-wrap {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+#hour-chart {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+#chart-tooltip {
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text);
+  pointer-events: none;
+  display: none;
+  z-index: 200;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  line-height: 1.6;
+}
+
+/* ─── Two Column Grid ─────────────────────────────────────────────────────── */
+#two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.panel-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* ─── Top Sellers ────────────────────────────────────────────────────────── */
+.seller-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.seller-row:last-child { border-bottom: none; }
+
+.seller-rank {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 600;
+}
+
+.seller-info { min-width: 0; }
+.seller-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 5px;
+}
+.seller-bar-wrap {
+  height: 3px;
+  background: var(--surface);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.seller-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  transition: width 0.5s ease;
+}
+
+.seller-meta {
+  text-align: right;
+  flex-shrink: 0;
+}
+.seller-qty {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 600;
+}
+.seller-rev {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ─── Bar Performance ────────────────────────────────────────────────────── */
+.bar-perf-row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.bar-perf-row:last-child { border-bottom: none; }
+
+.bar-perf-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  gap: 8px;
+}
+.bar-perf-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+.bar-zone-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 1px 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.bar-perf-rev {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  flex-shrink: 0;
+}
+.bar-perf-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.bar-perf-orders { font-size: 10px; color: var(--muted); }
+.bar-perf-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+.bar-fill-wrap {
+  height: 4px;
+  background: var(--surface);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+.bar-fill.rank-1     { background: linear-gradient(90deg, var(--green), #00c067); }
+.bar-fill.rank-2     { background: linear-gradient(90deg, var(--blue), #3a85df); }
+.bar-fill.rank-3     { background: linear-gradient(90deg, var(--amber), #e0a030); }
+.bar-fill.rank-other { background: linear-gradient(90deg, #3a4060, #2a2e48); }
+
+/* ─── Alerts Section ─────────────────────────────────────────────────────── */
+#alerts-section {
+  margin-bottom: 24px;
+}
+.alert-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.alert-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.alert-row:last-child { border-bottom: none; }
+.alert-row:hover { background: rgba(255,255,255,0.015); }
+
+.alert-severity {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.alert-severity.critical {
+  background: var(--glow-red);
+  border: 1px solid rgba(255, 68, 102, 0.35);
+  color: var(--red);
+}
+.alert-severity.low {
+  background: var(--glow-amber);
+  border: 1px solid rgba(255, 186, 56, 0.35);
+  color: var(--amber);
+}
+.alert-info { flex: 1; min-width: 0; }
+.alert-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alert-sub { font-size: 10px; color: var(--muted); }
+
+.alert-stock {
+  text-align: right;
+  flex-shrink: 0;
+  min-width: 52px;
+}
+.alert-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+.alert-pct.critical { color: var(--red); }
+.alert-pct.low      { color: var(--amber); }
+.alert-qty { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.btn-resolve {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+.btn-resolve:hover {
+  background: var(--glow-green);
+  border-color: rgba(0, 232, 122, 0.3);
+  color: var(--green);
+}
+
+/* ─── Inventory Health Grid ──────────────────────────────────────────────── */
+#inventory-section {
+  margin-bottom: 24px;
+}
+.inv-group-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.inv-group {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.inv-group-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.inv-group-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.inv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+.inv-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.inv-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+.inv-card.critical { border-color: rgba(255, 68, 102, 0.3); }
+.inv-card.low      { border-color: rgba(255, 186, 56, 0.25); }
+
+.inv-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.inv-emoji { font-size: 20px; line-height: 1; }
+.inv-status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.inv-status-dot.critical { background: var(--red); box-shadow: 0 0 6px var(--red); animation: pulse 2s infinite; }
+.inv-status-dot.low      { background: var(--amber); }
+
+.inv-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.inv-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  gap: 4px;
+}
+.inv-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+.inv-pct.critical { color: var(--red); }
+.inv-pct.low      { color: var(--amber); }
+.inv-qty { font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+.inv-prog-wrap {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.inv-prog-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+.inv-prog-fill.critical { background: var(--red); }
+.inv-prog-fill.low      { background: var(--amber); }
+
+/* ─── Transactions Table ─────────────────────────────────────────────────── */
+#txn-section {
+  margin-bottom: 24px;
+}
+.txn-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.txn-table-wrap { overflow-x: auto; }
+table.txn-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.txn-table thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.txn-table tbody td {
+  padding: 9px 14px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.txn-table tbody tr:last-child td { border-bottom: none; }
+.txn-table tbody tr { transition: background 0.1s; }
+.txn-table tbody tr:hover { background: rgba(255,255,255,0.025); }
+
+.txn-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text2);
+}
+.txn-bar   { color: var(--text); font-weight: 500; }
+.txn-items {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.txn-amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.txn-payment {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.txn-payment.card {
+  background: var(--glow-blue);
+  border: 1px solid rgba(90, 165, 255, 0.25);
+  color: var(--blue);
+}
+.txn-payment.cash {
+  background: var(--glow-amber);
+  border: 1px solid rgba(255, 186, 56, 0.25);
+  color: var(--amber);
+}
+.txn-payment.tab {
+  background: var(--glow-purple);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  color: var(--purple);
+}
+.txn-staff { font-size: 11px; color: var(--muted); }
+
+.txn-new-flash {
+  animation: txnFlash 1.5s ease-out;
+}
+@keyframes txnFlash {
+  0%   { background: rgba(0, 232, 122, 0.1); }
+  100% { background: transparent; }
+}
+
+/* ─── Empty States ────────────────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.empty-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.5; }
+
+/* ─── Toast ───────────────────────────────────────────────────────────────── */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+  animation: toastIn 0.25s ease-out;
+  max-width: 340px;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast.out {
+  animation: toastOut 0.2s ease-in forwards;
+}
+@keyframes toastOut {
+  to { opacity: 0; transform: translateY(6px) scale(0.95); }
+}
+.toast-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.toast-dot.green  { background: var(--green); }
+.toast-dot.amber  { background: var(--amber); }
+.toast-dot.red    { background: var(--red); }
+.toast-dot.blue   { background: var(--blue); }
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 1200px) {
+  #kpi-row  { grid-template-columns: repeat(2, 1fr); }
+  #two-col  { grid-template-columns: 1fr; }
+  #main     { padding: 16px 16px 48px; }
+}
+@media (max-width: 700px) {
+  #header         { padding: 0 14px; gap: 10px; }
+  .header-venue   { display: none; }
+  #header-updated { display: none; }
+  .logo-sub       { display: none; }
+  #kpi-row        { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi-value      { font-size: 20px; }
+  .kpi-card       { padding: 14px; }
+  #main           { padding: 12px 12px 48px; }
+  .inv-grid       { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
+@media (max-width: 420px) {
+  #kpi-row        { grid-template-columns: 1fr 1fr; }
+  .kpi-value      { font-size: 16px; }
+  #period-bar     { flex-direction: column; align-items: flex-start; }
+  .btn-export     { width: 100%; justify-content: center; }
+  .period-tabs    { width: 100%; overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ───────────────────────────────────────────────────────────── -->
+<header id="header">
+  <div class="header-logo">
+    <div class="logo-mark">BP</div>
+    <div class="logo-text">BarPass<span class="logo-sub">Analytics</span></div>
+  </div>
+
+  <div class="header-venue mono" id="header-venue">Hard Rock Stadium</div>
+
+  <div class="header-live">
+    <div class="live-dot"></div>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;">LIVE</span>
+  </div>
+
+  <div class="header-spacer"></div>
+
+  <span id="header-updated">Last updated: just now</span>
+  <span id="header-clock" class="mono">00:00:00</span>
+
+  <a class="btn-back" href="BarPass_v10.html">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M7.5 2L3.5 6L7.5 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Back to BarPass
+  </a>
+</header>
+
+<!-- ── Main ─────────────────────────────────────────────────────────────── -->
+<main id="main">
+
+  <!-- Period Selector + Export -->
+  <div id="period-bar">
+    <div class="period-tabs" role="tablist" aria-label="Time period">
+      <button class="period-tab active" data-period="today"  onclick="setPeriod('today',this)">Today</button>
+      <button class="period-tab"        data-period="week"   onclick="setPeriod('week',this)">This Week</button>
+      <button class="period-tab"        data-period="month"  onclick="setPeriod('month',this)">This Month</button>
+      <button class="period-tab"        data-period="all"    onclick="setPeriod('all',this)">All Time</button>
+    </div>
+    <button class="btn-export" onclick="exportCSV()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M6 1v7M3 5.5L6 8.5L9 5.5M2 10.5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Export CSV
+    </button>
+  </div>
+
+  <!-- KPI Cards -->
+  <div id="kpi-row" aria-label="Key performance indicators">
+    <div class="kpi-card green">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value mono" id="kpi-revenue">—</div>
+      <div class="kpi-sub" id="kpi-revenue-sub">loading…</div>
+      <div class="kpi-icon" aria-hidden="true">💰</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Total Orders</div>
+      <div class="kpi-value mono" id="kpi-orders">—</div>
+      <div class="kpi-sub" id="kpi-orders-sub">loading…</div>
+      <div class="kpi-icon" aria-hidden="true">🧾</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Avg Order Value</div>
+      <div class="kpi-value mono" id="kpi-avg">—</div>
+      <div class="kpi-sub" id="kpi-avg-sub">loading…</div>
+      <div class="kpi-icon" aria-hidden="true">📊</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">Top Bar</div>
+      <div class="kpi-value mono" id="kpi-topbar-rev">—</div>
+      <div class="kpi-sub" id="kpi-topbar-name">loading…</div>
+      <div class="kpi-icon" aria-hidden="true">🏆</div>
+    </div>
+  </div>
+
+  <!-- Revenue by Hour -->
+  <section id="chart-section">
+    <div class="chart-card">
+      <div class="section-head">
+        <span class="section-title">Revenue by Hour</span>
+        <span class="section-badge mono" id="chart-date-label">Today</span>
+      </div>
+      <div id="hour-chart-wrap">
+        <canvas id="hour-chart" role="img" aria-label="Hourly revenue bar chart"></canvas>
+      </div>
+    </div>
+    <div id="chart-tooltip" role="tooltip"></div>
+  </section>
+
+  <!-- Two-column: Top Sellers + Bar Performance -->
+  <div id="two-col">
+    <div class="panel-card">
+      <div class="section-head">
+        <span class="section-title">Top Sellers</span>
+        <span class="section-badge mono" id="sellers-count">—</span>
+      </div>
+      <div id="sellers-list">
+        <div class="empty-state"><div class="empty-icon">📦</div>Loading…</div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="section-head">
+        <span class="section-title">Bar Performance</span>
+        <span class="section-badge mono" id="bars-count">—</span>
+      </div>
+      <div id="bars-list">
+        <div class="empty-state"><div class="empty-icon">🏪</div>Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Alerts -->
+  <section id="alerts-section" style="display:none;" aria-live="polite">
+    <div class="section-head">
+      <span class="section-title">Active Alerts</span>
+      <span class="section-badge mono" id="alerts-count" style="color:var(--red);">0 alerts</span>
+    </div>
+    <div class="alert-card">
+      <div id="alerts-list"></div>
+    </div>
+  </section>
+
+  <!-- Inventory Health -->
+  <section id="inventory-section">
+    <div class="section-head">
+      <span class="section-title">Inventory Health</span>
+      <span class="section-badge mono" id="inv-count">—</span>
+    </div>
+    <div id="inv-content">
+      <div class="empty-state"><div class="empty-icon">✅</div>Loading…</div>
+    </div>
+  </section>
+
+  <!-- Recent Transactions -->
+  <section id="txn-section">
+    <div class="section-head">
+      <span class="section-title">Recent Transactions</span>
+      <span class="section-badge mono" id="txn-count">—</span>
+    </div>
+    <div class="txn-card">
+      <div class="txn-table-wrap">
+        <table class="txn-table" aria-label="Recent transactions">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Bar</th>
+              <th>Items</th>
+              <th>Amount</th>
+              <th>Payment</th>
+              <th>Staff</th>
+            </tr>
+          </thead>
+          <tbody id="txn-tbody">
+            <tr>
+              <td colspan="6">
+                <div class="empty-state"><div class="empty-icon">🧾</div>Loading…</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── Toast Container ──────────────────────────────────────────────────── -->
+<div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+<!-- ── Application Script ───────────────────────────────────────────────── -->
+<script>
+'use strict';
+
+/* ─── State ──────────────────────────────────────────────────────────────── */
+let currentPeriod = 'today';
+let lastUpdatedTs = Date.now();
+let refreshTimer  = null;
+let _barNameCache = {};
+
+/* ─── Period Helper ──────────────────────────────────────────────────────── */
+function getPeriodRange(period) {
+  const now = Date.now();
+  const sod = new Date(); sod.setHours(0, 0, 0, 0);
+  if (period === 'today') return { from: sod.getTime(), to: now };
+  if (period === 'week')  return { from: sod.getTime() - 6 * 86400000, to: now };
+  if (period === 'month') return { from: sod.getTime() - 29 * 86400000, to: now };
+  return { from: 0, to: now };
+}
+
+function getPeriodLabel(period) {
+  return { today: 'Today', week: 'This Week', month: 'This Month', all: 'All Time' }[period] || 'Today';
+}
+
+/* ─── Period Tab Switcher ────────────────────────────────────────────────── */
+function setPeriod(period, el) {
+  currentPeriod = period;
+  document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  refreshAll();
+}
+
+/* ─── Live Clock ─────────────────────────────────────────────────────────── */
+function startClock() {
+  function tick() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const el = document.getElementById('header-clock');
+    if (el) el.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+function updateLastUpdated() {
+  const el = document.getElementById('header-updated');
+  if (!el) return;
+  const ago = Math.floor((Date.now() - lastUpdatedTs) / 1000);
+  if (ago < 5)  el.textContent = 'Last updated: just now';
+  else if (ago < 60) el.textContent = `Last updated: ${ago}s ago`;
+  else el.textContent = `Last updated: ${Math.floor(ago / 60)}m ago`;
+}
+
+/* ─── Toast Notifications ────────────────────────────────────────────────── */
+function toast(msg, color) {
+  color = color || 'green';
+  const ct = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<div class="toast-dot ${color}"></div><span>${escHtml(msg)}</span>`;
+  ct.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 250);
+  }, 3000);
+}
+
+/* ─── KPI Cards ──────────────────────────────────────────────────────────── */
+function renderKPIs() {
+  const range = getPeriodRange(currentPeriod);
+  const m     = BPDB.getSalesMetrics({ from: range.from, to: range.to });
+  const byBar = BPDB.getRevenueByBar({ from: range.from, to: range.to });
+  const top   = byBar[0];
+
+  document.getElementById('kpi-revenue').textContent     = BPDB.fmt.currency(m.revenue);
+  document.getElementById('kpi-revenue-sub').textContent = m.orders.toLocaleString() + ' orders total';
+  document.getElementById('kpi-orders').textContent      = m.orders.toLocaleString();
+  document.getElementById('kpi-orders-sub').textContent  = m.items.toLocaleString() + ' items sold';
+  document.getElementById('kpi-avg').textContent         = BPDB.fmt.currency(m.avgOrder);
+  document.getElementById('kpi-avg-sub').textContent     = BPDB.fmt.currency(m.taxTotal) + ' tax collected';
+
+  if (top && top.revenue > 0) {
+    document.getElementById('kpi-topbar-rev').textContent  = BPDB.fmt.currency(top.revenue);
+    document.getElementById('kpi-topbar-name').textContent = top.name;
+  } else {
+    document.getElementById('kpi-topbar-rev').textContent  = '—';
+    document.getElementById('kpi-topbar-name').textContent = 'No activity in period';
+  }
+
+  // Sync venue name from settings
+  try {
+    const s = BPDB.getSettings();
+    const el = document.getElementById('header-venue');
+    if (el && s.venue) el.textContent = s.venue;
+  } catch(e) {}
+}
+
+/* ─── Revenue by Hour Canvas Chart ──────────────────────────────────────── */
+function renderHourChart() {
+  const canvas = document.getElementById('hour-chart');
+  const wrap   = document.getElementById('hour-chart-wrap');
+  if (!canvas || !wrap) return;
+
+  const hours   = BPDB.getRevenueByHour({});
+  const maxRev  = Math.max.apply(null, hours.map(function(h){ return h.revenue; }).concat([1]));
+  const nowHour = new Date().getHours();
+
+  document.getElementById('chart-date-label').textContent = getPeriodLabel(currentPeriod);
+
+  const W   = wrap.clientWidth  || 800;
+  const H   = 200;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx  = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const padL = 8, padR = 8, padT = 10, padB = 28;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+  const barW  = plotW / 24;
+  const gap   = Math.max(1, barW * 0.18);
+
+  // Subtle horizontal grid lines
+  ctx.strokeStyle = 'rgba(26, 32, 64, 0.9)';
+  ctx.lineWidth = 1;
+  [0.25, 0.5, 0.75, 1].forEach(function(frac) {
+    var y = padT + plotH * (1 - frac);
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + plotW, y);
+    ctx.stroke();
+  });
+
+  // Revenue value labels on y-axis
+  ctx.fillStyle = 'rgba(74, 83, 128, 0.7)';
+  ctx.font = '500 9px JetBrains Mono, monospace';
+  ctx.textAlign = 'right';
+  ['$0', BPDB.fmt.currency(maxRev * 0.5), BPDB.fmt.currency(maxRev)].forEach(function(label, i) {
+    var frac = i * 0.5;
+    var y = padT + plotH * (1 - frac) + (i === 0 ? -2 : 4);
+    ctx.fillText(label, padL + 38, y);
+  });
+
+  // Hour-label x-axis
+  ctx.fillStyle = 'rgba(74, 83, 128, 0.85)';
+  ctx.font = '500 9px JetBrains Mono, monospace';
+  ctx.textAlign = 'center';
+  var labelH  = [0, 4, 8, 12, 16, 20];
+  var labelTx = ['12am', '4am', '8am', '12pm', '4pm', '8pm'];
+  labelH.forEach(function(lh, i) {
+    var x = padL + lh * barW + barW / 2;
+    ctx.fillText(labelTx[i], x, H - 5);
+  });
+
+  // Store bar hit areas for hover
+  canvas._bars = [];
+
+  // Draw bars
+  hours.forEach(function(hd, i) {
+    var pct = hd.revenue / maxRev;
+    var x   = padL + i * barW + gap / 2;
+    var bw  = barW - gap;
+    var bh  = Math.max(pct > 0 ? 3 : 1, pct * plotH);
+    var y   = padT + plotH - bh;
+    var isCurrent = (i === nowHour);
+
+    ctx.save();
+    if (isCurrent) {
+      ctx.shadowColor = '#5AA5FF';
+      ctx.shadowBlur  = 14;
+    }
+
+    // Gradient fill
+    if (isCurrent) {
+      var gr = ctx.createLinearGradient(0, y, 0, y + bh);
+      gr.addColorStop(0, '#5AA5FF');
+      gr.addColorStop(1, 'rgba(90,165,255,0.3)');
+      ctx.fillStyle = gr;
+    } else if (hd.revenue > 0) {
+      var alpha = Math.min(0.9, 0.3 + 0.6 * pct);
+      var gr2 = ctx.createLinearGradient(0, y, 0, y + bh);
+      gr2.addColorStop(0, 'rgba(0,232,122,' + alpha + ')');
+      gr2.addColorStop(1, 'rgba(0,180,90,' + (alpha * 0.6) + ')');
+      ctx.fillStyle = gr2;
+    } else {
+      ctx.fillStyle = 'rgba(26,32,64,0.5)';
+    }
+
+    // Rounded-top rectangle
+    var r = Math.min(3, bw / 3);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + bw - r, y);
+    ctx.quadraticCurveTo(x + bw, y, x + bw, y + r);
+    ctx.lineTo(x + bw, y + bh);
+    ctx.lineTo(x, y + bh);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    canvas._bars.push({ x: x, y: padT, w: bw, h: plotH, revenue: hd.revenue, orders: hd.orders, hour: i });
+  });
+
+  // Hover tooltip
+  canvas.onmousemove = function(e) {
+    var rect = canvas.getBoundingClientRect();
+    var mx   = e.clientX - rect.left;
+    var tip  = document.getElementById('chart-tooltip');
+    var hit  = null;
+    for (var b of canvas._bars) {
+      if (mx >= b.x && mx <= b.x + b.w) { hit = b; break; }
+    }
+    if (hit) {
+      var h = hit.hour;
+      var label = h === 0 ? '12am' : h < 12 ? h + 'am' : h === 12 ? '12pm' : (h - 12) + 'pm';
+      tip.style.display = 'block';
+      tip.style.left = (e.clientX + 14) + 'px';
+      tip.style.top  = (e.clientY - 14) + 'px';
+      tip.innerHTML = '<strong>' + label + '</strong> &nbsp;' + BPDB.fmt.currency(hit.revenue) + '<br><span style="color:var(--muted)">' + hit.orders + ' order' + (hit.orders !== 1 ? 's' : '') + '</span>';
+    } else {
+      tip.style.display = 'none';
+    }
+  };
+  canvas.onmouseleave = function() {
+    document.getElementById('chart-tooltip').style.display = 'none';
+  };
+}
+
+/* ─── Top Sellers ────────────────────────────────────────────────────────── */
+function renderTopSellers() {
+  var range   = getPeriodRange(currentPeriod);
+  var sellers = BPDB.getTopSellers({ from: range.from, to: range.to, limit: 10 });
+  var list    = document.getElementById('sellers-list');
+  var badge   = document.getElementById('sellers-count');
+
+  badge.textContent = sellers.length + ' item' + (sellers.length !== 1 ? 's' : '');
+
+  if (!sellers.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div>No sales in this period</div>';
+    return;
+  }
+
+  var maxQty = Math.max.apply(null, sellers.map(function(s){ return s.qty; }).concat([1]));
+  var rankIcons = ['🥇','🥈','🥉'];
+  list.innerHTML = sellers.map(function(s, i) {
+    var rank = i < 3 ? rankIcons[i] : (i + 1);
+    var pct  = Math.round(s.qty / maxQty * 100);
+    return '<div class="seller-row">' +
+      '<div class="seller-rank">' + rank + '</div>' +
+      '<div class="seller-info">' +
+        '<div class="seller-name">' + (s.emoji || '📦') + ' ' + escHtml(s.name) + '</div>' +
+        '<div class="seller-bar-wrap"><div class="seller-bar-fill" style="width:' + pct + '%"></div></div>' +
+      '</div>' +
+      '<div class="seller-meta">' +
+        '<div class="seller-qty">' + s.qty.toLocaleString() + '</div>' +
+        '<div class="seller-rev">' + BPDB.fmt.currency(s.revenue) + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ─── Bar Performance ────────────────────────────────────────────────────── */
+function renderBarPerformance() {
+  var range   = getPeriodRange(currentPeriod);
+  var byBar   = BPDB.getRevenueByBar({ from: range.from, to: range.to });
+  var list    = document.getElementById('bars-list');
+  var badge   = document.getElementById('bars-count');
+  var active  = byBar.filter(function(b){ return b.orders > 0; });
+
+  badge.textContent = active.length + ' location' + (active.length !== 1 ? 's' : '');
+
+  if (!active.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🏪</div>No activity in this period</div>';
+    return;
+  }
+
+  var maxRev = Math.max.apply(null, active.map(function(b){ return b.revenue; }).concat([1]));
+  var rankClass = ['rank-1','rank-2','rank-3'];
+  list.innerHTML = active.map(function(b, i) {
+    var pct = Math.round(b.revenue / maxRev * 100);
+    var cls = rankClass[i] || 'rank-other';
+    return '<div class="bar-perf-row">' +
+      '<div class="bar-perf-top">' +
+        '<div class="bar-perf-name">' + escHtml(b.name) + ' <span class="bar-zone-chip">' + escHtml(b.zone) + '</span></div>' +
+        '<div class="bar-perf-rev">' + BPDB.fmt.currency(b.revenue) + '</div>' +
+      '</div>' +
+      '<div class="bar-perf-meta">' +
+        '<div class="bar-perf-orders">' + b.orders.toLocaleString() + ' order' + (b.orders !== 1 ? 's' : '') + '</div>' +
+        '<div class="bar-perf-pct">' + pct + '%</div>' +
+      '</div>' +
+      '<div class="bar-fill-wrap"><div class="bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ─── Active Alerts ──────────────────────────────────────────────────────── */
+function renderAlerts() {
+  var alerts  = BPDB.getAlerts({ resolved: false });
+  var section = document.getElementById('alerts-section');
+  var list    = document.getElementById('alerts-list');
+  var badge   = document.getElementById('alerts-count');
+
+  if (!alerts.length) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+  badge.textContent = alerts.length + ' alert' + (alerts.length !== 1 ? 's' : '');
+
+  // Sort: CRITICAL first, then by lowest pct
+  alerts = alerts.slice().sort(function(a, b) {
+    if (a.type === 'CRITICAL' && b.type !== 'CRITICAL') return -1;
+    if (a.type !== 'CRITICAL' && b.type === 'CRITICAL') return 1;
+    return a.pct - b.pct;
+  });
+
+  list.innerHTML = alerts.map(function(a) {
+    var sev = a.type.toLowerCase();
+    return '<div class="alert-row" id="alert-row-' + a.id + '">' +
+      '<div class="alert-severity ' + sev + '">' + a.type + '</div>' +
+      '<div class="alert-info">' +
+        '<div class="alert-title">' + escHtml(a.skuName) + ' — ' + escHtml(a.barName) + '</div>' +
+        '<div class="alert-sub">Zone ' + escHtml(a.barId) + ' · SKU: ' + escHtml(a.skuId) + '</div>' +
+      '</div>' +
+      '<div class="alert-stock">' +
+        '<div class="alert-pct ' + sev + '">' + a.pct + '%</div>' +
+        '<div class="alert-qty">' + a.qty + ' units</div>' +
+      '</div>' +
+      '<button class="btn-resolve" onclick="resolveAlert(\'' + a.id + '\')">Resolve</button>' +
+    '</div>';
+  }).join('');
+}
+
+function resolveAlert(id) {
+  var row = document.getElementById('alert-row-' + id);
+  if (row) { row.style.opacity = '0.4'; row.style.pointerEvents = 'none'; }
+  BPDB.resolveAlert(id);
+  setTimeout(function() {
+    renderAlerts();
+    toast('Alert resolved', 'green');
+  }, 350);
+}
+
+/* ─── Inventory Health ───────────────────────────────────────────────────── */
+function renderInventoryHealth() {
+  var health  = BPDB.getInventoryHealth();
+  var content = document.getElementById('inv-content');
+  var badge   = document.getElementById('inv-count');
+
+  badge.textContent = health.length + ' SKU' + (health.length !== 1 ? 's' : '') + ' below threshold';
+
+  if (!health.length) {
+    content.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div>All inventory levels are healthy</div>';
+    return;
+  }
+
+  // Group by bar
+  var groups = {};
+  health.forEach(function(item) {
+    if (!groups[item.barId]) groups[item.barId] = { name: item.barName, items: [] };
+    groups[item.barId].items.push(item);
+  });
+
+  var html = '<div class="inv-group-wrap">';
+  Object.values(groups).forEach(function(g) {
+    html += '<div class="inv-group">';
+    html += '<div class="inv-group-label">' + escHtml(g.name) + '</div>';
+    html += '<div class="inv-grid">';
+    g.items.forEach(function(item) {
+      var pctClamped = Math.max(0, Math.min(100, item.pct));
+      html += '<div class="inv-card ' + item.status + '">' +
+        '<div class="inv-card-top">' +
+          '<span class="inv-emoji">' + (item.emoji || '📦') + '</span>' +
+          '<span class="inv-status-dot ' + item.status + '"></span>' +
+        '</div>' +
+        '<div class="inv-name">' + escHtml(item.name) + '</div>' +
+        '<div class="inv-stats">' +
+          '<div class="inv-pct ' + item.status + '">' + item.pct + '%</div>' +
+          '<div class="inv-qty">' + item.qty + ' / ' + item.max + '</div>' +
+        '</div>' +
+        '<div class="inv-prog-wrap"><div class="inv-prog-fill ' + item.status + '" style="width:' + pctClamped + '%"></div></div>' +
+      '</div>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+/* ─── Transactions Table ─────────────────────────────────────────────────── */
+function renderTransactions(flashFirst) {
+  var range  = getPeriodRange(currentPeriod);
+  var txns   = BPDB.getTransactions({ from: range.from, to: range.to, limit: 25 });
+  var all    = BPDB.getTransactions({ from: range.from, to: range.to });
+  var tbody  = document.getElementById('txn-tbody');
+  var badge  = document.getElementById('txn-count');
+
+  badge.textContent = all.length.toLocaleString() + ' transaction' + (all.length !== 1 ? 's' : '');
+
+  if (!txns.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🧾</div>No transactions in this period</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = txns.map(function(t, idx) {
+    var pm  = t.paymentMethod || 'card';
+    var cls = flashFirst && idx === 0 ? 'txn-new-flash' : '';
+    return '<tr class="' + cls + '">' +
+      '<td class="txn-time mono">' + BPDB.fmt.time(t.ts) + '</td>' +
+      '<td class="txn-bar">' + escHtml(getBarName(t.barId)) + '</td>' +
+      '<td class="txn-items">' + t.items.length + ' item' + (t.items.length !== 1 ? 's' : '') + '</td>' +
+      '<td class="txn-amount">' + BPDB.fmt.currency(t.total) + '</td>' +
+      '<td><span class="txn-payment ' + pm + '">' + pm + '</span></td>' +
+      '<td class="txn-staff">' + escHtml(t.staffName || 'Staff') + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+/* ─── Bar name helper ─────────────────────────────────────────────────────── */
+function getBarName(barId) {
+  if (_barNameCache[barId]) return _barNameCache[barId];
+  try {
+    var inv = BPDB.getAllInventory();
+    if (inv && inv[barId]) {
+      _barNameCache[barId] = inv[barId].name;
+      return _barNameCache[barId];
+    }
+  } catch(e) {}
+  return barId;
+}
+
+/* ─── Export CSV ─────────────────────────────────────────────────────────── */
+function exportCSV() {
+  var range = getPeriodRange(currentPeriod);
+  var txns  = BPDB.getTransactions({ from: range.from, to: range.to });
+
+  if (!txns.length) {
+    toast('No transactions to export for this period', 'amber');
+    return;
+  }
+
+  var headers = ['Receipt ID','Date','Time','Bar','Staff','Items','Subtotal','Discount','Tax','Total','Payment','Customer'];
+  var rows = txns.map(function(t) {
+    return [
+      t.receiptId || t.id,
+      new Date(t.ts).toLocaleDateString('en-US'),
+      new Date(t.ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      getBarName(t.barId),
+      t.staffName || '',
+      t.items.map(function(i){ return i.name; }).join(' + '),
+      t.subtotal.toFixed(2),
+      (t.discount || 0).toFixed(2),
+      (t.tax || 0).toFixed(2),
+      t.total.toFixed(2),
+      t.paymentMethod || 'card',
+      t.customerName  || 'Guest',
+    ];
+  });
+
+  var csvContent = [headers].concat(rows).map(function(row) {
+    return row.map(function(v) {
+      return '"' + String(v).replace(/"/g, '""') + '"';
+    }).join(',');
+  }).join('\r\n');
+
+  var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  var slug = getPeriodLabel(currentPeriod).toLowerCase().replace(/\s+/g, '-');
+  a.href     = url;
+  a.download = 'barpass-' + slug + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  toast('Exported ' + txns.length + ' transactions', 'green');
+}
+
+/* ─── Refresh Orchestrator ───────────────────────────────────────────────── */
+function refreshAll() {
+  renderKPIs();
+  renderHourChart();
+  renderTopSellers();
+  renderBarPerformance();
+  renderAlerts();
+  renderInventoryHealth();
+  renderTransactions(false);
+  lastUpdatedTs = Date.now();
+  updateLastUpdated();
+}
+
+/* ─── Auto-refresh every 30 seconds ─────────────────────────────────────── */
+function startAutoRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(function() { refreshAll(); }, 30000);
+  setInterval(updateLastUpdated, 5000);
+}
+
+/* ─── Real-time BPDB event bindings ─────────────────────────────────────── */
+function bindRealtimeEvents() {
+  BPDB.on('transaction:new', function(txn) {
+    renderTransactions(true);
+    renderKPIs();
+    renderTopSellers();
+    renderBarPerformance();
+    lastUpdatedTs = Date.now();
+    toast('New order — ' + BPDB.fmt.currency(txn.total) + ' at ' + getBarName(txn.barId), 'blue');
+  });
+
+  BPDB.on('alert:new', function(alert) {
+    renderAlerts();
+    toast(alert.type + ': ' + alert.skuName + ' at ' + alert.barName, alert.type === 'CRITICAL' ? 'red' : 'amber');
+  });
+
+  BPDB.on('alert:resolved', function() {
+    renderAlerts();
+    renderInventoryHealth();
+  });
+
+  BPDB.on('inventory:updated', function() {
+    renderInventoryHealth();
+  });
+
+  BPDB.on('inventory:restocked', function() {
+    renderInventoryHealth();
+    renderAlerts();
+  });
+}
+
+/* ─── Resize chart on window resize ──────────────────────────────────────── */
+var _resizeDebounce = null;
+window.addEventListener('resize', function() {
+  clearTimeout(_resizeDebounce);
+  _resizeDebounce = setTimeout(function() { renderHourChart(); }, 160);
+});
+
+/* ─── HTML escape ─────────────────────────────────────────────────────────── */
+function escHtml(str) {
+  if (!str && str !== 0) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+/* ─── Boot Sequence ──────────────────────────────────────────────────────── */
+function boot() {
+  if (!window.BPDB) {
+    console.error('[Analytics] BPDB not found — ensure barpass-db.js is loaded.');
+    return;
+  }
+  if (!BPDB.ready) {
+    BPDB.on('ready', function() { boot(); });
+    return;
+  }
+
+  startClock();
+  refreshAll();
+  bindRealtimeEvents();
+  startAutoRefresh();
+
+  console.log('[Analytics] Executive dashboard ready.');
+}
+
+// barpass-db.js auto-inits on DOMContentLoaded. By the time our inline
+// script runs at end-of-body, BPDB.ready may already be true.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() { setTimeout(boot, 20); });
+} else {
+  setTimeout(boot, 20);
+}
+</script>
+</body>
+</html>
