@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>BarPass — Runner Task</title>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
   :root {
     --bg: #04060e;
@@ -506,6 +507,55 @@
   .tag.mid  { background:#FFba3818;color:var(--amber);border:1px solid #FFba3835; }
   .tag.low  { background:#00e87a18;color:var(--green);border:1px solid #00e87a35; }
 
+  /* ── Real Camera Scanner ── */
+  .cam-viewport {
+    position:relative;border-radius:14px;overflow:hidden;
+    background:#000;width:100%;aspect-ratio:1/1;max-height:300px;
+    margin:14px 0;
+  }
+  .cam-viewport video {
+    width:100%;height:100%;object-fit:cover;display:block;
+  }
+  .cam-overlay { position:absolute;inset:0;pointer-events:none; }
+  .cam-corner {
+    position:absolute;width:28px;height:28px;
+    border:3px solid var(--green);box-shadow:0 0 10px var(--green);
+  }
+  .cam-corner.tl { top:16px;left:16px;border-right:none;border-bottom:none;border-radius:4px 0 0 0; }
+  .cam-corner.tr { top:16px;right:16px;border-left:none;border-bottom:none;border-radius:0 4px 0 0; }
+  .cam-corner.bl { bottom:16px;left:16px;border-right:none;border-top:none;border-radius:0 0 0 4px; }
+  .cam-corner.br { bottom:16px;right:16px;border-left:none;border-top:none;border-radius:0 0 4px 0; }
+  .cam-scanline {
+    position:absolute;left:16px;right:16px;height:2px;
+    background:linear-gradient(90deg,transparent,var(--green),transparent);
+    box-shadow:0 0 10px var(--green);
+    animation:scanLine 2s ease-in-out infinite;top:16px;
+  }
+  .cam-status {
+    position:absolute;bottom:0;left:0;right:0;
+    padding:10px 14px;
+    background:linear-gradient(to top,rgba(4,6,14,.92),transparent);
+    font-family:var(--mono);font-size:10px;color:#fff;text-align:center;
+    line-height:1.5;
+  }
+  .cam-detected {
+    position:absolute;inset:0;background:#00e87a18;
+    display:flex;align-items:center;justify-content:center;
+    font-size:48px;animation:successPop .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .cam-error {
+    padding:24px 16px;text-align:center;
+    font-family:var(--mono);font-size:10px;
+    color:var(--muted);line-height:1.8;
+  }
+  .cam-error .cam-error-icon { font-size:32px;display:block;margin-bottom:8px; }
+  .cam-manual-btn {
+    display:inline-flex;align-items:center;gap:6px;margin-top:10px;
+    background:#FFba3820;color:var(--amber);border:1px solid #FFba3840;
+    border-radius:8px;padding:9px 16px;font-family:var(--mono);
+    font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.04em;
+  }
+
   /* Light theme override */
   @media (prefers-color-scheme: light) {
     :root { --bg:#f0f2f8; --surface:#fff; --card:#f8faff; --border:#dde2f0; --text:#0f1225; --muted:#8090b0; }
@@ -792,33 +842,47 @@
       <div class="hdr-sub">Point camera at Hub West QR · TK-1002</div>
     </div>
     <div class="body">
-      <div class="qr-scan-area" style="margin-top:14px;">
-        <div class="qr-frame">
-          <div class="qr-inner">
-            <div class="qr-emoji">⬡</div>
-            <div class="qr-scan-line"></div>
-          </div>
+
+      <!-- Real camera viewport -->
+      <div class="cam-viewport" id="hub-cam-viewport">
+        <video id="hub-video" autoplay playsinline muted></video>
+        <canvas id="hub-canvas" style="display:none;"></canvas>
+        <div class="cam-overlay">
+          <div class="cam-corner tl"></div>
+          <div class="cam-corner tr"></div>
+          <div class="cam-corner bl"></div>
+          <div class="cam-corner br"></div>
+          <div class="cam-scanline"></div>
         </div>
-        <div class="qr-hint">
-          Position the Hub West QR code within the frame<br>
-          <span style="color:var(--text);font-weight:700;">HUB-WEST-TK1002</span>
-        </div>
-        <br>
-        <button class="qr-btn-mock" onclick="hubScanned()">
-          ✓ Simulate Successful Scan
-        </button>
+        <div class="cam-status" id="hub-scan-status">Iniciando cámara...</div>
       </div>
 
-      <div class="notes-box">
-        <div class="notes-icon">📍</div>
-        <div>
-          <div class="notes-label">Hub Location</div>
-          <div class="notes-text" style="color:var(--text2,#ccd);">Hub West · Section B · Cart #3 · Look for the orange cone marker</div>
+      <!-- Camera error / manual fallback (hidden by default) -->
+      <div id="hub-cam-error" style="display:none;">
+        <div class="cam-error">
+          <span class="cam-error-icon">📷</span>
+          <strong style="color:var(--text);">Cámara no disponible</strong><br>
+          Activa el permiso de cámara en tu browser,<br>o usa el acceso manual si estás en desktop.
+          <br>
+          <button class="cam-manual-btn" onclick="hubScanned('MANUAL-OVERRIDE')">
+            ⚠ Continuar sin escanear
+          </button>
         </div>
       </div>
+
+      <!-- Hub info -->
+      <div class="notes-box" style="margin-top:4px;">
+        <div class="notes-icon">📍</div>
+        <div>
+          <div class="notes-label">Ubicación del Hub</div>
+          <div class="notes-text" id="hub-location-hint" style="color:var(--text);">Escanea el QR en el hub para confirmar recogida de carga</div>
+        </div>
+      </div>
+
+      <div style="height:80px;"></div>
     </div>
     <div class="cta-area">
-      <button class="btn-sub" onclick="goScreen('screen-picking')">← Back</button>
+      <button class="btn-sub" onclick="goScreen('screen-picking')">← Atrás</button>
     </div>
   </div>
 
@@ -923,33 +987,46 @@
       <div class="hdr-sub">Confirm delivery · Request manager sign-off</div>
     </div>
     <div class="body">
-      <div class="qr-scan-area" style="margin-top:14px;">
-        <div class="qr-frame">
-          <div class="qr-inner">
-            <div class="qr-emoji">🍺</div>
-            <div class="qr-scan-line"></div>
-          </div>
+
+      <!-- Real camera viewport -->
+      <div class="cam-viewport" id="bar-cam-viewport">
+        <video id="bar-video" autoplay playsinline muted></video>
+        <canvas id="bar-canvas" style="display:none;"></canvas>
+        <div class="cam-overlay">
+          <div class="cam-corner tl"></div>
+          <div class="cam-corner tr"></div>
+          <div class="cam-corner bl"></div>
+          <div class="cam-corner br"></div>
+          <div class="cam-scanline"></div>
         </div>
-        <div class="qr-hint">
-          Point camera at Bar C2 delivery QR<br>
-          <span style="color:var(--text);font-weight:700;">BAR-C2-DELIVERY-TK1002</span>
-        </div>
-        <br>
-        <button class="qr-btn-mock" onclick="barScanned()">
-          ✓ Simulate Delivery Scan
-        </button>
+        <div class="cam-status" id="bar-scan-status">Iniciando cámara...</div>
       </div>
 
-      <div class="notes-box">
-        <div class="notes-icon">👤</div>
-        <div>
-          <div class="notes-label">Manager Verification</div>
-          <div class="notes-text" style="color:var(--text2,#ccd);">After scanning, hand device to bar manager for final confirmation signature</div>
+      <!-- Camera error / manual fallback -->
+      <div id="bar-cam-error" style="display:none;">
+        <div class="cam-error">
+          <span class="cam-error-icon">📷</span>
+          <strong style="color:var(--text);">Cámara no disponible</strong><br>
+          Activa el permiso de cámara en tu browser,<br>o usa el acceso manual si estás en desktop.
+          <br>
+          <button class="cam-manual-btn" onclick="barScanned('MANUAL-OVERRIDE')">
+            ⚠ Continuar sin escanear
+          </button>
         </div>
       </div>
+
+      <div class="notes-box" style="margin-top:4px;">
+        <div class="notes-icon">👤</div>
+        <div>
+          <div class="notes-label" style="color:var(--green);">Verificación de Entrega</div>
+          <div class="notes-text" id="bar-location-hint" style="color:var(--text);">Escanea el QR del bar para confirmar entrega · Luego el manager firma</div>
+        </div>
+      </div>
+
+      <div style="height:80px;"></div>
     </div>
     <div class="cta-area">
-      <button class="btn-sub" onclick="goScreen('screen-transit')">← Back to Transit</button>
+      <button class="btn-sub" onclick="goScreen('screen-transit')">← Volver al Tránsito</button>
     </div>
   </div>
 
@@ -1311,11 +1388,141 @@ function buildCargoChecklist(){
   }).join('');
 }
 
+// ══════════════════════════════════════
+// REAL QR SCANNER — jsQR + getUserMedia
+// ══════════════════════════════════════
+let _scannerStream = null;
+let _scannerRAF    = null;
+let _scannerActive = false;
+
+async function startQRScanner(videoId, canvasId, statusId, errorBlockId, onDetect) {
+  stopQRScanner();
+  _scannerActive = true;
+
+  const video  = document.getElementById(videoId);
+  const canvas = document.getElementById(canvasId);
+  const status = document.getElementById(statusId);
+  const errBlk = document.getElementById(errorBlockId);
+
+  if (!video || !canvas) return;
+
+  // Check jsQR loaded
+  if (typeof jsQR === 'undefined') {
+    if (status) status.innerHTML = '⚠ jsQR no cargó. Verifica conexión.';
+    if (errBlk) errBlk.style.display = 'block';
+    return;
+  }
+
+  // Check camera API
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (status) status.innerHTML = '⚠ Este browser no soporta cámara';
+    if (errBlk) errBlk.style.display = 'block';
+    return;
+  }
+
+  try {
+    if (status) status.textContent = '📷 Solicitando acceso a cámara...';
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' }, // prefer back camera
+        width:  { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    });
+
+    _scannerStream = stream;
+    video.srcObject = stream;
+    video.style.display = 'block';
+
+    await new Promise((res, rej) => {
+      video.onloadedmetadata = res;
+      video.onerror = rej;
+    });
+    await video.play();
+
+    if (status) status.textContent = '🔍 Apunta al código QR...';
+
+    const ctx = canvas.getContext('2d');
+
+    const tick = () => {
+      if (!_scannerActive) return;
+
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width  = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        let code = null;
+        try {
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          code = jsQR(imgData.data, imgData.width, imgData.height, {
+            inversionAttempts: 'dontInvert'
+          });
+        } catch(e) {}
+
+        if (code && code.data) {
+          _scannerActive = false;
+          stopQRScanner();
+
+          // Flash detected overlay
+          const vp = video.parentElement;
+          const overlay = document.createElement('div');
+          overlay.className = 'cam-detected';
+          overlay.textContent = '✅';
+          vp.appendChild(overlay);
+
+          if (status) status.textContent = '✓ QR detectado · ' + code.data.substring(0,40);
+          setTimeout(() => onDetect(code.data), 600);
+          return;
+        }
+      }
+      _scannerRAF = requestAnimationFrame(tick);
+    };
+
+    _scannerRAF = requestAnimationFrame(tick);
+
+  } catch (err) {
+    console.warn('QR camera error:', err.name, err.message);
+    let msg = '⚠ Sin acceso a cámara';
+    if (err.name === 'NotAllowedError')   msg = '🔒 Permiso denegado · Actívalo en Configuración del browser';
+    if (err.name === 'NotFoundError')     msg = '📵 No se encontró cámara en este dispositivo';
+    if (err.name === 'NotReadableError')  msg = '⚠ Cámara en uso por otra app';
+    if (err.name === 'OverconstrainedError') msg = '⚠ Cámara no compatible';
+
+    if (status) status.innerHTML = msg;
+    if (errBlk) errBlk.style.display = 'block';
+  }
+}
+
+function stopQRScanner() {
+  _scannerActive = false;
+  if (_scannerRAF) { cancelAnimationFrame(_scannerRAF); _scannerRAF = null; }
+  if (_scannerStream) {
+    _scannerStream.getTracks().forEach(t => t.stop());
+    _scannerStream = null;
+  }
+}
+
 // ── Screen navigation ──
 function goScreen(id){
+  stopQRScanner(); // always kill camera before switching screens
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
+
+  // Auto-start camera on scan screens
+  if (id === 'screen-scan-hub') {
+    setTimeout(() => startQRScanner(
+      'hub-video', 'hub-canvas', 'hub-scan-status', 'hub-cam-error',
+      (data) => hubScanned(data)
+    ), 300);
+  } else if (id === 'screen-scan-bar') {
+    setTimeout(() => startQRScanner(
+      'bar-video', 'bar-canvas', 'bar-scan-status', 'bar-cam-error',
+      (data) => barScanned(data)
+    ), 300);
+  }
 }
 
 // ── Status bar clock ──
@@ -1430,10 +1637,14 @@ function acceptTask(){
   startPickingTimer();
 }
 
-function hubScanned(){
+function hubScanned(qrData){
   const ts = fmtTime(new Date());
   document.getElementById('hub-ts').textContent = ts;
-  document.getElementById('transit-hub-ts').textContent = `✓ Confirmed ${ts}`;
+  document.getElementById('transit-hub-ts').textContent = `✓ Confirmado ${ts}`;
+  // Update hub label with actual scanned data if real
+  if (qrData && qrData !== 'MANUAL-OVERRIDE') {
+    document.getElementById('hub-location-hint') && (document.getElementById('hub-location-hint').textContent = `✓ Escaneado: ${qrData.substring(0,50)}`);
+  }
   goScreen('screen-transit');
   startTransitTimer();
 }
@@ -1476,14 +1687,17 @@ function resetPhoto(){
   btn.style.cursor = 'not-allowed';
 }
 
-function barScanned(){
+function barScanned(qrData){
   _photoCapture = false;
   resetPhoto();
-  goScreen('screen-photo');
   const now = new Date();
   const elapsed = _acceptTime ? Math.floor((now-_acceptTime)/1000) : 0;
   document.getElementById('mgr-time').textContent = fmtSec(elapsed);
   document.getElementById('stat-time').textContent = fmtSec(elapsed);
+  if (qrData && qrData !== 'MANUAL-OVERRIDE') {
+    document.getElementById('bar-location-hint') && (document.getElementById('bar-location-hint').textContent = `✓ Escaneado: ${qrData.substring(0,50)}`);
+  }
+  goScreen('screen-photo');
   // re-init manager signature canvas
   setTimeout(()=>{
     initCanvas('mgr-sig-canvas','mgr-sig-placeholder',()=>{_mgrSigDone=true;validateManager();});
