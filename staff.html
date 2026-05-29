@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarPass Staff</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="barpass-db.js"></script>
+<style>
+:root{--bg:#04060e;--surface:#080c1a;--card:#0c1022;--border:#1a2040;--text:#e8eaf6;--muted:#4a5380;--green:#00e87a;--amber:#FFba38;--red:#FF4466;--blue:#5AA5FF;--purple:#a855f7;--cyan:#06b6d4;--mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);}
+.hdr{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:12px;height:56px;}
+.logo-pill{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--amber),var(--red));display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:13px;color:#04060e;}
+.hdr-title{font-weight:700;font-size:16px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-clock{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto;}
+.hdr-nav{display:flex;gap:6px;}
+.hdr-btn{padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;}
+.hdr-btn:hover{border-color:var(--amber);color:var(--amber);background:#FFba3810;}
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px 24px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.g::before{background:var(--green);}.kpi.b::before{background:var(--blue);}.kpi.a::before{background:var(--amber);}.kpi.r::before{background:var(--red);}.kpi.p::before{background:var(--purple);}
+.kpi-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.kpi-val{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1;}
+.kpi.g .kpi-val{color:var(--green);}.kpi.b .kpi-val{color:var(--blue);}.kpi.a .kpi-val{color:var(--amber);}.kpi.r .kpi-val{color:var(--red);}.kpi.p .kpi-val{color:var(--purple);}
+.kpi-sub{font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:4px;}
+.tabs{display:flex;gap:2px;padding:0 24px;border-bottom:1px solid var(--border);position:sticky;top:56px;z-index:90;background:var(--bg);}
+.tab{padding:10px 16px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.tab.active{color:var(--amber);border-bottom-color:var(--amber);}
+.tab-pane{display:none;padding:20px 24px;}.tab-pane.active{display:block;}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-title{font-size:13px;font-weight:600;}
+.btn-primary{padding:8px 16px;border-radius:8px;border:none;background:var(--amber);color:#04060e;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;}
+.btn-primary:hover{background:#ffca5a;}
+.btn-sm{padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:9px;cursor:pointer;transition:all .15s;}
+.btn-sm:hover{border-color:var(--text);color:var(--text);}
+/* Staff grid */
+.staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.staff-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .15s;}
+.staff-card:hover{border-color:var(--amber);}
+.sc-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.sc-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;border:2px solid;}
+.sc-avatar.online{border-color:var(--green);}
+.sc-avatar.offline{border-color:var(--border);}
+.sc-name{font-size:13px;font-weight:600;}
+.sc-role{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px;}
+.sc-status{margin-left:auto;font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.sc-status.online{background:#00e87a14;color:var(--green);}
+.sc-status.offline{background:var(--border);color:var(--muted);}
+.sc-status.break{background:#FFba3814;color:var(--amber);}
+.sc-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
+.sc-metric{background:var(--surface);border-radius:7px;padding:7px 8px;text-align:center;}
+.sc-metric-val{font-family:var(--mono);font-size:13px;font-weight:700;}
+.sc-metric-lbl{font-family:var(--mono);font-size:7px;color:var(--muted);margin-top:1px;}
+.sc-bar-wrap{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:6px;}
+.sc-bar-fill{height:100%;border-radius:2px;}
+.sc-actions{display:flex;gap:6px;}
+/* Performance leaderboard */
+.leaderboard{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.lb-row{display:grid;grid-template-columns:36px 1fr 100px 90px 70px 60px;gap:0;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);transition:background .1s;}
+.lb-row:last-child{border-bottom:none;}
+.lb-row:hover{background:var(--surface);}
+.lb-head{background:var(--surface);font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;padding:8px 16px;display:grid;grid-template-columns:36px 1fr 100px 90px 70px 60px;gap:0;}
+.lb-rank{font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;}
+.rank-1{color:var(--amber);}
+.rank-2{color:#c0c0c0;}
+.rank-3{color:#cd7f32;}
+.lb-name-cell{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;}
+.lb-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.lb-bar{width:100%;height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:3px;}
+.lb-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--amber),var(--green));}
+/* Schedule */
+.schedule-grid{display:grid;grid-template-columns:120px repeat(7,1fr);gap:0;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.sg-corner{background:var(--surface);padding:10px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+.sg-day{background:var(--surface);padding:10px 6px;text-align:center;border-right:1px solid var(--border);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--muted);}
+.sg-day.today{background:#5AA5FF10;color:var(--blue);}
+.sg-staff{background:var(--card);padding:10px 12px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);font-size:11px;font-weight:500;}
+.sg-staff:last-of-type{border-bottom:none;}
+.sg-cell{padding:6px 4px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;}
+.sg-shift{border-radius:4px;padding:3px 5px;font-family:var(--mono);font-size:8px;font-weight:600;cursor:pointer;margin-bottom:2px;}
+.sg-shift.morning{background:#00e87a18;color:var(--green);}
+.sg-shift.evening{background:#5AA5FF18;color:var(--blue);}
+.sg-shift.night{background:#a855f718;color:var(--purple);}
+.sg-shift.off{background:var(--surface);color:var(--muted);}
+/* Performance chart */
+.perf-chart{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
+.perf-chart-title{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;margin-bottom:12px;}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.bar-fill{width:100%;border-radius:3px 3px 0 0;transition:height .4s;min-height:4px;}
+.bar-lbl{font-family:var(--mono);font-size:7px;color:var(--muted);text-align:center;}
+.bar-val{font-family:var(--mono);font-size:7px;color:var(--text);}
+/* Role badge */
+.role-badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:8px;font-weight:700;}
+.role-badge.owner{background:#FFba3814;color:var(--amber);}
+.role-badge.manager{background:#a855f714;color:var(--purple);}
+.role-badge.bartender{background:#5AA5FF14;color:var(--blue);}
+.role-badge.runner{background:#00e87a14;color:var(--green);}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;}
+.modal-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:14px;font-weight:600;}
+.modal-close{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:14px;}
+.modal-body{padding:20px;}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+.form-group{margin-bottom:12px;}
+.form-label{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;display:block;margin-bottom:5px;}
+.form-input{width:100%;padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:var(--mono);font-size:10px;outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:var(--amber);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+/* Toast */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:6px;}
+.toast{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tin .2s ease;max-width:300px;}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.toast.out{animation:tout .2s ease forwards;}
+@keyframes tout{to{opacity:0;transform:translateY(6px)}}
+.toast-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+@media(max-width:900px){.kpi-strip{grid-template-columns:repeat(3,1fr);}.staff-grid{grid-template-columns:1fr;}.lb-row,.lb-head{grid-template-columns:36px 1fr 80px 70px;}
+.lb-row>*:nth-child(5),.lb-head>*:nth-child(5),.lb-row>*:nth-child(6),.lb-head>*:nth-child(6){display:none;}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo-pill">BP</div>
+  <div class="hdr-title">Staff</div>
+  <div class="live-dot"></div>
+  <div class="hdr-clock" id="hdr-clock">--:--:--</div>
+  <nav class="hdr-nav">
+    <button class="hdr-btn" onclick="location.href='BarPass_v10.html'">← BarPass</button>
+    <button class="hdr-btn" onclick="location.href='analytics.html'">📊 Analytics</button>
+    <button class="hdr-btn" onclick="location.href='inventory.html'">📦 Inventory</button>
+    <button class="hdr-btn" onclick="location.href='automation.html'">⚙️ Automation</button>
+  </nav>
+</header>
+
+<div class="kpi-strip">
+  <div class="kpi g"><div class="kpi-lbl">On Shift Now</div><div class="kpi-val" id="kpi-online">—</div><div class="kpi-sub">active staff</div></div>
+  <div class="kpi b"><div class="kpi-lbl">Total Staff</div><div class="kpi-val" id="kpi-total">—</div><div class="kpi-sub">in system</div></div>
+  <div class="kpi a"><div class="kpi-lbl">Avg Revenue/Staff</div><div class="kpi-val" id="kpi-avg-rev">—</div><div class="kpi-sub">today</div></div>
+  <div class="kpi p"><div class="kpi-lbl">Top Performer</div><div class="kpi-val" id="kpi-top" style="font-size:14px;margin-top:2px;">—</div><div class="kpi-sub" id="kpi-top-rev">—</div></div>
+  <div class="kpi r"><div class="kpi-lbl">Runners Active</div><div class="kpi-val" id="kpi-runners">—</div><div class="kpi-sub">on dispatch</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('roster',this)">ROSTER</div>
+  <div class="tab" onclick="switchTab('leaderboard',this)">LEADERBOARD</div>
+  <div class="tab" onclick="switchTab('schedule',this)">SCHEDULE</div>
+  <div class="tab" onclick="switchTab('performance',this)">PERFORMANCE</div>
+</div>
+
+<!-- ROSTER -->
+<div class="tab-pane active" id="pane-roster">
+  <div class="sec-hdr">
+    <div class="sec-title">Staff Roster</div>
+    <button class="btn-primary" onclick="openAddStaff()">+ Add Staff</button>
+  </div>
+  <div class="staff-grid" id="staff-grid"></div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="tab-pane" id="pane-leaderboard">
+  <div class="sec-hdr">
+    <div class="sec-title">Performance Leaderboard</div>
+    <select class="btn-sm" id="lb-period" onchange="renderLeaderboard()" style="padding:5px 10px;">
+      <option value="today">Today</option>
+      <option value="week">This Week</option>
+      <option value="month">This Month</option>
+      <option value="all">All Time</option>
+    </select>
+  </div>
+  <div class="leaderboard">
+    <div class="lb-head">
+      <span>#</span><span>STAFF</span><span>REVENUE</span><span>ORDERS</span><span>AVG ORDER</span><span>ITEMS</span>
+    </div>
+    <div id="lb-body"></div>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="tab-pane" id="pane-schedule">
+  <div class="sec-hdr">
+    <div class="sec-title">Weekly Schedule</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-sm" onclick="shiftWeek(-1)">← Prev</button>
+      <span id="week-label" style="font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;align-items:center;padding:0 8px;"></span>
+      <button class="btn-sm" onclick="shiftWeek(1)">Next →</button>
+    </div>
+  </div>
+  <div id="schedule-grid"></div>
+</div>
+
+<!-- PERFORMANCE -->
+<div class="tab-pane" id="pane-performance">
+  <div class="sec-hdr">
+    <div class="sec-title">Individual Performance</div>
+    <select class="btn-sm" id="perf-staff-sel" onchange="renderPerformance()" style="padding:5px 10px;"></select>
+  </div>
+  <div id="performance-detail"></div>
+</div>
+
+<!-- Add Staff Modal -->
+<div class="modal-overlay" id="staff-modal" style="display:none;" onclick="if(event.target===this)closeStaffModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="staff-modal-title">Add Staff Member</div>
+      <button class="modal-close" onclick="closeStaffModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">FIRST NAME</label><input class="form-input" id="sf-fname" placeholder="Diego"></div>
+        <div class="form-group"><label class="form-label">LAST NAME</label><input class="form-input" id="sf-lname" placeholder="López"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">ROLE</label>
+          <select class="form-input" id="sf-role">
+            <option value="bartender">Bartender</option>
+            <option value="runner">Runner</option>
+            <option value="manager">Manager</option>
+            <option value="owner">Owner</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">ZONE</label>
+          <select class="form-input" id="sf-zone">
+            <option value="A">Zone A — West</option>
+            <option value="B">Zone B — North</option>
+            <option value="C">Zone C — East</option>
+            <option value="D">Zone D — South</option>
+            <option value="VIP">VIP Suites</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">EMAIL</label><input class="form-input" id="sf-email" placeholder="diego@venue.com"></div>
+        <div class="form-group"><label class="form-label">PHONE</label><input class="form-input" id="sf-phone" placeholder="+1-305-555-0100"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">BADGE ID</label><input class="form-input" id="sf-badge" placeholder="BP-2024-0099"></div>
+        <div class="form-group"><label class="form-label">EMPLOYEE ID</label><input class="form-input" id="sf-empid" placeholder="EMP-099"></div>
+      </div>
+      <div class="form-group"><label class="form-label">CERTIFICATIONS</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer;"><input type="checkbox" id="cert-ramp" value="RAMP"> RAMP Certified</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer;"><input type="checkbox" id="cert-tabc" value="TABC"> TABC</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer;"><input type="checkbox" id="cert-food" value="Food Safety"> Food Safety</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:11px;cursor:pointer;"><input type="checkbox" id="cert-first" value="First Aid"> First Aid</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeStaffModal()">Cancel</button>
+      <button class="btn-primary" onclick="submitStaff()">Add Staff Member</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ── Staff demo data (seeded into BPDB.staff) ──
+const DEMO_STAFF = [
+  {id:'staff-01', name:'Diego L.',    role:'bartender', zone:'A',   email:'diego@venue.com',   phone:'+1-305-555-0101', badgeId:'BP-2024-0001', certs:['RAMP','Food Safety'], status:'online',  avatar:'🧑', avatarColor:'#5AA5FF'},
+  {id:'staff-02', name:'Elena R.',    role:'bartender', zone:'VIP', email:'elena@venue.com',   phone:'+1-305-555-0102', badgeId:'BP-2023-0108', certs:['RAMP','TABC'],       status:'online',  avatar:'👩', avatarColor:'#a855f7'},
+  {id:'staff-03', name:'Marco S.',    role:'runner',    zone:'B',   email:'marco@venue.com',   phone:'+1-305-555-0103', badgeId:'BP-2022-0019', certs:['Food Safety'],       status:'online',  avatar:'👨', avatarColor:'#00e87a'},
+  {id:'staff-04', name:'James K.',    role:'manager',   zone:'ALL', email:'james@venue.com',   phone:'+1-305-555-0104', badgeId:'BP-2021-0003', certs:['RAMP','TABC','First Aid'], status:'online', avatar:'👤', avatarColor:'#FFba38'},
+  {id:'staff-05', name:'Sofia M.',    role:'bartender', zone:'C',   email:'sofia@venue.com',   phone:'+1-305-555-0105', badgeId:'BP-2024-0042', certs:['RAMP'],             status:'break',   avatar:'👩', avatarColor:'#FF4466'},
+  {id:'staff-06', name:'Carlos V.',   role:'runner',    zone:'C',   email:'carlos@venue.com',  phone:'+1-305-555-0106', badgeId:'BP-2023-0055', certs:['Food Safety'],       status:'online',  avatar:'👨', avatarColor:'#06b6d4'},
+  {id:'staff-07', name:'Lucia T.',    role:'bartender', zone:'D',   email:'lucia@venue.com',   phone:'+1-305-555-0107', badgeId:'BP-2022-0088', certs:['RAMP','TABC'],       status:'offline', avatar:'👩', avatarColor:'#22d3ee'},
+  {id:'staff-08', name:'Admin User',  role:'owner',     zone:'ALL', email:'admin@venue.com',   phone:'+1-305-555-0100', badgeId:'BP-2020-0001', certs:['RAMP','TABC','Food Safety','First Aid'], status:'online', avatar:'👑', avatarColor:'#FFba38'},
+];
+
+// ── Clock ──
+setInterval(()=>{document.getElementById('hdr-clock').textContent=new Date().toLocaleTimeString('en-US',{hour12:false});},1000);
+document.getElementById('hdr-clock').textContent=new Date().toLocaleTimeString('en-US',{hour12:false});
+
+// ── Toast ──
+function toast(msg,type='info'){
+  const c={success:'#00e87a',error:'#FF4466',info:'#5AA5FF',warning:'#FFba38'};
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<div class="toast-dot" style="background:${c[type]||c.info}"></div>${msg}`;
+  document.getElementById('toasts').prepend(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),200);},3000);
+}
+
+// ── Tab switch ──
+function switchTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pane-'+id).classList.add('active');
+  if(id==='leaderboard')renderLeaderboard();
+  if(id==='schedule')renderSchedule();
+  if(id==='performance')renderPerformance();
+}
+
+// ── KPIs ──
+function renderKPIs(){
+  const online=DEMO_STAFF.filter(s=>s.status==='online').length;
+  const runners=DEMO_STAFF.filter(s=>s.role==='runner'&&s.status==='online').length;
+  document.getElementById('kpi-online').textContent=online;
+  document.getElementById('kpi-total').textContent=DEMO_STAFF.length;
+  document.getElementById('kpi-runners').textContent=runners;
+
+  // Revenue from BPDB
+  const today={from:new Date().setHours(0,0,0,0),to:Date.now()};
+  const staffRevs=DEMO_STAFF.map(s=>{
+    const m=BPDB.getStaffMetrics({staffId:s.id,...today});
+    return{...s, revenue:m.revenue, orders:m.orders};
+  }).filter(s=>s.revenue>0).sort((a,b)=>b.revenue-a.revenue);
+
+  if(staffRevs.length){
+    const topRev=staffRevs.reduce((s,m)=>s+m.revenue,0);
+    const avgRev=topRev/staffRevs.length;
+    document.getElementById('kpi-avg-rev').textContent=BPDB.fmt.currency(avgRev);
+    document.getElementById('kpi-top').textContent=staffRevs[0].name;
+    document.getElementById('kpi-top-rev').textContent=BPDB.fmt.currency(staffRevs[0].revenue);
+  } else {
+    // Use demo data
+    document.getElementById('kpi-avg-rev').textContent='$1,247';
+    document.getElementById('kpi-top').textContent='Elena R.';
+    document.getElementById('kpi-top-rev').textContent='$2,840 today';
+  }
+}
+
+// ── Roster ──
+function renderRoster(){
+  const el=document.getElementById('staff-grid');
+  // Seed demo revenue
+  const demoRevs={'staff-01':1840,'staff-02':2840,'staff-03':420,'staff-04':0,'staff-05':1120,'staff-06':380,'staff-07':0,'staff-08':0};
+  const demoOrders={'staff-01':24,'staff-02':38,'staff-03':8,'staff-04':0,'staff-05':15,'staff-06':6,'staff-07':0,'staff-08':0};
+  const maxRev=Math.max(...Object.values(demoRevs));
+
+  el.innerHTML=DEMO_STAFF.map(s=>{
+    const rev=demoRevs[s.id]||0;
+    const orders=demoOrders[s.id]||0;
+    const avg=orders?rev/orders:0;
+    const pct=maxRev?Math.round(rev/maxRev*100):0;
+    const barColor=pct>70?'var(--green)':pct>40?'var(--amber)':'var(--blue)';
+    return `<div class="staff-card">
+      <div class="sc-top">
+        <div class="sc-avatar ${s.status}" style="background:${s.avatarColor}20;color:${s.avatarColor};">${s.avatar}</div>
+        <div>
+          <div class="sc-name">${s.name}</div>
+          <div class="sc-role"><span class="role-badge ${s.role}">${s.role.toUpperCase()}</span> · Zone ${s.zone}</div>
+        </div>
+        <span class="sc-status ${s.status}">${s.status.toUpperCase()}</span>
+      </div>
+      <div class="sc-metrics">
+        <div class="sc-metric"><div class="sc-metric-val" style="color:var(--green)">${BPDB.fmt.currency(rev)}</div><div class="sc-metric-lbl">TODAY</div></div>
+        <div class="sc-metric"><div class="sc-metric-val" style="color:var(--blue)">${orders}</div><div class="sc-metric-lbl">ORDERS</div></div>
+        <div class="sc-metric"><div class="sc-metric-val" style="color:var(--amber)">${avg?BPDB.fmt.currency(avg):'—'}</div><div class="sc-metric-lbl">AVG</div></div>
+      </div>
+      <div class="sc-bar-wrap"><div class="sc-bar-fill" style="width:${pct}%;background:${barColor};"></div></div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-bottom:8px;">${s.certs.join(' · ')}</div>
+      <div class="sc-actions">
+        <button class="btn-sm" onclick="viewProfile('${s.id}')">Profile</button>
+        <button class="btn-sm" onclick="switchStatusStaff('${s.id}')">Toggle Status</button>
+        <button class="btn-sm" onclick="openScheduleFor('${s.id}')">Schedule</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function switchStatusStaff(id){
+  const s=DEMO_STAFF.find(s=>s.id===id);
+  if(!s)return;
+  const cycle={online:'break',break:'offline',offline:'online'};
+  s.status=cycle[s.status]||'online';
+  toast(`${s.name} → ${s.status.toUpperCase()}`,'info');
+  renderRoster(); renderKPIs();
+}
+
+function viewProfile(id){
+  const s=DEMO_STAFF.find(s=>s.id===id);
+  if(!s)return;
+  switchTab('performance',document.querySelectorAll('.tab')[3]);
+  document.getElementById('perf-staff-sel').value=id;
+  renderPerformance();
+}
+function openScheduleFor(id){
+  switchTab('schedule',document.querySelectorAll('.tab')[2]);
+}
+
+// ── Leaderboard ──
+function getPeriodRange(p){
+  const now=Date.now();
+  const sod=new Date();sod.setHours(0,0,0,0);
+  if(p==='today')return{from:sod.getTime(),to:now};
+  if(p==='week')return{from:sod.getTime()-6*86400000,to:now};
+  if(p==='month')return{from:sod.getTime()-29*86400000,to:now};
+  return{from:0,to:now};
+}
+
+function renderLeaderboard(){
+  const period=document.getElementById('lb-period').value;
+  const range=getPeriodRange(period);
+  // Demo data weighted by period
+  const demoBase={'staff-01':1840,'staff-02':2840,'staff-03':420,'staff-05':1120,'staff-06':380};
+  const mult={today:1,week:7,month:30,all:90};
+  const m=mult[period]||1;
+
+  const staff=DEMO_STAFF.filter(s=>s.role!=='owner').map(s=>{
+    const base=demoBase[s.id]||0;
+    const rev=base*m*(0.8+Math.random()*0.4);
+    const orders=Math.round(rev/76.5);
+    return{...s,revenue:rev,orders,avgOrder:orders?rev/orders:0,items:orders*2.4};
+  }).sort((a,b)=>b.revenue-a.revenue);
+
+  const maxRev=staff[0]?.revenue||1;
+  const el=document.getElementById('lb-body');
+  const medalColors=['var(--amber)','#c0c0c0','#cd7f32'];
+  el.innerHTML=staff.map((s,i)=>{
+    const pct=Math.round(s.revenue/maxRev*100);
+    const rankClass=i<3?`rank-${i+1}`:'';
+    return `<div class="lb-row">
+      <div class="lb-rank ${rankClass}">${i===0?'🏆':i===1?'🥈':i===2?'🥉':i+1}</div>
+      <div class="lb-name-cell">
+        <div class="lb-avatar" style="background:${s.avatarColor}20;color:${s.avatarColor}">${s.avatar}</div>
+        <div>
+          <div>${s.name}</div>
+          <div class="lb-bar"><div class="lb-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--green)">${BPDB.fmt.currency(s.revenue)}</div>
+      <div style="font-family:var(--mono);font-size:11px">${Math.round(s.orders)}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">${BPDB.fmt.currency(s.avgOrder)}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">${Math.round(s.items)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Schedule ──
+let _weekOffset=0;
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const SHIFTS={morning:'☀️ Morning',evening:'🌆 Evening',night:'🌙 Night',off:'—'};
+
+function shiftWeek(d){_weekOffset+=d;renderSchedule();}
+
+function renderSchedule(){
+  const today=new Date();
+  const dow=today.getDay();
+  const weekStart=new Date(today);
+  weekStart.setDate(today.getDate()-dow+_weekOffset*7);
+  const days=Array.from({length:7},(_,i)=>{
+    const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);return d;
+  });
+  document.getElementById('week-label').textContent=
+    `${days[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${days[6].toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+
+  // Seeded schedule
+  const schedule={
+    'staff-01':['morning','morning','off','evening','evening','night','off'],
+    'staff-02':['evening','evening','evening','off','morning','morning','off'],
+    'staff-03':['morning','morning','morning','morning','off','evening','off'],
+    'staff-04':['morning','morning','morning','morning','morning','off','off'],
+    'staff-05':['off','evening','evening','evening','night','night','off'],
+    'staff-06':['morning','off','morning','morning','morning','off','morning'],
+    'staff-07':['off','off','evening','evening','evening','morning','morning'],
+    'staff-08':['morning','morning','morning','morning','morning','morning','off'],
+  };
+
+  const el=document.getElementById('schedule-grid');
+  const staffRows=DEMO_STAFF.map(s=>{
+    const shifts=schedule[s.id]||['off','off','off','off','off','off','off'];
+    return `<div class="sg-staff">${s.name}<br><span style="font-family:var(--mono);font-size:8px;color:var(--muted)">${s.role}</span></div>`+
+      shifts.map(sh=>`<div class="sg-cell"><div class="sg-shift ${sh}" title="${SHIFTS[sh]}">${sh==='off'?'—':sh==='morning'?'☀️ AM':sh==='evening'?'🌆 PM':'🌙 PM+'}</div></div>`).join('');
+  }).join('');
+
+  el.innerHTML=`<div class="schedule-grid">
+    <div class="sg-corner"></div>
+    ${days.map((d,i)=>{
+      const isToday=d.toDateString()===today.toDateString();
+      return `<div class="sg-day ${isToday?'today':''}"><div>${DAYS[d.getDay()]}</div><div style="font-size:11px;font-weight:600;color:${isToday?'var(--blue)':'var(--text)'}">${d.getDate()}</div></div>`;
+    }).join('')}
+    ${staffRows}
+  </div>`;
+}
+
+// ── Performance detail ──
+function renderPerformance(){
+  const sel=document.getElementById('perf-staff-sel');
+  const id=sel.value;
+  const s=DEMO_STAFF.find(s=>s.id===id);
+  if(!s){document.getElementById('performance-detail').innerHTML='';return;}
+
+  const demoRevByDay=[1240,980,1540,2100,1870,2840,3200].map(v=>v*(0.7+Math.random()*0.6));
+  const maxDay=Math.max(...demoRevByDay);
+  const chartDays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  document.getElementById('performance-detail').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+          <div style="width:52px;height:52px;border-radius:50%;background:${s.avatarColor}20;color:${s.avatarColor};border:2px solid ${s.avatarColor};display:flex;align-items:center;justify-content:center;font-size:22px;">${s.avatar}</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;">${s.name}</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:3px;"><span class="role-badge ${s.role}">${s.role.toUpperCase()}</span> · Zone ${s.zone}</div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:3px;">${s.email} · ${s.badgeId}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">${s.certs.map(c=>`<span style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-family:var(--mono);font-size:8px;color:var(--muted)">✓ ${c}</span>`).join('')}</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;margin-bottom:10px;">THIS WEEK STATS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          ${[['$'+Math.round(demoRevByDay.reduce((a,b)=>a+b,0)).toLocaleString(),'Total Revenue'],['$'+Math.round(demoRevByDay.reduce((a,b)=>a+b,0)/7).toLocaleString(),'Daily Avg'],
+            [Math.round(demoRevByDay.reduce((a,b)=>a+b,0)/76.5)+'','Orders'],['$77.20','Avg Order']].map(([v,l])=>`
+          <div style="background:var(--surface);border-radius:7px;padding:8px;text-align:center;">
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--amber)">${v}</div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:2px">${l}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="perf-chart">
+      <div class="perf-chart-title">REVENUE BY DAY — LAST 7 DAYS</div>
+      <div class="bar-chart">
+        ${demoRevByDay.map((v,i)=>`<div class="bar-col">
+          <div class="bar-val">\$${Math.round(v/100)*100}</div>
+          <div class="bar-fill" style="height:${Math.round(v/maxDay*90)}px;background:linear-gradient(to top,var(--amber),var(--green));"></div>
+          <div class="bar-lbl">${chartDays[i]}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ── Add Staff Modal ──
+function openAddStaff(){document.getElementById('staff-modal').style.display='flex';}
+function closeStaffModal(){document.getElementById('staff-modal').style.display='none';}
+function submitStaff(){
+  const fname=document.getElementById('sf-fname').value.trim();
+  const lname=document.getElementById('sf-lname').value.trim();
+  if(!fname||!lname){toast('Enter first and last name','warning');return;}
+  const name=`${fname} ${lname[0]}.`;
+  const certs=[...document.querySelectorAll('[id^=cert-]:checked')].map(c=>c.value);
+  const newStaff={
+    id:'staff-'+Date.now().toString(36),
+    name,
+    role:document.getElementById('sf-role').value,
+    zone:document.getElementById('sf-zone').value,
+    email:document.getElementById('sf-email').value,
+    phone:document.getElementById('sf-phone').value,
+    badgeId:document.getElementById('sf-badge').value||'BP-'+Date.now().toString(36).toUpperCase(),
+    certs,
+    status:'offline',
+    avatar:'👤',
+    avatarColor:'#5AA5FF',
+  };
+  DEMO_STAFF.push(newStaff);
+  toast(`Staff added: ${name}`,'success');
+  closeStaffModal();
+  renderRoster(); renderKPIs();
+  populatePerformanceSel();
+}
+
+function populatePerformanceSel(){
+  const sel=document.getElementById('perf-staff-sel');
+  sel.innerHTML=DEMO_STAFF.map(s=>`<option value="${s.id}">${s.name} (${s.role})</option>`).join('');
+}
+
+// ── Init ──
+function init(){
+  renderKPIs();
+  renderRoster();
+  populatePerformanceSel();
+}
+if(BPDB.ready) init(); else BPDB.on('ready',init);
+setInterval(renderKPIs,30000);
+</script>
+</body>
+</html>
