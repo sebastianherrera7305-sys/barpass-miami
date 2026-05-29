@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>BarPass Enterprise — Authentication Gateway</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#030508;--surf:#070a12;--surf2:#0a0e1a;--border:#0f1628;--border2:#1a2040;
+  --blue:#5AA5FF;--blue2:#3d8ae0;--gold:#FFba38;--green:#00e87a;--red:#FF4466;
+  --purple:#a855f7;--cyan:#22d3ee;--text:#e8eaf0;--muted:#6b7490;--dim:#2a3050;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',system-ui,sans-serif;overflow:hidden;}
+
+/* ── GRID BACKGROUND ─────────────────────────────────────────────── */
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:48px 48px;opacity:.35;}
+.grid-bg::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,#5AA5FF08 0%,transparent 70%),
+             radial-gradient(ellipse 60% 40% at 80% 100%,#a855f708 0%,transparent 60%);}
+
+/* ── SCREENS ─────────────────────────────────────────────────────── */
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:24px;overflow-y:auto;}
+.screen.active{display:flex;}
+
+/* ── PROGRESS BAR ────────────────────────────────────────────────── */
+#progress-wrap{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:none;align-items:center;gap:12px;background:linear-gradient(var(--bg),transparent);}
+#progress-wrap.vis{display:flex;}
+.prog-steps{display:flex;gap:6px;align-items:center;flex:1;}
+.prog-step{height:2px;border-radius:2px;background:var(--border2);flex:1;transition:background .4s;}
+.prog-step.done{background:var(--blue);}
+.prog-step.active{background:linear-gradient(90deg,var(--blue),var(--purple));animation:shimmer 1.8s linear infinite;background-size:200% 100%;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.prog-label{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.08em;min-width:60px;text-align:right;}
+
+/* ── BACK BTN ────────────────────────────────────────────────────── */
+#back-btn{position:fixed;top:14px;left:20px;z-index:101;display:none;align-items:center;gap:6px;
+  background:transparent;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 8px;border-radius:6px;
+  font-family:inherit;letter-spacing:.06em;transition:color .18s;}
+#back-btn.vis{display:flex;}
+#back-btn:hover{color:var(--text);}
+#back-btn svg{width:14px;height:14px;}
+
+/* ── GATEWAY SCREEN ──────────────────────────────────────────────── */
+#s-gateway{background:radial-gradient(ellipse 100% 80% at 50% -10%,#5AA5FF0d 0%,transparent 60%);}
+.gw-logo{display:flex;align-items:center;gap:14px;margin-bottom:48px;}
+.gw-logo-mark{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#5AA5FF,#a855f7);
+  display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;
+  box-shadow:0 0 40px #5AA5FF30,0 0 80px #5AA5FF18;letter-spacing:-1px;color:#fff;}
+.gw-logo-text{display:flex;flex-direction:column;}
+.gw-logo-name{font-size:22px;font-weight:700;letter-spacing:-.5px;}
+.gw-logo-sub{font-size:10px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:1px;}
+.gw-tagline{font-size:38px;font-weight:700;letter-spacing:-.8px;text-align:center;line-height:1.15;max-width:540px;margin-bottom:16px;}
+.gw-tagline span{background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.gw-sub{font-size:14px;color:var(--muted);text-align:center;max-width:360px;line-height:1.6;margin-bottom:48px;}
+.gw-enter-btn{position:relative;padding:16px 48px;border-radius:12px;border:none;cursor:pointer;font-size:15px;font-weight:600;letter-spacing:.04em;
+  background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-family:inherit;
+  box-shadow:0 0 40px #5AA5FF40,0 8px 32px #5AA5FF20;transition:all .2s;overflow:hidden;}
+.gw-enter-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#ffffff18,transparent);opacity:0;transition:opacity .2s;}
+.gw-enter-btn:hover{transform:translateY(-2px);box-shadow:0 0 60px #5AA5FF50,0 12px 40px #5AA5FF30;}
+.gw-enter-btn:hover::before{opacity:1;}
+.gw-enter-btn:active{transform:translateY(0);}
+.gw-badges{display:flex;gap:10px;margin-top:32px;flex-wrap:wrap;justify-content:center;}
+.gw-badge{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.gw-badge span{width:6px;height:6px;border-radius:50%;background:var(--green);}
+
+/* ── AUTH SELECT ─────────────────────────────────────────────────── */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;overflow:hidden;}
+.card-head{padding:24px 28px 20px;border-bottom:1px solid var(--border);}
+.card-title{font-size:17px;font-weight:700;letter-spacing:-.2px;margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--muted);}
+.card-body{padding:20px 24px 24px;}
+
+.auth-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.auth-method{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 8px 12px;
+  border-radius:10px;border:1px solid var(--border);background:var(--surf2);cursor:pointer;
+  transition:all .18s;text-align:center;}
+.auth-method:hover{border-color:var(--blue);background:#5AA5FF0a;transform:translateY(-1px);}
+.auth-method:active{transform:scale(.97);}
+.auth-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:2px;}
+.auth-label{font-size:9.5px;font-weight:600;letter-spacing:.04em;color:var(--text);}
+.auth-desc{font-size:8.5px;color:var(--muted);line-height:1.3;}
+
+/* ── FORM ELEMENTS ───────────────────────────────────────────────── */
+.form-group{margin-bottom:16px;}
+.form-label{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px;display:block;}
+.form-input{width:100%;background:var(--surf2);border:1.5px solid var(--border2);border-radius:9px;
+  padding:12px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .18s;}
+.form-input:focus{border-color:var(--blue);}
+.form-input::placeholder{color:var(--dim);}
+.form-input.mono{font-family:'JetBrains Mono','Fira Code',monospace;letter-spacing:.1em;}
+
+.btn-primary{width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:600;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-family:inherit;
+  transition:all .18s;letter-spacing:.03em;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px #5AA5FF30;}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-secondary{width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--border2);cursor:pointer;
+  font-size:13px;font-weight:500;background:transparent;color:var(--muted);font-family:inherit;transition:all .18s;margin-top:8px;}
+.btn-secondary:hover{border-color:var(--blue);color:var(--text);}
+
+/* ── MFA SCREEN ──────────────────────────────────────────────────── */
+.otp-wrap{display:flex;gap:10px;justify-content:center;margin:24px 0;}
+.otp-input{width:48px;height:60px;border-radius:10px;border:1.5px solid var(--border2);background:var(--surf2);
+  color:var(--text);font-size:24px;font-weight:700;text-align:center;font-family:'JetBrains Mono',monospace;
+  outline:none;transition:border-color .18s;}
+.otp-input:focus{border-color:var(--blue);}
+.otp-input.filled{border-color:var(--blue);background:#5AA5FF08;}
+.mfa-timer{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;}
+.timer-ring{width:36px;height:36px;}
+.timer-track{fill:none;stroke:var(--border2);stroke-width:3;}
+.timer-prog{fill:none;stroke:var(--blue);stroke-width:3;stroke-linecap:round;
+  transform-origin:center;transform:rotate(-90deg);transition:stroke-dashoffset .9s linear;stroke-dasharray:88;stroke-dashoffset:0;}
+.timer-num{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+/* ── IDENTITY / FACE SCAN ────────────────────────────────────────── */
+.face-scan-wrap{width:200px;height:200px;position:relative;margin:0 auto 28px;}
+.face-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--blue);opacity:.4;animation:pulsering 2s ease infinite;}
+.face-ring:nth-child(2){animation-delay:.5s;inset:8px;}
+.face-ring:nth-child(3){animation-delay:1s;inset:16px;border-color:var(--purple);}
+@keyframes pulsering{0%,100%{opacity:.2;transform:scale(1);}50%{opacity:.6;transform:scale(1.02);}}
+.face-frame{position:absolute;inset:24px;border-radius:50%;background:var(--surf2);
+  border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:64px;
+  overflow:hidden;}
+.face-scan-line{position:absolute;left:24px;right:24px;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);
+  border-radius:2px;animation:faceScan 2.5s ease infinite;box-shadow:0 0 12px var(--blue);}
+@keyframes faceScan{0%{top:24px;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:calc(100% - 24px);opacity:0}}
+.face-dots{position:absolute;inset:24px;border-radius:50%;}
+.face-dot{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--blue);animation:dotBlink 1.2s ease infinite;}
+.face-dot:nth-child(1){top:20%;left:28%;}
+.face-dot:nth-child(2){top:20%;right:28%;}
+.face-dot:nth-child(3){top:50%;left:15%;animation-delay:.3s;}
+.face-dot:nth-child(4){top:50%;right:15%;animation-delay:.3s;}
+.face-dot:nth-child(5){bottom:25%;left:35%;animation-delay:.6s;}
+.face-dot:nth-child(6){bottom:25%;right:35%;animation-delay:.6s;}
+@keyframes dotBlink{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+.scan-status{font-size:12px;color:var(--blue);text-align:center;letter-spacing:.12em;text-transform:uppercase;}
+.scan-progress-bar{width:100%;height:3px;background:var(--border);border-radius:3px;margin:12px 0 8px;overflow:hidden;}
+.scan-progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:3px;
+  width:0%;transition:width .4s;}
+
+/* ── WORKFORCE ───────────────────────────────────────────────────── */
+.wf-result{background:var(--surf2);border:1px solid var(--border2);border-radius:10px;padding:16px;
+  display:none;margin-top:16px;animation:slideIn .3s ease;}
+.wf-result.vis{display:block;}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.wf-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);}
+.wf-row:last-child{border-bottom:none;}
+.wf-key{font-size:11px;color:var(--muted);letter-spacing:.04em;}
+.wf-val{font-size:12px;font-weight:600;color:var(--text);}
+.wf-badge{display:inline-flex;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.06em;}
+.wf-badge.active{background:#00e87a14;color:var(--green);border:1px solid #00e87a30;}
+.loading-dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--blue);
+  margin:0 2px;animation:bounce .8s ease infinite;}
+.loading-dots span:nth-child(2){animation-delay:.15s;}
+.loading-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
+/* ── ROLE SELECT ─────────────────────────────────────────────────── */
+.role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px;}
+.role-card{border:1.5px solid var(--border2);border-radius:12px;padding:20px 14px;cursor:pointer;
+  transition:all .2s;background:var(--surf2);position:relative;overflow:hidden;text-align:center;}
+.role-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.role-card.tier-1::before{background:var(--blue);}
+.role-card.tier-2::before{background:var(--gold);}
+.role-card.tier-3::before{background:linear-gradient(90deg,var(--gold),var(--purple));}
+.role-card:hover{transform:translateY(-2px);}
+.role-card.sel.tier-1{border-color:var(--blue);background:#5AA5FF0a;box-shadow:0 0 24px #5AA5FF18;}
+.role-card.sel.tier-2{border-color:var(--gold);background:#FFba380a;box-shadow:0 0 24px #FFba3818;}
+.role-card.sel.tier-3{border-color:var(--purple);background:#a855f70a;box-shadow:0 0 24px #a855f718;}
+.role-icon{font-size:28px;margin-bottom:10px;}
+.role-name{font-size:13px;font-weight:700;margin-bottom:4px;}
+.role-tier{font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+.role-card.tier-1 .role-tier{color:var(--blue);}
+.role-card.tier-2 .role-tier{color:var(--gold);}
+.role-card.tier-3 .role-tier{color:var(--purple);}
+.role-perms{font-size:9px;color:var(--muted);}
+.role-check{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;
+  background:var(--blue);display:none;align-items:center;justify-content:center;font-size:10px;}
+.role-card.sel .role-check{display:flex;}
+
+/* ── DEPT / VENUE ────────────────────────────────────────────────── */
+.select-field{width:100%;background:var(--surf2);border:1.5px solid var(--border2);border-radius:9px;
+  padding:12px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;
+  transition:border-color .18s;appearance:none;cursor:pointer;}
+.select-field:focus{border-color:var(--blue);}
+.select-wrap{position:relative;}
+.select-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  color:var(--muted);pointer-events:none;font-size:12px;}
+.venue-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.venue-pill{padding:5px 12px;border-radius:20px;border:1px solid var(--border2);font-size:11px;
+  cursor:pointer;color:var(--muted);transition:all .18s;background:var(--surf2);}
+.venue-pill:hover{border-color:var(--blue);color:var(--text);}
+.venue-pill.sel{border-color:var(--blue);background:#5AA5FF12;color:var(--blue);}
+
+/* ── PERMISSION ORCHESTRATION ────────────────────────────────────── */
+.perm-matrix{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:20px 0;}
+.perm-node{border-radius:8px;padding:8px 6px;border:1px solid var(--border);background:var(--surf2);
+  text-align:center;font-size:9px;color:var(--muted);transition:all .4s;cursor:default;}
+.perm-node.granted{border-color:var(--green);background:#00e87a0a;color:var(--green);
+  box-shadow:0 0 10px #00e87a18;}
+.perm-node.partial{border-color:var(--gold);background:#FFba380a;color:var(--gold);}
+.perm-node.denied{border-color:var(--red);background:#FF44660a;color:var(--red);}
+.perm-icon{font-size:14px;margin-bottom:4px;display:block;}
+.perm-name{font-size:8px;font-weight:600;letter-spacing:.04em;display:block;}
+.perm-status-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--surf2);border-radius:8px;border:1px solid var(--border);}
+.perm-count{font-size:22px;font-weight:700;color:var(--green);}
+.perm-count-label{font-size:11px;color:var(--muted);}
+.perm-log{max-height:80px;overflow-y:auto;background:var(--bg);border-radius:6px;
+  padding:8px 10px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted);margin-top:10px;}
+.perm-log-entry{padding:2px 0;border-bottom:1px solid var(--border);}
+.perm-log-entry.ok{color:var(--green);}
+.perm-log-entry.info{color:var(--blue);}
+
+/* ── DEVICE REG ──────────────────────────────────────────────────── */
+.device-info{background:var(--surf2);border:1px solid var(--border2);border-radius:12px;padding:20px;margin-bottom:16px;}
+.device-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.device-row:last-child{border-bottom:none;}
+.device-key{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.device-val{font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--text);}
+.trust-gauge{text-align:center;margin-bottom:24px;}
+.trust-arc{width:140px;height:80px;margin:0 auto 10px;}
+.trust-score-num{font-size:36px;font-weight:800;letter-spacing:-1px;}
+.trust-score-label{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;}
+
+/* ── COMPLETE SCREEN ─────────────────────────────────────────────── */
+#s-complete{background:radial-gradient(ellipse 80% 60% at 50% 50%,#00e87a08,transparent 70%);}
+.complete-icon{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--green),#00c458);
+  display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 24px;
+  animation:successPop .5s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 50px #00e87a30;}
+@keyframes successPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.complete-role-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:20px;
+  border:1px solid var(--border2);font-size:12px;font-weight:600;margin:12px auto;
+  letter-spacing:.04em;}
+.complete-actions{display:flex;gap:10px;margin-top:28px;width:100%;max-width:400px;}
+.complete-actions .btn-primary{flex:1;}
+
+/* ── DASHBOARDS ──────────────────────────────────────────────────── */
+.dash-wrap{width:100%;max-width:900px;height:100vh;overflow-y:auto;padding:0 0 40px;}
+.dash-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;
+  border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.dash-logo{display:flex;align-items:center;gap:10px;}
+.dash-logo-mark{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--purple));
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;}
+.dash-logo-name{font-size:14px;font-weight:700;}
+.dash-user{display:flex;align-items:center;gap:10px;}
+.dash-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;}
+.dash-user-info{display:flex;flex-direction:column;}
+.dash-user-name{font-size:12px;font-weight:600;}
+.dash-user-role{font-size:10px;color:var(--muted);}
+.dash-role-chip{padding:3px 10px;border-radius:12px;font-size:9px;font-weight:700;letter-spacing:.08em;}
+.chip-runner{background:#5AA5FF14;color:var(--blue);border:1px solid #5AA5FF30;}
+.chip-manager{background:#FFba3814;color:var(--gold);border:1px solid #FFba3830;}
+.chip-exec{background:#a855f714;color:var(--purple);border:1px solid #a855f730;}
+.chip-admin{background:#00e87a14;color:var(--green);border:1px solid #00e87a30;}
+
+.dash-body{padding:20px 24px;}
+.dash-section-title{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:12px;margin-top:24px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.kpi-card{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.kpi-val{font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
+.kpi-label{font-size:10px;color:var(--muted);letter-spacing:.04em;}
+.kpi-trend{font-size:10px;margin-top:6px;}
+.kpi-trend.up{color:var(--green);}
+.kpi-trend.down{color:var(--red);}
+.kpi-trend.flat{color:var(--muted);}
+
+.task-table{background:var(--surf);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.task-table-head{display:grid;grid-template-columns:80px 1fr 120px 90px 90px;gap:0;
+  padding:10px 16px;border-bottom:1px solid var(--border);font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.task-table-row{display:grid;grid-template-columns:80px 1fr 120px 90px 90px;gap:0;
+  padding:11px 16px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;}
+.task-table-row:last-child{border-bottom:none;}
+.task-table-row:hover{background:var(--surf2);}
+.task-state{display:inline-flex;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.06em;}
+.state-created{background:#5AA5FF14;color:var(--blue);}
+.state-assigned{background:#FFba3814;color:var(--gold);}
+.state-transit{background:#a855f714;color:var(--purple);}
+.state-done{background:#00e87a14;color:var(--green);}
+
+.map-preview{background:var(--surf);border:1px solid var(--border);border-radius:12px;
+  height:180px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.map-grid{position:absolute;inset:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:30px 30px;opacity:.3;}
+.map-node{position:absolute;width:10px;height:10px;border-radius:50%;cursor:pointer;}
+.map-node.hub{background:var(--blue);box-shadow:0 0 12px var(--blue);}
+.map-node.bar{background:var(--gold);box-shadow:0 0 8px var(--gold);}
+.map-runner-dot{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 10px var(--green);animation:runnerPulse 1.5s ease infinite;}
+@keyframes runnerPulse{0%,100%{box-shadow:0 0 5px var(--green)}50%{box-shadow:0 0 16px var(--green)}}
+
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.stat-card{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.stat-icon{font-size:20px;margin-bottom:8px;}
+.stat-val{font-size:22px;font-weight:700;margin-bottom:2px;}
+.stat-label{font-size:10px;color:var(--muted);}
+.stat-bar-wrap{height:4px;background:var(--border);border-radius:4px;margin-top:10px;overflow:hidden;}
+.stat-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--purple));}
+
+.runner-task-card{background:var(--surf);border:1px solid var(--border);border-radius:12px;
+  padding:18px;margin-bottom:12px;position:relative;overflow:hidden;}
+.runner-task-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);}
+.rtc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.rtc-id{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+.rtc-prio{padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700;}
+.prio-high{background:#FF446614;color:var(--red);border:1px solid #FF446630;}
+.prio-med{background:#FFba3814;color:var(--gold);border:1px solid #FFba3830;}
+.rtc-route{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:10px;}
+.rtc-arrow{color:var(--muted);font-size:10px;}
+.rtc-actions{display:flex;gap:8px;}
+.rtc-btn{flex:1;padding:9px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:all .15s;}
+.rtc-btn.accept{background:var(--green);color:#000;}
+.rtc-btn.start{background:var(--blue);color:#fff;}
+.rtc-btn.done{background:var(--surf2);border:1px solid var(--border2);color:var(--muted);}
+
+.alert-list{background:var(--surf);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.alert-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.alert-item:last-child{border-bottom:none;}
+.alert-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.alert-dot.crit{background:var(--red);box-shadow:0 0 8px var(--red);}
+.alert-dot.warn{background:var(--gold);}
+.alert-dot.info{background:var(--blue);}
+.alert-msg{font-size:12px;line-height:1.4;}
+.alert-ts{font-size:10px;color:var(--muted);margin-top:2px;}
+
+.user-mgmt-table{background:var(--surf);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.um-row{display:grid;grid-template-columns:1fr 100px 120px 80px 100px;gap:0;
+  padding:11px 16px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;}
+.um-row.head{font-size:10px;color:var(--muted);letter-spacing:.06em;background:var(--surf2);}
+.um-row:last-child{border-bottom:none;}
+.um-name{font-weight:600;}
+.um-email{font-size:10px;color:var(--muted);}
+.action-btn{padding:4px 10px;border-radius:5px;border:1px solid var(--border2);font-size:10px;
+  cursor:pointer;background:transparent;color:var(--muted);font-family:inherit;transition:all .15s;}
+.action-btn:hover{border-color:var(--blue);color:var(--blue);}
+
+/* ── TOASTS ──────────────────────────────────────────────────────── */
+#toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.toast{padding:10px 20px;border-radius:10px;font-size:12px;font-weight:600;letter-spacing:.04em;
+  animation:toastIn .3s ease;white-space:nowrap;border:1px solid;}
+.toast.info{background:#5AA5FF12;border-color:#5AA5FF40;color:var(--blue);}
+.toast.success{background:#00e87a12;border-color:#00e87a40;color:var(--green);}
+.toast.warn{background:#FFba3812;border-color:#FFba3840;color:var(--gold);}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── ANIMATIONS ──────────────────────────────────────────────────── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .35s ease;}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- PROGRESS -->
+<div id="progress-wrap">
+  <button id="back-btn" onclick="goBack()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>
+    Back
+  </button>
+  <div class="prog-steps" id="prog-steps"></div>
+  <div class="prog-label" id="prog-label"></div>
+</div>
+
+<div id="toast-wrap"></div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: GATEWAY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen active" id="s-gateway">
+  <div class="gw-logo fade-in">
+    <div class="gw-logo-mark">BP</div>
+    <div class="gw-logo-text">
+      <div class="gw-logo-name">BarPass</div>
+      <div class="gw-logo-sub">Enterprise Platform</div>
+    </div>
+  </div>
+  <div class="gw-tagline fade-in">Stadium Operations.<br><span>Secured.</span></div>
+  <div class="gw-sub fade-in">Military-grade authentication and role-based access control for enterprise stadium workforce management.</div>
+  <button class="gw-enter-btn fade-in" onclick="goScreen('s-auth-select')">Begin Authentication →</button>
+  <div class="gw-badges fade-in" style="margin-top:36px;">
+    <div class="gw-badge"><span></span>AES-256 Encrypted</div>
+    <div class="gw-badge"><span></span>Zero-Trust Architecture</div>
+    <div class="gw-badge"><span></span>SOC 2 Compliant</div>
+    <div class="gw-badge"><span></span>Multi-Tenant Ready</div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: AUTH SELECT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-auth-select">
+  <div class="card fade-in" style="max-width:640px;">
+    <div class="card-head">
+      <div class="card-title">Select Authentication Method</div>
+      <div class="card-sub">14 enterprise identity providers available · Choose your access pathway</div>
+    </div>
+    <div class="card-body">
+      <div class="auth-grid" id="auth-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: EMAIL AUTH ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-auth-email">
+  <div class="card fade-in">
+    <div class="card-head">
+      <div class="card-title">✉ Email Authentication</div>
+      <div class="card-sub">Enterprise credentials · Encrypted transport · Session-bound token</div>
+    </div>
+    <div class="card-body">
+      <div class="form-group">
+        <label class="form-label">Enterprise Email</label>
+        <input type="email" class="form-input" id="email-input" placeholder="name@barpass.io" oninput="validateEmail()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="pass-input" placeholder="••••••••••••" oninput="validateEmail()">
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);cursor:pointer;">
+          <input type="checkbox" id="remember-me" style="accent-color:var(--blue)"> Remember this device
+        </label>
+        <span style="font-size:12px;color:var(--blue);cursor:pointer;" onclick="showToast('Password reset link sent','info')">Forgot password?</span>
+      </div>
+      <button class="btn-primary" id="email-submit-btn" disabled onclick="submitEmail()">Continue to MFA →</button>
+      <button class="btn-secondary" onclick="goScreen('s-auth-select')">← Try another method</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: MFA ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-mfa">
+  <div class="card fade-in">
+    <div class="card-head">
+      <div class="card-title">🔐 Multi-Factor Verification</div>
+      <div class="card-sub" id="mfa-sub">6-digit code sent to your device</div>
+    </div>
+    <div class="card-body" style="text-align:center;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">Enter the verification code</div>
+      <div class="otp-wrap" id="otp-wrap"></div>
+      <div class="mfa-timer">
+        <svg class="timer-ring" viewBox="0 0 30 30">
+          <circle class="timer-track" cx="15" cy="15" r="12"/>
+          <circle class="timer-prog" id="timer-prog" cx="15" cy="15" r="12" stroke-dasharray="75.4" stroke-dashoffset="0"/>
+        </svg>
+        <span class="timer-num" id="timer-num">30s</span>
+        <span style="font-size:11px;color:var(--muted);">— <span style="color:var(--blue);cursor:pointer;" onclick="resendOtp()">Resend code</span></span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:16px;">Demo: enter any 6 digits</div>
+      <button class="btn-primary" id="mfa-btn" style="margin-top:20px;" disabled onclick="submitMfa()">Verify Identity →</button>
+      <button class="btn-secondary" onclick="goScreen('s-auth-email')">← Back to login</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: IDENTITY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-identity">
+  <div class="card fade-in">
+    <div class="card-head">
+      <div class="card-title">⬡ Identity Verification</div>
+      <div class="card-sub">AI-powered liveness detection · Biometric cross-reference · Anti-spoofing active</div>
+    </div>
+    <div class="card-body" style="text-align:center;">
+      <div class="face-scan-wrap">
+        <div class="face-ring"></div>
+        <div class="face-ring"></div>
+        <div class="face-ring"></div>
+        <div class="face-frame">🧑</div>
+        <div class="face-scan-line"></div>
+        <div class="face-dots">
+          <div class="face-dot"></div><div class="face-dot"></div>
+          <div class="face-dot"></div><div class="face-dot"></div>
+          <div class="face-dot"></div><div class="face-dot"></div>
+        </div>
+      </div>
+      <div class="scan-status" id="scan-status">INITIALIZING SCAN</div>
+      <div class="scan-progress-bar"><div class="scan-progress-fill" id="scan-fill"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:24px;" id="scan-step-label">Calibrating sensors…</div>
+      <button class="btn-primary" id="identity-btn" disabled onclick="nextAfterIdentity()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: WORKFORCE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-workforce">
+  <div class="card fade-in">
+    <div class="card-head">
+      <div class="card-title">🪪 Workforce Verification</div>
+      <div class="card-sub">Employee registry cross-check · HR system sync · Real-time status validation</div>
+    </div>
+    <div class="card-body">
+      <div class="form-group">
+        <label class="form-label">Employee ID</label>
+        <input type="text" class="form-input mono" id="emp-id-input" placeholder="BP-XXXX-XXXX" oninput="triggerWfLookup(this.value)" maxlength="13">
+      </div>
+      <div id="wf-loading" style="display:none;text-align:center;padding:16px;">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;">Querying HR registry…</div>
+      </div>
+      <div class="wf-result" id="wf-result">
+        <div class="wf-row"><span class="wf-key">Full Name</span><span class="wf-val" id="wf-name">—</span></div>
+        <div class="wf-row"><span class="wf-key">Department</span><span class="wf-val" id="wf-dept">—</span></div>
+        <div class="wf-row"><span class="wf-key">Hire Date</span><span class="wf-val" id="wf-hire">—</span></div>
+        <div class="wf-row"><span class="wf-key">Status</span><span class="wf-val"><span class="wf-badge active" id="wf-status">ACTIVE</span></span></div>
+        <div class="wf-row"><span class="wf-key">Clearance Level</span><span class="wf-val" id="wf-clearance">—</span></div>
+      </div>
+      <button class="btn-primary" id="wf-btn" style="margin-top:16px;" disabled onclick="goScreen('s-role')">Confirm Identity →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: ROLE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-role">
+  <div class="card fade-in" style="max-width:600px;">
+    <div class="card-head">
+      <div class="card-title">⬡ Role Assignment</div>
+      <div class="card-sub">Select your operational tier · Permissions scoped by role · Audit-logged</div>
+    </div>
+    <div class="card-body">
+      <div class="role-grid" id="role-grid"></div>
+      <button class="btn-primary" id="role-btn" style="margin-top:20px;" disabled onclick="goScreen('s-dept')">Confirm Role →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: DEPT/VENUE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-dept">
+  <div class="card fade-in">
+    <div class="card-head">
+      <div class="card-title">🏟 Department &amp; Venue Assignment</div>
+      <div class="card-sub">Scope your operational context · Multi-venue support enabled</div>
+    </div>
+    <div class="card-body">
+      <div class="form-group">
+        <label class="form-label">Department</label>
+        <div class="select-wrap">
+          <select class="select-field" id="dept-select" onchange="AUTH.dept=this.value;checkDept()">
+            <option value="">Select department…</option>
+            <option value="Operations">Operations</option>
+            <option value="Food & Beverage">Food &amp; Beverage</option>
+            <option value="Security">Security</option>
+            <option value="Guest Services">Guest Services</option>
+            <option value="Facilities">Facilities</option>
+            <option value="Executive">Executive</option>
+            <option value="Technology">Technology</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Venue Assignment</label>
+        <div class="venue-pills" id="venue-pills">
+          <div class="venue-pill" onclick="selectVenue(this,'Hard Rock Stadium')">Hard Rock Stadium</div>
+          <div class="venue-pill" onclick="selectVenue(this,'Kaseya Center')">Kaseya Center</div>
+          <div class="venue-pill" onclick="selectVenue(this,'LoanDepot Park')">LoanDepot Park</div>
+          <div class="venue-pill" onclick="selectVenue(this,'FLA Live Arena')">FLA Live Arena</div>
+          <div class="venue-pill" onclick="selectVenue(this,'All Venues')">All Venues ★</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Shift Pattern</label>
+        <div class="select-wrap">
+          <select class="select-field" id="shift-select" onchange="AUTH.shift=this.value;checkDept()">
+            <option value="">Select shift…</option>
+            <option value="Event Day">Event Day</option>
+            <option value="Morning">Morning (6AM–2PM)</option>
+            <option value="Afternoon">Afternoon (2PM–10PM)</option>
+            <option value="Night">Night (10PM–6AM)</option>
+            <option value="On-Call">On-Call</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" id="dept-btn" disabled onclick="goScreen('s-permissions')">Finalize Assignment →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: PERMISSIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-permissions">
+  <div class="card fade-in" style="max-width:640px;">
+    <div class="card-head">
+      <div class="card-title">⚡ Permission Orchestration</div>
+      <div class="card-sub">Building your access matrix · AI policy engine · Zero-trust validation</div>
+    </div>
+    <div class="card-body">
+      <div class="perm-status-bar" id="perm-status-bar">
+        <div>
+          <div class="perm-count" id="perm-count">0</div>
+          <div class="perm-count-label">Permissions Granted</div>
+        </div>
+        <div style="flex:1;margin:0 16px;">
+          <div class="scan-progress-bar"><div class="scan-progress-fill" id="perm-fill"></div></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;" id="perm-phase">Initializing policy engine…</div>
+        </div>
+        <div style="font-size:20px;" id="perm-icon">⚙️</div>
+      </div>
+      <div class="perm-matrix" id="perm-matrix"></div>
+      <div class="perm-log" id="perm-log"></div>
+      <button class="btn-primary" id="perm-btn" style="margin-top:16px;" disabled onclick="goScreen('s-device')">Register Device →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: DEVICE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-device">
+  <div class="card fade-in">
+    <div class="card-head">
+      <div class="card-title">💻 Device Registration</div>
+      <div class="card-sub">Hardware fingerprint · Endpoint trust scoring · MDM enrollment check</div>
+    </div>
+    <div class="card-body">
+      <div class="trust-gauge">
+        <svg class="trust-arc" viewBox="0 0 140 80">
+          <path d="M 14 70 A 56 56 0 0 1 126 70" fill="none" stroke="#0f1628" stroke-width="10" stroke-linecap="round"/>
+          <path d="M 14 70 A 56 56 0 0 1 126 70" fill="none" stroke="url(#tg)" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="176" stroke-dashoffset="44" id="trust-arc-path"/>
+          <defs><linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00e87a"/><stop offset="100%" stop-color="#5AA5FF"/>
+          </linearGradient></defs>
+        </svg>
+        <div class="trust-score-num" id="trust-num">—</div>
+        <div class="trust-score-label">Trust Score</div>
+      </div>
+      <div class="device-info" id="device-info">
+        <div class="device-row">
+          <span class="device-key">🖥 Device Type</span>
+          <span class="device-val" id="dv-type">—</span>
+        </div>
+        <div class="device-row">
+          <span class="device-key">🌐 Browser</span>
+          <span class="device-val" id="dv-browser">—</span>
+        </div>
+        <div class="device-row">
+          <span class="device-key">📍 Platform</span>
+          <span class="device-val" id="dv-platform">—</span>
+        </div>
+        <div class="device-row">
+          <span class="device-key">🔑 Device ID</span>
+          <span class="device-val" id="dv-id">—</span>
+        </div>
+        <div class="device-row">
+          <span class="device-key">🛡 MDM Status</span>
+          <span class="device-val"><span class="wf-badge active">ENROLLED</span></span>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="registerDevice()">Register &amp; Authorize →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SCREEN: COMPLETE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-complete">
+  <div style="text-align:center;max-width:420px;" class="fade-in">
+    <div class="complete-icon">✓</div>
+    <div style="font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px;">Access Granted</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">Authentication complete · Session established · All systems authorized</div>
+    <div class="complete-role-badge" id="complete-badge"></div>
+    <div style="display:flex;gap:16px;justify-content:center;margin:20px 0;flex-wrap:wrap;" id="complete-meta"></div>
+    <div class="complete-actions">
+      <button class="btn-primary" onclick="launchDashboard()">Enter Dashboard →</button>
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:16px;font-family:'JetBrains Mono',monospace;" id="complete-session"></div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DASHBOARD: RUNNER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-dash-runner">
+  <div class="dash-wrap">
+    <div class="dash-header">
+      <div class="dash-logo">
+        <div class="dash-logo-mark">BP</div>
+        <div class="dash-logo-name">BarPass <span style="color:var(--muted);font-weight:400;">Operations</span></div>
+      </div>
+      <div class="dash-user">
+        <div>
+          <div class="dash-user-name" id="runner-name">Runner</div>
+          <div class="dash-user-role" id="runner-venue">Hard Rock Stadium</div>
+        </div>
+        <span class="dash-role-chip chip-runner">RUNNER</span>
+        <div class="dash-avatar" id="runner-avatar">R</div>
+      </div>
+    </div>
+    <div class="dash-body">
+      <div class="dash-section-title">Active Assignment</div>
+      <div class="runner-task-card">
+        <div class="rtc-head">
+          <span class="rtc-id">TK-1042</span>
+          <span class="rtc-prio prio-high">HIGH</span>
+        </div>
+        <div class="rtc-route">
+          <span>🔷 Hub West</span>
+          <span class="rtc-arrow">→→→</span>
+          <span>🍺 Bar C2</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">48 units · Corona, Miller Lite · ETA 9 min · Inv 23%</div>
+        <div class="rtc-actions">
+          <button class="rtc-btn start">▶ En Route</button>
+          <button class="rtc-btn done" onclick="showToast('Task marked complete','success')">✓ Complete</button>
+        </div>
+      </div>
+
+      <div class="dash-section-title">Task Queue</div>
+      <div id="runner-queue"></div>
+
+      <div class="dash-section-title">Today's Stats</div>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-val" style="color:var(--blue);">12</div>
+          <div class="stat-label">Deliveries</div>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill" style="width:75%"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-val" style="color:var(--green);">94%</div>
+          <div class="stat-label">On-Time Rate</div>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill" style="width:94%;background:linear-gradient(90deg,var(--green),var(--blue))"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🕐</div>
+          <div class="stat-val" style="color:var(--gold);">8.2m</div>
+          <div class="stat-label">Avg Delivery</div>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill" style="width:60%;background:linear-gradient(90deg,var(--gold),var(--blue))"></div></div>
+        </div>
+      </div>
+
+      <div class="dash-section-title">Route Map</div>
+      <div class="map-preview">
+        <div class="map-grid"></div>
+        <div class="map-node hub" style="left:25%;top:40%;" title="Hub West"></div>
+        <div class="map-node hub" style="left:65%;top:20%;" title="Hub East"></div>
+        <div class="map-node bar" style="left:40%;top:60%;" title="Bar C2"></div>
+        <div class="map-node bar" style="left:55%;top:65%;" title="Bar D1"></div>
+        <div class="map-node bar" style="left:72%;top:50%;" title="Bar E3"></div>
+        <div class="map-runner-dot" style="left:32%;top:48%;"></div>
+        <div style="position:absolute;bottom:10px;left:14px;font-size:10px;color:var(--muted);">
+          🔷 Hubs &nbsp; 🟡 Bars &nbsp; 🟢 You
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DASHBOARD: MANAGER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-dash-manager">
+  <div class="dash-wrap">
+    <div class="dash-header">
+      <div class="dash-logo">
+        <div class="dash-logo-mark">BP</div>
+        <div class="dash-logo-name">BarPass <span style="color:var(--muted);font-weight:400;">Command</span></div>
+      </div>
+      <div class="dash-user">
+        <div>
+          <div class="dash-user-name" id="mgr-name">Manager</div>
+          <div class="dash-user-role" id="mgr-venue">Stadium Ops</div>
+        </div>
+        <span class="dash-role-chip chip-manager">MANAGER</span>
+        <div class="dash-avatar" style="background:linear-gradient(135deg,var(--gold),var(--blue));" id="mgr-avatar">M</div>
+      </div>
+    </div>
+    <div class="dash-body">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--blue);">23</div>
+          <div class="kpi-label">Active Tasks</div>
+          <div class="kpi-trend up">↑ 3 from last hour</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--green);">8</div>
+          <div class="kpi-label">Runners Online</div>
+          <div class="kpi-trend flat">→ Fully staffed</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--gold);">3</div>
+          <div class="kpi-label">Low Inventory</div>
+          <div class="kpi-trend down">↓ Needs restock</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--purple);">91%</div>
+          <div class="kpi-label">SLA Compliance</div>
+          <div class="kpi-trend up">↑ +4% vs yesterday</div>
+        </div>
+      </div>
+
+      <div class="dash-section-title">Live Alerts</div>
+      <div class="alert-list">
+        <div class="alert-item">
+          <div class="alert-dot crit"></div>
+          <div>
+            <div class="alert-msg">Bar C2 inventory critical — 18% remaining · Dispatch required</div>
+            <div class="alert-ts">2 min ago · Auto-assigned to Diego L.</div>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-dot warn"></div>
+          <div>
+            <div class="alert-msg">Runner Elena R. approaching 6hr shift limit — overtime alert</div>
+            <div class="alert-ts">11 min ago · HR policy triggered</div>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-dot info"></div>
+          <div>
+            <div class="alert-msg">Hub East restock completed · 240 units logged · QR verified</div>
+            <div class="alert-ts">34 min ago · Chain of custody confirmed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-section-title">Task Overview</div>
+      <div class="task-table">
+        <div class="task-table-head">
+          <span>ID</span><span>Route</span><span>Runner</span><span>Status</span><span>ETA</span>
+        </div>
+        <div class="task-table-row">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">TK-1042</span>
+          <span>Hub W → Bar C2</span><span>Diego L.</span>
+          <span><span class="task-state state-transit">TRANSIT</span></span>
+          <span style="color:var(--gold);">9 min</span>
+        </div>
+        <div class="task-table-row">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">TK-1041</span>
+          <span>Hub E → Bar A4</span><span>Elena R.</span>
+          <span><span class="task-state state-assigned">ASSIGNED</span></span>
+          <span>12 min</span>
+        </div>
+        <div class="task-table-row">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">TK-1040</span>
+          <span>Hub W → Bar D1</span><span>Marco S.</span>
+          <span><span class="task-state state-done">DONE</span></span>
+          <span style="color:var(--green);">✓ On-time</span>
+        </div>
+        <div class="task-table-row">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">TK-1039</span>
+          <span>Hub N → Bar B3</span><span>—</span>
+          <span><span class="task-state state-created">PENDING</span></span>
+          <span style="color:var(--muted);">Unassigned</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DASHBOARD: EXECUTIVE ━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-dash-exec">
+  <div class="dash-wrap">
+    <div class="dash-header">
+      <div class="dash-logo">
+        <div class="dash-logo-mark" style="background:linear-gradient(135deg,var(--gold),var(--purple));">BP</div>
+        <div class="dash-logo-name">BarPass <span style="color:var(--muted);font-weight:400;">Executive</span></div>
+      </div>
+      <div class="dash-user">
+        <div>
+          <div class="dash-user-name" id="exec-name">Executive</div>
+          <div class="dash-user-role">Enterprise View · All Venues</div>
+        </div>
+        <span class="dash-role-chip chip-exec">EXECUTIVE</span>
+        <div class="dash-avatar" style="background:linear-gradient(135deg,var(--gold),var(--purple));" id="exec-avatar">E</div>
+      </div>
+    </div>
+    <div class="dash-body">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--green);">$142K</div>
+          <div class="kpi-label">Revenue Today</div>
+          <div class="kpi-trend up">↑ 18% vs last event</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--blue);">4,821</div>
+          <div class="kpi-label">Transactions</div>
+          <div class="kpi-trend up">↑ 12% YoY</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--gold);">$29.40</div>
+          <div class="kpi-label">Avg Order Value</div>
+          <div class="kpi-trend up">↑ $2.10 vs last</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--purple);">98.4%</div>
+          <div class="kpi-label">Uptime SLA</div>
+          <div class="kpi-trend flat">→ Target met</div>
+        </div>
+      </div>
+
+      <div class="dash-section-title">Venue Performance</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;">Hard Rock Stadium</div>
+            <span class="wf-badge active">LIVE</span>
+          </div>
+          <div style="font-size:24px;font-weight:800;color:var(--green);">$87K</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:10px;">68 runners · 31 bars active</div>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill" style="width:87%"></div></div>
+        </div>
+        <div class="stat-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:700;">Kaseya Center</div>
+            <span class="wf-badge active">LIVE</span>
+          </div>
+          <div style="font-size:24px;font-weight:800;color:var(--blue);">$55K</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:10px;">42 runners · 18 bars active</div>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill" style="width:55%"></div></div>
+        </div>
+      </div>
+
+      <div class="dash-section-title">Operational Health</div>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-icon">🏃</div>
+          <div class="stat-val" style="color:var(--blue);">110</div>
+          <div class="stat-label">Runners Active</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-val" style="color:var(--gold);">847</div>
+          <div class="stat-label">Deliveries Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-val" style="color:var(--red);">7</div>
+          <div class="stat-label">Critical Alerts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DASHBOARD: ADMIN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="screen" id="s-dash-admin">
+  <div class="dash-wrap">
+    <div class="dash-header">
+      <div class="dash-logo">
+        <div class="dash-logo-mark" style="background:linear-gradient(135deg,var(--green),var(--blue));">BP</div>
+        <div class="dash-logo-name">BarPass <span style="color:var(--muted);font-weight:400;">Admin</span></div>
+      </div>
+      <div class="dash-user">
+        <div>
+          <div class="dash-user-name" id="admin-name">Administrator</div>
+          <div class="dash-user-role">Full System Access · Root Permissions</div>
+        </div>
+        <span class="dash-role-chip chip-admin">ADMIN</span>
+        <div class="dash-avatar" style="background:linear-gradient(135deg,var(--green),var(--blue));" id="admin-avatar">A</div>
+      </div>
+    </div>
+    <div class="dash-body">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--green);">342</div>
+          <div class="kpi-label">Total Users</div>
+          <div class="kpi-trend up">↑ 12 new this week</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--blue);">4</div>
+          <div class="kpi-label">Active Venues</div>
+          <div class="kpi-trend flat">→ All operational</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--gold);">99.7%</div>
+          <div class="kpi-label">System Uptime</div>
+          <div class="kpi-trend up">↑ 30-day average</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val" style="color:var(--purple);">0</div>
+          <div class="kpi-label">Security Incidents</div>
+          <div class="kpi-trend flat">→ All clear</div>
+        </div>
+      </div>
+
+      <div class="dash-section-title">User Management</div>
+      <div class="user-mgmt-table">
+        <div class="um-row head">
+          <span>User</span><span>Role</span><span>Venue</span><span>Status</span><span>Actions</span>
+        </div>
+        <div class="um-row">
+          <div><div class="um-name">Diego L.</div><div class="um-email">diego@barpass.io</div></div>
+          <span><span class="dash-role-chip chip-runner">RUNNER</span></span>
+          <span style="font-size:11px;">Hard Rock</span>
+          <span><span class="wf-badge active">ACTIVE</span></span>
+          <span><button class="action-btn">Edit</button></span>
+        </div>
+        <div class="um-row">
+          <div><div class="um-name">Elena R.</div><div class="um-email">elena@barpass.io</div></div>
+          <span><span class="dash-role-chip chip-runner">RUNNER</span></span>
+          <span style="font-size:11px;">Hard Rock</span>
+          <span><span class="wf-badge active">ACTIVE</span></span>
+          <span><button class="action-btn">Edit</button></span>
+        </div>
+        <div class="um-row">
+          <div><div class="um-name">James K.</div><div class="um-email">james@barpass.io</div></div>
+          <span><span class="dash-role-chip chip-manager">MANAGER</span></span>
+          <span style="font-size:11px;">All Venues</span>
+          <span><span class="wf-badge active">ACTIVE</span></span>
+          <span><button class="action-btn">Edit</button></span>
+        </div>
+        <div class="um-row">
+          <div><div class="um-name">Sarah M.</div><div class="um-email">sarah@barpass.io</div></div>
+          <span><span class="dash-role-chip chip-exec">EXEC</span></span>
+          <span style="font-size:11px;">All Venues</span>
+          <span><span class="wf-badge active">ACTIVE</span></span>
+          <span><button class="action-btn">Edit</button></span>
+        </div>
+      </div>
+
+      <div class="dash-section-title">System Health</div>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-icon">🖥</div>
+          <div class="stat-val" style="color:var(--green);">12ms</div>
+          <div class="stat-label">API Latency</div>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill" style="width:20%;background:var(--green)"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💾</div>
+          <div class="stat-val" style="color:var(--blue);">34%</div>
+          <div class="stat-label">DB Load</div>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill" style="width:34%"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔐</div>
+          <div class="stat-val" style="color:var(--purple);">1,284</div>
+          <div class="stat-label">Auth Events/hr</div>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill" style="width:64%;background:linear-gradient(90deg,var(--purple),var(--blue))"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ JAVASCRIPT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────────────────
+const AUTH = {
+  method:null, email:'', name:'', employeeId:'',
+  role:null, dept:null, venue:null, shift:null,
+  permissions:[], trustScore:0, deviceId:null,
+  mfaVerified:false, identityVerified:false
+};
+
+const SCREEN_STEPS = {
+  's-gateway':0,'s-auth-select':1,'s-auth-email':2,'s-mfa':3,
+  's-identity':4,'s-workforce':5,'s-role':6,'s-dept':7,
+  's-permissions':8,'s-device':9,'s-complete':10
+};
+const STEP_LABELS = [
+  '','Auth Method','Credentials','MFA',
+  'Identity','Workforce','Role','Dept',
+  'Permissions','Device','Complete'
+];
+const TOTAL_STEPS = 10;
+let _history = [];
+let _currentScreen = 's-gateway';
+
+// ── AUTH METHODS ──────────────────────────────────────────────────────────────────────
+const AUTH_METHODS = [
+  {id:'email',label:'Email',desc:'Password auth',icon:'✉',color:'#5AA5FF',bg:'#5AA5FF18'},
+  {id:'google',label:'Google',desc:'OAuth 2.0',icon:'G',color:'#EA4335',bg:'#EA433518'},
+  {id:'apple',label:'Apple',desc:'Sign in',icon:'⌘',color:'#e8eaf0',bg:'#e8eaf018'},
+  {id:'microsoft',label:'Microsoft',desc:'Azure AD',icon:'⊞',color:'#00BCF2',bg:'#00BCF218'},
+  {id:'phone',label:'Phone OTP',desc:'SMS code',icon:'📱',color:'#00e87a',bg:'#00e87a18'},
+  {id:'magic',label:'Magic Link',desc:'Passwordless',icon:'✨',color:'#a855f7',bg:'#a855f718'},
+  {id:'badge',label:'Badge Name',desc:'NFC badge',icon:'🪪',color:'#FFba38',bg:'#FFba3818'},
+  {id:'empid',label:'Employee ID',desc:'Staff registry',icon:'#',color:'#5AA5FF',bg:'#5AA5FF18'},
+  {id:'qr',label:'QR Badge',desc:'Scan to login',icon:'▦',color:'#22d3ee',bg:'#22d3ee18'},
+  {id:'nfc',label:'NFC Badge',desc:'Tap to auth',icon:'◎',color:'#00e87a',bg:'#00e87a18'},
+  {id:'sso',label:'SSO',desc:'SAML/OIDC',icon:'⟁',color:'#a855f7',bg:'#a855f718'},
+  {id:'bio',label:'Biometric',desc:'Fingerprint',icon:'⌢',color:'#FFba38',bg:'#FFba3818'},
+  {id:'faceid',label:'Face ID',desc:'Liveness check',icon:'⬡',color:'#FF4466',bg:'#FF446618'},
+  {id:'hwkey',label:'HW Key',desc:'FIDO2/U2F',icon:'⚿',color:'#22d3ee',bg:'#22d3ee18'},
+];
+
+// ── ROLES ─────────────────────────────────────────────────────────────────────────────
+const ROLES = [
+  {id:'runner',name:'Runner',tier:'Tier 1 · Operational',icon:'🏃',tierClass:'tier-1',
+   perms:'12 permissions · Zone access · Delivery ops · Task management',
+   dashboard:'s-dash-runner',chipClass:'chip-runner'},
+  {id:'manager',name:'Manager',tier:'Tier 2 · Management',icon:'📋',tierClass:'tier-2',
+   perms:'38 permissions · Team control · Dispatch · Analytics · Inventory',
+   dashboard:'s-dash-manager',chipClass:'chip-manager'},
+  {id:'supervisor',name:'Executive',tier:'Tier 3 · Executive',icon:'👑',tierClass:'tier-3',
+   perms:'94 permissions · Full venue · Financial · Admin · All venues',
+   dashboard:'s-dash-exec',chipClass:'chip-exec'},
+  {id:'admin',name:'Admin',tier:'Tier 4 · System Admin',icon:'⚙️',tierClass:'tier-3',
+   perms:'∞ permissions · Root access · System config · User management',
+   dashboard:'s-dash-admin',chipClass:'chip-admin'},
+];
+
+// ── PERMISSIONS ───────────────────────────────────────────────────────────────────────
+const ALL_PERMS = [
+  {icon:'📦',name:'Dispatch',def:'granted'},
+  {icon:'🗺',name:'Map View',def:'granted'},
+  {icon:'📊',name:'Analytics',def:'partial'},
+  {icon:'💰',name:'Finance',def:'denied'},
+  {icon:'👥',name:'Team Mgmt',def:'partial'},
+  {icon:'🔒',name:'Security',def:'denied'},
+  {icon:'📋',name:'Inventory',def:'granted'},
+  {icon:'⚙️',name:'System',def:'denied'},
+  {icon:'📡',name:'Comms',def:'granted'},
+  {icon:'🏟',name:'Venue Ctrl',def:'denied'},
+  {icon:'📜',name:'Audit Log',def:'partial'},
+  {icon:'🔑',name:'Auth Mgmt',def:'denied'},
+  {icon:'📤',name:'Export',def:'partial'},
+  {icon:'🌐',name:'Multi-site',def:'denied'},
+  {icon:'🤖',name:'AI Engine',def:'granted'},
+];
+
+const ROLE_PERMS = {
+  runner:  ['granted','granted','denied','denied','denied','denied','granted','denied','granted','denied','denied','denied','denied','denied','denied'],
+  manager: ['granted','granted','granted','partial','granted','denied','granted','denied','granted','partial','granted','denied','granted','denied','granted'],
+  supervisor:['granted','granted','granted','granted','granted','partial','granted','partial','granted','granted','granted','denied','granted','granted','granted'],
+  admin:   ['granted','granted','granted','granted','granted','granted','granted','granted','granted','granted','granted','granted','granted','granted','granted'],
+};
+
+// ── SCREEN NAVIGATION ─────────────────────────────────────────────────────────────────
+function goScreen(id){
+  document.getElementById(_currentScreen).classList.remove('active');
+  _history.push(_currentScreen);
+  _currentScreen=id;
+  document.getElementById(id).classList.add('active');
+  updateProgress(id);
+  onScreenEnter(id);
+  window.scrollTo(0,0);
+}
+
+function goBack(){
+  if(!_history.length) return;
+  document.getElementById(_currentScreen).classList.remove('active');
+  _currentScreen=_history.pop();
+  document.getElementById(_currentScreen).classList.add('active');
+  updateProgress(_currentScreen);
+}
+
+function updateProgress(id){
+  const step=SCREEN_STEPS[id]||0;
+  const pw=document.getElementById('progress-wrap');
+  const bb=document.getElementById('back-btn');
+  if(step===0){pw.classList.remove('vis');bb.classList.remove('vis');return;}
+  pw.classList.add('vis');
+  bb.classList[_history.length>0&&step>1?'add':'remove']('vis');
+  const ps=document.getElementById('prog-steps');
+  ps.innerHTML='';
+  for(let i=1;i<=TOTAL_STEPS;i++){
+    const d=document.createElement('div');
+    d.className='prog-step'+(i<step?' done':i===step?' active':'');
+    ps.appendChild(d);
+  }
+  document.getElementById('prog-label').textContent=`${step}/${TOTAL_STEPS}`;
+}
+
+// ── SCREEN ENTER HOOKS ────────────────────────────────────────────────────────────────
+function onScreenEnter(id){
+  if(id==='s-identity') startIdentityScan();
+  if(id==='s-mfa') startMfaTimer();
+  if(id==='s-permissions') startPermOrchestration();
+  if(id==='s-device') populateDevice();
+  if(id==='s-complete') populateComplete();
+  if(id.startsWith('s-dash')) populateDash(id);
+}
+
+// ── BUILD AUTH GRID ───────────────────────────────────────────────────────────────────
+(function buildAuthGrid(){
+  const g=document.getElementById('auth-grid');
+  AUTH_METHODS.forEach(m=>{
+    const d=document.createElement('div');
+    d.className='auth-method';
+    d.onclick=()=>selectAuthMethod(m);
+    d.innerHTML=`<div class="auth-icon" style="background:${m.bg};color:${m.color};">${m.icon}</div>
+      <div class="auth-label">${m.label}</div>
+      <div class="auth-desc">${m.desc}</div>`;
+    g.appendChild(d);
+  });
+})();
+
+// ── BUILD ROLE GRID ───────────────────────────────────────────────────────────────────
+(function buildRoleGrid(){
+  const g=document.getElementById('role-grid');
+  g.style.gridTemplateColumns='repeat(2,1fr)';
+  ROLES.forEach(r=>{
+    const d=document.createElement('div');
+    d.className=`role-card ${r.tierClass}`;
+    d.onclick=()=>selectRole(r.id,d);
+    d.innerHTML=`<div class="role-check">✓</div>
+      <div class="role-icon">${r.icon}</div>
+      <div class="role-name">${r.name}</div>
+      <div class="role-tier">${r.tier}</div>
+      <div class="role-perms">${r.perms}</div>`;
+    g.appendChild(d);
+  });
+})();
+
+// ── BUILD PERM MATRIX ─────────────────────────────────────────────────────────────────
+(function buildPermMatrix(){
+  const m=document.getElementById('perm-matrix');
+  ALL_PERMS.forEach(p=>{
+    const d=document.createElement('div');
+    d.className='perm-node';
+    d.id=`pn-${p.name.replace(/\s/g,'')}`;
+    d.innerHTML=`<span class="perm-icon">${p.icon}</span><span class="perm-name">${p.name}</span>`;
+    m.appendChild(d);
+  });
+})();
+
+// ── AUTH METHOD SELECTION ─────────────────────────────────────────────────────────────
+function selectAuthMethod(m){
+  AUTH.method=m.id;
+  if(m.id==='email'){
+    goScreen('s-auth-email');
+  } else if(m.id==='faceid'||m.id==='bio'){
+    AUTH.name='Demo User'; goScreen('s-identity');
+  } else if(m.id==='empid'||m.id==='badge'||m.id==='qr'||m.id==='nfc'){
+    goScreen('s-workforce');
+  } else {
+    // SSO / OAuth / etc → simulate redirect → go to MFA
+    showToast(`Connecting to ${m.label}…`,'info');
+    setTimeout(()=>{AUTH.name='Enterprise User';goScreen('s-mfa');},900);
+  }
+}
+
+// ── EMAIL AUTH ────────────────────────────────────────────────────────────────────────
+function validateEmail(){
+  const e=document.getElementById('email-input').value;
+  const p=document.getElementById('pass-input').value;
+  const btn=document.getElementById('email-submit-btn');
+  btn.disabled=!(e.includes('@')&&p.length>=6);
+}
+function submitEmail(){
+  const e=document.getElementById('email-input').value;
+  AUTH.email=e;
+  AUTH.name=e.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  showToast('Credentials verified','success');
+  setTimeout(()=>goScreen('s-mfa'),400);
+}
+
+// ── MFA / OTP ─────────────────────────────────────────────────────────────────────────
+let _mfaTimer=null;
+function buildOtpInputs(){
+  const w=document.getElementById('otp-wrap');
+  w.innerHTML='';
+  for(let i=0;i<6;i++){
+    const inp=document.createElement('input');
+    inp.type='text';inp.maxLength=1;inp.className='otp-input';inp.inputMode='numeric';
+    inp.addEventListener('input',e=>{
+      inp.classList.toggle('filled',inp.value.length>0);
+      if(inp.value&&inp.nextElementSibling) inp.nextElementSibling.focus();
+      checkOtp();
+    });
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Backspace'&&!inp.value&&inp.previousElementSibling) inp.previousElementSibling.focus();
+    });
+    w.appendChild(inp);
+  }
+  w.children[0].focus();
+}
+function checkOtp(){
+  const inputs=[...document.getElementById('otp-wrap').querySelectorAll('.otp-input')];
+  const full=inputs.every(i=>i.value.length===1);
+  document.getElementById('mfa-btn').disabled=!full;
+}
+function startMfaTimer(){
+  buildOtpInputs();
+  let secs=30;
+  const prog=document.getElementById('timer-prog');
+  const num=document.getElementById('timer-num');
+  const circ=75.4;
+  clearInterval(_mfaTimer);
+  _mfaTimer=setInterval(()=>{
+    secs--;num.textContent=secs+'s';
+    prog.style.strokeDashoffset=circ*(1-secs/30);
+    if(secs<=0){clearInterval(_mfaTimer);num.textContent='—';num.style.color='var(--red)';}
+  },1000);
+}
+function resendOtp(){clearInterval(_mfaTimer);buildOtpInputs();startMfaTimer();showToast('New code sent','info');}
+function submitMfa(){
+  AUTH.mfaVerified=true;
+  clearInterval(_mfaTimer);
+  showToast('MFA verified ✓','success');
+  setTimeout(()=>goScreen('s-identity'),400);
+}
+
+// ── IDENTITY SCAN ─────────────────────────────────────────────────────────────────────
+let _scanTimer=null;
+const SCAN_STEPS=[
+  [0,'INITIALIZING','Calibrating sensors…'],
+  [15,'DETECTING FACE','Positioning check…'],
+  [30,'MAPPING LANDMARKS','68-point facial mesh…'],
+  [52,'LIVENESS CHECK','Depth analysis active…'],
+  [70,'CROSS-REFERENCING','Checking identity registry…'],
+  [88,'VERIFYING','AI trust score computation…'],
+  [100,'VERIFIED ✓','Identity confirmed — proceeding'],
+];
+function startIdentityScan(){
+  AUTH.identityVerified=false;
+  document.getElementById('identity-btn').disabled=true;
+  document.getElementById('scan-fill').style.width='0%';
+  let prog=0;
+  let si=0;
+  clearInterval(_scanTimer);
+  _scanTimer=setInterval(()=>{
+    prog=Math.min(prog+2,100);
+    document.getElementById('scan-fill').style.width=prog+'%';
+    while(si<SCAN_STEPS.length-1&&prog>=SCAN_STEPS[si+1][0]) si++;
+    const s=SCAN_STEPS[si];
+    document.getElementById('scan-status').textContent=s[1];
+    document.getElementById('scan-step-label').textContent=s[2];
+    if(prog>=100){
+      clearInterval(_scanTimer);
+      AUTH.identityVerified=true;
+      document.getElementById('scan-status').style.color='var(--green)';
+      document.getElementById('identity-btn').disabled=false;
+      showToast('Identity verified ✓','success');
+    }
+  },60);
+}
+function nextAfterIdentity(){goScreen('s-workforce');}
+
+// ── WORKFORCE LOOKUP ──────────────────────────────────────────────────────────────────
+const WF_DB={
+  'BP-2024-0042':{name:'Diego L.',dept:'Food & Beverage',hire:'2024-03-15',clearance:'Level 2'},
+  'BP-2023-0108':{name:'Elena R.',dept:'Operations',hire:'2023-09-01',clearance:'Level 3'},
+  'BP-2022-0019':{name:'Marco S.',dept:'Operations',hire:'2022-06-20',clearance:'Level 2'},
+  'BP-2021-0003':{name:'James K.',dept:'Management',hire:'2021-01-10',clearance:'Level 4'},
+  'BP-2020-0001':{name:'Admin User',dept:'Technology',hire:'2020-01-01',clearance:'Level 5'},
+};
+let _wfTimer=null;
+function triggerWfLookup(val){
+  const v=val.toUpperCase().replace(/[^A-Z0-9]/g,'-');
+  document.getElementById('emp-id-input').value=v;
+  document.getElementById('wf-result').classList.remove('vis');
+  document.getElementById('wf-btn').disabled=true;
+  clearTimeout(_wfTimer);
+  if(v.length<10) return;
+  document.getElementById('wf-loading').style.display='block';
+  _wfTimer=setTimeout(()=>{
+    document.getElementById('wf-loading').style.display='none';
+    const emp=WF_DB[v]||{name:'Demo Employee',dept:'Operations',hire:'2024-01-01',clearance:'Level 2'};
+    AUTH.name=emp.name;AUTH.employeeId=v;
+    document.getElementById('wf-name').textContent=emp.name;
+    document.getElementById('wf-dept').textContent=emp.dept;
+    document.getElementById('wf-hire').textContent=emp.hire;
+    document.getElementById('wf-clearance').textContent=emp.clearance;
+    document.getElementById('wf-result').classList.add('vis');
+    document.getElementById('wf-btn').disabled=false;
+    showToast('Employee record found ✓','success');
+  },1400);
+}
+
+// ── ROLE SELECTION ────────────────────────────────────────────────────────────────────
+function selectRole(rid,el){
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  AUTH.role=rid;
+  document.getElementById('role-btn').disabled=false;
+}
+
+// ── DEPT / VENUE ──────────────────────────────────────────────────────────────────────
+function selectVenue(el,v){
+  document.querySelectorAll('.venue-pill').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');
+  AUTH.venue=v;
+  checkDept();
+}
+function checkDept(){
+  document.getElementById('dept-btn').disabled=!(AUTH.dept&&AUTH.venue&&AUTH.shift);
+}
+
+// ── PERMISSION ORCHESTRATION ──────────────────────────────────────────────────────────
+let _permTimer=null;
+function startPermOrchestration(){
+  const role=AUTH.role||'runner';
+  const perms=ROLE_PERMS[role]||ROLE_PERMS.runner;
+  const nodes=document.querySelectorAll('.perm-node');
+  const log=document.getElementById('perm-log');
+  const fill=document.getElementById('perm-fill');
+  const count=document.getElementById('perm-count');
+  const phase=document.getElementById('perm-phase');
+  const icon=document.getElementById('perm-icon');
+  log.innerHTML='';
+  nodes.forEach(n=>n.className='perm-node');
+  fill.style.width='0%';
+  count.textContent='0';
+  document.getElementById('perm-btn').disabled=true;
+  const phases=['Connecting to policy engine…','Loading role profile…','Evaluating access rules…','Applying zero-trust filters…','Building permission matrix…','Finalizing session scope…'];
+  let gi=0,granted=0,pi=0;
+  clearInterval(_permTimer);
+  _permTimer=setInterval(()=>{
+    if(gi>=ALL_PERMS.length){
+      clearInterval(_permTimer);
+      fill.style.width='100%';
+      phase.textContent='Access matrix complete ✓';
+      icon.textContent='✅';
+      document.getElementById('perm-btn').disabled=false;
+      return;
+    }
+    const p=ALL_PERMS[gi];
+    const state=perms[gi]||'denied';
+    const node=document.getElementById(`pn-${p.name.replace(/\s/g,'')}`);
+    if(node) node.className=`perm-node ${state}`;
+    if(state==='granted') granted++;
+    count.textContent=granted;
+    fill.style.width=Math.round((gi+1)/ALL_PERMS.length*100)+'%';
+    phase.textContent=phases[Math.min(pi,phases.length-1)];
+    if(gi%3===2) pi++;
+    const sym=state==='granted'?'✅':state==='partial'?'⚠️':'🚫';
+    const entry=document.createElement('div');
+    entry.className=`perm-log-entry ${state==='granted'?'ok':state==='denied'?'':'info'}`;
+    entry.textContent=`${sym} ${p.name} — ${state.toUpperCase()}`;
+    log.appendChild(entry);
+    log.scrollTop=log.scrollHeight;
+    gi++;
+    AUTH.permissions=permissions;
+  },160);
+  const permissions=[];
+}
+
+// ── DEVICE REGISTRATION ───────────────────────────────────────────────────────────────
+function populateDevice(){
+  const ua=navigator.userAgent;
+  const isMob=/Mobi|Android/i.test(ua);
+  const type=isMob?'Mobile Device':'Desktop / Laptop';
+  const browser=ua.includes('Chrome')?'Chrome':ua.includes('Firefox')?'Firefox':ua.includes('Safari')?'Safari':'Browser';
+  const plat=navigator.platform||'Unknown';
+  const devId='BP-'+Math.random().toString(36).substr(2,4).toUpperCase()+'-'+Math.random().toString(36).substr(2,4).toUpperCase();
+  AUTH.deviceId=devId;
+  AUTH.trustScore=Math.floor(82+Math.random()*16);
+  document.getElementById('dv-type').textContent=type;
+  document.getElementById('dv-browser').textContent=browser;
+  document.getElementById('dv-platform').textContent=plat;
+  document.getElementById('dv-id').textContent=devId;
+  // animate trust score
+  const num=document.getElementById('trust-num');
+  let n=0; const target=AUTH.trustScore;
+  const arc=document.getElementById('trust-arc-path');
+  const t=setInterval(()=>{
+    n=Math.min(n+3,target);
+    num.textContent=n;
+    num.style.color=n>=90?'var(--green)':n>=75?'var(--blue)':'var(--gold)';
+    const offset=176*(1-n/100)*0.75;
+    arc.style.strokeDashoffset=offset;
+    if(n>=target) clearInterval(t);
+  },30);
+}
+function registerDevice(){
+  showToast('Device registered ✓','success');
+  setTimeout(()=>goScreen('s-complete'),500);
+}
+
+// ── COMPLETE SCREEN ───────────────────────────────────────────────────────────────────
+function populateComplete(){
+  const role=ROLES.find(r=>r.id===AUTH.role)||ROLES[0];
+  const badge=document.getElementById('complete-badge');
+  badge.className=`complete-role-badge ${role.chipClass}`;
+  badge.innerHTML=`${role.icon} ${AUTH.name||'User'} &nbsp;·&nbsp; ${role.name} &nbsp;·&nbsp; ${AUTH.venue||'Stadium'}`;
+  const meta=document.getElementById('complete-meta');
+  meta.innerHTML=`
+    <div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--green);">${AUTH.trustScore}</div><div style="font-size:10px;color:var(--muted);">Trust Score</div></div>
+    <div style="width:1px;background:var(--border);"></div>
+    <div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--blue);">${(AUTH.permissions&&AUTH.permissions.length)||ROLE_PERMS[AUTH.role||'runner'].filter(p=>p==='granted').length}</div><div style="font-size:10px;color:var(--muted);">Permissions</div></div>
+    <div style="width:1px;background:var(--border);"></div>
+    <div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--gold);">${AUTH.dept||'Operations'}</div><div style="font-size:10px;color:var(--muted);">Department</div></div>`;
+  const sess=document.getElementById('complete-session');
+  sess.textContent=`SESSION: ${AUTH.deviceId||'BP-XXXX-XXXX'} · ${new Date().toISOString().slice(0,19).replace('T',' ')} UTC`;
+}
+function launchDashboard(){
+  // Map enterprise role → BarPass PIN role
+  const roleMap={runner:'bartender',manager:'owner',supervisor:'owner',admin:'owner'};
+  const bpRole=roleMap[AUTH.role]||'bartender';
+  // Store session so BarPass can auto-login
+  localStorage.setItem('bp_enterprise_session',JSON.stringify({
+    name:AUTH.name,
+    enterpriseRole:AUTH.role,
+    bpRole,
+    dept:AUTH.dept||'Operations',
+    venue:AUTH.venue||'Hard Rock Stadium',
+    trustScore:AUTH.trustScore,
+    deviceId:AUTH.deviceId,
+    email:AUTH.email||'',
+    ts:Date.now(),
+    expires:Date.now()+8*60*60*1000
+  }));
+  // Redirect to BarPass Command Center
+  window.location.href='BarPass_v10.html';
+}
+
+// ── DASHBOARD POPULATION ──────────────────────────────────────────────────────────────
+function populateDash(id){
+  const name=AUTH.name||'User';
+  const initials=name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const venue=AUTH.venue||'Hard Rock Stadium';
+  if(id==='s-dash-runner'){
+    setText('runner-name',name);setText('runner-venue',venue);
+    document.getElementById('runner-avatar').textContent=initials;
+    buildRunnerQueue();
+  } else if(id==='s-dash-manager'){
+    setText('mgr-name',name);setText('mgr-venue',AUTH.dept||'Stadium Ops');
+    document.getElementById('mgr-avatar').textContent=initials;
+  } else if(id==='s-dash-exec'){
+    setText('exec-name',name);
+    document.getElementById('exec-avatar').textContent=initials;
+  } else if(id==='s-dash-admin'){
+    setText('admin-name',name);
+    document.getElementById('admin-avatar').textContent=initials;
+  }
+}
+function setText(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+function buildRunnerQueue(){
+  const q=document.getElementById('runner-queue');
+  const tasks=[
+    {id:'TK-1043',from:'Hub East',to:'Bar A4',prio:'MED',units:32,eta:14},
+    {id:'TK-1044',from:'Hub West',to:'Bar D1',prio:'LOW',units:18,eta:21},
+  ];
+  q.innerHTML=tasks.map(t=>`
+    <div class="runner-task-card" style="border-left-color:${t.prio==='HIGH'?'var(--red)':t.prio==='MED'?'var(--gold)':'var(--border2)'};">
+      <div class="rtc-head">
+        <span class="rtc-id">${t.id}</span>
+        <span class="rtc-prio ${t.prio==='HIGH'?'prio-high':'prio-med'}">${t.prio}</span>
+      </div>
+      <div class="rtc-route"><span>🔷 ${t.from}</span><span class="rtc-arrow">→</span><span>🍺 ${t.to}</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">${t.units} units · ETA ~${t.eta} min</div>
+      <div class="rtc-actions">
+        <button class="rtc-btn accept" onclick="showToast('Task TK accepted','success')">Accept</button>
+        <button class="rtc-btn done">Decline</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────────────
+function showToast(msg,type='info',ms=2800){
+  const w=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;t.textContent=msg;
+  w.appendChild(t);
+  setTimeout(()=>t.remove(),ms);
+}
+</script>
+</body>
+</html>

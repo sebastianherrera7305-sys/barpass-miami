@@ -2837,7 +2837,15 @@ canvas.qr-canvas{image-rendering:pixelated;border:3px solid #fff;border-radius:3
     </div>
     <button class="l-btn" id="login-btn" data-i18n="login.btn" onclick="doLogin()">Authenticate →</button>
     <div class="l-err" id="lerr"></div>
-    <div style="font-size:10px;color:var(--muted);text-align:center;line-height:1.7">
+    <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
+      <div style="flex:1;height:1px;background:var(--border2)"></div>
+      <span style="font-size:9px;color:var(--muted);letter-spacing:.08em;">OR</span>
+      <div style="flex:1;height:1px;background:var(--border2)"></div>
+    </div>
+    <button onclick="window.location.href='enterprise-auth.html'" style="width:100%;padding:11px;border-radius:9px;border:1.5px solid #5AA5FF40;background:#5AA5FF08;color:#5AA5FF;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;letter-spacing:.03em;transition:all .18s;" onmouseover="this.style.background='#5AA5FF14'" onmouseout="this.style.background='#5AA5FF08'">
+      ⬡ Enterprise SSO Login →
+    </button>
+    <div style="font-size:10px;color:var(--muted);text-align:center;line-height:1.7;margin-top:10px">
       Bartender: 1234 · Manager: 2847 · Owner: 9999<br>
       Inventory: 5566 · Guest Experience: 0000<br>
       <span style="color:rgba(128,128,160,.5)" data-i18n="login.session">Session expires after 8h of inactivity</span>
@@ -5638,6 +5646,7 @@ function doLogin(){
 
 function doLogout(){
   Security.destroySession(currentRole);
+  localStorage.removeItem('bp_enterprise_session');
   currentRole=null;
   document.getElementById('login').style.display='flex';
   document.getElementById('nav').style.display='none';
@@ -5648,6 +5657,33 @@ function doLogout(){
   document.getElementById('lerr').textContent='';
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
 }
+
+// ── Enterprise SSO Auto-Login ─────────────────────────────────────────────────
+(function checkEnterpriseSession(){
+  try{
+    const raw=localStorage.getItem('bp_enterprise_session');
+    if(!raw) return;
+    const sess=JSON.parse(raw);
+    if(!sess||Date.now()>sess.expires) { localStorage.removeItem('bp_enterprise_session'); return; }
+    const pinMap={bartender:'1234',manager:'9999',owner:'9999'};
+    const pin=pinMap[sess.bpRole]||'1234';
+    // Wait for DOM then auto-login
+    setTimeout(()=>{
+      const pinEl=document.getElementById('pin');
+      if(!pinEl) return;
+      pinEl.value=pin;
+      doLogin();
+      // Show enterprise welcome badge
+      setTimeout(()=>{
+        const badge=document.createElement('div');
+        badge.style.cssText='position:fixed;top:12px;right:16px;z-index:9999;background:linear-gradient(135deg,#5AA5FF18,#a855f718);border:1px solid #5AA5FF40;border-radius:8px;padding:7px 14px;font-size:11px;color:#5AA5FF;font-family:"JetBrains Mono",monospace;display:flex;align-items:center;gap:8px;';
+        badge.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:#00e87a;display:inline-block;box-shadow:0 0 8px #00e87a;"></span>⬡ ${sess.name} · ${(sess.enterpriseRole||'').toUpperCase()} · Trust ${sess.trustScore}`;
+        document.body.appendChild(badge);
+        setTimeout(()=>badge.remove(),6000);
+      },800);
+    },200);
+  } catch(e){ localStorage.removeItem('bp_enterprise_session'); }
+})();
 
 function showErr(msg){const e=document.getElementById('lerr');e.textContent=Security.sanitize(msg);setTimeout(()=>e.textContent='',4000);}
 document.getElementById('pin').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
@@ -10370,9 +10406,12 @@ function stadRenderDispatchStep(){
     <div class="tm-sec-label" style="margin-bottom:6px;">RUNNER INSTRUCTIONS</div>
     <textarea class="tm-notes" id="tm-notes-field" rows="2" placeholder="e.g. Use service entrance · Handle glass carefully · Verify with Manager...">${_dispatch.notes||''}</textarea>
     <div class="tm-qr-area" style="display:flex;align-items:center;gap:16px;justify-content:center;">
-      <div>
-        <canvas id="tm-qr-canvas" class="qr-canvas" width="88" height="88"></canvas>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--muted);margin-top:4px;text-align:center;">CHAIN-OF-CUSTODY QR</div>
+      <div style="text-align:center;">
+        <canvas id="tm-qr-canvas" class="qr-canvas" width="88" height="88" style="cursor:pointer;" title="Tap to open consent page" onclick="window._consentUrl&&window.open(window._consentUrl,'_blank')"></canvas>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--muted);margin-top:4px;">CHAIN-OF-CUSTODY QR</div>
+        <div id="consent-link-wrap" style="margin-top:5px;display:none;">
+          <a id="consent-link" href="#" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#5AA5FF;text-decoration:none;background:#5AA5FF12;border:1px solid #5AA5FF30;border-radius:4px;padding:3px 8px;">📱 Open on Phone</a>
+        </div>
       </div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);line-height:1.8;text-align:left;">
         <div style="color:var(--text2);font-weight:700;margin-bottom:4px;">SCAN CHECKPOINTS</div>
@@ -10384,7 +10423,18 @@ function stadRenderDispatchStep(){
     if(nextBtn) nextBtn.textContent='🚀 DISPATCH';
     setTimeout(()=>{
       const c=document.getElementById('tm-qr-canvas');
-      if(c) stadDrawQR(c,taskId+_dispatch.hub+_dispatch.bar+Date.now());
+      if(c){
+        // Build real runner-consent URL with all dispatch params
+        const cargoStr=Object.entries(_dispatch.items).map(([k,v])=>v+'×'+k).join(',');
+        const origin=location.origin||'http://localhost:4321';
+        const consentUrl=`${origin}/runner-consent.html?id=${encodeURIComponent(taskId)}&hub=${encodeURIComponent(hub.name)}&bar=${encodeURIComponent(bar.name)}&runner=${encodeURIComponent(emp.name)}&priority=${encodeURIComponent(_dispatch.priority)}&inv=${Math.round(bar.inv)}&eta=${totalMins}&units=${totalUnits}&cargo=${encodeURIComponent(cargoStr)}&by=${encodeURIComponent(currentRole==='manager'?'Stadium Manager':'Stadium Ops')}${_dispatch.notes?'&notes='+encodeURIComponent(_dispatch.notes):''}`;
+        window._consentUrl=consentUrl;
+        stadDrawQR(c,consentUrl);
+        // Show clickable link
+        const lw=document.getElementById('consent-link-wrap');
+        const la=document.getElementById('consent-link');
+        if(lw&&la){lw.style.display='block';la.href=consentUrl;}
+      }
       const nf=document.getElementById('tm-notes-field');
       if(nf) nf.addEventListener('input',()=>{_dispatch.notes=nf.value;});
     },50);
