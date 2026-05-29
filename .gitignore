@@ -13,3 +13,4 @@ service-account-key.json
 node_modules/
 .env
 seed-venues.js
+!barpass-map.html

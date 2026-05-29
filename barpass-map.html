@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarPass — Stadium Digital Twin</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="barpass-db.js"></script>
+<style>
+:root{
+  --bg:#04060e;--surface:#080c1a;--card:#0c1022;--border:#1a2040;
+  --text:#e8eaf6;--muted:#4a5380;--green:#00e87a;--amber:#FFba38;
+  --red:#FF4466;--blue:#5AA5FF;--purple:#a855f7;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);}
+#map{position:absolute;inset:0;z-index:0;}
+
+/* ── HUD Top Bar ── */
+.hud-top{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:10px 16px;
+  display:flex;align-items:center;gap:12px;
+  background:linear-gradient(to bottom,rgba(4,6,14,.95),rgba(4,6,14,0));
+  pointer-events:none;
+}
+.hud-top > *{pointer-events:auto;}
+.brand{display:flex;align-items:center;gap:8px;}
+.brand-mark{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#5AA5FF,#a855f7);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:800;font-size:13px;color:#fff;}
+.brand-label{font-size:13px;font-weight:800;letter-spacing:-.01em;}
+.brand-sub{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.1em;}
+.hud-divider{width:1px;height:30px;background:var(--border);}
+
+/* Scene selector */
+.scene-selector{display:flex;gap:4px;background:rgba(8,12,26,.85);border:1px solid var(--border);border-radius:8px;padding:3px;}
+.scene-btn{padding:4px 10px;border-radius:5px;border:none;background:transparent;color:var(--muted);font-family:var(--mono);font-size:9px;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:all .15s;white-space:nowrap;}
+.scene-btn.active{background:var(--blue);color:#04060e;}
+
+/* Live stats */
+.hud-stats{display:flex;gap:8px;margin-left:auto;}
+.hstat{background:rgba(8,12,26,.85);border:1px solid var(--border);border-radius:7px;padding:5px 10px;display:flex;flex-direction:column;align-items:center;min-width:60px;}
+.hstat-val{font-family:var(--mono);font-size:14px;font-weight:700;}
+.hstat-lbl{font-family:var(--mono);font-size:7px;color:var(--muted);letter-spacing:.08em;margin-top:1px;}
+.live-pill{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid #00e87a30;background:#00e87a10;font-family:var(--mono);font-size:9px;color:var(--green);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── Left Panel ── */
+.left-panel{
+  position:fixed;left:12px;top:70px;bottom:70px;z-index:100;
+  width:260px;display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;
+}
+.left-panel > *{pointer-events:auto;}
+.lp-card{background:rgba(8,12,26,.92);border:1px solid var(--border);border-radius:12px;overflow:hidden;backdrop-filter:blur(10px);}
+.lp-hdr{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.lp-title{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--muted);}
+.lp-count{font-family:var(--mono);font-size:9px;color:var(--blue);}
+.lp-body{padding:8px;max-height:220px;overflow-y:auto;}
+.lp-body::-webkit-scrollbar{width:3px;}
+.lp-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* Zone rows */
+.zone-row{display:flex;align-items:center;gap:8px;padding:5px 4px;border-radius:6px;cursor:pointer;transition:background .1s;}
+.zone-row:hover{background:rgba(90,165,255,.08);}
+.zone-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.zone-info{flex:1;min-width:0;}
+.zone-name{font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.zone-meta{font-family:var(--mono);font-size:8px;color:var(--muted);}
+.zone-pct{font-family:var(--mono);font-size:10px;font-weight:700;flex-shrink:0;}
+
+/* Alert rows */
+.alert-row{display:flex;gap:8px;padding:5px 4px;border-radius:6px;cursor:pointer;animation:alertIn .3s ease;}
+@keyframes alertIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.alert-row.crit{background:#FF446610;border:1px solid #FF446620;}
+.alert-row.warn{background:#FFba3810;border:1px solid #FFba3820;}
+.alert-row.ok  {background:#00e87a10;border:1px solid #00e87a20;}
+.alert-icon{font-size:14px;flex-shrink:0;}
+.alert-msg{font-family:var(--mono);font-size:8px;line-height:1.5;color:var(--text);}
+.alert-ts{font-family:var(--mono);font-size:7px;color:var(--muted);margin-top:2px;}
+
+/* ── Right Detail Panel ── */
+.detail-panel{
+  position:fixed;right:12px;top:70px;bottom:70px;z-index:100;
+  width:270px;
+  background:rgba(8,12,26,.95);border:1px solid var(--border);border-radius:12px;
+  backdrop-filter:blur(12px);
+  display:flex;flex-direction:column;
+  transform:translateX(calc(100% + 20px));transition:transform .25s ease;
+}
+.detail-panel.open{transform:translateX(0);}
+.dp-hdr{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.dp-title{font-size:13px;font-weight:700;}
+.dp-close{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:13px;}
+.dp-body{flex:1;overflow-y:auto;padding:12px 14px;}
+.dp-body::-webkit-scrollbar{width:3px;}
+.dp-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.dp-section{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--muted);margin:12px 0 6px;display:flex;align-items:center;gap:6px;}
+.dp-section::after{content:'';flex:1;height:1px;background:var(--border);}
+.dp-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #0d1228;}
+.dp-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.dp-val{font-family:var(--mono);font-size:9px;font-weight:600;}
+.dp-actions{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:6px;flex-shrink:0;}
+.dp-btn{flex:1;padding:7px;border-radius:7px;border:none;font-family:var(--mono);font-size:9px;font-weight:700;cursor:pointer;transition:all .15s;}
+.dp-btn.primary{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;}
+.dp-btn.secondary{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.dp-btn.secondary:hover{border-color:var(--text);color:var(--text);}
+
+/* Inventory bar */
+.inv-bar{height:4px;background:#1a2040;border-radius:2px;overflow:hidden;margin-top:3px;}
+.inv-fill{height:100%;border-radius:2px;transition:width .4s;}
+
+/* Staff mini list */
+.staff-mini{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #0d1228;}
+.staff-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;border:1.5px solid;}
+.staff-info{flex:1;}
+.staff-name{font-size:10px;font-weight:500;}
+.staff-role{font-family:var(--mono);font-size:8px;color:var(--muted);}
+.staff-status{width:6px;height:6px;border-radius:50%;background:var(--green);}
+
+/* ── Layer Toggles ── */
+.layer-controls{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  z-index:100;
+  background:rgba(8,12,26,.92);border:1px solid var(--border);border-radius:10px;
+  padding:5px;display:flex;gap:3px;
+  backdrop-filter:blur(10px);
+}
+.lc-btn{padding:5px 12px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--muted);font-family:var(--mono);font-size:8px;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.lc-btn.on{border-color:var(--border);background:var(--card);color:var(--text);}
+.lc-btn:hover{color:var(--text);}
+.lc-dot{width:6px;height:6px;border-radius:50%;}
+
+/* ── Floor Selector ── */
+.floor-selector{
+  position:fixed;right:12px;bottom:70px;z-index:100;
+  background:rgba(8,12,26,.92);border:1px solid var(--border);border-radius:10px;
+  padding:4px;display:flex;flex-direction:column;gap:2px;
+  backdrop-filter:blur(10px);
+}
+.fs-btn{padding:6px 10px;border-radius:6px;border:none;background:transparent;color:var(--muted);font-family:var(--mono);font-size:9px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;}
+.fs-btn.active{background:var(--blue);color:#04060e;}
+
+/* ── Back link ── */
+.back-btn{
+  position:fixed;bottom:16px;right:12px;z-index:100;
+  padding:7px 12px;border-radius:8px;border:1px solid var(--border);
+  background:rgba(8,12,26,.9);color:var(--muted);font-family:var(--mono);font-size:9px;
+  text-decoration:none;transition:all .15s;
+}
+.back-btn:hover{border-color:var(--text);color:var(--text);}
+
+/* ── Toast ── */
+.toast-wrap{position:fixed;bottom:60px;right:12px;z-index:200;display:flex;flex-direction:column;gap:5px;max-width:260px;}
+.toast{display:flex;align-items:center;gap:7px;background:rgba(8,12,26,.95);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:9px;box-shadow:0 6px 20px rgba(0,0,0,.5);animation:tin .2s ease;}
+@keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.toast-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* ── Map attribution override ── */
+.maplibregl-ctrl-attrib{font-size:8px!important;background:rgba(4,6,14,.7)!important;}
+.maplibregl-ctrl-attrib a{color:var(--muted)!important;}
+
+/* ── Popup ── */
+.maplibregl-popup-content{background:rgba(8,12,26,.95)!important;border:1px solid var(--border)!important;border-radius:10px!important;color:var(--text)!important;font-family:var(--mono)!important;font-size:10px!important;padding:10px 14px!important;box-shadow:0 8px 24px rgba(0,0,0,.6)!important;}
+.maplibregl-popup-tip{border-top-color:var(--border)!important;border-bottom-color:var(--border)!important;}
+</style>
+</head>
+<body>
+
+<!-- Map -->
+<div id="map"></div>
+
+<!-- HUD Top -->
+<div class="hud-top">
+  <div class="brand">
+    <div class="brand-mark">BP</div>
+    <div><div class="brand-label">BarPass Map</div><div class="brand-sub">HARD ROCK STADIUM</div></div>
+  </div>
+  <div class="hud-divider"></div>
+  <div class="scene-selector">
+    <button class="scene-btn active" data-scene="operations" onclick="setScene(this)">⚙ OPS</button>
+    <button class="scene-btn" data-scene="security" onclick="setScene(this)">🛡 SECURITY</button>
+    <button class="scene-btn" data-scene="logistics" onclick="setScene(this)">📦 LOGISTICS</button>
+    <button class="scene-btn" data-scene="vip" onclick="setScene(this)">👑 VIP</button>
+    <button class="scene-btn" data-scene="crowd" onclick="setScene(this)">🌡 CROWD</button>
+  </div>
+  <div class="hud-stats">
+    <div class="hstat"><div class="hstat-val" id="hs-staff" style="color:var(--blue)">0</div><div class="hstat-lbl">STAFF</div></div>
+    <div class="hstat"><div class="hstat-val" id="hs-alerts" style="color:var(--red)">0</div><div class="hstat-lbl">ALERTS</div></div>
+    <div class="hstat"><div class="hstat-val" id="hs-crowd" style="color:var(--amber)">0%</div><div class="hstat-lbl">CROWD</div></div>
+    <div class="hstat"><div class="hstat-val" id="hs-revenue" style="color:var(--green)">$0</div><div class="hstat-lbl">REVENUE</div></div>
+    <div class="live-pill"><div class="live-dot"></div>LIVE</div>
+  </div>
+</div>
+
+<!-- Left Panel -->
+<div class="left-panel">
+  <!-- Zones -->
+  <div class="lp-card">
+    <div class="lp-hdr">
+      <span class="lp-title">ZONES</span>
+      <span class="lp-count" id="zone-count">0 zones</span>
+    </div>
+    <div class="lp-body" id="zone-list"></div>
+  </div>
+  <!-- Alerts -->
+  <div class="lp-card" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+    <div class="lp-hdr">
+      <span class="lp-title">LIVE ALERTS</span>
+      <span class="lp-count" id="alert-count">0 active</span>
+    </div>
+    <div class="lp-body" id="alert-list" style="max-height:none;flex:1;"></div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-panel" id="detail-panel">
+  <div class="dp-hdr">
+    <div class="dp-title" id="dp-title">—</div>
+    <button class="dp-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="dp-body" id="dp-body"></div>
+  <div class="dp-actions" id="dp-actions"></div>
+</div>
+
+<!-- Layer Controls -->
+<div class="layer-controls">
+  <button class="lc-btn on" data-layer="zones" onclick="toggleLayer(this)"><span class="lc-dot" style="background:var(--blue)"></span>ZONES</button>
+  <button class="lc-btn on" data-layer="staff" onclick="toggleLayer(this)"><span class="lc-dot" style="background:var(--green)"></span>STAFF</button>
+  <button class="lc-btn on" data-layer="heatmap" onclick="toggleLayer(this)"><span class="lc-dot" style="background:var(--red)"></span>HEATMAP</button>
+  <button class="lc-btn on" data-layer="inventory" onclick="toggleLayer(this)"><span class="lc-dot" style="background:var(--amber)"></span>INVENTORY</button>
+  <button class="lc-btn on" data-layer="routes" onclick="toggleLayer(this)"><span class="lc-dot" style="background:var(--purple)"></span>ROUTES</button>
+  <button class="lc-btn on" data-layer="labels" onclick="toggleLayer(this)"><span class="lc-dot" style="background:var(--muted)"></span>LABELS</button>
+</div>
+
+<!-- Floor Selector -->
+<div class="floor-selector">
+  <button class="fs-btn" onclick="setFloor(3)">3F</button>
+  <button class="fs-btn" onclick="setFloor(2)">2F</button>
+  <button class="fs-btn" onclick="setFloor(1)">1F</button>
+  <button class="fs-btn active" onclick="setFloor(0)">G</button>
+</div>
+
+<!-- Back -->
+<a href="hub.html" class="back-btn">← Hub</a>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+'use strict';
+
+// ── Hard Rock Stadium GIS Data ──────────────────────────────────────────────
+const VENUE = {
+  center: [-80.239018, 25.957746],
+  zoom: 17.2,
+  pitch: 52,
+  bearing: -15,
+};
+
+const ZONES_GEO = {
+  type: 'FeatureCollection',
+  features: [
+    // Stadium bowl (oval footprint)
+    {type:'Feature',id:'bowl',geometry:{type:'Polygon',coordinates:[[
+      [-80.2407,25.9572],[-80.2405,25.9565],[-80.2398,25.9560],[-80.2388,25.9558],
+      [-80.2378,25.9560],[-80.2372,25.9566],[-80.2370,25.9574],[-80.2371,25.9582],
+      [-80.2375,25.9589],[-80.2382,25.9594],[-80.2391,25.9596],[-80.2401,25.9595],
+      [-80.2407,25.9589],[-80.2410,25.9581],[-80.2409,25.9574],[-80.2407,25.9572]
+    ]]},properties:{id:'bowl',label:'Stadium Bowl',type:'bowl',floor:0,capacity:65000,fill:'#0a0f1e',stroke:'#1a2040',access:0}},
+
+    // North Concourse (100-level)
+    {type:'Feature',id:'conc-north',geometry:{type:'Polygon',coordinates:[[
+      [-80.2405,25.9590],[-80.2400,25.9596],[-80.2391,25.9599],[-80.2381,25.9597],
+      [-80.2375,25.9591],[-80.2372,25.9589],[-80.2375,25.9589],[-80.2382,25.9594],
+      [-80.2391,25.9596],[-80.2401,25.9595],[-80.2407,25.9589],[-80.2405,25.9590]
+    ]]},properties:{id:'conc-north',label:'North Concourse 100s',type:'concession',floor:0,capacity:4500,fill:'#5AA5FF18',stroke:'#5AA5FF',access:0}},
+
+    // South Concourse
+    {type:'Feature',id:'conc-south',geometry:{type:'Polygon',coordinates:[[
+      [-80.2407,25.9572],[-80.2398,25.9560],[-80.2388,25.9558],[-80.2378,25.9560],
+      [-80.2370,25.9566],[-80.2370,25.9564],[-80.2378,25.9556],[-80.2390,25.9553],
+      [-80.2400,25.9555],[-80.2409,25.9562],[-80.2410,25.9573],[-80.2407,25.9572]
+    ]]},properties:{id:'conc-south',label:'South Concourse 100s',type:'concession',floor:0,capacity:4000,fill:'#5AA5FF18',stroke:'#5AA5FF',access:0}},
+
+    // East Concourse
+    {type:'Feature',id:'conc-east',geometry:{type:'Polygon',coordinates:[[
+      [-80.2371,25.9582],[-80.2370,25.9574],[-80.2370,25.9566],[-80.2365,25.9566],
+      [-80.2363,25.9574],[-80.2363,25.9582],[-80.2365,25.9590],[-80.2370,25.9590],[-80.2371,25.9582]
+    ]]},properties:{id:'conc-east',label:'East Concourse',type:'concession',floor:0,capacity:3200,fill:'#5AA5FF18',stroke:'#5AA5FF',access:0}},
+
+    // West Concourse
+    {type:'Feature',id:'conc-west',geometry:{type:'Polygon',coordinates:[[
+      [-80.2409,25.9581],[-80.2410,25.9573],[-80.2409,25.9562],[-80.2415,25.9562],
+      [-80.2417,25.9572],[-80.2416,25.9582],[-80.2413,25.9590],[-80.2409,25.9589],[-80.2409,25.9581]
+    ]]},properties:{id:'conc-west',label:'West Concourse',type:'concession',floor:0,capacity:3200,fill:'#5AA5FF18',stroke:'#5AA5FF',access:0}},
+
+    // Gate A — North
+    {type:'Feature',id:'gate-a',geometry:{type:'Polygon',coordinates:[[
+      [-80.2400,25.9599],[-80.2381,25.9599],[-80.2380,25.9604],[-80.2401,25.9604],[-80.2400,25.9599]
+    ]]},properties:{id:'gate-a',label:'Gate A — North',type:'entry',floor:0,capacity:3000,fill:'#00e87a20',stroke:'#00e87a',access:0}},
+
+    // Gate C — East
+    {type:'Feature',id:'gate-c',geometry:{type:'Polygon',coordinates:[[
+      [-80.2363,25.9579],[-80.2363,25.9571],[-80.2358,25.9571],[-80.2358,25.9579],[-80.2363,25.9579]
+    ]]},properties:{id:'gate-c',label:'Gate C — East',type:'entry',floor:0,capacity:2500,fill:'#00e87a20',stroke:'#00e87a',access:0}},
+
+    // Gate B — West
+    {type:'Feature',id:'gate-b',geometry:{type:'Polygon',coordinates:[[
+      [-80.2420,25.9579],[-80.2420,25.9571],[-80.2416,25.9571],[-80.2416,25.9579],[-80.2420,25.9579]
+    ]]},properties:{id:'gate-b',label:'Gate B — West',type:'entry',floor:0,capacity:2500,fill:'#00e87a20',stroke:'#00e87a',access:0}},
+
+    // Gate D — South
+    {type:'Feature',id:'gate-d',geometry:{type:'Polygon',coordinates:[[
+      [-80.2400,25.9553],[-80.2380,25.9553],[-80.2380,25.9548],[-80.2400,25.9548],[-80.2400,25.9553]
+    ]]},properties:{id:'gate-d',label:'Gate D — South',type:'entry',floor:0,capacity:2000,fill:'#00e87a20',stroke:'#00e87a',access:0}},
+
+    // VIP East Suites (Club 72)
+    {type:'Feature',id:'vip-east',geometry:{type:'Polygon',coordinates:[[
+      [-80.2375,25.9586],[-80.2371,25.9586],[-80.2371,25.9570],[-80.2375,25.9570],[-80.2375,25.9586]
+    ]]},properties:{id:'vip-east',label:'Club 72 — VIP East',type:'vip',floor:2,capacity:500,fill:'#a855f720',stroke:'#a855f7',access:2}},
+
+    // VIP West Press Box
+    {type:'Feature',id:'vip-west',geometry:{type:'Polygon',coordinates:[[
+      [-80.2409,25.9586],[-80.2405,25.9586],[-80.2405,25.9570],[-80.2409,25.9570],[-80.2409,25.9586]
+    ]]},properties:{id:'vip-west',label:'Press Box — VIP West',type:'vip',floor:2,capacity:300,fill:'#a855f720',stroke:'#a855f7',access:3}},
+
+    // Accreditation Zone East
+    {type:'Feature',id:'acc-east',geometry:{type:'Polygon',coordinates:[[
+      [-80.2368,25.9584],[-80.2363,25.9584],[-80.2363,25.9579],[-80.2368,25.9579],[-80.2368,25.9584]
+    ]]},properties:{id:'acc-east',label:'Accreditation — East',type:'accreditation',floor:0,capacity:300,fill:'#FFba3820',stroke:'#FFba38',access:2}},
+
+    // Field / Pitch
+    {type:'Feature',id:'field',geometry:{type:'Polygon',coordinates:[[
+      [-80.2400,25.9582],[-80.2395,25.9589],[-80.2385,25.9589],[-80.2380,25.9582],
+      [-80.2380,25.9570],[-80.2385,25.9562],[-80.2395,25.9562],[-80.2400,25.9570],[-80.2400,25.9582]
+    ]]},properties:{id:'field',label:'Playing Field',type:'restricted',floor:0,capacity:50,fill:'#00e87a14',stroke:'#00e87a',access:4}},
+  ]
+};
+
+// Hubs (inventory storage)
+const HUBS = [
+  {id:'hub-north', name:'Hub North',  coords:[-80.2390,25.9601], floor:0},
+  {id:'hub-south', name:'Hub South',  coords:[-80.2390,25.9547], floor:0},
+  {id:'hub-east',  name:'Hub East',   coords:[-80.2356,25.9577], floor:1},
+  {id:'hub-west',  name:'Hub West',   coords:[-80.2423,25.9577], floor:1},
+  {id:'hub-upper', name:'Hub Upper',  coords:[-80.2390,25.9577], floor:3},
+];
+
+// Bars / concession points
+const BARS = [
+  {id:'barA1', name:'Bar A1', zone:'conc-north', coords:[-80.2397,25.9597], hub:'hub-north'},
+  {id:'barA2', name:'Bar A2', zone:'conc-north', coords:[-80.2383,25.9597], hub:'hub-north'},
+  {id:'barB1', name:'Bar B1', zone:'conc-west',  coords:[-80.2414,25.9580], hub:'hub-west'},
+  {id:'barB2', name:'Bar B2', zone:'conc-west',  coords:[-80.2414,25.9568], hub:'hub-west'},
+  {id:'barC1', name:'Bar C1', zone:'conc-east',  coords:[-80.2366,25.9580], hub:'hub-east'},
+  {id:'barC2', name:'Bar C2', zone:'conc-east',  coords:[-80.2366,25.9568], hub:'hub-east'},
+  {id:'barD1', name:'Bar D1', zone:'conc-south', coords:[-80.2396,25.9556], hub:'hub-south'},
+  {id:'barD2', name:'Bar D2', zone:'conc-south', coords:[-80.2384,25.9556], hub:'hub-south'},
+  {id:'vipBar',name:'VIP Bar',zone:'vip-east',   coords:[-80.2373,25.9578], hub:'hub-east'},
+  {id:'upperB',name:'Upper Bar',zone:'conc-north',coords:[-80.2390,25.9577], hub:'hub-upper'},
+];
+
+// Checkpoints
+const CHECKPOINTS = [
+  {id:'cp-a1', name:'Checkpoint A1', coords:[-80.2395,25.9601], zone:'gate-a', status:'active'},
+  {id:'cp-a2', name:'Checkpoint A2', coords:[-80.2385,25.9601], zone:'gate-a', status:'active'},
+  {id:'cp-c1', name:'Checkpoint C1', coords:[-80.2360,25.9576], zone:'gate-c', status:'active'},
+  {id:'cp-b1', name:'Checkpoint B1', coords:[-80.2418,25.9576], zone:'gate-b', status:'alert'},
+  {id:'cp-d1', name:'Checkpoint D1', coords:[-80.2390,25.9550], zone:'gate-d', status:'offline'},
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let map, activeScene = 'operations', activeFloor = 0;
+let staffPositions = [], crowdData = [], activeAlerts = [];
+let layerVisibility = {zones:true, staff:true, heatmap:true, inventory:true, routes:true, labels:true};
+let simInterval, crowdInterval, statsInterval;
+let selectedEntity = null;
+
+// ── Map Init ───────────────────────────────────────────────────────────────
+map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    sources: {
+      'carto-dark': {
+        type: 'raster',
+        tiles: [
+          'https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+          'https://b.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+        ],
+        tileSize: 256,
+        attribution: '© CARTO © OpenStreetMap',
+        maxzoom: 20,
+      }
+    },
+    layers: [{ id: 'carto-base', type: 'raster', source: 'carto-dark' }]
+  },
+  center: VENUE.center,
+  zoom: VENUE.zoom,
+  pitch: VENUE.pitch,
+  bearing: VENUE.bearing,
+  maxZoom: 22,
+  minZoom: 10,
+  hash: false,
+});
+
+map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+
+map.on('load', () => {
+  initSources();
+  addLayers();
+  loadBPDBData();
+  startSimulation();
+  renderZoneList();
+  renderAlerts();
+  updateHUDStats();
+  toast('Hard Rock Stadium loaded — Live operations active', 'success');
+});
+
+// ── Sources Init ───────────────────────────────────────────────────────────
+function initSources() {
+  // Zone polygons
+  map.addSource('zones', { type: 'geojson', data: ZONES_GEO, generateId: true });
+
+  // Hubs
+  map.addSource('hubs', {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: HUBS.map(h => ({
+      type: 'Feature', id: h.id,
+      geometry: { type: 'Point', coordinates: h.coords },
+      properties: { ...h, inv: 0.7 }
+    }))}
+  });
+
+  // Bars
+  map.addSource('bars', {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: BARS.map(b => ({
+      type: 'Feature', id: b.id,
+      geometry: { type: 'Point', coordinates: b.coords },
+      properties: { ...b, inv: Math.random() * 0.7 + 0.2 }
+    }))}
+  });
+
+  // Checkpoints
+  map.addSource('checkpoints', {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: CHECKPOINTS.map(cp => ({
+      type: 'Feature', id: cp.id,
+      geometry: { type: 'Point', coordinates: cp.coords },
+      properties: cp
+    }))}
+  });
+
+  // Staff (realtime, updated every second)
+  map.addSource('staff', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+
+  // Crowd heatmap
+  map.addSource('crowd', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+
+  // Runner routes
+  map.addSource('routes', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+
+  // Alert zones (pulsing highlight)
+  map.addSource('alert-zones', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+}
+
+// ── Layer Stack ────────────────────────────────────────────────────────────
+function addLayers() {
+
+  // ── Crowd Heatmap (rendered below zones for blending)
+  map.addLayer({ id: 'crowd-heat', type: 'heatmap', source: 'crowd',
+    paint: {
+      'heatmap-weight': ['interpolate',['linear'],['get','density'],0,0,1,1],
+      'heatmap-intensity': ['interpolate',['linear'],['zoom'],14,0.5,20,2],
+      'heatmap-radius': ['interpolate',['linear'],['zoom'],14,20,20,50],
+      'heatmap-color': ['interpolate',['linear'],['heatmap-density'],
+        0,   'rgba(0,0,0,0)',
+        0.2, 'rgba(0,232,122,0.5)',
+        0.5, 'rgba(255,186,56,0.7)',
+        0.8, 'rgba(255,68,102,0.8)',
+        1,   'rgba(255,0,50,1)'
+      ],
+      'heatmap-opacity': 0.55,
+    }
+  });
+
+  // ── Zone fills
+  map.addLayer({ id: 'zone-fill', type: 'fill', source: 'zones',
+    paint: {
+      'fill-color': ['get','fill'],
+      'fill-opacity': ['interpolate',['linear'],['zoom'],14,0,16,0.6,20,0.85],
+    }
+  });
+
+  // Alert zone glow
+  map.addLayer({ id: 'alert-zone-fill', type: 'fill', source: 'alert-zones',
+    paint: { 'fill-color': '#FF4466', 'fill-opacity': 0.25 }
+  });
+
+  // Zone extrusion (3D walls)
+  map.addLayer({ id: 'zone-extrusion', type: 'fill-extrusion', source: 'zones',
+    filter: ['!=', ['get', 'type'], 'bowl'],
+    paint: {
+      'fill-extrusion-color': ['get', 'stroke'],
+      'fill-extrusion-height': 5,
+      'fill-extrusion-base': 0,
+      'fill-extrusion-opacity': ['interpolate',['linear'],['zoom'],15,0,17,0.15],
+    }
+  });
+
+  // Zone outlines
+  map.addLayer({ id: 'zone-outline', type: 'line', source: 'zones',
+    paint: {
+      'line-color': ['get', 'stroke'],
+      'line-width': ['interpolate',['linear'],['zoom'],14,0.5,20,2.5],
+      'line-opacity': 0.8,
+    }
+  });
+
+  // Alert outline pulse
+  map.addLayer({ id: 'alert-zone-outline', type: 'line', source: 'alert-zones',
+    paint: { 'line-color': '#FF4466', 'line-width': 3, 'line-opacity': 0.9 }
+  });
+
+  // ── Runner routes
+  map.addLayer({ id: 'route-line', type: 'line', source: 'routes',
+    paint: {
+      'line-color': '#a855f7',
+      'line-width': 2.5,
+      'line-opacity': 0.7,
+      'line-dasharray': [3, 2],
+    }
+  });
+
+  // ── Hubs
+  map.addLayer({ id: 'hub-circle', type: 'circle', source: 'hubs',
+    paint: {
+      'circle-radius': ['interpolate',['linear'],['zoom'],14,4,20,14],
+      'circle-color': '#FFba38',
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#04060e',
+      'circle-opacity': 0.9,
+    }
+  });
+
+  // ── Bars (color by inventory level)
+  map.addLayer({ id: 'bar-circle', type: 'circle', source: 'bars',
+    paint: {
+      'circle-radius': ['interpolate',['linear'],['zoom'],14,3,20,10],
+      'circle-color': [
+        'case',
+        ['<', ['get','inv'], 0.20], '#FF4466',
+        ['<', ['get','inv'], 0.40], '#FFba38',
+        '#00e87a'
+      ],
+      'circle-stroke-width': 1.5,
+      'circle-stroke-color': '#04060e',
+      'circle-opacity': 0.9,
+    }
+  });
+
+  // ── Checkpoints
+  map.addLayer({ id: 'checkpoint-circle', type: 'circle', source: 'checkpoints',
+    paint: {
+      'circle-radius': ['interpolate',['linear'],['zoom'],14,3,20,9],
+      'circle-color': [
+        'match', ['get','status'],
+        'active', '#00e87a',
+        'alert', '#FF4466',
+        'offline', '#4a5380',
+        '#FFba38'
+      ],
+      'circle-stroke-width': 1.5,
+      'circle-stroke-color': '#04060e',
+    }
+  });
+
+  // ── Staff dots
+  map.addLayer({ id: 'staff-shadow', type: 'circle', source: 'staff',
+    paint: {
+      'circle-radius': ['interpolate',['linear'],['zoom'],14,5,20,14],
+      'circle-color': ['get','color'],
+      'circle-opacity': 0.15,
+      'circle-blur': 1,
+    }
+  });
+
+  map.addLayer({ id: 'staff-circle', type: 'circle', source: 'staff',
+    paint: {
+      'circle-radius': ['interpolate',['linear'],['zoom'],14,3,20,8],
+      'circle-color': ['get','color'],
+      'circle-stroke-width': 1.5,
+      'circle-stroke-color': '#04060e',
+      'circle-opacity': 1,
+    }
+  });
+
+  // ── Labels
+  map.addLayer({ id: 'zone-label', type: 'symbol', source: 'zones',
+    filter: ['!=', ['get','type'], 'bowl'],
+    layout: {
+      'text-field': ['get','label'],
+      'text-font': ['Open Sans Bold','Arial Unicode MS Bold'],
+      'text-size': ['interpolate',['linear'],['zoom'],14,8,20,13],
+      'text-max-width': 8,
+      'text-anchor': 'center',
+    },
+    paint: {
+      'text-color': '#e8eaf6',
+      'text-halo-color': '#04060e',
+      'text-halo-width': 2,
+      'text-opacity': ['interpolate',['linear'],['zoom'],15,0,16.5,1],
+    }
+  });
+
+  map.addLayer({ id: 'hub-label', type: 'symbol', source: 'hubs',
+    layout: {
+      'text-field': ['concat', '⬡ ', ['get','name']],
+      'text-font': ['Open Sans Bold','Arial Unicode MS Bold'],
+      'text-size': 10,
+      'text-offset': [0, 1.4],
+      'text-anchor': 'top',
+    },
+    paint: { 'text-color': '#FFba38', 'text-halo-color': '#04060e', 'text-halo-width': 2 }
+  });
+
+  map.addLayer({ id: 'bar-label', type: 'symbol', source: 'bars',
+    minzoom: 17,
+    layout: {
+      'text-field': ['get','name'],
+      'text-font': ['Open Sans Bold','Arial Unicode MS Bold'],
+      'text-size': 9,
+      'text-offset': [0, 1.2],
+      'text-anchor': 'top',
+    },
+    paint: { 'text-color': '#e8eaf6', 'text-halo-color': '#04060e', 'text-halo-width': 2 }
+  });
+
+  map.addLayer({ id: 'staff-label', type: 'symbol', source: 'staff',
+    minzoom: 18,
+    layout: {
+      'text-field': ['get','name'],
+      'text-font': ['Open Sans Regular','Arial Unicode MS Regular'],
+      'text-size': 9,
+      'text-offset': [0, 1.2],
+      'text-anchor': 'top',
+    },
+    paint: { 'text-color': '#e8eaf6', 'text-halo-color': '#04060e', 'text-halo-width': 2 }
+  });
+
+  // ── Click Interactions
+  addClickHandlers();
+}
+
+// ── BPDB Integration ───────────────────────────────────────────────────────
+function loadBPDBData() {
+  if (!window.BPDB) return;
+
+  const staff = BPDB.getAllStaff({ status: 'active' });
+  const alerts = BPDB.getAlerts({ resolved: false });
+  const inventory = BPDB.getAllInventory();
+
+  // Place staff on map at zone positions
+  staffPositions = staff.map((s, i) => placeStaffInZone(s, i));
+  updateStaffLayer();
+
+  // Update bar inventory from BPDB
+  updateBarInventory(inventory);
+
+  // Show alerts
+  activeAlerts = alerts.map(a => ({
+    id: a.id, type: a.type,
+    msg: `${a.skuName} @ ${a.barName} — ${a.pct}% stock`,
+    zoneId: a.barId, severity: a.type === 'CRITICAL' ? 'crit' : 'warn',
+    ts: a.ts,
+  }));
+  addDemoAlerts();
+  renderAlerts();
+
+  // Update HUD
+  document.getElementById('hs-staff').textContent = staff.length;
+  document.getElementById('hs-alerts').textContent = activeAlerts.length;
+
+  const metrics = BPDB.getSalesMetrics({ from: new Date().setHours(0,0,0,0) });
+  document.getElementById('hs-revenue').textContent = '$' + Math.round(metrics.revenue).toLocaleString();
+
+  // Listen for BPDB events
+  BPDB.on('dispatch:new', d => {
+    drawRunnerRoute(d);
+    toast(`🚀 Runner dispatched: ${d.fromHubId} → ${d.toBarId}`, 'info');
+  });
+  BPDB.on('alert:new', a => {
+    activeAlerts.unshift({ id: a.id, type: a.type, msg: `${a.skuName} @ ${a.barName}`, severity: a.type === 'CRITICAL' ? 'crit' : 'warn', ts: Date.now() });
+    renderAlerts();
+    highlightAlertZone(a.barId);
+    document.getElementById('hs-alerts').textContent = activeAlerts.length;
+  });
+  BPDB.on('inventory:updated', () => updateBarInventory(BPDB.getAllInventory()));
+}
+
+function placeStaffInZone(staff, idx) {
+  const zoneMap = {
+    runner: ['conc-north','conc-south','conc-east','conc-west'],
+    bartender: ['conc-north','conc-south'],
+    manager: ['conc-north'],
+    supervisor: ['vip-east'],
+  };
+  const zones = zoneMap[staff.role] || ['conc-north'];
+  const zoneName = zones[idx % zones.length];
+  const base = getZoneCenter(zoneName);
+  const roleColors = { runner:'#5AA5FF', bartender:'#00e87a', manager:'#FFba38', supervisor:'#a855f7', admin:'#FF4466' };
+  return {
+    id: staff.id, staffRef: staff,
+    lng: base[0] + (Math.random() - 0.5) * 0.003,
+    lat: base[1] + (Math.random() - 0.5) * 0.002,
+    zone: zoneName, role: staff.role,
+    name: staff.name, color: roleColors[staff.role] || '#8090b8',
+    vx: (Math.random() - 0.5) * 0.00003,
+    vy: (Math.random() - 0.5) * 0.00002,
+  };
+}
+
+function getZoneCenter(zoneId) {
+  const centers = {
+    'conc-north': [-80.2390, 25.9595],
+    'conc-south': [-80.2390, 25.9558],
+    'conc-east':  [-80.2366, 25.9577],
+    'conc-west':  [-80.2413, 25.9577],
+    'vip-east':   [-80.2373, 25.9578],
+    'vip-west':   [-80.2407, 25.9578],
+    'gate-a':     [-80.2390, 25.9602],
+    'gate-c':     [-80.2360, 25.9575],
+    'field':      [-80.2390, 25.9576],
+    'acc-east':   [-80.2365, 25.9581],
+  };
+  return centers[zoneId] || VENUE.center;
+}
+
+function updateStaffLayer() {
+  const geojson = {
+    type: 'FeatureCollection',
+    features: staffPositions.map(s => ({
+      type: 'Feature', id: s.id,
+      geometry: { type: 'Point', coordinates: [s.lng, s.lat] },
+      properties: { id: s.id, name: s.name, role: s.role, color: s.color, zone: s.zone }
+    }))
+  };
+  if (map.getSource('staff')) map.getSource('staff').setData(geojson);
+}
+
+function updateBarInventory(inventory) {
+  if (!inventory || !map.getSource('bars')) return;
+  const source = map.getSource('bars');
+  const data = source._data || { type: 'FeatureCollection', features: [] };
+  // Map BPDB bar IDs to map bar IDs
+  const invByBar = {
+    'bar-01': BPDB.getInventory('bar-01'),
+    'bar-02': BPDB.getInventory('bar-02'),
+    'bar-03': BPDB.getInventory('bar-03'),
+    'bar-04': BPDB.getInventory('bar-04'),
+  };
+  const bpdbMap = { barA1:'bar-01', barA2:'bar-01', barB1:'bar-03', barB2:'bar-03', barC1:'bar-04', barC2:'bar-04', barD1:'bar-02', barD2:'bar-02', vipBar:'bar-02', upperB:'bar-04' };
+  data.features.forEach(f => {
+    const bpId = bpdbMap[f.id];
+    const loc = invByBar[bpId];
+    if (loc) {
+      const items = Object.values(loc.items);
+      const avgPct = items.reduce((s, i) => s + i.qty / i.max, 0) / items.length;
+      f.properties.inv = Math.max(0.05, avgPct);
+    }
+  });
+  source.setData(data);
+}
+
+function addDemoAlerts() {
+  activeAlerts.push(
+    { id:'demo-1', type:'CRITICAL', msg:'Domestic Beer at Bar C2 — 8% stock', severity:'crit', ts:Date.now()-120000 },
+    { id:'demo-2', type:'LOW',      msg:'Vodka at VIP Bar — 17% stock',        severity:'warn', ts:Date.now()-300000 },
+    { id:'demo-3', type:'LOW',      msg:'Gate B checkpoint offline',            severity:'warn', ts:Date.now()-600000 },
+  );
+}
+
+// ── Simulation (staff movement + crowd) ───────────────────────────────────
+function startSimulation() {
+  // Staff movement
+  simInterval = setInterval(() => {
+    staffPositions.forEach(s => {
+      // Brownian motion within zone bounds
+      s.lng += s.vx + (Math.random() - 0.5) * 0.00002;
+      s.lat += s.vy + (Math.random() - 0.5) * 0.000015;
+      // Slight velocity drift
+      s.vx = s.vx * 0.98 + (Math.random() - 0.5) * 0.000008;
+      s.vy = s.vy * 0.98 + (Math.random() - 0.5) * 0.000006;
+      // Clamp to stadium area
+      s.lng = Math.max(-80.2425, Math.min(-80.2355, s.lng));
+      s.lat = Math.max(25.9545, Math.min(25.9610, s.lat));
+    });
+    updateStaffLayer();
+  }, 800);
+
+  // Crowd heatmap
+  crowdInterval = setInterval(() => {
+    updateCrowdHeatmap();
+    updateHUDStats();
+  }, 2000);
+
+  // Initial crowd
+  updateCrowdHeatmap();
+}
+
+function updateCrowdHeatmap() {
+  const now = Date.now();
+  const crowdPoints = [];
+  // Simulate crowd concentrated at gates + concourses
+  const hotspots = [
+    { center: [-80.2390, 25.9601], density: 0.8 + Math.sin(now/15000) * 0.15, count: 40 },
+    { center: [-80.2360, 25.9575], density: 0.65 + Math.cos(now/12000) * 0.2, count: 30 },
+    { center: [-80.2418, 25.9576], density: 0.45 + Math.sin(now/18000) * 0.2, count: 25 },
+    { center: [-80.2390, 25.9550], density: 0.55 + Math.cos(now/14000) * 0.15, count: 28 },
+    { center: [-80.2395, 25.9595], density: 0.7,  count: 35 },
+    { center: [-80.2383, 25.9595], density: 0.6,  count: 28 },
+    { center: [-80.2415, 25.9580], density: 0.5,  count: 20 },
+    { center: [-80.2414, 25.9568], density: 0.35, count: 15 },
+    { center: [-80.2366, 25.9580], density: 0.55, count: 22 },
+    { center: [-80.2366, 25.9568], density: 0.4,  count: 18 },
+    { center: [-80.2373, 25.9578], density: 0.9,  count: 20 },  // VIP
+  ];
+  hotspots.forEach(h => {
+    for (let i = 0; i < h.count; i++) {
+      crowdPoints.push({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [
+          h.center[0] + (Math.random() - 0.5) * 0.004,
+          h.center[1] + (Math.random() - 0.5) * 0.003,
+        ]},
+        properties: { density: h.density * (0.7 + Math.random() * 0.3) }
+      });
+    }
+  });
+  if (map.getSource('crowd')) {
+    map.getSource('crowd').setData({ type: 'FeatureCollection', features: crowdPoints });
+  }
+  const avgDensity = hotspots.reduce((s, h) => s + h.density, 0) / hotspots.length;
+  document.getElementById('hs-crowd').textContent = Math.round(avgDensity * 100) + '%';
+  document.getElementById('hs-crowd').style.color = avgDensity > 0.8 ? 'var(--red)' : avgDensity > 0.6 ? 'var(--amber)' : 'var(--green)';
+}
+
+// ── Route Animation ────────────────────────────────────────────────────────
+let activeRoutes = [];
+function drawRunnerRoute(dispatch) {
+  const hubCoord = HUBS.find(h => h.id === dispatch.fromHubId)?.coords || VENUE.center;
+  const barCoord = BARS.find(b => b.id === dispatch.toBarId)?.coords || VENUE.center;
+  const routeFeature = {
+    type: 'Feature', id: dispatch.id,
+    geometry: {
+      type: 'LineString',
+      coordinates: [hubCoord, [
+        (hubCoord[0] + barCoord[0]) / 2 + (Math.random() - 0.5) * 0.002,
+        (hubCoord[1] + barCoord[1]) / 2 + (Math.random() - 0.5) * 0.001,
+      ], barCoord]
+    },
+    properties: { id: dispatch.id, runnerId: dispatch.runnerId }
+  };
+  activeRoutes.push(routeFeature);
+  if (activeRoutes.length > 8) activeRoutes.shift();
+  if (map.getSource('routes')) {
+    map.getSource('routes').setData({ type: 'FeatureCollection', features: activeRoutes });
+  }
+  // Auto-remove after 45s
+  setTimeout(() => {
+    activeRoutes = activeRoutes.filter(r => r.id !== dispatch.id);
+    if (map.getSource('routes')) map.getSource('routes').setData({ type: 'FeatureCollection', features: activeRoutes });
+  }, 45000);
+}
+
+function highlightAlertZone(zoneId) {
+  const zone = ZONES_GEO.features.find(f => f.id === zoneId || f.properties.id === zoneId);
+  if (!zone) return;
+  const existing = map.getSource('alert-zones')._data?.features || [];
+  existing.push({ ...zone });
+  map.getSource('alert-zones').setData({ type: 'FeatureCollection', features: existing });
+  setTimeout(() => {
+    const updated = (map.getSource('alert-zones')._data?.features || []).filter(f => f.id !== zoneId);
+    map.getSource('alert-zones').setData({ type: 'FeatureCollection', features: updated });
+  }, 8000);
+}
+
+// ── Click Handlers ─────────────────────────────────────────────────────────
+function addClickHandlers() {
+  // Zone click
+  map.on('click', 'zone-fill', e => {
+    const props = e.features[0].properties;
+    showZoneDetail(props);
+  });
+
+  // Hub click
+  map.on('click', 'hub-circle', e => {
+    const props = e.features[0].properties;
+    showHubDetail(props);
+  });
+
+  // Bar click
+  map.on('click', 'bar-circle', e => {
+    const props = e.features[0].properties;
+    showBarDetail(props);
+  });
+
+  // Staff click
+  map.on('click', 'staff-circle', e => {
+    const props = e.features[0].properties;
+    showStaffDetail(props);
+  });
+
+  // Hover cursors
+  ['zone-fill','hub-circle','bar-circle','staff-circle','checkpoint-circle'].forEach(layer => {
+    map.on('mouseenter', layer, () => map.getCanvas().style.cursor = 'pointer');
+    map.on('mouseleave', layer, () => map.getCanvas().style.cursor = '');
+  });
+
+  // Close detail on map click (empty area)
+  map.on('click', e => {
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: ['zone-fill','hub-circle','bar-circle','staff-circle']
+    });
+    if (!features.length) closeDetail();
+  });
+}
+
+// ── Detail Panel ───────────────────────────────────────────────────────────
+function showZoneDetail(props) {
+  const typeColors = { concession:'var(--blue)', entry:'var(--green)', vip:'var(--purple)', restricted:'var(--red)', accreditation:'var(--amber)', bowl:'var(--muted)' };
+  const col = typeColors[props.type] || 'var(--blue)';
+  document.getElementById('dp-title').textContent = props.label;
+  document.getElementById('dp-body').innerHTML = `
+    <div class="dp-section">ZONE INFO</div>
+    ${dpRow('Type', `<span style="color:${col}">${props.type?.toUpperCase()}</span>`)}
+    ${dpRow('Floor', 'Level ' + (props.floor || 0))}
+    ${dpRow('Capacity', (props.capacity || 0).toLocaleString())}
+    ${dpRow('Access Level', ['Public','Staff','Accredited','Restricted','Secure'][props.access || 0])}
+    <div class="dp-section">LIVE STATUS</div>
+    ${dpRow('Crowd', '<span style="color:var(--amber)">Estimated active</span>')}
+    ${dpRow('Staff On-site', staffPositions.filter(s => s.zone === props.id).length)}
+    ${dpRow('Active Alerts', activeAlerts.filter(a => a.zoneId === props.id).length || 0)}
+    <div class="dp-section">NEARBY</div>
+    ${BARS.filter(b => b.zone === props.id).map(b =>
+      `<div style="font-family:var(--mono);font-size:9px;padding:3px 0;color:var(--muted);">🍺 ${b.name}</div>`
+    ).join('') || '<div style="font-family:var(--mono);font-size:9px;color:var(--muted);">No bars in this zone</div>'}
+  `;
+  document.getElementById('dp-actions').innerHTML = `
+    <button class="dp-btn primary" onclick="flyToZone('${props.id}')">📍 Fly to Zone</button>
+    <button class="dp-btn secondary" onclick="window.open('BarPass_v10.html','_blank')">⚙ BarPass</button>
+  `;
+  openDetail();
+}
+
+function showBarDetail(props) {
+  const invPct = Math.round((props.inv || 0.5) * 100);
+  const invCol = invPct < 20 ? 'var(--red)' : invPct < 40 ? 'var(--amber)' : 'var(--green)';
+  const bpdbLoc = window.BPDB ? BPDB.getInventory('bar-01') : null;
+  const skuRows = bpdbLoc ? Object.entries(bpdbLoc.items).slice(0,5).map(([k,sku]) => {
+    const p = Math.round(sku.qty / sku.max * 100);
+    const c = p < 20 ? 'var(--red)' : p < 40 ? 'var(--amber)' : 'var(--green)';
+    return `<div class="dp-row"><span class="dp-lbl">${sku.emoji} ${sku.name}</span>
+      <span class="dp-val" style="color:${c}">${p}%</span></div>`;
+  }).join('') : '';
+  document.getElementById('dp-title').textContent = props.name;
+  document.getElementById('dp-body').innerHTML = `
+    <div class="dp-section">INVENTORY</div>
+    <div style="text-align:center;margin:8px 0;">
+      <div style="font-family:var(--mono);font-size:28px;font-weight:700;color:${invCol}">${invPct}%</div>
+      <div class="inv-bar" style="margin:4px auto;max-width:160px;"><div class="inv-fill" style="width:${invPct}%;background:${invCol}"></div></div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--muted);">OVERALL STOCK LEVEL</div>
+    </div>
+    <div class="dp-section">BY SKU</div>
+    ${skuRows || '<div style="font-family:var(--mono);font-size:9px;color:var(--muted);">No data</div>'}
+    <div class="dp-section">LOGISTICS</div>
+    ${dpRow('Hub', HUBS.find(h => h.id === props.hub)?.name || props.hub)}
+    ${dpRow('Zone', props.zone)}
+    ${dpRow('Runners nearby', staffPositions.filter(s => s.role === 'runner').length)}
+  `;
+  document.getElementById('dp-actions').innerHTML = `
+    <button class="dp-btn primary" onclick="requestRestock('${props.id}')">📦 Request Restock</button>
+    <button class="dp-btn secondary" onclick="window.open('inventory.html','_blank')">📋 Inventory</button>
+  `;
+  openDetail();
+}
+
+function showHubDetail(props) {
+  const loc = window.BPDB ? BPDB.getInventory(props.id.replace('hub-', 'hub-0') || 'hub-01') : null;
+  document.getElementById('dp-title').textContent = props.name;
+  document.getElementById('dp-body').innerHTML = `
+    <div class="dp-section">HUB STATUS</div>
+    ${dpRow('Location', 'Floor ' + (props.floor || 0))}
+    ${dpRow('Type', 'Inventory Hub')}
+    ${dpRow('Status', '<span style="color:var(--green)">● ACTIVE</span>')}
+    ${dpRow('Dispatches Active', activeRoutes.filter(r => r.properties.hubId === props.id).length)}
+    <div class="dp-section">CONNECTED BARS</div>
+    ${BARS.filter(b => b.hub === props.id).map(b =>
+      `<div class="dp-row"><span class="dp-lbl">🍺 ${b.name}</span><span class="dp-val" style="color:var(--green)">●</span></div>`
+    ).join('')}
+  `;
+  document.getElementById('dp-actions').innerHTML = `
+    <button class="dp-btn primary" onclick="window.open('BarPass_v10.html','_blank')">🚀 Open Dispatch</button>
+    <button class="dp-btn secondary" onclick="window.open('inventory.html','_blank')">📦 Inventory</button>
+  `;
+  openDetail();
+}
+
+function showStaffDetail(props) {
+  const staff = window.BPDB ? BPDB.getStaff(props.id) : null;
+  const metrics = (staff && window.BPDB) ? BPDB.getStaffMetricsFull?.(props.id) : null;
+  const roleColors = { runner:'var(--blue)', bartender:'var(--green)', manager:'var(--amber)', supervisor:'var(--purple)' };
+  document.getElementById('dp-title').textContent = props.name || 'Staff Member';
+  document.getElementById('dp-body').innerHTML = `
+    <div style="text-align:center;padding:10px 0;">
+      <div style="font-size:32px;">${staff?.avatarEmoji || '🧑'}</div>
+      <div style="font-size:12px;font-weight:600;margin-top:5px;">${props.name}</div>
+      <div style="font-family:var(--mono);font-size:9px;color:${roleColors[props.role]||'var(--muted)'};">${props.role?.toUpperCase()}</div>
+    </div>
+    <div class="dp-section">POSITION</div>
+    ${dpRow('Zone', staffPositions.find(s=>s.id===props.id)?.zone || '—')}
+    ${dpRow('Floor', 'Level 0')}
+    ${dpRow('Status', '<span style="color:var(--green)">● On Shift</span>')}
+    ${dpRow('Employee ID', staff?.employeeId || '—')}
+    <div class="dp-section">PERFORMANCE</div>
+    ${dpRow('Orders Today', metrics?.totalOrders || 0)}
+    ${dpRow('Revenue', '$' + Math.round(metrics?.totalRevenue || 0))}
+    ${dpRow('Dispatches', metrics?.totalDispatches || 0)}
+    <div class="dp-section">CERTIFICATIONS</div>
+    ${(staff?.certifications || []).map(c =>
+      `<div style="font-family:var(--mono);font-size:8px;padding:2px 0;color:var(--muted);">✓ ${c.replace(/-/g,' ')}</div>`
+    ).join('') || '<div style="font-family:var(--mono);font-size:9px;color:var(--muted);">None recorded</div>'}
+  `;
+  document.getElementById('dp-actions').innerHTML = `
+    <button class="dp-btn primary" onclick="window.open('users.html','_blank')">👤 Profile</button>
+    <button class="dp-btn secondary" onclick="assignTask(this,'${props.id}')">📋 Assign Task</button>
+  `;
+  openDetail();
+}
+
+function dpRow(label, value) {
+  return `<div class="dp-row"><span class="dp-lbl">${label}</span><span class="dp-val">${value}</span></div>`;
+}
+
+function openDetail()  { document.getElementById('detail-panel').classList.add('open'); }
+function closeDetail() { document.getElementById('detail-panel').classList.remove('open'); }
+
+function flyToZone(zoneId) {
+  const zone = ZONES_GEO.features.find(f => f.id === zoneId);
+  if (!zone) return;
+  const coords = zone.geometry.coordinates[0];
+  const lngs = coords.map(c => c[0]), lats = coords.map(c => c[1]);
+  map.flyTo({
+    center: [(Math.min(...lngs)+Math.max(...lngs))/2, (Math.min(...lats)+Math.max(...lats))/2],
+    zoom: 18.5, pitch: 55, duration: 1200
+  });
+}
+
+function requestRestock(barId) {
+  if (window.BPDB) {
+    BPDB.createRestockOrder({ locationId: 'bar-01', supplierId: 'sup-001', urgency: 'standard', createdBy: 'Map UI' });
+    toast(`📦 Restock requested for ${barId}`, 'success');
+  }
+  closeDetail();
+}
+
+function assignTask(btn, staffId) {
+  btn.textContent = '✓ Task Assigned';
+  btn.style.color = 'var(--green)';
+  toast(`Task assigned to staff`, 'success');
+}
+
+// ── Zone List ──────────────────────────────────────────────────────────────
+function renderZoneList() {
+  const zones = ZONES_GEO.features.filter(f => f.properties.type !== 'bowl');
+  document.getElementById('zone-count').textContent = zones.length + ' zones';
+  document.getElementById('zone-list').innerHTML = zones.map(z => {
+    const p = z.properties;
+    const typeColors = { concession:'#5AA5FF', entry:'#00e87a', vip:'#a855f7', restricted:'#FF4466', accreditation:'#FFba38' };
+    const col = typeColors[p.type] || '#8090b8';
+    const staffCount = staffPositions.filter(s => s.zone === p.id).length;
+    return `<div class="zone-row" onclick="flyToZone('${p.id}');showZoneDetail(${JSON.stringify(p).replace(/"/g,"'")})">
+      <div class="zone-dot" style="background:${col}"></div>
+      <div class="zone-info">
+        <div class="zone-name">${p.label}</div>
+        <div class="zone-meta">Floor ${p.floor} · ${staffCount} staff</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Alert List ─────────────────────────────────────────────────────────────
+function renderAlerts() {
+  document.getElementById('alert-count').textContent = activeAlerts.length + ' active';
+  const fmtAgo = ts => {
+    const s = Math.floor((Date.now() - ts) / 1000);
+    return s < 60 ? s + 's ago' : Math.floor(s/60) + 'm ago';
+  };
+  document.getElementById('alert-list').innerHTML = activeAlerts.slice(0, 10).map(a =>
+    `<div class="alert-row ${a.severity}" onclick="flyToAlert('${a.zoneId}')">
+      <span class="alert-icon">${a.severity==='crit'?'🚨':'⚠️'}</span>
+      <div>
+        <div class="alert-msg">${a.msg}</div>
+        <div class="alert-ts">${fmtAgo(a.ts||Date.now())}</div>
+      </div>
+    </div>`
+  ).join('') || '<div style="font-family:var(--mono);font-size:9px;color:var(--muted);padding:8px 4px;">No active alerts</div>';
+}
+
+function flyToAlert(zoneId) {
+  const zone = ZONES_GEO.features.find(f => f.id === zoneId || f.properties.id === zoneId);
+  if (zone) flyToZone(zone.id);
+}
+
+// ── HUD Stats ──────────────────────────────────────────────────────────────
+function updateHUDStats() {
+  document.getElementById('hs-staff').textContent = staffPositions.length;
+  document.getElementById('hs-alerts').textContent = activeAlerts.length;
+  if (window.BPDB) {
+    const metrics = BPDB.getSalesMetrics({ from: new Date().setHours(0,0,0,0) });
+    document.getElementById('hs-revenue').textContent = '$' + Math.round(metrics.revenue).toLocaleString();
+  }
+}
+
+// ── Scene Selector ─────────────────────────────────────────────────────────
+const SCENES = {
+  operations: { pitch: 52, zoom: 17.2, bearing: -15, label: 'Operations View' },
+  security:   { pitch: 60, zoom: 17.5, bearing: 0,   label: 'Security View' },
+  logistics:  { pitch: 45, zoom: 16.8, bearing: 10,  label: 'Logistics View' },
+  vip:        { pitch: 50, zoom: 18.5, bearing: -30, center: [-80.2373, 25.9578], label: 'VIP View' },
+  crowd:      { pitch: 70, zoom: 16.5, bearing: 0,   label: 'Crowd Intelligence' },
+};
+
+function setScene(btn) {
+  document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const scene = btn.dataset.scene;
+  activeScene = scene;
+  const cfg = SCENES[scene];
+  map.flyTo({
+    center: cfg.center || VENUE.center,
+    zoom: cfg.zoom, pitch: cfg.pitch, bearing: cfg.bearing,
+    duration: 1400
+  });
+  // Adjust layer visibility per scene
+  applySceneVisibility(scene);
+  toast(`Switched to ${cfg.label}`, 'info');
+}
+
+function applySceneVisibility(scene) {
+  const vis = {
+    operations: { heatmap: 'visible', routes: 'visible', staff: 'visible', zones: 'visible' },
+    security:   { heatmap: 'none',    routes: 'none',    staff: 'visible', zones: 'visible' },
+    logistics:  { heatmap: 'none',    routes: 'visible', staff: 'visible', zones: 'visible' },
+    vip:        { heatmap: 'visible', routes: 'none',    staff: 'visible', zones: 'visible' },
+    crowd:      { heatmap: 'visible', routes: 'none',    staff: 'none',    zones: 'visible' },
+  };
+  const cfg = vis[scene] || vis.operations;
+  const layerMap = {
+    heatmap: ['crowd-heat'],
+    routes:  ['route-line'],
+    staff:   ['staff-circle','staff-shadow','staff-label'],
+    zones:   ['zone-fill','zone-outline','zone-label'],
+  };
+  Object.entries(cfg).forEach(([key, v]) => {
+    (layerMap[key] || []).forEach(lid => {
+      if (map.getLayer(lid)) map.setLayoutProperty(lid, 'visibility', v);
+    });
+  });
+}
+
+// ── Layer Toggles ──────────────────────────────────────────────────────────
+const LAYER_GROUPS = {
+  zones:     ['zone-fill','zone-outline','zone-extrusion','zone-label','alert-zone-fill','alert-zone-outline'],
+  staff:     ['staff-circle','staff-shadow','staff-label'],
+  heatmap:   ['crowd-heat'],
+  inventory: ['hub-circle','hub-label','bar-circle','bar-label','checkpoint-circle'],
+  routes:    ['route-line'],
+  labels:    ['zone-label','hub-label','bar-label','staff-label'],
+};
+
+function toggleLayer(btn) {
+  const layer = btn.dataset.layer;
+  layerVisibility[layer] = !layerVisibility[layer];
+  btn.classList.toggle('on', layerVisibility[layer]);
+  const v = layerVisibility[layer] ? 'visible' : 'none';
+  (LAYER_GROUPS[layer] || []).forEach(lid => {
+    if (map.getLayer(lid)) map.setLayoutProperty(lid, 'visibility', v);
+  });
+}
+
+// ── Floor Selector ─────────────────────────────────────────────────────────
+function setFloor(floor) {
+  document.querySelectorAll('.fs-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  activeFloor = floor;
+  // Filter staff by floor
+  const visible = staffPositions.filter(s => (s.floor || 0) === floor || floor === 0);
+  const geojson = { type:'FeatureCollection', features: visible.map(s => ({
+    type:'Feature', id:s.id,
+    geometry:{type:'Point',coordinates:[s.lng,s.lat]},
+    properties:{...s}
+  }))};
+  if (map.getSource('staff')) map.getSource('staff').setData(geojson);
+  toast(`Viewing Floor ${floor === 0 ? 'G (Ground)' : floor}`, 'info');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+  const colors = { success:'#00e87a', error:'#FF4466', warning:'#FFba38', info:'#5AA5FF' };
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<div class="toast-dot" style="background:${colors[type]};box-shadow:0 0 5px ${colors[type]}"></div><span>${msg}</span>`;
+  const wrap = document.getElementById('toasts');
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+</script>
+</body>
+</html>
