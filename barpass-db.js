@@ -7,7 +7,7 @@
 (function (global) {
 
   const STORE_KEY = 'bp_enterprise_v1';
-  const STORE_VER = 3;
+  const STORE_VER = 4;
 
   // ── Default schema ──────────────────────────────────────────────────────────
   function defaults() {
@@ -37,6 +37,10 @@
       staff: {},
       shifts: [],
       reports: [],
+      restockOrders: [],
+      automationRules: defaultRules(),
+      automationLog: [],
+      suppliers: defaultSuppliers(),
     };
   }
 
@@ -68,6 +72,50 @@
       sku.min = sku.max * 0.2;
     });
     return items;
+  }
+
+  // ── Default automation rules ────────────────────────────────────────────────
+  function defaultRules() {
+    return [
+      {
+        id: 'rule-001', enabled: true, name: 'Auto-dispatch on CRITICAL stock',
+        description: 'When any bar drops below 10% stock, auto-create a runner dispatch from the nearest hub.',
+        trigger: { type: 'inventory_threshold', barType: 'bar', threshold: 0.10, comparison: 'lte' },
+        action:  { type: 'create_dispatch', fromHub: 'hub-01', priority: 'HIGH', note: 'AUTO: Critical restock' },
+        cooldown: 1800000, lastFired: null, fireCount: 0,
+      },
+      {
+        id: 'rule-002', enabled: true, name: 'Alert manager on LOW stock',
+        description: 'Send an alert to the manager dashboard when any SKU drops below 20%.',
+        trigger: { type: 'inventory_threshold', barType: 'bar', threshold: 0.20, comparison: 'lte' },
+        action:  { type: 'create_alert', severity: 'LOW', message: 'Inventory below 20% — review required' },
+        cooldown: 900000, lastFired: null, fireCount: 0,
+      },
+      {
+        id: 'rule-003', enabled: true, name: 'Auto-restock order when hub runs low',
+        description: 'When a hub drops below 30% on any SKU, create a supplier restock order automatically.',
+        trigger: { type: 'inventory_threshold', barType: 'hub', threshold: 0.30, comparison: 'lte' },
+        action:  { type: 'create_restock_order', supplierId: 'sup-001', urgency: 'standard' },
+        cooldown: 3600000, lastFired: null, fireCount: 0,
+      },
+      {
+        id: 'rule-004', enabled: false, name: 'End-of-shift inventory snapshot',
+        description: 'Every day at 11 PM, record a full inventory snapshot and generate a shift report.',
+        trigger: { type: 'schedule', cron: '0 23 * * *' },
+        action:  { type: 'generate_report', reportType: 'shift_summary' },
+        cooldown: 82800000, lastFired: null, fireCount: 0,
+      },
+    ];
+  }
+
+  // ── Default suppliers ────────────────────────────────────────────────────────
+  function defaultSuppliers() {
+    return [
+      { id: 'sup-001', name: 'Miami Beverage Co.', contact: 'Juan Pérez', phone: '+1-305-555-0101', email: 'orders@miamibev.com', leadTimeDays: 2, categories: ['Beer', 'N/A'], rating: 4.8 },
+      { id: 'sup-002', name: 'Premium Spirits LLC', contact: 'Sarah K.',  phone: '+1-305-555-0202', email: 'orders@premspirits.com', leadTimeDays: 3, categories: ['Spirits', 'Cocktail'], rating: 4.5 },
+      { id: 'sup-003', name: 'SunVine Wines',       contact: 'Carlos M.', phone: '+1-305-555-0303', email: 'orders@sunvine.com', leadTimeDays: 4, categories: ['Wine'], rating: 4.7 },
+      { id: 'sup-004', name: 'Stadium Foods Inc.',  contact: 'Lisa T.',   phone: '+1-305-555-0404', email: 'orders@stadiumfoods.com', leadTimeDays: 1, categories: ['Food'], rating: 4.6 },
+    ];
   }
 
   // ── BPDB ────────────────────────────────────────────────────────────────────
@@ -225,6 +273,8 @@
 
       this._save();
       this.emit('inventory:updated', { barId, skuId, sku, delta, reason });
+      // Evaluate automation rules after every inventory change
+      if (delta < 0) setTimeout(() => this.evaluateRules({ barId, skuId, pct: sku.qty / sku.max }), 0);
       return sku;
     },
 
@@ -496,6 +546,195 @@
 
       this._save();
       console.log('[BPDB] Demo data seeded:', this._d.transactions.length, 'transactions');
+    },
+
+    // ── AUTOMATION RULES ──────────────────────────────────────────────────────
+    getRules() { return this._d.automationRules || []; },
+
+    createRule(rule) {
+      const r = { id: 'rule-' + Date.now().toString(36), enabled: true, fireCount: 0, lastFired: null, createdAt: Date.now(), ...rule };
+      this._d.automationRules = this._d.automationRules || [];
+      this._d.automationRules.push(r);
+      this._save();
+      this.emit('rule:created', r);
+      return r;
+    },
+
+    updateRule(id, patch) {
+      const r = (this._d.automationRules || []).find(r => r.id === id);
+      if (!r) return null;
+      Object.assign(r, patch, { updatedAt: Date.now() });
+      this._save();
+      this.emit('rule:updated', r);
+      return r;
+    },
+
+    deleteRule(id) {
+      this._d.automationRules = (this._d.automationRules || []).filter(r => r.id !== id);
+      this._save();
+      this.emit('rule:deleted', { id });
+    },
+
+    toggleRule(id) {
+      const r = (this._d.automationRules || []).find(r => r.id === id);
+      if (r) { r.enabled = !r.enabled; this._save(); this.emit('rule:toggled', r); }
+      return r;
+    },
+
+    evaluateRules(context = {}) {
+      const rules = (this._d.automationRules || []).filter(r => r.enabled);
+      const fired = [];
+      rules.forEach(rule => {
+        const now = Date.now();
+        if (rule.lastFired && (now - rule.lastFired) < rule.cooldown) return; // cooldown active
+        let matches = false;
+
+        if (rule.trigger.type === 'inventory_threshold') {
+          const { barType, threshold, skuId } = rule.trigger;
+          const inv = this._d.inventory;
+          Object.entries(inv).forEach(([barId, bar]) => {
+            if (barType && bar.type !== barType) return;
+            Object.entries(bar.items).forEach(([sid, sku]) => {
+              if (skuId && sid !== skuId) return;
+              const pct = sku.qty / sku.max;
+              if (pct <= threshold) matches = true;
+            });
+          });
+        }
+
+        if (matches) {
+          rule.lastFired = now;
+          rule.fireCount = (rule.fireCount || 0) + 1;
+          const logEntry = { ts: now, ruleId: rule.id, ruleName: rule.name, action: rule.action, context };
+          this._d.automationLog = this._d.automationLog || [];
+          this._d.automationLog.unshift(logEntry);
+          if (this._d.automationLog.length > 500) this._d.automationLog = this._d.automationLog.slice(0, 500);
+
+          // Execute action
+          this._executeRuleAction(rule, context);
+          fired.push(rule);
+        }
+      });
+      if (fired.length) this._save();
+      return fired;
+    },
+
+    _executeRuleAction(rule, context) {
+      const action = rule.action;
+      try {
+        if (action.type === 'create_dispatch') {
+          this.recordDispatch({
+            fromHubId: action.fromHub || 'hub-01',
+            toBarId: context.barId || 'bar-01',
+            priority: action.priority || 'MID',
+            by: 'Automation',
+            note: action.note || rule.name,
+            autoTriggered: true,
+            ruleId: rule.id,
+          });
+        } else if (action.type === 'create_alert') {
+          this._upsertAlert(action.severity || 'LOW', context.barId || 'system', 'System', context.skuId || 'system', rule.name, 0, 0);
+        } else if (action.type === 'create_restock_order') {
+          this.createRestockOrder({
+            supplierId: action.supplierId || 'sup-001',
+            urgency: action.urgency || 'standard',
+            locationId: context.barId || 'hub-01',
+            triggeredByRule: rule.id,
+            autoTriggered: true,
+          });
+        }
+        this.emit('automation:fired', { rule, context, action });
+      } catch(e) { console.warn('[BPDB] Rule action failed:', e); }
+    },
+
+    getAutomationLog({ limit = 50 } = {}) {
+      return (this._d.automationLog || []).slice(0, limit);
+    },
+
+    // ── RESTOCK ORDERS ────────────────────────────────────────────────────────
+    createRestockOrder(order) {
+      const o = {
+        id: 'RST-' + Date.now().toString(36).toUpperCase(),
+        ts: Date.now(),
+        status: 'PENDING',
+        supplierId: order.supplierId || 'sup-001',
+        locationId: order.locationId || 'hub-01',
+        urgency: order.urgency || 'standard',
+        items: order.items || this._autoGenerateRestockItems(order.locationId),
+        note: order.note || '',
+        estimatedArrival: Date.now() + (order.urgency === 'urgent' ? 86400000 : 3 * 86400000),
+        triggeredByRule: order.triggeredByRule || null,
+        autoTriggered: order.autoTriggered || false,
+        createdBy: order.createdBy || 'System',
+        totalCost: 0,
+        history: [{ ts: Date.now(), status: 'PENDING', by: order.createdBy || 'System' }],
+      };
+      o.totalCost = o.items.reduce((s, i) => s + (i.cost || 0) * (i.qty || 0), 0);
+      this._d.restockOrders = this._d.restockOrders || [];
+      this._d.restockOrders.unshift(o);
+      if (this._d.restockOrders.length > 200) this._d.restockOrders = this._d.restockOrders.slice(0, 200);
+      this._save();
+      this.emit('restock:created', o);
+      return o;
+    },
+
+    _autoGenerateRestockItems(locationId) {
+      const bar = this._d.inventory[locationId];
+      if (!bar) return [];
+      return Object.entries(bar.items)
+        .filter(([, sku]) => (sku.qty / sku.max) < 0.35)
+        .map(([skuId, sku]) => ({
+          skuId, name: sku.name, emoji: sku.emoji,
+          currentQty: sku.qty, targetQty: sku.max,
+          qty: sku.max - sku.qty, cost: sku.cost, unit: sku.unit,
+        }));
+    },
+
+    updateRestockOrder(id, patch) {
+      const o = (this._d.restockOrders || []).find(o => o.id === id);
+      if (!o) return null;
+      const prevStatus = o.status;
+      Object.assign(o, patch, { updatedAt: Date.now() });
+      o.history.push({ ts: Date.now(), status: patch.status || prevStatus, by: patch.updatedBy || 'Staff', note: patch.note });
+
+      if (patch.status === 'RECEIVED') {
+        // Auto-update inventory on receipt
+        (o.items || []).forEach(item => {
+          if (item.skuId && item.qty) {
+            this.updateInventory(o.locationId, item.skuId, item.qty, 'RESTOCK_ORDER', o.id);
+          }
+        });
+      }
+      this._save();
+      this.emit('restock:updated', o);
+      return o;
+    },
+
+    getRestockOrders({ status, locationId, limit = 50 } = {}) {
+      let list = this._d.restockOrders || [];
+      if (status)     list = list.filter(o => o.status === status);
+      if (locationId) list = list.filter(o => o.locationId === locationId);
+      return list.slice(0, limit);
+    },
+
+    // ── SUPPLIERS ─────────────────────────────────────────────────────────────
+    getSuppliers() { return this._d.suppliers || []; },
+
+    getSupplier(id) { return (this._d.suppliers || []).find(s => s.id === id); },
+
+    createSupplier(supplier) {
+      const s = { id: 'sup-' + Date.now().toString(36), createdAt: Date.now(), rating: 5, ...supplier };
+      this._d.suppliers = this._d.suppliers || [];
+      this._d.suppliers.push(s);
+      this._save();
+      this.emit('supplier:created', s);
+      return s;
+    },
+
+    updateSupplier(id, patch) {
+      const s = (this._d.suppliers || []).find(s => s.id === id);
+      if (s) { Object.assign(s, patch); this._save(); this.emit('supplier:updated', s); }
+      return s;
     },
 
     // ── DEV UTILITIES ─────────────────────────────────────────────────────────

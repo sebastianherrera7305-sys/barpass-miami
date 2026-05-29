@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarPass Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="barpass-db.js"></script>
+<style>
+:root{
+  --bg:#04060e;--surface:#080c1a;--card:#0c1022;--border:#1a2040;
+  --text:#e8eaf6;--muted:#4a5380;--green:#00e87a;--amber:#FFba38;
+  --red:#FF4466;--blue:#5AA5FF;--purple:#a855f7;--cyan:#06b6d4;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);}
+/* ── Header ── */
+.hdr{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:12px;height:56px;}
+.logo-pill{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:13px;color:#04060e;flex-shrink:0;}
+.hdr-title{font-weight:700;font-size:16px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hdr-clock{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto;}
+.hdr-nav{display:flex;gap:6px;}
+.hdr-btn{padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;}
+.hdr-btn:hover,.hdr-btn.active{border-color:var(--green);color:var(--green);background:#00e87a10;}
+/* ── KPI ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 24px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.g::before{background:var(--green);}
+.kpi.b::before{background:var(--blue);}
+.kpi.a::before{background:var(--amber);}
+.kpi.r::before{background:var(--red);}
+.kpi.p::before{background:var(--purple);}
+.kpi-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.kpi-val{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;}
+.kpi.g .kpi-val{color:var(--green);}
+.kpi.b .kpi-val{color:var(--blue);}
+.kpi.a .kpi-val{color:var(--amber);}
+.kpi.r .kpi-val{color:var(--red);}
+.kpi.p .kpi-val{color:var(--purple);}
+.kpi-sub{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:5px;}
+/* ── Tabs ── */
+.tabs{display:flex;gap:2px;padding:0 24px;border-bottom:1px solid var(--border);position:sticky;top:56px;z-index:90;background:var(--bg);}
+.tab{padding:10px 18px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
+.tab-pane{display:none;padding:20px 24px;}
+.tab-pane.active{display:block;}
+/* ── Section header ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-title{font-size:13px;font-weight:600;}
+/* ── Buttons ── */
+.btn-primary{padding:8px 16px;border-radius:8px;border:none;background:var(--green);color:#04060e;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.04em;}
+.btn-primary:hover{background:#00ff88;}
+.btn-secondary{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .15s;}
+.btn-secondary:hover{border-color:var(--text);}
+.btn-sm{padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:9px;cursor:pointer;transition:all .15s;}
+.btn-sm:hover{border-color:var(--text);color:var(--text);}
+.btn-sm.danger:hover{border-color:var(--red);color:var(--red);}
+.btn-sm.success{border-color:var(--green);color:var(--green);background:#00e87a08;}
+/* ── Alerts ── */
+.alert-card{border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.alert-card.critical{background:#FF446610;border:1px solid #FF446640;}
+.alert-card.low{background:#FFba3810;border:1px solid #FFba3840;}
+.alert-label{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.alert-card.critical .alert-label{background:#FF446620;color:var(--red);}
+.alert-card.low .alert-label{background:#FFba3820;color:var(--amber);}
+.alert-info{flex:1;min-width:0;}
+.alert-title{font-size:12px;font-weight:600;margin-bottom:2px;}
+.alert-sub{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.alert-pct{font-family:var(--mono);font-size:18px;font-weight:700;}
+.alert-card.critical .alert-pct{color:var(--red);}
+.alert-card.low .alert-pct{color:var(--amber);}
+.alert-actions{display:flex;gap:6px;flex-shrink:0;}
+/* ── Health grid ── */
+.health-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.health-row:last-child{border-bottom:none;}
+.health-emoji{width:24px;text-align:center;font-size:14px;}
+.health-name{flex:1;font-weight:500;}
+.health-bar-wrap{width:80px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.health-bar-fill{height:100%;border-radius:2px;}
+.health-bar-fill.ok{background:var(--green);}
+.health-bar-fill.low{background:var(--amber);}
+.health-bar-fill.critical{background:var(--red);animation:barPulse 1.5s ease infinite;}
+@keyframes barPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.health-pct{font-family:var(--mono);font-size:9px;min-width:30px;text-align:right;}
+.health-pct.ok{color:var(--green);}
+.health-pct.low{color:var(--amber);}
+.health-pct.critical{color:var(--red);}
+.health-location{font-family:var(--mono);font-size:8px;color:var(--muted);min-width:90px;}
+/* ── Accordion ── */
+.accordion{margin-bottom:8px;}
+.acc-header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .15s;}
+.acc-header:hover{border-color:var(--green);}
+.acc-header.open{border-radius:10px 10px 0 0;border-bottom-color:transparent;}
+.acc-name{font-size:13px;font-weight:600;flex:1;}
+.acc-body{background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;display:none;}
+.acc-body.open{display:block;}
+.zone-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:8px;font-weight:700;}
+.zone-chip.bar{background:#00e87a14;color:var(--green);}
+.zone-chip.hub{background:#5AA5FF14;color:var(--blue);}
+.zone-chip.vip{background:#a855f714;color:var(--purple);}
+.acc-health{display:flex;align-items:center;gap:6px;}
+.acc-health-bar{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.acc-health-fill{height:100%;border-radius:2px;}
+/* ── SKU table ── */
+.sku-table{width:100%;border-collapse:collapse;}
+.sku-table th{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;padding:8px 14px;text-align:left;border-bottom:1px solid var(--border);}
+.sku-table td{font-size:11px;padding:8px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.sku-table tr:last-child td{border-bottom:none;}
+.sku-table tr:hover td{background:#ffffff04;}
+.sku-name-cell{display:flex;align-items:center;gap:8px;}
+.sku-emoji{font-size:16px;}
+.pct-bar{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle;}
+.pct-fill{height:100%;border-radius:2px;transition:width .4s;}
+.pct-fill.ok{background:var(--green);}
+.pct-fill.low{background:var(--amber);}
+.pct-fill.critical{background:var(--red);}
+.status-badge{display:inline-flex;padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:8px;font-weight:700;}
+.status-badge.ok{background:#00e87a14;color:var(--green);}
+.status-badge.low{background:#FFba3814;color:var(--amber);}
+.status-badge.critical{background:#FF446614;color:var(--red);}
+.qty-edit{width:60px;padding:3px 6px;border-radius:5px;border:1px solid var(--purple);background:var(--card);color:var(--text);font-family:var(--mono);font-size:11px;text-align:center;}
+.qty-btn{width:24px;height:24px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:14px;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;}
+.qty-btn:hover{border-color:var(--green);color:var(--green);}
+.acc-footer{padding:10px 14px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+/* ── Transfer panel ── */
+.transfer-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:16px;}
+.transfer-title{font-size:13px;font-weight:600;margin-bottom:14px;}
+.transfer-row{display:grid;grid-template-columns:1fr 1fr 1fr 80px auto;gap:10px;align-items:end;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-label{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;}
+.form-input{padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--mono);font-size:10px;outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:var(--green);}
+/* ── Restock orders ── */
+.order-form-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.order-form-header{padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.order-form-body{padding:16px;display:none;}
+.order-form-body.open{display:block;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
+.items-builder{margin-bottom:14px;}
+.item-row{display:grid;grid-template-columns:1fr 80px 80px 80px 28px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);}
+.item-row:last-child{border-bottom:none;}
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.order-hdr{padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.order-id{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--blue);}
+.order-body{padding:14px 16px;}
+.order-items{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
+.oi-row{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--muted);}
+.oi-row .oi-name{color:var(--text);flex:1;}
+.order-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);}
+.order-cost{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green);}
+.order-actions{display:flex;gap:6px;}
+.order-status{display:inline-flex;align-items:center;padding:3px 8px;border-radius:5px;font-family:var(--mono);font-size:9px;font-weight:700;}
+.order-status.PENDING{background:#FFba3814;color:var(--amber);}
+.order-status.CONFIRMED{background:#5AA5FF14;color:var(--blue);}
+.order-status.SHIPPED{background:#a855f714;color:var(--purple);}
+.order-status.RECEIVED{background:#00e87a14;color:var(--green);}
+.order-status.CANCELLED{background:#FF446614;color:var(--red);}
+.urgency-badge{display:inline-flex;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:8px;font-weight:700;}
+.urgency-badge.standard{background:var(--border);color:var(--muted);}
+.urgency-badge.urgent{background:#FFba3814;color:var(--amber);}
+.urgency-badge.emergency{background:#FF446614;color:var(--red);}
+/* ── Suppliers ── */
+.supplier-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+.sup-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.sup-name{font-size:13px;font-weight:600;margin-bottom:4px;}
+.sup-contact{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:10px;}
+.sup-detail{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.sup-cats{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px;}
+.cat-chip{padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:8px;background:var(--surface);border:1px solid var(--border);color:var(--muted);}
+.stars{color:var(--amber);font-size:12px;}
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.modal-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:14px;font-weight:600;}
+.modal-close{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:14px;}
+.modal-body{padding:20px;}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+/* ── Toast ── */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:6px;}
+.toast{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tin .2s ease;max-width:300px;}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.toast.out{animation:tout .2s ease forwards;}
+@keyframes tout{to{opacity:0;transform:translateY(6px)}}
+.toast-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+/* Flash animation */
+@keyframes flash{0%{background:#00e87a18}100%{background:transparent}}
+.flash-row{animation:flash .8s ease;}
+@media(max-width:900px){
+  .kpi-strip{grid-template-columns:1fr 1fr;}
+  .transfer-row{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;}
+  .form-grid{grid-template-columns:1fr 1fr;}
+  .hdr-nav .hdr-btn:not(:first-child){display:none;}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo-pill">BP</div>
+  <div class="hdr-title">Inventory</div>
+  <div class="live-dot"></div>
+  <div class="hdr-clock" id="hdr-clock">--:--:--</div>
+  <nav class="hdr-nav">
+    <button class="hdr-btn" onclick="location.href='BarPass_v10.html'">← BarPass</button>
+    <button class="hdr-btn" onclick="location.href='analytics.html'">📊 Analytics</button>
+    <button class="hdr-btn" onclick="location.href='automation.html'">⚙️ Automation</button>
+  </nav>
+</header>
+
+<div class="kpi-strip">
+  <div class="kpi g"><div class="kpi-lbl">Total Locations</div><div class="kpi-val" id="kpi-locs">—</div><div class="kpi-sub" id="kpi-locs-sub">bars + hubs</div></div>
+  <div class="kpi r"><div class="kpi-lbl">Critical SKUs</div><div class="kpi-val" id="kpi-crit">—</div><div class="kpi-sub">need immediate restock</div></div>
+  <div class="kpi a"><div class="kpi-lbl">Inventory Value</div><div class="kpi-val" id="kpi-value">—</div><div class="kpi-sub">at cost across all locations</div></div>
+  <div class="kpi p"><div class="kpi-lbl">Pending Orders</div><div class="kpi-val" id="kpi-orders">—</div><div class="kpi-sub">restock orders open</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('overview',this)">OVERVIEW</div>
+  <div class="tab" onclick="switchTab('locations',this)">LOCATIONS</div>
+  <div class="tab" onclick="switchTab('restock',this)">RESTOCK</div>
+  <div class="tab" onclick="switchTab('suppliers',this)">SUPPLIERS</div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="tab-pane active" id="pane-overview">
+  <div id="alerts-section"></div>
+  <div class="sec-hdr" style="margin-top:16px;">
+    <div class="sec-title">Inventory Health — Items Below Threshold</div>
+    <button class="btn-secondary" onclick="switchTab('locations',document.querySelectorAll('.tab')[1])">View All →</button>
+  </div>
+  <div id="health-list"></div>
+</div>
+
+<!-- LOCATIONS -->
+<div class="tab-pane" id="pane-locations">
+  <div id="accordion-list"></div>
+
+  <div class="transfer-card">
+    <div class="transfer-title">📦 Transfer Stock Between Locations</div>
+    <div class="transfer-row">
+      <div class="form-group">
+        <div class="form-label">FROM</div>
+        <select class="form-input" id="xfer-from" onchange="populateXferSkus()"></select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">TO</div>
+        <select class="form-input" id="xfer-to"></select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">SKU</div>
+        <select class="form-input" id="xfer-sku"></select>
+      </div>
+      <div class="form-group">
+        <div class="form-label">QTY</div>
+        <input class="form-input" type="number" id="xfer-qty" min="1" value="10" style="width:80px;">
+      </div>
+      <div class="form-group">
+        <div class="form-label">&nbsp;</div>
+        <button class="btn-primary" onclick="doTransfer()">Transfer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESTOCK -->
+<div class="tab-pane" id="pane-restock">
+  <div class="order-form-card">
+    <div class="order-form-header" onclick="toggleOrderForm()">
+      <div style="font-size:13px;font-weight:600;">+ Create Restock Order</div>
+      <div id="order-form-arrow" style="color:var(--muted);font-size:12px;">▼</div>
+    </div>
+    <div class="order-form-body" id="order-form-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="form-label">LOCATION</div>
+          <select class="form-input" id="ro-location" onchange="autoFillOrderItems()"></select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">SUPPLIER</div>
+          <select class="form-input" id="ro-supplier"></select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">URGENCY</div>
+          <select class="form-input" id="ro-urgency">
+            <option value="standard">Standard (2-3 days)</option>
+            <option value="urgent">Urgent (1 day)</option>
+            <option value="emergency">Emergency (same day)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:12px;">
+        <div class="form-label">ITEMS TO ORDER</div>
+        <div class="items-builder" id="items-builder">
+          <div style="color:var(--muted);font-family:var(--mono);font-size:10px;padding:8px 0;">Select a location to auto-populate low stock items</div>
+        </div>
+        <button class="btn-sm" onclick="addOrderItem()" style="margin-top:6px;">+ Add Item</button>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <div class="form-label">NOTE (optional)</div>
+        <input class="form-input" id="ro-note" placeholder="Additional instructions...">
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <button class="btn-secondary" onclick="toggleOrderForm()">Cancel</button>
+        <button class="btn-primary" onclick="submitRestockOrder()">Submit Order</button>
+      </div>
+    </div>
+  </div>
+  <div id="orders-list"></div>
+</div>
+
+<!-- SUPPLIERS -->
+<div class="tab-pane" id="pane-suppliers">
+  <div class="sec-hdr">
+    <div class="sec-title">Approved Suppliers</div>
+    <button class="btn-primary" onclick="openSupplierModal()">+ Add Supplier</button>
+  </div>
+  <div class="supplier-grid" id="supplier-grid"></div>
+</div>
+
+<!-- Adjust Modal -->
+<div class="modal-overlay" id="adjust-modal" style="display:none;" onclick="if(event.target===this)closeAdjust()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="adjust-title">Adjust Stock</div>
+      <button class="modal-close" onclick="closeAdjust()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:12px;">
+        <div class="form-label">ADJUSTMENT (+/-)</div>
+        <input class="form-input" type="number" id="adj-delta" value="0" placeholder="e.g. -5 for waste, +20 for restock">
+      </div>
+      <div class="form-group">
+        <div class="form-label">REASON</div>
+        <select class="form-input" id="adj-reason">
+          <option value="RECOUNT">Inventory Recount</option>
+          <option value="RESTOCK">Manual Restock</option>
+          <option value="WASTE">Waste / Spoilage</option>
+          <option value="DAMAGED">Damaged Goods</option>
+          <option value="TRANSFER">Transfer</option>
+          <option value="OTHER">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeAdjust()">Cancel</button>
+      <button class="btn-primary" onclick="submitAdjust()">Apply Adjustment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Supplier Modal -->
+<div class="modal-overlay" id="sup-modal" style="display:none;" onclick="if(event.target===this)closeSupplierModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">Add Supplier</div>
+      <button class="modal-close" onclick="closeSupplierModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group" style="margin-bottom:12px;"><div class="form-label">COMPANY NAME</div><input class="form-input" id="sup-name" placeholder="Miami Beverage Co."></div>
+      <div class="form-group" style="margin-bottom:12px;"><div class="form-label">CONTACT NAME</div><input class="form-input" id="sup-contact" placeholder="John Smith"></div>
+      <div class="form-group" style="margin-bottom:12px;"><div class="form-label">PHONE</div><input class="form-input" id="sup-phone" placeholder="+1-305-555-0100"></div>
+      <div class="form-group" style="margin-bottom:12px;"><div class="form-label">EMAIL</div><input class="form-input" id="sup-email" placeholder="orders@supplier.com"></div>
+      <div class="form-group" style="margin-bottom:12px;"><div class="form-label">LEAD TIME (days)</div><input class="form-input" type="number" id="sup-lead" value="2" min="1"></div>
+      <div class="form-group"><div class="form-label">CATEGORIES (comma separated)</div><input class="form-input" id="sup-cats" placeholder="Beer, Spirits, Wine"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeSupplierModal()">Cancel</button>
+      <button class="btn-primary" onclick="submitSupplier()">Add Supplier</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ── Clock ──
+setInterval(()=>{document.getElementById('hdr-clock').textContent=new Date().toLocaleTimeString('en-US',{hour12:false});},1000);
+document.getElementById('hdr-clock').textContent=new Date().toLocaleTimeString('en-US',{hour12:false});
+
+// ── Toast ──
+function toast(msg,type='info'){
+  const c={success:var_('--green'),error:var_('--red'),info:var_('--blue'),warning:var_('--amber')};
+  const t=document.createElement('div');
+  t.className='toast';
+  t.innerHTML=`<div class="toast-dot" style="background:${c[type]||c.info}"></div>${msg}`;
+  document.getElementById('toasts').prepend(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),200);},3000);
+}
+function var_(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+// ── Tab switch ──
+function switchTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  if(el&&el.classList)el.classList.add('active');
+  document.getElementById('pane-'+id).classList.add('active');
+  if(id==='locations')renderLocations();
+  if(id==='restock'){renderOrders();populateRestockForm();}
+  if(id==='suppliers')renderSuppliers();
+}
+
+// ── KPIs ──
+function renderKPIs(){
+  const inv=BPDB.getAllInventory();
+  const locs=Object.keys(inv).length;
+  const bars=Object.values(inv).filter(l=>l.type==='bar').length;
+  const hubs=Object.values(inv).filter(l=>l.type==='hub').length;
+  document.getElementById('kpi-locs').textContent=locs;
+  document.getElementById('kpi-locs-sub').textContent=`${bars} bars · ${hubs} hubs`;
+
+  let totalVal=0,critical=0;
+  Object.values(inv).forEach(loc=>{
+    Object.values(loc.items).forEach(sku=>{
+      totalVal+=sku.qty*sku.cost;
+      if((sku.qty/sku.max)<0.10)critical++;
+    });
+  });
+  document.getElementById('kpi-crit').textContent=critical;
+  document.getElementById('kpi-value').textContent=BPDB.fmt.currency(totalVal);
+  const pending=BPDB.getRestockOrders({}).filter(o=>o.status==='PENDING'||o.status==='CONFIRMED').length;
+  document.getElementById('kpi-orders').textContent=pending;
+}
+
+// ── Overview ──
+function renderOverview(){
+  // Alerts
+  const alerts=BPDB.getAlerts({resolved:false});
+  const aEl=document.getElementById('alerts-section');
+  if(!alerts.length){aEl.innerHTML='';} else {
+    aEl.innerHTML=`<div class="sec-hdr"><div class="sec-title">⚠ Active Alerts (${alerts.length})</div></div>`+
+    alerts.map(a=>`<div class="alert-card ${a.type.toLowerCase()}">
+      <span class="alert-label">${a.type}</span>
+      <div class="alert-info">
+        <div class="alert-title">${a.barName} · ${a.skuName}</div>
+        <div class="alert-sub">SKU ${a.skuId} · ${a.qty} units remaining · ${BPDB.fmt.ago(a.ts)}</div>
+      </div>
+      <div class="alert-pct">${a.pct}%</div>
+      <div class="alert-actions">
+        <button class="btn-sm success" onclick="resolveAlert('${a.id}')">Resolve</button>
+      </div>
+    </div>`).join('');
+  }
+
+  // Health
+  const health=BPDB.getInventoryHealth();
+  const hEl=document.getElementById('health-list');
+  if(!health.length){
+    hEl.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:11px;">✅ All inventory levels are healthy</div>';
+  } else {
+    hEl.innerHTML=`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;padding:0 14px;">`+
+    health.map(h=>`<div class="health-row">
+      <span class="health-emoji">${h.emoji||'📦'}</span>
+      <span class="health-name">${h.name}</span>
+      <span class="health-location">${h.barName}</span>
+      <div class="health-bar-wrap"><div class="health-bar-fill ${h.status}" style="width:${h.pct}%"></div></div>
+      <span class="health-pct ${h.status}">${h.pct}%</span>
+      <button class="btn-sm" style="margin-left:8px;" onclick="openAdjust('${h.barId}','${h.skuId}','${h.name}')">Adjust</button>
+    </div>`).join('')+`</div>`;
+  }
+}
+
+function resolveAlert(id){
+  BPDB.resolveAlert(id);
+  toast('Alert resolved','success');
+  renderOverview(); renderKPIs();
+}
+
+// ── Locations ──
+function renderLocations(){
+  const inv=BPDB.getAllInventory();
+  const el=document.getElementById('accordion-list');
+  el.innerHTML=Object.entries(inv).map(([locId,loc])=>{
+    const items=Object.values(loc.items);
+    const avg=items.length?items.reduce((s,i)=>s+(i.qty/i.max),0)/items.length:0;
+    const chip=loc.type==='hub'?'hub':loc.zone==='VIP'?'vip':'bar';
+    const color=avg<0.10?'var(--red)':avg<0.20?'var(--amber)':'var(--green)';
+    return `<div class="accordion" id="acc-${locId}">
+      <div class="acc-header" onclick="toggleAcc('${locId}')">
+        <span class="zone-chip ${chip}">${loc.zone}</span>
+        <span class="acc-name">${loc.name}</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-right:8px;">${items.length} SKUs</span>
+        <div class="acc-health">
+          <div class="acc-health-bar"><div class="acc-health-fill" style="width:${Math.round(avg*100)}%;background:${color};height:100%;border-radius:2px;"></div></div>
+          <span style="font-family:var(--mono);font-size:9px;color:${color};min-width:34px;text-align:right">${Math.round(avg*100)}%</span>
+        </div>
+        <span style="color:var(--muted);margin-left:8px;font-size:12px;" id="arr-${locId}">▼</span>
+      </div>
+      <div class="acc-body" id="body-${locId}">
+        <table class="sku-table">
+          <thead><tr>
+            <th>SKU</th><th>CATEGORY</th><th>QTY</th><th>MIN</th><th>MAX</th><th>LEVEL</th><th>STATUS</th><th>PRICE</th><th>COST</th><th>ACTIONS</th>
+          </tr></thead>
+          <tbody>${Object.entries(loc.items).map(([skuId,sku])=>{
+            const pct=Math.round(sku.qty/sku.max*100);
+            const status=pct<10?'critical':pct<20?'low':'ok';
+            return `<tr id="tr-${locId}-${skuId}">
+              <td><div class="sku-name-cell"><span class="sku-emoji">${sku.emoji||'📦'}</span><div><div style="font-weight:500">${sku.name}</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted)">${sku.sku||skuId}</div></div></div></td>
+              <td style="font-family:var(--mono);font-size:9px;color:var(--muted)">${sku.cat}</td>
+              <td><div style="display:flex;align-items:center;gap:6px;">
+                <button class="qty-btn" onclick="quickAdj('${locId}','${skuId}',-1)">−</button>
+                <span id="qty-${locId}-${skuId}" style="font-family:var(--mono);font-weight:700;min-width:28px;text-align:center">${sku.qty}</span>
+                <button class="qty-btn" onclick="quickAdj('${locId}','${skuId}',1)">+</button>
+              </div></td>
+              <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${sku.min}</td>
+              <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${sku.max}</td>
+              <td><div style="display:flex;align-items:center;gap:6px;"><div class="pct-bar"><div class="pct-fill ${status}" style="width:${pct}%"></div></div><span style="font-family:var(--mono);font-size:9px">${pct}%</span></div></td>
+              <td><span class="status-badge ${status}">${status.toUpperCase()}</span></td>
+              <td style="font-family:var(--mono);font-size:10px">${BPDB.fmt.currency(sku.price)}</td>
+              <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${BPDB.fmt.currency(sku.cost)}</td>
+              <td><button class="btn-sm" onclick="openAdjust('${locId}','${skuId}','${sku.name}')">Adjust</button></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+        <div class="acc-footer">
+          <button class="btn-secondary" onclick="switchTab('restock',document.querySelectorAll('.tab')[2])">Order Restock →</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Populate transfer dropdowns
+  const locOpts=Object.entries(inv).map(([id,l])=>`<option value="${id}">${l.name}</option>`).join('');
+  document.getElementById('xfer-from').innerHTML=locOpts;
+  document.getElementById('xfer-to').innerHTML=locOpts;
+  populateXferSkus();
+}
+
+function toggleAcc(id){
+  const body=document.getElementById('body-'+id);
+  const arr=document.getElementById('arr-'+id);
+  const hdr=document.querySelector(`#acc-${id} .acc-header`);
+  const open=body.classList.toggle('open');
+  hdr.classList.toggle('open',open);
+  arr.textContent=open?'▲':'▼';
+}
+
+function quickAdj(barId,skuId,delta){
+  BPDB.updateInventory(barId,skuId,delta,delta>0?'MANUAL_ADD':'MANUAL_SUB');
+  const sku=BPDB.getSkuLevel(barId,skuId);
+  if(sku){
+    const qEl=document.getElementById(`qty-${barId}-${skuId}`);
+    if(qEl){qEl.textContent=sku.qty;const tr=document.getElementById(`tr-${barId}-${skuId}`);if(tr)tr.classList.add('flash-row'),setTimeout(()=>tr.classList.remove('flash-row'),800);}
+  }
+  renderKPIs();
+}
+
+// ── Transfer ──
+function populateXferSkus(){
+  const from=document.getElementById('xfer-from')?.value;
+  const skuSel=document.getElementById('xfer-sku');
+  if(!from||!skuSel)return;
+  const loc=BPDB.getInventory(from);
+  if(!loc)return;
+  skuSel.innerHTML=Object.entries(loc.items).map(([id,s])=>`<option value="${id}">${s.emoji} ${s.name} (${s.qty} ${s.unit})</option>`).join('');
+}
+
+function doTransfer(){
+  const from=document.getElementById('xfer-from').value;
+  const to=document.getElementById('xfer-to').value;
+  const sku=document.getElementById('xfer-sku').value;
+  const qty=parseInt(document.getElementById('xfer-qty').value)||0;
+  if(from===to){toast('Select different locations','warning');return;}
+  if(!qty||qty<1){toast('Enter a valid quantity','warning');return;}
+  const ref=BPDB.transferStock(from,to,sku,qty);
+  toast(`Transferred ${qty} units · ${ref}`,'success');
+  renderLocations(); renderKPIs();
+}
+
+// ── Adjust modal ──
+let _adjBarId='',_adjSkuId='';
+function openAdjust(barId,skuId,name){
+  _adjBarId=barId; _adjSkuId=skuId;
+  document.getElementById('adjust-title').textContent=`Adjust: ${name}`;
+  document.getElementById('adj-delta').value=0;
+  document.getElementById('adjust-modal').style.display='flex';
+}
+function closeAdjust(){document.getElementById('adjust-modal').style.display='none';}
+function submitAdjust(){
+  const delta=parseInt(document.getElementById('adj-delta').value)||0;
+  const reason=document.getElementById('adj-reason').value;
+  if(delta===0){toast('Enter a non-zero adjustment','warning');return;}
+  BPDB.updateInventory(_adjBarId,_adjSkuId,delta,reason);
+  toast(`Adjusted ${delta>0?'+':''}${delta} units (${reason})`,'success');
+  closeAdjust();
+  renderOverview(); renderLocations(); renderKPIs();
+}
+
+// ── Restock orders ──
+function populateRestockForm(){
+  const inv=BPDB.getAllInventory();
+  const sups=BPDB.getSuppliers();
+  const locSel=document.getElementById('ro-location');
+  const supSel=document.getElementById('ro-supplier');
+  if(locSel)locSel.innerHTML=Object.entries(inv).map(([id,l])=>`<option value="${id}">${l.name}</option>`).join('');
+  if(supSel)supSel.innerHTML=sups.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+let _orderFormOpen=false;
+function toggleOrderForm(){
+  _orderFormOpen=!_orderFormOpen;
+  document.getElementById('order-form-body').classList.toggle('open',_orderFormOpen);
+  document.getElementById('order-form-arrow').textContent=_orderFormOpen?'▲':'▼';
+  if(_orderFormOpen) autoFillOrderItems();
+}
+
+function autoFillOrderItems(){
+  const locId=document.getElementById('ro-location')?.value;
+  if(!locId)return;
+  const loc=BPDB.getInventory(locId);
+  if(!loc)return;
+  const low=Object.entries(loc.items).filter(([,s])=>(s.qty/s.max)<0.35);
+  const el=document.getElementById('items-builder');
+  if(!low.length){el.innerHTML='<div style="color:var(--green);font-family:var(--mono);font-size:10px;padding:8px 0;">✓ All items above 35% — no urgent restocking needed</div>';return;}
+  el.innerHTML=`<div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:8px;">AUTO-POPULATED — LOW STOCK ITEMS</div>
+  <div class="item-row" style="font-family:var(--mono);font-size:8px;color:var(--muted);">
+    <span>SKU</span><span>CURRENT</span><span>ORDER QTY</span><span>UNIT COST</span><span></span>
+  </div>`+
+  low.map(([skuId,sku],i)=>{
+    const need=sku.max-sku.qty;
+    return `<div class="item-row" id="irow-${i}">
+      <div style="font-size:11px;font-weight:500">${sku.emoji} ${sku.name}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">${sku.qty}/${sku.max}</div>
+      <input class="form-input" type="number" value="${need}" min="1" data-sku="${skuId}" data-cost="${sku.cost}" style="width:70px;padding:4px 8px;">
+      <div style="font-family:var(--mono);font-size:10px">${BPDB.fmt.currency(sku.cost)}</div>
+      <button class="qty-btn" onclick="document.getElementById('irow-${i}').remove()" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function addOrderItem(){
+  const locId=document.getElementById('ro-location')?.value;
+  const loc=locId?BPDB.getInventory(locId):null;
+  const opts=loc?Object.entries(loc.items).map(([id,s])=>`<option value="${id}" data-cost="${s.cost}">${s.emoji} ${s.name}</option>`).join(''):'';
+  const i=Date.now();
+  const el=document.getElementById('items-builder');
+  const row=document.createElement('div');
+  row.className='item-row'; row.id='irow-'+i;
+  row.innerHTML=`<select class="form-input" style="font-size:10px;" onchange="this.closest('.item-row').querySelector('[data-cost]').value=this.options[this.selectedIndex].dataset.cost">${opts}</select>
+    <div></div>
+    <input class="form-input" type="number" value="1" min="1" style="width:70px;padding:4px 8px;">
+    <input class="form-input" type="number" placeholder="Cost" data-cost="0" style="width:70px;padding:4px 8px;">
+    <button class="qty-btn" onclick="this.closest('.item-row').remove()">✕</button>`;
+  el.appendChild(row);
+}
+
+function submitRestockOrder(){
+  const locId=document.getElementById('ro-location').value;
+  const supId=document.getElementById('ro-supplier').value;
+  const urgency=document.getElementById('ro-urgency').value;
+  const note=document.getElementById('ro-note').value;
+  const itemRows=document.getElementById('items-builder').querySelectorAll('.item-row[id]');
+  const items=[];
+  itemRows.forEach(row=>{
+    const select=row.querySelector('select');
+    const inputs=row.querySelectorAll('input[type=number]');
+    const skuId=select?select.value:row.querySelector('[data-sku]')?.dataset.sku;
+    const qty=parseInt(inputs[0]?.value)||0;
+    const cost=parseFloat(inputs[1]?.value||row.querySelector('[data-cost]')?.dataset.cost)||0;
+    if(skuId&&qty>0){
+      const loc=BPDB.getInventory(locId);
+      const sku=loc?.items[skuId];
+      items.push({skuId,name:sku?.name||skuId,emoji:sku?.emoji||'📦',qty,cost,unit:sku?.unit||'unit',currentQty:sku?.qty||0,targetQty:sku?.max||qty});
+    }
+  });
+  if(!items.length){toast('Add at least one item','warning');return;}
+  const order=BPDB.createRestockOrder({locationId:locId,supplierId:supId,urgency,note,items,createdBy:'Manager'});
+  toast(`Order ${order.id} created · ${items.length} SKUs`,'success');
+  toggleOrderForm();
+  renderOrders(); renderKPIs();
+}
+
+function renderOrders(){
+  const orders=BPDB.getRestockOrders({limit:30});
+  const el=document.getElementById('orders-list');
+  if(!orders.length){el.innerHTML='<div style="text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:11px;">No restock orders yet</div>';return;}
+  const statusNext={PENDING:'CONFIRMED',CONFIRMED:'SHIPPED',SHIPPED:'RECEIVED'};
+  const statusLabel={PENDING:'Confirm Order',CONFIRMED:'Mark Shipped',SHIPPED:'Mark Received'};
+  const supMap=Object.fromEntries(BPDB.getSuppliers().map(s=>[s.id,s]));
+  const invMap=BPDB.getAllInventory();
+  el.innerHTML=orders.map(o=>{
+    const sup=supMap[o.supplierId];
+    const loc=invMap[o.locationId];
+    const eta=new Date(o.estimatedArrival).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    return `<div class="order-card">
+      <div class="order-hdr">
+        <span class="order-id">${o.id}</span>
+        <span class="urgency-badge ${o.urgency}">${o.urgency.toUpperCase()}</span>
+        <span class="order-status ${o.status}">${o.status}</span>
+        ${o.autoTriggered?'<span style="font-family:var(--mono);font-size:8px;color:var(--purple);background:#a855f714;border:1px solid #a855f730;padding:2px 6px;border-radius:4px;">AUTO</span>':''}
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:auto;">${BPDB.fmt.ago(o.ts)}</span>
+      </div>
+      <div class="order-body">
+        <div style="display:flex;gap:16px;margin-bottom:10px;font-family:var(--mono);font-size:9px;color:var(--muted);">
+          <span>📍 ${loc?.name||o.locationId}</span>
+          <span>🏭 ${sup?.name||o.supplierId}</span>
+          <span>📅 ETA: ${eta}</span>
+        </div>
+        <div class="order-items">${(o.items||[]).slice(0,5).map(item=>`
+          <div class="oi-row">
+            <span>${item.emoji||'📦'}</span>
+            <span class="oi-name">${item.name}</span>
+            <span style="color:var(--blue)">×${item.qty}</span>
+            <span>${BPDB.fmt.currency(item.cost*item.qty)}</span>
+          </div>`).join('')}
+          ${o.items?.length>5?`<div class="oi-row"><span style="color:var(--muted)">+${o.items.length-5} more items</span></div>`:''}
+        </div>
+        <div class="order-footer">
+          <span class="order-cost">${BPDB.fmt.currency(o.totalCost)}</span>
+          <div class="order-actions">
+            ${statusNext[o.status]?`<button class="btn-primary" style="font-size:9px;padding:6px 12px;" onclick="advanceOrder('${o.id}','${statusNext[o.status]}')">
+              ${statusLabel[o.status]}
+            </button>`:''}
+            ${o.status!=='RECEIVED'&&o.status!=='CANCELLED'?`<button class="btn-sm danger" onclick="cancelOrder('${o.id}')">Cancel</button>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function advanceOrder(id,status){
+  BPDB.updateRestockOrder(id,{status,updatedBy:'Manager'});
+  toast(status==='RECEIVED'?'Order received — inventory updated!':'Order status updated','success');
+  renderOrders(); renderKPIs(); renderOverview();
+}
+
+function cancelOrder(id){
+  BPDB.updateRestockOrder(id,{status:'CANCELLED',updatedBy:'Manager'});
+  toast('Order cancelled','warning');
+  renderOrders(); renderKPIs();
+}
+
+// ── Suppliers ──
+function renderSuppliers(){
+  const sups=BPDB.getSuppliers();
+  const el=document.getElementById('supplier-grid');
+  el.innerHTML=sups.map(s=>`<div class="sup-card">
+    <div class="sup-name">${s.name}</div>
+    <div class="sup-contact">${s.contact} · ${s.phone}</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--blue)">${s.email}</div>
+    <div class="sup-cats">${(s.categories||[]).map(c=>`<span class="cat-chip">${c}</span>`).join('')}</div>
+    <div class="sup-detail">
+      <span class="stars">${'★'.repeat(Math.round(s.rating||5))}<span style="color:var(--muted)">${'★'.repeat(5-Math.round(s.rating||5))}</span></span>
+      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Lead: ${s.leadTimeDays}d</span>
+    </div>
+  </div>`).join('');
+}
+
+function openSupplierModal(){document.getElementById('sup-modal').style.display='flex';}
+function closeSupplierModal(){document.getElementById('sup-modal').style.display='none';}
+function submitSupplier(){
+  const name=document.getElementById('sup-name').value.trim();
+  if(!name){toast('Enter a supplier name','warning');return;}
+  BPDB.createSupplier({
+    name,
+    contact:document.getElementById('sup-contact').value,
+    phone:document.getElementById('sup-phone').value,
+    email:document.getElementById('sup-email').value,
+    leadTimeDays:parseInt(document.getElementById('sup-lead').value)||2,
+    categories:document.getElementById('sup-cats').value.split(',').map(c=>c.trim()).filter(Boolean),
+  });
+  toast(`Supplier added: ${name}`,'success');
+  closeSupplierModal();
+  renderSuppliers();
+}
+
+// ── Real-time updates ──
+BPDB.on('inventory:updated',({barId,skuId,sku})=>{
+  const qEl=document.getElementById(`qty-${barId}-${skuId}`);
+  if(qEl){qEl.textContent=sku.qty;const tr=document.getElementById(`tr-${barId}-${skuId}`);if(tr){tr.classList.add('flash-row');setTimeout(()=>tr.classList.remove('flash-row'),800);}}
+  renderKPIs();
+  if(document.getElementById('pane-overview').classList.contains('active'))renderOverview();
+});
+BPDB.on('restock:created',()=>{renderKPIs();if(document.getElementById('pane-restock').classList.contains('active'))renderOrders();});
+BPDB.on('restock:updated',()=>{renderKPIs();if(document.getElementById('pane-restock').classList.contains('active'))renderOrders();});
+BPDB.on('alert:new',()=>{renderOverview();renderKPIs();});
+
+// ── Init ──
+function init(){renderKPIs();renderOverview();}
+if(BPDB.ready) init(); else BPDB.on('ready',init);
+setInterval(()=>{renderKPIs();},30000);
+</script>
+</body>
+</html>

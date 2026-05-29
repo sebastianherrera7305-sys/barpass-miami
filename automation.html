@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarPass Automation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="barpass-db.js"></script>
+<style>
+:root {
+  --bg:#04060e; --surface:#080c1a; --card:#0c1022; --border:#1a2040;
+  --text:#e8eaf6; --muted:#4a5380; --green:#00e87a; --amber:#FFba38;
+  --red:#FF4466; --blue:#5AA5FF; --purple:#a855f7; --cyan:#06b6d4;
+  --mono:'JetBrains Mono',monospace; --sans:'Inter',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);}
+a{color:inherit;text-decoration:none;}
+
+/* ── Header ── */
+.hdr{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;height:56px;}
+.logo-pill{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:14px;color:#fff;flex-shrink:0;}
+.hdr-title{font-weight:700;font-size:16px;letter-spacing:-.01em;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.hdr-clock{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto;}
+.hdr-nav{display:flex;gap:6px;}
+.hdr-btn{padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-family:var(--mono);cursor:pointer;transition:all .15s;}
+.hdr-btn:hover{border-color:var(--purple);color:var(--purple);background:#a855f710;}
+
+/* ── KPI Strip ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px 24px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.green::before{background:var(--green);}
+.kpi.blue::before{background:var(--blue);}
+.kpi.amber::before{background:var(--amber);}
+.kpi.purple::before{background:var(--purple);}
+.kpi-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.kpi-val{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1;}
+.kpi.green .kpi-val{color:var(--green);}
+.kpi.blue .kpi-val{color:var(--blue);}
+.kpi.amber .kpi-val{color:var(--amber);}
+.kpi.purple .kpi-val{color:var(--purple);}
+.kpi-sub{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px;}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:2px;padding:0 24px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:56px;z-index:90;}
+.tab{padding:10px 18px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.tab.active{color:var(--purple);border-bottom-color:var(--purple);}
+.tab-pane{display:none;padding:20px 24px;}
+.tab-pane.active{display:block;}
+
+/* ── Rule cards ── */
+.rules-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.rules-title{font-size:14px;font-weight:600;}
+.btn-primary{padding:8px 16px;border-radius:8px;border:none;background:var(--purple);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.04em;}
+.btn-primary:hover{background:#9333ea;}
+.btn-sm{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:9px;cursor:pointer;transition:all .15s;}
+.btn-sm:hover{border-color:var(--text);color:var(--text);}
+.btn-sm.danger:hover{border-color:var(--red);color:var(--red);}
+.btn-run{padding:5px 10px;border-radius:6px;border:1px solid #00e87a40;background:#00e87a10;color:var(--green);font-family:var(--mono);font-size:9px;cursor:pointer;transition:all .15s;}
+.btn-run:hover{background:#00e87a20;}
+
+.rule-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:14px;transition:border-color .2s,box-shadow .2s;}
+.rule-card.enabled{border-color:#a855f730;box-shadow:0 0 0 1px #a855f710;}
+.rule-card.fired-recently{box-shadow:0 0 20px #a855f720;}
+
+/* Toggle */
+.toggle-wrap{flex-shrink:0;padding-top:2px;}
+.toggle{width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;}
+.toggle.on{background:var(--purple);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4);}
+.toggle.on::after{left:18px;}
+
+.rule-body{flex:1;min-width:0;}
+.rule-name{font-size:13px;font-weight:600;margin-bottom:3px;}
+.rule-desc{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.6;margin-bottom:10px;}
+.rule-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;}
+.badge.inv{background:#5AA5FF14;color:var(--blue);border:1px solid #5AA5FF30;}
+.badge.sched{background:#FFba3814;color:var(--amber);border:1px solid #FFba3830;}
+.badge.sales{background:#a855f714;color:var(--purple);border:1px solid #a855f730;}
+.badge.dispatch{background:#00e87a14;color:var(--green);border:1px solid #00e87a30;}
+.badge.alert-b{background:#FF446614;color:var(--red);border:1px solid #FF446630;}
+.badge.restock{background:#FFba3814;color:var(--amber);border:1px solid #FFba3830;}
+.badge.report{background:#5AA5FF14;color:var(--blue);border:1px solid #5AA5FF30;}
+.badge.disabled{background:var(--border);color:var(--muted);border:1px solid var(--border);}
+
+.rule-stats{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.rule-stats span{color:var(--text);}
+
+.rule-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;flex-direction:column;}
+
+/* ── Log table ── */
+.log-filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.log-filter{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:9px;cursor:pointer;transition:all .15s;}
+.log-filter.active{border-color:var(--purple);color:var(--purple);background:#a855f710;}
+.log-table{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.log-thead{display:grid;grid-template-columns:110px 1fr 120px 100px 80px;gap:0;background:var(--surface);padding:8px 16px;font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;border-bottom:1px solid var(--border);}
+.log-row{display:grid;grid-template-columns:110px 1fr 120px 100px 80px;gap:0;padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;align-items:center;transition:background .1s;cursor:pointer;}
+.log-row:last-child{border-bottom:none;}
+.log-row:hover{background:var(--surface);}
+.log-row.expanded{background:var(--surface);}
+.log-detail{padding:10px 16px;background:#05080f;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--muted);white-space:pre;display:none;}
+.log-detail.show{display:block;}
+.status-ok{color:var(--green);}
+.status-err{color:var(--red);}
+.empty-state{text-align:center;padding:48px 24px;color:var(--muted);font-family:var(--mono);font-size:11px;}
+.empty-icon{font-size:36px;display:block;margin-bottom:12px;}
+
+/* ── Live Monitor ── */
+.monitor-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.monitor-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.mc-header{padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between;}
+.mc-body{padding:0;}
+.inv-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);font-size:11px;}
+.inv-row:last-child{border-bottom:none;}
+.inv-bar-wrap{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.inv-bar-fill{height:100%;border-radius:2px;transition:width .4s;}
+.inv-bar-fill.ok{background:var(--green);}
+.inv-bar-fill.low{background:var(--amber);}
+.inv-bar-fill.critical{background:var(--red);}
+.chip{display:inline-flex;align-items:center;padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:8px;font-weight:700;}
+.chip.hub{background:#5AA5FF14;color:var(--blue);}
+.chip.bar{background:#00e87a14;color:var(--green);}
+.chip.vip{background:#a855f714;color:var(--purple);}
+
+/* Live feed */
+.feed-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:16px;}
+.feed-header{padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between;}
+.feed-clear{padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:8px;cursor:pointer;}
+.feed-body{height:220px;overflow-y:auto;padding:8px 0;font-family:var(--mono);font-size:10px;}
+.feed-body::-webkit-scrollbar{width:4px;}
+.feed-body::-webkit-scrollbar-track{background:transparent;}
+.feed-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.feed-line{display:flex;gap:10px;padding:3px 16px;transition:background .1s;}
+.feed-line:hover{background:var(--surface);}
+.feed-ts{color:var(--muted);flex-shrink:0;}
+.feed-evt{color:var(--blue);flex-shrink:0;}
+.feed-msg{color:var(--text);}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6);}
+.modal-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:15px;font-weight:600;}
+.modal-close{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.modal-body{padding:20px;}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;}
+.step-indicators{display:flex;gap:6px;margin-bottom:20px;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .2s;}
+.step-dot.active{background:var(--purple);}
+.step-dot.done{background:var(--green);}
+.step-title{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;margin-bottom:12px;}
+.option-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.option-card{padding:14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;text-align:center;}
+.option-card:hover{border-color:var(--purple);background:#a855f708;}
+.option-card.selected{border-color:var(--purple);background:#a855f712;}
+.option-icon{font-size:24px;display:block;margin-bottom:6px;}
+.option-label{font-size:12px;font-weight:600;}
+.option-desc{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:3px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;display:block;margin-bottom:6px;}
+.form-input{width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:var(--mono);font-size:11px;outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:var(--purple);}
+select.form-input{cursor:pointer;}
+.range-wrap{display:flex;align-items:center;gap:10px;}
+.range-wrap input[type=range]{flex:1;accent-color:var(--purple);}
+.range-val{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--purple);min-width:40px;}
+
+/* ── Confirm modal ── */
+.confirm-modal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;}
+.confirm-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:380px;width:100%;text-align:center;}
+.confirm-title{font-size:15px;font-weight:600;margin-bottom:8px;}
+.confirm-msg{font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:20px;}
+.confirm-btns{display:flex;gap:8px;justify-content:center;}
+.btn-cancel{padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;cursor:pointer;}
+.btn-danger{padding:8px 20px;border-radius:8px;border:none;background:var(--red);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;}
+
+/* ── Toast ── */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:6px;}
+.toast{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:toastIn .2s ease;max-width:320px;}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.toast.out{animation:toastOut .2s ease forwards;}
+@keyframes toastOut{to{opacity:0;transform:translateY(6px);}}
+.toast-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+
+@media(max-width:768px){
+  .kpi-strip{grid-template-columns:1fr 1fr;}
+  .monitor-grid{grid-template-columns:1fr;}
+  .log-thead,.log-row{grid-template-columns:90px 1fr 90px 70px 60px;}
+  .option-grid{grid-template-columns:1fr;}
+  .hdr-nav{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hdr">
+  <div class="logo-pill">BP</div>
+  <div class="hdr-title">Automation</div>
+  <div class="live-dot"></div>
+  <div class="hdr-clock" id="hdr-clock">--:--:--</div>
+  <nav class="hdr-nav">
+    <button class="hdr-btn" onclick="location.href='BarPass_v10.html'">← BarPass</button>
+    <button class="hdr-btn" onclick="location.href='analytics.html'">📊 Analytics</button>
+    <button class="hdr-btn" onclick="location.href='inventory.html'">📦 Inventory</button>
+  </nav>
+</header>
+
+<!-- KPI Strip -->
+<div class="kpi-strip">
+  <div class="kpi green"><div class="kpi-lbl">Active Rules</div><div class="kpi-val" id="kpi-active">—</div><div class="kpi-sub">of <span id="kpi-total">—</span> total</div></div>
+  <div class="kpi blue"><div class="kpi-lbl">Fired Today</div><div class="kpi-val" id="kpi-fired">—</div><div class="kpi-sub">automation events</div></div>
+  <div class="kpi amber"><div class="kpi-lbl">Auto-Dispatches</div><div class="kpi-val" id="kpi-dispatches">—</div><div class="kpi-sub">runner deployments</div></div>
+  <div class="kpi purple"><div class="kpi-lbl">Auto-Restocks</div><div class="kpi-val" id="kpi-restocks">—</div><div class="kpi-sub">orders created</div></div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('rules',this)">RULES</div>
+  <div class="tab" onclick="switchTab('log',this)">ACTIVITY LOG</div>
+  <div class="tab" onclick="switchTab('monitor',this)">LIVE MONITOR</div>
+</div>
+
+<!-- ══ Tab: RULES ══ -->
+<div class="tab-pane active" id="pane-rules">
+  <div class="rules-header">
+    <div class="rules-title">Automation Rules</div>
+    <button class="btn-primary" onclick="openRuleBuilder()">+ New Rule</button>
+  </div>
+  <div id="rules-list"></div>
+</div>
+
+<!-- ══ Tab: LOG ══ -->
+<div class="tab-pane" id="pane-log">
+  <div class="log-filters">
+    <div class="log-filter active" onclick="filterLog('all',this)">All Events</div>
+    <div class="log-filter" onclick="filterLog('1h',this)">Last Hour</div>
+    <div class="log-filter" onclick="filterLog('24h',this)">Last 24h</div>
+  </div>
+  <div id="log-table-wrap"></div>
+</div>
+
+<!-- ══ Tab: MONITOR ══ -->
+<div class="tab-pane" id="pane-monitor">
+  <div class="monitor-grid">
+    <div class="monitor-card">
+      <div class="mc-header">INVENTORY STATUS <span id="inv-status-count"></span></div>
+      <div class="mc-body" id="inv-status-body"></div>
+    </div>
+    <div class="monitor-card">
+      <div class="mc-header">RECENT AUTO-DISPATCHES <span id="disp-count"></span></div>
+      <div class="mc-body" id="disp-body"></div>
+    </div>
+  </div>
+  <div class="feed-wrap">
+    <div class="feed-header">
+      LIVE EVENT FEED
+      <button class="feed-clear" onclick="clearFeed()">Clear</button>
+    </div>
+    <div class="feed-body" id="feed-body">
+      <div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:10px;">Waiting for events...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Rule Builder Modal -->
+<div class="modal-overlay" id="rule-modal" style="display:none;" onclick="if(event.target===this)closeRuleBuilder()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">New Automation Rule</div>
+      <button class="modal-close" onclick="closeRuleBuilder()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-sm" id="modal-back" onclick="ruleBuilderBack()" style="display:none;">← Back</button>
+      <button class="btn-sm" onclick="closeRuleBuilder()">Cancel</button>
+      <button class="btn-primary" id="modal-next" onclick="ruleBuilderNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="confirm-modal" id="confirm-modal" style="display:none;">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title">Are you sure?</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-danger" id="confirm-ok">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ── Clock ──
+function tick(){
+  const n=new Date();
+  document.getElementById('hdr-clock').textContent=n.toLocaleTimeString('en-US',{hour12:false});
+}
+setInterval(tick,1000); tick();
+
+// ── Toast ──
+function toast(msg, type='info'){
+  const colors={success:'#00e87a',error:'#FF4466',info:'#5AA5FF',warning:'#FFba38'};
+  const t=document.createElement('div');
+  t.className='toast';
+  t.innerHTML=`<div class="toast-dot" style="background:${colors[type]||colors.info}"></div>${msg}`;
+  document.getElementById('toasts').prepend(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),200);},3000);
+}
+
+// ── Confirm dialog ──
+let _confirmCb=null;
+function confirm(title,msg,cb){
+  document.getElementById('confirm-title').textContent=title;
+  document.getElementById('confirm-msg').textContent=msg;
+  document.getElementById('confirm-ok').onclick=()=>{closeConfirm();cb();};
+  document.getElementById('confirm-modal').style.display='flex';
+}
+function closeConfirm(){document.getElementById('confirm-modal').style.display='none';}
+
+// ── Tab switch ──
+function switchTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pane-'+id).classList.add('active');
+  if(id==='log') renderLog();
+  if(id==='monitor') renderMonitor();
+}
+
+// ── Badge helpers ──
+function triggerBadge(trigger){
+  if(!trigger) return '';
+  const t=trigger.type;
+  if(t==='inventory_threshold') return `<span class="badge inv">📦 INVENTORY &lt; ${Math.round(trigger.threshold*100)}%</span>`;
+  if(t==='schedule') return `<span class="badge sched">⏰ SCHEDULED</span>`;
+  if(t==='sales_velocity') return `<span class="badge sales">📈 SALES TRIGGER</span>`;
+  return `<span class="badge inv">${t}</span>`;
+}
+function actionBadge(action){
+  if(!action) return '';
+  const t=action.type;
+  if(t==='create_dispatch')      return `<span class="badge dispatch">🚀 DISPATCH</span>`;
+  if(t==='create_alert')         return `<span class="badge alert-b">🔔 ALERT</span>`;
+  if(t==='create_restock_order') return `<span class="badge restock">📋 RESTOCK</span>`;
+  if(t==='generate_report')      return `<span class="badge report">📊 REPORT</span>`;
+  return `<span class="badge report">${t}</span>`;
+}
+function fmtAgo(ts){if(!ts)return'Never';const s=Math.floor((Date.now()-ts)/1000);if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';return Math.floor(s/3600)+'h ago';}
+
+// ── KPI ──
+function renderKPIs(){
+  const rules=BPDB.getRules();
+  const active=rules.filter(r=>r.enabled).length;
+  const today=new Date().setHours(0,0,0,0);
+  const log=BPDB.getAutomationLog({limit:500}).filter(l=>l.ts>=today);
+  const dispatches=BPDB.getDispatches({}).filter(d=>d.autoTriggered);
+  const restocks=BPDB.getRestockOrders({}).filter(r=>r.autoTriggered);
+  document.getElementById('kpi-active').textContent=active;
+  document.getElementById('kpi-total').textContent=rules.length;
+  document.getElementById('kpi-fired').textContent=log.length;
+  document.getElementById('kpi-dispatches').textContent=dispatches.length;
+  document.getElementById('kpi-restocks').textContent=restocks.length;
+}
+
+// ── Rules list ──
+function renderRules(){
+  const rules=BPDB.getRules();
+  const el=document.getElementById('rules-list');
+  if(!rules.length){
+    el.innerHTML='<div class="empty-state"><span class="empty-icon">⚙️</span>No automation rules yet.<br>Click "+ New Rule" to create your first rule.</div>';
+    return;
+  }
+  const now=Date.now();
+  el.innerHTML=rules.map(r=>{
+    const firedRecently=r.lastFired&&(now-r.lastFired)<3600000;
+    const cooldownLeft=r.lastFired?(Math.max(0,r.cooldown-(now-r.lastFired))/1000/60).toFixed(0):0;
+    return `<div class="rule-card ${r.enabled?'enabled':''} ${firedRecently?'fired-recently':''}" id="rc-${r.id}">
+      <div class="toggle-wrap">
+        <div class="toggle ${r.enabled?'on':''}" onclick="toggleRule('${r.id}')" title="${r.enabled?'Disable':'Enable'} rule"></div>
+      </div>
+      <div class="rule-body">
+        <div class="rule-name">${r.name}</div>
+        <div class="rule-desc">${r.description||''}</div>
+        <div class="rule-badges">
+          ${triggerBadge(r.trigger)}
+          ${actionBadge(r.action)}
+          ${!r.enabled?'<span class="badge disabled">DISABLED</span>':''}
+          ${firedRecently?'<span class="badge dispatch">🔥 FIRED RECENTLY</span>':''}
+        </div>
+        <div class="rule-stats">
+          Fired <span>${r.fireCount||0}x total</span> · Last fired: <span>${fmtAgo(r.lastFired)}</span>
+          ${Number(cooldownLeft)>0&&r.lastFired?` · Cooldown: <span>${cooldownLeft}m remaining</span>`:''}
+          · Cooldown: <span>${Math.round(r.cooldown/60000)}min</span>
+        </div>
+      </div>
+      <div class="rule-actions">
+        <button class="btn-run" onclick="runRule('${r.id}')">▶ Run Now</button>
+        <button class="btn-sm" onclick="editRule('${r.id}')">Edit</button>
+        <button class="btn-sm danger" onclick="deleteRule('${r.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRule(id){
+  const r=BPDB.toggleRule(id);
+  toast(r.enabled?`Rule enabled: ${r.name}`:`Rule disabled: ${r.name}`, r.enabled?'success':'warning');
+  renderRules(); renderKPIs();
+}
+
+function runRule(id){
+  const r=BPDB.getRules().find(r=>r.id===id);
+  if(!r){toast('Rule not found','error');return;}
+  // Force fire by clearing cooldown temporarily
+  const prev=r.lastFired; r.lastFired=null;
+  const fired=BPDB.evaluateRules({manual:true,ruleId:id});
+  if(!fired.length){r.lastFired=prev;toast('Rule conditions not met currently','warning');}
+  else{toast(`Rule fired: ${r.name}`,'success');}
+  renderRules(); renderKPIs();
+}
+
+function deleteRule(id){
+  const r=BPDB.getRules().find(r=>r.id===id);
+  if(!r)return;
+  confirm('Delete Rule',`Are you sure you want to delete "${r.name}"? This cannot be undone.`,()=>{
+    BPDB.deleteRule(id);
+    toast('Rule deleted','warning');
+    renderRules(); renderKPIs();
+  });
+}
+
+// ── Log ──
+let _logFilter='all';
+function filterLog(f,el){
+  _logFilter=f;
+  document.querySelectorAll('.log-filter').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  renderLog();
+}
+function renderLog(){
+  const now=Date.now();
+  let log=BPDB.getAutomationLog({limit:200});
+  if(_logFilter==='1h')  log=log.filter(l=>l.ts>=now-3600000);
+  if(_logFilter==='24h') log=log.filter(l=>l.ts>=now-86400000);
+  const el=document.getElementById('log-table-wrap');
+  if(!log.length){
+    el.innerHTML='<div class="empty-state"><span class="empty-icon">📋</span>No automation events recorded yet.<br>Events appear here when rules fire.</div>';
+    return;
+  }
+  el.innerHTML=`<div class="log-table">
+    <div class="log-thead"><span>TIME</span><span>RULE</span><span>TRIGGER</span><span>ACTION</span><span>STATUS</span></div>
+    ${log.map((l,i)=>`
+      <div class="log-row" onclick="toggleLogDetail(${i})">
+        <span style="color:var(--muted)">${new Date(l.ts).toLocaleTimeString('en-US',{hour12:false})}</span>
+        <span style="font-weight:600">${l.ruleName||'Unknown'}</span>
+        <span>${triggerBadge(BPDB.getRules().find(r=>r.id===l.ruleId)?.trigger||{type:'unknown'})}</span>
+        <span>${actionBadge(l.action)}</span>
+        <span class="status-ok">SUCCESS</span>
+      </div>
+      <div class="log-detail" id="ld-${i}">Context: ${JSON.stringify(l.context||{},null,2)}\nAction: ${JSON.stringify(l.action||{},null,2)}</div>
+    `).join('')}
+  </div>`;
+}
+function toggleLogDetail(i){
+  const el=document.getElementById('ld-'+i);
+  if(el)el.classList.toggle('show');
+}
+
+// ── Monitor ──
+function renderMonitor(){
+  const inv=BPDB.getAllInventory();
+  const locs=Object.entries(inv);
+  // Inventory status
+  const ibody=document.getElementById('inv-status-body');
+  document.getElementById('inv-status-count').textContent=locs.length+' locations';
+  ibody.innerHTML=locs.map(([id,loc])=>{
+    const items=Object.values(loc.items);
+    const avg=items.length?items.reduce((s,i)=>s+(i.qty/i.max),0)/items.length:0;
+    const critical=items.filter(i=>(i.qty/i.max)<0.10).length;
+    const low=items.filter(i=>(i.qty/i.max)<0.20).length;
+    const status=avg<0.10?'critical':avg<0.20?'low':'ok';
+    const chip=loc.type==='hub'?'hub':loc.zone==='VIP'?'vip':'bar';
+    return `<div class="inv-row">
+      <span class="chip ${chip}">${loc.zone}</span>
+      <span style="font-size:11px;font-weight:500;flex:1">${loc.name}</span>
+      ${critical?`<span style="color:var(--red);font-family:var(--mono);font-size:9px">🔴 ${critical}</span>`:''}
+      ${low&&!critical?`<span style="color:var(--amber);font-family:var(--mono);font-size:9px">🟡 ${low}</span>`:''}
+      <div class="inv-bar-wrap" style="width:80px">
+        <div class="inv-bar-fill ${status}" style="width:${Math.round(avg*100)}%"></div>
+      </div>
+      <span style="font-family:var(--mono);font-size:9px;color:var(--muted);min-width:32px;text-align:right">${Math.round(avg*100)}%</span>
+    </div>`;
+  }).join('');
+
+  // Auto-dispatches
+  const disps=BPDB.getDispatches({}).filter(d=>d.autoTriggered).slice(0,8);
+  const dbody=document.getElementById('disp-body');
+  document.getElementById('disp-count').textContent=disps.length+' total';
+  if(!disps.length){
+    dbody.innerHTML='<div style="padding:24px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:10px;">No auto-dispatches yet</div>';
+  } else {
+    dbody.innerHTML=disps.map(d=>{
+      const statusColor={PENDING:'var(--amber)',CONFIRMED:'var(--blue)',DELIVERED:'var(--green)',CANCELLED:'var(--red)'}[d.status]||'var(--muted)';
+      return `<div class="inv-row">
+        <span style="font-family:var(--mono);font-size:9px;color:var(--blue)">${d.id}</span>
+        <span style="font-size:10px;flex:1">${d.fromHubId||'Hub'} → ${d.toBarId||'Bar'}</span>
+        <span style="font-family:var(--mono);font-size:9px;color:${statusColor}">${d.status}</span>
+        <span style="font-family:var(--mono);font-size:8px;color:var(--muted)">${fmtAgo(d.ts)}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ── Live Feed ──
+let _feedPaused=false;
+const _feedEvents=[];
+function addFeedLine(event,msg){
+  const now=new Date();
+  const ts=now.toLocaleTimeString('en-US',{hour12:false});
+  _feedEvents.unshift({ts,event,msg});
+  if(_feedEvents.length>50)_feedEvents.pop();
+  if(!_feedPaused)renderFeed();
+}
+function renderFeed(){
+  const el=document.getElementById('feed-body');
+  if(!_feedEvents.length){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:10px;">Waiting for events...</div>';return;}
+  const evtColors={'inventory:updated':'var(--green)','automation:fired':'var(--purple)','dispatch:new':'var(--blue)','restock:created':'var(--amber)','alert:new':'var(--red)','rule:toggled':'var(--cyan,#06b6d4)'};
+  el.innerHTML=_feedEvents.map(e=>`<div class="feed-line">
+    <span class="feed-ts">[${e.ts}]</span>
+    <span class="feed-evt" style="color:${evtColors[e.event]||'var(--blue)'}">${e.event}</span>
+    <span class="feed-msg">${e.msg}</span>
+  </div>`).join('');
+}
+function clearFeed(){_feedEvents.length=0;renderFeed();}
+document.getElementById('feed-body').addEventListener('scroll',function(){_feedPaused=this.scrollTop>10;});
+
+// ── BPDB event listeners for live feed ──
+BPDB.on('inventory:updated',d=>{
+  addFeedLine('inventory:updated',`${d.barId} · ${d.skuId} · ${d.delta>0?'+':''}${d.delta} (${d.reason})`);
+});
+BPDB.on('automation:fired',d=>{
+  addFeedLine('automation:fired',`${d.rule?.name||'Rule'} · ${d.action?.type}`);
+  renderKPIs(); renderRules();
+  // Flash rule card
+  const card=document.getElementById('rc-'+d.rule?.id);
+  if(card){card.style.boxShadow='0 0 30px #a855f740';setTimeout(()=>card.style.boxShadow='',2000);}
+});
+BPDB.on('dispatch:new',d=>{
+  addFeedLine('dispatch:new',`${d.id} · ${d.fromHubId||'Hub'} → ${d.toBarId||'Bar'} · ${d.priority}`);
+});
+BPDB.on('restock:created',d=>{
+  addFeedLine('restock:created',`${d.id} · ${d.locationId} · $${d.totalCost?.toFixed(2)||0}`);
+});
+BPDB.on('alert:new',d=>{
+  addFeedLine('alert:new',`${d.type} · ${d.barName} · ${d.skuName} · ${d.pct}%`);
+});
+BPDB.on('rule:toggled',d=>{
+  addFeedLine('rule:toggled',`${d.name} → ${d.enabled?'ENABLED':'DISABLED'}`);
+});
+
+// ── Rule Builder ──
+let _builderStep=0;
+let _newRule={trigger:{},action:{}};
+
+function openRuleBuilder(){
+  _builderStep=0;
+  _newRule={name:'',description:'',trigger:{},action:{},cooldown:1800000};
+  renderBuilderStep();
+  document.getElementById('rule-modal').style.display='flex';
+}
+function closeRuleBuilder(){document.getElementById('rule-modal').style.display='none';}
+
+function renderBuilderStep(){
+  const steps=['Trigger','Action','Configure','Name & Save'];
+  document.getElementById('modal-title').textContent=`New Rule — ${steps[_builderStep]}`;
+  document.getElementById('modal-back').style.display=_builderStep>0?'block':'none';
+  document.getElementById('modal-next').textContent=_builderStep===steps.length-1?'Save Rule ✓':'Next →';
+
+  const dots=steps.map((_,i)=>`<div class="step-dot ${i<_builderStep?'done':i===_builderStep?'active':''}"></div>`).join('');
+
+  let body='';
+  if(_builderStep===0){
+    body=`<div class="step-indicators">${dots}</div>
+    <div class="step-title">SELECT TRIGGER TYPE</div>
+    <div class="option-grid">
+      <div class="option-card ${_newRule.trigger.type==='inventory_threshold'?'selected':''}" onclick="selectTrigger('inventory_threshold',this)">
+        <span class="option-icon">📦</span>
+        <div class="option-label">Inventory Threshold</div>
+        <div class="option-desc">Fire when stock drops below a percentage</div>
+      </div>
+      <div class="option-card ${_newRule.trigger.type==='schedule'?'selected':''}" onclick="selectTrigger('schedule',this)">
+        <span class="option-icon">⏰</span>
+        <div class="option-label">Scheduled</div>
+        <div class="option-desc">Run at a specific time or interval</div>
+      </div>
+      <div class="option-card ${_newRule.trigger.type==='sales_velocity'?'selected':''}" onclick="selectTrigger('sales_velocity',this)">
+        <span class="option-icon">📈</span>
+        <div class="option-label">Sales Velocity</div>
+        <div class="option-desc">Fire based on revenue or order rate</div>
+      </div>
+    </div>`;
+  } else if(_builderStep===1){
+    body=`<div class="step-indicators">${dots}</div>
+    <div class="step-title">SELECT ACTION</div>
+    <div class="option-grid">
+      <div class="option-card ${_newRule.action.type==='create_dispatch'?'selected':''}" onclick="selectAction('create_dispatch',this)">
+        <span class="option-icon">🚀</span>
+        <div class="option-label">Dispatch Runner</div>
+        <div class="option-desc">Auto-assign a runner to restock</div>
+      </div>
+      <div class="option-card ${_newRule.action.type==='create_alert'?'selected':''}" onclick="selectAction('create_alert',this)">
+        <span class="option-icon">🔔</span>
+        <div class="option-label">Create Alert</div>
+        <div class="option-desc">Notify managers on the dashboard</div>
+      </div>
+      <div class="option-card ${_newRule.action.type==='create_restock_order'?'selected':''}" onclick="selectAction('create_restock_order',this)">
+        <span class="option-icon">📋</span>
+        <div class="option-label">Restock Order</div>
+        <div class="option-desc">Auto-order from supplier</div>
+      </div>
+      <div class="option-card ${_newRule.action.type==='generate_report'?'selected':''}" onclick="selectAction('generate_report',this)">
+        <span class="option-icon">📊</span>
+        <div class="option-label">Generate Report</div>
+        <div class="option-desc">Create a shift or inventory snapshot</div>
+      </div>
+    </div>`;
+  } else if(_builderStep===2){
+    const inv=BPDB.getAllInventory();
+    const locOpts=Object.entries(inv).map(([id,l])=>`<option value="${id}">${l.name}</option>`).join('');
+    const supOpts=BPDB.getSuppliers().map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+    let tConfig='', aConfig='';
+
+    if(_newRule.trigger.type==='inventory_threshold'){
+      tConfig=`<div class="form-group">
+        <label class="form-label">LOCATION TYPE</label>
+        <select class="form-input" onchange="_newRule.trigger.barType=this.value">
+          <option value="bar" ${_newRule.trigger.barType==='bar'?'selected':''}>All Bars</option>
+          <option value="hub" ${_newRule.trigger.barType==='hub'?'selected':''}>All Hubs</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">THRESHOLD — FIRE WHEN BELOW</label>
+        <div class="range-wrap">
+          <input type="range" min="5" max="50" value="${Math.round((_newRule.trigger.threshold||0.20)*100)}" oninput="_newRule.trigger.threshold=this.value/100;document.getElementById('thr-val').textContent=this.value+'%'">
+          <span class="range-val" id="thr-val">${Math.round((_newRule.trigger.threshold||0.20)*100)}%</span>
+        </div>
+      </div>`;
+    } else if(_newRule.trigger.type==='schedule'){
+      tConfig=`<div class="form-group">
+        <label class="form-label">CRON EXPRESSION</label>
+        <input class="form-input" placeholder="0 23 * * *" value="${_newRule.trigger.cron||''}" oninput="_newRule.trigger.cron=this.value">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:4px;">Examples: 0 23 * * * (daily 11pm) · 0 */4 * * * (every 4h)</div>
+      </div>`;
+    }
+
+    if(_newRule.action.type==='create_dispatch'){
+      aConfig=`<div class="form-group">
+        <label class="form-label">FROM HUB</label>
+        <select class="form-input" onchange="_newRule.action.fromHub=this.value">
+          ${Object.entries(inv).filter(([,l])=>l.type==='hub').map(([id,l])=>`<option value="${id}">${l.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">PRIORITY</label>
+        <select class="form-input" onchange="_newRule.action.priority=this.value">
+          <option value="HIGH">HIGH — Critical</option>
+          <option value="MID" selected>MID — Standard</option>
+          <option value="LOW">LOW — When available</option>
+        </select>
+      </div>`;
+    } else if(_newRule.action.type==='create_restock_order'){
+      aConfig=`<div class="form-group">
+        <label class="form-label">SUPPLIER</label>
+        <select class="form-input" onchange="_newRule.action.supplierId=this.value">${supOpts}</select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">URGENCY</label>
+        <select class="form-input" onchange="_newRule.action.urgency=this.value">
+          <option value="standard">Standard (2-3 days)</option>
+          <option value="urgent">Urgent (1 day)</option>
+          <option value="emergency">Emergency (same day)</option>
+        </select>
+      </div>`;
+    } else if(_newRule.action.type==='create_alert'){
+      aConfig=`<div class="form-group">
+        <label class="form-label">SEVERITY</label>
+        <select class="form-input" onchange="_newRule.action.severity=this.value">
+          <option value="LOW">LOW</option>
+          <option value="CRITICAL">CRITICAL</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">MESSAGE</label>
+        <input class="form-input" placeholder="Alert message..." value="${_newRule.action.message||''}" oninput="_newRule.action.message=this.value">
+      </div>`;
+    }
+
+    body=`<div class="step-indicators">${dots}</div>
+    <div class="step-title">CONFIGURE TRIGGER & ACTION</div>
+    ${tConfig||'<p style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:12px;">No additional configuration needed for this trigger.</p>'}
+    <hr style="border:none;border-top:1px solid var(--border);margin:12px 0;">
+    ${aConfig||'<p style="font-family:var(--mono);font-size:9px;color:var(--muted);">No additional configuration needed for this action.</p>'}`;
+  } else if(_builderStep===3){
+    body=`<div class="step-indicators">${dots}</div>
+    <div class="step-title">NAME & SAVE YOUR RULE</div>
+    <div class="form-group">
+      <label class="form-label">RULE NAME</label>
+      <input class="form-input" id="rb-name" placeholder="e.g. Auto-restock Main Bar on critical stock" value="${_newRule.name||''}" oninput="_newRule.name=this.value">
+    </div>
+    <div class="form-group">
+      <label class="form-label">DESCRIPTION (optional)</label>
+      <input class="form-input" placeholder="What does this rule do?" value="${_newRule.description||''}" oninput="_newRule.description=this.value">
+    </div>
+    <div class="form-group">
+      <label class="form-label">COOLDOWN (minutes between re-fires)</label>
+      <input class="form-input" type="number" min="1" value="${Math.round((_newRule.cooldown||1800000)/60000)}" oninput="_newRule.cooldown=this.value*60000">
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:8px;">SUMMARY</div>
+      <div style="font-family:var(--mono);font-size:10px;">${triggerBadge(_newRule.trigger)} → ${actionBadge(_newRule.action)}</div>
+    </div>`;
+  }
+
+  document.getElementById('modal-body').innerHTML=body;
+}
+
+function selectTrigger(type,el){
+  _newRule.trigger={type,threshold:0.20,barType:'bar',comparison:'lte'};
+  document.querySelectorAll('#modal-body .option-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectAction(type,el){
+  _newRule.action={type};
+  document.querySelectorAll('#modal-body .option-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function ruleBuilderNext(){
+  if(_builderStep===0&&!_newRule.trigger.type){toast('Select a trigger type','warning');return;}
+  if(_builderStep===1&&!_newRule.action.type){toast('Select an action','warning');return;}
+  if(_builderStep===3){
+    if(!_newRule.name?.trim()){toast('Give your rule a name','warning');return;}
+    BPDB.createRule(_newRule);
+    toast(`Rule created: ${_newRule.name}`,'success');
+    closeRuleBuilder();
+    renderRules(); renderKPIs();
+    return;
+  }
+  _builderStep=Math.min(3,_builderStep+1);
+  renderBuilderStep();
+}
+function ruleBuilderBack(){
+  _builderStep=Math.max(0,_builderStep-1);
+  renderBuilderStep();
+}
+
+function editRule(id){
+  const r=BPDB.getRules().find(r=>r.id===id);
+  if(!r)return;
+  _newRule={...r};
+  _builderStep=3; // go straight to name step for quick edit
+  renderBuilderStep();
+  document.getElementById('modal-next').textContent='Save Changes ✓';
+  document.getElementById('modal-next').onclick=()=>{
+    BPDB.updateRule(id,{name:_newRule.name,description:_newRule.description,cooldown:_newRule.cooldown,trigger:_newRule.trigger,action:_newRule.action});
+    toast('Rule updated','success');
+    closeRuleBuilder();
+    renderRules();
+    document.getElementById('modal-next').onclick=ruleBuilderNext;
+  };
+  document.getElementById('rule-modal').style.display='flex';
+}
+
+// ── Init ──
+function init(){renderKPIs();renderRules();}
+if(BPDB.ready) init(); else BPDB.on('ready',init);
+setInterval(()=>{renderKPIs();renderRules();},30000);
+</script>
+</body>
+</html>
