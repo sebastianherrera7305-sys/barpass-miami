@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>BarPass — Staff Profile Setup</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#030508;--surf:#070a12;--surf2:#0a0e1a;--surf3:#0d1220;
+  --border:#0f1628;--border2:#1a2040;--border3:#243060;
+  --blue:#5AA5FF;--blue2:#3d8ae0;--gold:#FFba38;--green:#00e87a;
+  --red:#FF4466;--purple:#a855f7;--cyan:#22d3ee;
+  --text:#e8eaf0;--muted:#6b7490;--dim:#1e2448;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',system-ui,sans-serif;
+  overflow-x:hidden;}
+
+/* GRID BG */
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:48px 48px;opacity:.3;}
+.grid-bg::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,#5AA5FF06,transparent 60%);}
+
+/* HEADER */
+.header{position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:14px 20px;display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(var(--bg),transparent);backdrop-filter:blur(8px);}
+.h-logo{display:flex;align-items:center;gap:10px;}
+.h-logo-mark{width:30px;height:30px;border-radius:8px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;}
+.h-logo-name{font-size:13px;font-weight:700;}
+.h-step{font-size:10px;color:var(--muted);letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+
+/* PROGRESS */
+.progress-track{position:fixed;top:0;left:0;right:0;height:2px;z-index:200;background:var(--border);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));
+  border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+
+/* MAIN */
+.main{position:relative;z-index:10;padding:80px 0 100px;
+  max-width:480px;margin:0 auto;padding-left:20px;padding-right:20px;}
+
+/* SCREENS */
+.screen{display:none;}
+.screen.active{display:block;animation:fadeUp .35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* STEP HEADER */
+.step-eyebrow{font-size:10px;color:var(--blue);letter-spacing:.16em;text-transform:uppercase;
+  margin-bottom:8px;font-family:'JetBrains Mono',monospace;}
+.step-title{font-size:26px;font-weight:800;letter-spacing:-.6px;line-height:1.15;margin-bottom:8px;}
+.step-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:28px;}
+
+/* FORM */
+.form-group{margin-bottom:18px;}
+.form-label{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:7px;display:block;}
+.form-input{width:100%;background:var(--surf2);border:1.5px solid var(--border2);border-radius:10px;
+  padding:13px 14px;color:var(--text);font-size:15px;font-family:inherit;outline:none;
+  transition:border-color .18s,box-shadow .18s;}
+.form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #5AA5FF12;}
+.form-input::placeholder{color:var(--dim);}
+.form-input.mono{font-family:'JetBrains Mono',monospace;letter-spacing:.06em;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-hint{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.4;}
+
+.select-wrap{position:relative;}
+.select-field{width:100%;background:var(--surf2);border:1.5px solid var(--border2);border-radius:10px;
+  padding:13px 14px;color:var(--text);font-size:15px;font-family:inherit;outline:none;
+  transition:border-color .18s;appearance:none;cursor:pointer;}
+.select-field:focus{border-color:var(--blue);}
+.select-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  color:var(--muted);pointer-events:none;}
+.select-field option{background:var(--surf2);}
+
+/* AVATAR UPLOAD */
+.avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;margin-bottom:28px;}
+.avatar-ring{width:120px;height:120px;border-radius:50%;border:2px dashed var(--border3);
+  background:var(--surf2);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;overflow:hidden;transition:all .2s;}
+.avatar-ring:hover{border-color:var(--blue);background:#5AA5FF08;}
+.avatar-ring.has-photo{border-style:solid;border-color:var(--blue);}
+.avatar-emoji{font-size:40px;transition:all .2s;}
+.avatar-overlay{position:absolute;inset:0;background:#00000080;display:flex;align-items:center;
+  justify-content:center;opacity:0;transition:opacity .2s;border-radius:50%;font-size:24px;}
+.avatar-ring:hover .avatar-overlay{opacity:1;}
+.avatar-initials{font-size:36px;font-weight:800;color:var(--blue);display:none;}
+.avatar-ring.has-photo .avatar-emoji{display:none;}
+.avatar-ring.has-photo .avatar-initials{display:block;}
+.avatar-actions{display:flex;gap:10px;}
+.avatar-btn{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border2);
+  font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;
+  background:transparent;color:var(--muted);transition:all .15s;}
+.avatar-btn:hover{border-color:var(--blue);color:var(--blue);}
+.avatar-btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;}
+
+/* ZONE GRID */
+.zone-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
+.zone-card{border:1.5px solid var(--border2);border-radius:10px;padding:14px 10px;
+  cursor:pointer;transition:all .18s;background:var(--surf2);text-align:center;}
+.zone-card:hover{border-color:var(--blue);}
+.zone-card.sel{border-color:var(--blue);background:#5AA5FF0a;box-shadow:0 0 16px #5AA5FF12;}
+.zone-icon{font-size:22px;margin-bottom:6px;}
+.zone-name{font-size:11px;font-weight:700;margin-bottom:2px;}
+.zone-desc{font-size:9px;color:var(--muted);}
+
+/* ROLE CARDS */
+.role-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.role-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;
+  border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;
+  background:var(--surf2);transition:all .18s;position:relative;}
+.role-opt:hover{border-color:var(--blue);}
+.role-opt.sel{border-color:var(--blue);background:#5AA5FF0a;}
+.role-opt.sel::after{content:'✓';position:absolute;right:14px;
+  width:20px;height:20px;border-radius:50%;background:var(--blue);
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;
+  display:flex;align-items:center;justify-content:center;}
+.role-opt-icon{font-size:24px;flex-shrink:0;}
+.role-opt-text{flex:1;}
+.role-opt-name{font-size:14px;font-weight:700;margin-bottom:2px;}
+.role-opt-desc{font-size:11px;color:var(--muted);}
+
+/* CERT CHIPS */
+.cert-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.cert-chip{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border2);
+  font-size:12px;cursor:pointer;color:var(--muted);transition:all .18s;
+  background:var(--surf2);display:flex;align-items:center;gap:6px;}
+.cert-chip:hover{border-color:var(--blue);}
+.cert-chip.sel{border-color:var(--green);background:#00e87a0a;color:var(--green);}
+.cert-chip.sel::before{content:'✓';}
+
+/* SCHEDULE */
+.sched-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:16px;}
+.day-cell{border-radius:8px;border:1.5px solid var(--border2);background:var(--surf2);
+  padding:10px 4px;text-align:center;cursor:pointer;transition:all .15s;}
+.day-cell.sel{border-color:var(--blue);background:#5AA5FF12;}
+.day-label{font-size:9px;color:var(--muted);display:block;margin-bottom:5px;}
+.day-abbr{font-size:12px;font-weight:700;}
+.shift-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.shift-opt{border:1.5px solid var(--border2);border-radius:10px;padding:12px 14px;
+  cursor:pointer;background:var(--surf2);transition:all .15s;}
+.shift-opt:hover{border-color:var(--blue);}
+.shift-opt.sel{border-color:var(--blue);background:#5AA5FF0a;}
+.shift-name{font-size:13px;font-weight:700;margin-bottom:2px;}
+.shift-time{font-size:10px;color:var(--muted);}
+
+/* EMERGENCY */
+.emerg-wrap{background:var(--surf);border:1px solid var(--border2);border-radius:12px;
+  padding:16px;margin-bottom:16px;}
+.emerg-label{font-size:10px;color:var(--red);letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+
+/* ID SCAN */
+.id-scan-wrap{border:2px dashed var(--border3);border-radius:14px;padding:32px 20px;
+  text-align:center;cursor:pointer;background:var(--surf2);transition:all .2s;margin-bottom:16px;}
+.id-scan-wrap:hover{border-color:var(--blue);background:#5AA5FF06;}
+.id-scan-wrap.scanned{border-style:solid;border-color:var(--green);background:#00e87a06;}
+.id-scan-icon{font-size:40px;margin-bottom:12px;}
+.id-scan-label{font-size:14px;font-weight:600;margin-bottom:4px;}
+.id-scan-hint{font-size:11px;color:var(--muted);}
+.id-fields{display:none;margin-top:16px;}
+.id-fields.vis{display:block;animation:fadeUp .3s ease;}
+
+/* REVIEW */
+.review-section{background:var(--surf);border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;margin-bottom:12px;}
+.review-section-head{padding:10px 16px;background:var(--surf2);border-bottom:1px solid var(--border);
+  font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;}
+.review-edit{font-size:10px;color:var(--blue);cursor:pointer;}
+.review-row{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 16px;border-bottom:1px solid var(--border);}
+.review-row:last-child{border-bottom:none;}
+.review-key{font-size:11px;color:var(--muted);}
+.review-val{font-size:12px;font-weight:600;text-align:right;max-width:60%;}
+.review-avatar{width:60px;height:60px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px;}
+
+/* COMPLETE */
+.complete-wrap{text-align:center;padding:20px 0;}
+.badge-card{background:linear-gradient(135deg,var(--surf2),var(--surf));
+  border:1px solid var(--border2);border-radius:16px;padding:24px;margin:24px 0;
+  position:relative;overflow:hidden;}
+.badge-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--blue),var(--purple));}
+.badge-qr{width:100px;height:100px;margin:0 auto 16px;
+  background:var(--surf);border:2px solid var(--border2);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);}
+.badge-qr canvas{border-radius:6px;}
+.badge-name{font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px;}
+.badge-role{font-size:11px;color:var(--muted);margin-bottom:12px;letter-spacing:.06em;}
+.badge-chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+.badge-chip{padding:3px 10px;border-radius:12px;font-size:9px;font-weight:700;letter-spacing:.06em;}
+.bc-blue{background:#5AA5FF14;color:var(--blue);border:1px solid #5AA5FF30;}
+.bc-green{background:#00e87a14;color:var(--green);border:1px solid #00e87a30;}
+.bc-gold{background:#FFba3814;color:var(--gold);border:1px solid #FFba3830;}
+.badge-id{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:12px;}
+
+/* BUTTONS */
+.btn-primary{width:100%;padding:15px;border-radius:11px;border:none;cursor:pointer;
+  font-size:15px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:#fff;font-family:inherit;transition:all .18s;letter-spacing:.02em;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 28px #5AA5FF30;}
+.btn-primary:active{transform:translateY(0);}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-secondary{width:100%;padding:13px;border-radius:11px;border:1.5px solid var(--border2);
+  cursor:pointer;font-size:14px;font-weight:500;background:transparent;
+  color:var(--muted);font-family:inherit;transition:all .18s;margin-top:10px;}
+.btn-secondary:hover{border-color:var(--blue);color:var(--text);}
+.btn-success{background:linear-gradient(135deg,var(--green),#00c458);color:#000;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;
+  padding:16px 20px calc(16px + env(safe-area-inset-bottom));
+  background:linear-gradient(transparent,var(--bg) 40%);backdrop-filter:blur(12px);}
+.bottom-nav-inner{max-width:480px;margin:0 auto;display:flex;gap:10px;}
+.bottom-nav-inner .btn-back{flex:0 0 auto;padding:14px 18px;border-radius:11px;
+  border:1.5px solid var(--border2);background:transparent;color:var(--muted);
+  font-size:18px;cursor:pointer;transition:all .15s;}
+.bottom-nav-inner .btn-back:hover{border-color:var(--blue);color:var(--blue);}
+.bottom-nav-inner .btn-next{flex:1;}
+
+/* MISC */
+.divider{display:flex;align-items:center;gap:10px;margin:20px 0;}
+.divider-line{flex:1;height:1px;background:var(--border2);}
+.divider-text{font-size:10px;color:var(--muted);letter-spacing:.08em;}
+
+.info-box{background:var(--surf2);border:1px solid var(--border2);border-radius:10px;
+  padding:12px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start;}
+.info-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.info-text{font-size:11px;color:var(--muted);line-height:1.5;}
+
+.char-count{font-size:10px;color:var(--muted);text-align:right;margin-top:4px;}
+
+/* TOAST */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:999;
+  padding:10px 20px;border-radius:10px;font-size:12px;font-weight:600;
+  pointer-events:none;white-space:nowrap;transition:all .3s;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.hide{opacity:0;transform:translateX(-50%) translateY(8px);}
+#toast.success{background:#00e87a14;border:1px solid #00e87a40;color:var(--green);}
+#toast.info{background:#5AA5FF14;border:1px solid #5AA5FF40;color:var(--blue);}
+#toast.warn{background:#FFba3814;border:1px solid #FFba3840;color:var(--gold);}
+
+textarea.form-input{resize:vertical;min-height:90px;}
+
+.phone-prefix{position:relative;}
+.phone-prefix::before{content:'+1';position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  color:var(--muted);font-size:15px;pointer-events:none;z-index:1;}
+.phone-prefix .form-input{padding-left:38px;}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="h-logo">
+    <div class="h-logo-mark">BP</div>
+    <div class="h-logo-name">BarPass <span style="color:var(--muted);font-weight:400;">Onboarding</span></div>
+  </div>
+  <div class="h-step" id="h-step">Step 1 of 9</div>
+</div>
+
+<div class="main">
+
+  <!-- ══════════════════ SCREEN 1: WELCOME ══════════════════ -->
+  <div class="screen active" id="s-welcome">
+    <div style="text-align:center;padding:20px 0 32px;">
+      <div style="font-size:64px;margin-bottom:20px;">👋</div>
+      <div class="step-title" style="text-align:center;">Welcome to<br>BarPass Ops</div>
+      <div class="step-sub" style="text-align:center;">Let's set up your staff profile. This takes about 3 minutes and gets you ready for your first shift.</div>
+    </div>
+    <div style="display:grid;gap:10px;margin-bottom:28px;">
+      <div class="info-box">
+        <div class="info-icon">⏱</div>
+        <div class="info-text"><strong style="color:var(--text);">~3 minutes</strong> to complete · Your progress is saved automatically</div>
+      </div>
+      <div class="info-box">
+        <div class="info-icon">🔒</div>
+        <div class="info-text"><strong style="color:var(--text);">Encrypted &amp; private</strong> · Your data is only shared with your venue manager</div>
+      </div>
+      <div class="info-box">
+        <div class="info-icon">🪪</div>
+        <div class="info-text"><strong style="color:var(--text);">Digital badge</strong> generated at the end · Use it to scan in at your hub</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Invite Code (optional)</label>
+      <input type="text" class="form-input mono" id="invite-code" placeholder="BP-XXXX-XXXX" maxlength="13" oninput="formatInvite(this)">
+      <div class="form-hint">Enter the code from your manager's invitation. You can skip this.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCREEN 2: PERSONAL INFO ══════════════════ -->
+  <div class="screen" id="s-personal">
+    <div class="step-eyebrow">Step 1 · Personal Info</div>
+    <div class="step-title">Who are you?</div>
+    <div class="step-sub">Your legal name as it appears on your ID. This will be on your staff badge.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input type="text" class="form-input" id="first-name" placeholder="Elena" oninput="validatePersonal()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input type="text" class="form-input" id="last-name" placeholder="Cruz" oninput="validatePersonal()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Preferred Name <span style="color:var(--muted)">(shown on badge)</span></label>
+      <input type="text" class="form-input" id="preferred-name" placeholder="Elena C." oninput="validatePersonal()">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date of Birth</label>
+        <input type="date" class="form-input" id="dob" oninput="validatePersonal()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Gender <span style="color:var(--muted)">(optional)</span></label>
+        <div class="select-wrap">
+          <select class="select-field" id="gender">
+            <option value="">Prefer not to say</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Non-binary</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Phone Number</label>
+      <div class="phone-prefix">
+        <input type="tel" class="form-input" id="phone" placeholder="(305) 000-0000" oninput="validatePersonal();formatPhone(this)">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Personal Email</label>
+      <input type="email" class="form-input" id="email" placeholder="you@email.com" oninput="validatePersonal()">
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCREEN 3: PHOTO ══════════════════ -->
+  <div class="screen" id="s-photo">
+    <div class="step-eyebrow">Step 2 · Profile Photo</div>
+    <div class="step-title">Add your photo</div>
+    <div class="step-sub">Used on your digital badge and in the team dashboard. Managers use this to identify you.</div>
+    <div class="avatar-wrap">
+      <div class="avatar-ring" id="avatar-ring" onclick="pickAvatar()">
+        <div class="avatar-emoji" id="avatar-emoji">🧑</div>
+        <div class="avatar-initials" id="avatar-initials"></div>
+        <div class="avatar-overlay">📷</div>
+      </div>
+      <div class="avatar-actions">
+        <button class="avatar-btn primary" onclick="pickAvatar()">Upload Photo</button>
+        <button class="avatar-btn" onclick="useInitials()">Use Initials</button>
+        <button class="avatar-btn" onclick="pickEmoji()">Choose Emoji</button>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:11px;color:var(--muted);margin-bottom:24px;">
+      JPG, PNG up to 5MB · Square photos work best
+    </div>
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-text">PICK AN AVATAR</div>
+      <div class="divider-line"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:16px;" id="emoji-grid"></div>
+    <div class="info-box">
+      <div class="info-icon">💡</div>
+      <div class="info-text">A clear face photo helps your manager verify your identity when you check in at the hub.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCREEN 4: ROLE & ZONE ══════════════════ -->
+  <div class="screen" id="s-role">
+    <div class="step-eyebrow">Step 3 · Role &amp; Zone</div>
+    <div class="step-title">What's your role?</div>
+    <div class="step-sub">Select your position and preferred zones. You can work multiple zones.</div>
+    <div class="role-list">
+      <div class="role-opt" onclick="selectRole('runner',this)">
+        <div class="role-opt-icon">🏃</div>
+        <div class="role-opt-text">
+          <div class="role-opt-name">Runner</div>
+          <div class="role-opt-desc">Deliver inventory between hubs and bars · Primary field role</div>
+        </div>
+      </div>
+      <div class="role-opt" onclick="selectRole('bartender',this)">
+        <div class="role-opt-icon">🍸</div>
+        <div class="role-opt-text">
+          <div class="role-opt-name">Bartender</div>
+          <div class="role-opt-desc">Station operations · POS access · Bar management</div>
+        </div>
+      </div>
+      <div class="role-opt" onclick="selectRole('supervisor',this)">
+        <div class="role-opt-icon">📋</div>
+        <div class="role-opt-text">
+          <div class="role-opt-name">Supervisor / Lead</div>
+          <div class="role-opt-desc">Team oversight · Dispatch approval · Zone management</div>
+        </div>
+      </div>
+      <div class="role-opt" onclick="selectRole('security',this)">
+        <div class="role-opt-icon">🛡</div>
+        <div class="role-opt-text">
+          <div class="role-opt-name">Security</div>
+          <div class="role-opt-desc">Access control · Age verification · Incident response</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-label" style="margin-bottom:10px;">PREFERRED ZONES</div>
+    <div class="zone-grid">
+      <div class="zone-card" onclick="toggleZone('north',this)">
+        <div class="zone-icon">⬆</div>
+        <div class="zone-name">North</div>
+        <div class="zone-desc">Sections A–C</div>
+      </div>
+      <div class="zone-card" onclick="toggleZone('south',this)">
+        <div class="zone-icon">⬇</div>
+        <div class="zone-name">South</div>
+        <div class="zone-desc">Sections D–F</div>
+      </div>
+      <div class="zone-card" onclick="toggleZone('east',this)">
+        <div class="zone-icon">➡</div>
+        <div class="zone-name">East</div>
+        <div class="zone-desc">Sections G–I</div>
+      </div>
+      <div class="zone-card" onclick="toggleZone('west',this)">
+        <div class="zone-icon">⬅</div>
+        <div class="zone-name">West</div>
+        <div class="zone-desc">Sections J–L</div>
+      </div>
+      <div class="zone-card" onclick="toggleZone('vip',this)">
+        <div class="zone-icon">👑</div>
+        <div class="zone-name">VIP</div>
+        <div class="zone-desc">Club level</div>
+      </div>
+      <div class="zone-card" onclick="toggleZone('field',this)">
+        <div class="zone-icon">🏟</div>
+        <div class="zone-name">Field</div>
+        <div class="zone-desc">Pitch level</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCREEN 5: CERTIFICATIONS ══════════════════ -->
+  <div class="screen" id="s-certs">
+    <div class="step-eyebrow">Step 4 · Certifications</div>
+    <div class="step-title">Your certifications</div>
+    <div class="step-sub">Select all that apply. You'll be asked to upload proof before your first shift.</div>
+    <div class="cert-grid" id="cert-grid"></div>
+    <div class="form-group">
+      <label class="form-label">Years of Experience</label>
+      <div class="select-wrap">
+        <select class="select-field" id="exp-years">
+          <option value="">Select…</option>
+          <option value="0">Less than 1 year</option>
+          <option value="1">1–2 years</option>
+          <option value="3">3–5 years</option>
+          <option value="5">5–10 years</option>
+          <option value="10">10+ years</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Previous Venues <span style="color:var(--muted)">(optional)</span></label>
+      <input type="text" class="form-input" id="prev-venues" placeholder="American Airlines Arena, LoanDepot Park…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Special Skills <span style="color:var(--muted)">(optional)</span></label>
+      <textarea class="form-input" id="skills" placeholder="e.g. Bilingual (Spanish/English), cocktail mixology, crowd management…" oninput="this.nextElementSibling.textContent=this.value.length+'/200'" maxlength="200"></textarea>
+      <div class="char-count">0/200</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCREEN 6: AVAILABILITY ══════════════════ -->
+  <div class="screen" id="s-avail">
+    <div class="step-eyebrow">Step 5 · Availability</div>
+    <div class="step-title">When can you work?</div>
+    <div class="step-sub">Select your available days and preferred shifts. You can update this anytime.</div>
+    <div class="form-label" style="margin-bottom:10px;">AVAILABLE DAYS</div>
+    <div class="sched-grid" id="day-grid"></div>
+    <div class="form-label" style="margin-bottom:10px;margin-top:8px;">PREFERRED SHIFTS</div>
+    <div class="shift-grid">
+      <div class="shift-opt" onclick="toggleShift('morning',this)">
+        <div class="shift-name">Morning</div>
+        <div class="shift-time">6:00 AM – 2:00 PM</div>
+      </div>
+      <div class="shift-opt" onclick="toggleShift('afternoon',this)">
+        <div class="shift-name">Afternoon</div>
+        <div class="shift-time">2:00 PM – 10:00 PM</div>
+      </div>
+      <div class="shift-opt" onclick="toggleShift('evening',this)">
+        <div class="shift-name">Evening</div>
+        <div class="shift-time">5:00 PM – 1:00 AM</div>
+      </div>
+      <div class="shift-opt" onclick="toggleShift('event',this)">
+        <div class="shift-name">Event Days</div>
+        <div class="shift-time">Flexible · Game / Concert</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Max Hours per Week</label>
+      <div class="select-wrap">
+        <select class="select-field" id="max-hours">
+          <option>Up to 20 hours</option>
+          <option selected>Up to 30 hours</option>
+          <option>Up to 40 hours (full-time)</option>
+          <option>Flexible / On-call</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Start Date</label>
+      <input type="date" class="form-input" id="start-date">
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCREEN 7: EMERGENCY CONTACT ══════════════════ -->
+  <div class="screen" id="s-emergency">
+    <div class="step-eyebrow">Step 6 · Emergency Contact</div>
+    <div class="step-title">Emergency contact</div>
+    <div class="step-sub">Required for all staff. Only contacted in case of emergency during your shift.</div>
+    <div class="emerg-wrap">
+      <div class="emerg-label">🚨 Primary Contact</div>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="ec-name" placeholder="Maria Cruz" oninput="validateEmergency()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Relationship</label>
+        <div class="select-wrap">
+          <select class="select-field" id="ec-rel">
+            <option value="">Select relationship…</option>
+            <option>Spouse / Partner</option>
+            <option>Parent</option>
+            <option>Sibling</option>
+            <option>Child</option>
+            <option>Friend</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Phone Number</label>
+        <div class="phone-prefix">
+          <input type="tel" class="form-input" id="ec-phone" placeholder="(305) 000-0000"
+            oninput="validateEmergency();formatPhone(this)">
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Medical Notes <span style="color:var(--muted)">(optional)</span></label>
+      <textarea class="form-input" id="medical-notes"
+        placeholder="Allergies, conditions, medications first responders should know about…"></textarea>
+    </div>
+    <div class="info-box">
+      <div class="info-icon">🔒</div>
+      <div class="info-text">Medical information is encrypted and only accessible to on-site medical staff and your manager.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCREEN 8: ID VERIFICATION ══════════════════ -->
+  <div class="screen" id="s-id">
+    <div class="step-eyebrow">Step 7 · Identity</div>
+    <div class="step-title">Verify your ID</div>
+    <div class="step-sub">We need to confirm your identity before your first shift. This is required by venue compliance.</div>
+    <div class="id-scan-wrap" id="id-scan-area" onclick="simulateScan()">
+      <div class="id-scan-icon" id="id-scan-icon">🪪</div>
+      <div class="id-scan-label" id="id-scan-label">Tap to scan ID</div>
+      <div class="id-scan-hint" id="id-scan-hint">Driver's License · Passport · State ID</div>
+    </div>
+    <div class="id-fields" id="id-fields">
+      <div class="form-group">
+        <label class="form-label">ID Type</label>
+        <div class="select-wrap">
+          <select class="select-field" id="id-type">
+            <option>Driver's License</option>
+            <option>Passport</option>
+            <option>State ID</option>
+            <option>Military ID</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">ID Number</label>
+          <input type="text" class="form-input mono" id="id-number" placeholder="D123-456-78-910-0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expiry Date</label>
+          <input type="date" class="form-input" id="id-expiry">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Issuing State / Country</label>
+        <div class="select-wrap">
+          <select class="select-field" id="id-state">
+            <option>Florida</option><option>California</option><option>New York</option>
+            <option>Texas</option><option>Georgia</option><option>Other US State</option>
+            <option>Puerto Rico</option><option>International</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <div class="info-icon">🔐</div>
+      <div class="info-text">ID data is AES-256 encrypted and never shared with third parties. Used only for compliance verification.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SCREEN 9: REVIEW ══════════════════ -->
+  <div class="screen" id="s-review">
+    <div class="step-eyebrow">Step 8 · Review</div>
+    <div class="step-title">Confirm your profile</div>
+    <div class="step-sub">Review everything before we create your staff badge.</div>
+    <div id="review-content"></div>
+  </div>
+
+  <!-- ══════════════════ SCREEN 10: COMPLETE ══════════════════ -->
+  <div class="screen" id="s-complete">
+    <div class="complete-wrap">
+      <div style="font-size:60px;animation:pop .5s cubic-bezier(.34,1.56,.64,1);">✅</div>
+      <div class="step-title" style="margin-top:16px;">Profile Created!</div>
+      <div class="step-sub">Your staff badge is ready. Show this to your manager at check-in.</div>
+      <div class="badge-card" id="badge-card">
+        <div class="badge-qr"><canvas id="badge-qr-canvas" width="96" height="96"></canvas></div>
+        <div class="badge-name" id="badge-name">—</div>
+        <div class="badge-role" id="badge-role">—</div>
+        <div class="badge-chips" id="badge-chips"></div>
+        <div class="badge-id" id="badge-id">—</div>
+      </div>
+      <div style="display:grid;gap:10px;">
+        <button class="btn-primary btn-success" onclick="window.location.href='enterprise-auth.html'">
+          ⬡ Proceed to Authentication →
+        </button>
+        <button class="btn-secondary" onclick="window.location.href='BarPass_v10.html'">
+          Open BarPass Command Center
+        </button>
+        <button class="btn-secondary" onclick="downloadBadge()">⬇ Download Badge</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" id="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="btn-back" id="btn-back" onclick="goBack()">←</button>
+    <button class="btn-primary btn-next" id="btn-next" onclick="goNext()">Continue →</button>
+  </div>
+</div>
+
+<div id="toast" class="hide"></div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────────────────
+const P = {
+  inviteCode:'', firstName:'', lastName:'', preferredName:'',
+  dob:'', gender:'', phone:'', email:'',
+  avatar:'emoji', avatarEmoji:'🧑', avatarInitials:'',
+  role:'', zones:[], certs:[], expYears:'', prevVenues:'', skills:'',
+  days:[], shifts:[], maxHours:'Up to 30 hours', startDate:'',
+  ecName:'', ecRel:'', ecPhone:'', medNotes:'',
+  idType:'', idNumber:'', idExpiry:'', idState:'',
+  employeeId:'', badgeId:''
+};
+
+const SCREENS=['s-welcome','s-personal','s-photo','s-role','s-certs',
+               's-avail','s-emergency','s-id','s-review','s-complete'];
+const STEP_LABELS=['Welcome','Personal Info','Photo','Role & Zone','Certifications',
+                   'Availability','Emergency','Identity','Review','Complete!'];
+let current=0;
+
+// ── PROGRESS ──────────────────────────────────────────────────────────────────────────
+function updateProgress(){
+  const pct=current/(SCREENS.length-1)*100;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('h-step').textContent=
+    current===0?'Let\'s go!':`Step ${current} of ${SCREENS.length-1}`;
+  document.getElementById('btn-back').style.display=current===0?'none':'flex';
+  const nextBtn=document.getElementById('btn-next');
+  if(current===SCREENS.length-1){
+    document.getElementById('bottom-nav').style.display='none';
+  } else {
+    document.getElementById('bottom-nav').style.display='block';
+    nextBtn.textContent=current===SCREENS.length-2?'Create Profile →':'Continue →';
+  }
+  validateCurrent();
+}
+
+function goNext(){
+  if(current>=SCREENS.length-1) return;
+  if(!canAdvance()) return;
+  saveCurrentStep();
+  document.getElementById(SCREENS[current]).classList.remove('active');
+  current++;
+  document.getElementById(SCREENS[current]).classList.add('active');
+  if(current===SCREENS.length-2) buildReview();
+  if(current===SCREENS.length-1) buildComplete();
+  window.scrollTo(0,0);
+  updateProgress();
+}
+
+function goBack(){
+  if(current===0) return;
+  document.getElementById(SCREENS[current]).classList.remove('active');
+  current--;
+  document.getElementById(SCREENS[current]).classList.add('active');
+  window.scrollTo(0,0);
+  updateProgress();
+}
+
+// ── VALIDATION ────────────────────────────────────────────────────────────────────────
+function canAdvance(){
+  const id=SCREENS[current];
+  if(id==='s-welcome') return true;
+  if(id==='s-personal') return !!(P.firstName&&P.lastName&&P.phone&&P.email);
+  if(id==='s-photo') return true;
+  if(id==='s-role') return !!P.role;
+  if(id==='s-certs') return true;
+  if(id==='s-avail') return true;
+  if(id==='s-emergency') return !!(P.ecName&&P.ecPhone);
+  if(id==='s-id') return true;
+  if(id==='s-review') return true;
+  return true;
+}
+
+function validateCurrent(){
+  const btn=document.getElementById('btn-next');
+  btn.disabled=!canAdvance();
+}
+
+function validatePersonal(){
+  P.firstName=document.getElementById('first-name').value.trim();
+  P.lastName=document.getElementById('last-name').value.trim();
+  P.preferredName=document.getElementById('preferred-name').value.trim()||`${P.firstName} ${P.lastName.charAt(0)}.`;
+  P.dob=document.getElementById('dob').value;
+  P.phone=document.getElementById('phone').value;
+  P.email=document.getElementById('email').value;
+  validateCurrent();
+}
+
+function validateEmergency(){
+  P.ecName=document.getElementById('ec-name').value.trim();
+  P.ecPhone=document.getElementById('ec-phone').value;
+  validateCurrent();
+}
+
+// ── SAVE STEP ─────────────────────────────────────────────────────────────────────────
+function saveCurrentStep(){
+  const id=SCREENS[current];
+  if(id==='s-personal'){
+    P.firstName=document.getElementById('first-name').value.trim();
+    P.lastName=document.getElementById('last-name').value.trim();
+    P.preferredName=document.getElementById('preferred-name').value.trim()||`${P.firstName} ${P.lastName.charAt(0)}.`;
+    P.dob=document.getElementById('dob').value;
+    P.gender=document.getElementById('gender').value;
+    P.phone=document.getElementById('phone').value;
+    P.email=document.getElementById('email').value;
+    // auto-generate initials
+    P.avatarInitials=(P.firstName.charAt(0)+P.lastName.charAt(0)).toUpperCase();
+  }
+  if(id==='s-certs'){
+    P.expYears=document.getElementById('exp-years').value;
+    P.prevVenues=document.getElementById('prev-venues').value;
+    P.skills=document.getElementById('skills').value;
+  }
+  if(id==='s-avail'){
+    P.maxHours=document.getElementById('max-hours').value;
+    P.startDate=document.getElementById('start-date').value;
+  }
+  if(id==='s-emergency'){
+    P.ecName=document.getElementById('ec-name').value.trim();
+    P.ecRel=document.getElementById('ec-rel').value;
+    P.ecPhone=document.getElementById('ec-phone').value;
+    P.medNotes=document.getElementById('medical-notes').value;
+  }
+  if(id==='s-id'){
+    P.idType=document.getElementById('id-type').value;
+    P.idNumber=document.getElementById('id-number').value;
+    P.idExpiry=document.getElementById('id-expiry').value;
+    P.idState=document.getElementById('id-state').value;
+  }
+  if(id==='s-welcome'){
+    P.inviteCode=document.getElementById('invite-code').value;
+  }
+}
+
+// ── AVATAR ────────────────────────────────────────────────────────────────────────────
+const EMOJIS=['🧑','👩','👨','🧑‍🍳','👩‍🍳','🏃','🙋','😊','😎','🤩','⚡','🌟','🎯','🔥','💪','🦁','🐯','🦊','🐺','🦅','🎸','🏆','🎪','🌊'];
+function buildEmojiGrid(){
+  const g=document.getElementById('emoji-grid');
+  EMOJIS.forEach(e=>{
+    const d=document.createElement('div');
+    d.style.cssText='font-size:28px;text-align:center;cursor:pointer;padding:6px;border-radius:8px;border:1.5px solid var(--border2);background:var(--surf2);transition:all .15s;';
+    d.textContent=e;
+    d.onclick=()=>{
+      P.avatar='emoji';P.avatarEmoji=e;
+      document.getElementById('avatar-emoji').textContent=e;
+      document.getElementById('avatar-ring').classList.remove('has-photo');
+      showToast(`Avatar set to ${e}`,'info');
+    };
+    d.onmouseover=()=>d.style.borderColor='var(--blue)';
+    d.onmouseout=()=>d.style.borderColor='var(--border2)';
+    g.appendChild(d);
+  });
+}
+function pickAvatar(){
+  showToast('Camera / gallery not available in demo','info');
+  // Simulate: use initials
+  useInitials();
+}
+function useInitials(){
+  const initials=(P.firstName?P.firstName.charAt(0):'')+
+                 (P.lastName?P.lastName.charAt(0):'') || '??';
+  P.avatar='initials'; P.avatarInitials=initials.toUpperCase();
+  document.getElementById('avatar-initials').textContent=initials.toUpperCase();
+  document.getElementById('avatar-ring').classList.add('has-photo');
+  showToast('Using initials as avatar','info');
+}
+function pickEmoji(){
+  document.getElementById('emoji-grid').scrollIntoView({behavior:'smooth'});
+}
+
+// ── ROLE & ZONES ──────────────────────────────────────────────────────────────────────
+function selectRole(role,el){
+  P.role=role;
+  document.querySelectorAll('.role-opt').forEach(r=>r.classList.remove('sel'));
+  el.classList.add('sel');
+  validateCurrent();
+}
+function toggleZone(zone,el){
+  if(P.zones.includes(zone)) P.zones=P.zones.filter(z=>z!==zone);
+  else P.zones.push(zone);
+  el.classList.toggle('sel',P.zones.includes(zone));
+}
+
+// ── CERTIFICATIONS ────────────────────────────────────────────────────────────────────
+const CERT_LIST=[
+  'Alcohol Service (TIPS)','Food Handler','ServSafe','CPR / First Aid',
+  'AED Certified','Crowd Management','Bar Management','Inventory Control',
+  'Security License','TABC Certification','RBS Certification','POS Systems',
+];
+function buildCertGrid(){
+  const g=document.getElementById('cert-grid');
+  CERT_LIST.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='cert-chip';
+    d.textContent=c;
+    d.onclick=()=>{
+      if(P.certs.includes(c)) P.certs=P.certs.filter(x=>x!==c);
+      else P.certs.push(c);
+      d.classList.toggle('sel',P.certs.includes(c));
+    };
+    g.appendChild(d);
+  });
+}
+
+// ── SCHEDULE ──────────────────────────────────────────────────────────────────────────
+const DAYS=[{a:'S',n:'Sun'},{a:'M',n:'Mon'},{a:'T',n:'Tue'},{a:'W',n:'Wed'},
+            {a:'T',n:'Thu'},{a:'F',n:'Fri'},{a:'S',n:'Sat'}];
+function buildDayGrid(){
+  const g=document.getElementById('day-grid');
+  DAYS.forEach((d,i)=>{
+    const el=document.createElement('div');
+    el.className='day-cell';
+    el.innerHTML=`<span class="day-label">${d.a}</span><span class="day-abbr">${d.n.slice(0,3)}</span>`;
+    el.onclick=()=>{
+      if(P.days.includes(i)) P.days=P.days.filter(x=>x!==i);
+      else P.days.push(i);
+      el.classList.toggle('sel',P.days.includes(i));
+      validateCurrent();
+    };
+    g.appendChild(el);
+  });
+}
+function toggleShift(shift,el){
+  if(P.shifts.includes(shift)) P.shifts=P.shifts.filter(s=>s!==shift);
+  else P.shifts.push(shift);
+  el.classList.toggle('sel',P.shifts.includes(shift));
+}
+
+// ── ID SCAN ───────────────────────────────────────────────────────────────────────────
+let _idScanned=false;
+function simulateScan(){
+  if(_idScanned) return;
+  const area=document.getElementById('id-scan-area');
+  const icon=document.getElementById('id-scan-icon');
+  const label=document.getElementById('id-scan-label');
+  const hint=document.getElementById('id-scan-hint');
+  icon.textContent='⏳'; label.textContent='Scanning…'; hint.textContent='Hold steady';
+  area.style.borderColor='var(--blue)';
+  setTimeout(()=>{
+    icon.textContent='✅'; label.textContent='ID Detected'; hint.textContent='Driver\'s License · Florida · Verified';
+    area.classList.add('scanned'); area.style.borderColor='';
+    document.getElementById('id-fields').classList.add('vis');
+    // Pre-fill demo data
+    document.getElementById('id-number').value='F123-456-78-910-0';
+    document.getElementById('id-type').value='Driver\'s License';
+    document.getElementById('id-state').value='Florida';
+    const future=new Date(); future.setFullYear(future.getFullYear()+4);
+    document.getElementById('id-expiry').value=future.toISOString().split('T')[0];
+    _idScanned=true;
+    showToast('ID verified ✓','success');
+  },1800);
+}
+
+// ── REVIEW ────────────────────────────────────────────────────────────────────────────
+function buildReview(){
+  const days=DAYS.filter((_,i)=>P.days.includes(i)).map(d=>d.n).join(', ') || '—';
+  const shifts=P.shifts.length?P.shifts.map(s=>s.charAt(0).toUpperCase()+s.slice(1)).join(', '):'—';
+  const avatarDisplay=P.avatar==='initials'?
+    `<div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;margin:0 auto 16px;">${P.avatarInitials||'?'}</div>`:
+    `<div style="font-size:56px;text-align:center;margin-bottom:10px;">${P.avatarEmoji}</div>`;
+
+  document.getElementById('review-content').innerHTML=`
+    ${avatarDisplay}
+    <div class="review-section">
+      <div class="review-section-head">Personal <span class="review-edit" onclick="jumpTo(1)">Edit</span></div>
+      <div class="review-row"><span class="review-key">Name</span><span class="review-val">${P.firstName} ${P.lastName}</span></div>
+      <div class="review-row"><span class="review-key">Badge Name</span><span class="review-val">${P.preferredName||'—'}</span></div>
+      <div class="review-row"><span class="review-key">Phone</span><span class="review-val">+1 ${P.phone}</span></div>
+      <div class="review-row"><span class="review-key">Email</span><span class="review-val">${P.email}</span></div>
+    </div>
+    <div class="review-section">
+      <div class="review-section-head">Role &amp; Zones <span class="review-edit" onclick="jumpTo(3)">Edit</span></div>
+      <div class="review-row"><span class="review-key">Role</span><span class="review-val">${P.role?P.role.charAt(0).toUpperCase()+P.role.slice(1):'—'}</span></div>
+      <div class="review-row"><span class="review-key">Zones</span><span class="review-val">${P.zones.length?P.zones.join(', '):'Any'}</span></div>
+      <div class="review-row"><span class="review-key">Experience</span><span class="review-val">${P.expYears?P.expYears+' yrs':'—'}</span></div>
+    </div>
+    <div class="review-section">
+      <div class="review-section-head">Schedule <span class="review-edit" onclick="jumpTo(5)">Edit</span></div>
+      <div class="review-row"><span class="review-key">Available Days</span><span class="review-val">${days}</span></div>
+      <div class="review-row"><span class="review-key">Shifts</span><span class="review-val">${shifts}</span></div>
+      <div class="review-row"><span class="review-key">Max Hours</span><span class="review-val">${P.maxHours}</span></div>
+    </div>
+    <div class="review-section">
+      <div class="review-section-head">Certifications <span class="review-edit" onclick="jumpTo(4)">Edit</span></div>
+      <div class="review-row"><span class="review-key">Certs</span><span class="review-val">${P.certs.length?P.certs.join(' · '):'None listed'}</span></div>
+    </div>
+    <div class="review-section">
+      <div class="review-section-head">Emergency Contact <span class="review-edit" onclick="jumpTo(6)">Edit</span></div>
+      <div class="review-row"><span class="review-key">Name</span><span class="review-val">${P.ecName||'—'}</span></div>
+      <div class="review-row"><span class="review-key">Relationship</span><span class="review-val">${P.ecRel||'—'}</span></div>
+      <div class="review-row"><span class="review-key">Phone</span><span class="review-val">${P.ecPhone?'+1 '+P.ecPhone:'—'}</span></div>
+    </div>`;
+}
+
+function jumpTo(stepIdx){
+  document.getElementById(SCREENS[current]).classList.remove('active');
+  current=stepIdx;
+  document.getElementById(SCREENS[current]).classList.add('active');
+  updateProgress();
+}
+
+// ── COMPLETE / BADGE ──────────────────────────────────────────────────────────────────
+function buildComplete(){
+  P.employeeId='BP-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
+  P.badgeId='BADGE-'+Math.random().toString(36).substr(2,8).toUpperCase();
+  const roleColor={runner:'bc-blue',bartender:'bc-blue',supervisor:'bc-gold',security:'bc-green'};
+
+  document.getElementById('badge-name').textContent=P.preferredName||`${P.firstName} ${P.lastName}`;
+  document.getElementById('badge-role').textContent=
+    (P.role?P.role.charAt(0).toUpperCase()+P.role.slice(1):'Staff')+
+    (P.zones.length?' · Zone '+P.zones[0].toUpperCase():'');
+  document.getElementById('badge-id').textContent=
+    `ID: ${P.employeeId} · ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})}`;
+
+  const chips=document.getElementById('badge-chips');
+  chips.innerHTML=`<span class="badge-chip ${roleColor[P.role]||'bc-blue'}">${(P.role||'STAFF').toUpperCase()}</span>`;
+  if(P.zones.includes('vip')) chips.innerHTML+=`<span class="badge-chip bc-gold">VIP ZONE</span>`;
+  if(P.certs.includes('Alcohol Service (TIPS)')) chips.innerHTML+=`<span class="badge-chip bc-green">TIPS CERT</span>`;
+  if(P.certs.includes('CPR / First Aid')) chips.innerHTML+=`<span class="badge-chip bc-green">CPR</span>`;
+  chips.innerHTML+=`<span class="badge-chip" style="background:#a855f714;color:var(--purple);border:1px solid #a855f730;">ACTIVE</span>`;
+
+  // Draw badge QR
+  setTimeout(()=>{
+    const c=document.getElementById('badge-qr-canvas');
+    if(c) drawQR(c,`BARPASS:${P.employeeId}:${P.badgeId}:${P.role}`);
+  },100);
+
+  // Save to localStorage so enterprise-auth can pick it up
+  localStorage.setItem('bp_new_profile',JSON.stringify({
+    name:P.preferredName||`${P.firstName} ${P.lastName}`,
+    employeeId:P.employeeId, role:P.role, zones:P.zones,
+    email:P.email, phone:P.phone, badgeId:P.badgeId,
+    certs:P.certs, ts:Date.now()
+  }));
+}
+
+function downloadBadge(){
+  showToast('Badge saved to Downloads','success');
+}
+
+// ── QR DRAW (same algo as BarPass) ───────────────────────────────────────────────────
+function drawQR(canvas,data){
+  const ctx=canvas.getContext('2d');
+  const s=canvas.width;
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,s,s);
+  ctx.fillStyle='#000000';
+  const cells=21;const cs=Math.floor(s/cells);
+  for(let r=0;r<cells;r++)for(let c=0;c<cells;c++){
+    let h=0;
+    for(let i=0;i<data.length;i++) h=(h*31+data.charCodeAt(i)*(r+1)*(c+1))%256;
+    if(h>128||(r<7&&c<7)||(r<7&&c>13)||(r>13&&c<7)){
+      ctx.fillRect(c*cs,r*cs,cs,cs);
+    }
+  }
+}
+
+// ── FORMAT HELPERS ────────────────────────────────────────────────────────────────────
+function formatPhone(inp){
+  let v=inp.value.replace(/\D/g,'');
+  if(v.length>=6) v=v.slice(0,3)+') '+v.slice(3,6)+'-'+v.slice(6,10);
+  else if(v.length>=3) v=v.slice(0,3)+') '+v.slice(3);
+  inp.value='('+v.replace(/^\(/,'');
+}
+function formatInvite(inp){
+  let v=inp.value.replace(/[^A-Z0-9]/gi,'').toUpperCase();
+  if(v.length>2) v=v.slice(0,2)+'-'+v.slice(2);
+  if(v.length>7) v=v.slice(0,7)+'-'+v.slice(7,11);
+  inp.value=v;
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────────────
+let _toastTimer;
+function showToast(msg,type='info',ms=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=`show ${type}`;
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>{t.className='hide';},ms);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────────────
+buildEmojiGrid();
+buildCertGrid();
+buildDayGrid();
+
+// Pre-fill if profile exists from URL params
+(()=>{
+  const p=new URLSearchParams(location.search);
+  if(p.get('name')){
+    const parts=p.get('name').split(' ');
+    P.firstName=parts[0]||'';P.lastName=parts.slice(1).join(' ')||'';
+    document.getElementById('first-name').value=P.firstName;
+    document.getElementById('last-name').value=P.lastName;
+  }
+  if(p.get('email')){
+    P.email=p.get('email');
+    document.getElementById('email').value=P.email;
+  }
+  if(p.get('role')){
+    P.role=p.get('role');
+    const el=document.querySelector(`.role-opt[onclick*="${P.role}"]`);
+    if(el) el.classList.add('sel');
+  }
+})();
+
+// Set today as default start date
+document.getElementById('start-date').value=new Date().toISOString().split('T')[0];
+
+updateProgress();
+</script>
+</body>
+</html>
