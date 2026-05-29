@@ -439,6 +439,62 @@
   .reason-opt:hover,.reason-opt.sel { border-color:var(--red);color:var(--red);background:#FF446610; }
   .reason-icon { font-size:16px; }
 
+  /* ── Runner stats strip ── */
+  .runner-stats {
+    display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;
+  }
+  .rstat {
+    background:var(--card);border:1px solid var(--border);border-radius:10px;
+    padding:10px 8px;text-align:center;
+  }
+  .rstat-val { font-family:var(--mono);font-size:15px;font-weight:700; }
+  .rstat-lbl { font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:2px;line-height:1.3; }
+
+  /* ── Photo proof ── */
+  .photo-area {
+    background:#060810;border:1.5px dashed var(--border);border-radius:12px;
+    height:176px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:10px;cursor:pointer;margin-bottom:12px;
+    position:relative;overflow:hidden;transition:border-color .25s,background .25s;
+  }
+  .photo-area:active { background:#0a0f1c; }
+  .photo-area.captured { border-color:var(--green);border-style:solid;background:#00e87a08; }
+  .photo-preview-icon { font-size:52px;transition:all .3s; }
+  .photo-capture-btn {
+    background:var(--blue);color:#04060e;border:none;border-radius:8px;
+    padding:9px 18px;font-family:var(--mono);font-size:10px;font-weight:700;
+    cursor:pointer;display:flex;align-items:center;gap:6px;pointer-events:none;
+  }
+
+  /* ── XP / Gamification ── */
+  .xp-card {
+    background:linear-gradient(135deg,#a855f714,#5AA5FF14);
+    border:1px solid #a855f740;border-radius:14px;padding:16px;margin-top:12px;
+  }
+  .xp-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px; }
+  .xp-title { font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase; }
+  .xp-total { font-family:var(--mono);font-size:22px;font-weight:700;color:var(--purple); }
+  .xp-bar-track { height:5px;background:#1a2040;border-radius:3px;overflow:hidden;margin-bottom:14px; }
+  .xp-bar-fill { height:100%;border-radius:3px;background:linear-gradient(90deg,var(--purple),var(--blue));width:0%;transition:width 1.4s cubic-bezier(.25,.46,.45,.94); }
+  .bonus-row { display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #1a2040; }
+  .bonus-row:last-child { border-bottom:none; }
+  .bonus-lbl { font-family:var(--mono);font-size:9px;color:var(--muted); }
+  .bonus-val { font-family:var(--mono);font-size:9px;font-weight:700;color:var(--green); }
+
+  /* ── Dual timer ── */
+  .dual-timer {
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;
+  }
+  .dt-block {
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:14px 10px;text-align:center;
+  }
+  .dt-label { font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;margin-bottom:6px; }
+  .dt-val { font-family:var(--mono);font-size:28px;font-weight:700;line-height:1; }
+  .dt-val.elapsed { color:var(--amber); }
+  .dt-val.countdown { color:var(--green); }
+  .dt-val.overdue { color:var(--red);animation:badgePulse 1s ease infinite; }
+
   /* ── Misc ── */
   .divider { height:1px;background:var(--border);margin:16px 0; }
   .tag {
@@ -489,6 +545,22 @@
         <div>
           <div class="runner-name" id="runner-name">Diego L.</div>
           <div class="runner-meta">Runner · <span class="runner-zone">Zone A</span> · On shift 3h 22m</div>
+        </div>
+      </div>
+
+      <!-- Runner stats -->
+      <div class="runner-stats" id="runner-stats">
+        <div class="rstat">
+          <div class="rstat-val" style="color:var(--blue);" id="stat-trips">3</div>
+          <div class="rstat-lbl">Trips Today</div>
+        </div>
+        <div class="rstat">
+          <div class="rstat-val" style="color:var(--green);">96%</div>
+          <div class="rstat-lbl">On-Time Rate</div>
+        </div>
+        <div class="rstat">
+          <div class="rstat-val" style="color:var(--amber);">🔥 5</div>
+          <div class="rstat-lbl">Day Streak</div>
         </div>
       </div>
 
@@ -763,11 +835,16 @@
       <div class="hdr-sub">TK-1002 · Hub confirmed <span id="hub-ts"></span></div>
     </div>
     <div class="body">
-      <!-- Timer -->
-      <div class="timer-block">
-        <div class="timer-label">TIME IN TRANSIT</div>
-        <div class="timer-val" id="timer-transit">00:00</div>
-        <div class="timer-sub">ETA: Bar C2 · Use service corridor B</div>
+      <!-- Dual timer: elapsed + countdown -->
+      <div class="dual-timer" style="margin-top:14px;">
+        <div class="dt-block">
+          <div class="dt-label">TIME IN TRANSIT</div>
+          <div class="dt-val elapsed" id="timer-transit">00:00</div>
+        </div>
+        <div class="dt-block">
+          <div class="dt-label">ETA REMAINING</div>
+          <div class="dt-val countdown" id="timer-countdown">--:--</div>
+        </div>
       </div>
 
       <!-- Live map -->
@@ -873,6 +950,67 @@
     </div>
     <div class="cta-area">
       <button class="btn-sub" onclick="goScreen('screen-transit')">← Back to Transit</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCREEN 5.5 — PHOTO PROOF
+  ══════════════════════════════════════ -->
+  <div class="screen" id="screen-photo">
+    <div class="hdr">
+      <div class="hdr-top">
+        <span class="hdr-logo">BARPASS OPS</span>
+        <span class="hdr-badge" style="background:var(--purple);color:#fff;">📸 PROOF</span>
+      </div>
+      <div class="hdr-title">Photo de Entrega</div>
+      <div class="hdr-sub" id="photo-task-sub">Capture la carga · Requerido para chain of custody</div>
+    </div>
+    <div class="body">
+
+      <div class="notes-box" style="margin-top:14px;border-color:#a855f730;">
+        <div class="notes-icon">📸</div>
+        <div>
+          <div class="notes-label" style="color:var(--purple);">Foto Requerida</div>
+          <div class="notes-text" style="color:var(--muted);">Captura toda la carga descargada en el bar. Esto queda registrado en el chain of custody.</div>
+        </div>
+      </div>
+
+      <!-- Photo capture area -->
+      <div class="photo-area" id="photo-area" onclick="capturePhoto()">
+        <div class="photo-preview-icon" id="photo-icon">📷</div>
+        <div id="photo-hint" style="font-family:var(--mono);font-size:10px;color:var(--muted);">Toca para capturar foto</div>
+        <button class="photo-capture-btn">
+          📷 Capturar
+        </button>
+      </div>
+
+      <!-- After capture -->
+      <div id="photo-captured-block" style="display:none;">
+        <div class="consent-items" style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+          <div class="consent-item" style="padding:5px 0;">
+            <div class="consent-check checked" style="background:var(--green);border-color:var(--green);pointer-events:none;"></div>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--green);">✓ Foto capturada exitosamente</span>
+          </div>
+          <div class="consent-item" style="padding:5px 0;">
+            <div class="consent-check checked" style="background:var(--green);border-color:var(--green);pointer-events:none;"></div>
+            <span style="font-family:var(--mono);font-size:10px;">GPS tagged · Hard Rock Stadium</span>
+          </div>
+          <div class="consent-item" style="padding:5px 0;">
+            <div class="consent-check checked" style="background:var(--green);border-color:var(--green);pointer-events:none;"></div>
+            <span style="font-family:var(--mono);font-size:10px;" id="photo-timestamp">Timestamp: --:--</span>
+          </div>
+        </div>
+        <button class="sig-clear" onclick="resetPhoto()" style="margin-bottom:12px;">↺ Retomar foto</button>
+      </div>
+
+      <div style="height:100px;"></div>
+    </div>
+    <div class="cta-area">
+      <button class="btn-main" id="btn-photo-next" onclick="goScreen('screen-manager')" disabled
+        style="background:var(--purple);color:#fff;opacity:.4;cursor:not-allowed;">
+        Continuar con Foto →
+      </button>
+      <button class="btn-sub" onclick="goScreen('screen-scan-bar')">← Atrás</button>
     </div>
   </div>
 
@@ -984,36 +1122,76 @@
       <div class="hdr-title">Delivery Complete</div>
       <div class="hdr-sub">Task TK-1002 · Chain of custody closed</div>
     </div>
-    <div class="success-hero">
-      <div class="success-icon">✓</div>
-      <div class="success-title">Delivered!</div>
-      <div class="success-sub">
-        48 units delivered to Bar C2<br>
-        Chain of custody verified · Manager signed off<br>
-        <span style="color:var(--green);">Great work — on time!</span>
+    <div class="body" style="padding-top:20px;">
+      <div style="text-align:center;padding:20px 0 10px;">
+        <div class="success-icon" style="margin:0 auto 12px;">✓</div>
+        <div class="success-title">Entregado!</div>
+        <div class="success-sub" id="success-summary">
+          Chain of custody cerrado · Manager firmó<br>
+          <span style="color:var(--green);">¡Excelente — llegaste a tiempo!</span>
+        </div>
       </div>
+
       <div class="success-stats">
         <div class="stat-box">
-          <div class="stat-val" id="stat-time">7m 34s</div>
-          <div class="stat-lbl">TOTAL TIME</div>
+          <div class="stat-val" id="stat-time">--</div>
+          <div class="stat-lbl">TIEMPO TOTAL</div>
         </div>
         <div class="stat-box">
-          <div class="stat-val" style="color:var(--green);">✓</div>
+          <div class="stat-val" id="stat-ontime" style="color:var(--green);">✓</div>
           <div class="stat-lbl">ON TIME</div>
         </div>
         <div class="stat-box">
-          <div class="stat-val">48</div>
-          <div class="stat-lbl">UNITS DELIVERED</div>
+          <div class="stat-val" id="stat-units">--</div>
+          <div class="stat-lbl">UNIDADES</div>
         </div>
         <div class="stat-box">
-          <div class="stat-val" style="color:var(--amber);">+2</div>
-          <div class="stat-lbl">TODAY'S TRIPS</div>
+          <div class="stat-val" style="color:var(--amber);">🔥 6</div>
+          <div class="stat-lbl">DAY STREAK</div>
         </div>
       </div>
+
+      <!-- XP / Bonus card -->
+      <div class="xp-card">
+        <div class="xp-header">
+          <div>
+            <div class="xp-title">XP EARNED THIS DELIVERY</div>
+            <div class="xp-total" id="xp-total">+150 XP</div>
+          </div>
+          <div style="font-size:28px;">⭐</div>
+        </div>
+        <div class="xp-bar-track">
+          <div class="xp-bar-fill" id="xp-bar" style="width:0%"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-bottom:12px;">Nivel 7 · 640/1000 XP para Nivel 8</div>
+
+        <div class="bonus-row">
+          <span class="bonus-lbl">🚀 Entrega base</span>
+          <span class="bonus-val">+100 XP</span>
+        </div>
+        <div class="bonus-row" id="xp-ontime-row">
+          <span class="bonus-lbl">⚡ On-time bonus</span>
+          <span class="bonus-val" id="xp-ontime-val">+50 XP</span>
+        </div>
+        <div class="bonus-row" id="xp-priority-row">
+          <span class="bonus-lbl" id="xp-priority-lbl">🔴 HIGH priority bonus</span>
+          <span class="bonus-val" id="xp-priority-val">+30 XP</span>
+        </div>
+        <div class="bonus-row">
+          <span class="bonus-lbl">📸 Photo proof</span>
+          <span class="bonus-val">+10 XP</span>
+        </div>
+        <div class="bonus-row">
+          <span class="bonus-lbl">✍️ Chain of custody</span>
+          <span class="bonus-val">+10 XP</span>
+        </div>
+      </div>
+
+      <div style="height:100px;"></div>
     </div>
     <div class="cta-area">
       <button class="btn-main accept" onclick="goScreen('screen-incoming');resetFlow()">
-        Ready for Next Task
+        Listo para Siguiente Tarea
       </button>
     </div>
   </div>
@@ -1111,9 +1289,9 @@ function populateTask(){
 
 function buildCargoGrid(){
   const items = TASK.cargo.split(',').map(s=>s.trim());
-  const emojis = {'spirits':'🥃','water':'💧','beer':'🍺','wine':'🍷','nachos':'🌮','burger':'🍔','soda':'🥤','juice':'🧃','mixed':'📦'};
+  const emojis = {'spirits':'🥃','water':'💧','beer':'🍺','heineken':'🍺','corona':'🍺','wine':'🍷','nachos':'🌮','burger':'🍔','soda':'🥤','juice':'🧃','mixed':'📦'};
   document.getElementById('cargo-grid').innerHTML = items.map(item=>{
-    const m = item.match(/^(\d+)×(.+)$/i);
+    const m = item.match(/^(\d+)[×x](.+)$/i);
     const qty = m?m[1]:'?', name = m?m[2]:item;
     const key = name.toLowerCase().replace(/[^a-z]/g,'');
     const emoji = emojis[key]||'📦';
@@ -1123,11 +1301,14 @@ function buildCargoGrid(){
 
 function buildCargoChecklist(){
   const items = TASK.cargo.split(',').map(s=>s.trim());
-  document.getElementById('cargo-checklist').innerHTML = items.map((item,i)=>`
-    <div class="consent-item" style="padding:8px 0;border-bottom:1px solid var(--border);">
+  document.getElementById('cargo-checklist').innerHTML = items.map((item,i)=>{
+    const m = item.match(/^(\d+)[×x](.+)$/i);
+    const label = m ? `${m[2]} — ×${m[1]} cargados y contados` : `${item} — cargado y contado`;
+    return `<div class="consent-item" style="padding:8px 0;border-bottom:1px solid var(--border);">
       <div class="consent-check" id="cargo-chk-${i}" onclick="toggleCheck('cargo-chk-${i}')"></div>
-      <span style="font-family:var(--mono);font-size:10px;">${item} — loaded &amp; counted</span>
-    </div>`).join('');
+      <span style="font-family:var(--mono);font-size:10px;">${label}</span>
+    </div>`;
+  }).join('');
 }
 
 // ── Screen navigation ──
@@ -1205,6 +1386,7 @@ function clearSignature(cid='sig-canvas', pid='sig-placeholder'){
 // ── Timers ──
 let _pickingStart=null, _transitStart=null;
 let _pickingTimer=null, _transitTimer=null;
+const _etaSecs = () => (parseInt(TASK.eta)||9) * 60;
 
 function startPickingTimer(){
   _pickingStart = Date.now();
@@ -1220,8 +1402,19 @@ function startTransitTimer(){
   clearInterval(_transitTimer);
   _transitTimer = setInterval(()=>{
     const elapsed = Math.floor((Date.now()-_transitStart)/1000);
-    const el = document.getElementById('timer-transit');
-    if(el) el.textContent = fmtSec(elapsed);
+    const elEl = document.getElementById('timer-transit');
+    const cdEl = document.getElementById('timer-countdown');
+    if(elEl) elEl.textContent = fmtSec(elapsed);
+    if(cdEl){
+      const remaining = _etaSecs() - elapsed;
+      if(remaining > 0){
+        cdEl.textContent = fmtSec(remaining);
+        cdEl.className = 'dt-val countdown';
+      } else {
+        cdEl.textContent = '-'+fmtSec(-remaining);
+        cdEl.className = 'dt-val overdue';
+      }
+    }
   },1000);
 }
 
@@ -1245,8 +1438,48 @@ function hubScanned(){
   startTransitTimer();
 }
 
+let _photoCapture = false;
+
+function capturePhoto(){
+  if(_photoCapture) return;
+  // Simulate camera flash + capture
+  const area = document.getElementById('photo-area');
+  area.style.background = '#ffffff20';
+  setTimeout(()=>{
+    area.style.background = '#00e87a08';
+    area.classList.add('captured');
+    area.onclick = null;
+    document.getElementById('photo-icon').textContent = '✅';
+    document.getElementById('photo-hint').textContent = 'Foto capturada';
+    document.getElementById('photo-captured-block').style.display = 'block';
+    document.getElementById('photo-timestamp').textContent = `Timestamp: ${fmtTime(new Date())} · ${new Date().toLocaleDateString()}`;
+    const btn = document.getElementById('btn-photo-next');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+    _photoCapture = true;
+  }, 200);
+}
+
+function resetPhoto(){
+  _photoCapture = false;
+  const area = document.getElementById('photo-area');
+  area.style.background = '#060810';
+  area.classList.remove('captured');
+  area.onclick = capturePhoto;
+  document.getElementById('photo-icon').textContent = '📷';
+  document.getElementById('photo-hint').textContent = 'Toca para capturar foto';
+  document.getElementById('photo-captured-block').style.display = 'none';
+  const btn = document.getElementById('btn-photo-next');
+  btn.disabled = true;
+  btn.style.opacity = '.4';
+  btn.style.cursor = 'not-allowed';
+}
+
 function barScanned(){
-  goScreen('screen-manager');
+  _photoCapture = false;
+  resetPhoto();
+  goScreen('screen-photo');
   const now = new Date();
   const elapsed = _acceptTime ? Math.floor((now-_acceptTime)/1000) : 0;
   document.getElementById('mgr-time').textContent = fmtSec(elapsed);
@@ -1260,7 +1493,33 @@ function barScanned(){
 function verifyDelivery(){
   clearInterval(_pickingTimer);
   clearInterval(_transitTimer);
+  // Calculate elapsed & on-time
+  const now = new Date();
+  const elapsed = _acceptTime ? Math.floor((now-_acceptTime)/1000) : 0;
+  const onTime = elapsed <= _etaSecs();
+  // Update stat displays
+  document.getElementById('stat-time').textContent = fmtSec(elapsed);
+  document.getElementById('stat-units').textContent = TASK.units;
+  document.getElementById('stat-ontime').textContent = onTime ? '✓' : '⚠';
+  document.getElementById('stat-ontime').style.color = onTime ? 'var(--green)' : 'var(--amber)';
+  document.getElementById('success-summary').innerHTML = `
+    ${TASK.units} unidades a ${TASK.bar} · Manager firmó<br>
+    <span style="color:${onTime?'var(--green)':'var(--amber)'};">${onTime?'¡Excelente — llegaste a tiempo!':'Completado — fuera de tiempo'}</span>`;
+  // XP calculation
+  const prioBonus = {HIGH:30, MID:10, LOW:5};
+  const xpBase = 100, xpOnTime = onTime?50:0, xpPrio = prioBonus[TASK.priority]||10;
+  const xpPhoto = _photoCapture?10:0, xpChain = 10;
+  const xpTotal = xpBase + xpOnTime + xpPrio + xpPhoto + xpChain;
+  document.getElementById('xp-total').textContent = `+${xpTotal} XP`;
+  document.getElementById('xp-ontime-val').textContent = xpOnTime?`+${xpOnTime} XP`:'— (fuera de tiempo)';
+  document.getElementById('xp-priority-lbl').textContent = `${TASK.priority==='HIGH'?'🔴':TASK.priority==='MID'?'🟡':'🟢'} ${TASK.priority} priority bonus`;
+  document.getElementById('xp-priority-val').textContent = `+${xpPrio} XP`;
   goScreen('screen-verified');
+  // Animate XP bar after render
+  setTimeout(()=>{
+    const fill = (640 + xpTotal) / 1000 * 100;
+    document.getElementById('xp-bar').style.width = Math.min(fill,100)+'%';
+  }, 400);
 }
 
 function resetFlow(){
