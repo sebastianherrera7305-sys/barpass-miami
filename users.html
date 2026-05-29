@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarPass — User Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="barpass-db.js"></script>
+<style>
+:root{--bg:#04060e;--surface:#080c1a;--card:#0c1022;--border:#1a2040;--text:#e8eaf6;--muted:#4a5380;--green:#00e87a;--amber:#FFba38;--red:#FF4466;--blue:#5AA5FF;--purple:#a855f7;--mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);}
+/* Header */
+.hdr{padding:16px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:var(--bg);backdrop-filter:blur(12px);}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-mark{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#5AA5FF,#a855f7);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:800;font-size:15px;color:#fff;}
+.brand-name{font-size:17px;font-weight:800;letter-spacing:-.02em;}
+.brand-sub{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:1px;letter-spacing:.1em;}
+.hdr-nav{display:flex;gap:8px;align-items:center;}
+.nav-lnk{padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:9px;text-decoration:none;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.nav-lnk:hover{border-color:var(--text);color:var(--text);}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+.live-badge{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1px solid #00e87a30;background:#00e87a08;font-family:var(--mono);font-size:9px;color:var(--green);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:24px 32px 0;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.kpi-val{font-family:var(--mono);font-size:26px;font-weight:700;margin-bottom:2px;}
+.kpi-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;}
+/* Toolbar */
+.toolbar{display:flex;align-items:center;gap:10px;padding:20px 32px 12px;flex-wrap:wrap;}
+.search-wrap{flex:1;min-width:200px;position:relative;}
+.search-inp{width:100%;padding:9px 12px 9px 34px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:var(--mono);font-size:11px;outline:none;transition:border-color .15s;}
+.search-inp:focus{border-color:var(--blue);}
+.search-ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none;}
+.filter-sel{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:var(--mono);font-size:10px;outline:none;cursor:pointer;}
+.btn-add{padding:9px 18px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--green),#00c065);color:#04060e;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;letter-spacing:.04em;white-space:nowrap;}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 4px 16px #00e87a30;}
+.btn-export{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .15s;}
+.btn-export:hover{border-color:var(--text);color:var(--text);}
+/* Table */
+.table-wrap{padding:0 32px 48px;overflow-x:auto;}
+.tbl{width:100%;border-collapse:collapse;min-width:900px;}
+.tbl th{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;font-weight:600;}
+.tbl td{padding:10px 12px;border-bottom:1px solid #0d1228;font-size:12px;vertical-align:middle;}
+.tbl tr:hover td{background:#0a0e1f;}
+.tbl tr.inactive td{opacity:.55;}
+/* Avatar */
+.av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid;}
+/* Status */
+.status{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-family:var(--mono);font-size:8px;font-weight:700;}
+.status.active{background:#00e87a14;color:var(--green);border:1px solid #00e87a30;}
+.status.inactive{background:#FF446614;color:var(--red);border:1px solid #FF446630;}
+.status.pending{background:#FFba3814;color:var(--amber);border:1px solid #FFba3830;}
+/* Role badge */
+.role{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:8px;font-weight:700;}
+.role.runner{background:#5AA5FF14;color:var(--blue);border:1px solid #5AA5FF30;}
+.role.bartender{background:#00e87a14;color:var(--green);border:1px solid #00e87a30;}
+.role.manager{background:#FFba3814;color:var(--amber);border:1px solid #FFba3830;}
+.role.supervisor{background:#a855f714;color:var(--purple);border:1px solid #a855f730;}
+.role.admin{background:#FF446614;color:var(--red);border:1px solid #FF446630;}
+/* Actions */
+.row-actions{display:flex;gap:5px;}
+.act-btn{padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:8px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.act-btn:hover{border-color:var(--text);color:var(--text);}
+.act-btn.danger:hover{border-color:var(--red);color:var(--red);}
+.act-btn.primary{border-color:#5AA5FF40;color:var(--blue);background:#5AA5FF08;}
+.act-btn.primary:hover{background:#5AA5FF18;}
+/* PIN display */
+.pin-badge{font-family:var(--mono);font-size:10px;font-weight:700;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:2px 7px;letter-spacing:.1em;cursor:pointer;}
+.pin-badge:hover{border-color:var(--amber);color:var(--amber);}
+/* Modal */
+.modal-ov{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.modal-hdr{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1;}
+.modal-ttl{font-size:15px;font-weight:700;}
+.modal-close{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:14px;transition:all .15s;}
+.modal-close:hover{border-color:var(--text);color:var(--text);}
+.modal-body{padding:22px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.form-row.single{grid-template-columns:1fr;}
+.form-grp{display:flex;flex-direction:column;gap:5px;}
+.form-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+.form-inp,.form-sel{padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:var(--mono);font-size:11px;outline:none;transition:border-color .15s;width:100%;}
+.form-inp:focus,.form-sel:focus{border-color:var(--blue);}
+.form-inp.has-error{border-color:var(--red);}
+.form-error{font-family:var(--mono);font-size:8px;color:var(--red);margin-top:3px;}
+.form-hint{font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:3px;}
+.cert-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.cert-tag{padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--card);font-family:var(--mono);font-size:9px;cursor:pointer;transition:all .15s;user-select:none;}
+.cert-tag.on{background:#5AA5FF14;border-color:#5AA5FF40;color:var(--blue);}
+.section-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:8px;}
+.section-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.modal-ftr{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--surface);}
+.btn-cancel{padding:9px 18px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;cursor:pointer;}
+.btn-save{padding:9px 20px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-save:hover{opacity:.9;}
+/* Profile drawer */
+.drawer-ov{position:fixed;inset:0;z-index:8999;background:rgba(0,0,0,.5);}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--surface);border-left:1px solid var(--border);z-index:9000;overflow-y:auto;animation:drawerIn .22s ease;}
+@keyframes drawerIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.drawer-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.drawer-body{padding:20px;}
+.dstat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.dstat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+.dstat-val{font-family:var(--mono);font-size:18px;font-weight:700;margin-bottom:2px;}
+.dstat-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);}
+.info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #0d1228;font-size:11px;}
+.info-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.info-val{font-family:var(--mono);font-size:10px;font-weight:500;}
+/* Toast */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:6px;}
+.toast{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:var(--mono);font-size:10px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tin .2s ease;max-width:300px;}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.toast-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+/* Empty state */
+.empty{text-align:center;padding:48px;color:var(--muted);font-family:var(--mono);font-size:11px;}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+/* Confirm */
+.confirm-ov{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:20px;}
+.confirm-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:100%;max-width:360px;padding:24px;}
+.confirm-msg{font-size:13px;margin-bottom:18px;line-height:1.6;}
+.confirm-actions{display:flex;gap:8px;justify-content:flex-end;}
+/* Responsive */
+@media(max-width:768px){.kpis{grid-template-columns:repeat(2,1fr);padding:16px;}.toolbar{padding:12px 16px;}.table-wrap{padding:0 0 40px;}.hdr{padding:12px 16px;}.hdr-nav{display:none;}.drawer{width:100%;}.modal{max-width:100%;margin:0;border-radius:14px 14px 0 0;}.modal-ov{align-items:flex-end;padding:0;}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="brand">
+    <div class="brand-mark">BP</div>
+    <div>
+      <div class="brand-name">User Management</div>
+      <div class="brand-sub">STAFF DATABASE</div>
+    </div>
+  </div>
+  <nav class="hdr-nav">
+    <a class="nav-lnk" href="hub.html">← Hub</a>
+    <a class="nav-lnk" href="BarPass_v10.html">🍺 POS</a>
+    <a class="nav-lnk" href="analytics.html">📊 Analytics</a>
+    <a class="nav-lnk" href="profile-setup.html" target="_blank">📋 Onboarding</a>
+  </nav>
+  <div class="hdr-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+  </div>
+</header>
+
+<!-- KPIs -->
+<div class="kpis" id="kpis"></div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-ico">🔍</span>
+    <input class="search-inp" id="search" type="text" placeholder="Search by name, email, employee ID, badge..." oninput="renderTable()">
+  </div>
+  <select class="filter-sel" id="filter-role" onchange="renderTable()">
+    <option value="">All Roles</option>
+    <option value="runner">Runner</option>
+    <option value="bartender">Bartender</option>
+    <option value="manager">Manager</option>
+    <option value="supervisor">Supervisor</option>
+    <option value="admin">Admin</option>
+  </select>
+  <select class="filter-sel" id="filter-zone" onchange="renderTable()">
+    <option value="">All Zones</option>
+    <option value="A">Zone A</option>
+    <option value="B">Zone B</option>
+    <option value="C">Zone C</option>
+    <option value="D">Zone D</option>
+    <option value="VIP">VIP</option>
+    <option value="ALL">ALL</option>
+  </select>
+  <select class="filter-sel" id="filter-status" onchange="renderTable()">
+    <option value="">All Status</option>
+    <option value="active">Active</option>
+    <option value="inactive">Inactive</option>
+    <option value="pending">Pending</option>
+  </select>
+  <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+  <button class="btn-add" onclick="openAdd()">＋ Add Staff</button>
+</div>
+
+<!-- Table -->
+<div class="table-wrap">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th>Staff</th>
+        <th>Role</th>
+        <th>Zone</th>
+        <th>Status</th>
+        <th>Employee ID</th>
+        <th>PIN</th>
+        <th>Certifications</th>
+        <th>Last Login</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="tbl-body"></tbody>
+  </table>
+  <div id="empty-state" class="empty" style="display:none;">
+    <div class="empty-icon">👥</div>
+    No staff found matching your filters.<br>
+    <a href="#" onclick="clearFilters()" style="color:var(--blue);text-decoration:none;margin-top:8px;display:inline-block;">Clear filters</a>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-ov" id="staff-modal" style="display:none;" onclick="if(event.target===this)closeModal()">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="modal-ttl" id="modal-title">Add Staff Member</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="edit-id">
+
+    <div class="section-lbl">Personal Information</div>
+    <div class="form-row">
+      <div class="form-grp">
+        <label class="form-lbl">First Name *</label>
+        <input class="form-inp" id="f-firstName" placeholder="Diego">
+        <div class="form-error" id="err-firstName"></div>
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Last Name *</label>
+        <input class="form-inp" id="f-lastName" placeholder="López">
+        <div class="form-error" id="err-lastName"></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-grp">
+        <label class="form-lbl">Email *</label>
+        <input class="form-inp" id="f-email" type="email" placeholder="diego@venue.com">
+        <div class="form-error" id="err-email"></div>
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Phone</label>
+        <input class="form-inp" id="f-phone" placeholder="+1-305-555-0000">
+      </div>
+    </div>
+
+    <div class="section-lbl">Role & Access</div>
+    <div class="form-row">
+      <div class="form-grp">
+        <label class="form-lbl">Role *</label>
+        <select class="form-sel" id="f-role" onchange="autoFillBpRole()">
+          <option value="runner">Runner</option>
+          <option value="bartender">Bartender</option>
+          <option value="manager">Manager</option>
+          <option value="supervisor">Supervisor</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Zone *</label>
+        <select class="form-sel" id="f-zone">
+          <option value="A">Zone A — West</option>
+          <option value="B">Zone B — North</option>
+          <option value="C">Zone C — East</option>
+          <option value="D">Zone D — South</option>
+          <option value="VIP">VIP Suites</option>
+          <option value="ALL">All Zones</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-grp">
+        <label class="form-lbl">BarPass Role (system access)</label>
+        <select class="form-sel" id="f-bpRole">
+          <option value="bartender">Bartender (PIN 1234 level)</option>
+          <option value="manager">Manager (PIN 2847 level)</option>
+          <option value="owner">Owner (full access)</option>
+        </select>
+        <div class="form-hint">Controls what they can see in BarPass POS</div>
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Custom PIN (4 digits)</label>
+        <input class="form-inp" id="f-pin" placeholder="Auto-generated" maxlength="4" pattern="[0-9]{4}">
+        <div class="form-hint">Leave blank to auto-generate a unique PIN</div>
+      </div>
+    </div>
+
+    <div class="section-lbl">Employment Details</div>
+    <div class="form-row">
+      <div class="form-grp">
+        <label class="form-lbl">Employee ID</label>
+        <input class="form-inp" id="f-employeeId" placeholder="BP-2025-0001 (auto)">
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Badge ID</label>
+        <input class="form-inp" id="f-badgeId" placeholder="BADGE-000">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-grp">
+        <label class="form-lbl">Status</label>
+        <select class="form-sel" id="f-status">
+          <option value="active">Active</option>
+          <option value="pending">Pending (onboarding)</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Avatar Emoji</label>
+        <input class="form-inp" id="f-avatarEmoji" placeholder="🧑" maxlength="2">
+      </div>
+    </div>
+
+    <div class="section-lbl">Certifications</div>
+    <div class="cert-grid" id="cert-grid">
+      <div class="cert-tag" data-cert="alcohol-compliance" onclick="toggleCert(this)">🍺 Alcohol Compliance</div>
+      <div class="cert-tag" data-cert="food-safety" onclick="toggleCert(this)">🍔 Food Safety</div>
+      <div class="cert-tag" data-cert="management" onclick="toggleCert(this)">📊 Management</div>
+      <div class="cert-tag" data-cert="vip-service" onclick="toggleCert(this)">👑 VIP Service</div>
+      <div class="cert-tag" data-cert="first-aid" onclick="toggleCert(this)">🏥 First Aid</div>
+      <div class="cert-tag" data-cert="security" onclick="toggleCert(this)">🛡️ Security</div>
+    </div>
+
+    <div class="section-lbl">Notes</div>
+    <div class="form-row single">
+      <div class="form-grp">
+        <textarea class="form-inp" id="f-notes" rows="2" placeholder="Internal notes about this staff member..." style="resize:vertical;"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="modal-ftr">
+    <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+    <button class="btn-save" onclick="saveStaff()">Save Staff Member</button>
+  </div>
+</div>
+</div>
+
+<!-- Profile Drawer overlay -->
+<div class="drawer-ov" id="drawer-ov" style="display:none;" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer" style="display:none;">
+  <div class="drawer-hdr">
+    <div id="drawer-name" style="font-size:15px;font-weight:700;"></div>
+    <button style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</div>
+
+<!-- Confirm dialog -->
+<div class="confirm-ov" id="confirm-ov" style="display:none;">
+  <div class="confirm-box">
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-actions">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button id="confirm-ok" class="btn-save" style="background:var(--red);">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const ROLE_META = {
+  runner:     { label:'Runner',     emoji:'🏃', color:'var(--blue)' },
+  bartender:  { label:'Bartender',  emoji:'🍹', color:'var(--green)' },
+  manager:    { label:'Manager',    emoji:'📊', color:'var(--amber)' },
+  supervisor: { label:'Supervisor', emoji:'👑', color:'var(--purple)' },
+  admin:      { label:'Admin',      emoji:'🛡️', color:'var(--red)' },
+};
+
+function fmtAgo(ts) {
+  if (!ts) return '—';
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60)   return s + 's ago';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  return new Date(ts).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+// ── Render KPIs ──────────────────────────────────────────────────────────────
+function renderKPIs() {
+  const all     = BPDB.getAllStaff();
+  const active  = all.filter(s => s.status === 'active').length;
+  const inactive= all.filter(s => s.status === 'inactive').length;
+  const pending = all.filter(s => s.status === 'pending').length;
+  const newThis = all.filter(s => Date.now() - s.createdAt < 30*86400000).length;
+  const kpis = [
+    { val: all.length,  lbl: 'TOTAL STAFF',  color: 'var(--blue)' },
+    { val: active,      lbl: 'ACTIVE',        color: 'var(--green)' },
+    { val: inactive,    lbl: 'INACTIVE',      color: 'var(--red)' },
+    { val: pending,     lbl: 'PENDING',       color: 'var(--amber)' },
+    { val: newThis,     lbl: 'NEW THIS MONTH',color: 'var(--purple)' },
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(k =>
+    `<div class="kpi"><div class="kpi-val" style="color:${k.color}">${k.val}</div><div class="kpi-lbl">${k.lbl}</div></div>`
+  ).join('');
+}
+
+// ── Render Table ─────────────────────────────────────────────────────────────
+function renderTable() {
+  const q     = document.getElementById('search').value.toLowerCase();
+  const role  = document.getElementById('filter-role').value;
+  const zone  = document.getElementById('filter-zone').value;
+  const status= document.getElementById('filter-status').value;
+
+  let list = BPDB.getAllStaff();
+  if (role)   list = list.filter(s => s.role === role);
+  if (zone)   list = list.filter(s => s.zone === zone);
+  if (status) list = list.filter(s => s.status === status);
+  if (q) list = list.filter(s =>
+    s.name.toLowerCase().includes(q) ||
+    s.email.toLowerCase().includes(q) ||
+    (s.employeeId||'').toLowerCase().includes(q) ||
+    (s.badgeId||'').toLowerCase().includes(q) ||
+    s.role.toLowerCase().includes(q)
+  );
+
+  const empty = document.getElementById('empty-state');
+  const tbody = document.getElementById('tbl-body');
+
+  if (!list.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const rm = ROLE_META;
+  tbody.innerHTML = list.map(s => {
+    const r = rm[s.role] || rm.bartender;
+    const avBg = s.status==='active'?r.color+'30':s.status==='inactive'?'#FF446620':'#FFba3820';
+    const avBorder = s.status==='active'?r.color:s.status==='inactive'?'var(--red)':'var(--amber)';
+    const certs = (s.certifications||[]).map(c => {
+      const lbl = c.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
+      return `<span style="font-family:var(--mono);font-size:7px;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:1px 5px;">${lbl}</span>`;
+    }).join(' ');
+    return `<tr class="${s.status==='inactive'?'inactive':''}">
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="av" style="background:${avBg};border-color:${avBorder};">${s.avatarEmoji||'🧑'}</div>
+          <div>
+            <div style="font-weight:600;font-size:12px;">${s.name}</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);">${s.email}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="role ${s.role}">${r.emoji} ${r.label}</span></td>
+      <td><span style="font-family:var(--mono);font-size:10px;">Zone ${s.zone}</span></td>
+      <td><span class="status ${s.status}">● ${s.status.toUpperCase()}</span></td>
+      <td><span style="font-family:var(--mono);font-size:10px;">${s.employeeId||'—'}</span></td>
+      <td>
+        <span class="pin-badge" title="Click to copy PIN" onclick="copyPin('${s.pin}','${s.name}')">
+          ${s.pin ? '••••' : '—'}
+        </span>
+      </td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap;">${certs||'<span style="color:var(--muted);font-size:10px;">None</span>'}</div></td>
+      <td><span style="font-family:var(--mono);font-size:9px;color:var(--muted);">${fmtAgo(s.lastLogin)}</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="act-btn primary" onclick="openProfile('${s.id}')">👤 View</button>
+          <button class="act-btn" onclick="openEdit('${s.id}')">✏️ Edit</button>
+          <button class="act-btn" onclick="toggleStatus('${s.id}','${s.status}')">${s.status==='active'?'⏸ Deactivate':'▶ Activate'}</button>
+          <button class="act-btn" onclick="confirmResetPin('${s.id}','${s.name}')">🔑 Reset PIN</button>
+          <button class="act-btn danger" onclick="confirmDelete('${s.id}','${s.name}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Add / Edit Modal ─────────────────────────────────────────────────────────
+function openAdd() {
+  document.getElementById('modal-title').textContent = 'Add Staff Member';
+  document.getElementById('edit-id').value = '';
+  clearForm();
+  document.getElementById('staff-modal').style.display = 'flex';
+}
+
+function openEdit(id) {
+  const s = BPDB.getStaff(id);
+  if (!s) return;
+  document.getElementById('modal-title').textContent = 'Edit — ' + s.name;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('f-firstName').value   = s.firstName || '';
+  document.getElementById('f-lastName').value    = s.lastName  || '';
+  document.getElementById('f-email').value       = s.email     || '';
+  document.getElementById('f-phone').value       = s.phone     || '';
+  document.getElementById('f-role').value        = s.role      || 'runner';
+  document.getElementById('f-zone').value        = s.zone      || 'A';
+  document.getElementById('f-bpRole').value      = s.bpRole    || 'bartender';
+  document.getElementById('f-pin').value         = s.pin       || '';
+  document.getElementById('f-employeeId').value  = s.employeeId|| '';
+  document.getElementById('f-badgeId').value     = s.badgeId   || '';
+  document.getElementById('f-status').value      = s.status    || 'active';
+  document.getElementById('f-avatarEmoji').value = s.avatarEmoji||'🧑';
+  document.getElementById('f-notes').value       = s.notes     || '';
+  // Certifications
+  document.querySelectorAll('.cert-tag').forEach(t => {
+    t.classList.toggle('on', (s.certifications||[]).includes(t.dataset.cert));
+  });
+  clearErrors();
+  document.getElementById('staff-modal').style.display = 'flex';
+}
+
+function clearForm() {
+  ['firstName','lastName','email','phone','pin','employeeId','badgeId','notes'].forEach(f => {
+    const el = document.getElementById('f-'+f);
+    if (el) el.value = '';
+  });
+  document.getElementById('f-role').value = 'runner';
+  document.getElementById('f-zone').value = 'A';
+  document.getElementById('f-bpRole').value = 'bartender';
+  document.getElementById('f-status').value = 'active';
+  document.getElementById('f-avatarEmoji').value = '🧑';
+  document.querySelectorAll('.cert-tag').forEach(t => t.classList.remove('on'));
+  clearErrors();
+}
+
+function clearErrors() {
+  document.querySelectorAll('.form-error').forEach(e => e.textContent = '');
+  document.querySelectorAll('.form-inp.has-error').forEach(e => e.classList.remove('has-error'));
+}
+
+function autoFillBpRole() {
+  const role = document.getElementById('f-role').value;
+  const map = { runner:'bartender', bartender:'bartender', manager:'manager', supervisor:'manager', admin:'owner' };
+  document.getElementById('f-bpRole').value = map[role] || 'bartender';
+}
+
+function toggleCert(el) { el.classList.toggle('on'); }
+
+function getCerts() {
+  return [...document.querySelectorAll('.cert-tag.on')].map(t => t.dataset.cert);
+}
+
+function validate() {
+  clearErrors();
+  let ok = true;
+  const required = { firstName:'First name is required', lastName:'Last name is required', email:'Email is required' };
+  Object.entries(required).forEach(([f, msg]) => {
+    const el = document.getElementById('f-'+f);
+    if (!el.value.trim()) {
+      el.classList.add('has-error');
+      document.getElementById('err-'+f).textContent = msg;
+      ok = false;
+    }
+  });
+  const pin = document.getElementById('f-pin').value;
+  if (pin && !/^\d{4}$/.test(pin)) {
+    document.getElementById('f-pin').classList.add('has-error');
+    ok = false;
+    toast('PIN must be exactly 4 digits', 'error');
+  }
+  return ok;
+}
+
+function saveStaff() {
+  if (!validate()) return;
+  const id   = document.getElementById('edit-id').value;
+  const data = {
+    firstName:      document.getElementById('f-firstName').value.trim(),
+    lastName:       document.getElementById('f-lastName').value.trim(),
+    email:          document.getElementById('f-email').value.trim(),
+    phone:          document.getElementById('f-phone').value.trim(),
+    role:           document.getElementById('f-role').value,
+    zone:           document.getElementById('f-zone').value,
+    bpRole:         document.getElementById('f-bpRole').value,
+    pin:            document.getElementById('f-pin').value || undefined,
+    employeeId:     document.getElementById('f-employeeId').value.trim() || undefined,
+    badgeId:        document.getElementById('f-badgeId').value.trim(),
+    status:         document.getElementById('f-status').value,
+    avatarEmoji:    document.getElementById('f-avatarEmoji').value || '🧑',
+    notes:          document.getElementById('f-notes').value.trim(),
+    certifications: getCerts(),
+  };
+
+  if (id) {
+    BPDB.updateStaff(id, data);
+    toast('Staff member updated', 'success');
+  } else {
+    const s = BPDB.createStaff(data);
+    toast(`${s.name} added — PIN: ${s.pin}`, 'success');
+  }
+  closeModal();
+  renderKPIs();
+  renderTable();
+}
+
+function closeModal() {
+  document.getElementById('staff-modal').style.display = 'none';
+  clearForm();
+}
+
+// ── Profile Drawer ────────────────────────────────────────────────────────────
+function openProfile(id) {
+  const s = BPDB.getStaffMetricsFull ? BPDB.getStaffMetricsFull(id) : BPDB.getStaff(id);
+  if (!s) return;
+  const r = ROLE_META[s.role] || ROLE_META.bartender;
+  document.getElementById('drawer-name').innerHTML =
+    `<span style="font-size:20px;margin-right:8px;">${s.avatarEmoji||'🧑'}</span>${s.name}`;
+  document.getElementById('drawer-body').innerHTML = `
+    <div class="dstat-grid">
+      <div class="dstat"><div class="dstat-val" style="color:var(--green);">${BPDB.fmt.currency(s.totalRevenue||0)}</div><div class="dstat-lbl">REVENUE</div></div>
+      <div class="dstat"><div class="dstat-val" style="color:var(--blue);">${s.totalOrders||0}</div><div class="dstat-lbl">ORDERS</div></div>
+      <div class="dstat"><div class="dstat-val" style="color:var(--amber);">${s.totalDispatches||0}</div><div class="dstat-lbl">DISPATCHES</div></div>
+      <div class="dstat"><div class="dstat-val" style="color:var(--purple);">${s.completedDispatches||0}</div><div class="dstat-lbl">COMPLETED</div></div>
+    </div>
+    <div class="section-lbl" style="margin-top:0;">Profile</div>
+    ${[
+      ['Name',        s.name],
+      ['Email',       s.email || '—'],
+      ['Phone',       s.phone || '—'],
+      ['Role',        `${r.emoji} ${r.label}`],
+      ['Zone',        'Zone ' + s.zone],
+      ['BP Access',   s.bpRole || '—'],
+      ['Status',      s.status.toUpperCase()],
+      ['Employee ID', s.employeeId || '—'],
+      ['Badge ID',    s.badgeId || '—'],
+      ['PIN',         s.pin || '—'],
+      ['Hire Date',   fmtDate(s.hireDate)],
+      ['Last Login',  fmtAgo(s.lastLogin)],
+      ['Created',     fmtDate(s.createdAt)],
+    ].map(([l,v])=>`<div class="info-row"><span class="info-lbl">${l}</span><span class="info-val">${v}</span></div>`).join('')}
+    <div class="section-lbl">Certifications</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
+      ${(s.certifications||[]).length
+        ? (s.certifications).map(c=>`<span style="padding:3px 9px;border-radius:5px;background:#5AA5FF14;border:1px solid #5AA5FF30;color:var(--blue);font-family:var(--mono);font-size:9px;">${c.replace(/-/g,' ')}</span>`).join('')
+        : '<span style="color:var(--muted);font-family:var(--mono);font-size:10px;">None</span>'}
+    </div>
+    ${s.notes ? `<div class="section-lbl">Notes</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.7;">${s.notes}</div>` : ''}
+    <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;">
+      <button class="act-btn primary" style="padding:8px 14px;font-size:10px;" onclick="closeDrawer();openEdit('${s.id}')">✏️ Edit Profile</button>
+      <button class="act-btn" style="padding:8px 14px;font-size:10px;" onclick="confirmResetPin('${s.id}','${s.name}');closeDrawer()">🔑 Reset PIN</button>
+      <button class="act-btn" style="padding:8px 14px;font-size:10px;" onclick="window.open('profile-setup.html','_blank')">📋 Onboarding Form</button>
+    </div>`;
+  document.getElementById('drawer-ov').style.display = 'block';
+  document.getElementById('drawer').style.display = 'block';
+}
+
+function closeDrawer() {
+  document.getElementById('drawer-ov').style.display = 'none';
+  document.getElementById('drawer').style.display = 'none';
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+function toggleStatus(id, current) {
+  if (current === 'active') {
+    BPDB.deactivateStaff(id);
+    toast('Staff member deactivated', 'warning');
+  } else {
+    BPDB.activateStaff(id);
+    toast('Staff member activated', 'success');
+  }
+  renderTable(); renderKPIs();
+}
+
+function copyPin(pin, name) {
+  if (!pin) return;
+  navigator.clipboard?.writeText(pin).then(() => toast(`${name} PIN copied`, 'success'))
+    .catch(() => toast(`PIN: ${pin}`, 'info'));
+}
+
+// ── Confirm helpers ───────────────────────────────────────────────────────────
+let _confirmCb = null;
+function showConfirm(msg, cb, btnLabel='Confirm', danger=true) {
+  document.getElementById('confirm-msg').innerHTML = msg;
+  document.getElementById('confirm-ok').textContent = btnLabel;
+  document.getElementById('confirm-ok').style.background = danger ? 'var(--red)' : 'var(--blue)';
+  _confirmCb = cb;
+  document.getElementById('confirm-ok').onclick = () => { closeConfirm(); cb(); };
+  document.getElementById('confirm-ov').style.display = 'flex';
+}
+function closeConfirm() { document.getElementById('confirm-ov').style.display = 'none'; _confirmCb = null; }
+
+function confirmDelete(id, name) {
+  showConfirm(`<strong>Delete ${name}?</strong><br><br>This will permanently remove them from the database. Their transaction history will be preserved.`, () => {
+    BPDB.deleteStaff(id);
+    toast(`${name} removed`, 'warning');
+    renderKPIs(); renderTable();
+  });
+}
+
+function confirmResetPin(id, name) {
+  showConfirm(`<strong>Reset PIN for ${name}?</strong><br><br>A new unique 4-digit PIN will be generated. Make sure to share it with them.`, () => {
+    const newPin = BPDB.resetPin(id);
+    toast(`New PIN for ${name}: <strong>${newPin}</strong>`, 'success');
+    renderTable();
+  }, 'Reset PIN', false);
+}
+
+// ── Export CSV ────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const all = BPDB.getAllStaff();
+  const header = ['ID','Name','Email','Phone','Role','Zone','BP Role','Status','Employee ID','Badge ID','Hire Date','Certifications','Notes'];
+  const rows = all.map(s => [
+    s.id, s.name, s.email, s.phone, s.role, s.zone, s.bpRole, s.status,
+    s.employeeId, s.badgeId, fmtDate(s.hireDate), (s.certifications||[]).join('|'), s.notes
+  ].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
+  const csv = [header.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `barpass-staff-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exported', 'success');
+}
+
+// ── Filter clear ──────────────────────────────────────────────────────────────
+function clearFilters() {
+  document.getElementById('search').value = '';
+  document.getElementById('filter-role').value = '';
+  document.getElementById('filter-zone').value = '';
+  document.getElementById('filter-status').value = '';
+  renderTable();
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(msg, type='info') {
+  const colors = { success:'#00e87a', error:'#FF4466', warning:'#FFba38', info:'#5AA5FF' };
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<div class="toast-dot" style="background:${colors[type]||colors.info};box-shadow:0 0 6px ${colors[type]||colors.info};"></div><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+function init() {
+  renderKPIs();
+  renderTable();
+}
+
+if (BPDB.ready) init(); else BPDB.on('ready', init);
+
+BPDB.on('staff:created', () => { renderKPIs(); renderTable(); });
+BPDB.on('staff:updated', () => { renderKPIs(); renderTable(); });
+BPDB.on('staff:deleted', () => { renderKPIs(); renderTable(); });
+</script>
+</body>
+</html>

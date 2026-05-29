@@ -44,6 +44,7 @@
       automationLog: [],
       suppliers: defaultSuppliers(),
       versionIndex: [], // [{ id, name, ts, label, stats }] — metadata only; payload in separate keys
+      staff: defaultStaff(),
     };
   }
 
@@ -75,6 +76,23 @@
       sku.min = sku.max * 0.2;
     });
     return items;
+  }
+
+  // ── Default staff ───────────────────────────────────────────────────────────
+  function defaultStaff() {
+    const now = Date.now();
+    return [
+      { id:'staff-001', firstName:'Diego', lastName:'López',   name:'Diego López',   email:'diego.lopez@hardrock.com',   phone:'+1-305-555-0101', role:'runner',     zone:'A',   bpRole:'bartender', pin:'1234', status:'active',   employeeId:'BP-2024-0042', badgeId:'BADGE-042', hireDate:now-420*86400000, lastLogin:now-3600000,   certifications:['alcohol-compliance','food-safety'], avatarEmoji:'⚡', notes:'Top runner Zone A', createdAt:now-420*86400000 },
+      { id:'staff-002', firstName:'Elena', lastName:'Ríos',    name:'Elena Ríos',    email:'elena.rios@hardrock.com',    phone:'+1-305-555-0202', role:'manager',    zone:'ALL', bpRole:'manager',    pin:'2847', status:'active',   employeeId:'BP-2023-0108', badgeId:'BADGE-108', hireDate:now-730*86400000, lastLogin:now-1800000,   certifications:['alcohol-compliance','food-safety','management'], avatarEmoji:'📊', notes:'Operations Manager', createdAt:now-730*86400000 },
+      { id:'staff-003', firstName:'Marco', lastName:'Silva',   name:'Marco Silva',   email:'marco.silva@hardrock.com',   phone:'+1-305-555-0303', role:'bartender',  zone:'B',   bpRole:'bartender', pin:'1234', status:'active',   employeeId:'BP-2022-0019', badgeId:'BADGE-019', hireDate:now-890*86400000, lastLogin:now-7200000,   certifications:['alcohol-compliance'], avatarEmoji:'🍹', notes:'', createdAt:now-890*86400000 },
+      { id:'staff-004', firstName:'James', lastName:'Kim',     name:'James Kim',     email:'james.kim@hardrock.com',     phone:'+1-305-555-0404', role:'supervisor', zone:'VIP', bpRole:'owner',      pin:'9999', status:'active',   employeeId:'BP-2021-0003', badgeId:'BADGE-003', hireDate:now-1100*86400000,lastLogin:now-86400000,  certifications:['alcohol-compliance','food-safety','management','vip-service'], avatarEmoji:'👑', notes:'VIP Area Supervisor', createdAt:now-1100*86400000 },
+      { id:'staff-005', firstName:'Ana',   lastName:'Méndez',  name:'Ana Méndez',    email:'ana.mendez@hardrock.com',    phone:'+1-305-555-0505', role:'runner',     zone:'C',   bpRole:'bartender', pin:'1234', status:'active',   employeeId:'BP-2024-0088', badgeId:'BADGE-088', hireDate:now-180*86400000, lastLogin:now-900000,    certifications:['alcohol-compliance'], avatarEmoji:'🏃', notes:'', createdAt:now-180*86400000 },
+      { id:'staff-006', firstName:'Luis',  lastName:'Torres',  name:'Luis Torres',   email:'luis.torres@hardrock.com',   phone:'+1-305-555-0606', role:'bartender',  zone:'D',   bpRole:'bartender', pin:'1234', status:'active',   employeeId:'BP-2023-0155', badgeId:'BADGE-155', hireDate:now-560*86400000, lastLogin:now-3600000,   certifications:['alcohol-compliance','food-safety'], avatarEmoji:'🍺', notes:'', createdAt:now-560*86400000 },
+      { id:'staff-007', firstName:'Sofia', lastName:'Castro',  name:'Sofia Castro',  email:'sofia.castro@hardrock.com',  phone:'+1-305-555-0707', role:'runner',     zone:'A',   bpRole:'bartender', pin:'1234', status:'inactive', employeeId:'BP-2024-0031', badgeId:'BADGE-031', hireDate:now-210*86400000, lastLogin:now-604800000, certifications:['alcohol-compliance'], avatarEmoji:'🔋', notes:'On leave', createdAt:now-210*86400000 },
+      { id:'staff-008', firstName:'Mike',  lastName:'Johnson', name:'Mike Johnson',  email:'mike.johnson@hardrock.com',  phone:'+1-305-555-0808', role:'bartender',  zone:'B',   bpRole:'bartender', pin:'1234', status:'active',   employeeId:'BP-2023-0199', badgeId:'BADGE-199', hireDate:now-400*86400000, lastLogin:now-1200000,   certifications:['alcohol-compliance'], avatarEmoji:'🍹', notes:'', createdAt:now-400*86400000 },
+      { id:'staff-009', firstName:'Sara',  lastName:'Vega',    name:'Sara Vega',     email:'sara.vega@hardrock.com',     phone:'+1-305-555-0909', role:'manager',    zone:'B',   bpRole:'manager',    pin:'2847', status:'active',   employeeId:'BP-2022-0077', badgeId:'BADGE-077', hireDate:now-800*86400000, lastLogin:now-600000,    certifications:['alcohol-compliance','food-safety','management'], avatarEmoji:'📋', notes:'Zone B Lead', createdAt:now-800*86400000 },
+      { id:'staff-010', firstName:'Carlos',lastName:'Morales', name:'Carlos Morales',email:'carlos.morales@hardrock.com',phone:'+1-305-555-1010', role:'runner',     zone:'D',   bpRole:'bartender', pin:'1234', status:'pending',  employeeId:'BP-2025-0001', badgeId:'',          hireDate:now-5*86400000,   lastLogin:null,          certifications:[], avatarEmoji:'🆕', notes:'New hire — onboarding in progress', createdAt:now-5*86400000 },
+    ];
   }
 
   // ── Default automation rules ────────────────────────────────────────────────
@@ -738,6 +756,122 @@
       const s = (this._d.suppliers || []).find(s => s.id === id);
       if (s) { Object.assign(s, patch); this._save(); this.emit('supplier:updated', s); }
       return s;
+    },
+
+    // ── STAFF MANAGEMENT ──────────────────────────────────────────────────────
+    getAllStaff({ role, zone, status } = {}) {
+      // Migrate: old schema stored staff as object {}, new is array
+      if (this._d.staff && !Array.isArray(this._d.staff)) {
+        this._d.staff = defaultStaff();
+        this._save();
+      }
+      if (!this._d.staff || this._d.staff.length === 0) {
+        this._d.staff = defaultStaff();
+        this._save();
+      }
+      let list = [...(this._d.staff || [])];
+      if (role)   list = list.filter(s => s.role === role);
+      if (zone)   list = list.filter(s => s.zone === zone || s.zone === 'ALL');
+      if (status) list = list.filter(s => s.status === status);
+      return list.sort((a, b) => a.name.localeCompare(b.name));
+    },
+
+    getStaff(id) {
+      return (this._d.staff || []).find(s => s.id === id) || null;
+    },
+
+    createStaff(data) {
+      const now = Date.now();
+      const id = 'staff-' + now.toString(36).toUpperCase();
+      const s = {
+        id,
+        firstName:     data.firstName     || '',
+        lastName:      data.lastName      || '',
+        name:          data.name          || `${data.firstName} ${data.lastName}`.trim(),
+        email:         data.email         || '',
+        phone:         data.phone         || '',
+        role:          data.role          || 'runner',
+        zone:          data.zone          || 'A',
+        bpRole:        data.bpRole        || (data.role === 'manager' || data.role === 'supervisor' ? 'manager' : 'bartender'),
+        pin:           data.pin           || this._generatePin(),
+        status:        data.status        || 'active',
+        employeeId:    data.employeeId    || this._generateEmployeeId(),
+        badgeId:       data.badgeId       || '',
+        hireDate:      data.hireDate      || now,
+        lastLogin:     null,
+        certifications:data.certifications|| [],
+        avatarEmoji:   data.avatarEmoji   || '🧑',
+        notes:         data.notes         || '',
+        emergencyContact: data.emergencyContact || null,
+        createdAt:     now,
+        updatedAt:     now,
+        createdBy:     data.createdBy     || 'admin',
+      };
+      this._d.staff = this._d.staff || [];
+      this._d.staff.push(s);
+      this._save();
+      this.emit('staff:created', s);
+      return s;
+    },
+
+    updateStaff(id, patch) {
+      const s = (this._d.staff || []).find(s => s.id === id);
+      if (!s) return null;
+      Object.assign(s, patch, { updatedAt: Date.now() });
+      if (patch.firstName || patch.lastName) {
+        s.name = `${s.firstName} ${s.lastName}`.trim();
+      }
+      this._save();
+      this.emit('staff:updated', s);
+      return s;
+    },
+
+    deleteStaff(id) {
+      const before = (this._d.staff || []).length;
+      this._d.staff = (this._d.staff || []).filter(s => s.id !== id);
+      if (this._d.staff.length < before) {
+        this._save();
+        this.emit('staff:deleted', { id });
+        return true;
+      }
+      return false;
+    },
+
+    deactivateStaff(id) { return this.updateStaff(id, { status: 'inactive' }); },
+    activateStaff(id)   { return this.updateStaff(id, { status: 'active' }); },
+
+    resetPin(id) {
+      const newPin = this._generatePin();
+      this.updateStaff(id, { pin: newPin });
+      return newPin;
+    },
+
+    getStaffMetricsFull(id) {
+      const s = this.getStaff(id);
+      if (!s) return null;
+      const txns = this.getTransactions({ staffId: id });
+      const dispatches = (this._d.dispatches || []).filter(d => d.runnerId === id || d.staffId === id);
+      return {
+        ...s,
+        totalOrders:   txns.length,
+        totalRevenue:  txns.reduce((acc, t) => acc + t.total, 0),
+        avgOrderValue: txns.length ? txns.reduce((acc, t) => acc + t.total, 0) / txns.length : 0,
+        totalDispatches: dispatches.length,
+        completedDispatches: dispatches.filter(d => d.status === 'DELIVERED').length,
+      };
+    },
+
+    _generatePin() {
+      const existing = new Set((this._d.staff || []).map(s => s.pin));
+      let pin;
+      do { pin = String(Math.floor(1000 + Math.random() * 9000)); } while (existing.has(pin));
+      return pin;
+    },
+
+    _generateEmployeeId() {
+      const year = new Date().getFullYear();
+      const count = ((this._d.staff || []).length + 1).toString().padStart(4, '0');
+      return `BP-${year}-${count}`;
     },
 
     // ── VERSION SNAPSHOTS ─────────────────────────────────────────────────────
