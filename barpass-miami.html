@@ -2382,6 +2382,11 @@ body::after{
         </div>
         <div class="lang-btn" id="lang-btn" onclick="toggleLang()" style="width:32px;height:32px;border-radius:10px;border:1px solid var(--border2);background:var(--smoke2);color:var(--cream3);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;letter-spacing:.02em;">EN</div>
         <div class="theme-btn" id="theme-btn" onclick="toggleTheme()" style="width:32px;height:32px;border-radius:10px;border:1px solid var(--border2);background:var(--smoke2);color:var(--cream3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;">🌤</div>
+        <!-- Cart button — hidden until items added -->
+        <div id="cart-btn-hdr" onclick="openScreen('cart-screen')" style="display:none;width:36px;height:36px;border-radius:10px;border:1px solid rgba(245,158,11,.4);background:rgba(245,158,11,.1);color:var(--gold2);font-size:18px;cursor:pointer;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;position:relative;">
+          🛒
+          <div id="cart-badge" style="display:none;position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--coral);color:#fff;font-size:10px;font-weight:800;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--ink);">0</div>
+        </div>
         <div id="wallet-pass-btn" onclick="openAppleWallet()" title="Add to Apple Wallet" style="width:32px;height:32px;border-radius:10px;border:1px solid rgba(212,160,23,.35);background:rgba(212,160,23,.1);color:var(--gold2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;position:relative;">
           🍎
           <div id="wallet-pass-dot" style="display:none;position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 5px #22c55e;"></div>
@@ -2596,6 +2601,11 @@ body::after{
         <div id="bottle-list"></div>
       </div>
     </div>
+  </div>
+  <!-- Floating cart FAB — visible inside venue when cart has items -->
+  <div id="venue-cart-fab" onclick="openScreen('cart-screen')" style="display:none;position:sticky;bottom:20px;margin:0 20px 20px;padding:16px 20px;border-radius:var(--r3);background:linear-gradient(135deg,#d4a017,#f5b830);color:#000;font-size:15px;font-weight:800;cursor:pointer;display:none;align-items:center;justify-content:space-between;box-shadow:0 8px 28px rgba(212,160,23,.4);transition:all .2s;flex-shrink:0;">
+    <span>🛒 Ver orden</span>
+    <span id="venue-cart-fab-info" style="font-size:13px;opacity:.75;">0 items · $0</span>
   </div>
 </div>
 
@@ -6204,9 +6214,18 @@ function addToCart(name,price,emoji){
   toast(emoji+' '+name+' added — $'+price,'ok');
 }
 function updateCartBadge(){
-  var total=0;for(var i=0;i<S.cart.length;i++)total+=S.cart[i].qty;
+  var total=0;var sub=0;
+  for(var i=0;i<S.cart.length;i++){total+=S.cart[i].qty;sub+=S.cart[i].price*S.cart[i].qty;}
+  // Header badge
   var badge=document.getElementById('cart-badge');
-  badge.textContent=total;badge.style.display=total?'flex':'none';
+  var btn=document.getElementById('cart-btn-hdr');
+  if(badge){badge.textContent=total;badge.style.display=total?'flex':'none';}
+  if(btn){btn.style.display=total?'flex':'none';}
+  // Venue floating FAB
+  var fab=document.getElementById('venue-cart-fab');
+  var fabInfo=document.getElementById('venue-cart-fab-info');
+  if(fab){fab.style.display=total?'flex':'none';}
+  if(fabInfo){fabInfo.textContent=total+' item'+(total!==1?'s':'')+'  ·  $'+sub.toFixed(2);}
 }
 function changeQty(name,delta){
   var idx=-1;for(var i=0;i<S.cart.length;i++){if(S.cart[i].name===name){idx=i;break;}}
@@ -6249,10 +6268,52 @@ function renderCart(){
   }
 }
 function placeOrder(){
+  if(!S.cart.length){toast('Tu carrito está vacío','warn');return;}
   var sub=0;for(var si=0;si<S.cart.length;si++)sub+=S.cart[si].price*S.cart[si].qty;
-  S.totalSpent+=sub;document.getElementById('p-spent').textContent='$'+S.totalSpent.toFixed(0);
-  S.cart=[];updateCartBadge();renderCart();closeScreen('cart-screen');
-  toast('🚀 Order placed! ~8 min delivery','ok');
+  var fee=0.99;
+  var total=parseFloat((sub+fee).toFixed(2));
+  var c=S.credit;
+
+  // Pay with wallet credit if enough balance
+  if(c.active&&c.balance>=total){
+    c.balance=parseFloat((c.balance-total).toFixed(2));
+    c.spent=parseFloat((c.spent+total).toFixed(2));
+    S.totalSpent=parseFloat((S.totalSpent+sub).toFixed(2));
+    var names=[];for(var si=0;si<S.cart.length;si++)names.push(S.cart[si].name);
+    if(!c.txs)c.txs=[];
+    c.txs.unshift({name:(S.currentVenue?S.currentVenue.name:'Venue')+' · '+names.join(', '),price:total,emoji:'🍸',time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}),type:'venue'});
+    // Post to server (non-blocking — local state already updated)
+    if(fbAuth&&fbAuth.currentUser){
+      var venueId=S.currentVenue?String(S.currentVenue.id):'unknown';
+      var idempKey='bp_'+venueId+'_'+(S.user&&S.user.uid||'guest')+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6).toUpperCase();
+      apiFetch('/api/wallet/spend',{
+        method:'POST',
+        headers:{'Idempotency-Key':idempKey},
+        body:JSON.stringify({amount:total,venueId:venueId,description:names.join(', ')})
+      }).then(function(d){
+        if(d&&d.balance!==undefined)S.credit.balance=d.balance;
+        refreshCreditUI&&refreshCreditUI();
+      }).catch(function(){});
+    }
+    S.cart=[];updateCartBadge();renderCart();
+    closeScreen('cart-screen');
+    refreshCreditUI&&refreshCreditUI();refreshWalletUI&&refreshWalletUI();
+    document.getElementById('p-spent').textContent='$'+S.totalSpent.toFixed(0);
+    nativeHaptic&&nativeHaptic('success');
+    toast('🚀 Orden enviada · $'+total.toFixed(2)+' deducidos del wallet','credit');
+    return;
+  }
+
+  // Not enough credit — open top-up
+  if(c.active&&c.balance>0&&c.balance<total){
+    toast('💳 Necesitas $'+total.toFixed(2)+' · recarga tu wallet','warn');
+    setTimeout(function(){closeScreen('cart-screen');openTopUpModal();},600);
+    return;
+  }
+
+  // No wallet — prompt to add funds
+  toast('🪙 Activa tu wallet para pagar','warn');
+  setTimeout(function(){closeScreen('cart-screen');openTopUpModal();},600);
 }
 
 // ── Native iOS bridge helpers ─────────────────────────────────────────────────
