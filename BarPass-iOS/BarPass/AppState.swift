@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import Network
 
 @MainActor
 final class AppState: ObservableObject {
@@ -11,27 +12,33 @@ final class AppState: ObservableObject {
     private var webReadyDone = false
     private var cancellables = Set<AnyCancellable>()
 
+    private let networkMonitor = NWPathMonitor()
+    private let networkQueue   = DispatchQueue(label: "io.barpass.appstate.network", qos: .utility)
+
     init() {
         NotificationCenter.default.publisher(for: .deepLinkReceived)
             .compactMap { $0.object as? URL }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] url in self?.deepLinkURL = url }
             .store(in: &cancellables)
+
+        networkMonitor.pathUpdateHandler = { [weak self] path in
+            let offline = path.status != .satisfied
+            Task { @MainActor in self?.isOffline = offline }
+        }
+        networkMonitor.start(queue: networkQueue)
     }
 
-    // Called by SplashView after minimum display time
     func splashMinTimerFired() {
         minTimerDone = true
         maybeCompleteSplash()
     }
 
-    // Called by NativeBridge when the JS web app fires signalReady()
     func webDidSignalReady() {
         webReadyDone = true
         maybeCompleteSplash()
     }
 
-    // Safety-net: hides splash unconditionally (if web never fires ready)
     func splashComplete() {
         withAnimation(.easeOut(duration: 0.4)) { showSplash = false }
     }

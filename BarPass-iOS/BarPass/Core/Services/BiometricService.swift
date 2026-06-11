@@ -23,7 +23,9 @@ final class BiometricService {
                 localizedReason: reason
             )
         } catch {
-            print("[Biometric] Auth error: \(error)")
+            #if DEBUG
+            print("[Biometric] Auth error:", error)
+            #endif
             return false
         }
     }

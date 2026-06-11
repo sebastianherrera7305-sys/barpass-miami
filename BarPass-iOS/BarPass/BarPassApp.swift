@@ -30,7 +30,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     func application(_ application: UIApplication,
                      didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("[BarPass] Push registration failed: \(error)")
+        #if DEBUG
+        print("[BarPass] Push registration failed:", error)
+        #endif
     }
 
     func application(_ app: UIApplication, open url: URL,

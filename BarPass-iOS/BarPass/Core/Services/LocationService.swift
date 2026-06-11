@@ -48,7 +48,9 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("[Location] Error: \(error)")
+        #if DEBUG
+        print("[Location] Error:", error)
+        #endif
         if let cont = onceCompletion {
             onceCompletion = nil
             cont.resume(returning: nil)

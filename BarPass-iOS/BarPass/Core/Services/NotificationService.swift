@@ -7,7 +7,9 @@ final class NotificationService {
             return try await UNUserNotificationCenter.current()
                 .requestAuthorization(options: [.alert, .badge, .sound])
         } catch {
-            print("[Notifications] Permission error: \(error)")
+            #if DEBUG
+            print("[Notifications] Permission error:", error)
+            #endif
             return false
         }
     }

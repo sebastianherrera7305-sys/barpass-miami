@@ -21,6 +21,9 @@ final class WebViewCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WK
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        #if DEBUG
+        print("[BarPass] Navigation failed:", error.localizedDescription)
+        #endif
         bridge.onPageError(error)
         loadBundleFallback(in: webView)
     }

@@ -2,6 +2,8 @@ import WebKit
 import UIKit
 import CoreLocation
 import LocalAuthentication
+import AVFoundation
+import Network
 
 @MainActor
 final class NativeBridge: ObservableObject {
@@ -11,12 +13,13 @@ final class NativeBridge: ObservableObject {
     private let location  = LocationService()
     private let notif     = NotificationService()
     private let biometric = BiometricService()
+    private let applePay  = ApplePayService()
 
-    // Called when JS fires window.barpassNative.signalReady()
     var webReadyHandler: (() -> Void)?
-
-    // Push token buffered until the page is loaded
     private var pendingPushToken: String?
+
+    private let networkMonitor = NWPathMonitor()
+    private let networkQueue   = DispatchQueue(label: "io.barpass.network", qos: .utility)
 
     enum MessageType: String, CaseIterable {
         case haptic, location, notification, biometric, share, camera, applePay, log, ready
@@ -24,12 +27,13 @@ final class NativeBridge: ObservableObject {
 
     func attach(webView: WKWebView) {
         self.webView = webView
+
         location.onUpdate = { [weak self] lat, lon, acc in
             Task { @MainActor in
                 self?.sendToJS("barpassNative.onLocation", args: [lat, lon, acc])
             }
         }
-        // Forward device push token to JS as soon as it arrives
+
         NotificationCenter.default.addObserver(
             forName: .deviceTokenReceived,
             object: nil,
@@ -38,6 +42,8 @@ final class NativeBridge: ObservableObject {
             guard let token = note.object as? String else { return }
             Task { @MainActor in self?.handlePushToken(token) }
         }
+
+        startNetworkMonitoring()
     }
 
     private func handlePushToken(_ token: String) {
@@ -46,6 +52,18 @@ final class NativeBridge: ObservableObject {
         } else {
             pendingPushToken = token
         }
+    }
+
+    // MARK: - Network monitoring
+
+    private func startNetworkMonitoring() {
+        networkMonitor.pathUpdateHandler = { [weak self] path in
+            let online = path.status == .satisfied
+            Task { @MainActor in
+                self?.sendToJS("barpassNative.onConnectivity", args: [online])
+            }
+        }
+        networkMonitor.start(queue: networkQueue)
     }
 
     // MARK: - Message dispatch
@@ -70,6 +88,7 @@ final class NativeBridge: ObservableObject {
     }
 
     // MARK: - Handlers
+
     private func handleHaptic(_ body: [String: Any]) {
         let style = body["style"] as? String ?? "light"
         switch style {
@@ -85,11 +104,10 @@ final class NativeBridge: ObservableObject {
 
     private func handleLocation(_ body: [String: Any]) async {
         let action = body["action"] as? String ?? "once"
-        if action == "start" {
-            location.startUpdating()
-        } else if action == "stop" {
-            location.stopUpdating()
-        } else {
+        switch action {
+        case "start": location.startUpdating()
+        case "stop":  location.stopUpdating()
+        default:
             if let coord = await location.requestOnce() {
                 sendToJS("barpassNative.onLocation", args: [coord.latitude, coord.longitude, 10.0])
             }
@@ -97,109 +115,168 @@ final class NativeBridge: ObservableObject {
     }
 
     private func handleNotification(_ body: [String: Any]) async {
-        let action = body["action"] as? String ?? "request"
-        if action == "request" {
-            let granted = await notif.requestPermission()
-            sendToJS("barpassNative.onNotificationPermission", args: [granted])
-            if granted {
-                #if !targetEnvironment(simulator)
-                if Bundle.main.object(forInfoDictionaryKey: "aps-environment") != nil ||
-                   Bundle.main.path(forResource: "embedded", ofType: "mobileprovision") != nil {
-                    await MainActor.run {
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
-                }
-                #endif
-            }
+        guard (body["action"] as? String) == "request" else { return }
+        let granted = await notif.requestPermission()
+        sendToJS("barpassNative.onNotificationPermission", args: [granted])
+        guard granted else { return }
+        #if !targetEnvironment(simulator)
+        if Bundle.main.object(forInfoDictionaryKey: "aps-environment") != nil ||
+           Bundle.main.path(forResource: "embedded", ofType: "mobileprovision") != nil {
+            await MainActor.run { UIApplication.shared.registerForRemoteNotifications() }
         }
+        #endif
     }
 
     private func handleBiometric(_ body: [String: Any]) async {
-        let result = await biometric.authenticate(reason: body["reason"] as? String ?? "Verify your identity")
+        let result = await biometric.authenticate(
+            reason: body["reason"] as? String ?? "Verify your identity"
+        )
         sendToJS("barpassNative.onBiometricResult", args: [result])
     }
 
     private func handleShare(_ body: [String: Any]) {
         var items: [Any] = []
         if let text = body["text"] as? String { items.append(text) }
-        if let url = body["url"] as? String, let u = URL(string: url) { items.append(u) }
+        if let url  = body["url"]  as? String, let u = URL(string: url) { items.append(u) }
         guard !items.isEmpty else { return }
-
         let vc = UIActivityViewController(activityItems: items, applicationActivities: nil)
         topViewController?.present(vc, animated: true)
         haptic.impact(.light)
     }
 
+    // MARK: - Camera / QR scanner
+
     private func handleCamera(_ body: [String: Any]) {
-        NotificationCenter.default.post(name: .openCamera, object: body)
+        let mode = body["mode"] as? String ?? "qr"
+        guard let presenter = topViewController else { return }
+
+        AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+            Task { @MainActor in
+                guard granted else {
+                    self?.sendToJS("barpassNative.onCameraResult", args: ["denied", ""])
+                    return
+                }
+                if mode == "qr" {
+                    self?.presentQRScanner(from: presenter)
+                } else {
+                    self?.presentPhotoPicker(from: presenter)
+                }
+            }
+        }
     }
 
+    private func presentQRScanner(from presenter: UIViewController) {
+        let scanner = QRScannerViewController()
+        scanner.modalPresentationStyle = .fullScreen
+        scanner.onResult = { [weak self] value in
+            Task { @MainActor in
+                self?.haptic.notification(.success)
+                self?.sendToJS("barpassNative.onCameraResult", args: ["qr", value])
+            }
+        }
+        scanner.onCancel = { [weak self] in
+            Task { @MainActor in
+                self?.sendToJS("barpassNative.onCameraResult", args: ["cancelled", ""])
+            }
+        }
+        presenter.present(scanner, animated: true)
+    }
+
+    private func presentPhotoPicker(from presenter: UIViewController) {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = photoPickerDelegate
+        presenter.present(picker, animated: true)
+    }
+
+    private lazy var photoPickerDelegate = PhotoPickerDelegate { [weak self] result in
+        Task { @MainActor in
+            self?.sendToJS("barpassNative.onCameraResult", args: ["photo", result])
+        }
+    }
+
+    // MARK: - Apple Pay (wired directly — no NotificationCenter)
+
     private func handleApplePay(_ body: [String: Any]) {
-        NotificationCenter.default.post(name: .startApplePay, object: body)
+        let raw    = (body["amount"] as? Double) ?? (body["amount"] as? NSNumber)?.doubleValue ?? 0
+        let label  = body["label"]  as? String ?? "BarPass"
+        guard raw > 0 else { return }
+
+        applePay.requestPayment(amount: Decimal(raw), label: label) { [weak self] success in
+            Task { @MainActor in
+                self?.haptic.notification(success ? .success : .warning)
+                self?.sendToJS("barpassNative.onApplePayResult", args: [success])
+            }
+        }
     }
 
     // MARK: - Page lifecycle
+
     func onPageLoaded() {
         let info: [String: Any] = [
-            "platform":        "ios",
-            "version":         UIDevice.current.systemVersion,
-            "model":           UIDevice.current.model,
-            "safeAreaTop":     safeAreaInsets.top,
-            "safeAreaBottom":  safeAreaInsets.bottom,
-            "hasFaceID":       biometric.biometricType == "Face ID",
-            "hasTouchID":      biometric.biometricType == "Touch ID",
-            "hasApplePay":     true
+            "platform":       "ios",
+            "version":        UIDevice.current.systemVersion,
+            "model":          UIDevice.current.model,
+            "safeAreaTop":    safeAreaInsets.top,
+            "safeAreaBottom": safeAreaInsets.bottom,
+            "hasFaceID":      biometric.biometricType == "Face ID",
+            "hasTouchID":     biometric.biometricType == "Touch ID",
+            "hasApplePay":    applePay.canMakePayments()
         ]
         guard let json = try? JSONSerialization.data(withJSONObject: info),
               let str  = String(data: json, encoding: .utf8) else { return }
 
         let js = """
         (function(){
-          if(typeof window.barpassNative !== 'undefined' &&
-             typeof window.barpassNative.setDeviceInfo === 'function'){
+          if(typeof window.barpassNative?.setDeviceInfo === 'function'){
             window.barpassNative.setDeviceInfo(\(str));
           } else {
             window.__barpassDeviceInfoPending = \(str);
           }
         })();
         """
-        webView?.evaluateJavaScript(js) { _, err in
-            if let err { print("[Bridge] setDeviceInfo error: \(err)") }
-        }
+        webView?.evaluateJavaScript(js)
 
-        // Deliver any push token that arrived before the page was ready
         if let token = pendingPushToken {
             sendToJS("barpassNative.onPushToken", args: [token])
             pendingPushToken = nil
         }
     }
 
-    func onPageError(_ error: Error) {}
+    func onPageError(_ error: Error) {
+        #if DEBUG
+        print("[BarPass] Page error:", error.localizedDescription)
+        #endif
+    }
 
     func onWebReady() {
+        #if DEBUG
         print("[BarPass] Web app ready")
+        #endif
         haptic.impact(.light)
         webReadyHandler?()
     }
 
     func handleDeepLink(_ url: URL) {
-        let path = url.path
-        sendToJS("barpassNative.handleDeepLink", args: [path])
+        sendToJS("barpassNative.handleDeepLink", args: [url.absoluteString])
     }
 
     // MARK: - JS Communication
-    // Uses JSONSerialization to guarantee correct escaping of strings, booleans, numbers
+
     func sendToJS(_ fn: String, args: [Any]) {
         guard let data    = try? JSONSerialization.data(withJSONObject: args, options: []),
               let encoded = String(data: data, encoding: .utf8) else { return }
-        let inner = encoded.dropFirst().dropLast()  // strip surrounding [ and ]
+        let inner = encoded.dropFirst().dropLast()
         let js = "if(typeof \(fn)==='function'){\(fn)(\(inner));}"
         webView?.evaluateJavaScript(js) { _, err in
-            if let err { print("[Bridge] JS error: \(err)") }
+            #if DEBUG
+            if let err { print("[Bridge] JS error:", err) }
+            #endif
         }
     }
 
     // MARK: - Static JS injection
+
     static var injectedJavaScript: String {
         """
         (function(){
@@ -211,39 +288,51 @@ final class NativeBridge: ObservableObject {
           }
 
           window.barpassNative = {
+            // ── Swift → Web callbacks ──
             setDeviceInfo: function(info){
               window.__barpassDeviceInfo = info;
               document.dispatchEvent(new CustomEvent('barpass:deviceInfo', { detail: info }));
             },
             onLocation: function(lat, lon, acc){
               window.__barpassLocation = { lat:lat, lon:lon, acc:acc };
-              document.dispatchEvent(new CustomEvent('barpass:location', { detail: {lat:lat,lon:lon,acc:acc} }));
+              document.dispatchEvent(new CustomEvent('barpass:location', { detail:{lat,lon,acc} }));
             },
             onNotificationPermission: function(granted){
-              document.dispatchEvent(new CustomEvent('barpass:notifPermission', { detail: {granted:granted} }));
+              document.dispatchEvent(new CustomEvent('barpass:notifPermission', { detail:{granted} }));
             },
             onBiometricResult: function(success){
-              document.dispatchEvent(new CustomEvent('barpass:biometric', { detail: {success:success} }));
+              document.dispatchEvent(new CustomEvent('barpass:biometric', { detail:{success} }));
             },
             onPushToken: function(token){
               window.__barpassPushToken = token;
-              document.dispatchEvent(new CustomEvent('barpass:pushToken', { detail: {token:token} }));
+              document.dispatchEvent(new CustomEvent('barpass:pushToken', { detail:{token} }));
             },
-            handleDeepLink: function(path){
-              document.dispatchEvent(new CustomEvent('barpass:deepLink', { detail: {path:path} }));
+            onApplePayResult: function(success){
+              document.dispatchEvent(new CustomEvent('barpass:applePayResult', { detail:{success} }));
+            },
+            onCameraResult: function(type, value){
+              document.dispatchEvent(new CustomEvent('barpass:cameraResult', { detail:{type,value} }));
+            },
+            onConnectivity: function(online){
+              window.__barpassOnline = online;
+              document.dispatchEvent(new CustomEvent('barpass:connectivity', { detail:{online} }));
+            },
+            handleDeepLink: function(url){
+              document.dispatchEvent(new CustomEvent('barpass:deepLink', { detail:{url} }));
             },
 
-            haptic: function(style){ post('haptic',{style:style||'light'}); },
-            requestLocation: function(){ post('location',{action:'once'}); },
-            startLocation: function(){ post('location',{action:'start'}); },
-            stopLocation: function(){ post('location',{action:'stop'}); },
+            // ── Web → Swift calls ──
+            haptic:               function(style){ post('haptic',{style:style||'light'}); },
+            requestLocation:      function(){ post('location',{action:'once'}); },
+            startLocation:        function(){ post('location',{action:'start'}); },
+            stopLocation:         function(){ post('location',{action:'stop'}); },
             requestNotifications: function(){ post('notification',{action:'request'}); },
-            authenticate: function(reason){ post('biometric',{reason:reason||'Verify your identity'}); },
-            share: function(text,url){ post('share',{text:text||'',url:url||''}); },
-            openCamera: function(){ post('camera',{}); },
-            applePayCharge: function(amount,label){ post('applePay',{amount:amount,label:label}); },
-            log: function(msg){ post('log',{msg:String(msg)}); },
-            signalReady: function(){ post('ready',{}); }
+            authenticate:         function(reason){ post('biometric',{reason:reason||'Verify your identity'}); },
+            share:                function(text,url){ post('share',{text:text||'',url:url||''}); },
+            openCamera:           function(mode){ post('camera',{mode:mode||'qr'}); },
+            applePayCharge:       function(amount,label){ post('applePay',{amount:amount,label:label}); },
+            log:                  function(msg){ post('log',{msg:String(msg)}); },
+            signalReady:          function(){ post('ready',{}); }
           };
 
           if(document.readyState === 'loading'){
@@ -253,31 +342,152 @@ final class NativeBridge: ObservableObject {
           } else {
             setTimeout(function(){ window.barpassNative.signalReady(); }, 0);
           }
-
-          console.log('[BarPass] Native bridge injected ✓');
         })();
         """
     }
 
     // MARK: - Helpers
+
     private var safeAreaInsets: UIEdgeInsets {
         UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
-            .first { $0.isKeyWindow }?
-            .safeAreaInsets ?? .zero
+            .first { $0.isKeyWindow }?.safeAreaInsets ?? .zero
     }
 
-    private var topViewController: UIViewController? {
+    var topViewController: UIViewController? {
         UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
-            .first { $0.isKeyWindow }?
-            .rootViewController
+            .first { $0.isKeyWindow }?.rootViewController
     }
 }
 
+// MARK: - Notification names
+
 extension Notification.Name {
-    static let openCamera    = Notification.Name("openCamera")
-    static let startApplePay = Notification.Name("startApplePay")
+    static let openCamera     = Notification.Name("openCamera")
+    static let startApplePay  = Notification.Name("startApplePay")
+}
+
+// MARK: - QR Scanner
+
+private final class QRScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+    var onResult: ((String) -> Void)?
+    var onCancel: (() -> Void)?
+    private var session: AVCaptureSession?
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .black
+        setupSession()
+        addOverlay()
+        addCancelButton()
+    }
+
+    private func setupSession() {
+        guard let device = AVCaptureDevice.default(for: .video),
+              let input  = try? AVCaptureDeviceInput(device: device) else {
+            dismiss(animated: true)
+            return
+        }
+        let s = AVCaptureSession()
+        s.addInput(input)
+
+        let output = AVCaptureMetadataOutput()
+        s.addOutput(output)
+        output.setMetadataObjectsDelegate(self, queue: .main)
+        output.metadataObjectTypes = [.qr, .code128, .code39, .ean13, .ean8, .pdf417]
+
+        let preview = AVCaptureVideoPreviewLayer(session: s)
+        preview.frame = view.bounds
+        preview.videoGravity = .resizeAspectFill
+        view.layer.insertSublayer(preview, at: 0)
+
+        session = s
+        DispatchQueue.global(qos: .userInitiated).async { s.startRunning() }
+    }
+
+    private func addOverlay() {
+        let box = UIView()
+        box.backgroundColor = .clear
+        box.layer.borderColor = UIColor.systemYellow.cgColor
+        box.layer.borderWidth = 2
+        box.layer.cornerRadius = 12
+        box.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(box)
+        let size: CGFloat = 220
+        NSLayoutConstraint.activate([
+            box.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            box.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -40),
+            box.widthAnchor.constraint(equalToConstant: size),
+            box.heightAnchor.constraint(equalToConstant: size)
+        ])
+
+        let label = UILabel()
+        label.text = "Point at a QR code"
+        label.textColor = UIColor.white.withAlphaComponent(0.7)
+        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: box.bottomAnchor, constant: 20),
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
+    }
+
+    private func addCancelButton() {
+        let btn = UIButton(type: .system)
+        btn.setTitle("Cancel", for: .normal)
+        btn.setTitleColor(.white, for: .normal)
+        btn.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
+        btn.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(btn)
+        NSLayoutConstraint.activate([
+            btn.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            btn.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+        ])
+    }
+
+    func metadataOutput(_ output: AVCaptureMetadataOutput,
+                        didOutput objects: [AVMetadataObject],
+                        from connection: AVCaptureConnection) {
+        guard let obj = objects.first as? AVMetadataMachineReadableCodeObject,
+              let value = obj.stringValue else { return }
+        session?.stopRunning()
+        onResult?(value)
+        dismiss(animated: true)
+    }
+
+    @objc private func cancelTapped() {
+        session?.stopRunning()
+        onCancel?()
+        dismiss(animated: true)
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        session?.stopRunning()
+    }
+}
+
+// MARK: - Photo picker delegate
+
+private final class PhotoPickerDelegate: NSObject,
+    UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+
+    let onPick: (String) -> Void
+    init(onPick: @escaping (String) -> Void) { self.onPick = onPick }
+
+    func imagePickerController(_ picker: UIImagePickerController,
+                               didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        picker.dismiss(animated: true)
+        onPick("captured")
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
+        onPick("cancelled")
+    }
 }
