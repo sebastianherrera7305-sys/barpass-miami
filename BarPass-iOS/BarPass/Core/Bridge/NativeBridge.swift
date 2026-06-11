@@ -460,14 +460,16 @@ private final class QRScannerViewController: UIViewController, AVCaptureMetadata
         ])
     }
 
-    func metadataOutput(_ output: AVCaptureMetadataOutput,
-                        didOutput objects: [AVMetadataObject],
-                        from connection: AVCaptureConnection) {
+    nonisolated func metadataOutput(_ output: AVCaptureMetadataOutput,
+                                    didOutput objects: [AVMetadataObject],
+                                    from connection: AVCaptureConnection) {
         guard let obj = objects.first as? AVMetadataMachineReadableCodeObject,
               let value = obj.stringValue else { return }
-        session?.stopRunning()
-        onResult?(value)
-        dismiss(animated: true)
+        DispatchQueue.main.async { [weak self] in
+            self?.session?.stopRunning()
+            self?.onResult?(value)
+            self?.dismiss(animated: true)
+        }
     }
 
     @objc private func cancelTapped() {
