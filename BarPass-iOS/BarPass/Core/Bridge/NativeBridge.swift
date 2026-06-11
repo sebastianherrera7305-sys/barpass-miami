@@ -12,6 +12,12 @@ final class NativeBridge: ObservableObject {
     private let notif     = NotificationService()
     private let biometric = BiometricService()
 
+    // Called when JS fires window.barpassNative.signalReady()
+    var webReadyHandler: (() -> Void)?
+
+    // Push token buffered until the page is loaded
+    private var pendingPushToken: String?
+
     enum MessageType: String, CaseIterable {
         case haptic, location, notification, biometric, share, camera, applePay, log, ready
     }
@@ -22,6 +28,23 @@ final class NativeBridge: ObservableObject {
             Task { @MainActor in
                 self?.sendToJS("barpassNative.onLocation", args: [lat, lon, acc])
             }
+        }
+        // Forward device push token to JS as soon as it arrives
+        NotificationCenter.default.addObserver(
+            forName: .deviceTokenReceived,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            guard let token = note.object as? String else { return }
+            Task { @MainActor in self?.handlePushToken(token) }
+        }
+    }
+
+    private func handlePushToken(_ token: String) {
+        if webView != nil {
+            sendToJS("barpassNative.onPushToken", args: [token])
+        } else {
+            pendingPushToken = token
         }
     }
 
@@ -67,7 +90,6 @@ final class NativeBridge: ObservableObject {
         } else if action == "stop" {
             location.stopUpdating()
         } else {
-            // once
             if let coord = await location.requestOnce() {
                 sendToJS("barpassNative.onLocation", args: [coord.latitude, coord.longitude, 10.0])
             }
@@ -80,8 +102,6 @@ final class NativeBridge: ObservableObject {
             let granted = await notif.requestPermission()
             sendToJS("barpassNative.onNotificationPermission", args: [granted])
             if granted {
-                // Only register for remote notifications if the aps-environment
-                // entitlement is present — avoids crash on dev builds without push cert.
                 #if !targetEnvironment(simulator)
                 if Bundle.main.object(forInfoDictionaryKey: "aps-environment") != nil ||
                    Bundle.main.path(forResource: "embedded", ofType: "mobileprovision") != nil {
@@ -111,18 +131,15 @@ final class NativeBridge: ObservableObject {
     }
 
     private func handleCamera(_ body: [String: Any]) {
-        // Trigger native image picker
         NotificationCenter.default.post(name: .openCamera, object: body)
     }
 
     private func handleApplePay(_ body: [String: Any]) {
-        // Apple Pay handled by ApplePayService
         NotificationCenter.default.post(name: .startApplePay, object: body)
     }
 
     // MARK: - Page lifecycle
     func onPageLoaded() {
-        // Inject device info via the bridge (setDeviceInfo is now always a function)
         let info: [String: Any] = [
             "platform":        "ios",
             "version":         UIDevice.current.systemVersion,
@@ -136,14 +153,12 @@ final class NativeBridge: ObservableObject {
         guard let json = try? JSONSerialization.data(withJSONObject: info),
               let str  = String(data: json, encoding: .utf8) else { return }
 
-        // Defensive: check bridge exists first to avoid "Can't find variable" error
         let js = """
         (function(){
           if(typeof window.barpassNative !== 'undefined' &&
              typeof window.barpassNative.setDeviceInfo === 'function'){
             window.barpassNative.setDeviceInfo(\(str));
           } else {
-            // Bridge not ready yet — store for later pickup
             window.__barpassDeviceInfoPending = \(str);
           }
         })();
@@ -151,16 +166,20 @@ final class NativeBridge: ObservableObject {
         webView?.evaluateJavaScript(js) { _, err in
             if let err { print("[Bridge] setDeviceInfo error: \(err)") }
         }
+
+        // Deliver any push token that arrived before the page was ready
+        if let token = pendingPushToken {
+            sendToJS("barpassNative.onPushToken", args: [token])
+            pendingPushToken = nil
+        }
     }
 
-    func onPageError(_ error: Error) {
-        // Could show native error UI here
-    }
+    func onPageError(_ error: Error) {}
 
     func onWebReady() {
-        // Web signaled it's fully interactive
         print("[BarPass] Web app ready")
         haptic.impact(.light)
+        webReadyHandler?()
     }
 
     func handleDeepLink(_ url: URL) {
@@ -169,19 +188,12 @@ final class NativeBridge: ObservableObject {
     }
 
     // MARK: - JS Communication
+    // Uses JSONSerialization to guarantee correct escaping of strings, booleans, numbers
     func sendToJS(_ fn: String, args: [Any]) {
-        let argsStr = args.map { arg -> String in
-            switch arg {
-            case let s as String: return "\"\(s.replacingOccurrences(of: "\"", with: "\\\""))\""
-            case let b as Bool:   return b ? "true" : "false"
-            case let n as Double: return String(n)
-            case let n as Float:  return String(n)
-            case let n as Int:    return String(n)
-            default:              return "null"
-            }
-        }.joined(separator: ", ")
-
-        let js = "if(typeof \(fn)==='function'){\(fn)(\(argsStr));}"
+        guard let data    = try? JSONSerialization.data(withJSONObject: args, options: []),
+              let encoded = String(data: data, encoding: .utf8) else { return }
+        let inner = encoded.dropFirst().dropLast()  // strip surrounding [ and ]
+        let js = "if(typeof \(fn)==='function'){\(fn)(\(inner));}"
         webView?.evaluateJavaScript(js) { _, err in
             if let err { print("[Bridge] JS error: \(err)") }
         }
@@ -199,8 +211,6 @@ final class NativeBridge: ObservableObject {
           }
 
           window.barpassNative = {
-            // ── Swift → Web callbacks (functions, not null) ──
-            // These dispatch a CustomEvent so any listener in the page can react
             setDeviceInfo: function(info){
               window.__barpassDeviceInfo = info;
               document.dispatchEvent(new CustomEvent('barpass:deviceInfo', { detail: info }));
@@ -215,11 +225,14 @@ final class NativeBridge: ObservableObject {
             onBiometricResult: function(success){
               document.dispatchEvent(new CustomEvent('barpass:biometric', { detail: {success:success} }));
             },
+            onPushToken: function(token){
+              window.__barpassPushToken = token;
+              document.dispatchEvent(new CustomEvent('barpass:pushToken', { detail: {token:token} }));
+            },
             handleDeepLink: function(path){
               document.dispatchEvent(new CustomEvent('barpass:deepLink', { detail: {path:path} }));
             },
 
-            // ── Web → Swift calls ──
             haptic: function(style){ post('haptic',{style:style||'light'}); },
             requestLocation: function(){ post('location',{action:'once'}); },
             startLocation: function(){ post('location',{action:'start'}); },
@@ -233,13 +246,11 @@ final class NativeBridge: ObservableObject {
             signalReady: function(){ post('ready',{}); }
           };
 
-          // Signal native once DOM is ready
           if(document.readyState === 'loading'){
             document.addEventListener('DOMContentLoaded', function(){
               window.barpassNative.signalReady();
             }, { once: true });
           } else {
-            // DOMContentLoaded already fired
             setTimeout(function(){ window.barpassNative.signalReady(); }, 0);
           }
 
@@ -267,6 +278,6 @@ final class NativeBridge: ObservableObject {
 }
 
 extension Notification.Name {
-    static let openCamera   = Notification.Name("openCamera")
+    static let openCamera    = Notification.Name("openCamera")
     static let startApplePay = Notification.Name("startApplePay")
 }

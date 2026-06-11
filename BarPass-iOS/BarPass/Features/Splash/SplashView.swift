@@ -103,8 +103,12 @@ struct SplashView: View {
             withAnimation(.linear(duration: 1.4).repeatForever(autoreverses: false).delay(0.6)) {
                 shimmerOffset = 300
             }
-            // Auto-dismiss after web loads
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+            // Minimum display time — then wait for web ready signal
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                appState.splashMinTimerFired()
+            }
+            // Safety net: dismiss unconditionally if web never fires ready
+            DispatchQueue.main.asyncAfter(deadline: .now() + 7.0) {
                 appState.splashComplete()
             }
         }

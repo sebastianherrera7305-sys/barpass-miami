@@ -10,8 +10,7 @@ struct AppleWalletButton: View {
     @State private var showError     = false
     @State private var errorMsg      = ""
 
-    // GitHub token guardado en Keychain (más seguro que UserDefaults)
-    @AppStorage("bp_gh_token") private var ghToken: String = ""
+    @State private var ghToken: String = ""
 
     var body: some View {
         Group {
@@ -40,7 +39,10 @@ struct AppleWalletButton: View {
                 generateButton
             }
         }
-        .onAppear { service.checkIfInWallet(walletId: wallet.walletId) }
+        .onAppear {
+            service.checkIfInWallet(walletId: wallet.walletId)
+            ghToken = KeychainHelper.load(forKey: "bp_gh_token") ?? ""
+        }
         .sheet(isPresented: $showSetup) { TokenSetupSheet(ghToken: $ghToken) }
         .alert("Error", isPresented: $showError) {
             Button("OK", role: .cancel) {}
@@ -214,7 +216,9 @@ struct TokenSetupSheet: View {
 
                     // Guardar
                     Button {
-                        ghToken = inputToken.trimmingCharacters(in: .whitespaces)
+                        let token = inputToken.trimmingCharacters(in: .whitespaces)
+                        KeychainHelper.save(token, forKey: "bp_gh_token")
+                        ghToken = token
                         dismiss()
                     } label: {
                         Text("Guardar y Activar")
@@ -273,16 +277,4 @@ private struct SetupStep: View {
     }
 }
 
-// MARK: - Color hex helper
-
-extension Color {
-    init(hex: String) {
-        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-        var int: UInt64 = 0
-        Scanner(string: hex).scanHexInt64(&int)
-        let r = Double((int >> 16) & 0xFF) / 255
-        let g = Double((int >> 08) & 0xFF) / 255
-        let b = Double((int >> 00) & 0xFF) / 255
-        self.init(red: r, green: g, blue: b)
-    }
-}
+// Color(hex:) is defined in SplashView.swift and available across the module

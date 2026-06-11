@@ -14,7 +14,12 @@ final class LocationService: NSObject, @preconcurrency CLLocationManagerDelegate
     }
 
     func requestOnce() async -> CLLocationCoordinate2D? {
-        await withCheckedContinuation { continuation in
+        // Resume any abandoned continuation before creating a new one
+        if let existing = onceCompletion {
+            onceCompletion = nil
+            existing.resume(returning: nil)
+        }
+        return await withCheckedContinuation { continuation in
             onceCompletion = continuation
             manager.requestWhenInUseAuthorization()
             manager.requestLocation()
