@@ -8,5 +8,9 @@
 	<array>
 		<string>pass.io.barpass.wallet</string>
 	</array>
+	<key>com.apple.developer.in-app-payments</key>
+	<array>
+		<string>merchant.com.barpass.app</string>
+	</array>
 </dict>
 </plist>
