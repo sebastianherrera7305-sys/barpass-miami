@@ -2794,11 +2794,11 @@ body::after{
     <div class="pay-modal-handle"></div>
     <div class="pay-modal-title">Add Credits</div>
     <div class="pay-modal-sub">Choose an amount to load into your BarPass wallet</div>
-    <!-- Apple Pay -->
-    <button class="apple-pay-btn" onclick="triggerApplePay()">
+    <!-- Apple Pay — shown only on non-native or when native lacks Apple Pay -->
+    <button class="apple-pay-btn" id="topup-ap-standalone" onclick="triggerApplePay()" style="display:none;">
       <span class="ap-logo">🍎</span> Pay with Apple Pay
     </button>
-    <div class="pay-divider">or pay with card</div>
+    <div class="pay-divider" id="topup-ap-divider" style="display:none;">or pay with card</div>
     <!-- Amount Grid -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
       <div class="load-amt" onclick="selectTopUpAmount(20,this)">
@@ -5684,7 +5684,21 @@ function closePayModal(id){
   if(m)m.classList.remove('open');
 }
 
-function openTopUpModal(){openPayModal('topup-modal');_topUpAmount=0;updateTopUpBtn();}
+function openTopUpModal(){
+  openPayModal('topup-modal');
+  _topUpAmount=0;
+  // Detect native Apple Pay capability
+  var hasAP = window.barpassNative &&
+              typeof window.barpassNative.applePayCharge === 'function' &&
+              window.__barpassDeviceInfo && window.__barpassDeviceInfo.hasApplePay;
+  var apBtn   = document.getElementById('topup-ap-standalone');
+  var apDiv   = document.getElementById('topup-ap-divider');
+  // On native with Apple Pay: hide standalone btn — confirm btn becomes Apple Pay
+  // On web / no Apple Pay: show standalone btn as fallback
+  if(apBtn) apBtn.style.display  = hasAP ? 'none' : 'flex';
+  if(apDiv) apDiv.style.display  = hasAP ? 'none' : 'flex';
+  updateTopUpBtn();
+}
 function openAddCardModal(){openPayModal('addcard-modal');}
 function openSendModal(){openPayModal('send-modal');}
 function openSplitModal(){openPayModal('split-modal');updateSplitCalc();}
@@ -5714,13 +5728,29 @@ function updateCustomTopUp(){
 function updateTopUpBtn(){
   var btn=document.getElementById('topup-confirm-btn');
   if(!btn)return;
+  var hasAP = window.barpassNative &&
+              typeof window.barpassNative.applePayCharge === 'function' &&
+              window.__barpassDeviceInfo && window.__barpassDeviceInfo.hasApplePay;
   if(_topUpAmount>0){
     var bonus=_topUpAmount>=500?50:_topUpAmount>=200?15:_topUpAmount>=100?5:0;
     btn.style.opacity='1';btn.style.pointerEvents='auto';
-    btn.textContent='Add $'+_topUpAmount+(bonus?' + $'+bonus+' bonus':'');
+    if(hasAP){
+      // Transform into Apple Pay button
+      btn.style.background='#000';
+      btn.style.color='#fff';
+      btn.innerHTML='<span style="font-family:-apple-system,sans-serif;font-size:17px;margin-right:4px;"></span> Pay $'+_topUpAmount+(bonus?' + $'+bonus+' bonus':'')+' with Apple Pay';
+    } else {
+      btn.style.background='linear-gradient(135deg,#d4a017,#f5b830)';
+      btn.style.color='#000';
+      btn.textContent='Add $'+_topUpAmount+(bonus?' + $'+bonus+' bonus':'');
+    }
   } else {
     btn.style.opacity='.5';btn.style.pointerEvents='none';
-    btn.textContent='Add Credits';
+    btn.style.background='linear-gradient(135deg,#d4a017,#f5b830)';
+    btn.style.color='#000';
+    btn.innerHTML=hasAP
+      ? '<span style="font-family:-apple-system,sans-serif;font-size:17px;margin-right:4px;"></span> Select amount to pay with Apple Pay'
+      : 'Add Credits';
   }
 }
 function triggerApplePay(){
@@ -5773,11 +5803,16 @@ if (window.barpassNative) {
   window.barpassNative.onApplePayResult = window._onApplePayResult;
 }
 function confirmTopUp(){
-  if(_topUpAmount<=0){toast('Select an amount','warn');return;}
-  if(!S.currentVenue&&!S.credit.active){
-    // Auto-activate with first load
-    S.credit.active=true;
+  if(_topUpAmount<=0){toast('Select an amount first','warn');nativeHaptic('warning');return;}
+  // Native path — Apple Pay sheet handles everything, _onApplePayResult credits balance
+  var hasAP = window.barpassNative &&
+              typeof window.barpassNative.applePayCharge === 'function' &&
+              window.__barpassDeviceInfo && window.__barpassDeviceInfo.hasApplePay;
+  if(hasAP){
+    triggerApplePay();
+    return;
   }
+  // Web fallback — update local state (no real charge)
   var c=S.credit;
   c.active=true;
   if(!c.venue&&S.currentVenue)c.venue=S.currentVenue.name;
@@ -5786,7 +5821,6 @@ function confirmTopUp(){
   c.balance=parseFloat((c.balance+_topUpAmount).toFixed(2));
   if(bonus>0){c.balance=parseFloat((c.balance+bonus).toFixed(2));S.cashback=parseFloat((S.cashback+bonus).toFixed(2));}
   S.points+=Math.floor(_topUpAmount/10);
-  // Add to transactions
   if(!c.txs)c.txs=[];
   c.txs.unshift({name:'Credits Added',price:_topUpAmount,emoji:'💳',time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}),type:'topup'});
   closePayModal('topup-modal');
