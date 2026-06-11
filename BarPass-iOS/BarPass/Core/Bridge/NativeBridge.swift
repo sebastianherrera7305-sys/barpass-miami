@@ -198,14 +198,22 @@ final class NativeBridge: ObservableObject {
     // MARK: - Apple Pay (wired directly — no NotificationCenter)
 
     private func handleApplePay(_ body: [String: Any]) {
-        let raw    = (body["amount"] as? Double) ?? (body["amount"] as? NSNumber)?.doubleValue ?? 0
-        let label  = body["label"]  as? String ?? "BarPass"
+        let raw   = (body["amount"] as? Double) ?? (body["amount"] as? NSNumber)?.doubleValue ?? 0
+        let label = body["label"] as? String ?? "BarPass"
         guard raw > 0 else { return }
 
-        applePay.requestPayment(amount: Decimal(raw), label: label) { [weak self] success in
+        applePay.requestPayment(amount: Decimal(raw), label: label) { [weak self] result in
             Task { @MainActor in
-                self?.haptic.notification(success ? .success : .warning)
-                self?.sendToJS("barpassNative.onApplePayResult", args: [success])
+                self?.haptic.notification(result.success ? .success : .warning)
+                var payload: [String: Any] = [
+                    "success": result.success,
+                    "amount":  result.amount,
+                    "label":   result.label
+                ]
+                if let token = result.token  { payload["token"] = token }
+                if let error = result.error  { payload["error"] = error }
+                // Call the API-wired handler directly
+                self?.sendToJS("_onApplePayResult", args: [payload])
             }
         }
     }
@@ -307,8 +315,10 @@ final class NativeBridge: ObservableObject {
               window.__barpassPushToken = token;
               document.dispatchEvent(new CustomEvent('barpass:pushToken', { detail:{token} }));
             },
-            onApplePayResult: function(success){
-              document.dispatchEvent(new CustomEvent('barpass:applePayResult', { detail:{success} }));
+            onApplePayResult: function(result){
+              // Route through the API-wired handler
+              if (typeof _onApplePayResult === 'function') { _onApplePayResult(result); }
+              document.dispatchEvent(new CustomEvent('barpass:applePayResult', { detail: result }));
             },
             onCameraResult: function(type, value){
               document.dispatchEvent(new CustomEvent('barpass:cameraResult', { detail:{type,value} }));

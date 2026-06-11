@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://firestore.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://firebaseinstallations.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://tile.openstreetmap.org https://*.tile.openstreetmap.org; frame-src 'none'; object-src 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://fonts.googleapis.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://firestore.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://firebaseinstallations.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://tile.openstreetmap.org https://*.tile.openstreetmap.org https://*.vercel.app; frame-src 'none'; object-src 'none';">
 <title>BarPass Miami — AI Nightlife Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
@@ -3483,6 +3483,10 @@ body::after{
 
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
 <script>
 /* ═══════════════════════════════════════════
    MIAMI VENUE DATABASE — 50 VENUES
@@ -3504,6 +3508,66 @@ try {
   fbAuth = firebase.auth();
 } catch(e) {
   console.warn('Firebase unavailable, running in local mode');
+}
+
+/* ── BARPASS API ─────────────────────────────────────────────────────────── */
+// Set BP_API to your Vercel deployment URL after running `vercel --prod`
+var BP_API = (function(){
+  var stored = typeof localStorage !== 'undefined' && localStorage.getItem('bp_api_url');
+  return stored || 'https://barpass-miami.vercel.app';
+})();
+
+async function getAuthToken() {
+  try {
+    var user = fbAuth && fbAuth.currentUser;
+    if (user) return await user.getIdToken();
+  } catch(e) {}
+  return null;
+}
+
+async function apiFetch(path, opts) {
+  var token = await getAuthToken();
+  var headers = Object.assign({ 'Content-Type': 'application/json' }, opts && opts.headers || {});
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  var res = await fetch(BP_API + path, Object.assign({}, opts, { headers: headers }));
+  if (!res.ok) { var err = await res.json().catch(function(){ return {}; }); throw err; }
+  return res.json();
+}
+
+/* Sync wallet balance + history from server; updates local S.credit state */
+async function syncWalletFromServer() {
+  if (!fbAuth || !fbAuth.currentUser) return;
+  try {
+    var data = await apiFetch('/api/wallet');
+    S.credit.active  = true;
+    S.credit.balance = data.balance || 0;
+    S.totalSpent     = data.total_spent || 0;
+    S.tier           = ['bronze','silver','gold','platinum'].indexOf(data.tier || 'bronze');
+    if (S.tier < 0) S.tier = 0;
+    refreshCreditUI && refreshCreditUI();
+    refreshWalletUI && refreshWalletUI();
+  } catch(e) {
+    console.warn('[BarPass] Wallet sync failed, using local state');
+  }
+}
+
+async function loadWalletHistory() {
+  if (!fbAuth || !fbAuth.currentUser) return;
+  try {
+    var data = await apiFetch('/api/wallet/history?limit=20');
+    if (!data.transactions || !data.transactions.length) return;
+    // Map server transactions into the local S.credit.txs format
+    S.credit.txs = data.transactions.map(function(t) {
+      return {
+        name:  t.description || (t.type === 'topup' ? 'Credits Added' : 'Venue Purchase'),
+        price: Math.abs(t.amount),
+        emoji: t.type === 'topup' ? '💳' : '🍸',
+        time:  t.created_at ? new Date(t.created_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '',
+        type:  t.type
+      };
+    });
+    refreshPaymentsUI && refreshPaymentsUI();
+  } catch(e) {}
 }
 function loadVenues(cb){
   if(!db){if(cb)cb(VENUES);return;}
@@ -4334,6 +4398,7 @@ function doLogin(){
     var u=cred.user;
     S.user={name:u.displayName||email.split('@')[0],email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
     loadVenues(function(){btn.innerHTML='Sign In';btn.disabled=false;showOnboarding();});
+    syncWalletFromServer();
   }).catch(function(err){
     if(err.code==='auth/user-not-found'||err.code==='auth/invalid-credential'){
       fbAuth.createUserWithEmailAndPassword(email,pass).then(function(cred){
@@ -4369,6 +4434,7 @@ function doSignup(){
     u.updateProfile({displayName:name||email.split('@')[0]});
     S.user={name:name||email.split('@')[0],email:u.email,emoji:'🎉',prefs:'Cocktails, rooftop',uid:u.uid};
     loadVenues(function(){btn.innerHTML='Create Account';btn.disabled=false;showOnboarding();});
+    syncWalletFromServer();
   }).catch(function(err){
     btn.innerHTML='Create Account';btn.disabled=false;
     document.getElementById('s-pass-err').textContent=err.message;
@@ -5658,13 +5724,53 @@ function updateTopUpBtn(){
   }
 }
 function triggerApplePay(){
+  var amt = _topUpAmount > 0 ? _topUpAmount : 50;
+  var label = 'BarPass Credits · $' + amt;
   if(window.barpassNative&&typeof window.barpassNative.applePayCharge==='function'){
-    window.barpassNative.applePayCharge(50,'BarPass Credits · $50');
+    window.barpassNative.applePayCharge(amt, label);
   } else {
-    // Fallback: open top up with $50
-    selectTopUpAmount(50, null);
-    toast('Apple Pay · $50 selected','info');
+    selectTopUpAmount(amt, null);
+    toast('Apple Pay · $' + amt + ' selected','info');
   }
+}
+
+/* Called by NativeBridge.swift after Apple Pay sheet completes */
+window._onApplePayResult = async function(result) {
+  // result: { success, token, amount, label, error }
+  if (!result || !result.success) {
+    toast(result && result.error ? result.error : 'Payment cancelled','warn');
+    return;
+  }
+  var btn = document.getElementById('topup-confirm-btn');
+  if (btn) { btn.textContent = 'Processing…'; btn.style.opacity = '.7'; btn.style.pointerEvents = 'none'; }
+  try {
+    var data = await apiFetch('/api/apple-pay/validate', {
+      method: 'POST',
+      body: JSON.stringify({
+        paymentToken: result.token,
+        amount:       result.amount || _topUpAmount,
+        label:        result.label  || 'BarPass Wallet Top-Up'
+      })
+    });
+    // Server is authoritative — update balance from response
+    S.credit.active  = true;
+    S.credit.balance = data.balance || S.credit.balance;
+    var bonus = data.bonus || 0;
+    closePayModal('topup-modal');
+    refreshCreditUI && refreshCreditUI();
+    refreshWalletUI && refreshWalletUI();
+    nativeHaptic && nativeHaptic('success');
+    toast('🪙 $' + data.amount_charged + (bonus ? ' + $' + bonus + ' bonus' : '') + ' added!', 'credit');
+  } catch(err) {
+    var msg = (err && err.message) || 'Payment failed — please try again';
+    toast(msg, 'warn');
+    if (btn) { btn.textContent = 'Add $' + (_topUpAmount||50); btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+  }
+};
+
+/* Bridge calls this via evaluateJavaScript("_onApplePayResult(...)") */
+if (window.barpassNative) {
+  window.barpassNative.onApplePayResult = window._onApplePayResult;
 }
 function confirmTopUp(){
   if(_topUpAmount<=0){toast('Select an amount','warn');return;}
@@ -6136,7 +6242,7 @@ function openScreen(id){
   s.style.display='flex';
   requestAnimationFrame(function(){requestAnimationFrame(function(){s.classList.add('open');});});
   if(id==='cart-screen')renderCart();
-  if(id==='wallet-screen'){refreshWalletUI();document.getElementById('load-section').style.display='none';}
+  if(id==='wallet-screen'){refreshWalletUI();document.getElementById('load-section').style.display='none';syncWalletFromServer();loadWalletHistory();}
   if(id==='venue-detail'&&feedMap)setTimeout(function(){feedMap.invalidateSize();},300);
   if(id==='tonight-screen'){buildTonight();buildTonightStories();buildTonightLiveRooms();}
   if(id==='ai-screen'){buildAI(aiMoodCache);}
@@ -8409,9 +8515,6 @@ document.addEventListener('barpass:deepLink', function(e) {
 })();
 
 </script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
