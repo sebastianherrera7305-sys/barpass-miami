@@ -165,26 +165,24 @@ final class WalletPassService: NSObject, ObservableObject {
 
     // MARK: - Presentar el sheet de Apple Wallet
 
-    func presentAddToWallet(passURL: URL,
-                            from viewController: UIViewController,
-                            completion: @escaping (Bool) -> Void) {
-        URLSession.shared.dataTask(with: passURL) { [weak self] data, _, error in
-            DispatchQueue.main.async {
-                guard let data = data, error == nil else {
-                    completion(false)
-                    return
-                }
-                do {
-                    let pass = try PKPass(data: data)
-                    self?.addCompletion = completion
-                    let addVC = PKAddPassesViewController(pass: pass)
-                    addVC?.delegate = self
-                    if let addVC { viewController.present(addVC, animated: true) }
-                } catch {
-                    completion(false)
+    func presentAddToWallet(passURL: URL, from viewController: UIViewController) async -> Bool {
+        do {
+            let (data, _) = try await URLSession.shared.data(from: passURL)
+            let pass      = try PKPass(data: data)
+            return await withCheckedContinuation { continuation in
+                addCompletion = { continuation.resume(returning: $0) }
+                let addVC = PKAddPassesViewController(pass: pass)
+                addVC?.delegate = self
+                if let addVC {
+                    viewController.present(addVC, animated: true)
+                } else {
+                    addCompletion = nil
+                    continuation.resume(returning: false)
                 }
             }
-        }.resume()
+        } catch {
+            return false
+        }
     }
 
     func cancelGeneration() {

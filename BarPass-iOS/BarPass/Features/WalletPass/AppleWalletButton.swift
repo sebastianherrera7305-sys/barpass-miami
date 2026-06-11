@@ -120,7 +120,8 @@ struct AppleWalletButton: View {
                 .compactMap({ $0 as? UIWindowScene }).first,
               let rootVC = windowScene.windows.first?.rootViewController else { return }
 
-        service.presentAddToWallet(passURL: url, from: rootVC) { success in
+        Task {
+            let success = await service.presentAddToWallet(passURL: url, from: rootVC)
             if !success {
                 errorMsg = "No se pudo abrir el pase. Intenta de nuevo."
                 showError = true

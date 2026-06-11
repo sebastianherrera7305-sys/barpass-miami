@@ -8354,6 +8354,52 @@ if(_appEl) _appObserver.observe(_appEl, {attributes:true, attributeFilter:['styl
 
 
 /* ────────────────────────────────────────
+   NATIVE DEEP LINK ROUTER
+   Handles barpass://screen/tonight, barpass://venue/komodo, etc.
+──────────────────────────────────────── */
+document.addEventListener('barpass:deepLink', function(e) {
+  var raw = e.detail && (e.detail.url || e.detail.path);
+  if (!raw) return;
+  try {
+    var u = new URL(raw);
+    var host = u.hostname;                         // 'venue', 'screen', 'vip', 'wallet'
+    var seg  = u.pathname.replace(/^\//, '');      // 'komodo', 'tonight', etc.
+
+    switch (host) {
+      case 'venue':
+        if (seg) {
+          // Wait for app to be ready before opening
+          var tryOpen = function(attempts) {
+            var v = VENUES && VENUES.find(function(v){ return v.id === seg || v.name.toLowerCase().replace(/\s+/g,'-') === seg; });
+            if (v) { openVenue(v.id); }
+            else if (attempts > 0) { setTimeout(function(){ tryOpen(attempts-1); }, 400); }
+          };
+          tryOpen(5);
+        }
+        break;
+      case 'screen':
+        var screenMap = {
+          tonight:  'tonight-screen',
+          explore:  'explore-screen',
+          wallet:   'wallet-screen',
+          ai:       'ai-screen',
+          social:   'social-screen',
+          games:    'games-screen'
+        };
+        var id = screenMap[seg];
+        if (id) setTimeout(function(){ openScreen(id); }, 300);
+        break;
+      case 'vip':
+        setTimeout(function(){ openScreen('express-screen'); }, 300);
+        break;
+      case 'wallet':
+        setTimeout(function(){ openScreen('wallet-screen'); }, 300);
+        break;
+    }
+  } catch(err) {}
+});
+
+/* ────────────────────────────────────────
    REACTION FLOAT KEYFRAME INJECTION
 ──────────────────────────────────────── */
 (function(){
