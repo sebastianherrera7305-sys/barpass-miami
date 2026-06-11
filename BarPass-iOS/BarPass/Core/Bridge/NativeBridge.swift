@@ -37,7 +37,10 @@ final class NativeBridge: ObservableObject {
             case .share:        handleShare(body)
             case .camera:       handleCamera(body)
             case .applePay:     handleApplePay(body)
-            case .log:          print("[WebJS]", body["msg"] ?? "")
+            case .log:
+                #if DEBUG
+                print("[WebJS]", body["msg"] ?? "")
+                #endif
             case .ready:        onWebReady()
             }
         }

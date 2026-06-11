@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://firestore.googleapis.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://firebaseinstallations.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://tile.openstreetmap.org https://*.tile.openstreetmap.org; frame-src 'none'; object-src 'none';">
 <title>BarPass Miami — AI Nightlife Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous">
@@ -5940,8 +5941,8 @@ function openVenue(id){
   }
   document.getElementById('vd-name').textContent=v.name;
   document.getElementById('vd-district').textContent=v.district;
-  document.getElementById('vd-meta').innerHTML='<span>⭐ '+v.rating+'</span><span>·</span><span>'+v.price+'</span><span>·</span><span>'+v.dist+'</span><span>·</span><span>👗 '+v.dress+'</span>';
-  document.getElementById('vd-tags-row').innerHTML=v.cat.map(function(c){return '<span class="vd-tag">'+c+'</span>';}).join('')+'<span class="vd-tag">🎵 '+v.music.split('·')[0].trim()+'</span><span class="vd-tag">🗓 '+v.bestNight+'</span>';
+  document.getElementById('vd-meta').innerHTML='<span>⭐ '+esc(v.rating)+'</span><span>·</span><span>'+esc(v.price)+'</span><span>·</span><span>'+esc(v.dist)+'</span><span>·</span><span>👗 '+esc(v.dress)+'</span>';
+  document.getElementById('vd-tags-row').innerHTML=v.cat.map(function(c){return '<span class="vd-tag">'+esc(c)+'</span>';}).join('')+'<span class="vd-tag">🎵 '+esc(v.music.split('·')[0].trim())+'</span><span class="vd-tag">🗓 '+esc(v.bestNight)+'</span>';
   document.getElementById('vd-ai-text').textContent=v.aiTip;
   _buildVenueConcierge(v);
   var capColor=v.cap<60?'var(--green)':v.cap<80?'var(--gold)':'var(--coral)';

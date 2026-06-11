@@ -34,14 +34,16 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
     func paymentAuthorizationController(_ controller: PKPaymentAuthorizationController,
                                         didAuthorizePayment payment: PKPayment,
                                         handler: @escaping (PKPaymentAuthorizationResult) -> Void) {
-        // In production: send payment.token to your server
+        // TODO: send payment.token.paymentData to your backend for server-side receipt validation
+        // before calling handler(.success) and crediting the user's balance.
         handler(PKPaymentAuthorizationResult(status: .success, errors: nil))
         completion?(true)
+        completion = nil  // nil out immediately so didFinish doesn't fire a second callback
     }
 
     func paymentAuthorizationControllerDidFinish(_ controller: PKPaymentAuthorizationController) {
         controller.dismiss()
-        completion?(false)
+        completion?(false)  // only fires if payment was not authorized (user cancelled)
         completion = nil
     }
 }
