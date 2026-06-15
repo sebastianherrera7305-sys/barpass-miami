@@ -2,8 +2,9 @@ import SwiftUI
 import WebKit
 
 struct BarPassWebContainerView: View {
+    let bridge: NativeBridge
     @EnvironmentObject private var appState: AppState
-    @StateObject private var bridge = NativeBridge()
+    @EnvironmentObject private var cart:     CartStore
 
     var body: some View {
         BarPassWebView(bridge: bridge)
@@ -11,6 +12,27 @@ struct BarPassWebContainerView: View {
             .onAppear {
                 bridge.webReadyHandler = { [weak appState] in
                     Task { @MainActor in appState?.webDidSignalReady() }
+                }
+                bridge.addToCartHandler = { [weak cart] name, price, emoji, venueId, venueName in
+                    Task { @MainActor in
+                        cart?.add(name: name, price: price, emoji: emoji,
+                                  venueId: venueId, venueName: venueName)
+                    }
+                }
+                bridge.openCartHandler = { [weak appState] in
+                    Task { @MainActor in appState?.showCart = true }
+                }
+                bridge.openPriorityEntryHandler = { [weak appState] venueId, venueName in
+                    Task { @MainActor in
+                        appState?.priorityVenueId   = venueId
+                        appState?.priorityVenueName = venueName
+                        appState?.showPriorityEntry = true
+                    }
+                }
+                bridge.authResultHandler = { [weak appState] success, error in
+                    Task { @MainActor in
+                        if !success { appState?.authError = error ?? "Error de autenticación" }
+                    }
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .deepLinkReceived)) { note in

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01609A069EE22D5E5CDAF602 /* EventTicket.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5086AAE9CBD601116597BE /* EventTicket.swift */; };
+		A957F031255C8A30AB61608E /* EventTicketsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 138CCFF5EDE420FFDFA78DC8 /* EventTicketsView.swift */; };
+		4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */; };
 		AA0000010000000000000001 /* BarPassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000001 /* BarPassApp.swift */; };
 		AA0000010000000000000002 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000002 /* AppState.swift */; };
 		AA0000010000000000000003 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000003 /* RootView.swift */; };
@@ -23,9 +26,25 @@
 		AA000001000000000000000E /* barpass-miami.html in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000E /* barpass-miami.html */; };
 		BB000001000000000000000E /* barpass-logo.svg in Resources */ = {isa = PBXBuildFile; fileRef = BB000002000000000000000E /* barpass-logo.svg */; };
 		AA000001000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000F /* Assets.xcassets */; };
-/* End PBXBuildFile section */
+		2A0BC0EA1346366A63326961 /* CartItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8568370BB34F88D6D61CD5B2 /* CartItem.swift */; };
+		E44CDF7872A2DD52484EE256 /* CartStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA3D664AAE5148E8E014E77 /* CartStore.swift */; };
+		30D51A75A5B95FDE56B0FBB0 /* CartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECEA1F54438283EF27ED535E /* CartView.swift */; };
+		4AD4CD88E1366A6ACA462B08 /* CardPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */; };
+		7B6B03398BDEC6245300D80C /* SkipLinePass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */; };
+		CEF97FC6EA40560FF2D7D0EF /* SkipLinePassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C54DE23E3FEFE20783A41C3 /* SkipLinePassView.swift */; };
+		8A1DDE6046186E41A8635D09 /* ActivePassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0C516E6C74A66937CBB9B8F /* ActivePassView.swift */; };
+		80A5280DA8DF78405C1E0A01 /* TableReservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA759652D778C1B0CD58E463 /* TableReservation.swift */; };
+		DDC733155D1594F75D48A1D0 /* TableReservationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F2D00744D57ECA5B25B120 /* TableReservationView.swift */; };
+		7D22239A32057DDDC1688082 /* ReservationConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA727DF04AFC4355197DDF95 /* ReservationConfirmView.swift */; };
+		EBF12578C120CFBF1FA60335 /* PriorityEntryHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2373126D43DE228E7095F6A2 /* PriorityEntryHubView.swift */; };
+		EE000002000000000000001A /* NativeAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000001000000000000001A /* NativeAuthView.swift */; };
+		/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		FB5086AAE9CBD601116597BE /* EventTicket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTicket.swift; sourceTree = "<group>"; };
+		138CCFF5EDE420FFDFA78DC8 /* EventTicketsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTicketsView.swift; sourceTree = "<group>"; };
+		AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveTicketView.swift; sourceTree = "<group>"; };
+
 		AA0000020000000000000001 /* BarPassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarPassApp.swift; sourceTree = "<group>"; };
 		AA0000020000000000000002 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		AA0000020000000000000003 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -44,7 +63,19 @@
 		AA000002000000000000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA00000200000000000000A0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA00000200000000000000A1 /* BarPass app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BarPass app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-/* End PBXFileReference section */
+		8568370BB34F88D6D61CD5B2 /* CartItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartItem.swift; sourceTree = "<group>"; };
+		3AA3D664AAE5148E8E014E77 /* CartStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartStore.swift; sourceTree = "<group>"; };
+		ECEA1F54438283EF27ED535E /* CartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartView.swift; sourceTree = "<group>"; };
+		5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPaymentView.swift; sourceTree = "<group>"; };
+		153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipLinePass.swift; sourceTree = "<group>"; };
+		8C54DE23E3FEFE20783A41C3 /* SkipLinePassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipLinePassView.swift; sourceTree = "<group>"; };
+		D0C516E6C74A66937CBB9B8F /* ActivePassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePassView.swift; sourceTree = "<group>"; };
+		CA759652D778C1B0CD58E463 /* TableReservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableReservation.swift; sourceTree = "<group>"; };
+		C2F2D00744D57ECA5B25B120 /* TableReservationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableReservationView.swift; sourceTree = "<group>"; };
+		EA727DF04AFC4355197DDF95 /* ReservationConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservationConfirmView.swift; sourceTree = "<group>"; };
+		2373126D43DE228E7095F6A2 /* PriorityEntryHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriorityEntryHubView.swift; sourceTree = "<group>"; };
+		EE000001000000000000001A /* NativeAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthView.swift; sourceTree = "<group>"; };
+		/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AA0000030000000000000003 /* Frameworks */ = {
@@ -70,6 +101,7 @@
 			children = (
 				AA0000020000000000000001 /* BarPassApp.swift */,
 				AA0000020000000000000002 /* AppState.swift */,
+				CC000004000000000000000A /* Models */,
 				AA0000040000000000000002 /* Core */,
 				AA000004000000000000000A /* Features */,
 				AA000004000000000000000B /* Resources */,
@@ -129,7 +161,10 @@
 		AA000004000000000000000A /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				EE000003000000000000001A /* Auth */,
 				AA0000020000000000000003 /* RootView.swift */,
+				CC000004000000000000000B /* Cart */,
+				DD000004000000000000000A /* PriorityEntry */,
 				AA000004000000000000000C /* Splash */,
 			);
 			path = Features;
@@ -169,7 +204,51 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-/* End PBXGroup section */
+		CC000004000000000000000A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				
+				FB5086AAE9CBD601116597BE /* EventTicket.swift */,8568370BB34F88D6D61CD5B2 /* CartItem.swift */,
+				153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */,
+				CA759652D778C1B0CD58E463 /* TableReservation.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		CC000004000000000000000B /* Cart */ = {
+			isa = PBXGroup;
+			children = (
+				3AA3D664AAE5148E8E014E77 /* CartStore.swift */,
+				ECEA1F54438283EF27ED535E /* CartView.swift */,
+				5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */,
+			);
+			path = Cart;
+			sourceTree = "<group>";
+		};
+		DD000004000000000000000A /* PriorityEntry */ = {
+			isa = PBXGroup;
+			children = (
+				
+				138CCFF5EDE420FFDFA78DC8 /* EventTicketsView.swift */,
+				AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */,8C54DE23E3FEFE20783A41C3 /* SkipLinePassView.swift */,
+				D0C516E6C74A66937CBB9B8F /* ActivePassView.swift */,
+				C2F2D00744D57ECA5B25B120 /* TableReservationView.swift */,
+				EA727DF04AFC4355197DDF95 /* ReservationConfirmView.swift */,
+				2373126D43DE228E7095F6A2 /* PriorityEntryHubView.swift */,
+			);
+			path = PriorityEntry;
+			sourceTree = "<group>";
+		};
+
+		EE000003000000000000001A /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				EE000001000000000000001A /* NativeAuthView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		/* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
 		AA0000050000000000000000 /* BarPass app */ = {
@@ -240,8 +319,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01609A069EE22D5E5CDAF602 /* EventTicket.swift in Sources */,
+				A957F031255C8A30AB61608E /* EventTicketsView.swift in Sources */,
+				4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */,
+
+				EE000002000000000000001A /* NativeAuthView.swift in Sources */,
 				AA0000010000000000000001 /* BarPassApp.swift in Sources */,
 				AA0000010000000000000002 /* AppState.swift in Sources */,
+				2A0BC0EA1346366A63326961 /* CartItem.swift in Sources */,
+				7B6B03398BDEC6245300D80C /* SkipLinePass.swift in Sources */,
+				CEF97FC6EA40560FF2D7D0EF /* SkipLinePassView.swift in Sources */,
+				8A1DDE6046186E41A8635D09 /* ActivePassView.swift in Sources */,
+				80A5280DA8DF78405C1E0A01 /* TableReservation.swift in Sources */,
+				DDC733155D1594F75D48A1D0 /* TableReservationView.swift in Sources */,
+				7D22239A32057DDDC1688082 /* ReservationConfirmView.swift in Sources */,
+				EBF12578C120CFBF1FA60335 /* PriorityEntryHubView.swift in Sources */,
+
+				E44CDF7872A2DD52484EE256 /* CartStore.swift in Sources */,
+				30D51A75A5B95FDE56B0FBB0 /* CartView.swift in Sources */,
+				4AD4CD88E1366A6ACA462B08 /* CardPaymentView.swift in Sources */,
+
 				AA0000010000000000000003 /* RootView.swift in Sources */,
 				AA0000010000000000000004 /* SplashView.swift in Sources */,
 				AA0000010000000000000005 /* BarPassWebView.swift in Sources */,

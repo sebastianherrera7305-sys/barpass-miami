@@ -1,29 +1,61 @@
 import SwiftUI
 import UserNotifications
+import BackgroundTasks
 
 @main
 struct BarPassApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appState = AppState()
+    @StateObject private var cart     = CartStore()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(appState)
+                .environmentObject(cart)
                 .preferredColorScheme(.dark)
         }
     }
 }
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
+    private static let cacheTaskID = "io.barpass.cache.refresh"
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         UNUserNotificationCenter.current().delegate = self
-        // Allow iOS to wake the app periodically to warm the web cache
-        UIApplication.shared.setMinimumBackgroundFetchInterval(
-            UIApplication.backgroundFetchIntervalMinimum
-        )
+        registerBackgroundTask()
         return true
+    }
+
+    private func registerBackgroundTask() {
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.cacheTaskID, using: nil) { task in
+            self.handleCacheRefresh(task: task as! BGAppRefreshTask)
+        }
+        scheduleNextCacheRefresh()
+    }
+
+    private func scheduleNextCacheRefresh() {
+        let request = BGAppRefreshTaskRequest(identifier: Self.cacheTaskID)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 3600)
+        try? BGTaskScheduler.shared.submit(request)
+    }
+
+    private func handleCacheRefresh(task: BGAppRefreshTask) {
+        scheduleNextCacheRefresh()
+        guard let url = URL(string: "https://sebastianherrera7305-sys.github.io/barpass-miami/barpass-miami.html") else {
+            task.setTaskCompleted(success: false)
+            return
+        }
+        var req = URLRequest(url: url)
+        req.cachePolicy = .reloadIgnoringLocalCacheData
+        req.timeoutInterval = 20
+        let dataTask = URLSession.shared.dataTask(with: req) { _, response, _ in
+            let ok = (response as? HTTPURLResponse)?.statusCode == 200
+            task.setTaskCompleted(success: ok)
+        }
+        task.expirationHandler = { dataTask.cancel() }
+        dataTask.resume()
     }
 
     // MARK: - Push notifications
@@ -39,23 +71,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         #if DEBUG
         print("[BarPass] Push registration failed:", error)
         #endif
-    }
-
-    // MARK: - Background fetch — pre-warms the GitHub Pages cache
-
-    func application(_ application: UIApplication,
-                     performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
-        guard let url = URL(string: "https://sebastianherrera7305-sys.github.io/barpass-miami/barpass-miami.html") else {
-            completionHandler(.noData)
-            return
-        }
-        var req = URLRequest(url: url)
-        req.cachePolicy = .reloadIgnoringLocalCacheData
-        req.timeoutInterval = 20
-        URLSession.shared.dataTask(with: req) { _, response, _ in
-            let fresh = (response as? HTTPURLResponse)?.statusCode == 200
-            completionHandler(fresh ? .newData : .noData)
-        }.resume()
     }
 
     // MARK: - Deep links

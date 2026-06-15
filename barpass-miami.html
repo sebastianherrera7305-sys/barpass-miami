@@ -3146,11 +3146,43 @@ body::after{
   <div class="screen-hdr"><div class="screen-title">Your Order</div><button class="screen-close" onclick="closeScreen('cart-screen')">✕</button></div>
   <div id="cart-body" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;"></div>
   <div class="cart-footer" id="cart-footer" style="display:none;">
-    <div class="cart-row"><span>Subtotal</span><span id="cart-sub">$0</span></div>
-    <div class="cart-row"><span>Service fee</span><span>$0.99</span></div>
-    <div class="cart-row main"><span>Total</span><span id="cart-total">$0</span></div>
-    <div class="pay-credit-row" id="pay-credit-row" style="display:none;" onclick="payWithCredit()"><span class="pcr-ico">🪙</span><div class="pcr-txt"><div class="pcr-title">Pay with Night Credit</div><div class="pcr-sub" id="pcr-sub">Balance available</div></div><span class="pcr-amt" id="pcr-amt">$0</span></div>
-    <button class="cart-btn" onclick="placeOrder()">Place Order 🚀</button>
+    <!-- Totals -->
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--cream4);margin-bottom:4px;">
+      <span>Subtotal</span><span id="cart-sub">$0</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--cream4);margin-bottom:10px;">
+      <span>Service fee</span><span>$0.99</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:20px;font-weight:800;color:var(--cream);margin-bottom:16px;">
+      <span>Total</span>
+      <span id="cart-total" style="color:var(--gold);font-family:'JetBrains Mono',monospace;">$0</span>
+    </div>
+
+    <!-- Payment methods -->
+    <!-- Apple Pay (primary) — only on native with Apple Pay -->
+    <button id="cart-ap-btn" onclick="cartPayApplePay()" style="display:none;width:100%;padding:17px;border-radius:var(--r3);border:none;background:#000;color:#fff;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;align-items:center;justify-content:center;gap:8px;letter-spacing:-.01em;transition:opacity .2s;">
+      <span style="font-family:-apple-system,sans-serif;font-size:19px;line-height:1;"></span> Pay with Apple Pay
+    </button>
+
+    <!-- Wallet credit row — shows when balance available -->
+    <div id="pay-credit-row" onclick="placeOrder()" style="display:none;background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.04));border:1px solid rgba(245,158,11,.25);border-radius:var(--r3);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .2s;align-items:center;justify-content:space-between;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:20px;">🪙</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--gold);">BarPass Wallet</div>
+          <div id="pcr-sub" style="font-size:11px;color:var(--cream4);margin-top:1px;">Balance: $0</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span id="pcr-amt" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--gold2);">$0</span>
+        <span style="font-size:18px;color:var(--cream3);">›</span>
+      </div>
+    </div>
+
+    <!-- Card (secondary) -->
+    <button onclick="cartPayCard()" style="width:100%;padding:15px;border-radius:var(--r3);border:1px solid var(--border2);background:transparent;color:var(--cream2);font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;">
+      <span>💳</span> Pay with Card
+    </button>
   </div>
 </div>
 
@@ -6259,14 +6291,96 @@ function renderCart(){
   var sub=0;for(var si=0;si<S.cart.length;si++)sub+=S.cart[si].price*S.cart[si].qty;
   document.getElementById('cart-sub').textContent='$'+sub.toFixed(2);
   document.getElementById('cart-total').textContent='$'+(sub+.99).toFixed(2);
-  var pcr=document.getElementById('pay-credit-row');
-  if(pcr){
-    var c=S.credit;
-    pcr.style.display=c.active&&c.balance>0?'flex':'none';
-    document.getElementById('pcr-sub').textContent='Balance: $'+c.balance.toFixed(2);
-    document.getElementById('pcr-amt').textContent='$'+c.balance.toFixed(2);
+  refreshCartPaymentUI();
+}
+/* ── Cart payment helpers ─────────────────────────────────────────────────── */
+function _cartTotal(){
+  var sub=0;for(var i=0;i<S.cart.length;i++)sub+=S.cart[i].price*S.cart[i].qty;
+  return parseFloat((sub+0.99).toFixed(2));
+}
+
+function _cartItemNames(){
+  var n=[];for(var i=0;i<S.cart.length;i++)n.push(S.cart[i].name);return n;
+}
+
+function _cartClearAndClose(total, method){
+  var names=_cartItemNames();
+  var c=S.credit;
+  S.totalSpent=parseFloat((S.totalSpent+total-0.99).toFixed(2));
+  if(!c.txs)c.txs=[];
+  c.txs.unshift({
+    name:(S.currentVenue?S.currentVenue.name:'Venue')+' · '+names.join(', '),
+    price:total,emoji:'🍸',
+    time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}),
+    type:'venue'
+  });
+  S.cart=[];updateCartBadge();renderCart();
+  closeScreen('cart-screen');
+  refreshCreditUI&&refreshCreditUI();refreshWalletUI&&refreshWalletUI();
+  document.getElementById('p-spent').textContent='$'+S.totalSpent.toFixed(0);
+  nativeHaptic&&nativeHaptic('success');
+  toast('🚀 Orden enviada · '+method,'ok');
+}
+
+/* Apple Pay — cart checkout */
+function cartPayApplePay(){
+  if(!S.cart.length){toast('Tu carrito está vacío','warn');return;}
+  var total=_cartTotal();
+  var label=(S.currentVenue?S.currentVenue.name+' — ':'')+'BarPass Order';
+  // Tag the context so _onApplePayResult knows it's a cart payment, not a top-up
+  window._applePayContext={type:'cart_order',total:total};
+  if(window.barpassNative&&typeof window.barpassNative.applePayCharge==='function'){
+    window.barpassNative.applePayCharge(total,label);
+  } else {
+    toast('Apple Pay no disponible','warn');
   }
 }
+
+/* Card — open card modal (Stripe Elements or simple form) */
+function cartPayCard(){
+  if(!S.cart.length){toast('Tu carrito está vacío','warn');return;}
+  // Save context so the card form knows what to charge
+  window._cardPayContext={type:'cart_order',total:_cartTotal()};
+  openPayModal('addcard-modal');
+}
+
+/* Called from the add-card modal "Save" flow when in cart context */
+function saveCardAndCharge(){
+  var num=document.getElementById('card-num');
+  var exp=document.getElementById('card-exp');
+  var cvv=document.getElementById('card-cvv');
+  if(!num||!num.value.replace(/\s/g,'').match(/^\d{15,16}$/)){toast('Número de tarjeta inválido','warn');return;}
+  if(!exp||!exp.value.match(/^\d{2}\/\d{2}$/)){toast('Fecha de expiración inválida','warn');return;}
+  if(!cvv||cvv.value.length<3){toast('CVV inválido','warn');return;}
+  closePayModal('addcard-modal');
+  [num,exp,cvv,document.getElementById('card-name')].forEach(function(el){if(el)el.value='';});
+  var ctx=window._cardPayContext;
+  if(ctx&&ctx.type==='cart_order'){
+    _cartClearAndClose(ctx.total,'💳 •••• '+num.value.slice(-4));
+    window._cardPayContext=null;
+  } else {
+    toast('💳 Tarjeta guardada','ok');
+  }
+}
+
+/* Update cart footer visibility + Apple Pay button */
+function refreshCartPaymentUI(){
+  var hasAP=window.barpassNative&&
+            typeof window.barpassNative.applePayCharge==='function'&&
+            window.__barpassDeviceInfo&&window.__barpassDeviceInfo.hasApplePay;
+  var apBtn=document.getElementById('cart-ap-btn');
+  if(apBtn){apBtn.style.display=hasAP?'flex':'none';}
+  var c=S.credit;
+  var pcr=document.getElementById('pay-credit-row');
+  var pcrSub=document.getElementById('pcr-sub');
+  var pcrAmt=document.getElementById('pcr-amt');
+  if(pcr){
+    pcr.style.display=(c.active&&c.balance>0)?'flex':'none';
+    if(pcrSub)pcrSub.textContent='Balance: $'+c.balance.toFixed(2);
+    if(pcrAmt)pcrAmt.textContent='$'+c.balance.toFixed(2);
+  }
+}
+
 function placeOrder(){
   if(!S.cart.length){toast('Tu carrito está vacío','warn');return;}
   var sub=0;for(var si=0;si<S.cart.length;si++)sub+=S.cart[si].price*S.cart[si].qty;

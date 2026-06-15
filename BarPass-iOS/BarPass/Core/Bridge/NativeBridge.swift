@@ -15,7 +15,11 @@ final class NativeBridge: ObservableObject {
     private let biometric = BiometricService()
     private let applePay  = ApplePayService()
 
-    var webReadyHandler: (() -> Void)?
+    var webReadyHandler:         (() -> Void)?
+    var addToCartHandler:        ((String, Double, String, String, String) -> Void)?
+    var openCartHandler:         (() -> Void)?
+    var openPriorityEntryHandler:((String, String) -> Void)?
+    var authResultHandler:       ((Bool, String?) -> Void)?
     private var pendingPushToken: String?
 
     private let networkMonitor = NWPathMonitor()
@@ -23,6 +27,7 @@ final class NativeBridge: ObservableObject {
 
     enum MessageType: String, CaseIterable {
         case haptic, location, notification, biometric, share, camera, applePay, log, ready
+        case addToCart, openCart, openPriorityEntry, authResult
     }
 
     func attach(webView: WKWebView) {
@@ -78,6 +83,10 @@ final class NativeBridge: ObservableObject {
             case .share:        handleShare(body)
             case .camera:       handleCamera(body)
             case .applePay:     handleApplePay(body)
+            case .addToCart:          handleAddToCart(body)
+            case .openCart:           handleOpenCart()
+            case .openPriorityEntry:  handleOpenPriorityEntry(body)
+            case .authResult:         handleAuthResult(body)
             case .log:
                 #if DEBUG
                 print("[WebJS]", body["msg"] ?? "")
@@ -218,6 +227,37 @@ final class NativeBridge: ObservableObject {
         }
     }
 
+    // MARK: - Cart handlers
+
+    private func handleAddToCart(_ body: [String: Any]) {
+        let name      = body["name"]      as? String ?? "Item"
+        let price     = (body["price"]    as? Double) ?? (body["price"] as? NSNumber)?.doubleValue ?? 0
+        let emoji     = body["emoji"]     as? String ?? "🍹"
+        let venueId   = body["venueId"]   as? String ?? ""
+        let venueName = body["venueName"] as? String ?? ""
+        addToCartHandler?(name, price, emoji, venueId, venueName)
+        haptic.impact(.medium)
+    }
+
+    private func handleOpenCart() {
+        openCartHandler?()
+        haptic.impact(.light)
+    }
+
+    private func handleOpenPriorityEntry(_ body: [String: Any]) {
+        let venueId   = body["venueId"]   as? String ?? ""
+        let venueName = body["venueName"] as? String ?? ""
+        openPriorityEntryHandler?(venueId, venueName)
+        haptic.impact(.medium)
+    }
+
+    private func handleAuthResult(_ body: [String: Any]) {
+        let success = body["success"] as? Bool ?? false
+        let error   = body["error"]   as? String
+        authResultHandler?(success, error)
+        if success { haptic.notification(.success) } else { haptic.notification(.error) }
+    }
+
     // MARK: - Page lifecycle
 
     func onPageLoaded() {
@@ -249,6 +289,59 @@ final class NativeBridge: ObservableObject {
             sendToJS("barpassNative.onPushToken", args: [token])
             pendingPushToken = nil
         }
+
+        // Auto-login returning users who have a Firebase session persisted in IndexedDB
+        let autoLoginJS = """
+        (function(){
+          setTimeout(function(){
+            try {
+              if (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser) {
+                var u = fbAuth.currentUser;
+                S.user = {name: u.displayName||u.email.split('@')[0], email: u.email, emoji:'🎉', prefs:'Cocktails, rooftop', uid: u.uid};
+                loadVenues(function(){ enterApp(); });
+              }
+            } catch(e) {}
+          }, 1800);
+        })();
+        """
+        webView?.evaluateJavaScript(autoLoginJS)
+    }
+
+    func submitNativeAuth(email: String, password: String, name: String, mode: String) {
+        let safeEmail = email.replacingOccurrences(of: "'", with: "\\'")
+        let safePass  = password.replacingOccurrences(of: "'", with: "\\'")
+        let safeName  = name.replacingOccurrences(of: "'", with: "\\'")
+        let js = """
+        (function(email, pass, displayName, mode){
+          function report(ok, msg){
+            try { window.webkit.messageHandlers.authResult.postMessage({success:ok, error:msg||''}); } catch(e){}
+          }
+          if(!fbAuth){
+            S.user={name:displayName||email.split('@')[0], email:email, emoji:'🎉', prefs:'Cocktails, rooftop'};
+            loadVenues(function(){ mode==='skip'?enterApp():showOnboarding(); });
+            report(true, null);
+            return;
+          }
+          if(mode === 'skip'){
+            S.user={name:'Invitado', email:'demo@barpass.io', emoji:'🎉', prefs:'Cocktails, rooftop'};
+            loadVenues(function(){ enterApp(); });
+            return;
+          }
+          var authPromise = mode === 'signup'
+            ? fbAuth.createUserWithEmailAndPassword(email, pass)
+            : fbAuth.signInWithEmailAndPassword(email, pass);
+          authPromise.then(function(cred){
+            var u=cred.user;
+            if(mode==='signup' && displayName) u.updateProfile({displayName:displayName});
+            S.user={name:displayName||u.displayName||email.split('@')[0], email:u.email, emoji:'🎉', prefs:'Cocktails, rooftop', uid:u.uid};
+            loadVenues(function(){ showOnboarding(); });
+            try { syncWalletFromServer(); } catch(e){}
+          }).catch(function(err){
+            report(false, err.message||'Authentication failed');
+          });
+        })('\(safeEmail)', '\(safePass)', '\(safeName)', '\(mode)');
+        """
+        webView?.evaluateJavaScript(js)
     }
 
     func onPageError(_ error: Error) {
@@ -341,17 +434,40 @@ final class NativeBridge: ObservableObject {
             share:                function(text,url){ post('share',{text:text||'',url:url||''}); },
             openCamera:           function(mode){ post('camera',{mode:mode||'qr'}); },
             applePayCharge:       function(amount,label){ post('applePay',{amount:amount,label:label}); },
+            addToCart:            function(name,price,emoji,venueId,venueName){
+                                    post('addToCart',{name:name,price:price,emoji:emoji||'🍹',venueId:venueId||'',venueName:venueName||''});
+                                  },
+            openCart:             function(){ post('openCart',{}); },
+            openPriorityEntry:    function(venueId,venueName){ post('openPriorityEntry',{venueId:venueId||'',venueName:venueName||''}); },
             log:                  function(msg){ post('log',{msg:String(msg)}); },
             signalReady:          function(){ post('ready',{}); }
           };
 
-          if(document.readyState === 'loading'){
-            document.addEventListener('DOMContentLoaded', function(){
+          // Signal ready only after #app is visible (post-onboarding).
+          // Uses getComputedStyle — not app.style — because #app starts as
+          // display:none via CSS, so the inline style attribute is empty string.
+          (function(){
+            var signaled = false;
+            function fire(){
+              if(signaled) return; signaled = true;
               window.barpassNative.signalReady();
-            }, { once: true });
-          } else {
-            setTimeout(function(){ window.barpassNative.signalReady(); }, 0);
-          }
+            }
+            function isVisible(el){
+              return window.getComputedStyle(el).display !== 'none';
+            }
+            function watch(){
+              var app = document.getElementById('app');
+              if(!app){ setTimeout(watch, 300); return; }
+              if(isVisible(app)){ setTimeout(fire, 400); return; }
+              var obs = new MutationObserver(function(){
+                if(isVisible(app)){ obs.disconnect(); setTimeout(fire, 400); }
+              });
+              obs.observe(app, {attributes:true, attributeFilter:['style','class']});
+            }
+            if(document.readyState === 'loading'){
+              document.addEventListener('DOMContentLoaded', watch);
+            } else { watch(); }
+          })();
         })();
         """
     }
