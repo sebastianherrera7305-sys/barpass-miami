@@ -10,71 +10,40 @@ struct PriorityEntryHubView: View {
     @State private var showSkipLine = false
     @State private var showTable    = false
     @State private var showTickets  = false
+    @State private var appeared     = false
 
-    private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
-    private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
+    private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
+
+    private let options: [(icon: String, sf: String, title: String, sub: String, badge: String, delay: Double)] = [
+        ("⚡️", "bolt.fill",           "Skip the Line",  "Acceso inmediato, sin esperar",          "Desde $25",    0.05),
+        ("🍾", "wineglass.fill",       "Mesa VIP",       "Reserva con bottle service incluido",     "Desde $100",   0.12),
+        ("🎟️", "ticket.fill",          "Event Tickets",  "Tu ticket, cero cover en la puerta",      "Desde $20",    0.19),
+    ]
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.031, green: 0.024, blue: 0.039).ignoresSafeArea()
+                Color.black.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // Header
-                    VStack(spacing: 6) {
-                        Text("PRIORITY ENTRY")
-                            .font(.system(size: 11, weight: .heavy, design: .rounded))
-                            .tracking(4)
-                            .foregroundStyle(gold)
-                        Text(venueName.isEmpty ? "BarPass" : venueName)
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundStyle(.white)
-                        Text("Elige cómo quieres vivir la experiencia")
-                            .font(.caption)
-                            .foregroundStyle(Color.white.opacity(0.4))
+                    header
+                        .padding(.top, 28)
+                        .padding(.bottom, 36)
+
+                    VStack(spacing: 12) {
+                        optionCard(options[0]) { showSkipLine = true }
+                        optionCard(options[1]) { showTable    = true }
+                        optionCard(options[2]) { showTickets  = true }
                     }
-                    .padding(.top, 32)
-                    .padding(.bottom, 32)
-
-                    // Option cards
-                    VStack(spacing: 14) {
-                        optionCard(
-                            emoji:    "⚡️",
-                            title:    "Skip the Line",
-                            subtitle: "Acceso inmediato, sin esperar",
-                            badge:    "Desde $25",
-                            badgeColor: gold,
-                            action:   { showSkipLine = true }
-                        )
-
-                        optionCard(
-                            emoji:    "🍾",
-                            title:    "Mesa VIP",
-                            subtitle: "Reserva tu mesa con bottle service",
-                            badge:    "Depósito desde $100",
-                            badgeColor: Color(red: 0.55, green: 0.25, blue: 0.75),
-                            action:   { showTable = true }
-                        )
-
-                        optionCard(
-                            emoji:    "🎟️",
-                            title:    "Event Tickets",
-                            subtitle: "Compra tu ticket y evita el cover",
-                            badge:    "Desde $20",
-                            badgeColor: Color(red: 0.15, green: 0.55, blue: 0.85),
-                            action:   { showTickets = true }
-                        )
-                    }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 20)
 
                     Spacer()
 
-                    // Disclaimer
                     Text("El depósito se aplica al consumo mínimo en el venue")
-                        .font(.caption2)
-                        .foregroundStyle(Color.white.opacity(0.25))
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.white.opacity(0.2))
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
+                        .padding(.horizontal, 40)
                         .padding(.bottom, 36)
                 }
             }
@@ -82,77 +51,129 @@ struct PriorityEntryHubView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cerrar") { dismiss() }.foregroundStyle(gold)
+                    Button("Cerrar") { dismiss() }
+                        .foregroundStyle(amber)
                 }
             }
             .navigationDestination(isPresented: $showSkipLine) {
                 SkipLinePassView(
-                    venueId:     venueId.isEmpty ? "venue" : venueId,
+                    venueId:     venueId.isEmpty   ? "venue"   : venueId,
                     venueName:   venueName.isEmpty ? "BarPass" : venueName,
                     waitMinutes: 35
                 )
                 .environmentObject(appState)
-                .navigationBarBackButtonHidden(false)
             }
             .navigationDestination(isPresented: $showTable) {
                 TableReservationView(
-                    venueId:   venueId.isEmpty ? "venue" : venueId,
+                    venueId:   venueId.isEmpty   ? "venue"   : venueId,
                     venueName: venueName.isEmpty ? "BarPass" : venueName
                 )
                 .environmentObject(appState)
-                .navigationBarBackButtonHidden(false)
             }
             .navigationDestination(isPresented: $showTickets) {
                 EventTicketsView(
-                    venueId:   venueId.isEmpty ? "venue" : venueId,
+                    venueId:   venueId.isEmpty   ? "venue"   : venueId,
                     venueName: venueName.isEmpty ? "BarPass" : venueName,
                     eventName: "Noche Especial",
                     eventDate: Date().addingTimeInterval(3600 * 6)
                 )
                 .environmentObject(appState)
-                .navigationBarBackButtonHidden(false)
             }
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.3).delay(0.05)) { appeared = true }
         }
     }
 
-    private func optionCard(emoji: String, title: String, subtitle: String,
-                             badge: String, badgeColor: Color,
-                             action: @escaping () -> Void) -> some View {
+    // MARK: - Header
+
+    private var header: some View {
+        VStack(spacing: 8) {
+            // Amber pill label
+            HStack(spacing: 6) {
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 9, weight: .bold))
+                Text("PRIORITY ENTRY")
+                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                    .kerning(2)
+            }
+            .foregroundStyle(amber)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(amber.opacity(0.10))
+                    .overlay(Capsule().strokeBorder(amber.opacity(0.22)))
+            )
+
+            Text(venueName.isEmpty ? "BarPass" : venueName)
+                .font(.system(size: 24, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+                .padding(.top, 4)
+
+            Text("Elige cómo quieres vivir la noche")
+                .font(.system(size: 13))
+                .foregroundStyle(Color.white.opacity(0.35))
+        }
+    }
+
+    // MARK: - Option card
+
+    private func optionCard(
+        _ opt: (icon: String, sf: String, title: String, sub: String, badge: String, delay: Double),
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
             HStack(spacing: 16) {
+                // Icon box
                 ZStack {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(badgeColor.opacity(0.15))
-                        .frame(width: 60, height: 60)
-                    Text(emoji).font(.system(size: 28))
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(Color.white.opacity(0.05))
+                        .frame(width: 54, height: 54)
+                        .overlay(RoundedRectangle(cornerRadius: 14)
+                            .strokeBorder(Color.white.opacity(0.08)))
+
+                    Image(systemName: opt.sf)
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(amber)
                 }
 
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(title)
-                        .font(.system(size: 17, weight: .bold))
+                // Labels
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(opt.title)
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(.white)
-                    Text(subtitle)
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color.white.opacity(0.45))
-                    Text(badge)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(badgeColor)
-                        .padding(.horizontal, 8).padding(.vertical, 3)
-                        .background(badgeColor.opacity(0.12), in: Capsule())
-                        .overlay(Capsule().strokeBorder(badgeColor.opacity(0.25), lineWidth: 1))
+                    Text(opt.sub)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.white.opacity(0.38))
+                        .lineLimit(1)
+                    Text(opt.badge)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(amber)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(amber.opacity(0.10)))
+                        .overlay(Capsule().strokeBorder(amber.opacity(0.2)))
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.white.opacity(0.25))
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.white.opacity(0.2))
             }
-            .padding(18)
-            .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 20))
-            .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color.white.opacity(0.04))
+                    .overlay(RoundedRectangle(cornerRadius: 18)
+                        .strokeBorder(Color.white.opacity(0.08)))
+            )
         }
         .buttonStyle(.plain)
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 14)
+        .animation(.spring(response: 0.42, dampingFraction: 0.82).delay(opt.delay), value: appeared)
     }
 }
 

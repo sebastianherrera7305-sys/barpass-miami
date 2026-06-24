@@ -4,72 +4,80 @@ struct NativeAuthView: View {
     let bridge: NativeBridge
 
     @EnvironmentObject private var appState: AppState
-    @State private var tab:         AuthTab = .signIn
-    @State private var email        = ""
-    @State private var password     = ""
-    @State private var name         = ""
-    @State private var isLoading    = false
-    @State private var errorMsg     = ""
-    @State private var showPassword = false
-    @State private var logoScale:   CGFloat = 0.7
-    @State private var logoOpacity: Double  = 0
+    @State private var tab:          AuthTab = .signIn
+    @State private var email         = ""
+    @State private var password      = ""
+    @State private var name          = ""
+    @State private var isLoading     = false
+    @State private var errorMsg      = ""
+    @State private var showPassword  = false
+    @State private var contentOpacity: Double  = 0
+    @State private var contentY:       CGFloat = 24
 
-    private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
-    private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
-    private let bg    = Color(red: 0.02, green: 0.01, blue: 0.04)
+    private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
+    private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
 
     enum AuthTab { case signIn, signUp }
 
     var body: some View {
         ZStack {
-            // Background
-            bg.ignoresSafeArea()
+            Color.black.ignoresSafeArea()
 
-            // Purple glow
-            RadialGradient(
-                colors: [Color(red: 0.25, green: 0.05, blue: 0.45).opacity(0.6), .clear],
-                center: .init(x: 0.5, y: 0.0),
-                startRadius: 0,
-                endRadius: 420
+            // Very subtle top glow — color-neutral
+            LinearGradient(
+                colors: [Color.white.opacity(0.03), .clear],
+                startPoint: .top,
+                endPoint: .center
             )
             .ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    // Logo section
                     logoSection
-                        .padding(.top, 72)
-                        .padding(.bottom, 40)
+                        .padding(.top, 68)
+                        .padding(.bottom, 44)
 
-                    // Auth card
-                    VStack(spacing: 0) {
-                        tabPicker
-                            .padding(.bottom, 24)
+                    tabPicker
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 28)
 
-                        if tab == .signIn { signInFields } else { signUpFields }
+                    fieldsSection
+                        .padding(.horizontal, 24)
 
-                        if !errorMsg.isEmpty { errorBanner }
-
-                        ctaButton
-                            .padding(.top, 20)
-
-                        skipButton
-                            .padding(.top, 16)
+                    if !errorMsg.isEmpty {
+                        errorBanner
+                            .padding(.horizontal, 24)
+                            .padding(.top, 14)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 48)
+
+                    ctaButton
+                        .padding(.horizontal, 24)
+                        .padding(.top, 24)
+
+                    divider
+                        .padding(.horizontal, 24)
+                        .padding(.top, 28)
+
+                    skipButton
+                        .padding(.top, 20)
+
+                    socialProof
+                        .padding(.top, 36)
+                        .padding(.bottom, 48)
                 }
             }
+            .opacity(contentOpacity)
+            .offset(y: contentY)
         }
         .onAppear {
-            withAnimation(.spring(response: 0.7, dampingFraction: 0.7).delay(0.1)) {
-                logoScale   = 1.0
-                logoOpacity = 1.0
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.78).delay(0.08)) {
+                contentOpacity = 1
+                contentY       = 0
             }
         }
         .onChange(of: appState.authError) { err in
             guard !err.isEmpty else { return }
-            errorMsg = err
+            withAnimation { errorMsg = err }
             isLoading = false
             appState.authError = ""
         }
@@ -78,50 +86,37 @@ struct NativeAuthView: View {
     // MARK: - Logo
 
     private var logoSection: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 16) {
             ZStack {
-                // Outer glow ring
                 Circle()
-                    .fill(gold.opacity(0.08))
-                    .frame(width: 104, height: 104)
-                Circle()
-                    .fill(gold.opacity(0.14))
-                    .frame(width: 84, height: 84)
-                // Monogram
-                ZStack {
-                    RoundedRectangle(cornerRadius: 22)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(red: 0.12, green: 0.08, blue: 0.20),
-                                         Color(red: 0.06, green: 0.04, blue: 0.10)],
-                                startPoint: .topLeading, endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 68, height: 68)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 22)
-                                .strokeBorder(gold.opacity(0.35), lineWidth: 1.5)
-                        )
-                    Text("BP")
-                        .font(.system(size: 26, weight: .black, design: .rounded))
-                        .foregroundStyle(
-                            LinearGradient(colors: [gold, goldB], startPoint: .topLeading, endPoint: .bottomTrailing)
-                        )
-                }
+                    .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
+                    .frame(width: 80, height: 80)
+
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color.white.opacity(0.04))
+                    .frame(width: 58, height: 58)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18)
+                            .strokeBorder(Color.white.opacity(0.10), lineWidth: 1)
+                    )
+
+                Text("BP")
+                    .font(.system(size: 22, weight: .black, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(colors: [amber, amberB],
+                                       startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
             }
-            .scaleEffect(logoScale)
-            .opacity(logoOpacity)
 
             VStack(spacing: 5) {
                 Text("BarPass")
-                    .font(.system(size: 32, weight: .black, design: .rounded))
+                    .font(.system(size: 28, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
-                    .opacity(logoOpacity)
+                    .kerning(-0.4)
 
-                Text("Tu pase a la mejor noche")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color.white.opacity(0.4))
-                    .opacity(logoOpacity)
+                Text("Tu acceso a la mejor noche")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.white.opacity(0.35))
             }
         }
     }
@@ -130,168 +125,219 @@ struct NativeAuthView: View {
 
     private var tabPicker: some View {
         HStack(spacing: 0) {
-            tabButton("Entrar",      tab: .signIn)
-            tabButton("Registrarse", tab: .signUp)
+            tabBtn("Entrar",      for: .signIn)
+            tabBtn("Registrarse", for: .signUp)
         }
-        .padding(4)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
     }
 
-    private func tabButton(_ label: String, tab: AuthTab) -> some View {
-        let selected = self.tab == tab
-        return Button { withAnimation(.spring(response: 0.3)) { self.tab = tab; errorMsg = "" } } label: {
-            Text(label)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(selected ? Color.white : Color.white.opacity(0.4))
-                .frame(maxWidth: .infinity)
-                .frame(height: 38)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(selected ? gold.opacity(0.18) : Color.clear)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(selected ? gold.opacity(0.3) : Color.clear, lineWidth: 1)
-                )
+    private func tabBtn(_ label: String, for t: AuthTab) -> some View {
+        let active = tab == t
+        return Button {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.8)) {
+                tab = t
+                errorMsg = ""
+            }
+        } label: {
+            VStack(spacing: 8) {
+                Text(label)
+                    .font(.system(size: 15, weight: active ? .semibold : .regular))
+                    .foregroundStyle(active ? .white : Color.white.opacity(0.35))
+                    .frame(maxWidth: .infinity)
+
+                // Underline indicator
+                Capsule()
+                    .fill(active ? amber : Color.clear)
+                    .frame(height: 2)
+            }
         }
         .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.2), value: active)
     }
 
     // MARK: - Fields
 
-    private var signInFields: some View {
-        VStack(spacing: 12) {
-            authField("Email", text: $email, keyboard: .emailAddress, icon: "envelope")
-            passwordField
+    @ViewBuilder
+    private var fieldsSection: some View {
+        VStack(spacing: 10) {
+            if tab == .signUp {
+                field("Nombre completo", text: $name,
+                      keyboard: .default, icon: "person", secure: false)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+            field("Email", text: $email,
+                  keyboard: .emailAddress, icon: "envelope", secure: false)
+            field("Contraseña", text: $password,
+                  keyboard: .default, icon: "lock", secure: true)
         }
+        .animation(.spring(response: 0.3, dampingFraction: 0.85), value: tab)
     }
 
-    private var signUpFields: some View {
-        VStack(spacing: 12) {
-            authField("Nombre", text: $name, keyboard: .default, icon: "person")
-            authField("Email",  text: $email, keyboard: .emailAddress, icon: "envelope")
-            passwordField
-        }
-    }
-
-    private func authField(_ placeholder: String, text: Binding<String>,
-                           keyboard: UIKeyboardType, icon: String) -> some View {
+    private func field(_ placeholder: String, text: Binding<String>,
+                       keyboard: UIKeyboardType, icon: String, secure: Bool) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 15))
-                .foregroundStyle(Color.white.opacity(0.35))
-                .frame(width: 20)
-            TextField(placeholder, text: text)
-                .keyboardType(keyboard)
-                .autocapitalization(.none)
-                .autocorrectionDisabled()
-                .foregroundStyle(.white)
-                .tint(gold)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 15)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.09)))
-    }
+                .font(.system(size: 14))
+                .foregroundStyle(Color.white.opacity(0.28))
+                .frame(width: 18)
 
-    private var passwordField: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "lock")
-                .font(.system(size: 15))
-                .foregroundStyle(Color.white.opacity(0.35))
-                .frame(width: 20)
             Group {
-                if showPassword {
-                    TextField("Contraseña", text: $password)
+                if secure && !showPassword {
+                    SecureField(placeholder, text: text)
                 } else {
-                    SecureField("Contraseña", text: $password)
+                    TextField(placeholder, text: text)
+                        .keyboardType(keyboard)
+                        .autocapitalization(keyboard == .emailAddress ? .none : .words)
+                        .autocorrectionDisabled()
                 }
             }
             .foregroundStyle(.white)
-            .tint(gold)
-            Button { showPassword.toggle() } label: {
-                Image(systemName: showPassword ? "eye.slash" : "eye")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color.white.opacity(0.3))
+            .tint(amber)
+
+            if secure {
+                Button {
+                    showPassword.toggle()
+                } label: {
+                    Image(systemName: showPassword ? "eye.slash" : "eye")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.white.opacity(0.25))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 15)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.09)))
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.05))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+                )
+        )
     }
 
     // MARK: - Error
 
     private var errorBanner: some View {
         HStack(spacing: 10) {
-            Image(systemName: "exclamationmark.circle.fill")
-                .font(.system(size: 14))
-                .foregroundStyle(Color(red: 1, green: 0.35, blue: 0.35))
+            Image(systemName: "exclamationmark.circle")
+                .font(.system(size: 13))
+                .foregroundStyle(Color(red: 1, green: 0.42, blue: 0.42))
             Text(errorMsg)
                 .font(.system(size: 13))
-                .foregroundStyle(Color(red: 1, green: 0.35, blue: 0.35))
+                .foregroundStyle(Color(red: 1, green: 0.42, blue: 0.42))
                 .multilineTextAlignment(.leading)
             Spacer()
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(Color(red: 1, green: 0.2, blue: 0.2).opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color(red: 1, green: 0.35, blue: 0.35).opacity(0.25)))
-        .padding(.top, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(red: 1, green: 0.2, blue: 0.2).opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(Color(red: 1, green: 0.42, blue: 0.42).opacity(0.2))
+                )
+        )
         .transition(.move(edge: .top).combined(with: .opacity))
     }
 
     // MARK: - CTA
 
     private var ctaButton: some View {
-        Button { submit() } label: {
+        let disabled = isLoading || email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty
+
+        return Button { submit() } label: {
             ZStack {
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(
+                        LinearGradient(
+                            colors: disabled
+                                ? [Color.white.opacity(0.08), Color.white.opacity(0.08)]
+                                : [amber, amberB],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(height: 52)
+
                 if isLoading {
-                    ProgressView().tint(.black)
+                    ProgressView()
+                        .tint(disabled ? Color.white.opacity(0.3) : .black)
                 } else {
                     Text(tab == .signIn ? "Entrar" : "Crear cuenta")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.black)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(disabled ? Color.white.opacity(0.25) : .black)
                 }
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 54)
-            .background(
-                LinearGradient(colors: [gold, goldB], startPoint: .leading, endPoint: .trailing),
-                in: RoundedRectangle(cornerRadius: 16)
-            )
-            .shadow(color: gold.opacity(0.35), radius: 14, y: 6)
         }
         .buttonStyle(.plain)
-        .disabled(isLoading || email.isEmpty || password.isEmpty)
-        .opacity((isLoading || email.isEmpty || password.isEmpty) ? 0.5 : 1)
-        .animation(.easeInOut(duration: 0.2), value: email.isEmpty || password.isEmpty)
+        .disabled(disabled)
+        .animation(.easeInOut(duration: 0.18), value: disabled)
+        .shadow(color: disabled ? .clear : amber.opacity(0.25), radius: 12, y: 4)
     }
+
+    // MARK: - Divider
+
+    private var divider: some View {
+        HStack(spacing: 12) {
+            Rectangle()
+                .fill(Color.white.opacity(0.07))
+                .frame(height: 1)
+            Text("o")
+                .font(.system(size: 12))
+                .foregroundStyle(Color.white.opacity(0.2))
+            Rectangle()
+                .fill(Color.white.opacity(0.07))
+                .frame(height: 1)
+        }
+    }
+
+    // MARK: - Skip
 
     private var skipButton: some View {
         Button { submitSkip() } label: {
-            Text("Continuar sin cuenta →")
-                .font(.system(size: 13))
-                .foregroundStyle(Color.white.opacity(0.28))
+            Text("Continuar como invitado")
+                .font(.system(size: 13, weight: .regular))
+                .foregroundStyle(Color.white.opacity(0.25))
+                .underline(color: Color.white.opacity(0.12))
         }
         .buttonStyle(.plain)
         .disabled(isLoading)
+    }
+
+    // MARK: - Social proof
+
+    private var socialProof: some View {
+        HStack(spacing: 6) {
+            // Stacked avatar dots
+            HStack(spacing: -6) {
+                ForEach(["🟤", "🟡", "⚪️"], id: \.self) { c in
+                    Text(c)
+                        .font(.system(size: 10))
+                        .frame(width: 20, height: 20)
+                        .background(Circle().fill(Color.white.opacity(0.06)))
+                        .overlay(Circle().strokeBorder(Color.black, lineWidth: 1.5))
+                }
+            }
+            Text("+5,000 personas ya salen con BarPass")
+                .font(.system(size: 11))
+                .foregroundStyle(Color.white.opacity(0.2))
+        }
     }
 
     // MARK: - Actions
 
     private func submit() {
         guard !isLoading else { return }
-        errorMsg  = ""
+        withAnimation { errorMsg = "" }
         isLoading = true
-        let mode = tab == .signIn ? "login" : "signup"
-        bridge.submitNativeAuth(email: email.trimmingCharacters(in: .whitespaces),
-                                password: password,
-                                name: name.trimmingCharacters(in: .whitespaces),
-                                mode: mode)
+        bridge.submitNativeAuth(
+            email:    email.trimmingCharacters(in: .whitespaces),
+            password: password,
+            name:     name.trimmingCharacters(in: .whitespaces),
+            mode:     tab == .signIn ? "login" : "signup"
+        )
     }
 
     private func submitSkip() {

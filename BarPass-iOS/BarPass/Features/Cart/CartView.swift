@@ -9,19 +9,19 @@ struct CartView: View {
     @State private var showCardSheet = false
     @State private var isProcessing  = false
 
-    private let gold = Color(red: 0.85, green: 0.63, blue: 0.09)
+    private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
+    private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.031, green: 0.024, blue: 0.039).ignoresSafeArea()
+                Color.black.ignoresSafeArea()
 
                 if cart.isEmpty {
                     emptyState
                 } else {
                     VStack(spacing: 0) {
                         itemList
-                        Divider().background(Color.white.opacity(0.07))
                         paymentFooter
                     }
                 }
@@ -32,12 +32,12 @@ struct CartView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cerrar") { dismiss() }
-                        .foregroundStyle(gold)
+                        .foregroundStyle(amber)
                 }
                 if !cart.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Limpiar") { withAnimation { cart.clear() } }
-                            .foregroundStyle(Color.white.opacity(0.4))
+                            .foregroundStyle(Color.white.opacity(0.3))
                             .font(.subheadline)
                     }
                 }
@@ -51,15 +51,27 @@ struct CartView: View {
     // MARK: - Empty state
 
     private var emptyState: some View {
-        VStack(spacing: 14) {
-            Text("🛒").font(.system(size: 56))
-            Text("Tu carrito está vacío")
-                .font(.title3.weight(.bold))
-                .foregroundStyle(.white)
-            Text("Agrega bebidas desde el menú del venue")
-                .font(.subheadline)
-                .foregroundStyle(Color.white.opacity(0.4))
-                .multilineTextAlignment(.center)
+        VStack(spacing: 16) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.white.opacity(0.04))
+                    .frame(width: 80, height: 80)
+                    .overlay(RoundedRectangle(cornerRadius: 20)
+                        .strokeBorder(Color.white.opacity(0.07)))
+                Image(systemName: "cart")
+                    .font(.system(size: 30, weight: .thin))
+                    .foregroundStyle(Color.white.opacity(0.25))
+            }
+
+            VStack(spacing: 6) {
+                Text("Carrito vacío")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+                Text("Agrega bebidas desde el menú del venue")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.white.opacity(0.3))
+                    .multilineTextAlignment(.center)
+            }
         }
         .padding()
     }
@@ -70,15 +82,19 @@ struct CartView: View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 ForEach(cart.items) { item in
-                    CartItemRow(item: item) { delta in
-                        withAnimation(.spring(response: 0.3)) {
+                    CartItemRow(item: item, amber: amber) { delta in
+                        withAnimation(.spring(response: 0.28)) {
                             cart.changeQty(id: item.id, delta: delta)
                         }
                     }
-                    Divider().background(Color.white.opacity(0.05)).padding(.leading, 72)
+                    // Hairline divider
+                    Rectangle()
+                        .fill(Color.white.opacity(0.05))
+                        .frame(height: 1)
+                        .padding(.leading, 76)
                 }
             }
-            .padding(.top, 8)
+            .padding(.top, 4)
         }
     }
 
@@ -86,117 +102,142 @@ struct CartView: View {
 
     private var paymentFooter: some View {
         VStack(spacing: 0) {
-            // Summary
-            VStack(spacing: 8) {
-                summaryRow(label: "Subtotal",    value: cart.subtotal)
-                summaryRow(label: "Service fee", value: cart.serviceFee)
-                Divider().background(Color.white.opacity(0.08))
-                HStack {
-                    Text("Total")
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(.white)
-                    Spacer()
-                    Text(String(format: "$%.2f", cart.total))
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(gold)
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            // Top separator
+            Rectangle()
+                .fill(Color.white.opacity(0.06))
+                .frame(height: 1)
 
-            // Payment buttons
-            VStack(spacing: 10) {
-                // Apple Pay
-                if PKPaymentAuthorizationController.canMakePayments() {
-                    ApplePayButton(total: cart.total,
-                                   label: applePayLabel,
-                                   isProcessing: $isProcessing,
-                                   onSuccess: handleOrderSuccess)
-                }
+            VStack(spacing: 16) {
+                // Summary rows
+                VStack(spacing: 10) {
+                    summaryRow("Subtotal",    cart.subtotal)
+                    summaryRow("Service fee", cart.serviceFee)
 
-                // BarPass Wallet (shown when balance available)
-                if appState.walletBalance > 0 {
-                    walletRow
-                }
+                    Rectangle()
+                        .fill(Color.white.opacity(0.06))
+                        .frame(height: 1)
 
-                // Card
-                Button {
-                    showCardSheet = true
-                } label: {
                     HStack {
-                        Image(systemName: "creditcard")
-                        Text("Pagar con tarjeta")
+                        Text("Total")
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundStyle(.white)
+                        Spacer()
+                        Text(String(format: "$%.2f", cart.total))
+                            .font(.system(size: 17, weight: .bold, design: .monospaced))
+                            .foregroundStyle(amber)
                     }
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(Color.white.opacity(0.85))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
-                    .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.1)))
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+
+                // Payment options
+                VStack(spacing: 10) {
+                    if PKPaymentAuthorizationController.canMakePayments() {
+                        ApplePayButton(
+                            total: cart.total,
+                            label: cart.venueName.isEmpty ? "BarPass Order" : cart.venueName,
+                            isProcessing: $isProcessing,
+                            onSuccess: handleOrderSuccess
+                        )
+                    }
+
+                    if appState.walletBalance > 0 {
+                        walletButton
+                    }
+
+                    cardButton
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 32)
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, max(24, 34))
         }
-        .background(Color(red: 0.06, green: 0.05, blue: 0.07))
+        .background(Color(white: 0.04))
     }
 
-    // MARK: - Wallet row
+    // MARK: - Wallet button
 
-    private var walletRow: some View {
+    private var walletButton: some View {
         Button { payWithWallet() } label: {
             HStack(spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(gold.opacity(0.15))
-                        .frame(width: 40, height: 40)
-                    Text("🪙").font(.system(size: 20))
-                }
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(amber.opacity(0.12))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Image(systemName: "wallet.bifold")
+                            .font(.system(size: 16))
+                            .foregroundStyle(amber)
+                    )
+
                 VStack(alignment: .leading, spacing: 2) {
                     Text("BarPass Wallet")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(gold)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(amber)
                     Text(String(format: "Balance: $%.2f", appState.walletBalance))
-                        .font(.caption)
-                        .foregroundStyle(Color.white.opacity(0.4))
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.white.opacity(0.35))
                 }
+
                 Spacer()
+
                 Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.white.opacity(0.25))
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.white.opacity(0.2))
             }
             .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(gold.opacity(0.07), in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.2)))
+            .padding(.vertical, 13)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(amber.opacity(0.06))
+                    .overlay(RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(amber.opacity(0.18)))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Card button
+
+    private var cardButton: some View {
+        Button { showCardSheet = true } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "creditcard")
+                    .font(.system(size: 14))
+                Text("Pagar con tarjeta")
+                    .font(.system(size: 15, weight: .semibold))
+            }
+            .foregroundStyle(Color.white.opacity(0.7))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 15)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Color.white.opacity(0.05))
+                    .overlay(RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(Color.white.opacity(0.09)))
+            )
         }
         .buttonStyle(.plain)
     }
 
     // MARK: - Helpers
 
-    private var applePayLabel: String {
-        cart.venueName.isEmpty ? "BarPass Order" : cart.venueName
-    }
-
-    private func summaryRow(label: String, value: Double) -> some View {
+    private func summaryRow(_ label: String, _ value: Double) -> some View {
         HStack {
-            Text(label).foregroundStyle(Color.white.opacity(0.45))
+            Text(label)
+                .font(.system(size: 14))
+                .foregroundStyle(Color.white.opacity(0.4))
             Spacer()
-            Text(String(format: "$%.2f", value)).foregroundStyle(Color.white.opacity(0.45))
+            Text(String(format: "$%.2f", value))
+                .font(.system(size: 14, design: .monospaced))
+                .foregroundStyle(Color.white.opacity(0.4))
         }
-        .font(.subheadline)
     }
 
     private func payWithWallet() {
-        guard appState.walletBalance >= cart.total else {
-            // Not enough — could prompt top-up
-            return
-        }
+        guard appState.walletBalance >= cart.total else { return }
         isProcessing = true
         Task {
             try? await Task.sleep(for: .milliseconds(600))
-            handleOrderSuccess(method: "🪙 BarPass Wallet")
+            handleOrderSuccess(method: "BarPass Wallet")
         }
     }
 
@@ -219,61 +260,73 @@ struct CartView: View {
 // MARK: - CartItemRow
 
 private struct CartItemRow: View {
-    let item:    CartItem
-    let onQty:   (Int) -> Void
-
-    private let gold = Color(red: 0.85, green: 0.63, blue: 0.09)
+    let item:   CartItem
+    let amber:  Color
+    let onQty:  (Int) -> Void
 
     var body: some View {
         HStack(spacing: 14) {
+            // Emoji container
             Text(item.emoji)
-                .font(.system(size: 32))
+                .font(.system(size: 28))
                 .frame(width: 52, height: 52)
-                .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.white.opacity(0.05))
+                        .overlay(RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Color.white.opacity(0.07)))
+                )
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.name)
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)
+                    .lineLimit(1)
                 Text(String(format: "$%.2f c/u", item.price))
-                    .font(.caption)
-                    .foregroundStyle(Color.white.opacity(0.4))
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.white.opacity(0.35))
             }
 
             Spacer()
 
-            // Qty stepper
+            // Stepper
             HStack(spacing: 0) {
-                qtyBtn(symbol: "minus", action: { onQty(-1) })
+                stepBtn("minus") { onQty(-1) }
                 Text("\(item.qty)")
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)
-                    .frame(minWidth: 28)
-                qtyBtn(symbol: "plus", action: { onQty(1) })
+                    .frame(minWidth: 26)
+                stepBtn("plus")  { onQty(1) }
             }
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.white.opacity(0.06))
+                    .overlay(RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(Color.white.opacity(0.08)))
+            )
 
-            Text(String(format: "$%.2f", item.price * Double(item.qty)))
-                .font(.system(size: 14, weight: .bold, design: .monospaced))
-                .foregroundStyle(gold)
-                .frame(minWidth: 50, alignment: .trailing)
+            // Line total
+            Text(String(format: "$%.0f", item.price * Double(item.qty)))
+                .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                .foregroundStyle(amber)
+                .frame(minWidth: 44, alignment: .trailing)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
     }
 
-    private func qtyBtn(symbol: String, action: @escaping () -> Void) -> some View {
+    private func stepBtn(_ icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(Color.white.opacity(0.6))
-                .frame(width: 32, height: 32)
+            Image(systemName: icon)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Color.white.opacity(0.55))
+                .frame(width: 30, height: 30)
         }
         .buttonStyle(.plain)
     }
 }
 
-// MARK: - ApplePayButton (wrapper)
+// MARK: - Apple Pay button
 
 private struct ApplePayButton: View {
     let total:        Double
@@ -298,16 +351,18 @@ private struct ApplePayButton: View {
                 if isProcessing {
                     ProgressView().tint(.white).scaleEffect(0.85)
                 } else {
-                    Text("")          // Apple Pay logo via SF Symbols
-                        .font(.system(size: 20))
-                    Text("Pay with Apple Pay")
-                        .font(.system(size: 16, weight: .bold))
+                    Image(systemName: "apple.logo")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text("Pay")
+                        .font(.system(size: 16, weight: .semibold))
                 }
             }
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 17)
-            .background(Color.black, in: RoundedRectangle(cornerRadius: 14))
+            .padding(.vertical, 16)
+            .background(Color(white: 0.13), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Color.white.opacity(0.12)))
         }
         .buttonStyle(.plain)
         .disabled(isProcessing)
@@ -315,6 +370,7 @@ private struct ApplePayButton: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     let cart = CartStore()
     cart.add(name: "Grey Goose Bottle", price: 350, emoji: "🍾",
