@@ -2956,10 +2956,7 @@ canvas.qr-canvas{image-rendering:pixelated;border:3px solid #fff;border-radius:3
   <div class="station">
     <!-- LEFT: ID + Profile -->
     <div class="panel">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div class="plabel" data-i18n="station.idVerif" style="margin-bottom:0">ID Verification</div>
-        <span id="id-age-badge" style="font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 8px;border-radius:20px;background:rgba(255,64,96,0.15);color:#ff4060;border:1px solid rgba(255,64,96,0.3);transition:all .3s;white-space:nowrap">⚠ BLOCKED</span>
-      </div>
+      <div class="plabel" data-i18n="station.idVerif">ID Verification</div>
       <div class="vs vs-wait" id="vs">
         <div class="vs-row">
           <div class="vs-badge" id="vs-badge">🪪</div>
@@ -2968,6 +2965,14 @@ canvas.qr-canvas{image-rendering:pixelated;border:3px solid #fff;border-radius:3
             <div class="vs-name" id="vs-name">—</div>
             <div class="vs-meta" id="vs-meta" data-i18n="station.insertId">Insert ID or passport</div>
           </div>
+        </div>
+      </div>
+      <!-- Tipo de Cliente box -->
+      <div style="margin-top:6px;flex-shrink:0">
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:9px 12px;">
+          <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">Tipo de Cliente</div>
+          <div id="tipo-cliente-val" style="font-size:13px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:6px;">— Sin escanear —</div>
+          <div id="tipo-cliente-sub" style="font-size:10px;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace;"></div>
         </div>
       </div>
       <div id="temp-zone" style="display:none"></div>
@@ -2987,6 +2992,7 @@ canvas.qr-canvas{image-rendering:pixelated;border:3px solid #fff;border-radius:3
         <div class="pbar"><div class="pbar-lbl" data-i18n="station.loyalty">Loyalty</div><div class="pbar-track"><div class="pbar-fill" id="pb-loy" style="background:var(--teal)"></div></div><div class="pbar-val" id="pv-loy">-</div></div>
         <div class="pbar"><div class="pbar-lbl" data-i18n="station.tonight">Tonight</div><div class="pbar-track"><div class="pbar-fill" id="pb-ton" style="background:var(--green)"></div></div><div class="pbar-val" id="pv-ton">-</div></div>
       </div>
+
     </div>
 
     <!-- CENTER: Catalog + Add-ons -->
@@ -6051,19 +6057,29 @@ function reqDiscount(){if(!discountsEnabled)toast(i18n.t('toast.askManager'),'wa
 
 /* ── ID Verification Gate ── */
 function updateIdBadge(){
-  const badge = document.getElementById('id-age-badge');
-  if(!badge) return;
-  if(state.idVerified){
-    badge.textContent = '✅ ALCOHOL OK';
-    badge.style.background='rgba(0,232,122,0.12)';
-    badge.style.color='#00e87a';
-    badge.style.borderColor='rgba(0,232,122,0.35)';
-  } else {
-    badge.textContent = '⚠ ALCOHOL BLOCKED';
-    badge.style.background='rgba(255,64,96,0.15)';
-    badge.style.color='#ff4060';
-    badge.style.borderColor='rgba(255,64,96,0.3)';
+  const val = document.getElementById('tipo-cliente-val');
+  const sub = document.getElementById('tipo-cliente-sub');
+  if(!val) return;
+  const c = state.currentCustomer;
+  if(!c){
+    val.innerHTML = '<span style="color:var(--muted)">— Sin escanear —</span>';
+    if(sub) sub.textContent = '';
+    return;
   }
+  if(!state.idVerified){
+    val.innerHTML = '<span style="color:#ff4060">🚫 MENOR DE EDAD</span>';
+    if(sub) sub.innerHTML = `<span style="color:#ff4060">Edad: ${c.age} · Servicio denegado</span>`;
+    return;
+  }
+  const tier = c.tier||'regular';
+  const tierMap = {
+    platinum: {icon:'👑', label:'Platinum VIP', color:'var(--gold)'},
+    vip:      {icon:'⭐', label:'VIP',          color:'var(--blue)'},
+    regular:  {icon:'✅', label:'Regular',       color:'var(--green)'}
+  };
+  const t = tierMap[tier] || tierMap.regular;
+  val.innerHTML = `<span style="font-size:18px">${t.icon}</span><span style="color:${t.color}">${t.label}</span>`;
+  if(sub) sub.innerHTML = `<span style="color:var(--muted)">${c.name} · ${c.age} años · ✅ Mayor de edad</span>`;
 }
 
 function showIdRequired(itemName){
