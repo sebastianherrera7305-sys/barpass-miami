@@ -2956,6 +2956,7 @@ canvas.qr-canvas{image-rendering:pixelated;border:3px solid #fff;border-radius:3
   <div class="station">
     <!-- LEFT: ID + Profile -->
     <div class="panel">
+      <div id="id-age-badge" style="display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:9px;border:1.5px solid rgba(255,64,96,0.3);background:rgba(255,64,96,0.06);font-size:11px;font-weight:600;margin-bottom:8px;line-height:1.4;flex-wrap:wrap;transition:all .3s;"><span style="color:#ff4060">🪪 ID Not Scanned</span> · <span style="font-size:10px;color:rgba(200,210,255,0.5)">Scan ID before serving alcohol</span> · <span style="color:#ff4060;font-size:9px">⚠ ALCOHOL BLOCKED</span></div>
       <div class="plabel" data-i18n="station.idVerif">ID Verification</div>
       <div class="vs vs-wait" id="vs">
         <div class="vs-row">
@@ -5442,7 +5443,8 @@ const state={
   uOpp:0,uAcc:0,risk:0,discounts:0,discSaved:0,
   hourly:Array(24).fill(0),tonight:[],
   alerts:[],insights:[],orderItems:[],orderSub:0,
-  currentCustomer:null,sapSynced:0,sapQueue:0,sapConnected:true,sapLastSync:null,
+  currentCustomer:null,idVerified:false,idAge:null,idName:null,
+  sapSynced:0,sapQueue:0,sapConnected:true,sapLastSync:null,
   bartenders:{
     Carlos:{rev:0,orders:0,avg:0,uOpp:0,uAcc:0,risk:0,drinkRev:0},
     Mike:{rev:0,orders:0,avg:0,uOpp:0,uAcc:0,risk:0,drinkRev:0},
@@ -5612,6 +5614,7 @@ function doLogin(){
   } else {
     initCharts();
     renderCatalog([],'cocktails');updateCatCountLabel();renderAddons();
+    updateIdBadge();
     if(role==='manager'||role==='owner')initRiskEngine();
     if(role==='owner')initStadium();
     if(role==='inventory'||role==='manager'||role==='owner')initInventory();
@@ -5759,6 +5762,10 @@ async function sim(key,bt){
   await delay(850);
   state.currentCustomer={...c,bartender:bt};
   const ok=c.decision==='APPROVED';
+  state.idVerified = ok;
+  state.idAge = c.age;
+  state.idName = c.name;
+  updateIdBadge();
   setVS(ok?'vs-ok':'vs-no',c.decision,c.name,c.doc+' · Age '+c.age);
   Security.log(ok?'info':'warn',currentRole,`ID scan: ${c.name} — ${c.decision} (Age ${c.age})`);
   // Risk Engine analysis
@@ -5850,7 +5857,8 @@ function forceMLTrain(){
 }
 
 function simReset(){
-  Object.assign(state,{rev:0,upsellRev:0,drinkRev:0,orders:0,guests:0,uOpp:0,uAcc:0,risk:0,discounts:0,discSaved:0,hourly:Array(24).fill(0),tonight:[],alerts:[],insights:[],orderItems:[],orderSub:0,currentCustomer:null,sapSynced:0,sapQueue:0});
+  Object.assign(state,{rev:0,upsellRev:0,drinkRev:0,orders:0,guests:0,uOpp:0,uAcc:0,risk:0,discounts:0,discSaved:0,hourly:Array(24).fill(0),tonight:[],alerts:[],insights:[],orderItems:[],orderSub:0,currentCustomer:null,idVerified:false,idAge:null,idName:null,sapSynced:0,sapQueue:0});
+  updateIdBadge();
   state.bartenders={Carlos:{rev:0,orders:0,avg:0,uOpp:0,uAcc:0,risk:0,drinkRev:0},Mike:{rev:0,orders:0,avg:0,uOpp:0,uAcc:0,risk:0,drinkRev:0},Sofia:{rev:0,orders:0,avg:0,uOpp:0,uAcc:0,risk:0,drinkRev:0}};
   activeDiscount=null;
   setVS('vs-wait','Ready to scan','—','Insert ID or passport');
@@ -5865,7 +5873,13 @@ function simReset(){
 /* ═══════════════════════════════════════════════════════════
    ORDER MANAGEMENT
 ═══════════════════════════════════════════════════════════ */
+const ALCOHOL_TYPES = new Set(['cocktail','double','beer','shot']);
+function isAlcoholic(item){ return ALCOHOL_TYPES.has(item.dt); }
+
 function addItem(item,isUpsell=false,bt=null){
+  if(isAlcoholic(item) && !state.idVerified){
+    showIdRequired(item.name); return;
+  }
   state.orderItems.push({...item,isUpsell});
   state.orderSub+=item.price;
   if(item.dt&&item.dt!=='water')state.drinkRev+=item.price;
@@ -6032,6 +6046,42 @@ function renderCatalog(suggestedIds,tab){
    DISCOUNT — with RBAC
 ═══════════════════════════════════════════════════════════ */
 function reqDiscount(){if(!discountsEnabled)toast(i18n.t('toast.askManager'),'warn');}
+
+/* ── ID Verification Gate ── */
+function updateIdBadge(){
+  const badge = document.getElementById('id-age-badge');
+  if(!badge) return;
+  if(state.idVerified){
+    badge.innerHTML = `<span style="color:#00e87a">✅ ID Verified</span> · <span style="font-family:'JetBrains Mono',monospace;font-size:10px">${state.idName||''} · Age ${state.idAge||'—'}</span> · <span style="color:#00e87a;font-size:9px">ALCOHOL OK</span>`;
+    badge.style.background='rgba(0,232,122,0.08)';
+    badge.style.borderColor='rgba(0,232,122,0.35)';
+  } else {
+    badge.innerHTML = `<span style="color:#ff4060">🪪 ID Not Scanned</span> · <span style="font-size:10px;color:rgba(200,210,255,0.5)">Scan ID before serving alcohol</span> · <span style="color:#ff4060;font-size:9px;animation:alertPulse 2s infinite">⚠ ALCOHOL BLOCKED</span>`;
+    badge.style.background='rgba(255,64,96,0.06)';
+    badge.style.borderColor='rgba(255,64,96,0.3)';
+  }
+}
+
+function showIdRequired(itemName){
+  const existing = document.getElementById('id-required-modal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'id-required-modal';
+  modal.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;`;
+  modal.innerHTML = `
+    <div style="background:#0d1020;border:1.5px solid rgba(255,64,96,0.5);border-radius:16px;padding:28px 32px;max-width:360px;width:90%;text-align:center;box-shadow:0 0 40px rgba(255,64,96,0.15);">
+      <div style="font-size:44px;margin-bottom:12px;">🚫</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:#ff4060;margin-bottom:8px;">ID Verification Required</div>
+      <div style="font-size:13px;color:rgba(200,210,255,0.7);margin-bottom:6px;"><strong style="color:#fff">${itemName}</strong> is an alcoholic beverage.</div>
+      <div style="font-size:12px;color:rgba(200,210,255,0.5);margin-bottom:20px;">You must scan a valid ID confirming the customer is <strong style="color:#fff">21+</strong> before adding alcohol to the order.</div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="document.getElementById('id-required-modal').remove()" style="flex:1;padding:11px;border-radius:9px;border:1.5px solid rgba(200,210,255,0.15);background:transparent;color:rgba(200,210,255,0.6);font-weight:600;cursor:pointer;font-size:12px;">Cancel</button>
+        <button onclick="document.getElementById('id-required-modal').remove();document.getElementById('vs').scrollIntoView({behavior:'smooth'})" style="flex:1;padding:11px;border-radius:9px;border:none;background:#ff4060;color:#fff;font-weight:700;cursor:pointer;font-size:12px;">📷 Scan ID Now</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
 function enableDiscounts(){
   if(!Security.requireRole(currentRole,'discount_enable')){toast(i18n.t('toast.noPerms'),'err');return;}
   if(document.getElementById('mgr-pin').value!==MGR_DISC_PIN){
