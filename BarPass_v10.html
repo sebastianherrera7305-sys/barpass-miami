@@ -2956,8 +2956,10 @@ canvas.qr-canvas{image-rendering:pixelated;border:3px solid #fff;border-radius:3
   <div class="station">
     <!-- LEFT: ID + Profile -->
     <div class="panel">
-      <div id="id-age-badge" style="display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:9px;border:1.5px solid rgba(255,64,96,0.3);background:rgba(255,64,96,0.06);font-size:11px;font-weight:600;margin-bottom:8px;line-height:1.4;flex-wrap:wrap;transition:all .3s;"><span style="color:#ff4060">🪪 ID Not Scanned</span> · <span style="font-size:10px;color:rgba(200,210,255,0.5)">Scan ID before serving alcohol</span> · <span style="color:#ff4060;font-size:9px">⚠ ALCOHOL BLOCKED</span></div>
-      <div class="plabel" data-i18n="station.idVerif">ID Verification</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="plabel" data-i18n="station.idVerif" style="margin-bottom:0">ID Verification</div>
+        <span id="id-age-badge" style="font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 8px;border-radius:20px;background:rgba(255,64,96,0.15);color:#ff4060;border:1px solid rgba(255,64,96,0.3);transition:all .3s;white-space:nowrap">⚠ BLOCKED</span>
+      </div>
       <div class="vs vs-wait" id="vs">
         <div class="vs-row">
           <div class="vs-badge" id="vs-badge">🪪</div>
@@ -6052,12 +6054,14 @@ function updateIdBadge(){
   const badge = document.getElementById('id-age-badge');
   if(!badge) return;
   if(state.idVerified){
-    badge.innerHTML = `<span style="color:#00e87a">✅ ID Verified</span> · <span style="font-family:'JetBrains Mono',monospace;font-size:10px">${state.idName||''} · Age ${state.idAge||'—'}</span> · <span style="color:#00e87a;font-size:9px">ALCOHOL OK</span>`;
-    badge.style.background='rgba(0,232,122,0.08)';
+    badge.textContent = '✅ ALCOHOL OK';
+    badge.style.background='rgba(0,232,122,0.12)';
+    badge.style.color='#00e87a';
     badge.style.borderColor='rgba(0,232,122,0.35)';
   } else {
-    badge.innerHTML = `<span style="color:#ff4060">🪪 ID Not Scanned</span> · <span style="font-size:10px;color:rgba(200,210,255,0.5)">Scan ID before serving alcohol</span> · <span style="color:#ff4060;font-size:9px;animation:alertPulse 2s infinite">⚠ ALCOHOL BLOCKED</span>`;
-    badge.style.background='rgba(255,64,96,0.06)';
+    badge.textContent = '⚠ ALCOHOL BLOCKED';
+    badge.style.background='rgba(255,64,96,0.15)';
+    badge.style.color='#ff4060';
     badge.style.borderColor='rgba(255,64,96,0.3)';
   }
 }
