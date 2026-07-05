@@ -155,10 +155,21 @@ barpass/
 
 ## Standing Rules (IMPORTANT)
 
-1. **Swift-first** — toda nueva feature va en Swift nativo, NO en barpass-miami.html
-2. El HTML es legacy — solo tocar para bug fixes o datos
-3. Diseño Deep Cosmos — negro + amber, sin colores culturalmente específicos
-4. Build target: iOS 17+, Swift 6
+1. **V2 web = Next.js** — el producto web V2 vive en `barpass-v2/` (Next.js App Router + TypeScript + Tailwind 4 + Supabase). Features nuevas de web van ahí como módulos en `src/features/`
+2. **iOS = Swift nativo** — features de la app iOS van en Swift (`BarPass-iOS/`), nunca en HTML
+3. El HTML legacy (barpass-miami.html etc.) — solo bug fixes, no features
+4. Diseño Deep Cosmos — negro + amber (#ebb847), sin colores culturalmente específicos
+5. Build target iOS: 17+, Swift 6
+6. Supabase será el backend único — web y iOS consumen las mismas tablas (ver `barpass-v2/supabase/schema.sql`)
+
+## BarPass V2 (barpass-v2/)
+
+Lanzamiento 15 agosto: "The smartest nightlife companion in Miami".
+- Stack: Next.js (App Router) · TS · Tailwind 4 · Supabase · OpenAI · TanStack Query · Framer Motion · Zod
+- Arquitectura feature-based: `src/features/{venues,discover,ai,map}/` — cada módulo con sus components/hooks/services/types
+- Regla clave: lecturas de venues SOLO via `features/venues/services/venue-service.ts` (swap a Supabase = 1 archivo)
+- AI Concierge: `POST /api/concierge` (OpenAI server-side, output validado con Zod)
+- Pendiente: llaves en `.env.local` (Supabase, OpenAI, Mapbox), correr `supabase/schema.sql`, deploy a Vercel
 
 ---
 
