@@ -11,26 +11,29 @@ struct MainTabView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            TabView(selection: $selectedTab) {
-                TonightView()
-                    .environmentObject(venueStore)
-                    .environmentObject(appState)
-                    .tag(0)
-
-                ExploreView()
-                    .environmentObject(venueStore)
-                    .tag(1)
-
-                PlanView()
-                    .environmentObject(venueStore)
-                    .environmentObject(appState)
-                    .tag(2)
-
-                ProfileView()
-                    .environmentObject(appState)
-                    .tag(3)
+            // Direct switch — paged TabView stole horizontal swipes from the
+            // venue carousels and ignored programmatic selection changes.
+            Group {
+                switch selectedTab {
+                case 0:
+                    TonightView()
+                        .environmentObject(venueStore)
+                        .environmentObject(appState)
+                case 1:
+                    ExploreView()
+                        .environmentObject(venueStore)
+                case 2:
+                    PlanView()
+                        .environmentObject(venueStore)
+                        .environmentObject(appState)
+                default:
+                    ProfileView()
+                        .environmentObject(appState)
+                }
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .transition(.opacity)
+            .id(selectedTab)
 
             // Custom tab bar
             customTabBar
