@@ -83,7 +83,18 @@ struct OnboardingVideoView: View {
             }
         }
         .onTapGesture { advanceScene() }
-        .onAppear { startScene(0) }
+        .onAppear {
+            // If no video clips are bundled yet, skip straight to auth —
+            // otherwise the user stares at ~30s of black screens.
+            let hasAnyVideo = scenes.contains {
+                Bundle.main.url(forResource: $0.file, withExtension: "mp4", subdirectory: "Onboarding") != nil
+            }
+            if hasAnyVideo {
+                startScene(0)
+            } else {
+                finish()
+            }
+        }
         .onDisappear { player?.pause() }
     }
 

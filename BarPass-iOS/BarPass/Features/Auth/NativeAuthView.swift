@@ -416,8 +416,9 @@ struct NativeAuthView: View {
 
     private func submitSkip() {
         guard !isLoading else { return }
-        isLoading = true
-        bridge.submitNativeAuth(email: "", password: "", name: "", mode: "skip")
+        // The main experience is native now — no WebView bridge round-trip needed.
+        // Guest mode goes straight into the app.
+        appState.webDidSignalReady()
     }
 
     private func sendPasswordReset() {
