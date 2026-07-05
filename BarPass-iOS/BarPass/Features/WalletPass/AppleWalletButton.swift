@@ -22,7 +22,7 @@ struct AppleWalletButton: View {
 
             // ── Listo para agregar ────────────────────────────────
             case .ready(let url):
-                PKAddPassButton(addPassButtonStyle: .blackOutline)
+                PKAddPassButtonView(style: .blackOutline)
                     .frame(width: 256, height: 44)
                     .onTapGesture { presentWallet(url: url) }
 
@@ -59,7 +59,7 @@ struct AppleWalletButton: View {
                 Task { await service.generatePass(wallet: wallet, ghToken: ghToken) }
             }
         } label: {
-            PKAddPassButton(addPassButtonStyle: .blackOutline)
+            PKAddPassButtonView(style: .blackOutline)
                 .frame(width: 256, height: 44)
                 .allowsHitTesting(false)
         }
@@ -276,6 +276,18 @@ private struct SetupStep: View {
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
     }
+}
+
+// MARK: - PKAddPassButton wrapper for SwiftUI
+
+private struct PKAddPassButtonView: UIViewRepresentable {
+    let style: PKAddPassButtonStyle
+
+    func makeUIView(context: Context) -> PKAddPassButton {
+        PKAddPassButton(addPassButtonStyle: style)
+    }
+
+    func updateUIView(_ uiView: PKAddPassButton, context: Context) {}
 }
 
 // Color(hex:) is defined in SplashView.swift and available across the module

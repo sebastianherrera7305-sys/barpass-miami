@@ -8,9 +8,12 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            BarPassWebContainerView(bridge: bridge)
-                .ignoresSafeArea()
-                .opacity(appState.showSplash ? 0 : 1)
+            // Native main experience
+            NavigationStack {
+                MainTabView()
+            }
+            .ignoresSafeArea()
+            .opacity(appState.showSplash || appState.showNativeAuth ? 0 : 1)
 
             if appState.showSplash {
                 SplashView()
@@ -18,7 +21,13 @@ struct RootView: View {
                     .zIndex(1)
             }
 
-            if appState.showNativeAuth {
+            if appState.showOnboarding && !appState.showSplash {
+                OnboardingVideoView()
+                    .transition(.opacity)
+                    .zIndex(4)
+            }
+
+            if appState.showNativeAuth && !appState.showOnboarding {
                 NativeAuthView(bridge: bridge)
                     .environmentObject(appState)
                     .transition(.asymmetric(
@@ -109,6 +118,7 @@ struct RootView: View {
             CartView()
                 .environmentObject(cart)
                 .environmentObject(appState)
+                .environmentObject(bridge)
         }
         // Priority Entry hub sheet
         .sheet(isPresented: $appState.showPriorityEntry) {

@@ -1,12 +1,17 @@
 import SwiftUI
 import UserNotifications
 import BackgroundTasks
+// import StripeCore  // Add via SPM: github.com/stripe/stripe-ios
 
 @main
 struct BarPassApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appState = AppState()
     @StateObject private var cart     = CartStore()
+
+    init() {
+        // StripeAPI.defaultPublishableKey = StripeConfig.publishableKey  // Uncomment after adding Stripe SPM
+    }
 
     var body: some Scene {
         WindowGroup {

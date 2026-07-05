@@ -2,19 +2,25 @@ import SwiftUI
 
 struct CardPaymentView: View {
     let total:     Double
+    let vendorId:  String
+    let items:     [CartItem]
     let onSuccess: (String) -> Void
 
+    @EnvironmentObject private var bridge: NativeBridge
     @Environment(\.dismiss) private var dismiss
-    @State private var number  = ""
-    @State private var expiry  = ""
-    @State private var cvv     = ""
-    @State private var name    = ""
-    @State private var loading = false
-    @FocusState private var focus: Field?
+
+    @State private var cardNumber  = ""
+    @State private var expiry      = ""
+    @State private var cvv         = ""
+    @State private var isCardValid = false
+    @State private var name        = ""
+    @State private var loading     = false
+    @State private var errorMsg    = ""
+    @FocusState private var activeFocus: CardField?
+
+    private enum CardField { case name, number, expiry, cvv }
 
     private let gold = Color(red: 0.85, green: 0.63, blue: 0.09)
-
-    private enum Field { case number, expiry, cvv, name }
 
     var body: some View {
         NavigationStack {
@@ -23,32 +29,30 @@ struct CardPaymentView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Card preview
                         cardPreview
                             .padding(.top, 8)
 
-                        // Form fields
                         VStack(spacing: 12) {
-                            field(label: "Número de tarjeta", placeholder: "0000  0000  0000  0000",
-                                  text: $number, field: .number, keyboard: .numberPad)
-                            .onChange(of: number) { _, v in number = formatCardNumber(v) }
+                            nameField
 
+                            Text("Número de tarjeta, expiración y CVV")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.white.opacity(0.45))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+
+                            cardInputField(placeholder: "1234 5678 9012 3456", text: $cardNumber, field: .number)
                             HStack(spacing: 12) {
-                                field(label: "Expiración", placeholder: "MM/AA",
-                                      text: $expiry, field: .expiry, keyboard: .numberPad)
-                                .onChange(of: expiry) { _, v in expiry = formatExpiry(v) }
-
-                                field(label: "CVV", placeholder: "•••",
-                                      text: $cvv, field: .cvv, keyboard: .numberPad)
-                                .onChange(of: cvv) { _, v in cvv = String(v.filter(\.isNumber).prefix(4)) }
+                                cardInputField(placeholder: "MM/AA", text: $expiry, field: .expiry)
+                                cardInputField(placeholder: "CVV", text: $cvv, field: .cvv)
                             }
-
-                            field(label: "Nombre en la tarjeta", placeholder: "Como aparece en la tarjeta",
-                                  text: $name, field: .name, keyboard: .default)
                         }
                         .padding(.horizontal, 20)
 
-                        // Pay button
+                        if !errorMsg.isEmpty {
+                            errorBanner
+                                .padding(.horizontal, 20)
+                        }
+
                         Button(action: pay) {
                             Group {
                                 if loading {
@@ -102,8 +106,9 @@ struct CardPaymentView: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Text(cardBrandEmoji)
-                        .font(.system(size: 28))
+                    Image(systemName: "creditcard.fill")
+                        .font(.system(size: 24))
+                        .foregroundStyle(.white.opacity(0.6))
                     Spacer()
                     Text("BarPass").font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(gold)
@@ -111,22 +116,15 @@ struct CardPaymentView: View {
 
                 Spacer()
 
-                Text(maskedNumber)
-                    .font(.system(size: 18, weight: .medium, design: .monospaced))
+                Text(isCardValid ? "•••• •••• •••• ••••" : "Ingresa los datos de tu tarjeta")
+                    .font(.system(size: isCardValid ? 18 : 13, weight: .medium, design: isCardValid ? .monospaced : .default))
                     .foregroundStyle(.white.opacity(0.9))
                     .padding(.bottom, 8)
 
-                HStack(spacing: 16) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("TITULAR").font(.system(size: 8, weight: .bold)).foregroundStyle(.white.opacity(0.35))
-                        Text(name.isEmpty ? "NOMBRE APELLIDO" : name.uppercased())
-                            .font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.75))
-                    }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("VENCE").font(.system(size: 8, weight: .bold)).foregroundStyle(.white.opacity(0.35))
-                        Text(expiry.isEmpty ? "MM/AA" : expiry)
-                            .font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.75))
-                    }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("TITULAR").font(.system(size: 8, weight: .bold)).foregroundStyle(.white.opacity(0.35))
+                    Text(name.isEmpty ? "NOMBRE APELLIDO" : name.uppercased())
+                        .font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.75))
                 }
             }
             .padding(22)
@@ -135,28 +133,41 @@ struct CardPaymentView: View {
         .padding(.horizontal, 20)
     }
 
-    // MARK: - Field builder
+    // MARK: - Name field
 
-    private func field(label: String, placeholder: String,
-                       text: Binding<String>, field: Field,
-                       keyboard: UIKeyboardType) -> some View {
+    private var nameField: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(label)
+            Text("Nombre en la tarjeta")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Color.white.opacity(0.45))
-            TextField(placeholder, text: text)
-                .keyboardType(keyboard)
+            TextField("Como aparece en la tarjeta", text: $name)
                 .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .focused($focus, equals: field)
+                .textInputAutocapitalization(.words)
+                .focused($activeFocus, equals: .name)
                 .font(.system(size: 16))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 14)
                 .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
                 .overlay(RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(focus == field ? gold.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1))
+                    .strokeBorder(activeFocus == .name ? gold.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1))
         }
+    }
+
+    // MARK: - Error banner
+
+    private var errorBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.circle.fill")
+                .font(.caption)
+            Text(errorMsg)
+                .font(.caption)
+        }
+        .foregroundStyle(Color(red: 1, green: 0.42, blue: 0.42))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(Color(red: 1, green: 0.2, blue: 0.2).opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
     }
 
     // MARK: - Security note
@@ -165,70 +176,90 @@ struct CardPaymentView: View {
         HStack(spacing: 6) {
             Image(systemName: "lock.fill")
                 .font(.caption2)
-            Text("Tu pago está cifrado y protegido")
+            Text("Tu pago se procesa de forma segura con Stripe")
                 .font(.caption2)
         }
         .foregroundStyle(Color.white.opacity(0.25))
     }
 
-    // MARK: - Helpers
+    // MARK: - Validation
+
+    // MARK: - Card input helper
+
+    private func cardInputField(placeholder: String, text: Binding<String>, field: CardField) -> some View {
+        TextField(placeholder, text: text)
+            .keyboardType(.numberPad)
+            .focused($activeFocus, equals: field)
+            .font(.system(size: 16, design: .monospaced))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(activeFocus == field ? gold.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1))
+            .onChange(of: text.wrappedValue) { _, _ in validateCard() }
+    }
 
     private var isValid: Bool {
-        number.filter(\.isNumber).count >= 15 &&
-        expiry.count == 5 &&
-        cvv.count >= 3 &&
-        !name.trimmingCharacters(in: .whitespaces).isEmpty
+        isCardValid && !name.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
-    private var maskedNumber: String {
-        let digits = number.filter(\.isNumber)
-        if digits.isEmpty { return "••••  ••••  ••••  ••••" }
-        let padded = digits + String(repeating: "•", count: max(0, 16 - digits.count))
-        return stride(from: 0, to: padded.count, by: 4)
-            .map { String(padded.dropFirst($0).prefix(4)) }
-            .joined(separator: "  ")
+    private func validateCard() {
+        let digits = cardNumber.filter(\.isNumber)
+        let expiryOk = expiry.count >= 4
+        let cvvOk = cvv.count >= 3
+        isCardValid = digits.count == 16 && expiryOk && cvvOk
     }
 
-    private var cardBrandEmoji: String {
-        let d = number.filter(\.isNumber)
-        if d.hasPrefix("4")      { return "💙" }
-        if d.hasPrefix("5")      { return "🟠" }
-        if d.hasPrefix("3")      { return "🟢" }
-        if d.hasPrefix("6")      { return "🔵" }
-        return "💳"
-    }
-
-    private func formatCardNumber(_ raw: String) -> String {
-        let digits = String(raw.filter(\.isNumber).prefix(16))
-        return stride(from: 0, to: digits.count, by: 4)
-            .map { String(digits.dropFirst($0).prefix(4)) }
-            .joined(separator: "  ")
-    }
-
-    private func formatExpiry(_ raw: String) -> String {
-        let digits = String(raw.filter(\.isNumber).prefix(4))
-        if digits.count >= 3 {
-            return String(digits.prefix(2)) + "/" + String(digits.dropFirst(2))
-        }
-        return digits
-    }
+    // MARK: - Payment flow (Stripe SPM not yet installed — stub until added)
 
     private func pay() {
-        focus = nil
-        loading = true
-        // Simulate network round-trip (replace with real Stripe call)
-        Task {
-            try? await Task.sleep(for: .milliseconds(1200))
-            loading = false
-            let last4 = String(number.filter(\.isNumber).suffix(4))
-            onSuccess("💳 •••• \(last4)")
-            dismiss()
+        guard isValid else { return }
+        activeFocus = nil
+        loading  = true
+        errorMsg = ""
+
+        let last4 = String(cardNumber.filter(\.isNumber).suffix(4))
+
+        bridge.fetchAuthSession { token, uid, authError in
+            guard let token else {
+                Task { @MainActor in
+                    self.loading  = false
+                    self.errorMsg = authError == "not_authenticated"
+                        ? "Inicia sesión para pagar con tarjeta."
+                        : "No se pudo verificar tu sesión. Intenta de nuevo."
+                }
+                return
+            }
+
+            Task {
+                do {
+                    _ = try await APIClient.createCardTransaction(
+                        idToken:    token,
+                        vendorId:   self.vendorId,
+                        customerId: uid,
+                        items:      self.items,
+                        stripePaymentMethodId: "stub_\(last4)"
+                    )
+                    await MainActor.run {
+                        self.loading = false
+                        self.onSuccess("💳 •••• \(last4)")
+                        self.dismiss()
+                    }
+                } catch {
+                    await MainActor.run {
+                        self.loading  = false
+                        self.errorMsg = error.localizedDescription
+                    }
+                }
+            }
         }
     }
 }
 
 #Preview {
-    CardPaymentView(total: 38.99) { method in
+    CardPaymentView(total: 38.99, vendorId: "venue_demo", items: []) { method in
         print("Paid with \(method)")
     }
+    .environmentObject(NativeBridge())
 }

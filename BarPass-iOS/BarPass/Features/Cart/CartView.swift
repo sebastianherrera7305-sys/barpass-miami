@@ -4,6 +4,7 @@ import PassKit
 struct CartView: View {
     @EnvironmentObject private var cart:     CartStore
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var bridge:   NativeBridge
     @Environment(\.dismiss) private var dismiss
 
     @State private var showCardSheet = false
@@ -44,7 +45,13 @@ struct CartView: View {
             }
         }
         .sheet(isPresented: $showCardSheet) {
-            CardPaymentView(total: cart.total, onSuccess: handleOrderSuccess)
+            CardPaymentView(
+                total:     cart.total,
+                vendorId:  cart.venueId,
+                items:     cart.items,
+                onSuccess: handleOrderSuccess
+            )
+            .environmentObject(bridge)
         }
     }
 
@@ -382,4 +389,5 @@ private struct ApplePayButton: View {
     return CartView()
         .environmentObject(cart)
         .environmentObject(appState)
+        .environmentObject(NativeBridge())
 }

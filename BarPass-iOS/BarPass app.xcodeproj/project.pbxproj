@@ -38,6 +38,20 @@
 		7D22239A32057DDDC1688082 /* ReservationConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA727DF04AFC4355197DDF95 /* ReservationConfirmView.swift */; };
 		EBF12578C120CFBF1FA60335 /* PriorityEntryHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2373126D43DE228E7095F6A2 /* PriorityEntryHubView.swift */; };
 		EE000002000000000000001A /* NativeAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000001000000000000001A /* NativeAuthView.swift */; };
+		EE000002000000000000001B /* AppleSignInHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000001000000000000001B /* AppleSignInHelpers.swift */; };
+		FF000002000000000000AA01 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA01 /* MainTabView.swift */; };
+		FF000002000000000000AA02 /* TonightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA02 /* TonightView.swift */; };
+		FF000002000000000000AA03 /* VenueDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA03 /* VenueDetailView.swift */; };
+		FF000002000000000000AA04 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA04 /* ExploreView.swift */; };
+		FF000002000000000000AA05 /* PlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA05 /* PlanView.swift */; };
+		FF000002000000000000AA06 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA06 /* ProfileView.swift */; };
+		FF000002000000000000AA07 /* OnboardingVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA07 /* OnboardingVideoView.swift */; };
+		FF000002000000000000AA08 /* Venue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA08 /* Venue.swift */; };
+		FF000002000000000000AA09 /* VenueStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA09 /* VenueStore.swift */; };
+		FF000002000000000000AB01 /* StripeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AB01 /* StripeConfig.swift */; };
+		FF000002000000000000AB02 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AB02 /* APIClient.swift */; };
+		FF000002000000000000AB03 /* WalletPassService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AB03 /* WalletPassService.swift */; };
+		FF000002000000000000AB04 /* AppleWalletButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AB04 /* AppleWalletButton.swift */; };
 		/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -75,6 +89,20 @@
 		EA727DF04AFC4355197DDF95 /* ReservationConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservationConfirmView.swift; sourceTree = "<group>"; };
 		2373126D43DE228E7095F6A2 /* PriorityEntryHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriorityEntryHubView.swift; sourceTree = "<group>"; };
 		EE000001000000000000001A /* NativeAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthView.swift; sourceTree = "<group>"; };
+		EE000001000000000000001B /* AppleSignInHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInHelpers.swift; sourceTree = "<group>"; };
+		FF000001000000000000AA01 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		FF000001000000000000AA02 /* TonightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightView.swift; sourceTree = "<group>"; };
+		FF000001000000000000AA03 /* VenueDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueDetailView.swift; sourceTree = "<group>"; };
+		FF000001000000000000AA04 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
+		FF000001000000000000AA05 /* PlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanView.swift; sourceTree = "<group>"; };
+		FF000001000000000000AA06 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		FF000001000000000000AA07 /* OnboardingVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingVideoView.swift; sourceTree = "<group>"; };
+		FF000001000000000000AA08 /* Venue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Venue.swift; sourceTree = "<group>"; };
+		FF000001000000000000AA09 /* VenueStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueStore.swift; sourceTree = "<group>"; };
+		FF000001000000000000AB01 /* StripeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StripeConfig.swift; path = BarPass/Core/Config/StripeConfig.swift; sourceTree = SOURCE_ROOT; };
+		FF000001000000000000AB02 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = APIClient.swift; path = BarPass/Core/Networking/APIClient.swift; sourceTree = SOURCE_ROOT; };
+		FF000001000000000000AB03 /* WalletPassService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletPassService.swift; sourceTree = "<group>"; };
+		FF000001000000000000AB04 /* AppleWalletButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleWalletButton.swift; path = BarPass/Features/WalletPass/AppleWalletButton.swift; sourceTree = SOURCE_ROOT; };
 		/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +174,9 @@
 				AA000002000000000000000A /* NotificationService.swift */,
 				AA000002000000000000000B /* BiometricService.swift */,
 				AA000002000000000000000C /* ApplePayService.swift */,
+				FF000001000000000000AB01 /* StripeConfig.swift */,
+				FF000001000000000000AB02 /* APIClient.swift */,
+				FF000001000000000000AB03 /* WalletPassService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -166,6 +197,13 @@
 				CC000004000000000000000B /* Cart */,
 				DD000004000000000000000A /* PriorityEntry */,
 				AA000004000000000000000C /* Splash */,
+			FF000003000000000000AA01 /* Main */,
+				FF000003000000000000AA02 /* Tonight */,
+				FF000003000000000000AA03 /* Explore */,
+				FF000003000000000000AA04 /* Plan */,
+				FF000003000000000000AA05 /* Profile */,
+				FF000003000000000000AA06 /* Onboarding */,
+				FF000001000000000000AB04 /* AppleWalletButton.swift */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -211,6 +249,8 @@
 				FB5086AAE9CBD601116597BE /* EventTicket.swift */,8568370BB34F88D6D61CD5B2 /* CartItem.swift */,
 				153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */,
 				CA759652D778C1B0CD58E463 /* TableReservation.swift */,
+				FF000001000000000000AA08 /* Venue.swift */,
+				FF000001000000000000AA09 /* VenueStore.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -244,8 +284,59 @@
 			isa = PBXGroup;
 			children = (
 				EE000001000000000000001A /* NativeAuthView.swift */,
+				EE000001000000000000001B /* AppleSignInHelpers.swift */,
 			);
 			path = Auth;
+			sourceTree = "<group>";
+		};
+
+		FF000003000000000000AA01 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				FF000001000000000000AA01 /* MainTabView.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		FF000003000000000000AA02 /* Tonight */ = {
+			isa = PBXGroup;
+			children = (
+				FF000001000000000000AA02 /* TonightView.swift */,
+				FF000001000000000000AA03 /* VenueDetailView.swift */,
+			);
+			path = Tonight;
+			sourceTree = "<group>";
+		};
+		FF000003000000000000AA03 /* Explore */ = {
+			isa = PBXGroup;
+			children = (
+				FF000001000000000000AA04 /* ExploreView.swift */,
+			);
+			path = Explore;
+			sourceTree = "<group>";
+		};
+		FF000003000000000000AA04 /* Plan */ = {
+			isa = PBXGroup;
+			children = (
+				FF000001000000000000AA05 /* PlanView.swift */,
+			);
+			path = Plan;
+			sourceTree = "<group>";
+		};
+		FF000003000000000000AA05 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				FF000001000000000000AA06 /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		FF000003000000000000AA06 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				FF000001000000000000AA07 /* OnboardingVideoView.swift */,
+			);
+			path = Onboarding;
 			sourceTree = "<group>";
 		};
 		/* End PBXGroup section */
@@ -324,6 +415,20 @@
 				4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */,
 
 				EE000002000000000000001A /* NativeAuthView.swift in Sources */,
+				EE000002000000000000001B /* AppleSignInHelpers.swift in Sources */,
+				FF000002000000000000AA01 /* MainTabView.swift in Sources */,
+				FF000002000000000000AA02 /* TonightView.swift in Sources */,
+				FF000002000000000000AA03 /* VenueDetailView.swift in Sources */,
+				FF000002000000000000AA04 /* ExploreView.swift in Sources */,
+				FF000002000000000000AA05 /* PlanView.swift in Sources */,
+				FF000002000000000000AA06 /* ProfileView.swift in Sources */,
+				FF000002000000000000AA07 /* OnboardingVideoView.swift in Sources */,
+				FF000002000000000000AA08 /* Venue.swift in Sources */,
+				FF000002000000000000AA09 /* VenueStore.swift in Sources */,
+				FF000002000000000000AB01 /* StripeConfig.swift in Sources */,
+				FF000002000000000000AB02 /* APIClient.swift in Sources */,
+				FF000002000000000000AB03 /* WalletPassService.swift in Sources */,
+				FF000002000000000000AB04 /* AppleWalletButton.swift in Sources */,
 				AA0000010000000000000001 /* BarPassApp.swift in Sources */,
 				AA0000010000000000000002 /* AppState.swift in Sources */,
 				2A0BC0EA1346366A63326961 /* CartItem.swift in Sources */,

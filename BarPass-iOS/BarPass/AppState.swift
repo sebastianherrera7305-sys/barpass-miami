@@ -12,6 +12,7 @@ struct OrderConfirmation: Equatable {
 @MainActor
 final class AppState: ObservableObject {
     @Published var showSplash             = true
+    @Published var showOnboarding         = true
     @Published var showActionBar          = false
     @Published var showNativeAuth         = true
     @Published var isOffline              = false

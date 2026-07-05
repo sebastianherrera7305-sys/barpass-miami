@@ -328,7 +328,7 @@ struct SkipLinePassView: View {
 
     private var cardBtn: some View {
         NavigationLink {
-            CardPaymentView(total: selected.price) { method in
+            CardPaymentView(total: selected.price, vendorId: venueId, items: []) { method in
                 completePass(method: method)
             }
         } label: {

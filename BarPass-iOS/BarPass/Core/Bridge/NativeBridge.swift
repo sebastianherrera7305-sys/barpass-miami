@@ -333,6 +333,7 @@ final class NativeBridge: ObservableObject {
           authPromise.then(function(cred){
             var u=cred.user;
             if(mode==='signup' && displayName) u.updateProfile({displayName:displayName});
+            if(mode==='signup'){ try { u.sendEmailVerification(); } catch(e){} }
             S.user={name:displayName||u.displayName||email.split('@')[0], email:u.email, emoji:'🎉', prefs:'Cocktails, rooftop', uid:u.uid};
             loadVenues(function(){ showOnboarding(); });
             try { syncWalletFromServer(); } catch(e){}
@@ -342,6 +343,158 @@ final class NativeBridge: ObservableObject {
         })('\(safeEmail)', '\(safePass)', '\(safeName)', '\(mode)');
         """
         webView?.evaluateJavaScript(js)
+    }
+
+    // MARK: - Auth session (token bridge for native API calls)
+
+    /// Pulls the current Firebase ID token + uid out of the WebView's JS auth session
+    /// (fbAuth lives in the web layer — there is no native Firebase SDK). Used by
+    /// native payment flows (e.g. CardPaymentView) that need to call the backend API
+    /// directly with `Authorization: Bearer <token>`.
+    func fetchAuthSession(completion: @escaping (_ token: String?, _ uid: String?, _ error: String?) -> Void) {
+        guard webView != nil else {
+            completion(nil, nil, "webview_not_ready")
+            return
+        }
+        let js = """
+        (function(){
+          return new Promise(function(resolve){
+            try {
+              if (typeof fbAuth !== 'undefined' && fbAuth && fbAuth.currentUser) {
+                fbAuth.currentUser.getIdToken().then(function(token){
+                  resolve(JSON.stringify({ token: token, uid: fbAuth.currentUser.uid }));
+                }).catch(function(err){
+                  resolve(JSON.stringify({ error: err && err.message ? err.message : 'token_error' }));
+                });
+              } else {
+                resolve(JSON.stringify({ error: 'not_authenticated' }));
+              }
+            } catch (e) {
+              resolve(JSON.stringify({ error: e && e.message ? e.message : 'bridge_error' }));
+            }
+          });
+        })();
+        """
+        webView?.evaluateJavaScript(js) { result, error in
+            guard error == nil,
+                  let str  = result as? String,
+                  let data = str.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                completion(nil, nil, error?.localizedDescription ?? "bridge_decode_error")
+                return
+            }
+            if let token = json["token"] as? String {
+                completion(token, json["uid"] as? String, nil)
+            } else {
+                completion(nil, nil, json["error"] as? String ?? "unknown_error")
+            }
+        }
+    }
+
+    // MARK: - Forgot password
+
+    /// Sends a Firebase password-reset email via the WebView's fbAuth session.
+    func sendPasswordReset(email: String, completion: @escaping (_ success: Bool, _ error: String?) -> Void) {
+        guard webView != nil else {
+            completion(false, "webview_not_ready")
+            return
+        }
+        let safeEmail = email.replacingOccurrences(of: "'", with: "\\'")
+        let js = """
+        (function(email){
+          return new Promise(function(resolve){
+            try {
+              if (typeof fbAuth === 'undefined' || !fbAuth) {
+                resolve(JSON.stringify({ error: 'auth_unavailable' }));
+                return;
+              }
+              fbAuth.sendPasswordResetEmail(email).then(function(){
+                resolve(JSON.stringify({ success: true }));
+              }).catch(function(err){
+                resolve(JSON.stringify({ error: err && err.message ? err.message : 'reset_failed' }));
+              });
+            } catch (e) {
+              resolve(JSON.stringify({ error: e && e.message ? e.message : 'bridge_error' }));
+            }
+          });
+        })('\(safeEmail)');
+        """
+        webView?.evaluateJavaScript(js) { result, error in
+            guard error == nil,
+                  let str  = result as? String,
+                  let data = str.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                completion(false, error?.localizedDescription ?? "bridge_decode_error")
+                return
+            }
+            if json["success"] as? Bool == true {
+                completion(true, nil)
+            } else {
+                completion(false, json["error"] as? String ?? "unknown_error")
+            }
+        }
+    }
+
+    // MARK: - Sign in with Apple
+
+    /// Exchanges a native Apple ID credential (identity token + raw nonce) for a Firebase
+    /// session, via fbAuth.signInWithCredential — same JS-bridge pattern as submitNativeAuth,
+    /// since fbAuth lives in the WebView, not in a native Firebase SDK.
+    func signInWithApple(identityToken: String, rawNonce: String, fullName: String?,
+                         completion: @escaping (_ success: Bool, _ error: String?) -> Void) {
+        guard webView != nil else {
+            completion(false, "webview_not_ready")
+            return
+        }
+        let safeToken = identityToken.replacingOccurrences(of: "'", with: "\\'")
+        let safeNonce = rawNonce.replacingOccurrences(of: "'", with: "\\'")
+        let safeName  = (fullName ?? "").replacingOccurrences(of: "'", with: "\\'")
+        let js = """
+        (function(idToken, rawNonce, displayName){
+          return new Promise(function(resolve){
+            try {
+              if (typeof fbAuth === 'undefined' || !fbAuth || typeof firebase === 'undefined') {
+                resolve(JSON.stringify({ error: 'auth_unavailable' }));
+                return;
+              }
+              var provider = new firebase.auth.OAuthProvider('apple.com');
+              var credential = provider.credential({ idToken: idToken, rawNonce: rawNonce });
+              fbAuth.signInWithCredential(credential).then(function(cred){
+                var u = cred.user;
+                if (displayName && !u.displayName) { try { u.updateProfile({displayName:displayName}); } catch(e){} }
+                S.user = {
+                  name: displayName || u.displayName || (u.email ? u.email.split('@')[0] : 'Usuario'),
+                  email: u.email || '',
+                  emoji: '🎉',
+                  prefs: 'Cocktails, rooftop',
+                  uid: u.uid
+                };
+                loadVenues(function(){ showOnboarding(); });
+                try { syncWalletFromServer(); } catch(e){}
+                resolve(JSON.stringify({ success: true }));
+              }).catch(function(err){
+                resolve(JSON.stringify({ error: err && err.message ? err.message : 'apple_signin_failed' }));
+              });
+            } catch (e) {
+              resolve(JSON.stringify({ error: e && e.message ? e.message : 'bridge_error' }));
+            }
+          });
+        })('\(safeToken)', '\(safeNonce)', '\(safeName)');
+        """
+        webView?.evaluateJavaScript(js) { result, error in
+            guard error == nil,
+                  let str  = result as? String,
+                  let data = str.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                completion(false, error?.localizedDescription ?? "bridge_decode_error")
+                return
+            }
+            if json["success"] as? Bool == true {
+                completion(true, nil)
+            } else {
+                completion(false, json["error"] as? String ?? "unknown_error")
+            }
+        }
     }
 
     func onPageError(_ error: Error) {

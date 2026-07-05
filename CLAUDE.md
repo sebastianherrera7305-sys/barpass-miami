@@ -99,11 +99,11 @@ Aspect ratio: **9:16** · Model: **Kling 3.0** · Muted audio
 ## Product Readiness Checklist
 
 ### 🔴 Crítico (blocker para cobrar)
-- [ ] Stripe SDK en CardPaymentView (ahora es solo UI)
+- [x] Stripe SDK en CardPaymentView — código listo (tokeniza con `STPPaymentCardTextField`, llama a `POST /transactions`). Falta: (1) agregar el paquete SPM `stripe-ios` en Xcode, (2) poner la publishable key real en `StripeConfig.swift`
 - [ ] Apple Pay merchant account verificado
 - [ ] Wallet top-up con pago real
-- [ ] Apple Sign In (requerido por Apple)
-- [ ] Pantalla "Olvidé mi contraseña"
+- [x] Apple Sign In (requerido por Apple) — código listo (`NativeAuthView.swift`, `NativeBridge.swift`, `AppleSignInHelpers.swift`). Falta: habilitar capability "Sign in with Apple" en Xcode (Signing & Capabilities) + configurarlo en el Apple Developer portal
+- [x] Pantalla "Olvidé mi contraseña" — listo (alert nativo → `NativeBridge.sendPasswordReset` → `fbAuth.sendPasswordResetEmail`)
 - [ ] Privacy Policy URL pública
 - [ ] Terms of Service
 - [ ] Verificación de edad 21+
@@ -172,3 +172,4 @@ barpass/
 ---
 
 *Última actualización: 2026-06-25*
+

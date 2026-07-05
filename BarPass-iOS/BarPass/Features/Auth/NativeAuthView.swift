@@ -1,4 +1,5 @@
 import SwiftUI
+import AuthenticationServices
 
 struct NativeAuthView: View {
     let bridge: NativeBridge
@@ -13,6 +14,16 @@ struct NativeAuthView: View {
     @State private var showPassword  = false
     @State private var contentOpacity: Double  = 0
     @State private var contentY:       CGFloat = 24
+
+    // Forgot password
+    @State private var showForgotPassword = false
+    @State private var resetEmail         = ""
+    @State private var resetStatusMsg     = ""
+    @State private var isSendingReset     = false
+
+    // Sign in with Apple
+    @State private var currentAppleNonce  = ""
+    @State private var isAppleLoading     = false
 
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
     private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
@@ -44,6 +55,12 @@ struct NativeAuthView: View {
                     fieldsSection
                         .padding(.horizontal, 24)
 
+                    if tab == .signIn {
+                        forgotPasswordLink
+                            .padding(.horizontal, 24)
+                            .padding(.top, 10)
+                    }
+
                     if !errorMsg.isEmpty {
                         errorBanner
                             .padding(.horizontal, 24)
@@ -57,6 +74,10 @@ struct NativeAuthView: View {
                     divider
                         .padding(.horizontal, 24)
                         .padding(.top, 28)
+
+                    appleSignInButton
+                        .padding(.horizontal, 24)
+                        .padding(.top, 20)
 
                     skipButton
                         .padding(.top, 20)
@@ -80,6 +101,25 @@ struct NativeAuthView: View {
             withAnimation { errorMsg = err }
             isLoading = false
             appState.authError = ""
+        }
+        .alert("Recuperar contraseña", isPresented: $showForgotPassword) {
+            TextField("Tu email", text: $resetEmail)
+                .keyboardType(.emailAddress)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+            Button("Cancelar", role: .cancel) {}
+            Button("Enviar") { sendPasswordReset() }
+                .disabled(resetEmail.trimmingCharacters(in: .whitespaces).isEmpty)
+        } message: {
+            Text("Te enviaremos un enlace para restablecer tu contraseña.")
+        }
+        .alert("Revisa tu email", isPresented: .init(
+            get: { !resetStatusMsg.isEmpty },
+            set: { if !$0 { resetStatusMsg = "" } }
+        )) {
+            Button("OK") { resetStatusMsg = "" }
+        } message: {
+            Text(resetStatusMsg)
         }
     }
 
@@ -293,6 +333,40 @@ struct NativeAuthView: View {
         }
     }
 
+    // MARK: - Forgot password
+
+    private var forgotPasswordLink: some View {
+        HStack {
+            Spacer()
+            Button {
+                resetEmail = email
+                showForgotPassword = true
+            } label: {
+                Text("¿Olvidaste tu contraseña?")
+                    .font(.system(size: 12.5, weight: .medium))
+                    .foregroundStyle(amber.opacity(0.85))
+            }
+            .buttonStyle(.plain)
+            .disabled(isLoading)
+        }
+    }
+
+    // MARK: - Sign in with Apple
+
+    private var appleSignInButton: some View {
+        SignInWithAppleButton(.signIn, onRequest: { request in
+            let nonce = AppleSignInHelpers.randomNonceString()
+            currentAppleNonce = nonce
+            request.requestedScopes = [.fullName, .email]
+            request.nonce = AppleSignInHelpers.sha256(nonce)
+        }, onCompletion: handleAppleSignIn)
+        .signInWithAppleButtonStyle(.white)
+        .frame(height: 52)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .disabled(isAppleLoading || isLoading)
+        .opacity((isAppleLoading || isLoading) ? 0.6 : 1)
+    }
+
     // MARK: - Skip
 
     private var skipButton: some View {
@@ -344,6 +418,55 @@ struct NativeAuthView: View {
         guard !isLoading else { return }
         isLoading = true
         bridge.submitNativeAuth(email: "", password: "", name: "", mode: "skip")
+    }
+
+    private func sendPasswordReset() {
+        let target = resetEmail.trimmingCharacters(in: .whitespaces)
+        guard !target.isEmpty, !isSendingReset else { return }
+        isSendingReset = true
+        bridge.sendPasswordReset(email: target) { success, error in
+            isSendingReset = false
+            resetStatusMsg = success
+                ? "Si \(target) tiene una cuenta, te llegará un email para restablecer tu contraseña."
+                : (error == "auth_unavailable"
+                    ? "No se pudo conectar. Intenta de nuevo en un momento."
+                    : "No se pudo enviar el email. Verifica la dirección e intenta de nuevo.")
+        }
+    }
+
+    private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
+        switch result {
+        case .failure(let error):
+            // User cancelling the Apple sheet surfaces as an error too — don't show a banner for that.
+            if (error as? ASAuthorizationError)?.code != .canceled {
+                withAnimation { errorMsg = "No se pudo iniciar sesión con Apple. Intenta de nuevo." }
+            }
+        case .success(let authorization):
+            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                  let tokenData  = credential.identityToken,
+                  let token      = String(data: tokenData, encoding: .utf8) else {
+                withAnimation { errorMsg = "No se pudo verificar tu cuenta de Apple." }
+                return
+            }
+            let fullName = [credential.fullName?.givenName, credential.fullName?.familyName]
+                .compactMap { $0 }
+                .joined(separator: " ")
+
+            isAppleLoading = true
+            withAnimation { errorMsg = "" }
+            bridge.signInWithApple(
+                identityToken: token,
+                rawNonce: currentAppleNonce,
+                fullName: fullName.isEmpty ? nil : fullName
+            ) { success, error in
+                isAppleLoading = false
+                if !success {
+                    withAnimation {
+                        errorMsg = "No se pudo iniciar sesión con Apple. Intenta de nuevo."
+                    }
+                }
+            }
+        }
     }
 }
 

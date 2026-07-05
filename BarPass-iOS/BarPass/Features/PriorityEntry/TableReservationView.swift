@@ -383,7 +383,7 @@ struct TableReservationView: View {
 
     private var cardBtn: some View {
         NavigationLink {
-            CardPaymentView(total: selectedPackage.deposit) { method in
+            CardPaymentView(total: selectedPackage.deposit, vendorId: venueId, items: []) { method in
                 completeReservation(method: method)
             }
         } label: {
