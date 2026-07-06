@@ -4,12 +4,14 @@ import {
   Star,
   MapPin,
   Clock,
+  Music,
   Shirt,
   Car,
-  Music,
   Camera,
   ChevronLeft,
   Zap,
+  Sparkles,
+  Calendar,
 } from "lucide-react";
 import {
   getVenueBySlug,
@@ -17,6 +19,8 @@ import {
   getSimilarVenues,
 } from "@/features/venues/services/venue-service";
 import { VenueCard } from "@/features/venues/components/venue-card";
+import { FactRow } from "@/features/venues/components/fact-row";
+import { GettingThere } from "@/features/venues/components/getting-there";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatUSD, formatTime } from "@/lib/utils";
@@ -38,11 +42,6 @@ export async function generateMetadata({
     : { title: "Venue not found" };
 }
 
-/**
- * Venue detail — better than Yelp.
- * Static-generated per venue; every fact a night-out decision needs
- * above the fold, editorial voice throughout.
- */
 export default async function VenuePage({
   params,
 }: {
@@ -63,7 +62,6 @@ export default async function VenuePage({
         <ChevronLeft className="h-4 w-4" /> Tonight
       </Link>
 
-      {/* Hero */}
       <div className="relative overflow-hidden rounded-[24px] border border-border-subtle bg-gradient-to-br from-surface-raised via-surface to-black">
         <div className="grid h-64 place-items-center text-8xl md:h-80">
           {venue.emoji}
@@ -78,7 +76,6 @@ export default async function VenuePage({
         </div>
       </div>
 
-      {/* Title block */}
       <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black tracking-tight">{venue.name}</h1>
@@ -104,7 +101,6 @@ export default async function VenuePage({
         {venue.description}
       </p>
 
-      {/* Vibes */}
       <div className="mt-4 flex flex-wrap gap-2">
         {venue.vibes.map((vibe) => (
           <Badge key={vibe} variant="outline">
@@ -113,7 +109,6 @@ export default async function VenuePage({
         ))}
       </div>
 
-      {/* Facts grid */}
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <Card className="space-y-3 p-5">
           <h3 className="flex items-center gap-2 text-sm font-bold">
@@ -156,7 +151,6 @@ export default async function VenuePage({
         </Card>
       </div>
 
-      {/* Popular drinks */}
       {venue.popularDrinks.length > 0 && (
         <section className="mt-8">
           <h3 className="text-lg font-bold">What to order</h3>
@@ -179,46 +173,110 @@ export default async function VenuePage({
         </section>
       )}
 
-      {/* Location + links */}
-      <Card className="mt-8 flex flex-wrap items-center justify-between gap-4 p-5">
-        <div>
-          <p className="text-sm font-semibold">{venue.address}</p>
-          {venue.instagramHandle && (
-            <a
-              href={`https://instagram.com/${venue.instagramHandle}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 inline-flex items-center gap-1 text-xs text-text-secondary hover:text-amber-brand"
-            >
-              <Camera className="h-3 w-3" /> @{venue.instagramHandle}
-            </a>
-          )}
-        </div>
-        <a
-          href={`https://maps.google.com/?q=${encodeURIComponent(venue.address)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-full border border-amber-brand/40 px-5 py-2 text-sm font-semibold text-amber-brand hover:bg-amber-brand/10"
-        >
-          Directions
-        </a>
-      </Card>
-
-      {/* Skip the Line — coming soon */}
-      <div className="mt-8 flex items-center justify-between rounded-[20px] border border-dashed border-border-strong px-6 py-5">
-        <div className="flex items-center gap-3">
-          <Zap className="h-5 w-5 text-text-tertiary" />
-          <div>
-            <p className="font-semibold text-text-secondary">Skip the Line</p>
-            <p className="text-xs text-text-tertiary">
-              Priority entry at {venue.name} — coming soon
-            </p>
+      {venue.upcomingEvents.length > 0 && (
+        <section className="mt-8">
+          <h3 className="flex items-center gap-2 text-lg font-bold">
+            <Calendar className="h-4 w-4 text-amber-brand" /> Upcoming events
+          </h3>
+          <div className="mt-3 space-y-3">
+            {venue.upcomingEvents.map((event) => (
+              <Card key={event.id} className="flex items-start gap-4 p-5">
+                <span className="mt-0.5 text-2xl">📅</span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold">{event.title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+                    {event.description}
+                  </p>
+                  <div className="mt-2 flex items-center gap-3 text-xs text-text-tertiary">
+                    <span>
+                      {new Date(event.date).toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                      })}
+                    </span>
+                    {event.coverPrice !== null && (
+                      <span className="text-amber-brand">
+                        {formatUSD(event.coverPrice)} cover
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
+        </section>
+      )}
+
+      <section className="mt-8 grid gap-4 sm:grid-cols-2">
+        <Card className="p-5">
+          <h3 className="flex items-center gap-2 text-sm font-bold">
+            <Camera className="h-4 w-4 text-amber-brand" /> Photos
+          </h3>
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {["🍾", "🎶", "✨", "🌴", "🥂", "🎤"].map((emoji, i) => (
+              <div
+                key={i}
+                className="grid aspect-square place-items-center rounded-xl bg-surface-raised text-2xl"
+              >
+                {emoji}
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-5">
+          <h3 className="flex items-center gap-2 text-sm font-bold">
+            <Star className="h-4 w-4 text-amber-brand" /> Reviews
+          </h3>
+          <div className="mt-3 space-y-3 text-sm">
+            <div className="flex items-center gap-2 text-amber-brand">
+              <Star className="h-5 w-5 fill-current" />
+              <span className="text-lg font-black">{venue.rating}</span>
+              <span className="text-text-tertiary">
+                ({venue.reviewCount.toLocaleString()} reviews)
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              {[
+                { label: "Atmosphere", score: 4.7 },
+                { label: "Music", score: 4.5 },
+                { label: "Service", score: 4.3 },
+                { label: "Value", score: 4.0 },
+              ].map(({ label, score }) => (
+                <div key={label} className="flex items-center gap-2 text-xs">
+                  <span className="w-20 text-text-tertiary">{label}</span>
+                  <div className="h-1.5 flex-1 rounded-full bg-surface-raised">
+                    <div
+                      className="h-full rounded-full bg-amber-brand"
+                      style={{ width: `${(score / 5) * 100}%` }}
+                    />
+                  </div>
+                  <span className="w-6 text-right text-amber-brand">{score}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      <GettingThere venue={venue} />
+
+      <div className="mt-6 flex gap-3">
+        <Link
+          href={`/concierge?venue=${venue.slug}`}
+          className="flex flex-1 items-center justify-center gap-2 rounded-full border border-amber-brand/40 px-5 py-3 text-sm font-semibold text-amber-brand transition-colors hover:bg-amber-brand/10"
+        >
+          <Sparkles className="h-4 w-4" />
+          Ask Remy about {venue.name}
+        </Link>
+        <div className="flex flex-1 items-center justify-center gap-2 rounded-full border border-dashed border-border-strong px-5 py-3 text-sm font-semibold text-text-tertiary">
+          <Zap className="h-4 w-4" />
+          Skip the Line — Soon
         </div>
-        <Badge>Soon</Badge>
       </div>
 
-      {/* Similar venues */}
       {similar.length > 0 && (
         <section className="mt-12">
           <h3 className="text-lg font-bold">If you like {venue.name}…</h3>
@@ -229,28 +287,6 @@ export default async function VenuePage({
           </div>
         </section>
       )}
-    </div>
-  );
-}
-
-function FactRow({
-  label,
-  value,
-  capitalize,
-}: {
-  label: string;
-  value: string;
-  icon?: React.ComponentType<{ className?: string }>;
-  capitalize?: boolean;
-}) {
-  return (
-    <div className="flex items-baseline justify-between gap-4">
-      <dt className="shrink-0 text-text-tertiary">{label}</dt>
-      <dd
-        className={`text-right font-medium ${capitalize ? "capitalize" : ""}`}
-      >
-        {value}
-      </dd>
     </div>
   );
 }
