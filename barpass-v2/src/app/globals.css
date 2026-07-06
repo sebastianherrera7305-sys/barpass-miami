@@ -76,3 +76,46 @@ body {
 .glow-amber {
   box-shadow: 0 0 24px rgba(235, 184, 71, 0.25);
 }
+
+/* ── Live map markers (MapLibre custom HTML markers) ──────────── */
+.bp-marker {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid var(--color-border-strong);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.bp-marker:hover {
+  transform: scale(1.12);
+  border-color: rgba(235, 184, 71, 0.6);
+}
+.bp-marker--active {
+  border-color: var(--color-amber-brand);
+  box-shadow: 0 0 18px rgba(235, 184, 71, 0.55);
+  transform: scale(1.2);
+  z-index: 10;
+}
+
+/* Tame MapLibre's default control chrome to match the dark theme. */
+.maplibregl-ctrl-group {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: 1px solid var(--color-border-subtle) !important;
+}
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--color-border-subtle) !important;
+}
+.maplibregl-ctrl-attrib {
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+.maplibregl-ctrl-attrib a {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
