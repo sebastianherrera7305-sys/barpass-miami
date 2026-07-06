@@ -78,8 +78,9 @@ Complexity — **S** ≤ half day · **M** ~1–2 days · **L** ~3–5 days.
 ---
 
 ## Recommended sequence
-1. ~~C1 site outage~~ ✅ done
-2. **C2 real map** (biggest visible win, unblocks geolocation for M3)
-3. **H2 Uber/Getting-There** (small, high-delight, Priority #4)
-4. **H1 concierge key + fallback** (needs your OpenAI key)
-5. M1 file splits → H3 middleware perf → M2 prod perf pass
+1. ~~C1 site outage~~ ✅ done (`626e88c`)
+2. ~~C2 real map~~ ✅ done (`626e88c`) — MapLibre + CARTO, markers/flyTo/geolocate verified
+3. ~~H2 Uber/Getting-There~~ ✅ done (`15af149`) — Priority #4, deep links verified
+4. ~~M1 venue-page split~~ ✅ done (`15af149`) — page 313 → 292 lines via `getting-there.tsx`
+5. **H1 concierge key + fallback** ← NEXT (needs your `OPENAI_API_KEY`)
+6. H3 middleware perf (skip `getUser()` for anon) → remaining M1 splits → M2 prod perf pass
