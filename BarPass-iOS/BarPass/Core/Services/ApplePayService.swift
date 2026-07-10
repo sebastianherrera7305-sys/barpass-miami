@@ -1,5 +1,4 @@
 import PassKit
-import UIKit
 
 struct ApplePayResult {
     let success:   Bool

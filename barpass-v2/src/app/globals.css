@@ -105,6 +105,20 @@ body {
   z-index: 10;
 }
 
+/* Branded photo markers — the venue's real image, clipped to a circle. */
+.bp-marker--photo {
+  padding: 0;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+.bp-marker--photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+
 /* Tame MapLibre's default control chrome to match the dark theme. */
 .maplibregl-ctrl-group {
   background: rgba(0, 0, 0, 0.8) !important;

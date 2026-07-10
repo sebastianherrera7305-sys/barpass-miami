@@ -1,19 +1,53 @@
 import SwiftUI
-import AuthenticationServices
+
+// MARK: - Auth Flow State Machine
+
+enum AuthFlowState: Equatable {
+    case idle
+    case validating
+    case signingIn
+    case signingUp
+    case loadingUser
+    case success
+    case failure(String)
+
+    var isLoading: Bool {
+        switch self {
+        case .validating, .signingIn, .signingUp, .loadingUser: return true
+        default: return false
+        }
+    }
+
+    var buttonLabel: String {
+        switch self {
+        case .idle, .validating, .failure: return ""
+        case .signingIn:  return "Iniciando sesión..."
+        case .signingUp:  return "Creando cuenta..."
+        case .loadingUser: return "Preparando tu experiencia..."
+        case .success:    return "¡Bienvenido!"
+        }
+    }
+}
+
+// MARK: - View
 
 struct NativeAuthView: View {
-    let bridge: NativeBridge
-
     @EnvironmentObject private var appState: AppState
+
+    // State machine
+    @State private var flowState: AuthFlowState = .idle
+
+    // Input fields
     @State private var tab:          AuthTab = .signIn
     @State private var email         = ""
     @State private var password      = ""
-    @State private var name          = ""
-    @State private var isLoading     = false
-    @State private var errorMsg      = ""
     @State private var showPassword  = false
+
+    // Animations
     @State private var contentOpacity: Double  = 0
-    @State private var contentY:       CGFloat = 24
+    @State private var contentY:       CGFloat = 12
+
+
 
     // Forgot password
     @State private var showForgotPassword = false
@@ -21,20 +55,20 @@ struct NativeAuthView: View {
     @State private var resetStatusMsg     = ""
     @State private var isSendingReset     = false
 
-    // Sign in with Apple
-    @State private var currentAppleNonce  = ""
-    @State private var isAppleLoading     = false
+    // Performance tracking
+    @State private var lastMetrics: AuthMetrics?
 
-    private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
-    private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
+    private let amber  = Color.bpAmber
+    private let amberB = Color.bpAmberBright
 
     enum AuthTab { case signIn, signUp }
+
+    // MARK: - Body
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            // Very subtle top glow — color-neutral
             LinearGradient(
                 colors: [Color.white.opacity(0.03), .clear],
                 startPoint: .top,
@@ -42,88 +76,102 @@ struct NativeAuthView: View {
             )
             .ignoresSafeArea()
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    logoSection
-                        .padding(.top, 68)
-                        .padding(.bottom, 44)
+            mainContent
 
-                    tabPicker
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 28)
-
-                    fieldsSection
-                        .padding(.horizontal, 24)
-
-                    if tab == .signIn {
-                        forgotPasswordLink
-                            .padding(.horizontal, 24)
-                            .padding(.top, 10)
-                    }
-
-                    if !errorMsg.isEmpty {
-                        errorBanner
-                            .padding(.horizontal, 24)
-                            .padding(.top, 14)
-                    }
-
-                    ctaButton
-                        .padding(.horizontal, 24)
-                        .padding(.top, 24)
-
-                    divider
-                        .padding(.horizontal, 24)
-                        .padding(.top, 28)
-
-                    appleSignInButton
-                        .padding(.horizontal, 24)
-                        .padding(.top, 20)
-
-                    skipButton
-                        .padding(.top, 20)
-
-                    socialProof
-                        .padding(.top, 36)
-                        .padding(.bottom, 48)
+            // Session checking overlay
+            if flowState == .idle && contentOpacity < 0.5 {
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .tint(amber)
+                    Text("Verificando sesión...")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.white.opacity(0.4))
                 }
+                .transition(.opacity)
             }
-            .opacity(contentOpacity)
-            .offset(y: contentY)
-        }
-        .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.78).delay(0.08)) {
-                contentOpacity = 1
-                contentY       = 0
+
+            // Error toast at bottom
+            if case .failure(let msg) = flowState {
+                ErrorToast(
+                    message: msg,
+                    onDismiss: { withAnimation(.spring(response: 0.3)) { flowState = .idle } }
+                )
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .padding(.horizontal, 20)
+                .padding(.bottom, 40)
+                .zIndex(10)
             }
         }
-        .onChange(of: appState.authError) { err in
-            guard !err.isEmpty else { return }
-            withAnimation { errorMsg = err }
-            isLoading = false
-            appState.authError = ""
+        .onAppear(perform: onAppear)
+        .sheet(isPresented: $showForgotPassword) {
+            forgotPasswordSheet
+                .presentationDetents([.height(340)])
+                .presentationBackground(.clear)
         }
-        .alert("Recuperar contraseña", isPresented: $showForgotPassword) {
-            TextField("Tu email", text: $resetEmail)
-                .keyboardType(.emailAddress)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-            Button("Cancelar", role: .cancel) {}
-            Button("Enviar") { sendPasswordReset() }
-                .disabled(resetEmail.trimmingCharacters(in: .whitespaces).isEmpty)
-        } message: {
-            Text("Te enviaremos un enlace para restablecer tu contraseña.")
+        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: flowState)
+    }
+
+    // MARK: - Main Content
+
+    private var mainContent: some View {
+        VStack(spacing: 0) {
+            Spacer()
+            logoSection
+                .padding(.bottom, 36)
+
+            tabPicker
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+
+            fieldsSection
+                .padding(.horizontal, 24)
+
+            if tab == .signIn {
+                forgotPasswordLink
+                    .padding(.horizontal, 24)
+                    .padding(.top, 10)
+            }
+
+            ctaButton
+                .padding(.horizontal, 24)
+                .padding(.top, 24)
+
+            divider
+                .padding(.horizontal, 24)
+                .padding(.top, 28)
+
+            skipButton
+                .padding(.top, 20)
+
+            socialProof
+                .padding(.top, 28)
+
+            Spacer()
         }
-        .alert("Revisa tu email", isPresented: .init(
-            get: { !resetStatusMsg.isEmpty },
-            set: { if !$0 { resetStatusMsg = "" } }
-        )) {
-            Button("OK") { resetStatusMsg = "" }
-        } message: {
-            Text(resetStatusMsg)
+        .opacity(contentOpacity)
+        .offset(y: contentY)
+    }
+
+    // MARK: - On Appear
+
+    private func onAppear() {
+        // Check session FIRST, synchronously — if found, skip auth entirely
+        if AuthService.shared.restoreSession() != nil {
+            appState.completeAuth()
+            // Silently refresh token in background if needed
+            Task { try? await Task.sleep(nanoseconds: 2_000_000_000); _ = await AuthService.shared.refreshIfNeeded() }
+            return
+        }
+        flowState = .idle
+
+        // Only animate content in when we're actually showing the form
+        withAnimation(.spring(response: 0.2, dampingFraction: 0.85)) {
+            contentOpacity = 1
+            contentY       = 0
         }
     }
 
-    // MARK: - Logo
+    // MARK: - Logo Section
 
     private var logoSection: some View {
         VStack(spacing: 16) {
@@ -143,8 +191,11 @@ struct NativeAuthView: View {
                 Text("BP")
                     .font(.system(size: 22, weight: .black, design: .rounded))
                     .foregroundStyle(
-                        LinearGradient(colors: [amber, amberB],
-                                       startPoint: .topLeading, endPoint: .bottomTrailing)
+                        LinearGradient(
+                            colors: [amber, amberB],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
             }
 
@@ -161,7 +212,7 @@ struct NativeAuthView: View {
         }
     }
 
-    // MARK: - Tab picker
+    // MARK: - Tab Picker
 
     private var tabPicker: some View {
         HStack(spacing: 0) {
@@ -171,11 +222,11 @@ struct NativeAuthView: View {
     }
 
     private func tabBtn(_ label: String, for t: AuthTab) -> some View {
-        let active = tab == t
+        let active = tab == t && !flowState.isLoading
         return Button {
             withAnimation(.spring(response: 0.28, dampingFraction: 0.8)) {
                 tab = t
-                errorMsg = ""
+                flowState = .idle
             }
         } label: {
             VStack(spacing: 8) {
@@ -184,25 +235,24 @@ struct NativeAuthView: View {
                     .foregroundStyle(active ? .white : Color.white.opacity(0.35))
                     .frame(maxWidth: .infinity)
 
-                // Underline indicator
                 Capsule()
-                    .fill(active ? amber : Color.clear)
+                    .fill(tab == t && !flowState.isLoading ? amber : Color.clear)
                     .frame(height: 2)
             }
         }
         .buttonStyle(.plain)
+        .disabled(flowState.isLoading)
         .animation(.easeInOut(duration: 0.2), value: active)
     }
 
-    // MARK: - Fields
+    // MARK: - Input Fields
 
     @ViewBuilder
     private var fieldsSection: some View {
         VStack(spacing: 10) {
             if tab == .signUp {
-                field("Nombre completo", text: $name,
-                      keyboard: .default, icon: "person", secure: false)
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                // Name field is removed — Supabase signup only needs email + password.
+                // Profile name can be added later via a profile update screen.
             }
             field("Email", text: $email,
                   keyboard: .emailAddress, icon: "envelope", secure: false)
@@ -256,43 +306,40 @@ struct NativeAuthView: View {
         )
     }
 
-    // MARK: - Error
-
-    private var errorBanner: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "exclamationmark.circle")
-                .font(.system(size: 13))
-                .foregroundStyle(Color(red: 1, green: 0.42, blue: 0.42))
-            Text(errorMsg)
-                .font(.system(size: 13))
-                .foregroundStyle(Color(red: 1, green: 0.42, blue: 0.42))
-                .multilineTextAlignment(.leading)
-            Spacer()
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(red: 1, green: 0.2, blue: 0.2).opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(Color(red: 1, green: 0.42, blue: 0.42).opacity(0.2))
-                )
-        )
-        .transition(.move(edge: .top).combined(with: .opacity))
-    }
-
-    // MARK: - CTA
+    // MARK: - CTA Button
 
     private var ctaButton: some View {
-        let disabled = isLoading || email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty
+        let isDisabled: Bool = {
+            switch flowState {
+            case .signingIn, .signingUp, .loadingUser: return true
+            default: break
+            }
+            if case .failure = flowState { return false }
+            return email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty
+        }()
 
-        return Button { submit() } label: {
+        let label: String = {
+            if flowState.isLoading { return flowState.buttonLabel }
+            if case .failure = flowState { return "Intentar de nuevo" }
+            return tab == .signIn ? "Entrar" : "Crear cuenta"
+        }()
+
+        let showSpinner: Bool = {
+            switch flowState {
+            case .validating, .signingIn, .signingUp, .loadingUser: return true
+            default: return false
+            }
+        }()
+
+        return Button {
+            guard !flowState.isLoading else { return }
+            submit()
+        } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: 14)
                     .fill(
                         LinearGradient(
-                            colors: disabled
+                            colors: isDisabled
                                 ? [Color.white.opacity(0.08), Color.white.opacity(0.08)]
                                 : [amber, amberB],
                             startPoint: .leading,
@@ -301,20 +348,25 @@ struct NativeAuthView: View {
                     )
                     .frame(height: 52)
 
-                if isLoading {
-                    ProgressView()
-                        .tint(disabled ? Color.white.opacity(0.3) : .black)
-                } else {
-                    Text(tab == .signIn ? "Entrar" : "Crear cuenta")
+                HStack(spacing: 8) {
+                    if showSpinner {
+                        ProgressView()
+                            .tint(isDisabled ? Color.white.opacity(0.3) : .black)
+                            .scaleEffect(0.85)
+                    }
+                    Text(label)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(disabled ? Color.white.opacity(0.25) : .black)
+                        .foregroundStyle(isDisabled ? Color.white.opacity(0.25) : .black)
                 }
             }
         }
         .buttonStyle(.plain)
-        .disabled(disabled)
-        .animation(.easeInOut(duration: 0.18), value: disabled)
-        .shadow(color: disabled ? .clear : amber.opacity(0.25), radius: 12, y: 4)
+        .disabled(isDisabled)
+        .animation(.easeInOut(duration: 0.18), value: isDisabled)
+        .animation(.easeInOut(duration: 0.18), value: label)
+        .shadow(color: isDisabled || flowState.isLoading ? .clear : amber.opacity(0.25),
+                radius: 12, y: 4)
+        .opacity(flowState.isLoading ? 0.9 : 1)
     }
 
     // MARK: - Divider
@@ -333,38 +385,130 @@ struct NativeAuthView: View {
         }
     }
 
-    // MARK: - Forgot password
+    // MARK: - Forgot Password
 
     private var forgotPasswordLink: some View {
-        HStack {
-            Spacer()
-            Button {
-                resetEmail = email
-                showForgotPassword = true
-            } label: {
-                Text("¿Olvidaste tu contraseña?")
-                    .font(.system(size: 12.5, weight: .medium))
-                    .foregroundStyle(amber.opacity(0.85))
-            }
-            .buttonStyle(.plain)
-            .disabled(isLoading)
+        Button {
+            resetEmail = email
+            showForgotPassword = true
+        } label: {
+            Text("¿Olvidaste tu contraseña?")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.bpAmber)
         }
+        .buttonStyle(.plain)
+        .disabled(flowState.isLoading)
+        .frame(maxWidth: .infinity)
+        .bpAccessibility(label: "Olvidé mi contraseña", hint: "Recibirás un enlace para restablecerla", isButton: true)
     }
 
-    // MARK: - Sign in with Apple
+    // MARK: - Forgot Password Sheet
 
-    private var appleSignInButton: some View {
-        SignInWithAppleButton(.signIn, onRequest: { request in
-            let nonce = AppleSignInHelpers.randomNonceString()
-            currentAppleNonce = nonce
-            request.requestedScopes = [.fullName, .email]
-            request.nonce = AppleSignInHelpers.sha256(nonce)
-        }, onCompletion: handleAppleSignIn)
-        .signInWithAppleButtonStyle(.white)
-        .frame(height: 52)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .disabled(isAppleLoading || isLoading)
-        .opacity((isAppleLoading || isLoading) ? 0.6 : 1)
+    private var forgotPasswordSheet: some View {
+        VStack(spacing: 0) {
+            // Drag indicator
+            Capsule()
+                .fill(Color.white.opacity(0.2))
+                .frame(width: 36, height: 4)
+                .padding(.top, 12)
+
+            Spacer()
+
+            if resetStatusMsg.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "lock.rotation")
+                        .font(.system(size: 28))
+                        .foregroundStyle(Color.bpAmber)
+
+                    Text("Recuperar contraseña")
+                        .font(.bpTitle2())
+                        .foregroundStyle(.white)
+
+                    Text("Te enviaremos un enlace a tu email para restablecerla.")
+                        .font(.bpBody())
+                        .foregroundStyle(Color.bpTextSecondary)
+                        .multilineTextAlignment(.center)
+
+                    TextField("Tu email", text: $resetEmail)
+                        .font(.bpBody())
+                        .foregroundStyle(.white)
+                        .keyboardType(.emailAddress)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .padding(14)
+                        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.white.opacity(0.07)))
+                }
+                .padding(.horizontal, 24)
+
+                Spacer()
+
+                HStack(spacing: 12) {
+                    Button("Cancelar") {
+                        showForgotPassword = false
+                        resetStatusMsg = ""
+                    }
+                    .font(.bpHeadline())
+                    .foregroundStyle(Color.bpTextSecondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+
+                    Button {
+                        sendPasswordReset()
+                    } label: {
+                        Text("Enviar")
+                            .font(.bpHeadline())
+                            .foregroundStyle(.black)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: BPRadius.md))
+                    .opacity(resetEmail.trimmingCharacters(in: .whitespaces).isEmpty ? 0.5 : 1)
+                    .disabled(resetEmail.trimmingCharacters(in: .whitespaces).isEmpty || isSendingReset)
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+            } else {
+                VStack(spacing: 16) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 48))
+                        .foregroundStyle(Color.bpGreen)
+
+                    Text("Revisa tu email")
+                        .font(.bpTitle2())
+                        .foregroundStyle(.white)
+
+                    Text(resetStatusMsg)
+                        .font(.bpBody())
+                        .foregroundStyle(Color.bpTextSecondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, 24)
+
+                Spacer()
+
+                Button {
+                    showForgotPassword = false
+                    resetStatusMsg = ""
+                } label: {
+                    Text("OK")
+                        .font(.bpHeadline())
+                        .foregroundStyle(.black)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: BPRadius.md))
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
+            }
+        }
+        .frame(height: 280)
+        .background(
+            RoundedRectangle(cornerRadius: BPRadius.xxl)
+                .fill(Color(white: 0.06))
+                .overlay(RoundedRectangle(cornerRadius: BPRadius.xxl).strokeBorder(Color.white.opacity(0.07)))
+        )
     }
 
     // MARK: - Skip
@@ -377,14 +521,13 @@ struct NativeAuthView: View {
                 .underline(color: Color.white.opacity(0.12))
         }
         .buttonStyle(.plain)
-        .disabled(isLoading)
+        .disabled(flowState.isLoading)
     }
 
-    // MARK: - Social proof
+    // MARK: - Social Proof
 
     private var socialProof: some View {
         HStack(spacing: 6) {
-            // Stacked avatar dots
             HStack(spacing: -6) {
                 ForEach(["🟤", "🟡", "⚪️"], id: \.self) { c in
                     Text(c)
@@ -403,75 +546,207 @@ struct NativeAuthView: View {
     // MARK: - Actions
 
     private func submit() {
-        guard !isLoading else { return }
-        withAnimation { errorMsg = "" }
-        isLoading = true
-        bridge.submitNativeAuth(
-            email:    email.trimmingCharacters(in: .whitespaces),
-            password: password,
-            name:     name.trimmingCharacters(in: .whitespaces),
-            mode:     tab == .signIn ? "login" : "signup"
-        )
-    }
+        let cleanEmail = email.trimmingCharacters(in: .whitespaces).lowercased()
 
-    private func submitSkip() {
-        guard !isLoading else { return }
-        // The main experience is native now — no WebView bridge round-trip needed.
-        // Guest mode goes straight into the app.
-        appState.webDidSignalReady()
-    }
-
-    private func sendPasswordReset() {
-        let target = resetEmail.trimmingCharacters(in: .whitespaces)
-        guard !target.isEmpty, !isSendingReset else { return }
-        isSendingReset = true
-        bridge.sendPasswordReset(email: target) { success, error in
-            isSendingReset = false
-            resetStatusMsg = success
-                ? "Si \(target) tiene una cuenta, te llegará un email para restablecer tu contraseña."
-                : (error == "auth_unavailable"
-                    ? "No se pudo conectar. Intenta de nuevo en un momento."
-                    : "No se pudo enviar el email. Verifica la dirección e intenta de nuevo.")
+        // --- Local validation ---
+        guard !cleanEmail.isEmpty, !password.isEmpty else {
+            withAnimation { flowState = .failure("Please fill in all fields.") }
+            BPHaptics.heavy()
+            return
         }
-    }
 
-    private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
-        switch result {
-        case .failure(let error):
-            // User cancelling the Apple sheet surfaces as an error too — don't show a banner for that.
-            if (error as? ASAuthorizationError)?.code != .canceled {
-                withAnimation { errorMsg = "No se pudo iniciar sesión con Apple. Intenta de nuevo." }
-            }
-        case .success(let authorization):
-            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-                  let tokenData  = credential.identityToken,
-                  let token      = String(data: tokenData, encoding: .utf8) else {
-                withAnimation { errorMsg = "No se pudo verificar tu cuenta de Apple." }
-                return
-            }
-            let fullName = [credential.fullName?.givenName, credential.fullName?.familyName]
-                .compactMap { $0 }
-                .joined(separator: " ")
+        guard isValidEmail(cleanEmail) else {
+            withAnimation { flowState = .failure("Please enter a valid email address.") }
+            BPHaptics.heavy()
+            return
+        }
 
-            isAppleLoading = true
-            withAnimation { errorMsg = "" }
-            bridge.signInWithApple(
-                identityToken: token,
-                rawNonce: currentAppleNonce,
-                fullName: fullName.isEmpty ? nil : fullName
-            ) { success, error in
-                isAppleLoading = false
-                if !success {
-                    withAnimation {
-                        errorMsg = "No se pudo iniciar sesión con Apple. Intenta de nuevo."
+        guard password.count >= 6 else {
+            withAnimation { flowState = .failure("Password must be at least 6 characters.") }
+            BPHaptics.heavy()
+            return
+        }
+
+        flowState = .validating
+        let startTime = CFAbsoluteTimeGetCurrent()
+
+        Task {
+            // Record pre-API time
+            let validationTime = CFAbsoluteTimeGetCurrent() - startTime
+
+            do {
+                let targetState: AuthFlowState = tab == .signIn ? .signingIn : .signingUp
+                await MainActor.run { flowState = targetState }
+
+                if tab == .signIn {
+                    _ = try await AuthService.shared.signIn(
+                        email: cleanEmail,
+                        password: password
+                    )
+                } else {
+                    _ = try await AuthService.shared.signUp(
+                        email: cleanEmail,
+                        password: password
+                    )
+                }
+
+                let totalTime = CFAbsoluteTimeGetCurrent() - startTime
+                let requestTime = totalTime - validationTime
+
+                await MainActor.run {
+                    lastMetrics = AuthMetrics(
+                        validationTime: validationTime,
+                        requestTime: requestTime,
+                        totalTime: totalTime
+                    )
+                    log("[Auth] completed in \(String(format: "%.2f", totalTime))s (validate: \(String(format: "%.2f", validationTime))s, api: \(String(format: "%.2f", requestTime))s)")
+
+                    flowState = .success
+                    BPHaptics.success()
+                    appState.completeAuth()
+                }
+            } catch let error as AuthError {
+                await MainActor.run {
+                    let msg = error.localizedDescription
+                    flowState = .failure(msg)
+                    BPHaptics.heavy()
+                    log("[Auth] error: \(msg)")
+                }
+                // Auto-clear failure after 4s
+                Task {
+                    try? await Task.sleep(nanoseconds: 4_000_000_000)
+                    if case .failure = flowState {
+                        await MainActor.run {
+                            withAnimation(.spring(response: 0.3)) { flowState = .idle }
+                        }
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    flowState = .failure("We're having trouble connecting right now. Please try again in a moment.")
+                    BPHaptics.heavy()
+                    log("[Auth] unexpected error: \(error.localizedDescription)")
+                }
+                Task {
+                    try? await Task.sleep(nanoseconds: 4_000_000_000)
+                    if case .failure = flowState {
+                        await MainActor.run {
+                            withAnimation(.spring(response: 0.3)) { flowState = .idle }
+                        }
                     }
                 }
             }
         }
     }
+
+    private func submitSkip() {
+        guard !flowState.isLoading else { return }
+        log("[Auth] Guest mode")
+        appState.completeAuth()
+    }
+
+    private func sendPasswordReset() {
+        let target = resetEmail.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !target.isEmpty, !isSendingReset else { return }
+        guard isValidEmail(target) else {
+            resetStatusMsg = "Please enter a valid email address."
+            return
+        }
+
+        isSendingReset = true
+        Task {
+            do {
+                try await AuthService.shared.sendPasswordReset(email: target)
+                await MainActor.run {
+                    resetStatusMsg = "If \(target) has an account, a reset link has been sent."
+                    isSendingReset = false
+                }
+            } catch {
+                await MainActor.run {
+                    resetStatusMsg = "We're having trouble sending the reset email. Please try again."
+                    isSendingReset = false
+                }
+            }
+        }
+    }
+
+    // MARK: - Validation
+
+    private func isValidEmail(_ email: String) -> Bool {
+        let pattern = "^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+        return email.range(of: pattern, options: .regularExpression) != nil
+    }
+
+    // MARK: - Helpers
+
+    private func log(_ msg: String) {
+        #if DEBUG
+        print("[BarPass] \(msg)")
+        #endif
+    }
 }
 
+// MARK: - Premium Error Toast
+
+private struct ErrorToast: View {
+    let message: String
+    let onDismiss: () -> Void
+
+    @State private var showDismissHint = false
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 14))
+                .foregroundStyle(Color.bpAmber)
+
+            Text(message)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.white)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 8)
+
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Color.white.opacity(0.4))
+                    .frame(width: 24, height: 24)
+                    .background(Color.white.opacity(0.08), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .opacity(showDismissHint ? 1 : 0.6)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(red: 0.08, green: 0.06, blue: 0.12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(Color.bpAmber.opacity(0.2), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.4), radius: 16, y: 6)
+        )
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.6).delay(0.5)) {
+                showDismissHint = true
+            }
+        }
+    }
+}
+
+// MARK: - Haptic Convenience
+
+private extension BPHaptics {
+    static func success() {
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+}
+
+// MARK: - Preview
+
 #Preview {
-    NativeAuthView(bridge: NativeBridge())
-        .environmentObject(AppState())
+    NativeAuthView()
 }

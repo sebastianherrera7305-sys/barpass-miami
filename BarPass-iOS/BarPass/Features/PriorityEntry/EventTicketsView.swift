@@ -1,5 +1,4 @@
 import SwiftUI
-import PassKit
 
 struct EventTicketsView: View {
     let venueId:   String

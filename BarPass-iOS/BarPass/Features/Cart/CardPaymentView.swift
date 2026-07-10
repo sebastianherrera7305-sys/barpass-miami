@@ -6,7 +6,6 @@ struct CardPaymentView: View {
     let items:     [CartItem]
     let onSuccess: (String) -> Void
 
-    @EnvironmentObject private var bridge: NativeBridge
     @Environment(\.dismiss) private var dismiss
 
     @State private var cardNumber  = ""
@@ -221,36 +220,30 @@ struct CardPaymentView: View {
 
         let last4 = String(cardNumber.filter(\.isNumber).suffix(4))
 
-        bridge.fetchAuthSession { token, uid, authError in
-            guard let token else {
-                Task { @MainActor in
-                    self.loading  = false
-                    self.errorMsg = authError == "not_authenticated"
-                        ? "Inicia sesión para pagar con tarjeta."
-                        : "No se pudo verificar tu sesión. Intenta de nuevo."
-                }
-                return
-            }
+        guard let session = AuthService.shared.restoreSession() else {
+            loading = false
+            errorMsg = "Inicia sesión para pagar con tarjeta."
+            return
+        }
 
-            Task {
-                do {
-                    _ = try await APIClient.createCardTransaction(
-                        idToken:    token,
-                        vendorId:   self.vendorId,
-                        customerId: uid,
-                        items:      self.items,
-                        stripePaymentMethodId: "stub_\(last4)"
-                    )
-                    await MainActor.run {
-                        self.loading = false
-                        self.onSuccess("💳 •••• \(last4)")
-                        self.dismiss()
-                    }
-                } catch {
-                    await MainActor.run {
-                        self.loading  = false
-                        self.errorMsg = error.localizedDescription
-                    }
+        Task {
+            do {
+                _ = try await APIClient.createCardTransaction(
+                    idToken:    session.accessToken,
+                    vendorId:   self.vendorId,
+                    customerId: session.user.id,
+                    items:      self.items,
+                    stripePaymentMethodId: "stub_\(last4)"
+                )
+                await MainActor.run {
+                    self.loading = false
+                    self.onSuccess("💳 •••• \(last4)")
+                    self.dismiss()
+                }
+            } catch {
+                await MainActor.run {
+                    self.loading  = false
+                    self.errorMsg = error.localizedDescription
                 }
             }
         }
@@ -261,5 +254,5 @@ struct CardPaymentView: View {
     CardPaymentView(total: 38.99, vendorId: "venue_demo", items: []) { method in
         print("Paid with \(method)")
     }
-    .environmentObject(NativeBridge())
+
 }

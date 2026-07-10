@@ -61,7 +61,7 @@ struct EventTicket: Identifiable {
                     eventDate: Date, quantity: Int, package: String,
                     amount: Double, payMethod: String) -> EventTicket {
         let chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        let code  = String((0..<8).map { _ in chars.randomElement()! })
+        let code  = String((0..<8).compactMap { _ in chars.randomElement() })
         return EventTicket(
             id:          UUID(),
             ticketCode:  code,

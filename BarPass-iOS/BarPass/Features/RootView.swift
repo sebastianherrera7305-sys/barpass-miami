@@ -4,8 +4,6 @@ struct RootView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var cart:     CartStore
 
-    @StateObject private var bridge = NativeBridge()
-
     var body: some View {
         ZStack {
             // Native main experience
@@ -28,7 +26,7 @@ struct RootView: View {
             }
 
             if appState.showNativeAuth && !appState.showOnboarding {
-                NativeAuthView(bridge: bridge)
+                NativeAuthView()
                     .environmentObject(appState)
                     .transition(.asymmetric(
                         insertion: .opacity,
@@ -47,9 +45,9 @@ struct RootView: View {
                 .zIndex(2)
             }
         }
-        .animation(.easeInOut(duration: 0.5), value: appState.showSplash)
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: appState.isOffline)
-        .animation(.easeInOut(duration: 0.5), value: appState.showNativeAuth)
+        .animation(.easeOut(duration: 0.1), value: appState.showSplash)
+        .animation(.spring(response: 0.2, dampingFraction: 0.85), value: appState.isOffline)
+        .animation(.easeOut(duration: 0.1), value: appState.showNativeAuth)
         // Native floating action bar
         .overlay(alignment: .bottom) {
             HStack(spacing: 12) {
@@ -111,14 +109,13 @@ struct RootView: View {
             )
             .padding(.bottom, 100)
             .opacity(appState.showActionBar ? 1 : 0)
-            .animation(.easeIn(duration: 0.4), value: appState.showActionBar)
+            .animation(.easeOut(duration: 0.15), value: appState.showActionBar)
         }
         // Native cart sheet
         .sheet(isPresented: $appState.showCart) {
             CartView()
                 .environmentObject(cart)
                 .environmentObject(appState)
-                .environmentObject(bridge)
         }
         // Priority Entry hub sheet
         .sheet(isPresented: $appState.showPriorityEntry) {

@@ -38,7 +38,23 @@ export function VenueMarkers({
         const el = document.createElement("button");
         el.className = "bp-marker";
         el.setAttribute("aria-label", venue.name);
-        el.textContent = venue.emoji;
+        // Branded marker: real venue photo, circular, with graceful fallbacks
+        // (broken/missing image → category emoji). Never shows a broken image.
+        if (venue.imageUrl) {
+          el.classList.add("bp-marker--photo");
+          const img = document.createElement("img");
+          img.src = venue.imageUrl;
+          img.alt = "";
+          img.loading = "lazy";
+          img.decoding = "async";
+          img.onerror = () => {
+            el.classList.remove("bp-marker--photo");
+            el.textContent = venue.emoji;
+          };
+          el.appendChild(img);
+        } else {
+          el.textContent = venue.emoji;
+        }
         el.addEventListener("click", (e) => {
           e.stopPropagation();
           onSelectRef.current(venue);

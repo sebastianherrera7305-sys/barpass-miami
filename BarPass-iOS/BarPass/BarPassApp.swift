@@ -10,6 +10,7 @@ struct BarPassApp: App {
     @StateObject private var cart     = CartStore()
 
     init() {
+        ImageCache.configure()
         // StripeAPI.defaultPublishableKey = StripeConfig.publishableKey  // Uncomment after adding Stripe SPM
     }
 
@@ -35,7 +36,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     private func registerBackgroundTask() {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.cacheTaskID, using: nil) { task in
-            self.handleCacheRefresh(task: task as! BGAppRefreshTask)
+            guard let refreshTask = task as? BGAppRefreshTask else { return }
+            self.handleCacheRefresh(task: refreshTask)
         }
         scheduleNextCacheRefresh()
     }
@@ -48,19 +50,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     private func handleCacheRefresh(task: BGAppRefreshTask) {
         scheduleNextCacheRefresh()
-        guard let url = URL(string: "https://sebastianherrera7305-sys.github.io/barpass-miami/barpass-miami.html") else {
-            task.setTaskCompleted(success: false)
-            return
-        }
-        var req = URLRequest(url: url)
-        req.cachePolicy = .reloadIgnoringLocalCacheData
-        req.timeoutInterval = 20
-        let dataTask = URLSession.shared.dataTask(with: req) { _, response, _ in
-            let ok = (response as? HTTPURLResponse)?.statusCode == 200
-            task.setTaskCompleted(success: ok)
-        }
-        task.expirationHandler = { dataTask.cancel() }
-        dataTask.resume()
+        task.setTaskCompleted(success: true)
     }
 
     // MARK: - Push notifications

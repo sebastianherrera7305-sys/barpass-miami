@@ -3,10 +3,12 @@ import SwiftUI
 struct PlanView: View {
     @EnvironmentObject private var venueStore: VenueStore
     @EnvironmentObject private var appState:   AppState
-    @State private var prompt  = ""
+    @State private var prompt    = ""
     @State private var isLoading = false
     @State private var plan: NightPlan? = nil
+    @State private var savedPlans: [NightPlan] = []
 
+    private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
     private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
 
@@ -30,16 +32,16 @@ struct PlanView: View {
 
                     // Header
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("AI PLANNER")
+                        Text("REMY")
                             .font(.system(size: 11, weight: .heavy))
                             .tracking(3)
                             .foregroundStyle(amber)
 
-                        Text("Planea tu noche perfecta")
+                        Text("Tu concierge de noche")
                             .font(.system(size: 26, weight: .bold))
                             .foregroundStyle(.white)
 
-                        Text("Cuéntame qué quieres y te armo el plan completo")
+                        Text("Dime tu presupuesto, vibe y lo que buscas — te armo la noche perfecta en Miami.")
                             .font(.system(size: 14))
                             .foregroundStyle(Color.white.opacity(0.4))
                     }
@@ -50,7 +52,7 @@ struct PlanView: View {
                     VStack(spacing: 12) {
                         ZStack(alignment: .topLeading) {
                             if prompt.isEmpty {
-                                Text("Ej: Somos 6 personas, $100 por cabeza, queremos algo VIP...")
+                                Text("Ej: Primera cita, $100, queremos rooftops...")
                                     .font(.system(size: 14))
                                     .foregroundStyle(Color.white.opacity(0.25))
                                     .padding(.horizontal, 14)
@@ -77,7 +79,7 @@ struct PlanView: View {
                                     ProgressView().tint(.black).scaleEffect(0.85)
                                 } else {
                                     Image(systemName: "sparkles")
-                                    Text("Generar Plan")
+                                    Text("Armar mi noche")
                                         .font(.system(size: 16, weight: .bold))
                                 }
                             }
@@ -123,14 +125,43 @@ struct PlanView: View {
 
                     // Plan result
                     if let plan {
-                        NightPlanView(plan: plan)
+                        NightPlanView(plan: plan, onSave: savePlan)
                             .padding(.horizontal, 20)
+                    }
+
+                    // Saved plans
+                    if !savedPlans.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Planes guardados")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(Color.white.opacity(0.3))
+                                .padding(.horizontal, 20)
+
+                            ForEach(savedPlans) { p in
+                                Button { self.plan = p } label: {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(p.title)
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundStyle(.white)
+                                        Text(p.stops.map(\.venueName).joined(separator: " → "))
+                                            .font(.system(size: 11))
+                                            .foregroundStyle(Color.white.opacity(0.4))
+                                    }
+                                    .padding(14)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.horizontal, 20)
+                            }
+                        }
                     }
 
                     Spacer(minLength: 120)
                 }
             }
         }
+        .task { await loadSavedPlans() }
     }
 
     private func generatePlan() {
@@ -145,38 +176,19 @@ struct PlanView: View {
             }
         }
     }
-}
 
-// MARK: - Night Plan Model
-
-struct NightPlan {
-    struct Stop: Identifiable {
-        let id = UUID()
-        let time: String
-        let venue: Venue
-        let note: String
+    private func savePlan(_ plan: NightPlan) {
+        let repo = planRepo
+        Task {
+            try? await repo.savePlan(plan)
+            await loadSavedPlans()
+        }
     }
 
-    let stops:     [Stop]
-    let totalEst:  String
-    let aiInsight: String
-
-    static func sample(for prompt: String, venues: [Venue]) -> NightPlan {
-        let open = venues.filter { $0.isOpenNow }
-        let stop1 = open.first { $0.hasHappyHour } ?? open.first { $0.type == .rooftop }
-        let stop2 = open.first { $0.type == .lounge || $0.type == .bar }
-        let stop3 = open.first { $0.type == .club }
-
-        var stops: [Stop] = []
-        if let v = stop1 { stops.append(Stop(time: "8:00 PM",  venue: v, note: "Empieza con el pre-game")) }
-        if let v = stop2 { stops.append(Stop(time: "10:30 PM", venue: v, note: "Ambiente y música en vivo")) }
-        if let v = stop3 { stops.append(Stop(time: "12:30 AM", venue: v, note: "La noche pega duro aquí")) }
-
-        return NightPlan(
-            stops: stops,
-            totalEst: "$60–120/persona",
-            aiInsight: "Plan armado basado en lo que está trending esta noche en Miami. Llega antes de las 12 para evitar filas."
-        )
+    private func loadSavedPlans() async {
+        guard AuthService.shared.restoreSession() != nil else { return }
+        let repo = planRepo
+        savedPlans = (try? await repo.getPlans()) ?? []
     }
 }
 
@@ -184,6 +196,7 @@ struct NightPlan {
 
 struct NightPlanView: View {
     let plan: NightPlan
+    let onSave: (NightPlan) -> Void
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
 
     var body: some View {
@@ -202,7 +215,6 @@ struct NightPlanView: View {
             VStack(spacing: 0) {
                 ForEach(Array(plan.stops.enumerated()), id: \.element.id) { i, stop in
                     HStack(alignment: .top, spacing: 14) {
-                        // Timeline
                         VStack(spacing: 0) {
                             Circle()
                                 .fill(amber)
@@ -222,13 +234,13 @@ struct NightPlanView: View {
                             Text(stop.time)
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundStyle(amber)
-                            Text(stop.venue.name)
+                            Text(stop.venueName)
                                 .font(.system(size: 15, weight: .bold))
                                 .foregroundStyle(.white)
                             Text(stop.note)
                                 .font(.system(size: 12))
                                 .foregroundStyle(Color.white.opacity(0.4))
-                            Text("\(stop.venue.neighborhood) · \(stop.venue.priceRange)")
+                            Text("\(stop.venueNeighborhood) · \(stop.venuePriceRange)")
                                 .font(.system(size: 11))
                                 .foregroundStyle(Color.white.opacity(0.3))
                         }
@@ -237,7 +249,6 @@ struct NightPlanView: View {
                 }
             }
 
-            // AI insight
             HStack(alignment: .top, spacing: 10) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 13))
@@ -250,20 +261,36 @@ struct NightPlanView: View {
             .background(amber.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(amber.opacity(0.15)))
 
-            // Share button
-            Button {  } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "square.and.arrow.up")
-                    Text("Compartir plan")
+            HStack(spacing: 12) {
+                Button {
+                    onSave(plan)
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "bookmark.fill")
+                        Text("Guardar")
+                    }
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 13)
+                    .background(amber, in: RoundedRectangle(cornerRadius: 12))
                 }
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 13)
-                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.white.opacity(0.09)))
+                .buttonStyle(.plain)
+
+                Button { } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "square.and.arrow.up")
+                        Text("Compartir")
+                    }
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 13)
+                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.white.opacity(0.09)))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .padding(18)
         .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: 20))

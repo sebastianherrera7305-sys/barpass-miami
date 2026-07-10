@@ -196,8 +196,8 @@ final class WalletPassService: NSObject, ObservableObject {
 
 extension WalletPassService: PKAddPassesViewControllerDelegate {
     nonisolated func addPassesViewControllerDidFinish(_ controller: PKAddPassesViewController) {
-        controller.dismiss(animated: true)
         Task { @MainActor in
+            controller.dismiss(animated: true)
             self.isInWallet = true
             self.addCompletion?(true)
             self.addCompletion = nil

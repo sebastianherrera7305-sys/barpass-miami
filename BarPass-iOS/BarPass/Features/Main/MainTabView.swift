@@ -7,12 +7,8 @@ struct MainTabView: View {
 
     @State private var selectedTab = 0
 
-    private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
-
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Direct switch — paged TabView stole horizontal swipes from the
-            // venue carousels and ignored programmatic selection changes.
             Group {
                 switch selectedTab {
                 case 0:
@@ -23,6 +19,9 @@ struct MainTabView: View {
                     ExploreView()
                         .environmentObject(venueStore)
                 case 2:
+                    TripsListView()
+                        .environmentObject(venueStore)
+                case 3:
                     PlanView()
                         .environmentObject(venueStore)
                         .environmentObject(appState)
@@ -32,53 +31,69 @@ struct MainTabView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .transition(.opacity)
-            .id(selectedTab)
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 72) }
 
-            // Custom tab bar
-            customTabBar
+            floatingTabBar
         }
         .ignoresSafeArea(edges: .bottom)
+        .task { await venueStore.loadVenues() }
     }
 
-    private var customTabBar: some View {
+    private var floatingTabBar: some View {
         HStack(spacing: 0) {
-            tabItem(icon: "flame.fill",       label: "Tonight",  index: 0)
-            tabItem(icon: "map.fill",         label: "Explore",  index: 1)
-            tabItem(icon: "sparkles",         label: "Plan",     index: 2)
-            tabItem(icon: "person.fill",      label: "Me",       index: 3)
+            ForEach(0..<5) { i in
+                tabButton(index: i)
+            }
         }
-        .padding(.horizontal, 8)
-        .padding(.top, 12)
-        .padding(.bottom, 28)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 6)
         .background(
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .overlay(alignment: .top) {
-                    Rectangle()
-                        .fill(Color.white.opacity(0.08))
-                        .frame(height: 0.5)
-                }
-                .ignoresSafeArea()
+            Capsule()
+                .fill(Color(red: 0.06, green: 0.04, blue: 0.10).opacity(0.96))
+                .overlay(Capsule().strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
+                .shadow(color: .black.opacity(0.5), radius: 20, y: 8)
         )
-        .environment(\.colorScheme, .dark)
+        .padding(.horizontal, 40)
+        .padding(.bottom, 6)
     }
 
-    private func tabItem(icon: String, label: String, index: Int) -> some View {
-        let selected = selectedTab == index
-        return Button { withAnimation(.easeInOut(duration: 0.2)) { selectedTab = index } } label: {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 20, weight: selected ? .semibold : .regular))
-                    .foregroundStyle(selected ? amber : Color.white.opacity(0.35))
-                    .scaleEffect(selected ? 1.1 : 1.0)
-                    .animation(.spring(response: 0.3), value: selected)
+    private func tabButton(index: Int) -> some View {
+        let isSelected = selectedTab == index
+        let items: [(icon: String, label: String)] = [
+            ("flame.fill",    "Tonight"),
+            ("map.fill",      "Explore"),
+            ("suitcase.fill", "Trips"),
+            ("sparkles",      "Plan"),
+            ("person.fill",   "Me"),
+        ]
+        let item = items[index]
 
-                Text(label)
-                    .font(.system(size: 10, weight: selected ? .semibold : .regular))
-                    .foregroundStyle(selected ? amber : Color.white.opacity(0.3))
+        return Button {
+            BPHaptics.light()
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                selectedTab = index
+            }
+        } label: {
+            VStack(spacing: 3) {
+                ZStack {
+                    if isSelected {
+                        Capsule()
+                            .fill(Color.bpAmber.opacity(0.15))
+                            .frame(width: 36, height: 28)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                    Image(systemName: item.icon)
+                        .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
+                        .foregroundStyle(isSelected ? Color.bpAmber : Color.white.opacity(0.3))
+                }
+                .frame(height: 28)
+
+                Text(item.label)
+                    .font(.system(size: 9, weight: isSelected ? .semibold : .regular))
+                    .foregroundStyle(isSelected ? Color.bpAmber : Color.white.opacity(0.25))
             }
             .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

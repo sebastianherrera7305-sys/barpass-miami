@@ -7,7 +7,6 @@ import {
   Music,
   Shirt,
   Car,
-  Camera,
   ChevronLeft,
   Zap,
   Sparkles,
@@ -21,6 +20,9 @@ import {
 import { VenueCard } from "@/features/venues/components/venue-card";
 import { FactRow } from "@/features/venues/components/fact-row";
 import { GettingThere } from "@/features/venues/components/getting-there";
+import { VenuePhotos } from "@/features/venues/components/venue-photos";
+import { VenueReviews } from "@/features/venues/components/venue-reviews";
+import { VenueAmenities } from "@/features/venues/components/venue-amenities";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { formatUSD, formatTime } from "@/lib/utils";
@@ -101,6 +103,13 @@ export default async function VenuePage({
         {venue.description}
       </p>
 
+      {venue.live?.editorialSummary && (
+        <p className="mt-3 max-w-2xl border-l-2 border-amber-brand/40 pl-3 text-sm italic text-text-tertiary">
+          {venue.live.editorialSummary}{" "}
+          <span className="not-italic">— Google</span>
+        </p>
+      )}
+
       <div className="mt-4 flex flex-wrap gap-2">
         {venue.vibes.map((vibe) => (
           <Badge key={vibe} variant="outline">
@@ -108,6 +117,8 @@ export default async function VenuePage({
           </Badge>
         ))}
       </div>
+
+      {venue.live && <VenueAmenities live={venue.live} />}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <Card className="space-y-3 p-5">
@@ -210,55 +221,12 @@ export default async function VenuePage({
       )}
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2">
-        <Card className="p-5">
-          <h3 className="flex items-center gap-2 text-sm font-bold">
-            <Camera className="h-4 w-4 text-amber-brand" /> Photos
-          </h3>
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {["🍾", "🎶", "✨", "🌴", "🥂", "🎤"].map((emoji, i) => (
-              <div
-                key={i}
-                className="grid aspect-square place-items-center rounded-xl bg-surface-raised text-2xl"
-              >
-                {emoji}
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        <Card className="p-5">
-          <h3 className="flex items-center gap-2 text-sm font-bold">
-            <Star className="h-4 w-4 text-amber-brand" /> Reviews
-          </h3>
-          <div className="mt-3 space-y-3 text-sm">
-            <div className="flex items-center gap-2 text-amber-brand">
-              <Star className="h-5 w-5 fill-current" />
-              <span className="text-lg font-black">{venue.rating}</span>
-              <span className="text-text-tertiary">
-                ({venue.reviewCount.toLocaleString()} reviews)
-              </span>
-            </div>
-            <div className="space-y-1.5">
-              {[
-                { label: "Atmosphere", score: 4.7 },
-                { label: "Music", score: 4.5 },
-                { label: "Service", score: 4.3 },
-                { label: "Value", score: 4.0 },
-              ].map(({ label, score }) => (
-                <div key={label} className="flex items-center gap-2 text-xs">
-                  <span className="w-20 text-text-tertiary">{label}</span>
-                  <div className="h-1.5 flex-1 rounded-full bg-surface-raised">
-                    <div
-                      className="h-full rounded-full bg-amber-brand"
-                      style={{ width: `${(score / 5) * 100}%` }}
-                    />
-                  </div>
-                  <span className="w-6 text-right text-amber-brand">{score}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
+        <VenuePhotos photoRefs={venue.live?.photoRefs ?? []} />
+        <VenueReviews
+          rating={venue.rating}
+          reviewCount={venue.reviewCount}
+          reviews={venue.live?.reviews ?? []}
+        />
       </section>
 
       <GettingThere venue={venue} />

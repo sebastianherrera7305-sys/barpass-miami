@@ -5,6 +5,7 @@ import AVKit
 // and name them: scene1.mp4, scene2.mp4 ... scene6.mp4
 // They play in sequence with crossfade, then show NativeAuthView.
 
+@MainActor
 struct OnboardingVideoView: View {
     @EnvironmentObject private var appState: AppState
     @State private var currentScene  = 0
@@ -119,7 +120,7 @@ struct OnboardingVideoView: View {
                 forName: .AVPlayerItemDidPlayToEndTime,
                 object: newPlayer.currentItem,
                 queue: .main
-            ) { _ in advanceScene() }
+            ) { _ in Task { @MainActor in advanceScene() } }
 
             newPlayer.play()
             withAnimation { opacity = 1 }

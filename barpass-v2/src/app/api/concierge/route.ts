@@ -16,7 +16,13 @@ import {
  * the model directly.
  */
 export async function POST(request: Request) {
-  const parsed = conciergeRequestSchema.safeParse(await request.json());
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+  }
+  const parsed = conciergeRequestSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }
@@ -30,9 +36,9 @@ export async function POST(request: Request) {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       response_format: { type: "json_object" },
-      temperature: 0.8,
+      temperature: 0.9,
       messages: [
         { role: "system", content: buildConciergeSystemPrompt(venues) },
         { role: "user", content: parsed.data.prompt },

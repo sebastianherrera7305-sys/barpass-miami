@@ -1,5 +1,3 @@
-import Foundation
-
 /// Stripe publishable key configuration.
 ///
 /// IMPORTANT: This is the *publishable* key (pk_live_… / pk_test_…), safe to ship in the

@@ -96,4 +96,68 @@ export interface Venue {
 
   isTrending: boolean;
   isOpenNow: boolean;
+
+  /**
+   * LIVE layer — populated by the Google Places enrichment script.
+   * Absent until a venue has been verified against Google. When present,
+   * `businessStatus` is the source of truth for whether the venue still
+   * exists (this is what would have caught The Wharf).
+   */
+  live?: VenueLiveMeta;
+}
+
+export type BusinessStatus =
+  | "OPERATIONAL"
+  | "CLOSED_TEMPORARILY"
+  | "CLOSED_PERMANENTLY";
+
+/** A single real Google review — never fabricated. */
+export interface LiveReview {
+  author: string;
+  authorPhoto: string | null;
+  rating: number;
+  text: string;
+  relativeTime: string; // "5 months ago"
+}
+
+/**
+ * Amenities as reported by Google. A field is only present when Google
+ * actually knows it — absent means "unknown", never "false". The UI must
+ * treat `undefined` as "don't show", not as a negative.
+ */
+export interface LiveAmenities {
+  reservable?: boolean;
+  outdoorSeating?: boolean;
+  liveMusic?: boolean;
+  goodForGroups?: boolean;
+  servesCocktails?: boolean;
+  servesBeer?: boolean;
+  servesWine?: boolean;
+  restroom?: boolean;
+  wheelchairAccessible?: boolean;
+}
+
+export type PriceLevel =
+  | "PRICE_LEVEL_INEXPENSIVE"
+  | "PRICE_LEVEL_MODERATE"
+  | "PRICE_LEVEL_EXPENSIVE"
+  | "PRICE_LEVEL_VERY_EXPENSIVE";
+
+export interface VenueLiveMeta {
+  placeId: string;
+  businessStatus: BusinessStatus;
+  googleMapsUri: string | null;
+  weekdayText: string[];
+  photoRefs: string[];
+  /** ISO timestamp of the last successful Google verification. */
+  lastVerified: string;
+
+  /** Google's own one-line editorial description, when available. */
+  editorialSummary: string | null;
+  primaryType: string | null;
+  priceLevel: PriceLevel | null;
+  phone: string | null;
+  website: string | null;
+  amenities: LiveAmenities;
+  reviews: LiveReview[];
 }

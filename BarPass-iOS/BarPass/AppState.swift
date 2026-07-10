@@ -12,7 +12,7 @@ struct OrderConfirmation: Equatable {
 @MainActor
 final class AppState: ObservableObject {
     @Published var showSplash             = true
-    @Published var showOnboarding         = true
+    @Published var showOnboarding         = false
     @Published var showActionBar          = false
     @Published var showNativeAuth         = true
     @Published var isOffline              = false
@@ -23,12 +23,13 @@ final class AppState: ObservableObject {
     @Published var showPriorityEntry       = false
     @Published var priorityVenueId:        String = ""
     @Published var priorityVenueName:      String = ""
-    @Published var authError:              String = ""
+    @Published var appReady                = false
 
-    private var minTimerDone = false
-    private var webReadyDone = false
+    /// Kept for legacy WebView bridge compatibility.
+    /// Native auth uses `completeAuth()` and local error state instead.
+    @Published var authError: String = ""
+
     private var cancellables = Set<AnyCancellable>()
-
     private let networkMonitor = NWPathMonitor()
     private let networkQueue   = DispatchQueue(label: "io.barpass.appstate.network", qos: .utility)
 
@@ -46,33 +47,19 @@ final class AppState: ObservableObject {
         networkMonitor.start(queue: networkQueue)
     }
 
-    func splashMinTimerFired() {
-        minTimerDone = true
-        maybeCompleteSplash()
-    }
-
-    func webDidSignalReady() {
-        webReadyDone = true
-        maybeCompleteSplash()
-        scheduleActionBar(delay: 0.6)
-        withAnimation(.easeInOut(duration: 0.5)) { showNativeAuth = false }
-    }
-
     func splashComplete() {
-        withAnimation(.easeOut(duration: 0.4)) { showSplash = false }
-        // Safety timer dismisses splash only — action bar waits for web signal
+        withAnimation(.easeOut(duration: 0.15)) { showSplash = false }
     }
 
-    private func scheduleActionBar(delay: Double) {
-        guard !showActionBar else { return }
-        Task {
-            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-            withAnimation(.easeIn(duration: 0.4)) { showActionBar = true }
-        }
+    /// Called after successful auth (sign in, sign up, or session restore).
+    /// Dismisses auth UI, marks app as ready, and reveals the action bar.
+    func completeAuth() {
+        withAnimation(.easeOut(duration: 0.1)) { showNativeAuth = false }
+        appReady = true
+        withAnimation(.easeOut(duration: 0.15).delay(0.1)) { showActionBar = true }
     }
 
-    private func maybeCompleteSplash() {
-        guard minTimerDone && webReadyDone else { return }
-        withAnimation(.easeOut(duration: 0.4)) { showSplash = false }
-    }
+    /// Legacy bridge alias — kept for orphaned WebView compatibility.
+    /// Do NOT use in new code.
+    func webDidSignalReady() { completeAuth() }
 }

@@ -122,6 +122,29 @@ create policy "manage own favorites"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- TRIPS ─────────────────────────────────────────────────────
+create table if not exists public.trips (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  destination_city text not null,
+  start_date text not null,
+  end_date text not null,
+  visibility text not null default 'private',
+  status text not null default 'planning',
+  trip_data jsonb not null default '{}',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.trips enable row level security;
+
+create policy "manage own trips"
+  on public.trips for all
+  to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
 -- SAVED PLANS (AI Concierge output) ───────────────────────────
 create table if not exists public.night_plans (
   id uuid primary key default gen_random_uuid(),

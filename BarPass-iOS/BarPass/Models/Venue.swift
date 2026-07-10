@@ -1,4 +1,6 @@
-import Foundation
+import MapKit
+
+// MARK: - Domain Enums
 
 enum VenueType: String, Codable, CaseIterable {
     case club       = "Club"
@@ -23,6 +25,8 @@ enum MusicGenre: String, Codable, CaseIterable {
     case rnb        = "R&B"
 }
 
+// MARK: - Domain Models
+
 struct PopularDrink: Identifiable, Codable {
     let id: String
     let name: String
@@ -38,11 +42,13 @@ struct VenueEvent: Identifiable, Codable {
     let description: String
 }
 
-struct Venue: Identifiable, Codable {
+struct BarPassVenue: Identifiable, Codable {
     let id:               String
     let name:             String
     let neighborhood:     String
     let address:          String
+    let latitude:         Double
+    let longitude:        Double
     let type:             VenueType
     let vibes:            [String]
     let musicGenres:      [MusicGenre]
@@ -55,7 +61,7 @@ struct Venue: Identifiable, Codable {
     let avgSpend:         String
     let dressCode:        String
     let parking:          String
-    let crowdLevel:       Int        // 0–5
+    let crowdLevel:       Int
     let bestArrivalTime:  String
     let peakHours:        String
     let popularDrinks:    [PopularDrink]
@@ -63,10 +69,12 @@ struct Venue: Identifiable, Codable {
     let tags:             [String]
     let emoji:            String
     let instagramHandle:  String?
-    var isTrending:       Bool
-    var hasHappyHour:     Bool
-    var happyHourUntil:   String?
-    var isOpenNow:        Bool
+    let isTrending:       Bool
+    let hasHappyHour:     Bool
+    let happyHourUntil:   String?
+    let isOpenNow:        Bool
+    let photoUrls:        [String]
+    let editorial:        String?
 
     var crowdDescription: String {
         switch crowdLevel {
@@ -84,4 +92,52 @@ struct Venue: Identifiable, Codable {
         guard let cover = coverMen else { return "Sin cover" }
         return cover == 0 ? "Sin cover" : "$\(cover)+ cover"
     }
+
+    var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
 }
+
+// MARK: - Preview
+
+extension BarPassVenue {
+    static let preview = BarPassVenue(
+        id: "liv-miami",
+        name: "LIV Miami",
+        neighborhood: "South Beach",
+        address: "4441 Collins Ave, Miami Beach",
+        latitude: 25.8171,
+        longitude: -80.1229,
+        type: .club,
+        vibes: ["VIP", "Luxury", "Bottle Service", "Celebrity"],
+        musicGenres: [.edm, .hipHop, .pop],
+        rating: 3.3,
+        reviewCount: 2050,
+        coverMen: 40,
+        coverWomen: 20,
+        openTime: "11:00 PM",
+        closeTime: "5:00 AM",
+        avgSpend: "$150–400",
+        dressCode: "Upscale — no sneakers, no shorts",
+        parking: "Valet $30",
+        crowdLevel: 4,
+        bestArrivalTime: "11:30 PM – 12:30 AM",
+        peakHours: "1:00 AM – 3:00 AM",
+        popularDrinks: [
+            PopularDrink(id: "1", name: "Grey Goose Bottle", price: 350, emoji: "🍾"),
+            PopularDrink(id: "2", name: "Ace of Spades", price: 800, emoji: "🥂"),
+        ],
+        upcomingEvents: [],
+        tags: ["EDM", "VIP", "Nightclub", "South Beach"],
+        emoji: "🔥",
+        instagramHandle: "livmiami",
+        isTrending: true,
+        hasHappyHour: false,
+        happyHourUntil: nil,
+        isOpenNow: true,
+        photoUrls: [],
+        editorial: "Trendy, opulent Fontainebleau Hotel club."
+    )
+}
+
+// MARK: - Design system tokens live in Resources/DesignSystem.swift

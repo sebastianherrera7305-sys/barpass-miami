@@ -18,9 +18,10 @@ export function formatUSD(amount: number): string {
   }).format(amount);
 }
 
-/** "10:30 PM" from a 24h "22:30" string. */
+/** "10:30 PM" from a 24h "22:30" string. Handles "24:00" as Midnight. */
 export function formatTime(time24: string): string {
   const [h, m] = time24.split(":").map(Number);
+  if (h === 24 && m === 0) return "Midnight";
   const suffix = h >= 12 ? "PM" : "AM";
   const hour = h % 12 || 12;
   return `${hour}:${m.toString().padStart(2, "0")} ${suffix}`;

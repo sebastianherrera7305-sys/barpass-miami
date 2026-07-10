@@ -1,12 +1,11 @@
 import SwiftUI
+import MapKit
 
 struct VenueDetailView: View {
-    let venue: Venue
+    let venue: BarPassVenue
     @Environment(\.dismiss) private var dismiss
     @State private var isSaved = false
-
-    private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
-    private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
+    @State private var showShareSheet = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -21,32 +20,25 @@ struct VenueDetailView: View {
             }
             .ignoresSafeArea(edges: .top)
 
-            // CTA bar
             ctaBar
         }
         .navigationBarHidden(true)
         .overlay(alignment: .topLeading) { navBar }
+        .sheet(isPresented: $showShareSheet) {
+            ShareSheet(venue: venue)
+                .presentationDetents([.medium, .large])
+        }
     }
 
     // MARK: - Hero
 
     private var heroSection: some View {
         ZStack(alignment: .bottomLeading) {
-            // Gradient background (placeholder for real photo)
-            LinearGradient(
-                colors: [Color(white: 0.15), Color(white: 0.06)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .frame(height: 300)
+            heroBackground
+                .frame(height: 300)
+                .frame(maxWidth: .infinity)
+                .clipped()
 
-            // Emoji large
-            Text(venue.emoji)
-                .font(.system(size: 120))
-                .opacity(0.12)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-
-            // Gradient fade
             LinearGradient(
                 colors: [.clear, .black],
                 startPoint: .init(x: 0.5, y: 0.3),
@@ -54,95 +46,128 @@ struct VenueDetailView: View {
             )
             .frame(height: 300)
 
-            // Venue info
             VStack(alignment: .leading, spacing: 8) {
-                // Vibes
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
                         ForEach(venue.vibes.prefix(4), id: \.self) { vibe in
-                            Text("#\(vibe)")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(Color.white.opacity(0.6))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.white.opacity(0.1), in: Capsule())
+            Text("#\(vibe)")
+                .font(.bpCaption())
+                .foregroundStyle(Color.bpTextSecondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.white.opacity(0.1), in: Capsule())
                         }
                     }
                 }
 
                 Text(venue.name)
-                    .font(.system(size: 30, weight: .black))
-                    .foregroundStyle(.white)
+                .font(.bpLargeTitle())
+                .foregroundStyle(.white)
 
                 HStack(spacing: 12) {
                     HStack(spacing: 4) {
-                        Image(systemName: "star.fill").font(.system(size: 12)).foregroundStyle(amber)
+                        Image(systemName: "star.fill").font(.system(size: 12)).foregroundStyle(Color.bpAmber)
                         Text(String(format: "%.1f", venue.rating))
                             .font(.system(size: 13, weight: .bold)).foregroundStyle(.white)
                         Text("(\(venue.reviewCount))")
-                            .font(.system(size: 12)).foregroundStyle(Color.white.opacity(0.4))
+                            .font(.system(size: 12)).foregroundStyle(Color.bpTextSecondary)
                     }
-                    Text("·").foregroundStyle(Color.white.opacity(0.2))
+                    Text("·").foregroundStyle(Color.bpTextTertiary)
                     Text(venue.type.rawValue)
-                        .font(.system(size: 13)).foregroundStyle(Color.white.opacity(0.5))
-                    Text("·").foregroundStyle(Color.white.opacity(0.2))
+                        .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
+                    Text("·").foregroundStyle(Color.bpTextTertiary)
                     Text(venue.neighborhood)
-                        .font(.system(size: 13)).foregroundStyle(Color.white.opacity(0.5))
+                        .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, BPSpacing.lg)
             .padding(.bottom, 20)
         }
         .frame(height: 300)
+    }
+
+    /// Real Google photo when available, emoji gradient as graceful fallback.
+    @ViewBuilder private var heroBackground: some View {
+        if let first = venue.photoUrls.first, let url = URL(string: first) {
+            CachedImage(url: url, targetSize: CGSize(width: 420, height: 420), priority: .hot) { image in
+                // Color.clear adopts the PROPOSED size; the overlaid fill image
+                // is then clipped to it. A bare scaledToFill here reports the
+                // bitmap's ideal width (~1260pt) and blows the whole screen
+                // layout sideways.
+                Color.clear
+                    .overlay(image.resizable().scaledToFill())
+                    .clipped()
+            } placeholder: {
+                ZStack {
+                    heroEmojiFallback
+                    ProgressView().tint(Color.bpAmber)
+                }
+            }
+        } else {
+            heroEmojiFallback
+        }
+    }
+
+    private var heroEmojiFallback: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color(white: 0.15), Color(white: 0.06)],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            )
+            Text(venue.emoji).font(.system(size: 120)).opacity(0.12)
+        }
     }
 
     // MARK: - Content
 
     private var contentSection: some View {
         VStack(alignment: .leading, spacing: 24) {
-
-            // Quick stats row
             quickStats
-                .padding(.horizontal, 20)
+                .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 20)
 
             divider
 
-            // Crowd & timing
             timingSection
-                .padding(.horizontal, 20)
+                .padding(.horizontal, BPSpacing.lg)
 
             divider
 
-            // Music
-            musicSection
-                .padding(.horizontal, 20)
+            // AI Insight — prominent position
+            aiInsightSection
+                .padding(.horizontal, BPSpacing.lg)
 
-            // Popular drinks
+            divider
+
+            musicSection
+                .padding(.horizontal, BPSpacing.lg)
+
             if !venue.popularDrinks.isEmpty {
                 divider
                 drinksSection
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, BPSpacing.lg)
             }
 
-            // Upcoming events
             if !venue.upcomingEvents.isEmpty {
                 divider
                 eventsSection
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, BPSpacing.lg)
+            }
+
+            if !venue.photoUrls.isEmpty {
+                divider
+                photosSection
             }
 
             divider
 
-            // AI Insight
-            aiInsightSection
-                .padding(.horizontal, 20)
+            reviewsSection
+                .padding(.horizontal, BPSpacing.lg)
 
             divider
 
-            // Location
             locationSection
-                .padding(.horizontal, 20)
+                .padding(.horizontal, BPSpacing.lg)
         }
     }
 
@@ -150,28 +175,28 @@ struct VenueDetailView: View {
 
     private var quickStats: some View {
         HStack(spacing: 0) {
-            quickStat(icon: "clock.fill", label: "Cierra", value: venue.closeTime)
+            quickStat(icon: "clock.fill", label: "Cierra", value: venue.closeTime, primary: true)
             Divider().background(Color.white.opacity(0.08)).frame(height: 40)
-            quickStat(icon: "ticket.fill", label: "Cover", value: venue.priceRange)
+            quickStat(icon: "ticket.fill", label: "Cover", value: venue.priceRange, primary: false)
             Divider().background(Color.white.opacity(0.08)).frame(height: 40)
-            quickStat(icon: "person.3.fill", label: "Crowd", value: venue.crowdDescription)
+            quickStat(icon: "person.3.fill", label: "Crowd", value: venue.crowdDescription, primary: false)
         }
         .padding(.vertical, 14)
-        .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.07)))
+        .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.07)))
     }
 
-    private func quickStat(icon: String, label: String, value: String) -> some View {
+    private func quickStat(icon: String, label: String, value: String, primary: Bool) -> some View {
         VStack(spacing: 5) {
             Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundStyle(amber)
+                .font(.system(size: primary ? 18 : 14))
+                .foregroundStyle(Color.bpAmber)
             Text(value)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(.white)
+                .font(.system(size: primary ? 16 : 13, weight: primary ? .black : .bold))
+                .foregroundStyle(primary ? Color.bpAmber : .white)
             Text(label)
-                .font(.system(size: 11))
-                .foregroundStyle(Color.white.opacity(0.35))
+                .font(.bpSmall())
+                .foregroundStyle(Color.bpTextSecondary)
         }
         .frame(maxWidth: .infinity)
     }
@@ -183,25 +208,22 @@ struct VenueDetailView: View {
             sectionTitle("Cuándo ir")
 
             infoRow("calendar", "Horario", "\(venue.openTime) – \(venue.closeTime)")
-            infoRow("clock.arrow.2.circlepath", "Mejor hora de llegar", venue.bestArrivalTime)
+            infoRow("clock.arrow.2.circlepath", "Mejor hora", venue.bestArrivalTime)
             infoRow("waveform.path.ecg", "Peak hours", venue.peakHours)
-            infoRow("dollarsign.circle.fill", "Gasto promedio", venue.avgSpend + " / persona")
+            infoRow("dollarsign.circle.fill", "Gasto prom.", venue.avgSpend + " / persona")
 
-            // Crowd bar
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Nivel de crowd")
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color.white.opacity(0.4))
+                    Text("Crowd")
+                        .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
                     Spacer()
                     Text(venue.crowdDescription)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .font(.system(size: 13, weight: .semibold)).foregroundStyle(.white)
                 }
                 HStack(spacing: 4) {
                     ForEach(0..<5) { i in
                         RoundedRectangle(cornerRadius: 3)
-                            .fill(i < venue.crowdLevel ? amber : Color.white.opacity(0.1))
+                            .fill(i < venue.crowdLevel ? Color.bpAmber : Color.white.opacity(0.1))
                             .frame(height: 8)
                     }
                 }
@@ -217,12 +239,12 @@ struct VenueDetailView: View {
             HStack(spacing: 8) {
                 ForEach(venue.musicGenres, id: \.self) { genre in
                     Text(genre.rawValue)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(amber)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(Color.bpAmber)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
-                        .background(amber.opacity(0.1), in: Capsule())
-                        .overlay(Capsule().strokeBorder(amber.opacity(0.2)))
+                        .background(Color.bpAmber.opacity(0.1), in: Capsule())
+                        .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.2)))
                 }
             }
             infoRow("tshirt.fill", "Dress Code", venue.dressCode)
@@ -244,7 +266,7 @@ struct VenueDetailView: View {
                         Spacer()
                         Text(String(format: "$%.0f", drink.price))
                             .font(.system(size: 14, weight: .bold, design: .monospaced))
-                            .foregroundStyle(amber)
+                            .foregroundStyle(Color.bpAmber)
                     }
                 }
             }
@@ -256,28 +278,75 @@ struct VenueDetailView: View {
     private var eventsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             sectionTitle("Próximos eventos")
-            VStack(spacing: 10) {
-                ForEach(venue.upcomingEvents) { event in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(event.title)
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(.white)
-                            Text(event.date, style: .date)
-                                .font(.system(size: 12))
-                                .foregroundStyle(Color.white.opacity(0.4))
-                        }
-                        Spacer()
-                        if let cover = event.coverPrice {
-                            Text(cover == 0 ? "Gratis" : String(format: "$%.0f", cover))
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(cover == 0 ? Color(red: 0.2, green: 0.9, blue: 0.4) : amber)
-                        }
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(venue.upcomingEvents.sorted { $0.date < $1.date }) { event in
+                        EventFlyerCard(event: event, venue: venue, width: 190, height: 250)
                     }
-                    .padding(12)
-                    .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
                 }
             }
+        }
+    }
+
+    // MARK: - Photos (real Google photos via venue_media.json)
+
+    private var photosSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Fotos")
+                .padding(.horizontal, BPSpacing.lg)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(venue.photoUrls, id: \.self) { urlString in
+                        AsyncImage(url: URL(string: urlString)) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image.resizable().scaledToFill()
+                            case .empty:
+                                ZStack {
+                                    Color(white: 0.08)
+                                    ProgressView().tint(Color.bpAmber)
+                                }
+                            case .failure:
+                                ZStack {
+                                    Color(white: 0.08)
+                                    Image(systemName: "photo")
+                                        .foregroundStyle(Color.bpTextSecondary)
+                                }
+                            @unknown default:
+                                Color(white: 0.08)
+                            }
+                        }
+                        .frame(width: 260, height: 180)
+                        .clipShape(RoundedRectangle(cornerRadius: BPRadius.md))
+                    }
+                }
+                .padding(.horizontal, BPSpacing.lg)
+            }
+        }
+    }
+
+    // MARK: - Reviews
+
+    private var reviewsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Reviews")
+
+            HStack(spacing: 8) {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(Color.bpAmber)
+                Text(String(format: "%.1f", venue.rating))
+                    .font(.system(size: 24, weight: .black))
+                    .foregroundStyle(.white)
+                Text("(\(venue.reviewCount) reviews)")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.bpTextSecondary)
+                Spacer()
+            }
+
+            Text("Rating de Google")
+                .font(.system(size: 11))
+                .foregroundStyle(Color.bpTextSecondary.opacity(0.7))
         }
     }
 
@@ -286,17 +355,24 @@ struct VenueDetailView: View {
     private var aiInsightSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
-                Image(systemName: "sparkles").foregroundStyle(amber)
-                Text("AI Insight").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                Image(systemName: "sparkles").foregroundStyle(Color.bpAmber)
+                Text("Remy dice").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
             }
             Text("Mejor momento para ir: \(venue.bestArrivalTime). \(venue.type == .club ? "Llega con lista para evitar el cover." : "Ambiente más tranquilo entre semana.") Dress code: \(venue.dressCode).")
                 .font(.system(size: 13))
-                .foregroundStyle(Color.white.opacity(0.5))
+                .foregroundStyle(Color.bpTextSecondary)
                 .lineSpacing(4)
+            HStack(spacing: 6) {
+                Image(systemName: "sparkles.magnifyingglass")
+                    .font(.system(size: 10))
+                Text("Pregúntale a Remy en Plan →")
+                    .font(.system(size: 11, weight: .semibold))
+            }
+            .foregroundStyle(Color.bpAmber.opacity(0.7))
         }
         .padding(16)
-        .background(amber.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(amber.opacity(0.15)))
+        .background(Color.bpAmber.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpAmber.opacity(0.15)))
     }
 
     // MARK: - Location
@@ -304,14 +380,14 @@ struct VenueDetailView: View {
     private var locationSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             sectionTitle("Cómo llegar")
-            infoRow("location.fill",    "Dirección", venue.address)
-            infoRow("car.fill",         "Parking",   venue.parking)
+            infoRow("location.fill", "Dirección", venue.address)
+            infoRow("car.fill", "Parking", venue.parking)
 
             HStack(spacing: 10) {
-                linkButton(icon: "map.fill",     label: "Maps")
-                linkButton(icon: "car.fill",     label: "Uber")
+                linkButton(icon: "map.fill", label: "Maps") { openMaps() }
+                linkButton(icon: "car.fill", label: "Uber") { openUber() }
                 if let ig = venue.instagramHandle {
-                    linkButton(icon: "camera.fill", label: "@\(ig)")
+                    linkButton(icon: "camera.fill", label: "@\(ig)") { openInstagram(handle: ig) }
                 }
             }
         }
@@ -320,39 +396,47 @@ struct VenueDetailView: View {
     // MARK: - CTA Bar
 
     private var ctaBar: some View {
-        HStack(spacing: 12) {
-            // Save button
+        HStack(spacing: 10) {
             Button {
+                BPHaptics.light()
                 withAnimation(.spring(response: 0.3)) { isSaved.toggle() }
             } label: {
                 Image(systemName: isSaved ? "heart.fill" : "heart")
-                    .font(.system(size: 20))
-                    .foregroundStyle(isSaved ? Color(red: 1, green: 0.3, blue: 0.3) : .white)
-                    .frame(width: 52, height: 52)
+                    .font(.system(size: 18))
+                    .foregroundStyle(isSaved ? Color.bpDanger : .white)
+                    .frame(width: 48, height: 48)
                     .background(Color.white.opacity(0.08), in: Circle())
                     .overlay(Circle().strokeBorder(Color.white.opacity(0.1)))
             }
             .buttonStyle(.plain)
 
-            // Check in
             Button { } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "mappin.circle.fill").font(.system(size: 16))
-                    Text("Check-in · +50 BPX")
-                        .font(.system(size: 15, weight: .bold))
+                HStack(spacing: 6) {
+                    Image(systemName: "bolt.fill").font(.system(size: 12))
+                    Text("Skip the Line")
+                        .font(.system(size: 14, weight: .bold))
                 }
                 .foregroundStyle(.black)
                 .frame(maxWidth: .infinity)
-                .frame(height: 52)
+                .frame(height: 48)
                 .background(
-                    LinearGradient(colors: [amber, amberB], startPoint: .leading, endPoint: .trailing),
-                    in: RoundedRectangle(cornerRadius: 14)
+                    LinearGradient(colors: [Color.bpAmber, Color.bpAmberBright], startPoint: .leading, endPoint: .trailing),
+                    in: RoundedRectangle(cornerRadius: BPRadius.md)
                 )
             }
             .buttonStyle(.plain)
+
+            Button { } label: {
+                Image(systemName: "mappin.circle.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(Color.bpAmber)
+                    .frame(width: 48, height: 48)
+                    .background(Color.bpAmber.opacity(0.12), in: Circle())
+            }
+            .buttonStyle(.plain)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
+        .padding(.horizontal, BPSpacing.lg)
+        .padding(.vertical, 10)
         .padding(.bottom, 24)
         .background(.ultraThinMaterial)
         .environment(\.colorScheme, .dark)
@@ -362,27 +446,27 @@ struct VenueDetailView: View {
 
     private var navBar: some View {
         HStack {
-            Button { dismiss() } label: {
+            Button { BPHaptics.light(); dismiss() } label: {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)
-                    .frame(width: 36, height: 36)
+                    .frame(width: 34, height: 34)
                     .background(.ultraThinMaterial, in: Circle())
                     .environment(\.colorScheme, .dark)
             }
             .buttonStyle(.plain)
             Spacer()
-            Button { } label: {
+            Button { BPHaptics.light(); showShareSheet = true } label: {
                 Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)
-                    .frame(width: 36, height: 36)
+                    .frame(width: 34, height: 34)
                     .background(.ultraThinMaterial, in: Circle())
                     .environment(\.colorScheme, .dark)
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, BPSpacing.lg)
         .padding(.top, 56)
     }
 
@@ -392,7 +476,7 @@ struct VenueDetailView: View {
         Rectangle()
             .fill(Color.white.opacity(0.06))
             .frame(height: 1)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, BPSpacing.lg)
     }
 
     private func sectionTitle(_ title: String) -> some View {
@@ -405,12 +489,12 @@ struct VenueDetailView: View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 13))
-                .foregroundStyle(amber)
+                .foregroundStyle(Color.bpAmber)
                 .frame(width: 18)
             Text(label)
                 .font(.system(size: 13))
-                .foregroundStyle(Color.white.opacity(0.4))
-                .frame(width: 90, alignment: .leading)
+                .foregroundStyle(Color.bpTextSecondary)
+                .frame(width: 80, alignment: .leading)
             Text(value)
                 .font(.system(size: 13))
                 .foregroundStyle(Color.white.opacity(0.7))
@@ -419,24 +503,67 @@ struct VenueDetailView: View {
         }
     }
 
-    private func linkButton(icon: String, label: String) -> some View {
-        Button { } label: {
+    private func linkButton(icon: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
             HStack(spacing: 6) {
-                Image(systemName: icon).font(.system(size: 12))
-                Text(label).font(.system(size: 13, weight: .semibold))
+                Image(systemName: icon).font(.system(size: 11))
+                Text(label).font(.system(size: 12, weight: .semibold))
             }
             .foregroundStyle(Color.white.opacity(0.7))
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
-            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.white.opacity(0.09)))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.sm))
+            .overlay(RoundedRectangle(cornerRadius: BPRadius.sm).strokeBorder(Color.white.opacity(0.09)))
         }
         .buttonStyle(.plain)
     }
+
+    // MARK: - Actions
+
+    private func openMaps() {
+        let placemark = MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: venue.latitude, longitude: venue.longitude))
+        let mapItem = MKMapItem(placemark: placemark)
+        mapItem.name = venue.name
+        mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+    }
+
+    private func openUber() {
+        let encoded = venue.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let uberURL = URL(string: "uber://?action=setPickup&dropoff[latitude]=\(venue.latitude)&dropoff[longitude]=\(venue.longitude)&dropoff[nickname]=\(encoded)")
+        if let url = uberURL, UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+        } else if let url = URL(string: "https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=\(venue.latitude)&dropoff[longitude]=\(venue.longitude)") {
+            UIApplication.shared.open(url)
+        }
+    }
+
+    private func openInstagram(handle: String) {
+        let cleanHandle = handle.replacingOccurrences(of: "@", with: "")
+        if let url = URL(string: "instagram://user?username=\(cleanHandle)"),
+           UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+        } else if let url = URL(string: "https://instagram.com/\(cleanHandle)") {
+            UIApplication.shared.open(url)
+        }
+    }
+}
+
+// MARK: - Share Sheet
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let venue: BarPassVenue
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let text = "Check out \(venue.name) in Miami! \(venue.neighborhood)"
+        let url = URL(string: "https://barpass.app/venues/\(venue.id)")!
+        return UIActivityViewController(activityItems: [text, url], applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
 }
 
 #Preview {
     NavigationStack {
-        VenueDetailView(venue: VenueStore.miamVenues[0])
+        VenueDetailView(venue: BarPassVenue.preview)
     }
 }
