@@ -68,21 +68,28 @@ struct CachedImage<Content: View, Placeholder: View>: View {
         guard let url else { return }
         if let cached = ImageCache.image(for: url) { uiImage = cached; return }
 
-        let maxPixel = max(targetSize?.width ?? 512, targetSize?.height ?? 512) * UIScreen.main.scale
-        let opts: CFDictionary = [
-            kCGImageSourceShouldCache: false,
-            kCGImageSourceCreateThumbnailFromImageAlways: true,
-            kCGImageSourceShouldCacheImmediately: true,
-            kCGImageSourceCreateThumbnailWithTransform: true,
-            kCGImageSourceThumbnailMaxPixelSize: maxPixel,
-        ] as CFDictionary
+        // View.task runs on the MainActor — CGImageSourceCreateWithURL there
+        // downloads AND decodes on the main thread, freezing the whole UI
+        // (the login was untouchable while 181 hidden cards loaded). All
+        // network + decode now happens on a detached background task.
+        let maxPixel = max(targetSize?.width ?? 512, targetSize?.height ?? 512) * 3
+        let prio = priority
+        let img = await Task.detached(priority: .utility) { () -> UIImage? in
+            let opts: CFDictionary = [
+                kCGImageSourceShouldCache: false,
+                kCGImageSourceCreateThumbnailFromImageAlways: true,
+                kCGImageSourceShouldCacheImmediately: true,
+                kCGImageSourceCreateThumbnailWithTransform: true,
+                kCGImageSourceThumbnailMaxPixelSize: maxPixel,
+            ] as CFDictionary
+            guard let source = CGImageSourceCreateWithURL(url as CFURL, opts),
+                  let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, opts)
+            else { return nil }
+            return UIImage(cgImage: cg)
+        }.value
 
-        guard let source = CGImageSourceCreateWithURL(url as CFURL, opts),
-              let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, opts)
-        else { return }
-
-        let img = UIImage(cgImage: cgImage)
-        ImageCache.store(img, for: url, priority: priority)
+        guard let img else { return }
+        ImageCache.store(img, for: url, priority: prio)
         if !Task.isCancelled { uiImage = img }
     }
 }

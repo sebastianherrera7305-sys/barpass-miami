@@ -23,9 +23,19 @@ struct AuthSession: Codable, Sendable {
 final class AuthService: @unchecked Sendable {
     static let shared = AuthService()
 
+    // URLSession is thread-safe; assigned once at init.
+    nonisolated(unsafe) private static let customSession: URLSession = {
+        let cfg = URLSessionConfiguration.default
+        cfg.timeoutIntervalForRequest = requestTimeout
+        cfg.timeoutIntervalForResource = requestTimeout
+        cfg.waitsForConnectivity = false
+        return URLSession(configuration: cfg)
+    }()
+
     private static let baseURL = "https://hrhdezziddfrktvtgzbg.supabase.co/auth/v1"
     private static let anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyaGRlenppZGRmcmt0dnRnemJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODM1NjksImV4cCI6MjA5ODk1OTU2OX0.vzgIE7JPL8vN0fWVGkf-AvUCH1iWTioHjZpxcuSRBRo"
     private static let sessionKey = "bp_auth_session"
+    private static let requestTimeout: TimeInterval = 8
 
     private let defaults = UserDefaults.standard
     private let lock = NSLock()
@@ -75,7 +85,7 @@ final class AuthService: @unchecked Sendable {
         applyHeaders(&request)
         request.httpBody = try JSONSerialization.data(withJSONObject: ["email": email, "password": password])
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await Self.customSession.data(for: request)
         try Self.ensureOK(response, data: data)
         // Signup with autoconfirm returns a session; otherwise sign in directly.
         if let session = Self.parseSession(data) {
@@ -91,7 +101,7 @@ final class AuthService: @unchecked Sendable {
         request.httpMethod = "POST"
         applyHeaders(&request)
         request.httpBody = try JSONSerialization.data(withJSONObject: ["email": email])
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await Self.customSession.data(for: request)
         try Self.ensureOK(response, data: data)
         BPAnalytics.track(.forgotPassword)
     }
@@ -109,7 +119,7 @@ final class AuthService: @unchecked Sendable {
         applyHeaders(&request)
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await Self.customSession.data(for: request)
         try Self.ensureOK(response, data: data)
         guard let session = Self.parseSession(data) else { throw AuthError.network }
         return session
@@ -118,7 +128,7 @@ final class AuthService: @unchecked Sendable {
     private func applyHeaders(_ request: inout URLRequest) {
         request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 15
+        request.timeoutInterval = Self.requestTimeout
     }
 
     private static func ensureOK(_ response: URLResponse, data: Data) throws {

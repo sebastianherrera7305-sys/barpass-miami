@@ -6,12 +6,18 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            // Native main experience
-            NavigationStack {
-                MainTabView()
+            // Native main experience. Built only AFTER auth: at opacity 0 it
+            // still rendered 181 venue cards behind the login, saturating the
+            // main thread and making the login feel frozen.
+            if !appState.showSplash && !appState.showNativeAuth {
+                NavigationStack {
+                    MainTabView()
+                }
+                .ignoresSafeArea()
+                .transition(.opacity)
+            } else {
+                Color.black.ignoresSafeArea()
             }
-            .ignoresSafeArea()
-            .opacity(appState.showSplash || appState.showNativeAuth ? 0 : 1)
 
             if appState.showSplash {
                 SplashView()
