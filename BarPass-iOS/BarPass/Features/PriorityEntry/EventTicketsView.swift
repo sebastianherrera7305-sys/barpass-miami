@@ -166,6 +166,7 @@ struct EventTicketsView: View {
             )
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: pkg.name, hint: "Selecciona el tipo de ticket \(pkg.name), \(String(format: "$%.0f", pkg.price)) por persona", isButton: true)
     }
 
     // MARK: - Quantity
@@ -194,6 +195,7 @@ struct EventTicketsView: View {
                         .frame(width: 40, height: 40)
                 }
                 .disabled(quantity <= 1)
+                .bpAccessibility(label: "Reducir cantidad", hint: "Disminuye la cantidad de tickets en uno", isButton: true)
 
                 Text("\(quantity)")
                     .font(.system(size: 18, weight: .bold))
@@ -209,6 +211,7 @@ struct EventTicketsView: View {
                         .frame(width: 40, height: 40)
                 }
                 .disabled(quantity >= 8)
+                .bpAccessibility(label: "Aumentar cantidad", hint: "Aumenta la cantidad de tickets en uno, máximo ocho", isButton: true)
             }
             .background(Color.white.opacity(0.07), in: Capsule())
         }
@@ -258,6 +261,8 @@ struct EventTicketsView: View {
         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.08)))
         .padding(.horizontal, 20)
         .padding(.top, 20)
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "Resumen de compra", hint: "Muestra el total de la compra incluyendo cargo por servicio")
     }
 
     // MARK: - Payment buttons
@@ -304,6 +309,7 @@ struct EventTicketsView: View {
             }
             .buttonStyle(.plain)
             .disabled(isProcessing)
+            .bpAccessibility(label: "Pagar con Apple Pay", hint: "Procesa la compra de tickets usando Apple Pay", isButton: true)
 
             // Wallet
             Button { purchaseWithWallet() } label: {
@@ -322,6 +328,7 @@ struct EventTicketsView: View {
             }
             .buttonStyle(.plain)
             .disabled(appState.walletBalance < total || isProcessing)
+            .bpAccessibility(label: "Pagar con BarPass Wallet", hint: "Usa el saldo de tu billetera BarPass para comprar los tickets", isButton: true)
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)

@@ -67,6 +67,7 @@ struct PlanView: View {
                                 .font(.system(size: 14))
                                 .padding(10)
                                 .frame(minHeight: 100)
+                                .bpAccessibility(label: "Descripción de la noche", hint: "Describí cómo querés que sea tu noche")
                         }
                         .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 16))
                         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.09)))
@@ -92,6 +93,7 @@ struct PlanView: View {
                             )
                         }
                         .buttonStyle(.plain)
+                        .bpAccessibility(label: "Armar mi noche", hint: "Generar un plan personalizado", isButton: true)
                         .disabled(prompt.trimmingCharacters(in: .whitespaces).isEmpty || isLoading)
                         .opacity(prompt.trimmingCharacters(in: .whitespaces).isEmpty ? 0.4 : 1)
                     }
@@ -117,6 +119,7 @@ struct PlanView: View {
                                             .overlay(Capsule().strokeBorder(Color.white.opacity(0.09)))
                                     }
                                     .buttonStyle(.plain)
+                                    .bpAccessibility(label: s, hint: "Usar esta sugerencia como prompt", isButton: true)
                                 }
                             }
                             .padding(.horizontal, 20)
@@ -152,6 +155,7 @@ struct PlanView: View {
                                     .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
                                 }
                                 .buttonStyle(.plain)
+                                .bpAccessibility(label: p.title, hint: "Cargar este plan guardado", isButton: true)
                                 .padding(.horizontal, 20)
                             }
                         }
@@ -161,8 +165,9 @@ struct PlanView: View {
                 }
             }
         }
+        .onAppear { BPAnalytics.track(.viewPlan) }
         .task { await loadSavedPlans() }
-    }
+}
 
     private func generatePlan() {
         guard !prompt.trimmingCharacters(in: .whitespaces).isEmpty else { return }
@@ -171,6 +176,7 @@ struct PlanView: View {
             try? await Task.sleep(for: .seconds(1.5))
             await MainActor.run {
                 plan = NightPlan.sample(for: prompt, venues: venueStore.venues)
+                BPAnalytics.track(.createPlan(method: "prompt"))
                 isLoading = false
                 prompt = ""
             }
@@ -276,6 +282,7 @@ struct NightPlanView: View {
                     .background(amber, in: RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
+                .bpAccessibility(label: "Guardar", hint: "Guardar este plan", isButton: true)
 
                 Button { } label: {
                     HStack(spacing: 6) {
@@ -290,6 +297,7 @@ struct NightPlanView: View {
                     .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.white.opacity(0.09)))
                 }
                 .buttonStyle(.plain)
+                .bpAccessibility(label: "Compartir", hint: "Compartir este plan", isButton: true)
             }
         }
         .padding(18)

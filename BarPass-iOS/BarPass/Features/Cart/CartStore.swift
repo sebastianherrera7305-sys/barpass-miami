@@ -23,6 +23,7 @@ final class CartStore: ObservableObject {
             items.append(CartItem(name: name, price: price, emoji: emoji,
                                   venueId: venueId, venueName: venueName))
         }
+        BPAnalytics.track(.addToCart(item: name, venue: venueName))
     }
 
     func changeQty(id: UUID, delta: Int) {

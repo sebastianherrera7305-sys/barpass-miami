@@ -151,6 +151,8 @@ struct ActivePassView: View {
             }
         }
         .onAppear { pulse = true }
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "Pase Priority Entry para \(pass.venueName)", hint: "Muestra el código QR y detalles del pase para saltar la fila")
     }
 
     // MARK: - Footer
@@ -171,6 +173,7 @@ struct ActivePassView: View {
                     .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.25)))
             }
             .buttonStyle(.plain)
+            .bpAccessibility(label: "Compartir pase", hint: "Comparte el código del pase con otras personas", isButton: true)
 
             Button { dismiss() } label: {
                 Text("Cerrar")
@@ -181,6 +184,7 @@ struct ActivePassView: View {
                     .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
             }
             .buttonStyle(.plain)
+            .bpAccessibility(label: "Cerrar pase", hint: "Cierra la vista del pase activo", isButton: true)
         }
         .padding(.horizontal, 28)
     }

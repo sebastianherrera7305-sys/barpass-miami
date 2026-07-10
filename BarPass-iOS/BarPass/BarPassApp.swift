@@ -1,7 +1,7 @@
 import SwiftUI
 import UserNotifications
 import BackgroundTasks
-// import StripeCore  // Add via SPM: github.com/stripe/stripe-ios
+@preconcurrency import Stripe
 
 @main
 struct BarPassApp: App {
@@ -11,7 +11,7 @@ struct BarPassApp: App {
 
     init() {
         ImageCache.configure()
-        // StripeAPI.defaultPublishableKey = StripeConfig.publishableKey  // Uncomment after adding Stripe SPM
+        StripeAPI.defaultPublishableKey = StripeConfig.publishableKey
     }
 
     var body: some Scene {

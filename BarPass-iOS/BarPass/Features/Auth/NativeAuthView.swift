@@ -1,5 +1,13 @@
 import SwiftUI
 
+// MARK: - Auth Metrics
+
+struct AuthMetrics {
+    let validationTime: Double
+    let requestTime: Double
+    let totalTime: Double
+}
+
 // MARK: - Auth Flow State Machine
 
 enum AuthFlowState: Equatable {
@@ -210,6 +218,8 @@ struct NativeAuthView: View {
                     .foregroundStyle(Color.white.opacity(0.35))
             }
         }
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "BarPass", hint: "Tu acceso a la mejor noche")
     }
 
     // MARK: - Tab Picker
@@ -242,6 +252,11 @@ struct NativeAuthView: View {
         }
         .buttonStyle(.plain)
         .disabled(flowState.isLoading)
+        .bpAccessibility(
+            label: t == .signIn ? "Iniciar sesión" : "Crear cuenta",
+            hint: t == .signIn ? "Cambiar a inicio de sesión" : "Cambiar a registro",
+            isButton: true
+        )
         .animation(.easeInOut(duration: 0.2), value: active)
     }
 
@@ -282,6 +297,10 @@ struct NativeAuthView: View {
             }
             .foregroundStyle(.white)
             .tint(amber)
+            .bpAccessibility(
+                label: placeholder == "Email" ? "Correo electrónico" : "Contraseña",
+                hint: placeholder == "Email" ? "Ingresa tu correo electrónico" : "Ingresa tu contraseña"
+            )
 
             if secure {
                 Button {
@@ -292,6 +311,11 @@ struct NativeAuthView: View {
                         .foregroundStyle(Color.white.opacity(0.25))
                 }
                 .buttonStyle(.plain)
+                .bpAccessibility(
+                    label: showPassword ? "Ocultar contraseña" : "Mostrar contraseña",
+                    hint: "Muestra u oculta la contraseña",
+                    isButton: true
+                )
             }
         }
         .padding(.horizontal, 16)
@@ -367,6 +391,11 @@ struct NativeAuthView: View {
         .shadow(color: isDisabled || flowState.isLoading ? .clear : amber.opacity(0.25),
                 radius: 12, y: 4)
         .opacity(flowState.isLoading ? 0.9 : 1)
+        .bpAccessibility(
+            label: tab == .signIn ? "Entrar" : "Crear cuenta",
+            hint: tab == .signIn ? "Iniciar sesión en tu cuenta" : "Crear una cuenta nueva",
+            isButton: true
+        )
     }
 
     // MARK: - Divider
@@ -438,6 +467,7 @@ struct NativeAuthView: View {
                         .padding(14)
                         .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                         .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.white.opacity(0.07)))
+                        .bpAccessibility(label: "Correo electrónico", hint: "Ingresa tu correo para recuperar contraseña")
                 }
                 .padding(.horizontal, 24)
 
@@ -453,6 +483,7 @@ struct NativeAuthView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                    .bpAccessibility(label: "Cancelar", hint: "Cerrar recuperación de contraseña", isButton: true)
 
                     Button {
                         sendPasswordReset()
@@ -466,6 +497,7 @@ struct NativeAuthView: View {
                     .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: BPRadius.md))
                     .opacity(resetEmail.trimmingCharacters(in: .whitespaces).isEmpty ? 0.5 : 1)
                     .disabled(resetEmail.trimmingCharacters(in: .whitespaces).isEmpty || isSendingReset)
+                    .bpAccessibility(label: "Enviar", hint: "Enviar enlace de recuperación", isButton: true)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
@@ -499,6 +531,7 @@ struct NativeAuthView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: BPRadius.md))
+                .bpAccessibility(label: "OK", hint: "Confirmar cierre", isButton: true)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
             }
@@ -522,6 +555,7 @@ struct NativeAuthView: View {
         }
         .buttonStyle(.plain)
         .disabled(flowState.isLoading)
+        .bpAccessibility(label: "Continuar como invitado", hint: "Omitir inicio de sesión", isButton: true)
     }
 
     // MARK: - Social Proof
@@ -541,6 +575,8 @@ struct NativeAuthView: View {
                 .font(.system(size: 11))
                 .foregroundStyle(Color.white.opacity(0.2))
         }
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "Más de 5,000 personas ya usan BarPass")
     }
 
     // MARK: - Actions
@@ -716,6 +752,7 @@ private struct ErrorToast: View {
                     .background(Color.white.opacity(0.08), in: Circle())
             }
             .buttonStyle(.plain)
+            .bpAccessibility(label: "Cerrar error", hint: "Descarta el mensaje de error", isButton: true)
             .opacity(showDismissHint ? 1 : 0.6)
         }
         .padding(.horizontal, 16)
@@ -734,14 +771,6 @@ private struct ErrorToast: View {
                 showDismissHint = true
             }
         }
-    }
-}
-
-// MARK: - Haptic Convenience
-
-private extension BPHaptics {
-    static func success() {
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 }
 

@@ -112,6 +112,8 @@ struct ReservationConfirmView: View {
                 }
             }
         }
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "Reservación confirmada en \(reservation.venueName)", hint: "Muestra el código QR y los detalles de la reservación de mesa VIP")
     }
 
     // MARK: - Footer
@@ -137,6 +139,7 @@ struct ReservationConfirmView: View {
                         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.25)))
                 }
                 .buttonStyle(.plain)
+                .bpAccessibility(label: "Compartir reservación", hint: "Comparte los detalles de la reservación con otras personas", isButton: true)
 
                 Button { dismiss() } label: {
                     Text("Listo")
@@ -150,6 +153,7 @@ struct ReservationConfirmView: View {
                         )
                 }
                 .buttonStyle(.plain)
+                .bpAccessibility(label: "Listo", hint: "Cierra la vista de confirmación de reservación", isButton: true)
             }
             .padding(.horizontal, 24)
         }

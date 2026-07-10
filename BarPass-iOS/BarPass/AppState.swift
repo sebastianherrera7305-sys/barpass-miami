@@ -25,10 +25,6 @@ final class AppState: ObservableObject {
     @Published var priorityVenueName:      String = ""
     @Published var appReady                = false
 
-    /// Kept for legacy WebView bridge compatibility.
-    /// Native auth uses `completeAuth()` and local error state instead.
-    @Published var authError: String = ""
-
     private var cancellables = Set<AnyCancellable>()
     private let networkMonitor = NWPathMonitor()
     private let networkQueue   = DispatchQueue(label: "io.barpass.appstate.network", qos: .utility)
@@ -59,7 +55,4 @@ final class AppState: ObservableObject {
         withAnimation(.easeOut(duration: 0.15).delay(0.1)) { showActionBar = true }
     }
 
-    /// Legacy bridge alias — kept for orphaned WebView compatibility.
-    /// Do NOT use in new code.
-    func webDidSignalReady() { completeAuth() }
 }

@@ -29,11 +29,13 @@ struct ProfileView: View {
                             Text("🎉")
                                 .font(.system(size: 34))
                         }
+                        .bpAccessibility(label: "Foto de perfil", hint: "Tu foto de perfil de usuario")
 
                         VStack(spacing: 4) {
                             Text("Miami Nightlifer")
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundStyle(.white)
+                                .bpAccessibility(label: "Miami Nightlifer", hint: "Tu nombre de usuario")
 
                             HStack(spacing: 6) {
                                 Text(level)
@@ -43,6 +45,7 @@ struct ProfileView: View {
                                     .padding(.vertical, 4)
                                     .background(Color.bpAmber.opacity(0.12), in: Capsule())
                                     .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.25)))
+                                    .bpAccessibility(label: level, hint: "Tu nivel actual")
                             }
                         }
                     }
@@ -92,6 +95,8 @@ struct ProfileView: View {
                     .padding(18)
                     .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.xl))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.15)))
+                    .accessibilityElement(children: .ignore)
+                    .bpAccessibility(label: "BarPass Points \(points) BPX", hint: "Tus puntos y progreso al siguiente nivel")
                     .padding(.horizontal, BPSpacing.lg)
 
                     // Stats
@@ -118,6 +123,8 @@ struct ProfileView: View {
                     .padding(18)
                     .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.xl))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.white.opacity(0.07)))
+                    .accessibilityElement(children: .ignore)
+                    .bpAccessibility(label: "Cómo ganar puntos", hint: "Sección de cómo ganar puntos de BarPass")
                     .padding(.horizontal, BPSpacing.lg)
 
                     Spacer(minLength: 120)
@@ -148,6 +155,8 @@ struct ProfileView: View {
         .padding(.vertical, 16)
         .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.07)))
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "\(value) \(label)", hint: "Estadística: \(label)")
     }
 
     private func earnRow(icon: String, action: String, points: String) -> some View {

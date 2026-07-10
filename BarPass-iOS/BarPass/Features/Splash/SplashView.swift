@@ -42,6 +42,8 @@ struct SplashView: View {
             .opacity(logoOpacity)
             .offset(y: logoY)
         }
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "BarPass", hint: "Cargando aplicación")
         .onAppear {
             withAnimation(.spring(response: 0.15, dampingFraction: 0.85)) {
                 logoOpacity = 1

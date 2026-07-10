@@ -15,7 +15,6 @@
 		AA0000010000000000000003 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000003 /* RootView.swift */; };
 		AA0000010000000000000004 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000004 /* SplashView.swift */; };
 
-		AA0000010000000000000008 /* HapticService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000008 /* HapticService.swift */; };
 		AA0000010000000000000009 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000009 /* LocationService.swift */; };
 		AA000001000000000000000A /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000A /* NotificationService.swift */; };
 		AA000001000000000000000B /* BiometricService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000B /* BiometricService.swift */; };
@@ -73,6 +72,8 @@
 		PY000002000000000000RP01 /* PromptYourNightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PY000001000000000000RP01 /* PromptYourNightView.swift */; };
 		PRIV00000000000000000002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PRIV00000000000000000001 /* PrivacyInfo.xcprivacy */; };
 		EF000002000000000000RP01 /* EventFlyerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF000001000000000000RP01 /* EventFlyerCard.swift */; };
+		AN0000010000000000000001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AN0000020000000000000001 /* AnalyticsService.swift */; };
+		TS0000020000000000000001 /* TripStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS0000010000000000000001 /* TripStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -85,7 +86,6 @@
 		AA0000020000000000000003 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		AA0000020000000000000004 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 
-		AA0000020000000000000008 /* HapticService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticService.swift; sourceTree = "<group>"; };
 		AA0000020000000000000009 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		AA000002000000000000000A /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		AA000002000000000000000B /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricService.swift; sourceTree = "<group>"; };
@@ -145,6 +145,8 @@
 		PY000001000000000000RP01 /* PromptYourNightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PromptYourNightView.swift; path = BarPass/Features/Trips/PromptYourNightView.swift; sourceTree = SOURCE_ROOT; };
 		PRIV00000000000000000001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		EF000001000000000000RP01 /* EventFlyerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventFlyerCard.swift; path = BarPass/Features/Tonight/EventFlyerCard.swift; sourceTree = SOURCE_ROOT; };
+		AN0000020000000000000001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalyticsService.swift; path = BarPass/Core/Services/AnalyticsService.swift; sourceTree = SOURCE_ROOT; };
+		TS0000010000000000000001 /* TripStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripStore.swift; path = BarPass/Features/Stores/TripStore.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -195,7 +197,6 @@
 		AA0000040000000000000006 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				AA0000020000000000000008 /* HapticService.swift */,
 				AA0000020000000000000009 /* LocationService.swift */,
 				AA000002000000000000000A /* NotificationService.swift */,
 				AA000002000000000000000B /* BiometricService.swift */,
@@ -204,6 +205,7 @@
 				FF000001000000000000AB02 /* APIClient.swift */,
 				FF000001000000000000AB03 /* WalletPassService.swift */,
 				FF000001000000000000AA20 /* AuthService.swift */,
+				AN0000020000000000000001 /* AnalyticsService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -231,6 +233,7 @@
 				FF000003000000000000AA05 /* Profile */,
 				FF000003000000000000AA06 /* Onboarding */,
 				FF000001000000000000AB04 /* AppleWalletButton.swift */,
+				TS0000040000000000000001 /* Stores */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -370,6 +373,14 @@
 			path = Onboarding;
 			sourceTree = "<group>";
 		};
+		TS0000040000000000000001 /* Stores */ = {
+			isa = PBXGroup;
+			children = (
+				TS0000010000000000000001 /* TripStore.swift */,
+			);
+			path = Stores;
+			sourceTree = "<group>";
+		};
 		FF000004000000000000AA10 /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
@@ -501,7 +512,6 @@
 
 				AA0000010000000000000003 /* RootView.swift in Sources */,
 				AA0000010000000000000004 /* SplashView.swift in Sources */,
-				AA0000010000000000000008 /* HapticService.swift in Sources */,
 				IMGC02000000000000RP01 /* ImageCache.swift in Sources */,
 				AA0000010000000000000009 /* LocationService.swift in Sources */,
 				AA000001000000000000000A /* NotificationService.swift in Sources */,
@@ -509,6 +519,7 @@
 				AA000001000000000000000C /* ApplePayService.swift in Sources */,
 				AA000001000000000000000D /* CacheManager.swift in Sources */,
 				FF000002000000000000AA20 /* AuthService.swift in Sources */,
+				AN0000010000000000000001 /* AnalyticsService.swift in Sources */,
 				TR000002000000000000AA01 /* Trip.swift in Sources */,
 				TR000002000000000000AA02 /* TripsListView.swift in Sources */,
 				TR000002000000000000AA03 /* TripCreateFlow.swift in Sources */,
@@ -527,6 +538,7 @@
 				RE0000020000000000000003 /* PlanRepository.swift in Sources */,
 				RE0000020000000000000004 /* SupabasePlanRepository.swift in Sources */,
 				NP0000020000000000000001 /* NightPlan.swift in Sources */,
+				TS0000020000000000000001 /* TripStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

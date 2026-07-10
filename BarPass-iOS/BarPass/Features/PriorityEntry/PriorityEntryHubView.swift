@@ -31,8 +31,8 @@ struct PriorityEntryHubView: View {
                         .padding(.bottom, 36)
 
                     VStack(spacing: 12) {
-                        optionCard(options[0]) { showSkipLine = true }
-                        optionCard(options[1]) { showTable    = true }
+                        optionCard(options[0]) { BPAnalytics.track(.buySkipLinePass(venue: venueName)); showSkipLine = true }
+                        optionCard(options[1]) { BPAnalytics.track(.buyTableReservation(venue: venueName)); showTable    = true }
                         optionCard(options[2]) { showTickets  = true }
                     }
                     .padding(.horizontal, 20)
@@ -53,6 +53,7 @@ struct PriorityEntryHubView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cerrar") { dismiss() }
                         .foregroundStyle(amber)
+                        .bpAccessibility(label: "Cerrar", hint: "Cierra el menú de Priority Entry", isButton: true)
                 }
             }
             .navigationDestination(isPresented: $showSkipLine) {
@@ -174,6 +175,7 @@ struct PriorityEntryHubView: View {
         .opacity(appeared ? 1 : 0)
         .offset(y: appeared ? 0 : 14)
         .animation(.spring(response: 0.42, dampingFraction: 0.82).delay(opt.delay), value: appeared)
+        .bpAccessibility(label: opt.title, hint: opt.sub, isButton: true)
     }
 }
 

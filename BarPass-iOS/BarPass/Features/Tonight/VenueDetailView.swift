@@ -4,6 +4,7 @@ import MapKit
 struct VenueDetailView: View {
     let venue: BarPassVenue
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var appState: AppState
     @State private var isSaved = false
     @State private var showShareSheet = false
 
@@ -22,7 +23,8 @@ struct VenueDetailView: View {
 
             ctaBar
         }
-        .navigationBarHidden(true)
+            .onAppear { BPAnalytics.track(.viewVenue(venue.id)) }
+            .navigationBarHidden(true)
         .overlay(alignment: .topLeading) { navBar }
         .sheet(isPresented: $showShareSheet) {
             ShareSheet(venue: venue)
@@ -268,6 +270,7 @@ struct VenueDetailView: View {
                             .font(.system(size: 14, weight: .bold, design: .monospaced))
                             .foregroundStyle(Color.bpAmber)
                     }
+                    .bpAccessibility(label: "\(drink.name), \(String(format: "$%.0f", drink.price))", hint: "Bebida popular en este venue")
                 }
             }
         }
@@ -409,8 +412,13 @@ struct VenueDetailView: View {
                     .overlay(Circle().strokeBorder(Color.white.opacity(0.1)))
             }
             .buttonStyle(.plain)
+            .bpAccessibility(label: "Guardar", hint: "Guardar o quitar de favoritos", isButton: true)
 
-            Button { } label: {
+            Button {
+                appState.priorityVenueId = venue.id
+                appState.priorityVenueName = venue.name
+                appState.showPriorityEntry = true
+            } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "bolt.fill").font(.system(size: 12))
                     Text("Skip the Line")
@@ -425,8 +433,14 @@ struct VenueDetailView: View {
                 )
             }
             .buttonStyle(.plain)
+            .bpAccessibility(label: "Skip the Line", hint: "Comprar acceso prioritario sin fila", isButton: true)
 
-            Button { } label: {
+            Button {
+                BPAnalytics.track(.openMaps(venue: venue.name))
+                let coords = "\(venue.latitude),\(venue.longitude)"
+                guard let url = URL(string: "https://maps.apple.com/?ll=\(coords)&q=\(venue.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")") else { return }
+                UIApplication.shared.open(url)
+            } label: {
                 Image(systemName: "mappin.circle.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(Color.bpAmber)
@@ -434,6 +448,7 @@ struct VenueDetailView: View {
                     .background(Color.bpAmber.opacity(0.12), in: Circle())
             }
             .buttonStyle(.plain)
+            .bpAccessibility(label: "Direcciones", hint: "Abrir ubicación en Mapas", isButton: true)
         }
         .padding(.horizontal, BPSpacing.lg)
         .padding(.vertical, 10)
@@ -455,8 +470,9 @@ struct VenueDetailView: View {
                     .environment(\.colorScheme, .dark)
             }
             .buttonStyle(.plain)
+            .bpAccessibility(label: "Volver", hint: "Volver a la pantalla anterior", isButton: true)
             Spacer()
-            Button { BPHaptics.light(); showShareSheet = true } label: {
+            Button { BPHaptics.light(); showShareSheet = true; BPAnalytics.track(.shareVenue(venue: venue.id)) } label: {
                 Image(systemName: "square.and.arrow.up")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)
@@ -465,6 +481,7 @@ struct VenueDetailView: View {
                     .environment(\.colorScheme, .dark)
             }
             .buttonStyle(.plain)
+            .bpAccessibility(label: "Compartir", hint: "Compartir este venue", isButton: true)
         }
         .padding(.horizontal, BPSpacing.lg)
         .padding(.top, 56)
@@ -516,6 +533,7 @@ struct VenueDetailView: View {
             .overlay(RoundedRectangle(cornerRadius: BPRadius.sm).strokeBorder(Color.white.opacity(0.09)))
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: label, hint: "Abrir en \(label)", isButton: true)
     }
 
     // MARK: - Actions
@@ -555,7 +573,9 @@ private struct ShareSheet: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let text = "Check out \(venue.name) in Miami! \(venue.neighborhood)"
-        let url = URL(string: "https://barpass.app/venues/\(venue.id)")!
+        guard let url = URL(string: "https://barpass.app/venues/\(venue.id)") else {
+            return UIActivityViewController(activityItems: [text], applicationActivities: nil)
+        }
         return UIActivityViewController(activityItems: [text, url], applicationActivities: nil)
     }
 

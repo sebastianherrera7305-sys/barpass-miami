@@ -33,12 +33,14 @@ struct CartView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cerrar") { dismiss() }
                         .foregroundStyle(amber)
+                        .bpAccessibility(label: "Cerrar carrito", hint: "Cierra la vista del carrito", isButton: true)
                 }
                 if !cart.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Limpiar") { withAnimation { cart.clear() } }
                             .foregroundStyle(Color.white.opacity(0.3))
                             .font(.subheadline)
+                            .bpAccessibility(label: "Limpiar carrito", hint: "Elimina todos los artículos del carrito", isButton: true)
                     }
                 }
             }
@@ -198,12 +200,13 @@ struct CartView: View {
             )
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: "Pagar con BarPass Wallet", hint: "Usa el saldo de tu billetera BarPass para pagar", isButton: true)
     }
 
     // MARK: - Card button
 
     private var cardButton: some View {
-        Button { showCardSheet = true } label: {
+        Button { BPAnalytics.track(.cartCheckout(itemCount: cart.itemCount, total: cart.total)); showCardSheet = true } label: {
             HStack(spacing: 8) {
                 Image(systemName: "creditcard")
                     .font(.system(size: 14))
@@ -221,6 +224,7 @@ struct CartView: View {
             )
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: "Pagar con tarjeta", hint: "Abre el formulario de pago con tarjeta de crédito o débito", isButton: true)
     }
 
     // MARK: - Helpers
@@ -318,6 +322,8 @@ private struct CartItemRow: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: item.name, hint: "Artículo en el carrito, precio \(String(format: "$%.2f", item.price)) por unidad, cantidad \(item.qty)")
     }
 
     private func stepBtn(_ icon: String, action: @escaping () -> Void) -> some View {
@@ -328,6 +334,7 @@ private struct CartItemRow: View {
                 .frame(width: 30, height: 30)
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: icon == "minus" ? "Reducir cantidad" : "Aumentar cantidad", hint: icon == "minus" ? "Resta uno a la cantidad del artículo" : "Suma uno a la cantidad del artículo", isButton: true)
     }
 }
 
@@ -371,6 +378,7 @@ private struct ApplePayButton: View {
         }
         .buttonStyle(.plain)
         .disabled(isProcessing)
+        .bpAccessibility(label: "Pagar con Apple Pay", hint: "Procesa el pago usando Apple Pay", isButton: true)
     }
 }
 

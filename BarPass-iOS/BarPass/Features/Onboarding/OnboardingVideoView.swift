@@ -1,9 +1,6 @@
 import SwiftUI
 import AVKit
-
-// Drop your Higgsfield clips into BarPass/Resources/Onboarding/
-// and name them: scene1.mp4, scene2.mp4 ... scene6.mp4
-// They play in sequence with crossfade, then show NativeAuthView.
+import Combine
 
 @MainActor
 struct OnboardingVideoView: View {
@@ -13,6 +10,7 @@ struct OnboardingVideoView: View {
     @State private var textOpacity: Double = 0
     @State private var player: AVPlayer?
     @State private var isFinished = false
+    @State private var cancellables = Set<AnyCancellable>()
 
     private let scenes: [SceneInfo] = [
         SceneInfo(file: "scene1", caption: nil),
@@ -34,7 +32,6 @@ struct OnboardingVideoView: View {
                     .animation(.easeInOut(duration: 0.6), value: opacity)
             }
 
-            // Gradient overlay bottom
             LinearGradient(
                 colors: [.clear, .black.opacity(0.7)],
                 startPoint: .center,
@@ -45,7 +42,6 @@ struct OnboardingVideoView: View {
             VStack {
                 Spacer()
 
-                // Caption
                 if let caption = scenes[safe: currentScene]?.caption {
                     Text(caption)
                         .font(.system(size: 22, weight: .bold))
@@ -57,7 +53,6 @@ struct OnboardingVideoView: View {
                         .padding(.horizontal, 32)
                 }
 
-                // Scene dots
                 HStack(spacing: 6) {
                     ForEach(0..<scenes.count, id: \.self) { i in
                         Capsule()
@@ -69,8 +64,9 @@ struct OnboardingVideoView: View {
                 .padding(.top, 12)
                 .padding(.bottom, 60)
             }
+            .accessibilityElement(children: .ignore)
+            .bpAccessibility(label: "Escena \(currentScene + 1) de \(scenes.count)", hint: "Indicador de progreso")
 
-            // Skip button
             VStack {
                 HStack {
                     Spacer()
@@ -79,14 +75,14 @@ struct OnboardingVideoView: View {
                         .foregroundStyle(Color.white.opacity(0.5))
                         .padding(.trailing, 24)
                         .padding(.top, 56)
+                        .bpAccessibility(label: "Saltar", hint: "Omitir introducción", isButton: true)
                 }
                 Spacer()
             }
         }
+        .bpAccessibility(label: "Video de introducción", hint: "Toca para avanzar al siguiente video", isButton: true)
         .onTapGesture { advanceScene() }
         .onAppear {
-            // If no video clips are bundled yet, skip straight to auth —
-            // otherwise the user stares at ~30s of black screens.
             let hasAnyVideo = scenes.contains {
                 Bundle.main.url(forResource: $0.file, withExtension: "mp4", subdirectory: "Onboarding") != nil
             }
@@ -96,10 +92,11 @@ struct OnboardingVideoView: View {
                 finish()
             }
         }
-        .onDisappear { player?.pause() }
+        .onDisappear {
+            player?.pause()
+            cancellables.removeAll()
+        }
     }
-
-    // MARK: - Scene control
 
     private func startScene(_ index: Int) {
         guard index < scenes.count else { finish(); return }
@@ -109,36 +106,37 @@ struct OnboardingVideoView: View {
 
         let scene = scenes[index]
 
-        // Try bundle resource, fall back to placeholder
         if let url = Bundle.main.url(forResource: scene.file, withExtension: "mp4",
                                       subdirectory: "Onboarding") {
             let newPlayer = AVPlayer(url: url)
             newPlayer.isMuted = true
             self.player = newPlayer
 
-            NotificationCenter.default.addObserver(
-                forName: .AVPlayerItemDidPlayToEndTime,
-                object: newPlayer.currentItem,
-                queue: .main
-            ) { _ in Task { @MainActor in advanceScene() } }
+            NotificationCenter.default.publisher(for: .AVPlayerItemDidPlayToEndTime, object: newPlayer.currentItem)
+                .sink { _ in Task { @MainActor in self.advanceScene() } }
+                .store(in: &cancellables)
 
             newPlayer.play()
             withAnimation { opacity = 1 }
 
-            // Show caption after 0.5s
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                withAnimation { textOpacity = 1 }
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(0.5 * 1_000_000_000))
+                await MainActor.run { withAnimation { self.textOpacity = 1 } }
             }
-            // Auto-advance after duration (fallback 4s if video shorter)
-            let duration = scene.duration
-            DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                if self.currentScene == index { advanceScene() }
+
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(scene.duration * 1_000_000_000))
+                await MainActor.run {
+                    if self.currentScene == index { self.advanceScene() }
+                }
             }
         } else {
-            // No video file yet — show placeholder and auto-advance
             withAnimation { opacity = 1; textOpacity = 1 }
-            DispatchQueue.main.asyncAfter(deadline: .now() + scenes[index].duration) {
-                if self.currentScene == index { advanceScene() }
+            Task {
+                try? await Task.sleep(nanoseconds: UInt64(scenes[index].duration * 1_000_000_000))
+                await MainActor.run {
+                    if self.currentScene == index { self.advanceScene() }
+                }
             }
         }
     }
@@ -148,9 +146,12 @@ struct OnboardingVideoView: View {
         let next = currentScene + 1
         if next < scenes.count {
             withAnimation(.easeInOut(duration: 0.4)) { opacity = 0; textOpacity = 0 }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                player?.pause()
-                startScene(next)
+            Task {
+                try? await Task.sleep(nanoseconds: 400_000_000)
+                await MainActor.run {
+                    self.player?.pause()
+                    self.startScene(next)
+                }
             }
         } else {
             finish()
@@ -167,8 +168,6 @@ struct OnboardingVideoView: View {
     }
 }
 
-// MARK: - Supporting types
-
 private struct SceneInfo {
     let file:     String
     let caption:  String?
@@ -180,8 +179,6 @@ private extension Array {
         indices.contains(index) ? self[index] : nil
     }
 }
-
-// MARK: - AVPlayer UIViewRepresentable
 
 private struct VideoPlayerLayer: UIViewRepresentable {
     let player: AVPlayer

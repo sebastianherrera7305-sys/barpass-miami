@@ -70,6 +70,8 @@ struct MainTabView: View {
 
         return Button {
             BPHaptics.light()
+            let screenNames = ["Tonight", "Explore", "Trips", "Plan", "Profile"]
+            BPAnalytics.screen(screenNames[index])
             withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                 selectedTab = index
             }
@@ -96,6 +98,11 @@ struct MainTabView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .bpAccessibility(
+            label: ["Esta noche", "Explorar", "Viajes", "Planificar", "Perfil"][index],
+            hint: ["Eventos de esta noche", "Explorar lugares", "Tus viajes", "Planificar tu noche", "Tu perfil"][index],
+            isButton: true
+        )
     }
 }
 

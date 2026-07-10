@@ -138,6 +138,7 @@ struct TonightView: View {
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
         }
+        .bpAccessibility(label: greeting, hint: "Bienvenido a BarPass. ¿A dónde quieres ir esta noche?")
     }
 
     // MARK: - Vibe tags
@@ -169,6 +170,7 @@ struct TonightView: View {
                             )
                     }
                     .buttonStyle(.plain)
+                    .bpAccessibility(label: tag, hint: "Filtrar venues por esta categoría", isButton: true)
                 }
             }
             .padding(.horizontal, BPSpacing.lg)
@@ -201,6 +203,7 @@ struct TonightView: View {
                             EventFlyerCard(event: pair.event, venue: pair.venue)
                         }
                         .buttonStyle(.plain)
+                        .bpAccessibility(label: "\(pair.event.title) en \(pair.venue.name)", hint: "Ver detalle del evento", isButton: true)
                     }
                 }
                 .padding(.horizontal, BPSpacing.lg)
@@ -333,6 +336,7 @@ struct HeroVenueCard: View {
             .padding(16)
         }
         .frame(width: 280, height: 180)
+        .accessibilityElement(children: .ignore)
         .bpAccessibility(label: venue.name, hint: "Venue: \(venue.neighborhood). \(venue.type.rawValue). Puntuación: \(venue.rating)", isButton: true)
         .bpEntrance(offset: CGSize(width: 0, height: 20), delay: 0.1)
     }
@@ -413,6 +417,7 @@ struct SmallVenueCard: View {
             }
         }
         .frame(width: 150)
+        .accessibilityElement(children: .ignore)
         .bpAccessibility(label: venue.name, hint: "\(venue.neighborhood). Puntuación: \(venue.rating)", isButton: true)
         .bpEntrance(offset: CGSize(width: 0, height: 10), delay: 0.15)
     }

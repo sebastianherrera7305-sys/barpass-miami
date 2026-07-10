@@ -25,6 +25,7 @@ struct AppleWalletButton: View {
                 PKAddPassButtonView(style: .blackOutline)
                     .frame(width: 256, height: 44)
                     .onTapGesture { presentWallet(url: url) }
+                    .bpAccessibility(label: "Agregar a Apple Wallet", hint: "Agregar el pase a tu Apple Wallet", isButton: true)
 
             // ── Generando (con barra de progreso) ─────────────────
             case .generating(let progress):
@@ -63,12 +64,14 @@ struct AppleWalletButton: View {
                 .frame(width: 256, height: 44)
                 .allowsHitTesting(false)
         }
+        .bpAccessibility(label: "Agregar a Apple Wallet", hint: "Generar el pase para agregar a Apple Wallet", isButton: true)
     }
 
     private var inWalletBadge: some View {
         Label("Guardado en Apple Wallet", systemImage: "checkmark.circle.fill")
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(.green)
+            .bpAccessibility(label: "Guardado en Apple Wallet", hint: "Este pase ya está en tu Apple Wallet")
     }
 
     private func generatingView(progress: Double) -> some View {
@@ -93,6 +96,7 @@ struct AppleWalletButton: View {
             Button("Cancelar") { service.cancelGeneration() }
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.secondary)
+                .bpAccessibility(label: "Cancelar", hint: "Cancelar la generación del pase", isButton: true)
         }
         .padding(.vertical, 8)
     }
@@ -110,6 +114,7 @@ struct AppleWalletButton: View {
             }
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(Color(hex: "#f5b830"))
+            .bpAccessibility(label: "Reintentar", hint: "Intentar generar el pase nuevamente", isButton: true)
         }
     }
 

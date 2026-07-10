@@ -3,13 +3,12 @@ import Foundation
 @MainActor
 final class VenueStore: ObservableObject {
     @Published var venues: [BarPassVenue] = []
-    @Published var searchText = ""
     @Published var selectedNeighborhood: String? = nil
     @Published var selectedType: VenueType? = nil
     @Published var isLoading = true
     @Published var loadError: String? = nil
 
-    nonisolated(unsafe) private let repository: VenueRepository
+    private let repository: VenueRepository
 
     init(repository: VenueRepository = RepositoryDependencies.venue) {
         self.repository = repository
@@ -38,12 +37,4 @@ final class VenueStore: ObservableObject {
         venues.filter { $0.tags.contains(tag) || $0.vibes.contains(tag) }
     }
 
-    func filtered(by query: String) -> [BarPassVenue] {
-        guard !query.isEmpty else { return venues }
-        return venues.filter {
-            $0.name.localizedCaseInsensitiveContains(query) ||
-            $0.neighborhood.localizedCaseInsensitiveContains(query) ||
-            $0.tags.contains { $0.localizedCaseInsensitiveContains(query) }
-        }
-    }
 }

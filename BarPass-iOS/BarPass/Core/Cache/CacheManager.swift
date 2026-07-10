@@ -1,5 +1,4 @@
 import Foundation
-import WebKit
 import Security
 
 @MainActor
@@ -16,13 +15,7 @@ final class CacheManager {
         URLCache.shared = cache
     }
 
-    func clearWebCache() async {
-        let types = WKWebsiteDataStore.allWebsiteDataTypes()
-        let since = Date(timeIntervalSince1970: 0)
-        await WKWebsiteDataStore.default().removeData(ofTypes: types, modifiedSince: since)
-    }
-
-    // MARK: - Session token — Keychain (survives app reinstall if iCloud Keychain is on)
+    // MARK: - Session token — Keychain
 
     func saveSession(_ token: String) {
         KeychainHelper.save(token, forKey: "bp_session_token")
@@ -36,8 +29,6 @@ final class CacheManager {
         KeychainHelper.delete(forKey: "bp_session_token")
     }
 }
-
-// MARK: - Keychain helper (available across the whole module)
 
 enum KeychainHelper {
     private static let service = "io.barpass.app"

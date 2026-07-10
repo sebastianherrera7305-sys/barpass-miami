@@ -74,6 +74,7 @@ struct RootView: View {
                     )
                 }
                 .buttonStyle(.plain)
+                .bpAccessibility(label: "Priority Entry", hint: "Abrir acceso prioritario", isButton: true)
 
                 // 🛒 Cart
                 Button {
@@ -98,6 +99,7 @@ struct RootView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .bpAccessibility(label: "Carrito", hint: "Ver tu carrito de compras", isButton: true)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 8)
@@ -159,6 +161,8 @@ private struct OfflineBanner: View {
         .background(.black.opacity(0.84), in: Capsule())
         .overlay(Capsule().strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
         .shadow(color: .black.opacity(0.35), radius: 10, y: 3)
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "Sin conexión", hint: "Usando versión local de los datos")
     }
 }
 

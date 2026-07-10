@@ -1,4 +1,5 @@
 import SwiftUI
+@preconcurrency import Stripe
 
 struct CardPaymentView: View {
     let total:     Double
@@ -73,6 +74,7 @@ struct CardPaymentView: View {
                         .disabled(!isValid || loading)
                         .opacity(isValid ? 1 : 0.45)
                         .padding(.horizontal, 20)
+                        .bpAccessibility(label: String(format: "Pagar %.2f dólares", total), hint: "Procesa el pago con la tarjeta ingresada", isButton: true)
 
                         securityNote
                             .padding(.bottom, 30)
@@ -85,6 +87,7 @@ struct CardPaymentView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancelar") { dismiss() }.foregroundStyle(gold)
+                        .bpAccessibility(label: "Cancelar pago", hint: "Cierra el formulario de pago sin procesar", isButton: true)
                 }
             }
         }
@@ -130,6 +133,8 @@ struct CardPaymentView: View {
         }
         .frame(height: 190)
         .padding(.horizontal, 20)
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "Vista previa de la tarjeta", hint: "Muestra una representación visual de la tarjeta ingresada")
     }
 
     // MARK: - Name field
@@ -150,6 +155,7 @@ struct CardPaymentView: View {
                 .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
                 .overlay(RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(activeFocus == .name ? gold.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1))
+                .bpAccessibility(label: "Nombre en la tarjeta", hint: "Ingresa el nombre del titular de la tarjeta")
         }
     }
 
@@ -197,6 +203,7 @@ struct CardPaymentView: View {
             .overlay(RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(activeFocus == field ? gold.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1))
             .onChange(of: text.wrappedValue) { _, _ in validateCard() }
+            .bpAccessibility(label: field == .number ? "Número de tarjeta" : (field == .expiry ? "Fecha de expiración" : "Código de seguridad CVV"), hint: field == .number ? "Ingresa el número de tu tarjeta" : (field == .expiry ? "Ingresa la fecha de vencimiento en formato MM/AA" : "Ingresa el código de seguridad de 3 dígitos"))
     }
 
     private var isValid: Bool {
@@ -213,6 +220,7 @@ struct CardPaymentView: View {
     // MARK: - Payment flow (Stripe SPM not yet installed — stub until added)
 
     private func pay() {
+        BPAnalytics.track(.startPayment(method: "card", amount: total))
         guard isValid else { return }
         activeFocus = nil
         loading  = true
@@ -228,15 +236,32 @@ struct CardPaymentView: View {
 
         Task {
             do {
+                let parts = expiry.split(separator: "/")
+                let month = parts.first.flatMap { UInt($0) } ?? 0
+                let year = parts.count > 1 ? UInt(parts[1]) ?? 0 : 0
+
+                let cardParams = STPPaymentMethodCardParams()
+                cardParams.number = cardNumber
+                cardParams.expMonth = NSNumber(value: month)
+                cardParams.expYear = NSNumber(value: 2000 + year)
+                cardParams.cvc = cvv
+
+                let billingDetails = STPPaymentMethodBillingDetails()
+                billingDetails.name = name
+
+                let paymentParams = STPPaymentMethodParams(card: cardParams, billingDetails: billingDetails, metadata: nil)
+                let paymentMethod = try await STPAPIClient.shared.createPaymentMethod(with: paymentParams, additionalPaymentUserAgentValues: [])
+
                 _ = try await APIClient.createCardTransaction(
                     idToken:    session.accessToken,
                     vendorId:   self.vendorId,
                     customerId: session.user.id,
                     items:      self.items,
-                    stripePaymentMethodId: "stub_\(last4)"
+                    stripePaymentMethodId: paymentMethod.stripeId
                 )
                 await MainActor.run {
                     self.loading = false
+                    BPAnalytics.track(.paymentSuccess(method: "card", amount: self.total))
                     self.onSuccess("💳 •••• \(last4)")
                     self.dismiss()
                 }
@@ -244,6 +269,7 @@ struct CardPaymentView: View {
                 await MainActor.run {
                     self.loading  = false
                     self.errorMsg = error.localizedDescription
+                    BPAnalytics.track(.paymentFailed(method: "card", error: error.localizedDescription))
                 }
             }
         }

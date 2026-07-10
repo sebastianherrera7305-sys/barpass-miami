@@ -36,6 +36,7 @@ struct ActiveTicketView: View {
                 Button("Listo") { dismiss() }
                     .foregroundStyle(gold)
                     .fontWeight(.semibold)
+                    .bpAccessibility(label: "Listo", hint: "Cierra la vista del ticket", isButton: true)
             }
         }
         .onAppear { pulse = true }
@@ -145,6 +146,8 @@ struct ActiveTicketView: View {
                 .shadow(color: .black.opacity(0.4), radius: 20, y: 8)
         )
         .padding(.horizontal, 20)
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "Ticket para \(ticket.eventName) en \(ticket.venueName)", hint: "Muestra el código QR y los detalles del ticket")
     }
 
     private var dashedDivider: some View {
@@ -238,6 +241,7 @@ struct ActiveTicketView: View {
                     .strokeBorder(Color.white.opacity(0.12)))
             }
             .buttonStyle(.plain)
+            .bpAccessibility(label: "Compartir ticket", hint: "Comparte los detalles del ticket con otras personas", isButton: true)
 
             Button { dismiss() } label: {
                 Text("Listo")
@@ -251,6 +255,7 @@ struct ActiveTicketView: View {
                     )
             }
             .buttonStyle(.plain)
+            .bpAccessibility(label: "Listo", hint: "Cierra la vista del ticket confirmado", isButton: true)
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)

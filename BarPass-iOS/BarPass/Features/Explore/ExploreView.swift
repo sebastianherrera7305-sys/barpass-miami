@@ -100,6 +100,7 @@ struct ExploreView: View {
                             .glass(radius: 16)
                     }
                     .buttonStyle(.plain)
+                    .bpAccessibility(label: showList ? "Ver mapa" : "Ver lista", hint: "Cambiar entre vista de mapa y lista", isButton: true)
                 }
                 .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 60)
@@ -113,6 +114,7 @@ struct ExploreView: View {
                             .font(.system(size: 13))
                             .foregroundStyle(.white)
                             .tint(Color.bpAmber)
+                            .bpAccessibility(label: "Buscar venues", hint: "Buscar venues por nombre o ubicación")
                         if !searchText.isEmpty {
                             Button { searchText = "" } label: {
                                 Image(systemName: "xmark.circle.fill")
@@ -120,6 +122,7 @@ struct ExploreView: View {
                                     .foregroundStyle(Color.bpTextTertiary)
                             }
                             .buttonStyle(.plain)
+                            .bpAccessibility(label: "Limpiar búsqueda", hint: "Borrar el texto de búsqueda", isButton: true)
                         }
                     }
                     .padding(.horizontal, 10)
@@ -138,6 +141,7 @@ struct ExploreView: View {
                             .glass(radius: 16)
                     }
                     .buttonStyle(.plain)
+                    .bpAccessibility(label: "Centrar mapa", hint: "Volver al centro del mapa", isButton: true)
                 }
                 .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 8)
@@ -228,6 +232,7 @@ struct ExploreView: View {
             .background(Circle().fill(Color.bpAmber))
             .overlay(Circle().strokeBorder(.white.opacity(0.9), lineWidth: 2))
             .shadow(color: .black.opacity(0.4), radius: 4, y: 1)
+            .bpAccessibility(label: "\(n) venues", hint: "Hacer zoom para ver venues individuales", isButton: true)
     }
 
     // MARK: - Marker
@@ -271,6 +276,7 @@ struct ExploreView: View {
                     .offset(x: size * 0.4, y: -size * 0.4)
             }
         }
+        .bpAccessibility(label: venue.name, hint: "Venue en el mapa. \(venue.neighborhood). Puntuación: \(venue.rating)")
     }
 
     private func categoryPin(_ venue: BarPassVenue, size: CGFloat) -> some View {
@@ -356,6 +362,7 @@ struct ExploreView: View {
             )
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: venue.name, hint: "Ver detalle de \(venue.name)", isButton: true)
     }
 
     // MARK: - Chips
@@ -381,6 +388,7 @@ struct ExploreView: View {
             .overlay(Capsule().strokeBorder(selected ? Color.clear : Color.white.opacity(0.08)))
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: layer.label, hint: "Filtrar venues por \(layer.label)", isButton: true)
     }
 
     // MARK: - List
@@ -471,5 +479,7 @@ struct VenueListRow: View {
         }
         .padding(.horizontal, BPSpacing.lg)
         .padding(.vertical, 14)
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: venue.name, hint: "\(venue.neighborhood). \(venue.type.rawValue). Puntuación: \(venue.rating)", isButton: true)
     }
 }

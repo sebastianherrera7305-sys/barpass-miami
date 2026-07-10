@@ -55,6 +55,7 @@ struct TableReservationView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cerrar") { dismiss() }.foregroundStyle(gold)
+                        .bpAccessibility(label: "Cerrar", hint: "Cierra la vista de reservación de mesa", isButton: true)
                 }
             }
         }
@@ -194,6 +195,7 @@ struct TableReservationView: View {
             )
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: pkg.name, hint: "Paquete de mesa, depósito de \(String(format: "$%.0f", pkg.deposit)) dólares", isButton: true)
     }
 
     // MARK: - Guest count
@@ -223,6 +225,7 @@ struct TableReservationView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .bpAccessibility(label: "\(n) invitados", hint: "Selecciona \(n) invitados para la mesa", isButton: true)
                 }
             }
             .padding(.horizontal, 20)
@@ -268,6 +271,7 @@ struct TableReservationView: View {
                             )
                     }
                     .buttonStyle(.plain)
+                    .bpAccessibility(label: "Horario \(slot.0)", hint: "Selecciona las \(slot.0) como horario para la reservación", isButton: true)
                 }
             }
             .padding(.horizontal, 20)
@@ -322,6 +326,8 @@ struct TableReservationView: View {
         .padding(16)
         .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.07)))
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "Resumen de reservación", hint: "Muestra el resumen de la reservación incluyendo mesa, invitados y depósito")
     }
 
     private func rowSummary(label: String, value: String) -> some View {
@@ -359,6 +365,7 @@ struct TableReservationView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.12)))
         }
         .buttonStyle(.plain).disabled(isProcessing)
+        .bpAccessibility(label: "Pagar depósito con Apple Pay", hint: "Procesa el depósito de la mesa usando Apple Pay", isButton: true)
     }
 
     private var walletBtn: some View {
@@ -379,6 +386,7 @@ struct TableReservationView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.2)))
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: "Pagar depósito con BarPass Wallet", hint: "Usa el saldo de tu billetera BarPass para pagar el depósito", isButton: true)
     }
 
     private var cardBtn: some View {
@@ -398,6 +406,7 @@ struct TableReservationView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.1)))
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: "Pagar depósito con tarjeta", hint: "Abre el formulario para pagar el depósito con tarjeta de crédito o débito", isButton: true)
     }
 
     // MARK: - Helpers

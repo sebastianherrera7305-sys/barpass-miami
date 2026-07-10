@@ -69,6 +69,7 @@ struct SkipLinePassView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cerrar") { dismiss() }.foregroundStyle(gold)
+                        .bpAccessibility(label: "Cerrar", hint: "Cierra la vista de compra de pase", isButton: true)
                 }
             }
         }
@@ -228,6 +229,7 @@ struct SkipLinePassView: View {
             )
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: option.label, hint: "Pase para \(option.qty) persona\(option.qty > 1 ? "s" : ""), precio \(String(format: "$%.0f", option.price)) dólares", isButton: true)
     }
 
     // MARK: - Payment
@@ -299,6 +301,7 @@ struct SkipLinePassView: View {
         }
         .buttonStyle(.plain)
         .disabled(isProcessing)
+        .bpAccessibility(label: "Pagar con Apple Pay", hint: "Procesa el pago del pase usando Apple Pay", isButton: true)
     }
 
     private var walletBtn: some View {
@@ -324,6 +327,7 @@ struct SkipLinePassView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.2)))
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: "Pagar con BarPass Wallet", hint: "Usa el saldo de tu billetera BarPass para comprar el pase", isButton: true)
     }
 
     private var cardBtn: some View {
@@ -344,6 +348,7 @@ struct SkipLinePassView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.1)))
         }
         .buttonStyle(.plain)
+        .bpAccessibility(label: "Pagar con tarjeta", hint: "Abre el formulario para pagar el pase con tarjeta de crédito o débito", isButton: true)
     }
 
     // MARK: - Completion
