@@ -33,6 +33,8 @@ enum AnalyticsEvent {
     case shareVenue(venue: String)
     case deepLink(URL)
 
+    case earnXP(action: String, amount: Int)
+
     case error(name: String, details: String?)
     case warning(name: String, details: String?)
 }
@@ -77,6 +79,7 @@ final class ConsoleAnalyticsService: AnalyticsService {
         case .openMaps:            (emoji, label) = ("🗺️", "openMaps")
         case .shareVenue:          (emoji, label) = ("📤", "shareVenue")
         case .deepLink:            (emoji, label) = ("🔗", "deepLink")
+        case .earnXP:              (emoji, label) = ("🏆", "earnXP")
         case .error:               (emoji, label) = ("🚨", "error")
         case .warning:             (emoji, label) = ("⚠️", "warning")
         }

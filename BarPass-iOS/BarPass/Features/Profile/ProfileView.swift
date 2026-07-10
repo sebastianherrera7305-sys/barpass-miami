@@ -4,13 +4,15 @@ struct ProfileView: View {
     @EnvironmentObject private var appState: AppState
     @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var themeService = ThemeService.shared
+    @ObservedObject private var engine = PointsEngine.shared
     @State private var animateStats = false
+    @State private var showToast = false
 
-    private let points = 1240
-    private let level = "Insider"
-    private let checkins = 8
-    private let nextLevel = "VIP"
-    private let nextPoints = 2000
+    private var points: Int { engine.totalXP }
+    private var level: String { engine.levelName }
+    private var checkins: Int { engine.checkinCount }
+    private var nextLevel: String { engine.nextLevelName ?? "Max" }
+    private var nextPoints: Int { engine.xpForNextLevel ?? engine.totalXP }
 
     var body: some View {
         ZStack {
@@ -83,13 +85,13 @@ struct ProfileView: View {
                                     .frame(height: 6)
                                 RoundedRectangle(cornerRadius: 4)
                                     .fill(LinearGradient(colors: [Color.bpAmber, Color.bpAmberBright], startPoint: .leading, endPoint: .trailing))
-                                    .frame(width: animateStats ? geo.size.width * CGFloat(points) / CGFloat(nextPoints) : 0, height: 6)
+                                    .frame(width: animateStats ? geo.size.width * CGFloat(engine.progress) : 0, height: 6)
                                     .animation(.spring(response: 1.2, dampingFraction: 0.8).delay(0.3), value: animateStats)
                             }
                         }
                         .frame(height: 6)
 
-                        Text("\(nextPoints - points) BPX para llegar a \(nextLevel)")
+                        Text(engine.xpForNextLevel != nil ? "\(nextPoints - points) BPX para llegar a \(nextLevel)" : "Nivel máximo alcanzado 🏆")
                             .font(.system(size: 11))
                             .foregroundStyle(Color.bpTextTertiary)
                             .frame(maxWidth: .infinity, alignment: .trailing)
@@ -104,8 +106,8 @@ struct ProfileView: View {
                     // Stats
                     HStack(spacing: 12) {
                         statCard(value: "\(checkins)", label: l10n.t("profile.checkins"), icon: "mappin.circle.fill")
-                        statCard(value: "3", label: l10n.t("profile.reviews"), icon: "star.fill")
-                        statCard(value: "2", label: l10n.t("profile.invited"), icon: "person.2.fill")
+                        statCard(value: "\(engine.reviewCount)", label: l10n.t("profile.reviews"), icon: "star.fill")
+                        statCard(value: "\(engine.shareCount)", label: l10n.t("profile.invited"), icon: "person.2.fill")
                     }
                     .padding(.horizontal, BPSpacing.lg)
 
@@ -116,10 +118,10 @@ struct ProfileView: View {
                             .foregroundStyle(.white)
 
                         VStack(spacing: 10) {
-                            earnRow(icon: "mappin.circle.fill", action: "Check-in en venue", points: "+50 BPX")
-                            earnRow(icon: "camera.fill", action: "Review con foto", points: "+75 BPX")
-                            earnRow(icon: "person.fill.badge.plus", action: "Invitar un amigo", points: "+200 BPX")
-                            earnRow(icon: "square.and.arrow.up", action: "Compartir venue", points: "+25 BPX")
+                            earnRow(icon: "mappin.circle.fill", action: "Check-in en venue (×\(engine.checkinCount))", points: "+50 BPX")
+                            earnRow(icon: "camera.fill", action: "Review con foto (×\(engine.reviewCount))", points: "+75 BPX")
+                            earnRow(icon: "sparkles", action: "Crear o completar trip (×\(engine.tripCount))", points: "+100/200 BPX")
+                            earnRow(icon: "square.and.arrow.up", action: "Compartir venue (×\(engine.shareCount))", points: "+25 BPX")
                         }
                     }
                     .padding(18)
@@ -216,6 +218,28 @@ struct ProfileView: View {
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                 withAnimation(.easeOut(duration: 0.6)) { animateStats = true }
+            }
+        }
+        .overlay(alignment: .top) {
+            if showToast, let award = engine.lastAward {
+                HStack(spacing: 8) {
+                    Text("🏆")
+                    Text("+\(award.xp) XP · \(award.action.label)")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.black)
+                }
+                .padding(.horizontal, 18).padding(.vertical, 11)
+                .background(Color.bpAmber, in: Capsule())
+                .shadow(color: Color.bpAmber.opacity(0.4), radius: 12, y: 4)
+                .padding(.top, 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .onChange(of: engine.lastAward?.xp) { _, newValue in
+            guard newValue != nil else { return }
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { showToast = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                withAnimation(.easeOut(duration: 0.4)) { showToast = false; engine.lastAward = nil }
             }
         }
     }

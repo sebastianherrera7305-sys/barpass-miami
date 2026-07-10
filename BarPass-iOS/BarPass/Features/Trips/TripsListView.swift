@@ -271,7 +271,7 @@ struct TripsListView: View {
             stops: stops
         )
         Task {
-            await tripStore.create(trip)
+            await tripStore.create(trip); PointsEngine.shared.award(.createTrip)
             BPAnalytics.track(.createTrip)
         }
     }

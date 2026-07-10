@@ -262,6 +262,7 @@ struct CardPaymentView: View {
                 await MainActor.run {
                     self.loading = false
                     BPAnalytics.track(.paymentSuccess(method: "card", amount: self.total))
+                    PointsEngine.shared.award(.completeTrip)
                     self.onSuccess("💳 •••• \(last4)")
                     self.dismiss()
                 }

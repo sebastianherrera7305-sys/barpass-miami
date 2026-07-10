@@ -7,6 +7,9 @@ struct VenueDetailView: View {
     @EnvironmentObject private var appState: AppState
     @State private var isSaved = false
     @State private var showShareSheet = false
+    @ObservedObject private var points = PointsEngine.shared
+    @State private var checkinMessage: String?
+    @State private var checkingIn = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -350,6 +353,86 @@ struct VenueDetailView: View {
             Text("Rating de Google")
                 .font(.system(size: 11))
                 .foregroundStyle(Color.bpTextSecondary.opacity(0.7))
+
+            xpActions
+        }
+    }
+
+    // MARK: - XP actions (check-in por proximidad + review)
+
+    private var xpActions: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 10) {
+                Button(action: attemptCheckIn) {
+                    HStack(spacing: 6) {
+                        if checkingIn { ProgressView().tint(.black).scaleEffect(0.7) }
+                        else { Image(systemName: points.hasCheckedInToday(venueId: venue.id) ? "checkmark.seal.fill" : "mappin.and.ellipse").font(.system(size: 13)) }
+                        Text(points.hasCheckedInToday(venueId: venue.id) ? "Check-in hecho" : "Check-in · +50 XP")
+                            .font(.system(size: 13, weight: .bold))
+                    }
+                    .foregroundStyle(points.hasCheckedInToday(venueId: venue.id) ? Color.bpGreen : .black)
+                    .frame(maxWidth: .infinity).padding(.vertical, 12)
+                    .background(points.hasCheckedInToday(venueId: venue.id) ? Color.bpGreen.opacity(0.12) : Color.bpAmber, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .disabled(checkingIn || points.hasCheckedInToday(venueId: venue.id))
+                .bpAccessibility(label: "Check-in", hint: "Registrar tu visita a este venue y ganar 50 XP", isButton: true)
+
+                Button {
+                    if points.leaveReview(venueId: venue.id) != nil {
+                        checkinMessage = "+75 XP · ¡Gracias por tu review!"
+                    } else {
+                        checkinMessage = "Ya dejaste review de este lugar."
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: points.hasReviewed(venueId: venue.id) ? "star.fill" : "square.and.pencil").font(.system(size: 13))
+                        Text(points.hasReviewed(venueId: venue.id) ? "Review dejada" : "Dejar review · +75 XP")
+                            .font(.system(size: 13, weight: .bold))
+                    }
+                    .foregroundStyle(points.hasReviewed(venueId: venue.id) ? Color.bpGreen : Color.bpAmber)
+                    .frame(maxWidth: .infinity).padding(.vertical, 12)
+                    .background(Color.bpAmber.opacity(points.hasReviewed(venueId: venue.id) ? 0.06 : 0.12), in: Capsule())
+                    .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.35)))
+                }
+                .buttonStyle(.plain)
+                .disabled(points.hasReviewed(venueId: venue.id))
+                .bpAccessibility(label: "Dejar review", hint: "Dejar una review y ganar 75 XP", isButton: true)
+            }
+
+            if let msg = checkinMessage {
+                Text(msg)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.bpAmber)
+                    .transition(.opacity)
+            }
+        }
+        .padding(.top, 6)
+    }
+
+    private func attemptCheckIn() {
+        checkingIn = true
+        checkinMessage = nil
+        Task {
+            let service = LocationService()
+            let coord = await service.requestOnce()
+            await MainActor.run {
+                checkingIn = false
+                guard let coord else {
+                    checkinMessage = "Activá la ubicación para hacer check-in."
+                    return
+                }
+                let here = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
+                let there = CLLocation(latitude: venue.latitude, longitude: venue.longitude)
+                let meters = here.distance(from: there)
+                if meters <= 250 {
+                    if points.checkIn(venueId: venue.id) != nil {
+                        withAnimation { checkinMessage = "+50 XP · ¡Estás en \(venue.name)!" }
+                    }
+                } else {
+                    withAnimation { checkinMessage = "Estás a \(Int(meters)) m — acercate para el check-in." }
+                }
+            }
         }
     }
 
@@ -472,7 +555,7 @@ struct VenueDetailView: View {
             .buttonStyle(.plain)
             .bpAccessibility(label: "Volver", hint: "Volver a la pantalla anterior", isButton: true)
             Spacer()
-            Button { BPHaptics.light(); showShareSheet = true; BPAnalytics.track(.shareVenue(venue: venue.id)) } label: {
+            Button { BPHaptics.light(); showShareSheet = true; BPAnalytics.track(.shareVenue(venue: venue.id)); PointsEngine.shared.award(.shareVenue) } label: {
                 Image(systemName: "square.and.arrow.up")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)

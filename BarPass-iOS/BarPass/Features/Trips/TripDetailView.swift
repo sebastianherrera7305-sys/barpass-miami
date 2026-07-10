@@ -49,7 +49,7 @@ struct TripDetailView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     if trip.creatorId == TripStore.currentUserId && trip.status != .completed {
                         Button {
-                            store.completeTrip(trip.id)
+                            store.completeTrip(trip.id); PointsEngine.shared.award(.completeTrip)
                         } label: {
                             Text("Completar")
                                 .font(.bpCaption())
