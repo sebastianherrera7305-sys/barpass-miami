@@ -74,6 +74,7 @@
 		EF000002000000000000RP01 /* EventFlyerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF000001000000000000RP01 /* EventFlyerCard.swift */; };
 		AN0000010000000000000001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AN0000020000000000000001 /* AnalyticsService.swift */; };
 		TS0000020000000000000001 /* TripStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS0000010000000000000001 /* TripStore.swift */; };
+		L10N02000000000000RP01 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10N01000000000000RP01 /* LocalizationService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -147,6 +148,7 @@
 		EF000001000000000000RP01 /* EventFlyerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventFlyerCard.swift; path = BarPass/Features/Tonight/EventFlyerCard.swift; sourceTree = SOURCE_ROOT; };
 		AN0000020000000000000001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalyticsService.swift; path = BarPass/Core/Services/AnalyticsService.swift; sourceTree = SOURCE_ROOT; };
 		TS0000010000000000000001 /* TripStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripStore.swift; path = BarPass/Features/Stores/TripStore.swift; sourceTree = SOURCE_ROOT; };
+		L10N01000000000000RP01 /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocalizationService.swift; path = BarPass/Core/Services/LocalizationService.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -513,6 +515,7 @@
 				AA0000010000000000000003 /* RootView.swift in Sources */,
 				AA0000010000000000000004 /* SplashView.swift in Sources */,
 				IMGC02000000000000RP01 /* ImageCache.swift in Sources */,
+				L10N02000000000000RP01 /* LocalizationService.swift in Sources */,
 				AA0000010000000000000009 /* LocationService.swift in Sources */,
 				AA000001000000000000000A /* NotificationService.swift in Sources */,
 				AA000001000000000000000B /* BiometricService.swift in Sources */,

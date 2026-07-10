@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct TonightView: View {
+    @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
     @EnvironmentObject private var appState:   AppState
     @State private var selectedTag: String? = nil
@@ -134,7 +135,7 @@ struct TonightView: View {
                 .font(.bpTitle1())
                 .foregroundStyle(.white)
 
-            Text("¿A dónde esta noche?")
+            Text(l10n.t("home.where"))
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
         }
@@ -246,9 +247,9 @@ struct TonightView: View {
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 0..<12: return "Buenos días"
-        case 12..<18: return "Buenas tardes"
-        default: return "Buenas noches"
+        case 0..<12: return l10n.t("greet.morning")
+        case 12..<18: return l10n.t("greet.afternoon")
+        default: return l10n.t("greet.night")
         }
     }
 }

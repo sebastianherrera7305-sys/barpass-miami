@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject private var appState: AppState
+    @ObservedObject private var l10n = L10n.shared
     @State private var animateStats = false
 
     private let points = 1240
@@ -55,7 +56,7 @@ struct ProfileView: View {
                     VStack(spacing: 14) {
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
-                                Text("BarPass Points")
+                                Text(l10n.t("profile.points"))
                                     .font(.system(size: 12))
                                     .foregroundStyle(Color.bpTextSecondary)
                                 Text("\(points) BPX")
@@ -65,7 +66,7 @@ struct ProfileView: View {
                             }
                             Spacer()
                             VStack(alignment: .trailing, spacing: 3) {
-                                Text("Próximo nivel")
+                                Text(l10n.t("profile.nextLevel"))
                                     .font(.system(size: 12))
                                     .foregroundStyle(Color.bpTextSecondary)
                                 Text(nextLevel)
@@ -101,15 +102,15 @@ struct ProfileView: View {
 
                     // Stats
                     HStack(spacing: 12) {
-                        statCard(value: "\(checkins)", label: "Check-ins", icon: "mappin.circle.fill")
-                        statCard(value: "3", label: "Reviews", icon: "star.fill")
-                        statCard(value: "2", label: "Invitados", icon: "person.2.fill")
+                        statCard(value: "\(checkins)", label: l10n.t("profile.checkins"), icon: "mappin.circle.fill")
+                        statCard(value: "3", label: l10n.t("profile.reviews"), icon: "star.fill")
+                        statCard(value: "2", label: l10n.t("profile.invited"), icon: "person.2.fill")
                     }
                     .padding(.horizontal, BPSpacing.lg)
 
                     // How to earn
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Cómo ganar puntos")
+                        Text(l10n.t("profile.howToEarn"))
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(.white)
 
@@ -125,6 +126,44 @@ struct ProfileView: View {
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.white.opacity(0.07)))
                     .accessibilityElement(children: .ignore)
                     .bpAccessibility(label: "Cómo ganar puntos", hint: "Sección de cómo ganar puntos de BarPass")
+                    .padding(.horizontal, BPSpacing.lg)
+
+                    // Language selector
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text(l10n.t("profile.language"))
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+
+                        HStack(spacing: 10) {
+                            ForEach(AppLanguage.allCases) { lang in
+                                let on = l10n.language == lang
+                                Button {
+                                    BPHaptics.light()
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                                        l10n.language = lang
+                                    }
+                                } label: {
+                                    VStack(spacing: 4) {
+                                        Text(lang.flag).font(.system(size: 22))
+                                        Text(lang.label)
+                                            .font(.system(size: 11, weight: on ? .bold : .regular))
+                                            .foregroundStyle(on ? Color.bpAmber : Color.bpTextSecondary)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background(on ? Color.bpAmber.opacity(0.12) : Color.white.opacity(0.04),
+                                                in: RoundedRectangle(cornerRadius: BPRadius.md))
+                                    .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
+                                        .strokeBorder(on ? Color.bpAmber.opacity(0.4) : Color.white.opacity(0.07)))
+                                }
+                                .buttonStyle(.plain)
+                                .bpAccessibility(label: lang.label, hint: "Cambiar idioma de la app", isButton: true)
+                            }
+                        }
+                    }
+                    .padding(18)
+                    .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.white.opacity(0.07)))
                     .padding(.horizontal, BPSpacing.lg)
 
                     Spacer(minLength: 120)

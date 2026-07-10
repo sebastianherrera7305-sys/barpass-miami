@@ -4,6 +4,7 @@ struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var cart:     CartStore
     @StateObject private var venueStore = VenueStore()
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var selectedTab = 0
 
@@ -60,11 +61,11 @@ struct MainTabView: View {
     private func tabButton(index: Int) -> some View {
         let isSelected = selectedTab == index
         let items: [(icon: String, label: String)] = [
-            ("flame.fill",    "Tonight"),
-            ("map.fill",      "Explore"),
-            ("suitcase.fill", "Trips"),
-            ("sparkles",      "Plan"),
-            ("person.fill",   "Me"),
+            ("flame.fill",    l10n.t("tab.tonight")),
+            ("map.fill",      l10n.t("tab.explore")),
+            ("suitcase.fill", l10n.t("tab.trips")),
+            ("sparkles",      l10n.t("tab.plan")),
+            ("person.fill",   l10n.t("tab.me")),
         ]
         let item = items[index]
 
