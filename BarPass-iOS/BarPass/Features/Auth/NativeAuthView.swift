@@ -75,10 +75,10 @@ struct NativeAuthView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.bpBackground.ignoresSafeArea()
 
             LinearGradient(
-                colors: [Color.white.opacity(0.03), .clear],
+                colors: [Color.bpInk.opacity(0.03), .clear],
                 startPoint: .top,
                 endPoint: .center
             )
@@ -93,7 +93,7 @@ struct NativeAuthView: View {
                         .tint(amber)
                     Text("Verificando sesión...")
                         .font(.system(size: 13))
-                        .foregroundStyle(Color.white.opacity(0.4))
+                        .foregroundStyle(Color.bpInk.opacity(0.4))
                 }
                 .transition(.opacity)
             }
@@ -185,15 +185,15 @@ struct NativeAuthView: View {
         VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .strokeBorder(Color.white.opacity(0.06), lineWidth: 1)
+                    .strokeBorder(Color.bpInk.opacity(0.06), lineWidth: 1)
                     .frame(width: 80, height: 80)
 
                 RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.white.opacity(0.04))
+                    .fill(Color.bpInk.opacity(0.04))
                     .frame(width: 58, height: 58)
                     .overlay(
                         RoundedRectangle(cornerRadius: 18)
-                            .strokeBorder(Color.white.opacity(0.10), lineWidth: 1)
+                            .strokeBorder(Color.bpInk.opacity(0.10), lineWidth: 1)
                     )
 
                 Text("BP")
@@ -210,12 +210,12 @@ struct NativeAuthView: View {
             VStack(spacing: 5) {
                 Text("BarPass")
                     .font(.system(size: 28, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                     .kerning(-0.4)
 
                 Text("Tu acceso a la mejor noche")
                     .font(.system(size: 13))
-                    .foregroundStyle(Color.white.opacity(0.35))
+                    .foregroundStyle(Color.bpInk.opacity(0.35))
             }
         }
         .accessibilityElement(children: .ignore)
@@ -242,7 +242,7 @@ struct NativeAuthView: View {
             VStack(spacing: 8) {
                 Text(label)
                     .font(.system(size: 15, weight: active ? .semibold : .regular))
-                    .foregroundStyle(active ? .white : Color.white.opacity(0.35))
+                    .foregroundStyle(active ? Color.bpInk : Color.bpInk.opacity(0.35))
                     .frame(maxWidth: .infinity)
 
                 Capsule()
@@ -282,7 +282,7 @@ struct NativeAuthView: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 14))
-                .foregroundStyle(Color.white.opacity(0.28))
+                .foregroundStyle(Color.bpInk.opacity(0.28))
                 .frame(width: 18)
 
             Group {
@@ -295,7 +295,7 @@ struct NativeAuthView: View {
                         .autocorrectionDisabled()
                 }
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.bpInk)
             .tint(amber)
             .bpAccessibility(
                 label: placeholder == "Email" ? "Correo electrónico" : "Contraseña",
@@ -308,7 +308,7 @@ struct NativeAuthView: View {
                 } label: {
                     Image(systemName: showPassword ? "eye.slash" : "eye")
                         .font(.system(size: 13))
-                        .foregroundStyle(Color.white.opacity(0.25))
+                        .foregroundStyle(Color.bpInk.opacity(0.25))
                 }
                 .buttonStyle(.plain)
                 .bpAccessibility(
@@ -322,10 +322,10 @@ struct NativeAuthView: View {
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.05))
+                .fill(Color.bpInk.opacity(0.05))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+                        .strokeBorder(Color.bpInk.opacity(0.08), lineWidth: 1)
                 )
         )
     }
@@ -364,7 +364,7 @@ struct NativeAuthView: View {
                     .fill(
                         LinearGradient(
                             colors: isDisabled
-                                ? [Color.white.opacity(0.08), Color.white.opacity(0.08)]
+                                ? [Color.bpInk.opacity(0.08), Color.bpInk.opacity(0.08)]
                                 : [amber, amberB],
                             startPoint: .leading,
                             endPoint: .trailing
@@ -375,12 +375,12 @@ struct NativeAuthView: View {
                 HStack(spacing: 8) {
                     if showSpinner {
                         ProgressView()
-                            .tint(isDisabled ? Color.white.opacity(0.3) : .black)
+                            .tint(isDisabled ? Color.bpInk.opacity(0.3) : .black)
                             .scaleEffect(0.85)
                     }
                     Text(label)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(isDisabled ? Color.white.opacity(0.25) : .black)
+                        .foregroundStyle(isDisabled ? Color.bpInk.opacity(0.25) : .black)
                 }
             }
         }
@@ -403,13 +403,13 @@ struct NativeAuthView: View {
     private var divider: some View {
         HStack(spacing: 12) {
             Rectangle()
-                .fill(Color.white.opacity(0.07))
+                .fill(Color.bpInk.opacity(0.07))
                 .frame(height: 1)
             Text("o")
                 .font(.system(size: 12))
-                .foregroundStyle(Color.white.opacity(0.2))
+                .foregroundStyle(Color.bpInk.opacity(0.2))
             Rectangle()
-                .fill(Color.white.opacity(0.07))
+                .fill(Color.bpInk.opacity(0.07))
                 .frame(height: 1)
         }
     }
@@ -437,7 +437,7 @@ struct NativeAuthView: View {
         VStack(spacing: 0) {
             // Drag indicator
             Capsule()
-                .fill(Color.white.opacity(0.2))
+                .fill(Color.bpInk.opacity(0.2))
                 .frame(width: 36, height: 4)
                 .padding(.top, 12)
 
@@ -451,7 +451,7 @@ struct NativeAuthView: View {
 
                     Text("Recuperar contraseña")
                         .font(.bpTitle2())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
 
                     Text("Te enviaremos un enlace a tu email para restablecerla.")
                         .font(.bpBody())
@@ -460,13 +460,13 @@ struct NativeAuthView: View {
 
                     TextField("Tu email", text: $resetEmail)
                         .font(.bpBody())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
                         .keyboardType(.emailAddress)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
                         .padding(14)
-                        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
-                        .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.white.opacity(0.07)))
+                        .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpInk.opacity(0.07)))
                         .bpAccessibility(label: "Correo electrónico", hint: "Ingresa tu correo para recuperar contraseña")
                 }
                 .padding(.horizontal, 24)
@@ -482,7 +482,7 @@ struct NativeAuthView: View {
                     .foregroundStyle(Color.bpTextSecondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                    .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                     .bpAccessibility(label: "Cancelar", hint: "Cerrar recuperación de contraseña", isButton: true)
 
                     Button {
@@ -509,7 +509,7 @@ struct NativeAuthView: View {
 
                     Text("Revisa tu email")
                         .font(.bpTitle2())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
 
                     Text(resetStatusMsg)
                         .font(.bpBody())
@@ -539,8 +539,8 @@ struct NativeAuthView: View {
         .frame(height: 280)
         .background(
             RoundedRectangle(cornerRadius: BPRadius.xxl)
-                .fill(Color(white: 0.06))
-                .overlay(RoundedRectangle(cornerRadius: BPRadius.xxl).strokeBorder(Color.white.opacity(0.07)))
+                .fill(Color.bpSurface)
+                .overlay(RoundedRectangle(cornerRadius: BPRadius.xxl).strokeBorder(Color.bpInk.opacity(0.07)))
         )
     }
 
@@ -550,8 +550,8 @@ struct NativeAuthView: View {
         Button { submitSkip() } label: {
             Text("Continuar como invitado")
                 .font(.system(size: 13, weight: .regular))
-                .foregroundStyle(Color.white.opacity(0.25))
-                .underline(color: Color.white.opacity(0.12))
+                .foregroundStyle(Color.bpInk.opacity(0.25))
+                .underline(color: Color.bpInk.opacity(0.12))
         }
         .buttonStyle(.plain)
         .disabled(flowState.isLoading)
@@ -567,13 +567,13 @@ struct NativeAuthView: View {
                     Text(c)
                         .font(.system(size: 10))
                         .frame(width: 20, height: 20)
-                        .background(Circle().fill(Color.white.opacity(0.06)))
+                        .background(Circle().fill(Color.bpInk.opacity(0.06)))
                         .overlay(Circle().strokeBorder(Color.black, lineWidth: 1.5))
                 }
             }
             Text("+5,000 personas ya salen con BarPass")
                 .font(.system(size: 11))
-                .foregroundStyle(Color.white.opacity(0.2))
+                .foregroundStyle(Color.bpInk.opacity(0.2))
         }
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: "Más de 5,000 personas ya usan BarPass")
@@ -738,7 +738,7 @@ private struct ErrorToast: View {
 
             Text(message)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -747,9 +747,9 @@ private struct ErrorToast: View {
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color.white.opacity(0.4))
+                    .foregroundStyle(Color.bpInk.opacity(0.4))
                     .frame(width: 24, height: 24)
-                    .background(Color.white.opacity(0.08), in: Circle())
+                    .background(Color.bpInk.opacity(0.08), in: Circle())
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: "Cerrar error", hint: "Descarta el mensaje de error", isButton: true)

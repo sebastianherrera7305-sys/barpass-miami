@@ -19,7 +19,7 @@ struct PromptYourNightView: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("¿Qué noche buscás?")
-                    .font(.system(size: 26, weight: .black)).foregroundStyle(.white)
+                    .font(.system(size: 26, weight: .black)).foregroundStyle(Color.bpInk)
                 Text("Elegí un vibe o describilo. Yo armo la noche.")
                     .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
             }
@@ -31,11 +31,11 @@ struct PromptYourNightView: View {
             HStack(spacing: 10) {
                 TextField("ej: cita inolvidable, rooftops, $100…", text: $prompt)
                     .focused($promptFocused)
-                    .font(.system(size: 15)).foregroundStyle(.white)
+                    .font(.system(size: 15)).foregroundStyle(Color.bpInk)
                     .padding(.horizontal, 14).padding(.vertical, 13)
-                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                    .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
-                        .strokeBorder(promptFocused ? Color.bpAmber.opacity(0.5) : Color.white.opacity(0.08)))
+                        .strokeBorder(promptFocused ? Color.bpAmber.opacity(0.5) : Color.bpInk.opacity(0.08)))
                     .bpAccessibility(label: "Descripción de la noche", hint: "Escribí cómo querés que sea tu noche")
             }
 
@@ -74,8 +74,8 @@ struct PromptYourNightView: View {
             .foregroundStyle(on ? .black : .white)
             .padding(.horizontal, 12).padding(.vertical, 10)
             .frame(maxWidth: .infinity)
-            .background(on ? Color.bpAmber : Color.white.opacity(0.06), in: Capsule())
-            .overlay(Capsule().strokeBorder(on ? .clear : Color.white.opacity(0.1)))
+            .background(on ? Color.bpAmber : Color.bpInk.opacity(0.06), in: Capsule())
+            .overlay(Capsule().strokeBorder(on ? .clear : Color.bpInk.opacity(0.1)))
         }
         .buttonStyle(.plain)
         .bpAccessibility(label: vibe.label, hint: "Seleccionar este vibe", isButton: true)
@@ -84,7 +84,7 @@ struct PromptYourNightView: View {
     private var routeView: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Tu noche")
-                .font(.system(size: 18, weight: .bold)).foregroundStyle(.white)
+                .font(.system(size: 18, weight: .bold)).foregroundStyle(Color.bpInk)
                 .padding(.top, 4)
 
             ForEach(Array(route.enumerated()), id: \.element.id) { i, stop in
@@ -103,7 +103,7 @@ struct PromptYourNightView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("PARADA \(i + 1)")
                             .font(.system(size: 9, weight: .bold)).foregroundStyle(Color.bpAmber)
-                        Text(v.name).font(.system(size: 15, weight: .semibold)).foregroundStyle(.white)
+                        Text(v.name).font(.system(size: 15, weight: .semibold)).foregroundStyle(Color.bpInk)
                         Text("\(v.neighborhood) · \(v.type.rawValue)")
                             .font(.system(size: 11)).foregroundStyle(Color.bpTextSecondary)
                         if let reason = stop.reason {

@@ -13,7 +13,7 @@ struct VenueDetailView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.black.ignoresSafeArea()
+            Color.bpBackground.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
@@ -57,10 +57,10 @@ struct VenueDetailView: View {
                         ForEach(venue.vibes.prefix(4), id: \.self) { vibe in
             Text("#\(vibe)")
                 .font(.bpCaption())
-                .foregroundStyle(Color.bpTextSecondary)
+                .foregroundStyle(Color.white.opacity(0.65))
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(Color.white.opacity(0.1), in: Capsule())
+                .background(Color.bpInk.opacity(0.1), in: Capsule())
                         }
                     }
                 }
@@ -75,14 +75,14 @@ struct VenueDetailView: View {
                         Text(String(format: "%.1f", venue.rating))
                             .font(.system(size: 13, weight: .bold)).foregroundStyle(.white)
                         Text("(\(venue.reviewCount))")
-                            .font(.system(size: 12)).foregroundStyle(Color.bpTextSecondary)
+                            .font(.system(size: 12)).foregroundStyle(Color.white.opacity(0.65))
                     }
                     Text("·").foregroundStyle(Color.bpTextTertiary)
                     Text(venue.type.rawValue)
-                        .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
+                        .font(.system(size: 13)).foregroundStyle(Color.white.opacity(0.65))
                     Text("·").foregroundStyle(Color.bpTextTertiary)
                     Text(venue.neighborhood)
-                        .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
+                        .font(.system(size: 13)).foregroundStyle(Color.white.opacity(0.65))
                 }
             }
             .padding(.horizontal, BPSpacing.lg)
@@ -116,7 +116,7 @@ struct VenueDetailView: View {
     private var heroEmojiFallback: some View {
         ZStack {
             LinearGradient(
-                colors: [Color(white: 0.15), Color(white: 0.06)],
+                colors: [Color(white: 0.15), Color.bpSurface],
                 startPoint: .topLeading, endPoint: .bottomTrailing
             )
             Text(venue.emoji).font(.system(size: 120)).opacity(0.12)
@@ -186,14 +186,14 @@ struct VenueDetailView: View {
     private var quickStats: some View {
         HStack(spacing: 0) {
             quickStat(icon: "clock.fill", label: "Cierra", value: venue.closeTime, primary: true)
-            Divider().background(Color.white.opacity(0.08)).frame(height: 40)
+            Divider().background(Color.bpInk.opacity(0.08)).frame(height: 40)
             quickStat(icon: "ticket.fill", label: "Cover", value: venue.priceRange, primary: false)
-            Divider().background(Color.white.opacity(0.08)).frame(height: 40)
+            Divider().background(Color.bpInk.opacity(0.08)).frame(height: 40)
             quickStat(icon: "person.3.fill", label: "Crowd", value: venue.crowdDescription, primary: false)
         }
         .padding(.vertical, 14)
-        .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.07)))
+        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpInk.opacity(0.07)))
     }
 
     private func quickStat(icon: String, label: String, value: String, primary: Bool) -> some View {
@@ -228,12 +228,12 @@ struct VenueDetailView: View {
                         .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
                     Spacer()
                     Text(venue.crowdDescription)
-                        .font(.system(size: 13, weight: .semibold)).foregroundStyle(.white)
+                        .font(.system(size: 13, weight: .semibold)).foregroundStyle(Color.bpInk)
                 }
                 HStack(spacing: 4) {
                     ForEach(0..<5) { i in
                         RoundedRectangle(cornerRadius: 3)
-                            .fill(i < venue.crowdLevel ? Color.bpAmber : Color.white.opacity(0.1))
+                            .fill(i < venue.crowdLevel ? Color.bpAmber : Color.bpInk.opacity(0.1))
                             .frame(height: 8)
                     }
                 }
@@ -272,7 +272,7 @@ struct VenueDetailView: View {
                         Text(drink.emoji).font(.system(size: 22))
                         Text(drink.name)
                             .font(.system(size: 14))
-                            .foregroundStyle(Color.white.opacity(0.7))
+                            .foregroundStyle(Color.bpInk.opacity(0.7))
                         Spacer()
                         Text(String(format: "$%.0f", drink.price))
                             .font(.system(size: 14, weight: .bold, design: .monospaced))
@@ -314,17 +314,17 @@ struct VenueDetailView: View {
                                 image.resizable().scaledToFill()
                             case .empty:
                                 ZStack {
-                                    Color(white: 0.08)
+                                    Color.bpSurfaceRaised
                                     ProgressView().tint(Color.bpAmber)
                                 }
                             case .failure:
                                 ZStack {
-                                    Color(white: 0.08)
+                                    Color.bpSurfaceRaised
                                     Image(systemName: "photo")
                                         .foregroundStyle(Color.bpTextSecondary)
                                 }
                             @unknown default:
-                                Color(white: 0.08)
+                                Color.bpSurfaceRaised
                             }
                         }
                         .frame(width: 260, height: 180)
@@ -348,7 +348,7 @@ struct VenueDetailView: View {
                     .foregroundStyle(Color.bpAmber)
                 Text(String(format: "%.1f", venue.rating))
                     .font(.system(size: 24, weight: .black))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                 Text("(\(venue.reviewCount) reviews)")
                     .font(.system(size: 13))
                     .foregroundStyle(Color.bpTextSecondary)
@@ -477,8 +477,8 @@ struct VenueDetailView: View {
                     .font(.system(size: 18))
                     .foregroundStyle(isSaved ? Color.bpDanger : .white)
                     .frame(width: 48, height: 48)
-                    .background(Color.white.opacity(0.08), in: Circle())
-                    .overlay(Circle().strokeBorder(Color.white.opacity(0.1)))
+                    .background(Color.bpInk.opacity(0.08), in: Circle())
+                    .overlay(Circle().strokeBorder(Color.bpInk.opacity(0.1)))
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: "Guardar", hint: "Guardar o quitar de favoritos", isButton: true)
@@ -533,7 +533,7 @@ struct VenueDetailView: View {
             Button { BPHaptics.light(); dismiss() } label: {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                     .frame(width: 34, height: 34)
                     .background(.ultraThinMaterial, in: Circle())
                     .environment(\.colorScheme, .dark)
@@ -544,7 +544,7 @@ struct VenueDetailView: View {
             Button { BPHaptics.light(); showShareSheet = true; BPAnalytics.track(.shareVenue(venue: venue.id)); PointsEngine.shared.award(.shareVenue) } label: {
                 Image(systemName: "square.and.arrow.up")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                     .frame(width: 34, height: 34)
                     .background(.ultraThinMaterial, in: Circle())
                     .environment(\.colorScheme, .dark)
@@ -560,7 +560,7 @@ struct VenueDetailView: View {
 
     private var divider: some View {
         Rectangle()
-            .fill(Color.white.opacity(0.06))
+            .fill(Color.bpInk.opacity(0.06))
             .frame(height: 1)
             .padding(.horizontal, BPSpacing.lg)
     }
@@ -568,7 +568,7 @@ struct VenueDetailView: View {
     private func sectionTitle(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 16, weight: .bold))
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.bpInk)
     }
 
     private func infoRow(_ icon: String, _ label: String, _ value: String) -> some View {
@@ -583,7 +583,7 @@ struct VenueDetailView: View {
                 .frame(width: 80, alignment: .leading)
             Text(value)
                 .font(.system(size: 13))
-                .foregroundStyle(Color.white.opacity(0.7))
+                .foregroundStyle(Color.bpInk.opacity(0.7))
                 .multilineTextAlignment(.leading)
             Spacer()
         }
@@ -595,11 +595,11 @@ struct VenueDetailView: View {
                 Image(systemName: icon).font(.system(size: 11))
                 Text(label).font(.system(size: 12, weight: .semibold))
             }
-            .foregroundStyle(Color.white.opacity(0.7))
+            .foregroundStyle(Color.bpInk.opacity(0.7))
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.sm))
-            .overlay(RoundedRectangle(cornerRadius: BPRadius.sm).strokeBorder(Color.white.opacity(0.09)))
+            .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.sm))
+            .overlay(RoundedRectangle(cornerRadius: BPRadius.sm).strokeBorder(Color.bpInk.opacity(0.09)))
         }
         .buttonStyle(.plain)
         .bpAccessibility(label: label, hint: "Abrir en \(label)", isButton: true)

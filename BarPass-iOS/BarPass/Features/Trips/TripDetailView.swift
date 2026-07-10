@@ -14,7 +14,7 @@ struct TripDetailView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 20) {
@@ -86,7 +86,7 @@ struct TripDetailView: View {
 
             Text(trip.title)
                 .font(.bpLargeTitle())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
 
             HStack(spacing: 14) {
                 Label(trip.startDate.formatted(date: .abbreviated, time: .omitted),
@@ -125,7 +125,7 @@ struct TripDetailView: View {
                 .foregroundStyle(amber)
             Text(value)
                 .font(.bpHeadline())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
             Text(label)
                 .font(.bpTiny())
                 .foregroundStyle(Color.bpTextSecondary)
@@ -142,7 +142,7 @@ struct TripDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Itinerario")
                 .font(.bpTitle2())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
 
             ForEach(Array(trip.stopsByDay.enumerated()), id: \.offset) { _, dayGroup in
                 VStack(alignment: .leading, spacing: 8) {
@@ -170,7 +170,7 @@ struct TripDetailView: View {
                 HStack {
                     Text(stop.venueName)
                         .font(.bpHeadline())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
                     Spacer()
                     if !stop.startTime.isEmpty {
                         Text(stop.startTime)
@@ -218,7 +218,7 @@ struct TripDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Miembros (\(trip.memberIds.count))")
                 .font(.bpTitle2())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
 
             ForEach(trip.memberIds, id: \.self) { memberId in
                 let rep = store.reputation(for: memberId)
@@ -235,7 +235,7 @@ struct TripDetailView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(memberId == TripStore.currentUserId ? "Vos" : memberId)
                             .font(.bpHeadline())
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
                         ReputationBadgeView(rep: rep)
                     }
 
@@ -274,7 +274,7 @@ struct TripDetailView: View {
         VStack(spacing: 12) {
             Text("Acciones")
                 .font(.bpTitle2())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
 
             if trip.visibility == .publicTrip || trip.visibility == .semiOpen {
                 Button {

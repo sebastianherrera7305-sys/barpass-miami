@@ -23,7 +23,7 @@ struct PriorityEntryHubView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     header
@@ -41,7 +41,7 @@ struct PriorityEntryHubView: View {
 
                     Text("El depósito se aplica al consumo mínimo en el venue")
                         .font(.system(size: 11))
-                        .foregroundStyle(Color.white.opacity(0.2))
+                        .foregroundStyle(Color.bpInk.opacity(0.2))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                         .padding(.bottom, 36)
@@ -109,12 +109,12 @@ struct PriorityEntryHubView: View {
 
             Text(venueName.isEmpty ? "BarPass" : venueName)
                 .font(.system(size: 24, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .padding(.top, 4)
 
             Text("Elige cómo quieres vivir la noche")
                 .font(.system(size: 13))
-                .foregroundStyle(Color.white.opacity(0.35))
+                .foregroundStyle(Color.bpInk.opacity(0.35))
         }
     }
 
@@ -129,10 +129,10 @@ struct PriorityEntryHubView: View {
                 // Icon box
                 ZStack {
                     RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.white.opacity(0.05))
+                        .fill(Color.bpInk.opacity(0.05))
                         .frame(width: 54, height: 54)
                         .overlay(RoundedRectangle(cornerRadius: 14)
-                            .strokeBorder(Color.white.opacity(0.08)))
+                            .strokeBorder(Color.bpInk.opacity(0.08)))
 
                     Image(systemName: opt.sf)
                         .font(.system(size: 20, weight: .semibold))
@@ -143,10 +143,10 @@ struct PriorityEntryHubView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(opt.title)
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
                     Text(opt.sub)
                         .font(.system(size: 12))
-                        .foregroundStyle(Color.white.opacity(0.38))
+                        .foregroundStyle(Color.bpInk.opacity(0.38))
                         .lineLimit(1)
                     Text(opt.badge)
                         .font(.system(size: 10, weight: .semibold))
@@ -161,14 +161,14 @@ struct PriorityEntryHubView: View {
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.white.opacity(0.2))
+                    .foregroundStyle(Color.bpInk.opacity(0.2))
             }
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.white.opacity(0.04))
+                    .fill(Color.bpInk.opacity(0.04))
                     .overlay(RoundedRectangle(cornerRadius: 18)
-                        .strokeBorder(Color.white.opacity(0.08)))
+                        .strokeBorder(Color.bpInk.opacity(0.08)))
             )
         }
         .buttonStyle(.plain)

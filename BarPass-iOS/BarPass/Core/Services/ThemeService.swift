@@ -60,3 +60,36 @@ final class ThemeService: ObservableObject {
         Self.currentPalette = t.palette
     }
 }
+
+
+// MARK: - Appearance (dark / light)
+
+enum BPAppearance: String, CaseIterable, Identifiable {
+    case dark, light
+    var id: String { rawValue }
+    var label: String { self == .dark ? "Oscuro" : "Claro" }
+    var emoji: String { self == .dark ? "🌙" : "☀️" }
+}
+
+@MainActor
+final class AppearanceStore: ObservableObject {
+    static let shared = AppearanceStore()
+    private static let key = "bp_appearance"
+
+    /// Read by the Color tokens from any context (plain value).
+    nonisolated(unsafe) static var isDark: Bool = true
+
+    @Published var appearance: BPAppearance {
+        didSet {
+            UserDefaults.standard.set(appearance.rawValue, forKey: Self.key)
+            Self.isDark = appearance == .dark
+        }
+    }
+
+    private init() {
+        let saved = UserDefaults.standard.string(forKey: Self.key)
+        let a = saved.flatMap(BPAppearance.init) ?? .dark
+        appearance = a
+        Self.isDark = a == .dark
+    }
+}

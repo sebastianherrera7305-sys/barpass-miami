@@ -8,6 +8,7 @@ struct BarPassApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appState = AppState()
     @StateObject private var cart     = CartStore()
+    @ObservedObject private var appearanceStore = AppearanceStore.shared
 
     init() {
         ImageCache.configure()
@@ -19,7 +20,7 @@ struct BarPassApp: App {
             RootView()
                 .environmentObject(appState)
                 .environmentObject(cart)
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(appearanceStore.appearance == .dark ? .dark : .light)
         }
     }
 }

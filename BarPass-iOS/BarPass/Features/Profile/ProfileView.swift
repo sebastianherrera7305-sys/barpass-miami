@@ -4,6 +4,7 @@ struct ProfileView: View {
     @EnvironmentObject private var appState: AppState
     @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var themeService = ThemeService.shared
+    @ObservedObject private var appearanceStore = AppearanceStore.shared
     @ObservedObject private var engine = PointsEngine.shared
     @State private var animateStats = false
     @State private var showToast = false
@@ -17,7 +18,7 @@ struct ProfileView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.bpBackground.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
@@ -39,7 +40,7 @@ struct ProfileView: View {
                         VStack(spacing: 4) {
                             Text("Miami Nightlifer")
                                 .font(.system(size: 20, weight: .bold))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Color.bpInk)
                                 .bpAccessibility(label: "Miami Nightlifer", hint: "Tu nombre de usuario")
 
                             HStack(spacing: 6) {
@@ -75,14 +76,14 @@ struct ProfileView: View {
                                     .foregroundStyle(Color.bpTextSecondary)
                                 Text(nextLevel)
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color.bpInk)
                             }
                         }
 
                         GeometryReader { geo in
                             ZStack(alignment: .leading) {
                                 RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color.white.opacity(0.08))
+                                    .fill(Color.bpInk.opacity(0.08))
                                     .frame(height: 6)
                                 RoundedRectangle(cornerRadius: 4)
                                     .fill(LinearGradient(colors: [Color.bpAmber, Color.bpAmberBright], startPoint: .leading, endPoint: .trailing))
@@ -98,7 +99,7 @@ struct ProfileView: View {
                             .frame(maxWidth: .infinity, alignment: .trailing)
                     }
                     .padding(18)
-                    .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.15)))
                     .accessibilityElement(children: .ignore)
                     .bpAccessibility(label: "BarPass Points \(points) BPX", hint: "Tus puntos y progreso al siguiente nivel")
@@ -113,7 +114,7 @@ struct ProfileView: View {
                             Text("🎮").font(.system(size: 22))
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Juegos y misiones")
-                                    .font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                                    .font(.system(size: 15, weight: .bold)).foregroundStyle(Color.bpInk)
                                 Text("Trivia diaria y misiones con XP extra")
                                     .font(.system(size: 11)).foregroundStyle(Color.bpTextSecondary)
                             }
@@ -123,7 +124,7 @@ struct ProfileView: View {
                                 .foregroundStyle(Color.bpAmber)
                         }
                         .padding(16)
-                        .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
                         .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
                     }
                     .buttonStyle(.plain)
@@ -142,7 +143,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         Text(l10n.t("profile.howToEarn"))
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
 
                         VStack(spacing: 10) {
                             earnRow(icon: "mappin.circle.fill", action: "Check-in en venue (×\(engine.checkinCount))", points: "+50 BPX")
@@ -152,8 +153,8 @@ struct ProfileView: View {
                         }
                     }
                     .padding(18)
-                    .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.white.opacity(0.07)))
+                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
                     .accessibilityElement(children: .ignore)
                     .bpAccessibility(label: "Cómo ganar puntos", hint: "Sección de cómo ganar puntos de BarPass")
                     .padding(.horizontal, BPSpacing.lg)
@@ -162,7 +163,7 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         Text(l10n.t("profile.language"))
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
 
                         HStack(spacing: 10) {
                             ForEach(AppLanguage.allCases) { lang in
@@ -181,10 +182,10 @@ struct ProfileView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
-                                    .background(on ? Color.bpAmber.opacity(0.12) : Color.white.opacity(0.04),
+                                    .background(on ? Color.bpAmber.opacity(0.12) : Color.bpInk.opacity(0.04),
                                                 in: RoundedRectangle(cornerRadius: BPRadius.md))
                                     .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
-                                        .strokeBorder(on ? Color.bpAmber.opacity(0.4) : Color.white.opacity(0.07)))
+                                        .strokeBorder(on ? Color.bpAmber.opacity(0.4) : Color.bpInk.opacity(0.07)))
                                 }
                                 .buttonStyle(.plain)
                                 .bpAccessibility(label: lang.label, hint: "Cambiar idioma de la app", isButton: true)
@@ -192,15 +193,15 @@ struct ProfileView: View {
                         }
                     }
                     .padding(18)
-                    .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.white.opacity(0.07)))
+                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
                     .padding(.horizontal, BPSpacing.lg)
 
                     // Theme selector
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Tema")
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
 
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 10)], spacing: 10) {
                             ForEach(BPTheme.allCases) { theme in
@@ -223,10 +224,10 @@ struct ProfileView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 12)
-                                    .background(on ? theme.palette.0.opacity(0.12) : Color.white.opacity(0.04),
+                                    .background(on ? theme.palette.0.opacity(0.12) : Color.bpInk.opacity(0.04),
                                                 in: RoundedRectangle(cornerRadius: BPRadius.md))
                                     .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
-                                        .strokeBorder(on ? theme.palette.0.opacity(0.45) : Color.white.opacity(0.07)))
+                                        .strokeBorder(on ? theme.palette.0.opacity(0.45) : Color.bpInk.opacity(0.07)))
                                 }
                                 .buttonStyle(.plain)
                                 .bpAccessibility(label: theme.label, hint: "Cambiar el tema de color de la app", isButton: true)
@@ -234,8 +235,46 @@ struct ProfileView: View {
                         }
                     }
                     .padding(18)
-                    .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.white.opacity(0.07)))
+                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
+                    .padding(.horizontal, BPSpacing.lg)
+
+                    // Appearance selector
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Apariencia")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Color.bpInk)
+
+                        HStack(spacing: 10) {
+                            ForEach(BPAppearance.allCases) { mode in
+                                let on = appearanceStore.appearance == mode
+                                Button {
+                                    BPHaptics.medium()
+                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                        appearanceStore.appearance = mode
+                                    }
+                                } label: {
+                                    VStack(spacing: 4) {
+                                        Text(mode.emoji).font(.system(size: 22))
+                                        Text(mode.label)
+                                            .font(.system(size: 11, weight: on ? .bold : .regular))
+                                            .foregroundStyle(on ? Color.bpAmber : Color.bpTextSecondary)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background(on ? Color.bpAmber.opacity(0.12) : Color.bpInk.opacity(0.04),
+                                                in: RoundedRectangle(cornerRadius: BPRadius.md))
+                                    .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
+                                        .strokeBorder(on ? Color.bpAmber.opacity(0.4) : Color.bpInk.opacity(0.07)))
+                                }
+                                .buttonStyle(.plain)
+                                .bpAccessibility(label: mode.label, hint: "Cambiar apariencia de la app", isButton: true)
+                            }
+                        }
+                    }
+                    .padding(18)
+                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
                     .padding(.horizontal, BPSpacing.lg)
 
                     Spacer(minLength: 120)
@@ -282,7 +321,7 @@ struct ProfileView: View {
                 .foregroundStyle(Color.bpAmber)
             Text(value)
                 .font(.system(size: 20, weight: .black))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .contentTransition(.numericText())
             Text(label)
                 .font(.system(size: 11))
@@ -290,8 +329,8 @@ struct ProfileView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
-        .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.07)))
+        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpInk.opacity(0.07)))
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: "\(value) \(label)", hint: "Estadística: \(label)")
     }
@@ -304,7 +343,7 @@ struct ProfileView: View {
                 .frame(width: 24)
             Text(action)
                 .font(.system(size: 14))
-                .foregroundStyle(Color.white.opacity(0.7))
+                .foregroundStyle(Color.bpInk.opacity(0.7))
             Spacer()
             Text(points)
                 .font(.system(size: 13, weight: .bold))

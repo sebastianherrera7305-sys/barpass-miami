@@ -87,7 +87,7 @@ struct ExploreView: View {
                 HStack {
                     Text("Explorar")
                         .font(.system(size: 24, weight: .black))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
                     Spacer()
                     Button {
                         BPHaptics.light()
@@ -112,7 +112,7 @@ struct ExploreView: View {
                             .foregroundStyle(Color.bpTextTertiary)
                         TextField("", text: $searchText, prompt: Text("Buscar venues...").foregroundStyle(Color.bpTextTertiary))
                             .font(.system(size: 13))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
                             .tint(Color.bpAmber)
                             .bpAccessibility(label: "Buscar venues", hint: "Buscar venues por nombre o ubicación")
                         if !searchText.isEmpty {
@@ -128,7 +128,7 @@ struct ExploreView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
                     .glass(radius: BPRadius.xl)
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.white.opacity(0.06)))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.06)))
 
                     Button {
                         showList = false
@@ -262,7 +262,7 @@ struct ExploreView: View {
             .clipShape(Circle())
             .overlay(
                 Circle().strokeBorder(
-                    isSelected ? Color.bpAmber : Color.white.opacity(0.8),
+                    isSelected ? Color.bpAmber : Color.bpInk.opacity(0.8),
                     lineWidth: isSelected ? 2.5 : 1.5
                 )
             )
@@ -284,7 +284,7 @@ struct ExploreView: View {
             Circle().fill(Color.bpCardBackground.opacity(0.96))
             Image(systemName: Self.markerIcon(venue.type))
                 .font(.system(size: size * 0.44, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
         }
     }
 
@@ -311,7 +311,7 @@ struct ExploreView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(venue.name)
                         .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
 
                     HStack(spacing: 6) {
                         Image(systemName: "star.fill")
@@ -383,9 +383,9 @@ struct ExploreView: View {
             .foregroundStyle(selected ? .black : .white)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(selected ? Color.bpAmber : Color.white.opacity(0.1))
+            .background(selected ? Color.bpAmber : Color.bpInk.opacity(0.1))
             .clipShape(Capsule())
-            .overlay(Capsule().strokeBorder(selected ? Color.clear : Color.white.opacity(0.08)))
+            .overlay(Capsule().strokeBorder(selected ? Color.clear : Color.bpInk.opacity(0.08)))
         }
         .buttonStyle(.plain)
         .bpAccessibility(label: layer.label, hint: "Filtrar venues por \(layer.label)", isButton: true)
@@ -401,7 +401,7 @@ struct ExploreView: View {
                         VenueListRow(venue: venue)
                     }
                     .buttonStyle(.plain)
-                    Divider().overlay(Color.white.opacity(0.05)).padding(.leading, 76)
+                    Divider().overlay(Color.bpInk.opacity(0.05)).padding(.leading, 76)
                 }
             }
             .padding(.top, 4)
@@ -447,12 +447,12 @@ struct VenueListRow: View {
             Text(venue.emoji)
                 .font(.system(size: 28))
                 .frame(width: 52, height: 52)
-                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(venue.name)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                 Text("\(venue.neighborhood) · \(venue.type.rawValue)")
                     .font(.system(size: 12))
                     .foregroundStyle(Color.bpTextSecondary)

@@ -16,7 +16,7 @@ struct RootView: View {
                 .ignoresSafeArea()
                 .transition(.opacity)
             } else {
-                Color.black.ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
             }
 
             if appState.showSplash {
@@ -89,10 +89,10 @@ struct RootView: View {
                     ZStack(alignment: .topTrailing) {
                         Image(systemName: "cart.fill")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
                             .frame(width: 44, height: 44)
-                            .background(Color.white.opacity(0.15), in: Circle())
-                            .overlay(Circle().strokeBorder(Color.white.opacity(0.2)))
+                            .background(Color.bpInk.opacity(0.15), in: Circle())
+                            .overlay(Circle().strokeBorder(Color.bpInk.opacity(0.2)))
 
                         if cart.itemCount > 0 {
                             Text("\(cart.itemCount)")
@@ -112,7 +112,7 @@ struct RootView: View {
             .background(
                 Capsule()
                     .fill(Color(red:0.06,green:0.04,blue:0.10).opacity(0.97))
-                    .overlay(Capsule().strokeBorder(Color.white.opacity(0.15), lineWidth: 1))
+                    .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.15), lineWidth: 1))
                     .shadow(color: .black.opacity(0.6), radius: 16, y: 4)
             )
             .padding(.bottom, 100)
@@ -161,11 +161,11 @@ private struct OfflineBanner: View {
             Text("Sin conexión — usando versión local")
                 .font(.caption.weight(.medium))
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(Color.bpInk)
         .padding(.horizontal, 14)
         .padding(.vertical, 9)
         .background(.black.opacity(0.84), in: Capsule())
-        .overlay(Capsule().strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
+        .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.12), lineWidth: 1))
         .shadow(color: .black.opacity(0.35), radius: 10, y: 3)
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: "Sin conexión", hint: "Usando versión local de los datos")
@@ -184,10 +184,10 @@ private struct OrderConfirmationBanner: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Orden enviada")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                 Text(order.method + " · " + String(format: "$%.2f", order.total))
                     .font(.caption)
-                    .foregroundStyle(Color.white.opacity(0.5))
+                    .foregroundStyle(Color.bpInk.opacity(0.5))
             }
             Spacer()
             Text("~8 min")

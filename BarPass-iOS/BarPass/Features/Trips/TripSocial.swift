@@ -11,7 +11,7 @@ struct JoinRequestModal: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
                 ScrollView {
                     VStack(spacing: 14) {
                         if stop.pendingStopRequests.isEmpty {
@@ -44,7 +44,7 @@ struct JoinRequestModal: View {
                 Circle().fill(Color.bpAmber.opacity(0.25)).frame(width: 44, height: 44)
                     .overlay(Text(String(user.prefix(1)).uppercased()).font(.system(size: 18, weight: .bold)).foregroundStyle(Color.bpAmber))
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(user).font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                    Text(user).font(.system(size: 15, weight: .bold)).foregroundStyle(Color.bpInk)
                     ReputationBadgeView(rep: rep)
                 }
                 Spacer()
@@ -61,7 +61,7 @@ struct JoinRequestModal: View {
                 } label: { pill("Aceptar", bg: Color.bpAmber, fg: .black) }.buttonStyle(.plain).bpAccessibility(label: "Aceptar", hint: "Aceptar la solicitud para unirse", isButton: true)
                 Button {
                     store.rejectStopRequest(stop.id, in: tripId, user: user)
-                } label: { pill("Rechazar", bg: Color.white.opacity(0.08), fg: .white) }.buttonStyle(.plain).bpAccessibility(label: "Rechazar", hint: "Rechazar la solicitud para unirse", isButton: true)
+                } label: { pill("Rechazar", bg: Color.bpInk.opacity(0.08), fg: .white) }.buttonStyle(.plain).bpAccessibility(label: "Rechazar", hint: "Rechazar la solicitud para unirse", isButton: true)
             }
         }
         .padding(14)
@@ -70,7 +70,7 @@ struct JoinRequestModal: View {
 
     private func signal(_ v: String, _ l: String) -> some View {
         VStack(spacing: 1) {
-            Text(v).font(.system(size: 14, weight: .bold)).foregroundStyle(.white)
+            Text(v).font(.system(size: 14, weight: .bold)).foregroundStyle(Color.bpInk)
             Text(l).font(.system(size: 10)).foregroundStyle(Color.bpTextSecondary)
         }
     }
@@ -125,10 +125,10 @@ struct RatingPrompt: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
                 VStack(spacing: 22) {
                     Text("¿Cómo estuvo salir con \(rateeName)?")
-                        .font(.system(size: 18, weight: .bold)).foregroundStyle(.white)
+                        .font(.system(size: 18, weight: .bold)).foregroundStyle(Color.bpInk)
                         .multilineTextAlignment(.center)
 
                     HStack(spacing: 10) {
@@ -180,7 +180,7 @@ private struct FlowTags: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(on ? .black : .white)
                     .padding(.horizontal, 12).padding(.vertical, 8)
-                    .background(on ? Color.bpAmber : Color.white.opacity(0.08), in: Capsule())
+                    .background(on ? Color.bpAmber : Color.bpInk.opacity(0.08), in: Capsule())
                     .onTapGesture {
                         if on { selected.remove(tag) }
                         else if selected.count < max { selected.insert(tag) }

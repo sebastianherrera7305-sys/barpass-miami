@@ -117,14 +117,30 @@ extension Color {
     // view keeps using these names (see ThemeService).
     static var bpAmber: Color { ThemeService.currentPalette.0 }
     static var bpAmberBright: Color { ThemeService.currentPalette.1 }
-    static let bpSurface = Color(white: 0.06)
-    static let bpSurfaceRaised = Color(white: 0.08)
-    static let bpBorder = Color.white.opacity(0.07)
-    static let bpTextSecondary = Color.white.opacity(0.4)
-    static let bpTextTertiary = Color.white.opacity(0.25)
+
+    // Appearance-aware tokens (dark / light). "Ink" is the primary content
+    // color: white on dark, near-black on light. Fills and borders derive
+    // from ink so subtle surfaces work in both modes.
+    static var bpBackground: Color {
+        AppearanceStore.isDark ? .black : Color(red: 0.97, green: 0.96, blue: 0.94)
+    }
+    static var bpInk: Color {
+        AppearanceStore.isDark ? .white : Color(red: 0.09, green: 0.08, blue: 0.12)
+    }
+    static var bpSurface: Color {
+        AppearanceStore.isDark ? Color(white: 0.06) : .white
+    }
+    static var bpSurfaceRaised: Color {
+        AppearanceStore.isDark ? Color(white: 0.08) : Color(white: 0.93)
+    }
+    static var bpCardBackground: Color {
+        AppearanceStore.isDark ? Color(red: 0.06, green: 0.04, blue: 0.10) : .white
+    }
+    static var bpBorder: Color { bpInk.opacity(0.07) }
+    static var bpTextSecondary: Color { bpInk.opacity(AppearanceStore.isDark ? 0.4 : 0.55) }
+    static var bpTextTertiary: Color { bpInk.opacity(AppearanceStore.isDark ? 0.25 : 0.4) }
     static let bpGreen = Color(red: 0.2, green: 0.9, blue: 0.4)
     static let bpDanger = Color(red: 1, green: 0.42, blue: 0.42)
-    static let bpCardBackground = Color(red: 0.06, green: 0.04, blue: 0.10)
 
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: .alphanumerics.inverted)
@@ -149,7 +165,7 @@ struct BarPassLogo: View {
             HStack(spacing: 0) {
                 Text("BAR")
                     .font(.system(size: 22, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                 Text("PASS")
                     .font(.system(size: 22, weight: .black, design: .rounded))
                     .foregroundStyle(Color.bpAmber)

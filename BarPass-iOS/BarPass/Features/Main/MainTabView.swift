@@ -6,6 +6,7 @@ struct MainTabView: View {
     @StateObject private var venueStore = VenueStore()
     @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var themeService = ThemeService.shared
+    @ObservedObject private var appearanceStore = AppearanceStore.shared
 
     @State private var selectedTab = 0
 
@@ -39,7 +40,7 @@ struct MainTabView: View {
         }
         .ignoresSafeArea(edges: .bottom)
         // Theme switch rebuilds the whole tree so every Color.bpAmber re-resolves.
-        .id(themeService.theme)
+        .id("\(themeService.theme.rawValue)-\(appearanceStore.appearance.rawValue)")
         .task { await venueStore.loadVenues() }
     }
 
@@ -54,7 +55,7 @@ struct MainTabView: View {
         .background(
             Capsule()
                 .fill(Color(red: 0.06, green: 0.04, blue: 0.10).opacity(0.96))
-                .overlay(Capsule().strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
+                .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.08), lineWidth: 1))
                 .shadow(color: .black.opacity(0.5), radius: 20, y: 8)
         )
         .padding(.horizontal, 40)
@@ -90,13 +91,13 @@ struct MainTabView: View {
                     }
                     Image(systemName: item.icon)
                         .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
-                        .foregroundStyle(isSelected ? Color.bpAmber : Color.white.opacity(0.3))
+                        .foregroundStyle(isSelected ? Color.bpAmber : Color.bpInk.opacity(0.3))
                 }
                 .frame(height: 28)
 
                 Text(item.label)
                     .font(.system(size: 9, weight: isSelected ? .semibold : .regular))
-                    .foregroundStyle(isSelected ? Color.bpAmber : Color.white.opacity(0.25))
+                    .foregroundStyle(isSelected ? Color.bpAmber : Color.bpInk.opacity(0.25))
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())

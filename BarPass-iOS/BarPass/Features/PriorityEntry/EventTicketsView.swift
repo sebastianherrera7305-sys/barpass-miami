@@ -17,7 +17,7 @@ struct EventTicketsView: View {
 
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
-    private let bg    = Color(red: 0.031, green: 0.024, blue: 0.039)
+    private let bg    = Color.bpBackground
 
     private var subtotal: Double { selectedPkg.price * Double(quantity) }
     private var fee: Double      { 1.50 }
@@ -72,14 +72,14 @@ struct EventTicketsView: View {
 
                 Text(eventName)
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
 
                 HStack(spacing: 12) {
                     Label(venueName, systemImage: "mappin.circle.fill")
                     Label(formattedEventDate, systemImage: "calendar")
                 }
                 .font(.system(size: 12))
-                .foregroundStyle(Color.white.opacity(0.6))
+                .foregroundStyle(Color.bpInk.opacity(0.6))
             }
             .padding(20)
             .padding(.bottom, 8)
@@ -100,7 +100,7 @@ struct EventTicketsView: View {
             Text("TIPO DE TICKET")
                 .font(.system(size: 11, weight: .heavy))
                 .tracking(3)
-                .foregroundStyle(Color.white.opacity(0.35))
+                .foregroundStyle(Color.bpInk.opacity(0.35))
                 .padding(.horizontal, 24)
 
             VStack(spacing: 10) {
@@ -119,7 +119,7 @@ struct EventTicketsView: View {
             HStack(spacing: 14) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(selected ? gold.opacity(0.2) : Color.white.opacity(0.06))
+                        .fill(selected ? gold.opacity(0.2) : Color.bpInk.opacity(0.06))
                         .frame(width: 52, height: 52)
                     Text(pkg.emoji).font(.system(size: 24))
                 }
@@ -128,7 +128,7 @@ struct EventTicketsView: View {
                     HStack(spacing: 8) {
                         Text(pkg.name)
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
                         if let badge = pkg.badge {
                             Text(badge)
                                 .font(.system(size: 9, weight: .heavy))
@@ -140,7 +140,7 @@ struct EventTicketsView: View {
                     }
                     Text(pkg.perks.prefix(2).joined(separator: " · "))
                         .font(.system(size: 12))
-                        .foregroundStyle(Color.white.opacity(0.4))
+                        .foregroundStyle(Color.bpInk.opacity(0.4))
                         .lineLimit(1)
                 }
 
@@ -152,16 +152,16 @@ struct EventTicketsView: View {
                         .foregroundStyle(selected ? gold : .white)
                     Text("por persona")
                         .font(.system(size: 10))
-                        .foregroundStyle(Color.white.opacity(0.3))
+                        .foregroundStyle(Color.bpInk.opacity(0.3))
                 }
             }
             .padding(14)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(selected ? gold.opacity(0.08) : Color.white.opacity(0.04))
+                    .fill(selected ? gold.opacity(0.08) : Color.bpInk.opacity(0.04))
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
-                            .strokeBorder(selected ? gold.opacity(0.5) : Color.white.opacity(0.07), lineWidth: 1)
+                            .strokeBorder(selected ? gold.opacity(0.5) : Color.bpInk.opacity(0.07), lineWidth: 1)
                     )
             )
         }
@@ -177,10 +177,10 @@ struct EventTicketsView: View {
                 Text("CANTIDAD")
                     .font(.system(size: 11, weight: .heavy))
                     .tracking(3)
-                    .foregroundStyle(Color.white.opacity(0.35))
+                    .foregroundStyle(Color.bpInk.opacity(0.35))
                 Text("\(quantity) ticket\(quantity > 1 ? "s" : "")")
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
             }
 
             Spacer()
@@ -191,7 +191,7 @@ struct EventTicketsView: View {
                 } label: {
                     Image(systemName: "minus")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(quantity > 1 ? .white : Color.white.opacity(0.2))
+                        .foregroundStyle(quantity > 1 ? .white : Color.bpInk.opacity(0.2))
                         .frame(width: 40, height: 40)
                 }
                 .disabled(quantity <= 1)
@@ -199,7 +199,7 @@ struct EventTicketsView: View {
 
                 Text("\(quantity)")
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                     .frame(width: 32)
 
                 Button {
@@ -207,13 +207,13 @@ struct EventTicketsView: View {
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(quantity < 8 ? .white : Color.white.opacity(0.2))
+                        .foregroundStyle(quantity < 8 ? .white : Color.bpInk.opacity(0.2))
                         .frame(width: 40, height: 40)
                 }
                 .disabled(quantity >= 8)
                 .bpAccessibility(label: "Aumentar cantidad", hint: "Aumenta la cantidad de tickets en uno, máximo ocho", isButton: true)
             }
-            .background(Color.white.opacity(0.07), in: Capsule())
+            .background(Color.bpInk.opacity(0.07), in: Capsule())
         }
         .padding(.horizontal, 24)
         .padding(.top, 20)
@@ -225,31 +225,31 @@ struct EventTicketsView: View {
         VStack(spacing: 0) {
             HStack {
                 Text("\(quantity) × \(selectedPkg.name)")
-                    .foregroundStyle(Color.white.opacity(0.6))
+                    .foregroundStyle(Color.bpInk.opacity(0.6))
                 Spacer()
                 Text(String(format: "$%.0f", subtotal))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
             }
             .font(.system(size: 14))
             .padding(.bottom, 10)
 
             HStack {
                 Text("Cargo por servicio")
-                    .foregroundStyle(Color.white.opacity(0.4))
+                    .foregroundStyle(Color.bpInk.opacity(0.4))
                 Spacer()
                 Text(String(format: "$%.2f", fee))
-                    .foregroundStyle(Color.white.opacity(0.4))
+                    .foregroundStyle(Color.bpInk.opacity(0.4))
             }
             .font(.system(size: 13))
             .padding(.bottom, 14)
 
-            Divider().background(Color.white.opacity(0.1))
+            Divider().background(Color.bpInk.opacity(0.1))
                 .padding(.bottom, 14)
 
             HStack {
                 Text("Total")
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                 Spacer()
                 Text(String(format: "$%.2f", total))
                     .font(.system(size: 18, weight: .bold))
@@ -257,8 +257,8 @@ struct EventTicketsView: View {
             }
         }
         .padding(18)
-        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.08)))
+        .background(Color.bpInk.opacity(0.05), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.bpInk.opacity(0.08)))
         .padding(.horizontal, 20)
         .padding(.top, 20)
         .accessibilityElement(children: .ignore)
@@ -273,7 +273,7 @@ struct EventTicketsView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Incluye")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(Color.white.opacity(0.3))
+                    .foregroundStyle(Color.bpInk.opacity(0.3))
                 ForEach(selectedPkg.perks, id: \.self) { perk in
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.circle.fill")
@@ -281,13 +281,13 @@ struct EventTicketsView: View {
                             .foregroundStyle(gold)
                         Text(perk)
                             .font(.system(size: 13))
-                            .foregroundStyle(Color.white.opacity(0.7))
+                            .foregroundStyle(Color.bpInk.opacity(0.7))
                     }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
-            .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
+            .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
             .padding(.bottom, 4)
 
             // Apple Pay
@@ -319,12 +319,12 @@ struct EventTicketsView: View {
                     Text(String(format: "BarPass Wallet  ·  $%.0f", appState.walletBalance))
                         .font(.system(size: 14, weight: .semibold))
                 }
-                .foregroundStyle(appState.walletBalance >= total ? gold : Color.white.opacity(0.3))
+                .foregroundStyle(appState.walletBalance >= total ? gold : Color.bpInk.opacity(0.3))
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
-                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+                .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14)
-                    .strokeBorder((appState.walletBalance >= total ? gold : Color.white.opacity(0.06)).opacity(0.4)))
+                    .strokeBorder((appState.walletBalance >= total ? gold : Color.bpInk.opacity(0.06)).opacity(0.4)))
             }
             .buttonStyle(.plain)
             .disabled(appState.walletBalance < total || isProcessing)

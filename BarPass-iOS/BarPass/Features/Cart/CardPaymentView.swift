@@ -25,7 +25,7 @@ struct CardPaymentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.031, green: 0.024, blue: 0.039).ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 20) {
@@ -37,7 +37,7 @@ struct CardPaymentView: View {
 
                             Text("Número de tarjeta, expiración y CVV")
                                 .font(.caption.weight(.semibold))
-                                .foregroundStyle(Color.white.opacity(0.45))
+                                .foregroundStyle(Color.bpInk.opacity(0.45))
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
                             cardInputField(placeholder: "1234 5678 9012 3456", text: $cardNumber, field: .number)
@@ -103,7 +103,7 @@ struct CardPaymentView: View {
                              Color(red:0.14,green:0.10,blue:0.18)],
                     startPoint: .topLeading, endPoint: .bottomTrailing))
                 .overlay(RoundedRectangle(cornerRadius: 20)
-                    .strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
+                    .strokeBorder(Color.bpInk.opacity(0.08), lineWidth: 1))
                 .shadow(color: .black.opacity(0.4), radius: 20, y: 8)
 
             VStack(alignment: .leading, spacing: 0) {
@@ -143,18 +143,18 @@ struct CardPaymentView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Nombre en la tarjeta")
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.white.opacity(0.45))
+                .foregroundStyle(Color.bpInk.opacity(0.45))
             TextField("Como aparece en la tarjeta", text: $name)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.words)
                 .focused($activeFocus, equals: .name)
                 .font(.system(size: 16))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 14)
-                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+                .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
                 .overlay(RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(activeFocus == .name ? gold.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1))
+                    .strokeBorder(activeFocus == .name ? gold.opacity(0.5) : Color.bpInk.opacity(0.08), lineWidth: 1))
                 .bpAccessibility(label: "Nombre en la tarjeta", hint: "Ingresa el nombre del titular de la tarjeta")
         }
     }
@@ -184,7 +184,7 @@ struct CardPaymentView: View {
             Text("Tu pago se procesa de forma segura con Stripe")
                 .font(.caption2)
         }
-        .foregroundStyle(Color.white.opacity(0.25))
+        .foregroundStyle(Color.bpInk.opacity(0.25))
     }
 
     // MARK: - Validation
@@ -196,12 +196,12 @@ struct CardPaymentView: View {
             .keyboardType(.numberPad)
             .focused($activeFocus, equals: field)
             .font(.system(size: 16, design: .monospaced))
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.bpInk)
             .padding(.horizontal, 14)
             .padding(.vertical, 14)
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+            .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(activeFocus == field ? gold.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1))
+                .strokeBorder(activeFocus == field ? gold.opacity(0.5) : Color.bpInk.opacity(0.08), lineWidth: 1))
             .onChange(of: text.wrappedValue) { _, _ in validateCard() }
             .bpAccessibility(label: field == .number ? "Número de tarjeta" : (field == .expiry ? "Fecha de expiración" : "Código de seguridad CVV"), hint: field == .number ? "Ingresa el número de tu tarjeta" : (field == .expiry ? "Ingresa la fecha de vencimiento en formato MM/AA" : "Ingresa el código de seguridad de 3 dígitos"))
     }

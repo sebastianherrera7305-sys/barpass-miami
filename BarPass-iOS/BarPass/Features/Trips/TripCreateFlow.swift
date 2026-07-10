@@ -18,7 +18,7 @@ struct TripCreateFlow: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
 
                 switch step {
                 case 0: titleStep
@@ -53,13 +53,13 @@ struct TripCreateFlow: View {
             Spacer()
             Text("¿Cómo se llama tu plan?")
                 .font(.bpTitle2())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
 
             TextField("ej: Noche en South Beach", text: $title)
                 .font(.bpBody())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .padding(14)
-                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                 .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
                 .padding(.horizontal, BPSpacing.lg)
                 .bpAccessibility(label: "Nombre del plan", hint: "Escribí el nombre de tu plan")
@@ -71,9 +71,9 @@ struct TripCreateFlow: View {
 
                 TextField("ej: Miami", text: $destinationCity)
                     .font(.bpBody())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                     .padding(14)
-                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                    .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
                     .bpAccessibility(label: "Ciudad", hint: "Escribí la ciudad del plan")
             }
@@ -89,7 +89,7 @@ struct TripCreateFlow: View {
             Spacer()
             Text("¿Cuándo?")
                 .font(.bpTitle2())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Desde")
@@ -122,7 +122,7 @@ struct TripCreateFlow: View {
         VStack(spacing: 14) {
             Text("Elegí venues")
                 .font(.bpTitle2())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .padding(.top, 20)
 
             Text("Seleccioná los lugares que querés incluir")
@@ -140,7 +140,7 @@ struct TripCreateFlow: View {
                         } label: {
                             HStack(spacing: 12) {
                                 Circle()
-                                    .fill(selected ? amber : Color.white.opacity(0.06))
+                                    .fill(selected ? amber : Color.bpInk.opacity(0.06))
                                     .frame(width: 24, height: 24)
                                     .overlay(
                                         Image(systemName: selected ? "checkmark" : "")
@@ -151,7 +151,7 @@ struct TripCreateFlow: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(v.name)
                                         .font(.bpHeadline())
-                                        .foregroundStyle(.white)
+                                        .foregroundStyle(Color.bpInk)
                                     Text("\(v.neighborhood) · \(v.type.rawValue)")
                                         .font(.bpSmall())
                                         .foregroundStyle(Color.bpTextSecondary)
@@ -181,7 +181,7 @@ struct TripCreateFlow: View {
 
             Text("Resumen")
                 .font(.bpTitle1())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
 
             VStack(spacing: 10) {
                 summaryRow("Título", title)
@@ -239,7 +239,7 @@ struct TripCreateFlow: View {
             Spacer()
             Text(value)
                 .font(.bpBody())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
         }
     }
 

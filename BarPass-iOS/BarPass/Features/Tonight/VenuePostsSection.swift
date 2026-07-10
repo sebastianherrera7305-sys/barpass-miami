@@ -16,7 +16,7 @@ struct VenuePostsSection: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("La gente dice")
-                    .font(.bpTitle2()).foregroundStyle(.white)
+                    .font(.bpTitle2()).foregroundStyle(Color.bpInk)
                 Spacer()
                 Button {
                     BPHaptics.light()
@@ -46,7 +46,7 @@ struct VenuePostsSection: View {
                         .font(.bpCaption()).foregroundStyle(Color.bpTextSecondary)
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 18)
-                .background(Color.white.opacity(0.03), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                .background(Color.bpInk.opacity(0.03), in: RoundedRectangle(cornerRadius: BPRadius.md))
             } else {
                 ForEach(posts.prefix(5)) { post in postCard(post) }
             }
@@ -77,7 +77,7 @@ struct VenuePostsSection: View {
                     .overlay(Text(post.emoji ?? "🎉").font(.system(size: 14)))
                 VStack(alignment: .leading, spacing: 1) {
                     Text("@\(post.authorHandle)")
-                        .font(.system(size: 13, weight: .bold)).foregroundStyle(.white)
+                        .font(.system(size: 13, weight: .bold)).foregroundStyle(Color.bpInk)
                     Text(post.relativeTime)
                         .font(.system(size: 10)).foregroundStyle(Color.bpTextTertiary)
                 }
@@ -89,7 +89,7 @@ struct VenuePostsSection: View {
             }
 
             Text(post.caption)
-                .font(.bpBody()).foregroundStyle(Color.white.opacity(0.85))
+                .font(.bpBody()).foregroundStyle(Color.bpInk.opacity(0.85))
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 12) {
@@ -100,7 +100,7 @@ struct VenuePostsSection: View {
         }
         .padding(12)
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
-        .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.white.opacity(0.06)))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpInk.opacity(0.06)))
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: "Post de \(post.authorHandle): \(post.caption)", hint: "Publicación de la comunidad")
     }
@@ -138,20 +138,20 @@ struct PostComposer: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         Text("¿Cómo estuvo \(venue.name)?")
-                            .font(.bpTitle2()).foregroundStyle(.white)
+                            .font(.bpTitle2()).foregroundStyle(Color.bpInk)
 
                         TextField("Contale a la gente…", text: $caption, axis: .vertical)
                             .lineLimit(3...5)
                             .focused($captionFocused)
-                            .font(.bpBody()).foregroundStyle(.white)
+                            .font(.bpBody()).foregroundStyle(Color.bpInk)
                             .padding(12)
-                            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                            .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                             .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
-                                .strokeBorder(captionFocused ? Color.bpAmber.opacity(0.5) : Color.white.opacity(0.08)))
+                                .strokeBorder(captionFocused ? Color.bpAmber.opacity(0.5) : Color.bpInk.opacity(0.08)))
 
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
@@ -161,7 +161,7 @@ struct PostComposer: View {
                                     } label: {
                                         Text(e).font(.system(size: 22))
                                             .frame(width: 42, height: 42)
-                                            .background(emoji == e ? Color.bpAmber.opacity(0.2) : Color.white.opacity(0.05), in: Circle())
+                                            .background(emoji == e ? Color.bpAmber.opacity(0.2) : Color.bpInk.opacity(0.05), in: Circle())
                                             .overlay(Circle().strokeBorder(emoji == e ? Color.bpAmber : .clear))
                                     }
                                     .buttonStyle(.plain)

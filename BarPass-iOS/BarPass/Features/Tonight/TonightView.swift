@@ -40,7 +40,7 @@ struct TonightView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.bpBackground.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BPSpacing.xl) {
@@ -105,7 +105,7 @@ struct TonightView: View {
                 HStack(spacing: BPSpacing.md) {
                     ForEach(0..<3, id: \.self) { _ in
                         RoundedRectangle(cornerRadius: BPRadius.xl)
-                            .fill(Color.white.opacity(0.04))
+                            .fill(Color.bpInk.opacity(0.04))
                             .frame(width: 280, height: 180)
                             .shimmer()
                             .overlay(
@@ -133,7 +133,7 @@ struct TonightView: View {
 
             Text(greeting)
                 .font(.bpTitle1())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
 
             Text(l10n.t("home.where"))
                 .font(.bpBody())
@@ -162,12 +162,12 @@ struct TonightView: View {
                             .background(
                                 Capsule().fill(selectedTag == tag
                                     ? Color.bpAmber
-                                    : Color.white.opacity(0.08))
+                                    : Color.bpInk.opacity(0.08))
                             )
                             .overlay(
                                 Capsule().strokeBorder(selectedTag == tag
                                     ? Color.clear
-                                    : Color.white.opacity(0.08))
+                                    : Color.bpInk.opacity(0.08))
                             )
                     }
                     .buttonStyle(.plain)
@@ -194,7 +194,7 @@ struct TonightView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("🎟️ Esta noche")
                 .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, BPSpacing.lg)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -218,7 +218,7 @@ struct TonightView: View {
         VStack(alignment: .leading, spacing: BPSpacing.md) {
             Text(title)
                 .font(.bpHeadline())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, BPSpacing.lg)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -262,8 +262,8 @@ struct HeroVenueCard: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             RoundedRectangle(cornerRadius: BPRadius.xl)
-                .fill(LinearGradient(colors: [Color(white: 0.12), Color(white: 0.06)], startPoint: .topLeading, endPoint: .bottomTrailing))
-                .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.white.opacity(0.07)))
+                .fill(LinearGradient(colors: [Color(white: 0.12), Color.bpSurface], startPoint: .topLeading, endPoint: .bottomTrailing))
+                .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
 
             Text(venue.emoji)
                 .font(.system(size: 72))
@@ -309,7 +309,7 @@ struct HeroVenueCard: View {
 
                 Text(venue.name)
                     .font(.bpTitle2())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
 
                 HStack(spacing: 10) {
                     Label(venue.neighborhood, systemImage: "location.fill")
@@ -327,7 +327,7 @@ struct HeroVenueCard: View {
                         .foregroundStyle(Color.bpAmber)
                     Text(String(format: "%.1f", venue.rating))
                         .font(.bpSmall()).fontWeight(.semibold)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
                     Text(venue.priceRange)
                         .font(.bpSmall())
                         .foregroundStyle(Color.bpTextSecondary)
@@ -346,7 +346,7 @@ struct HeroVenueCard: View {
         HStack(spacing: 2) {
             ForEach(0..<5) { i in
                 RoundedRectangle(cornerRadius: 1.5)
-                    .fill(i < venue.crowdLevel ? Color.bpAmber : Color.white.opacity(0.15))
+                    .fill(i < venue.crowdLevel ? Color.bpAmber : Color.bpInk.opacity(0.15))
                     .frame(width: 3, height: 8)
             }
         }
@@ -362,8 +362,8 @@ struct SmallVenueCard: View {
         VStack(alignment: .leading, spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 RoundedRectangle(cornerRadius: BPRadius.lg)
-                    .fill(Color(white: 0.08))
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.07)))
+                    .fill(Color.bpSurfaceRaised)
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpInk.opacity(0.07)))
                     .frame(height: 100)
 
                 if let first = venue.photoUrls.first, let url = URL(string: first) {
@@ -397,7 +397,7 @@ struct SmallVenueCard: View {
 
             Text(venue.name)
                 .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .lineLimit(1)
 
             Text(venue.neighborhood)

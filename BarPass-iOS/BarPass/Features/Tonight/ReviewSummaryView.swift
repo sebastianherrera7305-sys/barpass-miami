@@ -17,7 +17,7 @@ struct ReviewSummaryView: View {
                     .foregroundStyle(Color.bpAmber)
                 Text("Remy dice")
                     .font(.bpHeadline())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                 Spacer()
             }
 
@@ -30,7 +30,7 @@ struct ReviewSummaryView: View {
             } else if let summary {
                 Text(summary)
                     .font(.bpBody())
-                    .foregroundStyle(Color.white.opacity(0.85))
+                    .foregroundStyle(Color.bpInk.opacity(0.85))
                     .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
 

@@ -52,7 +52,7 @@ struct SkipLinePassView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.031, green: 0.024, blue: 0.039).ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
@@ -113,17 +113,17 @@ struct SkipLinePassView: View {
 
                 Text(venueName)
                     .font(.system(size: 26, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
 
                 HStack(spacing: 8) {
                     Label("~\(waitMinutes) min de espera", systemImage: "clock.fill")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color.white.opacity(0.6))
+                        .foregroundStyle(Color.bpInk.opacity(0.6))
                     Text("•")
-                        .foregroundStyle(Color.white.opacity(0.3))
+                        .foregroundStyle(Color.bpInk.opacity(0.3))
                     Label("Hoy", systemImage: "calendar")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color.white.opacity(0.6))
+                        .foregroundStyle(Color.bpInk.opacity(0.6))
                 }
             }
             .padding(20)
@@ -139,7 +139,7 @@ struct SkipLinePassView: View {
                     Text(item.0).font(.title3)
                     Text(item.1)
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(Color.white.opacity(0.55))
+                        .foregroundStyle(Color.bpInk.opacity(0.55))
                         .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
@@ -162,7 +162,7 @@ struct SkipLinePassView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Elige tu pase")
                 .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, 20)
                 .padding(.top, 24)
 
@@ -182,7 +182,7 @@ struct SkipLinePassView: View {
                 // Emoji circle
                 ZStack {
                     Circle()
-                        .fill(isSelected ? gold.opacity(0.2) : Color.white.opacity(0.05))
+                        .fill(isSelected ? gold.opacity(0.2) : Color.bpInk.opacity(0.05))
                         .frame(width: 48, height: 48)
                     Text(option.emoji).font(.title3)
                 }
@@ -203,27 +203,27 @@ struct SkipLinePassView: View {
                     }
                     Text("\(option.qty) persona\(option.qty > 1 ? "s" : "") · Pase + entrada prioritaria")
                         .font(.caption)
-                        .foregroundStyle(Color.white.opacity(0.4))
+                        .foregroundStyle(Color.bpInk.opacity(0.4))
                 }
 
                 Spacer()
 
                 Text(String(format: "$%.0f", option.price))
                     .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(isSelected ? gold : Color.white.opacity(0.7))
+                    .foregroundStyle(isSelected ? gold : Color.bpInk.opacity(0.7))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
             .background(
                 isSelected
                     ? gold.opacity(0.08)
-                    : Color.white.opacity(0.04),
+                    : Color.bpInk.opacity(0.04),
                 in: RoundedRectangle(cornerRadius: 16)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
                     .strokeBorder(
-                        isSelected ? gold.opacity(0.5) : Color.white.opacity(0.07),
+                        isSelected ? gold.opacity(0.5) : Color.bpInk.opacity(0.07),
                         lineWidth: isSelected ? 1.5 : 1
                     )
             )
@@ -240,7 +240,7 @@ struct SkipLinePassView: View {
             HStack {
                 Text("Total")
                     .font(.subheadline)
-                    .foregroundStyle(Color.white.opacity(0.4))
+                    .foregroundStyle(Color.bpInk.opacity(0.4))
                 Spacer()
                 Text(String(format: "$%.0f", selected.price))
                     .font(.title3.weight(.bold))
@@ -249,7 +249,7 @@ struct SkipLinePassView: View {
             .padding(.horizontal, 20)
             .padding(.top, 24)
 
-            Divider().background(Color.white.opacity(0.06)).padding(.horizontal, 20)
+            Divider().background(Color.bpInk.opacity(0.06)).padding(.horizontal, 20)
 
             VStack(spacing: 10) {
                 // Apple Pay
@@ -293,11 +293,11 @@ struct SkipLinePassView: View {
                         .font(.system(size: 16, weight: .bold))
                 }
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.bpInk)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 17)
             .background(Color.black, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.12)))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpInk.opacity(0.12)))
         }
         .buttonStyle(.plain)
         .disabled(isProcessing)
@@ -314,7 +314,7 @@ struct SkipLinePassView: View {
                         .foregroundStyle(gold)
                     Text(String(format: "Balance: $%.2f", appState.walletBalance))
                         .font(.caption)
-                        .foregroundStyle(Color.white.opacity(0.4))
+                        .foregroundStyle(Color.bpInk.opacity(0.4))
                 }
                 Spacer()
                 Text(String(format: "$%.0f", selected.price))
@@ -341,11 +341,11 @@ struct SkipLinePassView: View {
                 Text("Pagar con tarjeta")
             }
             .font(.system(size: 16, weight: .semibold))
-            .foregroundStyle(Color.white.opacity(0.85))
+            .foregroundStyle(Color.bpInk.opacity(0.85))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.1)))
+            .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpInk.opacity(0.1)))
         }
         .buttonStyle(.plain)
         .bpAccessibility(label: "Pagar con tarjeta", hint: "Abre el formulario para pagar el pase con tarjeta de crédito o débito", isButton: true)

@@ -10,7 +10,7 @@ struct ReservationConfirmView: View {
 
     var body: some View {
         ZStack {
-            Color(red: 0.031, green: 0.024, blue: 0.039).ignoresSafeArea()
+            Color.bpBackground.ignoresSafeArea()
             VStack(spacing: 0) {
                 header.padding(.top, 20)
                 Spacer()
@@ -33,10 +33,10 @@ struct ReservationConfirmView: View {
             }
             Text("Reservación Confirmada")
                 .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
             Text(reservation.venueName)
                 .font(.subheadline)
-                .foregroundStyle(Color.white.opacity(0.45))
+                .foregroundStyle(Color.bpInk.opacity(0.45))
         }
     }
 
@@ -67,10 +67,10 @@ struct ReservationConfirmView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(reservation.packageName)
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
                         Text("Mesa VIP · \(reservation.guestCount) personas")
                             .font(.caption)
-                            .foregroundStyle(Color.white.opacity(0.4))
+                            .foregroundStyle(Color.bpInk.opacity(0.4))
                     }
                     Spacer()
                 }
@@ -106,7 +106,7 @@ struct ReservationConfirmView: View {
 
                     Text(reservation.confirmCode)
                         .font(.system(size: 14, weight: .medium, design: .monospaced))
-                        .foregroundStyle(Color.white.opacity(0.35))
+                        .foregroundStyle(Color.bpInk.opacity(0.35))
                         .tracking(2)
                         .padding(.bottom, 18)
                 }
@@ -122,7 +122,7 @@ struct ReservationConfirmView: View {
         VStack(spacing: 10) {
             Text("Muestra este QR al llegar al venue")
                 .font(.caption)
-                .foregroundStyle(Color.white.opacity(0.35))
+                .foregroundStyle(Color.bpInk.opacity(0.35))
 
             HStack(spacing: 12) {
                 Button {
@@ -144,7 +144,7 @@ struct ReservationConfirmView: View {
                 Button { dismiss() } label: {
                     Text("Listo")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                         .background(
@@ -173,11 +173,11 @@ struct ReservationConfirmView: View {
                 .frame(width: 20)
             Text(label)
                 .font(.system(size: 13))
-                .foregroundStyle(Color.white.opacity(0.4))
+                .foregroundStyle(Color.bpInk.opacity(0.4))
             Spacer()
             Text(value)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
         }
     }
 
@@ -187,7 +187,7 @@ struct ReservationConfirmView: View {
                 p.move(to: .init(x: 20, y: 0))
                 p.addLine(to: .init(x: geo.size.width - 20, y: 0))
             }
-            .stroke(Color.white.opacity(0.12), style: StrokeStyle(lineWidth: 1, dash: [6, 4]))
+            .stroke(Color.bpInk.opacity(0.12), style: StrokeStyle(lineWidth: 1, dash: [6, 4]))
         }
         .frame(height: 1)
     }

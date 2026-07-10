@@ -8,7 +8,7 @@ struct ActiveTicketView: View {
 
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
-    private let bg    = Color(red: 0.031, green: 0.024, blue: 0.039)
+    private let bg    = Color.bpBackground
 
     @State private var pulse = false
 
@@ -59,16 +59,16 @@ struct ActiveTicketView: View {
 
                 Image(systemName: "ticket.fill")
                     .font(.system(size: 28, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
             }
 
             Text("¡Ticket Confirmado!")
                 .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
 
             Text(ticket.eventName)
                 .font(.system(size: 15))
-                .foregroundStyle(Color.white.opacity(0.5))
+                .foregroundStyle(Color.bpInk.opacity(0.5))
                 .multilineTextAlignment(.center)
         }
         .padding(.vertical, 28)
@@ -82,12 +82,12 @@ struct ActiveTicketView: View {
             VStack(spacing: 8) {
                 Text(ticket.eventName)
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                     .multilineTextAlignment(.center)
 
                 Text(ticket.venueName)
                     .font(.system(size: 13))
-                    .foregroundStyle(Color.white.opacity(0.5))
+                    .foregroundStyle(Color.bpInk.opacity(0.5))
 
                 Text(ticket.formattedDate)
                     .font(.system(size: 12, weight: .medium))
@@ -123,7 +123,7 @@ struct ActiveTicketView: View {
 
                 Text(ticket.ticketCode)
                     .font(.system(size: 18, weight: .bold, design: .monospaced))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                     .tracking(4)
 
                 HStack(spacing: 6) {
@@ -132,7 +132,7 @@ struct ActiveTicketView: View {
                     Text("\(ticket.quantity) persona\(ticket.quantity > 1 ? "s" : "") · \(ticket.package)")
                         .font(.caption)
                 }
-                .foregroundStyle(Color.white.opacity(0.45))
+                .foregroundStyle(Color.bpInk.opacity(0.45))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 24)
@@ -157,7 +157,7 @@ struct ActiveTicketView: View {
                 .frame(width: 24, height: 24)
                 .offset(x: -12)
             Rectangle()
-                .fill(Color.white.opacity(0.1))
+                .fill(Color.bpInk.opacity(0.1))
                 .frame(height: 1)
                 .background(
                     GeometryReader { _ in
@@ -166,7 +166,7 @@ struct ActiveTicketView: View {
                             path.addLine(to: CGPoint(x: 1000, y: 0.5))
                         }
                         .stroke(style: StrokeStyle(lineWidth: 1, dash: [6, 4]))
-                        .foregroundStyle(Color.white.opacity(0.15))
+                        .foregroundStyle(Color.bpInk.opacity(0.15))
                     }
                 )
             Circle()
@@ -182,16 +182,16 @@ struct ActiveTicketView: View {
     private var detailRows: some View {
         VStack(spacing: 0) {
             row(icon: "mappin.circle.fill", label: "Venue",    value: ticket.venueName)
-            Divider().background(Color.white.opacity(0.07)).padding(.horizontal, 16)
+            Divider().background(Color.bpInk.opacity(0.07)).padding(.horizontal, 16)
             row(icon: "calendar",           label: "Fecha",    value: ticket.formattedDate)
-            Divider().background(Color.white.opacity(0.07)).padding(.horizontal, 16)
+            Divider().background(Color.bpInk.opacity(0.07)).padding(.horizontal, 16)
             row(icon: "creditcard.fill",    label: "Pago",     value: ticket.payMethod)
-            Divider().background(Color.white.opacity(0.07)).padding(.horizontal, 16)
+            Divider().background(Color.bpInk.opacity(0.07)).padding(.horizontal, 16)
             row(icon: "dollarsign.circle.fill", label: "Total",
                 value: String(format: "$%.2f", ticket.amount))
         }
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.07)))
+        .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.bpInk.opacity(0.07)))
         .padding(.horizontal, 20)
         .padding(.top, 20)
     }
@@ -204,11 +204,11 @@ struct ActiveTicketView: View {
                 .frame(width: 24)
             Text(label)
                 .font(.system(size: 14))
-                .foregroundStyle(Color.white.opacity(0.4))
+                .foregroundStyle(Color.bpInk.opacity(0.4))
             Spacer()
             Text(value)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .multilineTextAlignment(.trailing)
         }
         .padding(.horizontal, 20)
@@ -233,12 +233,12 @@ struct ActiveTicketView: View {
                     Text("Compartir")
                         .font(.system(size: 15, weight: .semibold))
                 }
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
-                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+                .background(Color.bpInk.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14)
-                    .strokeBorder(Color.white.opacity(0.12)))
+                    .strokeBorder(Color.bpInk.opacity(0.12)))
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: "Compartir ticket", hint: "Comparte los detalles del ticket con otras personas", isButton: true)

@@ -38,7 +38,7 @@ struct TableReservationView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.031, green: 0.024, blue: 0.039).ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         venueBanner
@@ -88,10 +88,10 @@ struct TableReservationView: View {
                     .foregroundStyle(gold)
                 Text(venueName)
                     .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                 Text("Reserva tu mesa y garantiza la mejor experiencia")
                     .font(.caption)
-                    .foregroundStyle(Color.white.opacity(0.5))
+                    .foregroundStyle(Color.bpInk.opacity(0.5))
             }
             .padding(20)
         }
@@ -119,7 +119,7 @@ struct TableReservationView: View {
                 HStack(spacing: 14) {
                     ZStack {
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(selected ? gold.opacity(0.18) : Color.white.opacity(0.05))
+                            .fill(selected ? gold.opacity(0.18) : Color.bpInk.opacity(0.05))
                             .frame(width: 52, height: 52)
                         Text(pkg.emoji).font(.system(size: 26))
                     }
@@ -128,7 +128,7 @@ struct TableReservationView: View {
                         HStack(spacing: 8) {
                             Text(pkg.name)
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundStyle(selected ? gold : .white)
+                                .foregroundStyle(selected ? gold : Color.bpInk)
                             if pkg.id == "premium" {
                                 Text("Popular")
                                     .font(.system(size: 9, weight: .bold))
@@ -139,7 +139,7 @@ struct TableReservationView: View {
                         }
                         Text(pkg.guestRange)
                             .font(.caption)
-                            .foregroundStyle(Color.white.opacity(0.35))
+                            .foregroundStyle(Color.bpInk.opacity(0.35))
                     }
 
                     Spacer()
@@ -147,10 +147,10 @@ struct TableReservationView: View {
                     VStack(alignment: .trailing, spacing: 2) {
                         Text(String(format: "$%.0f", pkg.deposit))
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(selected ? gold : Color.white.opacity(0.7))
+                            .foregroundStyle(selected ? gold : Color.bpInk.opacity(0.7))
                         Text("depósito")
                             .font(.system(size: 9))
-                            .foregroundStyle(Color.white.opacity(0.3))
+                            .foregroundStyle(Color.bpInk.opacity(0.3))
                     }
                 }
                 .padding(.horizontal, 14).padding(.vertical, 14)
@@ -165,14 +165,14 @@ struct TableReservationView: View {
                                     .foregroundStyle(gold)
                                 Text(perk)
                                     .font(.system(size: 12))
-                                    .foregroundStyle(Color.white.opacity(0.6))
+                                    .foregroundStyle(Color.bpInk.opacity(0.6))
                                 Spacer()
                             }
                         }
                         HStack {
                             Text("Consumo mínimo:")
                                 .font(.system(size: 12))
-                                .foregroundStyle(Color.white.opacity(0.4))
+                                .foregroundStyle(Color.bpInk.opacity(0.4))
                             Spacer()
                             Text(String(format: "$%.0f", pkg.minSpend))
                                 .font(.system(size: 13, weight: .bold))
@@ -185,12 +185,12 @@ struct TableReservationView: View {
                 }
             }
             .background(
-                selected ? gold.opacity(0.07) : Color.white.opacity(0.03),
+                selected ? gold.opacity(0.07) : Color.bpInk.opacity(0.03),
                 in: RoundedRectangle(cornerRadius: 16)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .strokeBorder(selected ? gold.opacity(0.45) : Color.white.opacity(0.07),
+                    .strokeBorder(selected ? gold.opacity(0.45) : Color.bpInk.opacity(0.07),
                                   lineWidth: selected ? 1.5 : 1)
             )
         }
@@ -211,7 +211,7 @@ struct TableReservationView: View {
                         VStack(spacing: 4) {
                             Text(guestIcon(n)).font(.title3)
                             Text("\(n)").font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(guestCount == n ? gold : Color.white.opacity(0.5))
+                                .foregroundStyle(guestCount == n ? gold : Color.bpInk.opacity(0.5))
                         }
                         .frame(maxWidth: .infinity).padding(.vertical, 12)
                         .background(
@@ -230,7 +230,7 @@ struct TableReservationView: View {
             }
             .padding(.horizontal, 20)
             .padding(6)
-            .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
+            .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal, 20)
         }
         .padding(.top, 24)
@@ -259,13 +259,13 @@ struct TableReservationView: View {
                     } label: {
                         Text(slot.0)
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(selectedSlot == idx ? .black : Color.white.opacity(0.55))
+                            .foregroundStyle(selectedSlot == idx ? .black : Color.bpInk.opacity(0.55))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                             .background(
                                 selectedSlot == idx
                                     ? LinearGradient(colors: [gold, goldB], startPoint: .leading, endPoint: .trailing)
-                                    : LinearGradient(colors: [Color.white.opacity(0.05), Color.white.opacity(0.05)],
+                                    : LinearGradient(colors: [Color.bpInk.opacity(0.05), Color.bpInk.opacity(0.05)],
                                                      startPoint: .leading, endPoint: .trailing),
                                 in: RoundedRectangle(cornerRadius: 12)
                             )
@@ -305,36 +305,36 @@ struct TableReservationView: View {
             HStack {
                 Text("Resumen")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                 Spacer()
                 Text(timeSlots[selectedSlot].0)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(gold)
             }
-            Divider().background(Color.white.opacity(0.07))
+            Divider().background(Color.bpInk.opacity(0.07))
             rowSummary(label: "Mesa",       value: selectedPackage.name)
             rowSummary(label: "Invitados",  value: "\(guestCount) personas")
             rowSummary(label: "Consumo mín.", value: String(format: "$%.0f", selectedPackage.minSpend))
-            Divider().background(Color.white.opacity(0.07))
+            Divider().background(Color.bpInk.opacity(0.07))
             HStack {
-                Text("Depósito ahora").font(.subheadline).foregroundStyle(Color.white.opacity(0.5))
+                Text("Depósito ahora").font(.subheadline).foregroundStyle(Color.bpInk.opacity(0.5))
                 Spacer()
                 Text(String(format: "$%.0f", selectedPackage.deposit))
                     .font(.title3.weight(.bold)).foregroundStyle(gold)
             }
         }
         .padding(16)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.07)))
+        .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.bpInk.opacity(0.07)))
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: "Resumen de reservación", hint: "Muestra el resumen de la reservación incluyendo mesa, invitados y depósito")
     }
 
     private func rowSummary(label: String, value: String) -> some View {
         HStack {
-            Text(label).font(.system(size: 13)).foregroundStyle(Color.white.opacity(0.4))
+            Text(label).font(.system(size: 13)).foregroundStyle(Color.bpInk.opacity(0.4))
             Spacer()
-            Text(value).font(.system(size: 13, weight: .semibold)).foregroundStyle(.white)
+            Text(value).font(.system(size: 13, weight: .semibold)).foregroundStyle(Color.bpInk)
         }
     }
 
@@ -359,10 +359,10 @@ struct TableReservationView: View {
                     Text("Pay with Apple Pay").font(.system(size: 16, weight: .bold))
                 }
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.bpInk)
             .frame(maxWidth: .infinity).padding(.vertical, 17)
             .background(Color.black, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.12)))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpInk.opacity(0.12)))
         }
         .buttonStyle(.plain).disabled(isProcessing)
         .bpAccessibility(label: "Pagar depósito con Apple Pay", hint: "Procesa el depósito de la mesa usando Apple Pay", isButton: true)
@@ -375,7 +375,7 @@ struct TableReservationView: View {
                 VStack(alignment: .leading, spacing: 1) {
                     Text("BarPass Wallet").font(.system(size: 14, weight: .bold)).foregroundStyle(gold)
                     Text(String(format: "Balance: $%.2f", appState.walletBalance))
-                        .font(.caption).foregroundStyle(Color.white.opacity(0.4))
+                        .font(.caption).foregroundStyle(Color.bpInk.opacity(0.4))
                 }
                 Spacer()
                 Text(String(format: "$%.0f", selectedPackage.deposit))
@@ -400,10 +400,10 @@ struct TableReservationView: View {
                 Text("Pagar depósito con tarjeta")
             }
             .font(.system(size: 16, weight: .semibold))
-            .foregroundStyle(Color.white.opacity(0.85))
+            .foregroundStyle(Color.bpInk.opacity(0.85))
             .frame(maxWidth: .infinity).padding(.vertical, 16)
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.1)))
+            .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpInk.opacity(0.1)))
         }
         .buttonStyle(.plain)
         .bpAccessibility(label: "Pagar depósito con tarjeta", hint: "Abre el formulario para pagar el depósito con tarjeta de crédito o débito", isButton: true)
@@ -414,7 +414,7 @@ struct TableReservationView: View {
     private func sectionHeader(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 17, weight: .bold))
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.bpInk)
             .padding(.horizontal, 20)
     }
 

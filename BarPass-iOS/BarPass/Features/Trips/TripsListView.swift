@@ -15,7 +15,7 @@ struct TripsListView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.bpBackground.ignoresSafeArea()
 
             if let error = tripStore.loadError {
                 errorView(error)
@@ -63,7 +63,7 @@ struct TripsListView: View {
                 .foregroundStyle(Color.bpDanger)
             Text("Algo salió mal")
                 .font(.bpTitle1())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
             Text(error)
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
@@ -94,7 +94,7 @@ struct TripsListView: View {
             VStack(spacing: 6) {
                 Text("Armá tu noche")
                     .font(.bpTitle1())
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                 Text("Crea un trip con los mejores venues de Miami.\nEmpezá con un vibe o contame qué buscás.")
                     .font(.bpBody())
                     .foregroundStyle(Color.bpTextSecondary)
@@ -148,7 +148,7 @@ struct TripsListView: View {
             VStack(alignment: .leading, spacing: 4) {
                     Text("Tus Trips")
                         .font(.bpLargeTitle())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
                         .bpAccessibility(label: "Tus Trips", hint: "Sección de tus planes nocturnos")
                 Text("\(tripStore.myTrips.count) plan\(tripStore.myTrips.count != 1 ? "es" : "")")
                     .font(.bpCaption())
@@ -178,7 +178,7 @@ struct TripsListView: View {
                 HStack {
                     Text(trip.title)
                         .font(.bpHeadline())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Color.bpInk)
                         .lineLimit(1)
                     Spacer()
                     tripStatusBadge(trip.status)

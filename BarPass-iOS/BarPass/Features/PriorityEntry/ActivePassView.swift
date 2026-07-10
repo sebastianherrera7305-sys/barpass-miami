@@ -13,7 +13,7 @@ struct ActivePassView: View {
 
     var body: some View {
         ZStack {
-            Color(red: 0.031, green: 0.024, blue: 0.039).ignoresSafeArea()
+            Color.bpBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 // Header
@@ -50,7 +50,7 @@ struct ActivePassView: View {
                 .foregroundStyle(gold)
             Text(pass.venueName)
                 .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bpInk)
         }
     }
 
@@ -81,10 +81,10 @@ struct ActivePassView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Label(quantityLabel, systemImage: "person.fill")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
                         Text("Skip the line")
                             .font(.caption)
-                            .foregroundStyle(Color.white.opacity(0.45))
+                            .foregroundStyle(Color.bpInk.opacity(0.45))
                     }
                     Spacer()
                     // Valid badge
@@ -117,7 +117,7 @@ struct ActivePassView: View {
                 // Pass code
                 Text(pass.passCode)
                     .font(.system(size: 13, weight: .medium, design: .monospaced))
-                    .foregroundStyle(Color.white.opacity(0.35))
+                    .foregroundStyle(Color.bpInk.opacity(0.35))
                     .tracking(2)
 
                 // Dashed divider
@@ -128,7 +128,7 @@ struct ActivePassView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Válido hasta")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(Color.white.opacity(0.35))
+                            .foregroundStyle(Color.bpInk.opacity(0.35))
                             .tracking(1)
                         Text(timeString)
                             .font(.system(size: 20, weight: .bold, design: .monospaced))
@@ -139,11 +139,11 @@ struct ActivePassView: View {
                     VStack(alignment: .trailing, spacing: 3) {
                         Text("Pagado con")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(Color.white.opacity(0.35))
+                            .foregroundStyle(Color.bpInk.opacity(0.35))
                             .tracking(1)
                         Text(pass.payMethod)
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
                     }
                 }
                 .padding(.horizontal, 22)
@@ -178,10 +178,10 @@ struct ActivePassView: View {
             Button { dismiss() } label: {
                 Text("Cerrar")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color.white.opacity(0.55))
+                    .foregroundStyle(Color.bpInk.opacity(0.55))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+                    .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: "Cerrar pase", hint: "Cierra la vista del pase activo", isButton: true)
@@ -216,7 +216,7 @@ struct ActivePassView: View {
                         path.move(to: CGPoint(x: 0, y: 0))
                         path.addLine(to: CGPoint(x: geo.size.width, y: 0))
                     }
-                    .stroke(Color.white.opacity(0.12),
+                    .stroke(Color.bpInk.opacity(0.12),
                             style: StrokeStyle(lineWidth: 1, dash: [6, 4]))
                 }
             )

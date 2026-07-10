@@ -11,7 +11,7 @@ struct GamificationView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
@@ -44,7 +44,7 @@ struct GamificationView: View {
             HStack(spacing: 8) {
                 Text("🎯")
                 Text("Trivia de la noche")
-                    .font(.bpHeadline()).foregroundStyle(.white)
+                    .font(.bpHeadline()).foregroundStyle(Color.bpInk)
                 Spacer()
                 Text("+100 XP")
                     .font(.system(size: 11, weight: .bold)).foregroundStyle(Color.bpAmber)
@@ -54,7 +54,7 @@ struct GamificationView: View {
 
             if let q = trivia.todayQuestion {
                 Text(q.question)
-                    .font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
+                    .font(.system(size: 16, weight: .bold)).foregroundStyle(Color.bpInk)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if trivia.answeredToday {
@@ -86,13 +86,13 @@ struct GamificationView: View {
             HStack {
                 Text(option)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                     .multilineTextAlignment(.leading)
                 Spacer()
             }
             .padding(.horizontal, 14).padding(.vertical, 12)
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
-            .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.white.opacity(0.08)))
+            .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+            .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpInk.opacity(0.08)))
         }
         .buttonStyle(.plain)
         .bpAccessibility(label: option, hint: "Responder la trivia", isButton: true)
@@ -113,7 +113,7 @@ struct GamificationView: View {
                 }
                 .padding(.horizontal, 14).padding(.vertical, 10)
                 .background(
-                    (isCorrect ? Color.bpGreen.opacity(0.08) : (wasPicked ? Color.bpDanger.opacity(0.08) : Color.white.opacity(0.03))),
+                    (isCorrect ? Color.bpGreen.opacity(0.08) : (wasPicked ? Color.bpDanger.opacity(0.08) : Color.bpInk.opacity(0.03))),
                     in: RoundedRectangle(cornerRadius: BPRadius.md)
                 )
             }
@@ -136,7 +136,7 @@ struct GamificationView: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
                 Text("🏆")
-                Text("Misiones de hoy").font(.bpHeadline()).foregroundStyle(.white)
+                Text("Misiones de hoy").font(.bpHeadline()).foregroundStyle(Color.bpInk)
             }
 
             if missionEngine.missions.isEmpty {
@@ -168,14 +168,14 @@ struct GamificationView: View {
                     .background(Color.bpAmber.opacity(0.12), in: Capsule())
             }
 
-            Text(m.title).font(.system(size: 14, weight: .bold)).foregroundStyle(.white)
+            Text(m.title).font(.system(size: 14, weight: .bold)).foregroundStyle(Color.bpInk)
             Text(m.description).font(.system(size: 11)).foregroundStyle(Color.bpTextSecondary)
                 .lineLimit(2)
 
             // Progress
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.08)).frame(height: 5)
+                    Capsule().fill(Color.bpInk.opacity(0.08)).frame(height: 5)
                     Capsule().fill(m.isCompleted ? Color.bpGreen : Color.bpAmber)
                         .frame(width: geo.size.width * CGFloat(min(Double(m.progress) / Double(m.requirement), 1)), height: 5)
                 }
@@ -190,7 +190,7 @@ struct GamificationView: View {
         .frame(width: 170)
         .background(Color.bpCardBackground.opacity(m.isCompleted ? 0.5 : 0.9), in: RoundedRectangle(cornerRadius: BPRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg)
-            .strokeBorder(m.isCompleted ? Color.bpGreen.opacity(0.3) : Color.white.opacity(0.08)))
+            .strokeBorder(m.isCompleted ? Color.bpGreen.opacity(0.3) : Color.bpInk.opacity(0.08)))
         .opacity(m.isCompleted ? 0.75 : 1)
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: "\(m.title): \(m.progress) de \(m.requirement)", hint: m.description)

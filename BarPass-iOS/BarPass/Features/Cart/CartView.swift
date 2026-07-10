@@ -15,7 +15,7 @@ struct CartView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.bpBackground.ignoresSafeArea()
 
                 if cart.isEmpty {
                     emptyState
@@ -38,7 +38,7 @@ struct CartView: View {
                 if !cart.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Limpiar") { withAnimation { cart.clear() } }
-                            .foregroundStyle(Color.white.opacity(0.3))
+                            .foregroundStyle(Color.bpInk.opacity(0.3))
                             .font(.subheadline)
                             .bpAccessibility(label: "Limpiar carrito", hint: "Elimina todos los artículos del carrito", isButton: true)
                     }
@@ -61,22 +61,22 @@ struct CartView: View {
         VStack(spacing: 16) {
             ZStack {
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.white.opacity(0.04))
+                    .fill(Color.bpInk.opacity(0.04))
                     .frame(width: 80, height: 80)
                     .overlay(RoundedRectangle(cornerRadius: 20)
-                        .strokeBorder(Color.white.opacity(0.07)))
+                        .strokeBorder(Color.bpInk.opacity(0.07)))
                 Image(systemName: "cart")
                     .font(.system(size: 30, weight: .thin))
-                    .foregroundStyle(Color.white.opacity(0.25))
+                    .foregroundStyle(Color.bpInk.opacity(0.25))
             }
 
             VStack(spacing: 6) {
                 Text("Carrito vacío")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                 Text("Agrega bebidas desde el menú del venue")
                     .font(.system(size: 13))
-                    .foregroundStyle(Color.white.opacity(0.3))
+                    .foregroundStyle(Color.bpInk.opacity(0.3))
                     .multilineTextAlignment(.center)
             }
         }
@@ -96,7 +96,7 @@ struct CartView: View {
                     }
                     // Hairline divider
                     Rectangle()
-                        .fill(Color.white.opacity(0.05))
+                        .fill(Color.bpInk.opacity(0.05))
                         .frame(height: 1)
                         .padding(.leading, 76)
                 }
@@ -111,7 +111,7 @@ struct CartView: View {
         VStack(spacing: 0) {
             // Top separator
             Rectangle()
-                .fill(Color.white.opacity(0.06))
+                .fill(Color.bpInk.opacity(0.06))
                 .frame(height: 1)
 
             VStack(spacing: 16) {
@@ -121,13 +121,13 @@ struct CartView: View {
                     summaryRow("Service fee", cart.serviceFee)
 
                     Rectangle()
-                        .fill(Color.white.opacity(0.06))
+                        .fill(Color.bpInk.opacity(0.06))
                         .frame(height: 1)
 
                     HStack {
                         Text("Total")
                             .font(.system(size: 17, weight: .bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.bpInk)
                         Spacer()
                         Text(String(format: "$%.2f", cart.total))
                             .font(.system(size: 17, weight: .bold, design: .monospaced))
@@ -181,14 +181,14 @@ struct CartView: View {
                         .foregroundStyle(amber)
                     Text(String(format: "Balance: $%.2f", appState.walletBalance))
                         .font(.system(size: 11))
-                        .foregroundStyle(Color.white.opacity(0.35))
+                        .foregroundStyle(Color.bpInk.opacity(0.35))
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.white.opacity(0.2))
+                    .foregroundStyle(Color.bpInk.opacity(0.2))
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 13)
@@ -213,14 +213,14 @@ struct CartView: View {
                 Text("Pagar con tarjeta")
                     .font(.system(size: 15, weight: .semibold))
             }
-            .foregroundStyle(Color.white.opacity(0.7))
+            .foregroundStyle(Color.bpInk.opacity(0.7))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)
             .background(
                 RoundedRectangle(cornerRadius: 14)
-                    .fill(Color.white.opacity(0.05))
+                    .fill(Color.bpInk.opacity(0.05))
                     .overlay(RoundedRectangle(cornerRadius: 14)
-                        .strokeBorder(Color.white.opacity(0.09)))
+                        .strokeBorder(Color.bpInk.opacity(0.09)))
             )
         }
         .buttonStyle(.plain)
@@ -233,11 +233,11 @@ struct CartView: View {
         HStack {
             Text(label)
                 .font(.system(size: 14))
-                .foregroundStyle(Color.white.opacity(0.4))
+                .foregroundStyle(Color.bpInk.opacity(0.4))
             Spacer()
             Text(String(format: "$%.2f", value))
                 .font(.system(size: 14, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.4))
+                .foregroundStyle(Color.bpInk.opacity(0.4))
         }
     }
 
@@ -281,19 +281,19 @@ private struct CartItemRow: View {
                 .frame(width: 52, height: 52)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.05))
+                        .fill(Color.bpInk.opacity(0.05))
                         .overlay(RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color.white.opacity(0.07)))
+                            .strokeBorder(Color.bpInk.opacity(0.07)))
                 )
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.name)
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                     .lineLimit(1)
                 Text(String(format: "$%.2f c/u", item.price))
                     .font(.system(size: 12))
-                    .foregroundStyle(Color.white.opacity(0.35))
+                    .foregroundStyle(Color.bpInk.opacity(0.35))
             }
 
             Spacer()
@@ -303,15 +303,15 @@ private struct CartItemRow: View {
                 stepBtn("minus") { onQty(-1) }
                 Text("\(item.qty)")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.bpInk)
                     .frame(minWidth: 26)
                 stepBtn("plus")  { onQty(1) }
             }
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.white.opacity(0.06))
+                    .fill(Color.bpInk.opacity(0.06))
                     .overlay(RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(Color.white.opacity(0.08)))
+                        .strokeBorder(Color.bpInk.opacity(0.08)))
             )
 
             // Line total
@@ -330,7 +330,7 @@ private struct CartItemRow: View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(Color.white.opacity(0.55))
+                .foregroundStyle(Color.bpInk.opacity(0.55))
                 .frame(width: 30, height: 30)
         }
         .buttonStyle(.plain)
@@ -369,12 +369,12 @@ private struct ApplePayButton: View {
                         .font(.system(size: 16, weight: .semibold))
                 }
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.bpInk)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background(Color(white: 0.13), in: RoundedRectangle(cornerRadius: 14))
             .overlay(RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(Color.white.opacity(0.12)))
+                .strokeBorder(Color.bpInk.opacity(0.12)))
         }
         .buttonStyle(.plain)
         .disabled(isProcessing)
