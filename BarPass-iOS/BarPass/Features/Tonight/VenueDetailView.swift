@@ -439,26 +439,7 @@ struct VenueDetailView: View {
     // MARK: - AI Insight
 
     private var aiInsightSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 6) {
-                Image(systemName: "sparkles").foregroundStyle(Color.bpAmber)
-                Text("Remy dice").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
-            }
-            Text("Mejor momento para ir: \(venue.bestArrivalTime). \(venue.type == .club ? "Llega con lista para evitar el cover." : "Ambiente más tranquilo entre semana.") Dress code: \(venue.dressCode).")
-                .font(.system(size: 13))
-                .foregroundStyle(Color.bpTextSecondary)
-                .lineSpacing(4)
-            HStack(spacing: 6) {
-                Image(systemName: "sparkles.magnifyingglass")
-                    .font(.system(size: 10))
-                Text("Pregúntale a Remy en Plan →")
-                    .font(.system(size: 11, weight: .semibold))
-            }
-            .foregroundStyle(Color.bpAmber.opacity(0.7))
-        }
-        .padding(16)
-        .background(Color.bpAmber.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
-        .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpAmber.opacity(0.15)))
+        ReviewSummaryView(venue: venue)
     }
 
     // MARK: - Location
