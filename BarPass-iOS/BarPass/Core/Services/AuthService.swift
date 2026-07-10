@@ -23,8 +23,8 @@ struct AuthSession: Codable, Sendable {
 final class AuthService: @unchecked Sendable {
     static let shared = AuthService()
 
-    // URLSession is thread-safe; assigned once at init.
-    nonisolated(unsafe) private static let customSession: URLSession = {
+    // URLSession is Sendable — a plain constant is concurrency-safe.
+    private static let customSession: URLSession = {
         let cfg = URLSessionConfiguration.default
         cfg.timeoutIntervalForRequest = requestTimeout
         cfg.timeoutIntervalForResource = requestTimeout
