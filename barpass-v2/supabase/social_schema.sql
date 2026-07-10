@@ -19,13 +19,16 @@ create index if not exists venue_posts_venue_idx on venue_posts (venue_id, creat
 alter table venue_posts enable row level security;
 
 -- Anyone can read the feed.
+drop policy if exists "venue_posts_read" on venue_posts;
 create policy "venue_posts_read" on venue_posts
   for select using (true);
 
 -- Only authenticated users can post, and only as themselves.
+drop policy if exists "venue_posts_insert" on venue_posts;
 create policy "venue_posts_insert" on venue_posts
   for insert with check (auth.uid() = user_id);
 
 -- Authors can delete their own posts.
+drop policy if exists "venue_posts_delete" on venue_posts;
 create policy "venue_posts_delete" on venue_posts
   for delete using (auth.uid() = user_id);
