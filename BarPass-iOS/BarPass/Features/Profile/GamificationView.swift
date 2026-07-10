@@ -1,0 +1,198 @@
+import SwiftUI
+
+/// Juegos y misiones: trivia diaria + misiones que premian acciones reales.
+struct GamificationView: View {
+    @ObservedObject private var trivia = TriviaEngine.shared
+    @ObservedObject private var missionEngine = MissionEngine.shared
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var selectedAnswer: Int?
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.black.ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 24) {
+                        triviaCard
+                        missionsSection
+                        Spacer(minLength: 60)
+                    }
+                    .padding(BPSpacing.lg)
+                }
+            }
+            .navigationTitle("Juegos y misiones")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cerrar") { dismiss() }.foregroundStyle(Color.bpAmber)
+                }
+            }
+            .onAppear {
+                trivia.loadTodayQuestion()
+                missionEngine.loadMissions()
+            }
+        }
+    }
+
+    // MARK: - Trivia
+
+    private var triviaCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Text("🎯")
+                Text("Trivia de la noche")
+                    .font(.bpHeadline()).foregroundStyle(.white)
+                Spacer()
+                Text("+100 XP")
+                    .font(.system(size: 11, weight: .bold)).foregroundStyle(Color.bpAmber)
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(Color.bpAmber.opacity(0.12), in: Capsule())
+            }
+
+            if let q = trivia.todayQuestion {
+                Text(q.question)
+                    .font(.system(size: 16, weight: .bold)).foregroundStyle(.white)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if trivia.answeredToday {
+                    answeredState(q)
+                } else {
+                    VStack(spacing: 8) {
+                        ForEach(Array(q.options.enumerated()), id: \.offset) { i, option in
+                            optionButton(i, option, q)
+                        }
+                    }
+                }
+            } else {
+                ShimmerSkeleton(height: 60)
+            }
+        }
+        .padding(16)
+        .background(Color.bpCardBackground.opacity(0.8), in: RoundedRectangle(cornerRadius: BPRadius.xl))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.18)))
+    }
+
+    private func optionButton(_ index: Int, _ option: String, _ q: TriviaQuestion) -> some View {
+        Button {
+            BPHaptics.light()
+            selectedAnswer = index
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                _ = trivia.answer(index)
+            }
+        } label: {
+            HStack {
+                Text(option)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.leading)
+                Spacer()
+            }
+            .padding(.horizontal, 14).padding(.vertical, 12)
+            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+            .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.white.opacity(0.08)))
+        }
+        .buttonStyle(.plain)
+        .bpAccessibility(label: option, hint: "Responder la trivia", isButton: true)
+    }
+
+    private func answeredState(_ q: TriviaQuestion) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Reveal each option colored by correctness.
+            ForEach(Array(q.options.enumerated()), id: \.offset) { i, option in
+                let isCorrect = i == q.correctIndex
+                let wasPicked = i == selectedAnswer
+                HStack {
+                    Text(option).font(.system(size: 14, weight: isCorrect ? .bold : .regular))
+                        .foregroundStyle(isCorrect ? Color.bpGreen : (wasPicked ? Color.bpDanger : Color.bpTextSecondary))
+                    Spacer()
+                    if isCorrect { Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.bpGreen) }
+                    else if wasPicked { Image(systemName: "xmark.circle.fill").foregroundStyle(Color.bpDanger) }
+                }
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(
+                    (isCorrect ? Color.bpGreen.opacity(0.08) : (wasPicked ? Color.bpDanger.opacity(0.08) : Color.white.opacity(0.03))),
+                    in: RoundedRectangle(cornerRadius: BPRadius.md)
+                )
+            }
+
+            HStack(spacing: 6) {
+                Text(trivia.lastAnswerCorrect == true ? "✅ ¡Correcto! +100 XP" : "Respondida — mañana hay otra")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(trivia.lastAnswerCorrect == true ? Color.bpGreen : Color.bpTextSecondary)
+            }
+            Text("💡 \(q.funFact)")
+                .font(.bpCaption())
+                .foregroundStyle(Color.bpTextSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: - Missions
+
+    private var missionsSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 8) {
+                Text("🏆")
+                Text("Misiones de hoy").font(.bpHeadline()).foregroundStyle(.white)
+            }
+
+            if missionEngine.missions.isEmpty {
+                HStack(spacing: 12) {
+                    ForEach(0..<3, id: \.self) { _ in ShimmerSkeleton(height: 120) }
+                }
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(missionEngine.missions) { mission in
+                            missionCard(mission)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func missionCard(_ m: Mission) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: m.isCompleted ? "checkmark.circle.fill" : m.icon)
+                    .font(.system(size: 18))
+                    .foregroundStyle(m.isCompleted ? Color.bpGreen : Color.bpAmber)
+                Spacer()
+                Text("+\(m.xpReward) XP")
+                    .font(.system(size: 10, weight: .bold)).foregroundStyle(Color.bpAmber)
+                    .padding(.horizontal, 6).padding(.vertical, 3)
+                    .background(Color.bpAmber.opacity(0.12), in: Capsule())
+            }
+
+            Text(m.title).font(.system(size: 14, weight: .bold)).foregroundStyle(.white)
+            Text(m.description).font(.system(size: 11)).foregroundStyle(Color.bpTextSecondary)
+                .lineLimit(2)
+
+            // Progress
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white.opacity(0.08)).frame(height: 5)
+                    Capsule().fill(m.isCompleted ? Color.bpGreen : Color.bpAmber)
+                        .frame(width: geo.size.width * CGFloat(min(Double(m.progress) / Double(m.requirement), 1)), height: 5)
+                }
+            }
+            .frame(height: 5)
+
+            Text("\(min(m.progress, m.requirement))/\(m.requirement)")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(m.isCompleted ? Color.bpGreen : Color.bpTextSecondary)
+        }
+        .padding(14)
+        .frame(width: 170)
+        .background(Color.bpCardBackground.opacity(m.isCompleted ? 0.5 : 0.9), in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg)
+            .strokeBorder(m.isCompleted ? Color.bpGreen.opacity(0.3) : Color.white.opacity(0.08)))
+        .opacity(m.isCompleted ? 0.75 : 1)
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(label: "\(m.title): \(m.progress) de \(m.requirement)", hint: m.description)
+    }
+}

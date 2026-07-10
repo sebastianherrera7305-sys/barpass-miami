@@ -7,6 +7,7 @@ struct ProfileView: View {
     @ObservedObject private var engine = PointsEngine.shared
     @State private var animateStats = false
     @State private var showToast = false
+    @State private var showGames = false
 
     private var points: Int { engine.totalXP }
     private var level: String { engine.levelName }
@@ -101,6 +102,32 @@ struct ProfileView: View {
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.15)))
                     .accessibilityElement(children: .ignore)
                     .bpAccessibility(label: "BarPass Points \(points) BPX", hint: "Tus puntos y progreso al siguiente nivel")
+                    .padding(.horizontal, BPSpacing.lg)
+
+                    // Juegos y misiones
+                    Button {
+                        BPHaptics.light()
+                        showGames = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text("🎮").font(.system(size: 22))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Juegos y misiones")
+                                    .font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                                Text("Trivia diaria y misiones con XP extra")
+                                    .font(.system(size: 11)).foregroundStyle(Color.bpTextSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundStyle(Color.bpAmber)
+                        }
+                        .padding(16)
+                        .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
+                    }
+                    .buttonStyle(.plain)
+                    .bpAccessibility(label: "Juegos y misiones", hint: "Abrir trivia diaria y misiones", isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
 
                     // Stats
@@ -234,6 +261,10 @@ struct ProfileView: View {
                 .padding(.top, 8)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
+        }
+        .sheet(isPresented: $showGames) {
+            GamificationView()
+                .presentationBackground(.black)
         }
         .onChange(of: engine.lastAward?.xp) { _, newValue in
             guard newValue != nil else { return }

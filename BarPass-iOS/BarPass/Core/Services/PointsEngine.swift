@@ -9,6 +9,7 @@ enum XPAction: String, Codable, CaseIterable {
     case createTrip   = "create_trip"
     case completeTrip = "complete_trip"
     case inviteFriend = "invite_friend"
+    case triviaWin    = "trivia_win"
 
     var xp: Int {
         switch self {
@@ -18,6 +19,7 @@ enum XPAction: String, Codable, CaseIterable {
         case .createTrip:   return 100
         case .completeTrip: return 200
         case .inviteFriend: return 200
+        case .triviaWin:    return 100
         }
     }
 
@@ -29,6 +31,7 @@ enum XPAction: String, Codable, CaseIterable {
         case .createTrip:   return "Trip creado"
         case .completeTrip: return "Trip completado"
         case .inviteFriend: return "Amigo invitado"
+        case .triviaWin:    return "Trivia ganada"
         }
     }
 }
@@ -48,6 +51,7 @@ final class PointsEngine: ObservableObject {
     @Published private(set) var reviewCount: Int = 0
     @Published private(set) var shareCount: Int = 0
     @Published private(set) var tripCount: Int = 0
+    @Published private(set) var triviaWins: Int = 0
     /// Last award, for the toast ("+50 XP · Check-in"). Cleared by the UI.
     @Published var lastAward: (action: XPAction, xp: Int)?
 
@@ -62,6 +66,7 @@ final class PointsEngine: ObservableObject {
         var reviewCount: Int
         var shareCount: Int
         var tripCount: Int
+        var triviaWins: Int?
         var lastCheckins: [String: String]
         var reviewedVenues: Set<String>?
     }
@@ -101,6 +106,7 @@ final class PointsEngine: ObservableObject {
         case .leaveReview:  reviewCount += 1
         case .shareVenue:   shareCount += 1
         case .createTrip, .completeTrip: tripCount += 1
+        case .triviaWin:    triviaWins += 1
         case .inviteFriend: break
         }
         totalXP += action.xp
@@ -108,7 +114,32 @@ final class PointsEngine: ObservableObject {
         BPAnalytics.track(.earnXP(action: action.rawValue, amount: action.xp))
         BPHaptics.success()
         save()
+        if let missionType = Self.missionType(for: action) {
+            MissionEngine.shared.registerAction(missionType)
+        }
         return action.xp
+    }
+
+    /// Bonus XP from a completed mission — NOT an action, so it never
+    /// re-registers with MissionEngine (no recursion possible).
+    func awardMissionBonus(_ xp: Int) {
+        totalXP += xp
+        lastAward = (.triviaWin, xp)   // reuse toast pipeline
+        BPAnalytics.track(.earnXP(action: "mission_complete", amount: xp))
+        BPHaptics.success()
+        save()
+    }
+
+    private static func missionType(for action: XPAction) -> MissionType? {
+        switch action {
+        case .checkIn:      return .checkIn
+        case .shareVenue:   return .shareVenue
+        case .leaveReview:  return .reviewVenue
+        case .createTrip:   return .createTrip
+        case .completeTrip: return .completeTrip
+        case .triviaWin:    return .triviaWin
+        case .inviteFriend: return nil
+        }
     }
 
     /// Check-in with same-day-per-venue guard. Returns XP or nil if already
@@ -136,7 +167,7 @@ final class PointsEngine: ObservableObject {
     func hasReviewed(venueId: String) -> Bool { reviewedVenues.contains(venueId) }
 
     func reset() {
-        totalXP = 0; checkinCount = 0; reviewCount = 0; shareCount = 0; tripCount = 0
+        totalXP = 0; checkinCount = 0; reviewCount = 0; shareCount = 0; tripCount = 0; triviaWins = 0
         lastCheckins = [:]; reviewedVenues = []; lastAward = nil
         save()
     }
@@ -147,13 +178,13 @@ final class PointsEngine: ObservableObject {
         guard let data = UserDefaults.standard.data(forKey: Self.key),
               let s = try? JSONDecoder().decode(State.self, from: data) else { return }
         totalXP = s.totalXP; checkinCount = s.checkinCount; reviewCount = s.reviewCount
-        shareCount = s.shareCount; tripCount = s.tripCount; lastCheckins = s.lastCheckins
+        shareCount = s.shareCount; tripCount = s.tripCount; lastCheckins = s.lastCheckins; triviaWins = s.triviaWins ?? 0
         reviewedVenues = s.reviewedVenues ?? []
     }
 
     private func save() {
         let s = State(totalXP: totalXP, checkinCount: checkinCount, reviewCount: reviewCount,
-                      shareCount: shareCount, tripCount: tripCount, lastCheckins: lastCheckins,
+                      shareCount: shareCount, tripCount: tripCount, triviaWins: triviaWins, lastCheckins: lastCheckins,
                       reviewedVenues: reviewedVenues)
         if let data = try? JSONEncoder().encode(s) {
             UserDefaults.standard.set(data, forKey: Self.key)
