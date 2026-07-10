@@ -113,8 +113,10 @@ enum BPSpacing {
 }
 
 extension Color {
-    static let bpAmber = Color(red: 0.92, green: 0.72, blue: 0.28)
-    static let bpAmberBright = Color(red: 0.98, green: 0.86, blue: 0.50)
+    // Theme-aware accent tokens — the active theme supplies the pair, every
+    // view keeps using these names (see ThemeService).
+    static var bpAmber: Color { ThemeService.currentPalette.0 }
+    static var bpAmberBright: Color { ThemeService.currentPalette.1 }
     static let bpSurface = Color(white: 0.06)
     static let bpSurfaceRaised = Color(white: 0.08)
     static let bpBorder = Color.white.opacity(0.07)

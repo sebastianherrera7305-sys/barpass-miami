@@ -5,6 +5,7 @@ struct MainTabView: View {
     @EnvironmentObject private var cart:     CartStore
     @StateObject private var venueStore = VenueStore()
     @ObservedObject private var l10n = L10n.shared
+    @ObservedObject private var themeService = ThemeService.shared
 
     @State private var selectedTab = 0
 
@@ -37,6 +38,8 @@ struct MainTabView: View {
             floatingTabBar
         }
         .ignoresSafeArea(edges: .bottom)
+        // Theme switch rebuilds the whole tree so every Color.bpAmber re-resolves.
+        .id(themeService.theme)
         .task { await venueStore.loadVenues() }
     }
 

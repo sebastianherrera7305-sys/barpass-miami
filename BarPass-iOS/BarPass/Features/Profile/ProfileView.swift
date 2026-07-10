@@ -3,6 +3,7 @@ import SwiftUI
 struct ProfileView: View {
     @EnvironmentObject private var appState: AppState
     @ObservedObject private var l10n = L10n.shared
+    @ObservedObject private var themeService = ThemeService.shared
     @State private var animateStats = false
 
     private let points = 1240
@@ -158,6 +159,48 @@ struct ProfileView: View {
                                 }
                                 .buttonStyle(.plain)
                                 .bpAccessibility(label: lang.label, hint: "Cambiar idioma de la app", isButton: true)
+                            }
+                        }
+                    }
+                    .padding(18)
+                    .background(Color(white: 0.06), in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.white.opacity(0.07)))
+                    .padding(.horizontal, BPSpacing.lg)
+
+                    // Theme selector
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Tema")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 10)], spacing: 10) {
+                            ForEach(BPTheme.allCases) { theme in
+                                let on = themeService.theme == theme
+                                Button {
+                                    BPHaptics.medium()
+                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                        themeService.theme = theme
+                                    }
+                                } label: {
+                                    VStack(spacing: 6) {
+                                        HStack(spacing: 4) {
+                                            Circle().fill(theme.palette.0).frame(width: 14, height: 14)
+                                            Circle().fill(theme.palette.1).frame(width: 14, height: 14)
+                                        }
+                                        Text(theme.label)
+                                            .font(.system(size: 11, weight: on ? .bold : .regular))
+                                            .foregroundStyle(on ? theme.palette.0 : Color.bpTextSecondary)
+                                            .lineLimit(1).minimumScaleFactor(0.8)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background(on ? theme.palette.0.opacity(0.12) : Color.white.opacity(0.04),
+                                                in: RoundedRectangle(cornerRadius: BPRadius.md))
+                                    .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
+                                        .strokeBorder(on ? theme.palette.0.opacity(0.45) : Color.white.opacity(0.07)))
+                                }
+                                .buttonStyle(.plain)
+                                .bpAccessibility(label: theme.label, hint: "Cambiar el tema de color de la app", isButton: true)
                             }
                         }
                     }
