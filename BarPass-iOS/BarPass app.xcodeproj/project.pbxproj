@@ -82,6 +82,9 @@
 		TRIV02000000000000RP01 /* TriviaEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = TRIV01000000000000RP01 /* TriviaEngine.swift */; };
 		MISS02000000000000RP01 /* MissionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = MISS01000000000000RP01 /* MissionEngine.swift */; };
 		GAMF02000000000000RP01 /* GamificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GAMF01000000000000RP01 /* GamificationView.swift */; };
+		VPST02000000000000RP01 /* VenuePost.swift in Sources */ = {isa = PBXBuildFile; fileRef = VPST01000000000000RP01 /* VenuePost.swift */; };
+		PREP02000000000000RP01 /* PostRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = PREP01000000000000RP01 /* PostRepository.swift */; };
+		VPSC02000000000000RP01 /* VenuePostsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = VPSC01000000000000RP01 /* VenuePostsSection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -163,6 +166,9 @@
 		TRIV01000000000000RP01 /* TriviaEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TriviaEngine.swift; path = BarPass/Core/Services/TriviaEngine.swift; sourceTree = SOURCE_ROOT; };
 		MISS01000000000000RP01 /* MissionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MissionEngine.swift; path = BarPass/Core/Services/MissionEngine.swift; sourceTree = SOURCE_ROOT; };
 		GAMF01000000000000RP01 /* GamificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GamificationView.swift; path = BarPass/Features/Profile/GamificationView.swift; sourceTree = SOURCE_ROOT; };
+		VPST01000000000000RP01 /* VenuePost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenuePost.swift; path = BarPass/Models/VenuePost.swift; sourceTree = SOURCE_ROOT; };
+		PREP01000000000000RP01 /* PostRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PostRepository.swift; path = BarPass/Repositories/PostRepository.swift; sourceTree = SOURCE_ROOT; };
+		VPSC01000000000000RP01 /* VenuePostsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenuePostsSection.swift; path = BarPass/Features/Tonight/VenuePostsSection.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -532,6 +538,9 @@
 				L10N02000000000000RP01 /* LocalizationService.swift in Sources */,
 				THEM02000000000000RP01 /* ThemeService.swift in Sources */,
 				XPEN02000000000000RP01 /* PointsEngine.swift in Sources */,
+				VPSC02000000000000RP01 /* VenuePostsSection.swift in Sources */,
+				PREP02000000000000RP01 /* PostRepository.swift in Sources */,
+				VPST02000000000000RP01 /* VenuePost.swift in Sources */,
 				GAMF02000000000000RP01 /* GamificationView.swift in Sources */,
 				MISS02000000000000RP01 /* MissionEngine.swift in Sources */,
 				TRIV02000000000000RP01 /* TriviaEngine.swift in Sources */,

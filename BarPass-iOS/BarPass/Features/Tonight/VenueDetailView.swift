@@ -171,6 +171,11 @@ struct VenueDetailView: View {
 
             divider
 
+            VenuePostsSection(venue: venue)
+                .padding(.horizontal, BPSpacing.lg)
+
+            divider
+
             locationSection
                 .padding(.horizontal, BPSpacing.lg)
         }

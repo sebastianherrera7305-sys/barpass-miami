@@ -8,4 +8,5 @@ enum RepositoryDependencies {
     // (the Supabase implementations are registered and ready to swap in).
     nonisolated(unsafe) static var trip: TripRepository = LocalTripRepository()
     nonisolated(unsafe) static var plan: PlanRepository = LocalPlanRepository()
+    nonisolated(unsafe) static var post: PostRepository = SupabasePostRepository()
 }
