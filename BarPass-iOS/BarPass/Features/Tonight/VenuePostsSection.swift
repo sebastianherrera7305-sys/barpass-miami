@@ -52,6 +52,10 @@ struct VenuePostsSection: View {
             }
         }
         .task(id: venue.id) { await load() }
+        .onReceive(NotificationCenter.default.publisher(for: .bpPostsChanged)) { note in
+            guard (note.object as? String) == venue.id else { return }
+            Task { await load() }
+        }
         .sheet(isPresented: $showComposer) {
             PostComposer(venue: venue) { post in
                 posts.insert(post, at: 0)
@@ -242,4 +246,9 @@ struct PostComposer: View {
             Spacer()
         }
     }
+}
+
+
+extension Notification.Name {
+    static let bpPostsChanged = Notification.Name("bpPostsChanged")
 }

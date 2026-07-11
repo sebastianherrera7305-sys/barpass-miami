@@ -9,8 +9,26 @@ final class TripStore: ObservableObject {
 
     private let repository: TripRepository
 
+    /// Blind ratings persist to disk — they were memory-only and vanished
+    /// on every app restart (defeating the whole reputation system).
+    private static let ratingsURL: URL = {
+        let base = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("BarPassTrips", isDirectory: true)
+        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        return base.appendingPathComponent("ratings.json")
+    }()
+
     init(repository: TripRepository) {
         self.repository = repository
+        ratings = (try? Data(contentsOf: Self.ratingsURL))
+            .flatMap { try? JSONDecoder().decode([TripRating].self, from: $0) } ?? []
+    }
+
+    private func persistRatings() {
+        if let data = try? JSONEncoder().encode(ratings) {
+            try? data.write(to: Self.ratingsURL, options: .atomic)
+        }
     }
 
     static var currentUserId: String {
@@ -116,6 +134,7 @@ final class TripStore: ObservableObject {
                 ratings[idx].visible = true
             }
         }
+        persistRatings()
     }
 
     func reputation(for userId: String) -> UserReputation {

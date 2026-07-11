@@ -10,6 +10,7 @@ struct VenueDetailView: View {
     @ObservedObject private var points = PointsEngine.shared
     @State private var checkinMessage: String?
     @State private var checkingIn = false
+    @State private var showReviewComposer = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -32,6 +33,19 @@ struct VenueDetailView: View {
         .sheet(isPresented: $showShareSheet) {
             ShareSheet(venue: venue)
                 .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showReviewComposer) {
+            PostComposer(venue: venue) { post in
+                Task {
+                    try? await RepositoryDependencies.post.create(post)
+                    await MainActor.run {
+                        NotificationCenter.default.post(name: .bpPostsChanged, object: venue.id)
+                        checkinMessage = "+75 XP · Tu review quedó publicada abajo 👇"
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+            .presentationBackground(.black)
         }
     }
 
@@ -384,11 +398,8 @@ struct VenueDetailView: View {
                 .bpAccessibility(label: "Check-in", hint: "Registrar tu visita a este venue y ganar 50 XP", isButton: true)
 
                 Button {
-                    if points.leaveReview(venueId: venue.id) != nil {
-                        checkinMessage = "+75 XP · ¡Gracias por tu review!"
-                    } else {
-                        checkinMessage = "Ya dejaste review de este lugar."
-                    }
+                    BPHaptics.light()
+                    showReviewComposer = true
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: points.hasReviewed(venueId: venue.id) ? "star.fill" : "square.and.pencil").font(.system(size: 13))

@@ -10,6 +10,7 @@ enum XPAction: String, Codable, CaseIterable {
     case completeTrip = "complete_trip"
     case inviteFriend = "invite_friend"
     case triviaWin    = "trivia_win"
+    case missionComplete = "mission_complete"
 
     var xp: Int {
         switch self {
@@ -20,6 +21,7 @@ enum XPAction: String, Codable, CaseIterable {
         case .completeTrip: return 200
         case .inviteFriend: return 200
         case .triviaWin:    return 100
+        case .missionComplete: return 0   // variable bonus, set at award time
         }
     }
 
@@ -32,6 +34,7 @@ enum XPAction: String, Codable, CaseIterable {
         case .completeTrip: return "Trip completado"
         case .inviteFriend: return "Amigo invitado"
         case .triviaWin:    return "Trivia ganada"
+        case .missionComplete: return "Misión completada"
         }
     }
 }
@@ -107,7 +110,7 @@ final class PointsEngine: ObservableObject {
         case .shareVenue:   shareCount += 1
         case .createTrip, .completeTrip: tripCount += 1
         case .triviaWin:    triviaWins += 1
-        case .inviteFriend: break
+        case .inviteFriend, .missionComplete: break
         }
         totalXP += action.xp
         lastAward = (action, action.xp)
@@ -124,7 +127,7 @@ final class PointsEngine: ObservableObject {
     /// re-registers with MissionEngine (no recursion possible).
     func awardMissionBonus(_ xp: Int) {
         totalXP += xp
-        lastAward = (.triviaWin, xp)   // reuse toast pipeline
+        lastAward = (.missionComplete, xp)
         BPAnalytics.track(.earnXP(action: "mission_complete", amount: xp))
         BPHaptics.success()
         save()
@@ -138,7 +141,7 @@ final class PointsEngine: ObservableObject {
         case .createTrip:   return .createTrip
         case .completeTrip: return .completeTrip
         case .triviaWin:    return .triviaWin
-        case .inviteFriend: return nil
+        case .inviteFriend, .missionComplete: return nil
         }
     }
 
