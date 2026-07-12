@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct TonightView: View {
+    @ObservedObject private var favorites = FavoritesStore.shared
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
     @EnvironmentObject private var appState:   AppState
@@ -30,6 +31,10 @@ struct TonightView: View {
         let haystack = ([venue.type.rawValue, venue.name] + venue.vibes + venue.tags
             + venue.musicGenres.map { $0.rawValue }).joined(separator: " ").lowercased()
         return mood.keywords.contains { haystack.contains($0) }
+    }
+
+    private var favoriteVenues: [BarPassVenue] {
+        venueStore.venues.filter { favorites.ids.contains($0.id) }
     }
 
     private var moodVenues: [BarPassVenue] {
@@ -70,6 +75,10 @@ struct TonightView: View {
                             }
                         }
                     } else {
+                        if !favoriteVenues.isEmpty {
+                            section(title: "❤️ Tus favoritos", venues: favoriteVenues, style: .card)
+                        }
+
                         if !tonightEvents.isEmpty {
                             eventsTonightSection
                         }

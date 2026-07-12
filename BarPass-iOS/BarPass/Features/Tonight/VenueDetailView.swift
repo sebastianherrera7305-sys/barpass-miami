@@ -5,7 +5,7 @@ struct VenueDetailView: View {
     let venue: BarPassVenue
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
-    @State private var isSaved = false
+    @ObservedObject private var favorites = FavoritesStore.shared
     @State private var showShareSheet = false
     @ObservedObject private var points = PointsEngine.shared
     @State private var checkinMessage: String?
@@ -482,11 +482,11 @@ struct VenueDetailView: View {
         HStack(spacing: 10) {
             Button {
                 BPHaptics.light()
-                withAnimation(.spring(response: 0.3)) { isSaved.toggle() }
+                withAnimation(.spring(response: 0.3)) { favorites.toggle(venue.id) }
             } label: {
-                Image(systemName: isSaved ? "heart.fill" : "heart")
+                Image(systemName: favorites.isFavorite(venue.id) ? "heart.fill" : "heart")
                     .font(.system(size: 18))
-                    .foregroundStyle(isSaved ? Color.bpDanger : .white)
+                    .foregroundStyle(favorites.isFavorite(venue.id) ? Color.bpDanger : Color.bpInk)
                     .frame(width: 48, height: 48)
                     .background(Color.bpInk.opacity(0.08), in: Circle())
                     .overlay(Circle().strokeBorder(Color.bpInk.opacity(0.1)))

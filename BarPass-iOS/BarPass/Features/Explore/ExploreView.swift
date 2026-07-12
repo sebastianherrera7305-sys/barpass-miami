@@ -395,6 +395,31 @@ struct ExploreView: View {
 
     private var listView: some View {
         ScrollView(showsIndicators: false) {
+            if filteredVenues.isEmpty {
+                VStack(spacing: 10) {
+                    Text("🔍").font(.system(size: 40))
+                    Text(searchText.isEmpty ? "No hay venues con esos filtros" : "Sin resultados para \"\(searchText)\"")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.bpInk)
+                    Text("Probá con otro nombre, barrio o quitá los filtros.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.bpTextSecondary)
+                    Button {
+                        BPHaptics.light()
+                        withAnimation { searchText = "" }
+                    } label: {
+                        Text("Limpiar búsqueda")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(Color.bpAmber)
+                            .padding(.horizontal, 16).padding(.vertical, 9)
+                            .background(Color.bpAmber.opacity(0.12), in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .opacity(searchText.isEmpty ? 0 : 1)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 220)
+            }
             LazyVStack(spacing: 0) {
                 ForEach(filteredVenues) { venue in
                     NavigationLink(destination: VenueDetailView(venue: venue)) {

@@ -277,6 +277,61 @@ struct ProfileView: View {
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
                     .padding(.horizontal, BPSpacing.lg)
 
+                    // Account
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Cuenta")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Color.bpInk)
+
+                        if let session = AuthService.shared.restoreSession() {
+                            HStack(spacing: 10) {
+                                Image(systemName: "person.crop.circle.badge.checkmark")
+                                    .font(.system(size: 18)).foregroundStyle(Color.bpGreen)
+                                Text(session.user.email ?? "Sesión activa")
+                                    .font(.system(size: 14)).foregroundStyle(Color.bpTextSecondary)
+                                    .lineLimit(1)
+                                Spacer()
+                            }
+                            Button {
+                                BPHaptics.medium()
+                                AuthService.shared.signOut()
+                                appState.showNativeAuth = true
+                            } label: {
+                                Text("Cerrar sesión")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(Color.bpDanger)
+                                    .frame(maxWidth: .infinity).padding(.vertical, 12)
+                                    .background(Color.bpDanger.opacity(0.1), in: Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .bpAccessibility(label: "Cerrar sesión", hint: "Salir de tu cuenta", isButton: true)
+                        } else {
+                            HStack(spacing: 10) {
+                                Image(systemName: "person.crop.circle.badge.questionmark")
+                                    .font(.system(size: 18)).foregroundStyle(Color.bpTextSecondary)
+                                Text("Estás en modo invitado")
+                                    .font(.system(size: 14)).foregroundStyle(Color.bpTextSecondary)
+                                Spacer()
+                            }
+                            Button {
+                                BPHaptics.medium()
+                                appState.showNativeAuth = true
+                            } label: {
+                                Text("Iniciar sesión")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(.black)
+                                    .frame(maxWidth: .infinity).padding(.vertical, 12)
+                                    .background(Color.bpAmber, in: Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .bpAccessibility(label: "Iniciar sesión", hint: "Entrar con tu cuenta para sincronizar", isButton: true)
+                        }
+                    }
+                    .padding(18)
+                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
+                    .padding(.horizontal, BPSpacing.lg)
+
                     Spacer(minLength: 120)
                 }
             }
