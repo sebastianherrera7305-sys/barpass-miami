@@ -11,6 +11,10 @@ struct PromptYourNightView: View {
     @State private var prompt = ""
     @State private var route: [NightPlanner.PlannedStop] = []
     @State private var didGenerate = false
+    /// Staged reveal: stops appear one by one with spring physics + a haptic
+    /// tick each — the plan feels BUILT for you, not fetched.
+    @State private var revealedCount = 0
+    @State private var revealDone = false
     @FocusState private var promptFocused: Bool
 
     private let cols = [GridItem(.adaptive(minimum: 110), spacing: 10)]
@@ -89,6 +93,7 @@ struct PromptYourNightView: View {
 
             ForEach(Array(route.enumerated()), id: \.element.id) { i, stop in
                 let v = stop.venue
+                let revealed = i < revealedCount
                 HStack(spacing: 12) {
                     ZStack {
                         Circle().fill(.white)
@@ -119,12 +124,16 @@ struct PromptYourNightView: View {
                 .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
                 .accessibilityElement(children: .ignore)
                 .bpAccessibility(label: v.name, hint: "Parada sugerida en tu ruta")
+                .opacity(revealed ? 1 : 0)
+                .offset(y: revealed ? 0 : 26)
+                .scaleEffect(revealed ? 1 : 0.92, anchor: .top)
             }
 
+            if revealDone {
             Button {
                 BPHaptics.medium()
                 onSave(saveTitle, route.map(\.venue))
-                route = []; didGenerate = false; selected = []; prompt = ""
+                route = []; didGenerate = false; selected = []; prompt = ""; revealedCount = 0; revealDone = false
             } label: {
                 Text("Guardar como Trip")
                     .font(.system(size: 15, weight: .bold)).foregroundStyle(Color.bpAmber)
@@ -134,6 +143,8 @@ struct PromptYourNightView: View {
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: "Guardar como Trip", hint: "Guardar la ruta generada como un trip", isButton: true)
+            .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
         }
     }
 
@@ -147,9 +158,26 @@ struct PromptYourNightView: View {
     private func generate() {
         promptFocused = false
         BPHaptics.medium()
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-            route = NightPlanner.plan(venues: venues, selected: selected, prompt: prompt)
-            didGenerate = true
+        revealedCount = 0
+        revealDone = false
+        route = NightPlanner.plan(venues: venues, selected: selected, prompt: prompt)
+        didGenerate = true
+
+        // Staged reveal: each stop lands with its own spring + haptic tick.
+        let total = route.count
+        Task { @MainActor in
+            for i in 0..<total {
+                try? await Task.sleep(nanoseconds: i == 0 ? 150_000_000 : 320_000_000)
+                withAnimation(.spring(response: 0.42, dampingFraction: 0.78)) {
+                    revealedCount = i + 1
+                }
+                BPHaptics.light()
+            }
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                revealDone = true
+            }
+            if total > 0 { BPHaptics.success() }
         }
     }
 }
