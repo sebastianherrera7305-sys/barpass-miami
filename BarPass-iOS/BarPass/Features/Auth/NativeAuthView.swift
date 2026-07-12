@@ -92,7 +92,7 @@ struct NativeAuthView: View {
                     ProgressView()
                         .tint(amber)
                     Text("Verificando sesión...")
-                        .font(.system(size: 13))
+                        .font(.bpScaled(13))
                         .foregroundStyle(Color.bpInk.opacity(0.4))
                 }
                 .transition(.opacity)
@@ -197,7 +197,7 @@ struct NativeAuthView: View {
                     )
 
                 Text("BP")
-                    .font(.system(size: 22, weight: .black, design: .rounded))
+                    .font(.bpScaled(22, weight: .black, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
                             colors: [amber, amberB],
@@ -209,12 +209,12 @@ struct NativeAuthView: View {
 
             VStack(spacing: 5) {
                 Text("BarPass")
-                    .font(.system(size: 28, weight: .black, design: .rounded))
+                    .font(.bpScaled(28, weight: .black, design: .rounded))
                     .foregroundStyle(Color.bpInk)
                     .kerning(-0.4)
 
                 Text("Tu acceso a la mejor noche")
-                    .font(.system(size: 13))
+                    .font(.bpScaled(13))
                     .foregroundStyle(Color.bpInk.opacity(0.35))
             }
         }
@@ -281,7 +281,7 @@ struct NativeAuthView: View {
                        keyboard: UIKeyboardType, icon: String, secure: Bool) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 14))
+                .font(.bpScaled(14))
                 .foregroundStyle(Color.bpInk.opacity(0.28))
                 .frame(width: 18)
 
@@ -307,7 +307,7 @@ struct NativeAuthView: View {
                     showPassword.toggle()
                 } label: {
                     Image(systemName: showPassword ? "eye.slash" : "eye")
-                        .font(.system(size: 13))
+                        .font(.bpScaled(13))
                         .foregroundStyle(Color.bpInk.opacity(0.25))
                 }
                 .buttonStyle(.plain)
@@ -379,7 +379,7 @@ struct NativeAuthView: View {
                             .scaleEffect(0.85)
                     }
                     Text(label)
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.bpScaled(16, weight: .semibold))
                         .foregroundStyle(isDisabled ? Color.bpInk.opacity(0.25) : .black)
                 }
             }
@@ -406,7 +406,7 @@ struct NativeAuthView: View {
                 .fill(Color.bpInk.opacity(0.07))
                 .frame(height: 1)
             Text("o")
-                .font(.system(size: 12))
+                .font(.bpScaled(12))
                 .foregroundStyle(Color.bpInk.opacity(0.2))
             Rectangle()
                 .fill(Color.bpInk.opacity(0.07))
@@ -422,7 +422,7 @@ struct NativeAuthView: View {
             showForgotPassword = true
         } label: {
             Text("¿Olvidaste tu contraseña?")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.bpScaled(13, weight: .semibold))
                 .foregroundStyle(Color.bpAmber)
         }
         .buttonStyle(.plain)
@@ -446,7 +446,7 @@ struct NativeAuthView: View {
             if resetStatusMsg.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "lock.rotation")
-                        .font(.system(size: 28))
+                        .font(.bpScaled(28))
                         .foregroundStyle(Color.bpAmber)
 
                     Text("Recuperar contraseña")
@@ -504,7 +504,7 @@ struct NativeAuthView: View {
             } else {
                 VStack(spacing: 16) {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 48))
+                        .font(.bpScaled(48))
                         .foregroundStyle(Color.bpGreen)
 
                     Text("Revisa tu email")
@@ -549,7 +549,7 @@ struct NativeAuthView: View {
     private var skipButton: some View {
         Button { submitSkip() } label: {
             Text("Continuar como invitado")
-                .font(.system(size: 13, weight: .regular))
+                .font(.bpScaled(13, weight: .regular))
                 .foregroundStyle(Color.bpInk.opacity(0.25))
                 .underline(color: Color.bpInk.opacity(0.12))
         }
@@ -565,14 +565,14 @@ struct NativeAuthView: View {
             HStack(spacing: -6) {
                 ForEach(["🟤", "🟡", "⚪️"], id: \.self) { c in
                     Text(c)
-                        .font(.system(size: 10))
+                        .font(.bpScaled(10))
                         .frame(width: 20, height: 20)
                         .background(Circle().fill(Color.bpInk.opacity(0.06)))
                         .overlay(Circle().strokeBorder(Color.black, lineWidth: 1.5))
                 }
             }
             Text("+5,000 personas ya salen con BarPass")
-                .font(.system(size: 11))
+                .font(.bpScaled(11))
                 .foregroundStyle(Color.bpInk.opacity(0.2))
         }
         .accessibilityElement(children: .ignore)
@@ -733,11 +733,11 @@ private struct ErrorToast: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14))
+                .font(.bpScaled(14))
                 .foregroundStyle(Color.bpAmber)
 
             Text(message)
-                .font(.system(size: 14, weight: .medium))
+                .font(.bpScaled(14, weight: .medium))
                 .foregroundStyle(Color.bpInk)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -746,7 +746,7 @@ private struct ErrorToast: View {
 
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .bold))
+                    .font(.bpScaled(12, weight: .bold))
                     .foregroundStyle(Color.bpInk.opacity(0.4))
                     .frame(width: 24, height: 24)
                     .background(Color.bpInk.opacity(0.08), in: Circle())

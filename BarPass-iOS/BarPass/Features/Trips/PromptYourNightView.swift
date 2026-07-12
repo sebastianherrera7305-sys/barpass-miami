@@ -23,9 +23,9 @@ struct PromptYourNightView: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("¿Qué noche buscás?")
-                    .font(.system(size: 26, weight: .black)).foregroundStyle(Color.bpInk)
+                    .font(.bpScaled(26, weight: .black)).foregroundStyle(Color.bpInk)
                 Text("Elegí un vibe o describilo. Yo armo la noche.")
-                    .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
+                    .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
             }
 
             LazyVGrid(columns: cols, spacing: 10) {
@@ -35,7 +35,7 @@ struct PromptYourNightView: View {
             HStack(spacing: 10) {
                 TextField("ej: cita inolvidable, rooftops, $100…", text: $prompt)
                     .focused($promptFocused)
-                    .font(.system(size: 15)).foregroundStyle(Color.bpInk)
+                    .font(.bpScaled(15)).foregroundStyle(Color.bpInk)
                     .padding(.horizontal, 14).padding(.vertical, 13)
                     .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
@@ -48,7 +48,7 @@ struct PromptYourNightView: View {
                     Image(systemName: "sparkles")
                     Text(didGenerate ? "Armá otra noche" : "Armá mi noche")
                 }
-                .font(.system(size: 16, weight: .bold)).foregroundStyle(.black)
+                .font(.bpScaled(16, weight: .bold)).foregroundStyle(.black)
                 .frame(maxWidth: .infinity).padding(.vertical, 15)
                 .background(Color.bpAmber, in: Capsule())
             }
@@ -59,7 +59,7 @@ struct PromptYourNightView: View {
                 routeView
             } else if didGenerate {
                 Text("No encontré match — probá otro vibe o palabra.")
-                    .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
+                    .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
             }
         }
     }
@@ -72,7 +72,7 @@ struct PromptYourNightView: View {
         } label: {
             HStack(spacing: 6) {
                 Text(vibe.emoji)
-                Text(vibe.label).font(.system(size: 12, weight: .semibold))
+                Text(vibe.label).font(.bpScaled(12, weight: .semibold))
                     .lineLimit(1).minimumScaleFactor(0.8)
             }
             .foregroundStyle(on ? .black : .white)
@@ -88,7 +88,7 @@ struct PromptYourNightView: View {
     private var routeView: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Tu noche")
-                .font(.system(size: 18, weight: .bold)).foregroundStyle(Color.bpInk)
+                .font(.bpScaled(18, weight: .bold)).foregroundStyle(Color.bpInk)
                 .padding(.top, 4)
 
             ForEach(Array(route.enumerated()), id: \.element.id) { i, stop in
@@ -100,20 +100,20 @@ struct PromptYourNightView: View {
                         if let logo = VenueLogos.url(for: v.id) {
                             CachedImage(url: logo, targetSize: CGSize(width: 60, height: 60), priority: .hot) { img in
                                 img.resizable().scaledToFit().padding(6)
-                            } placeholder: { Text(v.emoji).font(.system(size: 18)) }
-                        } else { Text(v.emoji).font(.system(size: 18)) }
+                            } placeholder: { Text(v.emoji).font(.bpScaled(18)) }
+                        } else { Text(v.emoji).font(.bpScaled(18)) }
                     }
                     .frame(width: 40, height: 40).clipShape(Circle())
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("PARADA \(i + 1)")
-                            .font(.system(size: 9, weight: .bold)).foregroundStyle(Color.bpAmber)
-                        Text(v.name).font(.system(size: 15, weight: .semibold)).foregroundStyle(Color.bpInk)
+                            .font(.bpScaled(9, weight: .bold)).foregroundStyle(Color.bpAmber)
+                        Text(v.name).font(.bpScaled(15, weight: .semibold)).foregroundStyle(Color.bpInk)
                         Text("\(v.neighborhood) · \(v.type.rawValue)")
-                            .font(.system(size: 11)).foregroundStyle(Color.bpTextSecondary)
+                            .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                         if let reason = stop.reason {
                             Text(reason)
-                                .font(.system(size: 11, weight: .semibold))
+                                .font(.bpScaled(11, weight: .semibold))
                                 .foregroundStyle(Color.bpAmber)
                                 .lineLimit(1)
                         }
@@ -136,7 +136,7 @@ struct PromptYourNightView: View {
                 route = []; didGenerate = false; selected = []; prompt = ""; revealedCount = 0; revealDone = false
             } label: {
                 Text("Guardar como Trip")
-                    .font(.system(size: 15, weight: .bold)).foregroundStyle(Color.bpAmber)
+                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpAmber)
                     .frame(maxWidth: .infinity).padding(.vertical, 13)
                     .background(Color.bpAmber.opacity(0.12), in: Capsule())
                     .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.4)))

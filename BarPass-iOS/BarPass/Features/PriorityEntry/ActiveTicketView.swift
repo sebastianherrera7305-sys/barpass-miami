@@ -58,16 +58,16 @@ struct ActiveTicketView: View {
                     .frame(width: 60, height: 60)
 
                 Image(systemName: "ticket.fill")
-                    .font(.system(size: 28, weight: .semibold))
+                    .font(.bpScaled(28, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
             }
 
             Text("¡Ticket Confirmado!")
-                .font(.system(size: 22, weight: .bold))
+                .font(.bpScaled(22, weight: .bold))
                 .foregroundStyle(Color.bpInk)
 
             Text(ticket.eventName)
-                .font(.system(size: 15))
+                .font(.bpScaled(15))
                 .foregroundStyle(Color.bpInk.opacity(0.5))
                 .multilineTextAlignment(.center)
         }
@@ -81,16 +81,16 @@ struct ActiveTicketView: View {
             // Top section — event info
             VStack(spacing: 8) {
                 Text(ticket.eventName)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.bpScaled(18, weight: .bold))
                     .foregroundStyle(Color.bpInk)
                     .multilineTextAlignment(.center)
 
                 Text(ticket.venueName)
-                    .font(.system(size: 13))
+                    .font(.bpScaled(13))
                     .foregroundStyle(Color.bpInk.opacity(0.5))
 
                 Text(ticket.formattedDate)
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.bpScaled(12, weight: .medium))
                     .foregroundStyle(gold)
             }
             .frame(maxWidth: .infinity)
@@ -122,7 +122,7 @@ struct ActiveTicketView: View {
                 }
 
                 Text(ticket.ticketCode)
-                    .font(.system(size: 18, weight: .bold, design: .monospaced))
+                    .font(.bpScaled(18, weight: .bold, design: .monospaced))
                     .foregroundStyle(Color.bpInk)
                     .tracking(4)
 
@@ -199,15 +199,15 @@ struct ActiveTicketView: View {
     private func row(icon: String, label: String, value: String) -> some View {
         HStack(spacing: 14) {
             Image(systemName: icon)
-                .font(.system(size: 16))
+                .font(.bpScaled(16))
                 .foregroundStyle(gold)
                 .frame(width: 24)
             Text(label)
-                .font(.system(size: 14))
+                .font(.bpScaled(14))
                 .foregroundStyle(Color.bpInk.opacity(0.4))
             Spacer()
             Text(value)
-                .font(.system(size: 14, weight: .medium))
+                .font(.bpScaled(14, weight: .medium))
                 .foregroundStyle(Color.bpInk)
                 .multilineTextAlignment(.trailing)
         }
@@ -229,9 +229,9 @@ struct ActiveTicketView: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.bpScaled(14, weight: .semibold))
                     Text("Compartir")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.bpScaled(15, weight: .semibold))
                 }
                 .foregroundStyle(Color.bpInk)
                 .frame(maxWidth: .infinity)
@@ -245,7 +245,7 @@ struct ActiveTicketView: View {
 
             Button { dismiss() } label: {
                 Text("Listo")
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.bpScaled(15, weight: .bold))
                     .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)

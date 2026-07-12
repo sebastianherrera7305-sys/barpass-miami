@@ -47,14 +47,14 @@ struct GamificationView: View {
                     .font(.bpHeadline()).foregroundStyle(Color.bpInk)
                 Spacer()
                 Text("+100 XP")
-                    .font(.system(size: 11, weight: .bold)).foregroundStyle(Color.bpAmber)
+                    .font(.bpScaled(11, weight: .bold)).foregroundStyle(Color.bpAmber)
                     .padding(.horizontal, 8).padding(.vertical, 4)
                     .background(Color.bpAmber.opacity(0.12), in: Capsule())
             }
 
             if let q = trivia.todayQuestion {
                 Text(q.question)
-                    .font(.system(size: 16, weight: .bold)).foregroundStyle(Color.bpInk)
+                    .font(.bpScaled(16, weight: .bold)).foregroundStyle(Color.bpInk)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if trivia.answeredToday {
@@ -85,7 +85,7 @@ struct GamificationView: View {
         } label: {
             HStack {
                 Text(option)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                     .multilineTextAlignment(.leading)
                 Spacer()
@@ -120,7 +120,7 @@ struct GamificationView: View {
 
             HStack(spacing: 6) {
                 Text(trivia.lastAnswerCorrect == true ? "✅ ¡Correcto! +100 XP" : "Respondida — mañana hay otra")
-                    .font(.system(size: 13, weight: .bold))
+                    .font(.bpScaled(13, weight: .bold))
                     .foregroundStyle(trivia.lastAnswerCorrect == true ? Color.bpGreen : Color.bpTextSecondary)
             }
             Text("💡 \(q.funFact)")
@@ -159,17 +159,17 @@ struct GamificationView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: m.isCompleted ? "checkmark.circle.fill" : m.icon)
-                    .font(.system(size: 18))
+                    .font(.bpScaled(18))
                     .foregroundStyle(m.isCompleted ? Color.bpGreen : Color.bpAmber)
                 Spacer()
                 Text("+\(m.xpReward) XP")
-                    .font(.system(size: 10, weight: .bold)).foregroundStyle(Color.bpAmber)
+                    .font(.bpScaled(10, weight: .bold)).foregroundStyle(Color.bpAmber)
                     .padding(.horizontal, 6).padding(.vertical, 3)
                     .background(Color.bpAmber.opacity(0.12), in: Capsule())
             }
 
-            Text(m.title).font(.system(size: 14, weight: .bold)).foregroundStyle(Color.bpInk)
-            Text(m.description).font(.system(size: 11)).foregroundStyle(Color.bpTextSecondary)
+            Text(m.title).font(.bpScaled(14, weight: .bold)).foregroundStyle(Color.bpInk)
+            Text(m.description).font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                 .lineLimit(2)
 
             // Progress
@@ -183,7 +183,7 @@ struct GamificationView: View {
             .frame(height: 5)
 
             Text("\(min(m.progress, m.requirement))/\(m.requirement)")
-                .font(.system(size: 10, weight: .semibold))
+                .font(.bpScaled(10, weight: .semibold))
                 .foregroundStyle(m.isCompleted ? Color.bpGreen : Color.bpTextSecondary)
         }
         .padding(14)

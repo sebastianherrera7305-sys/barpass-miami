@@ -1,6 +1,12 @@
 import SwiftUI
 
 extension Font {
+    /// Dynamic-Type-aware fixed size: identity at the default content size,
+    /// scales with the user's text size setting (UIFontMetrics).
+    static func bpScaled(_ size: CGFloat, weight: Font.Weight = .regular, design: Font.Design = .default) -> Font {
+        .system(size: UIFontMetrics.default.scaledValue(for: size), weight: weight, design: design)
+    }
+
     static func bpLargeTitle() -> Font { .system(.largeTitle, design: .rounded).weight(.black) }
     static func bpTitle1() -> Font { .system(.title, design: .rounded).weight(.black) }
     static func bpTitle2() -> Font { .title2.weight(.bold) }

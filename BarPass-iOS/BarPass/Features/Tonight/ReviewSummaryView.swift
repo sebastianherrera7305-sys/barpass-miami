@@ -13,7 +13,7 @@ struct ReviewSummaryView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "sparkles")
-                    .font(.system(size: 15))
+                    .font(.bpScaled(15))
                     .foregroundStyle(Color.bpAmber)
                 Text("Remy dice")
                     .font(.bpHeadline())

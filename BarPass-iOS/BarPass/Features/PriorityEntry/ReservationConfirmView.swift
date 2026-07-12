@@ -28,11 +28,11 @@ struct ReservationConfirmView: View {
             ZStack {
                 Circle().fill(gold.opacity(0.15)).frame(width: 64, height: 64)
                 Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 32))
+                    .font(.bpScaled(32))
                     .foregroundStyle(gold)
             }
             Text("Reservación Confirmada")
-                .font(.system(size: 20, weight: .bold))
+                .font(.bpScaled(20, weight: .bold))
                 .foregroundStyle(Color.bpInk)
             Text(reservation.venueName)
                 .font(.subheadline)
@@ -60,13 +60,13 @@ struct ReservationConfirmView: View {
                 // Package badge
                 HStack(spacing: 10) {
                     Text(packageEmoji)
-                        .font(.system(size: 28))
+                        .font(.bpScaled(28))
                         .frame(width: 50, height: 50)
                         .background(gold.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
 
                     VStack(alignment: .leading, spacing: 3) {
                         Text(reservation.packageName)
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.bpScaled(16, weight: .bold))
                             .foregroundStyle(Color.bpInk)
                         Text("Mesa VIP · \(reservation.guestCount) personas")
                             .font(.caption)
@@ -105,7 +105,7 @@ struct ReservationConfirmView: View {
                         .padding(.top, 16)
 
                     Text(reservation.confirmCode)
-                        .font(.system(size: 14, weight: .medium, design: .monospaced))
+                        .font(.bpScaled(14, weight: .medium, design: .monospaced))
                         .foregroundStyle(Color.bpInk.opacity(0.35))
                         .tracking(2)
                         .padding(.bottom, 18)
@@ -131,7 +131,7 @@ struct ReservationConfirmView: View {
                     topVC?.present(av, animated: true)
                 } label: {
                     Label("Compartir", systemImage: "square.and.arrow.up")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.bpScaled(14, weight: .semibold))
                         .foregroundStyle(gold)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
@@ -143,7 +143,7 @@ struct ReservationConfirmView: View {
 
                 Button { dismiss() } label: {
                     Text("Listo")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.bpScaled(14, weight: .semibold))
                         .foregroundStyle(Color.bpInk)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
@@ -168,15 +168,15 @@ struct ReservationConfirmView: View {
     private func detailRow(icon: String, label: String, value: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 13))
+                .font(.bpScaled(13))
                 .foregroundStyle(gold.opacity(0.7))
                 .frame(width: 20)
             Text(label)
-                .font(.system(size: 13))
+                .font(.bpScaled(13))
                 .foregroundStyle(Color.bpInk.opacity(0.4))
             Spacer()
             Text(value)
-                .font(.system(size: 13, weight: .semibold))
+                .font(.bpScaled(13, weight: .semibold))
                 .foregroundStyle(Color.bpInk)
         }
     }

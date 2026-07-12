@@ -65,20 +65,20 @@ struct EventTicketsView: View {
                         .font(.caption.weight(.bold))
                         .foregroundStyle(gold)
                     Text("EVENTO ESPECIAL")
-                        .font(.system(size: 10, weight: .heavy))
+                        .font(.bpScaled(10, weight: .heavy))
                         .tracking(3)
                         .foregroundStyle(gold)
                 }
 
                 Text(eventName)
-                    .font(.system(size: 24, weight: .bold))
+                    .font(.bpScaled(24, weight: .bold))
                     .foregroundStyle(Color.bpInk)
 
                 HStack(spacing: 12) {
                     Label(venueName, systemImage: "mappin.circle.fill")
                     Label(formattedEventDate, systemImage: "calendar")
                 }
-                .font(.system(size: 12))
+                .font(.bpScaled(12))
                 .foregroundStyle(Color.bpInk.opacity(0.6))
             }
             .padding(20)
@@ -98,7 +98,7 @@ struct EventTicketsView: View {
     private var packageSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("TIPO DE TICKET")
-                .font(.system(size: 11, weight: .heavy))
+                .font(.bpScaled(11, weight: .heavy))
                 .tracking(3)
                 .foregroundStyle(Color.bpInk.opacity(0.35))
                 .padding(.horizontal, 24)
@@ -121,17 +121,17 @@ struct EventTicketsView: View {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(selected ? gold.opacity(0.2) : Color.bpInk.opacity(0.06))
                         .frame(width: 52, height: 52)
-                    Text(pkg.emoji).font(.system(size: 24))
+                    Text(pkg.emoji).font(.bpScaled(24))
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
                         Text(pkg.name)
-                            .font(.system(size: 15, weight: .bold))
+                            .font(.bpScaled(15, weight: .bold))
                             .foregroundStyle(Color.bpInk)
                         if let badge = pkg.badge {
                             Text(badge)
-                                .font(.system(size: 9, weight: .heavy))
+                                .font(.bpScaled(9, weight: .heavy))
                                 .tracking(1)
                                 .foregroundStyle(.black)
                                 .padding(.horizontal, 6).padding(.vertical, 2)
@@ -139,7 +139,7 @@ struct EventTicketsView: View {
                         }
                     }
                     Text(pkg.perks.prefix(2).joined(separator: " · "))
-                        .font(.system(size: 12))
+                        .font(.bpScaled(12))
                         .foregroundStyle(Color.bpInk.opacity(0.4))
                         .lineLimit(1)
                 }
@@ -148,10 +148,10 @@ struct EventTicketsView: View {
 
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("$\(Int(pkg.price))")
-                        .font(.system(size: 18, weight: .bold))
+                        .font(.bpScaled(18, weight: .bold))
                         .foregroundStyle(selected ? gold : .white)
                     Text("por persona")
-                        .font(.system(size: 10))
+                        .font(.bpScaled(10))
                         .foregroundStyle(Color.bpInk.opacity(0.3))
                 }
             }
@@ -175,11 +175,11 @@ struct EventTicketsView: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text("CANTIDAD")
-                    .font(.system(size: 11, weight: .heavy))
+                    .font(.bpScaled(11, weight: .heavy))
                     .tracking(3)
                     .foregroundStyle(Color.bpInk.opacity(0.35))
                 Text("\(quantity) ticket\(quantity > 1 ? "s" : "")")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.bpScaled(15, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
             }
 
@@ -190,7 +190,7 @@ struct EventTicketsView: View {
                     if quantity > 1 { quantity -= 1 }
                 } label: {
                     Image(systemName: "minus")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.bpScaled(14, weight: .bold))
                         .foregroundStyle(quantity > 1 ? .white : Color.bpInk.opacity(0.2))
                         .frame(width: 40, height: 40)
                 }
@@ -198,7 +198,7 @@ struct EventTicketsView: View {
                 .bpAccessibility(label: "Reducir cantidad", hint: "Disminuye la cantidad de tickets en uno", isButton: true)
 
                 Text("\(quantity)")
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.bpScaled(18, weight: .bold))
                     .foregroundStyle(Color.bpInk)
                     .frame(width: 32)
 
@@ -206,7 +206,7 @@ struct EventTicketsView: View {
                     if quantity < 8 { quantity += 1 }
                 } label: {
                     Image(systemName: "plus")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.bpScaled(14, weight: .bold))
                         .foregroundStyle(quantity < 8 ? .white : Color.bpInk.opacity(0.2))
                         .frame(width: 40, height: 40)
                 }
@@ -230,7 +230,7 @@ struct EventTicketsView: View {
                 Text(String(format: "$%.0f", subtotal))
                     .foregroundStyle(Color.bpInk)
             }
-            .font(.system(size: 14))
+            .font(.bpScaled(14))
             .padding(.bottom, 10)
 
             HStack {
@@ -240,7 +240,7 @@ struct EventTicketsView: View {
                 Text(String(format: "$%.2f", fee))
                     .foregroundStyle(Color.bpInk.opacity(0.4))
             }
-            .font(.system(size: 13))
+            .font(.bpScaled(13))
             .padding(.bottom, 14)
 
             Divider().background(Color.bpInk.opacity(0.1))
@@ -248,11 +248,11 @@ struct EventTicketsView: View {
 
             HStack {
                 Text("Total")
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.bpScaled(16, weight: .bold))
                     .foregroundStyle(Color.bpInk)
                 Spacer()
                 Text(String(format: "$%.2f", total))
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.bpScaled(18, weight: .bold))
                     .foregroundStyle(gold)
             }
         }
@@ -272,15 +272,15 @@ struct EventTicketsView: View {
             // Perks reminder
             VStack(alignment: .leading, spacing: 6) {
                 Text("Incluye")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.bpScaled(11, weight: .semibold))
                     .foregroundStyle(Color.bpInk.opacity(0.3))
                 ForEach(selectedPkg.perks, id: \.self) { perk in
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 12))
+                            .font(.bpScaled(12))
                             .foregroundStyle(gold)
                         Text(perk)
-                            .font(.system(size: 13))
+                            .font(.bpScaled(13))
                             .foregroundStyle(Color.bpInk.opacity(0.7))
                     }
                 }
@@ -297,9 +297,9 @@ struct EventTicketsView: View {
                         ProgressView().tint(.black)
                     } else {
                         Image(systemName: "applelogo")
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(.bpScaled(15, weight: .semibold))
                         Text("Pay")
-                            .font(.system(size: 17, weight: .semibold))
+                            .font(.bpScaled(17, weight: .semibold))
                     }
                 }
                 .foregroundStyle(.black)
@@ -315,9 +315,9 @@ struct EventTicketsView: View {
             Button { purchaseWithWallet() } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "wallet.pass.fill")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.bpScaled(14, weight: .semibold))
                     Text(String(format: "BarPass Wallet  ·  $%.0f", appState.walletBalance))
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.bpScaled(14, weight: .semibold))
                 }
                 .foregroundStyle(appState.walletBalance >= total ? gold : Color.bpInk.opacity(0.3))
                 .frame(maxWidth: .infinity)

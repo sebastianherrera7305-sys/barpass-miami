@@ -59,7 +59,7 @@ struct CardPaymentView: View {
                                     ProgressView().tint(.black)
                                 } else {
                                     Text(String(format: "Pagar $%.2f", total))
-                                        .font(.system(size: 17, weight: .heavy))
+                                        .font(.bpScaled(17, weight: .heavy))
                                 }
                             }
                             .frame(maxWidth: .infinity)
@@ -109,10 +109,10 @@ struct CardPaymentView: View {
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
                     Image(systemName: "creditcard.fill")
-                        .font(.system(size: 24))
+                        .font(.bpScaled(24))
                         .foregroundStyle(.white.opacity(0.6))
                     Spacer()
-                    Text("BarPass").font(.system(size: 13, weight: .heavy, design: .rounded))
+                    Text("BarPass").font(.bpScaled(13, weight: .heavy, design: .rounded))
                         .foregroundStyle(gold)
                 }
 
@@ -124,9 +124,9 @@ struct CardPaymentView: View {
                     .padding(.bottom, 8)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("TITULAR").font(.system(size: 8, weight: .bold)).foregroundStyle(.white.opacity(0.35))
+                    Text("TITULAR").font(.bpScaled(8, weight: .bold)).foregroundStyle(.white.opacity(0.35))
                     Text(name.isEmpty ? "NOMBRE APELLIDO" : name.uppercased())
-                        .font(.system(size: 12, weight: .semibold)).foregroundStyle(.white.opacity(0.75))
+                        .font(.bpScaled(12, weight: .semibold)).foregroundStyle(.white.opacity(0.75))
                 }
             }
             .padding(22)
@@ -148,7 +148,7 @@ struct CardPaymentView: View {
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.words)
                 .focused($activeFocus, equals: .name)
-                .font(.system(size: 16))
+                .font(.bpScaled(16))
                 .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 14)

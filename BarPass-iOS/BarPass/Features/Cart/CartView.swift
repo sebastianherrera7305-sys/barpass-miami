@@ -66,16 +66,16 @@ struct CartView: View {
                     .overlay(RoundedRectangle(cornerRadius: 20)
                         .strokeBorder(Color.bpInk.opacity(0.07)))
                 Image(systemName: "cart")
-                    .font(.system(size: 30, weight: .thin))
+                    .font(.bpScaled(30, weight: .thin))
                     .foregroundStyle(Color.bpInk.opacity(0.25))
             }
 
             VStack(spacing: 6) {
                 Text("Carrito vacío")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.bpScaled(18, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                 Text("Agrega bebidas desde el menú del venue")
-                    .font(.system(size: 13))
+                    .font(.bpScaled(13))
                     .foregroundStyle(Color.bpInk.opacity(0.3))
                     .multilineTextAlignment(.center)
             }
@@ -126,11 +126,11 @@ struct CartView: View {
 
                     HStack {
                         Text("Total")
-                            .font(.system(size: 17, weight: .bold))
+                            .font(.bpScaled(17, weight: .bold))
                             .foregroundStyle(Color.bpInk)
                         Spacer()
                         Text(String(format: "$%.2f", cart.total))
-                            .font(.system(size: 17, weight: .bold, design: .monospaced))
+                            .font(.bpScaled(17, weight: .bold, design: .monospaced))
                             .foregroundStyle(amber)
                     }
                 }
@@ -171,23 +171,23 @@ struct CartView: View {
                     .frame(width: 40, height: 40)
                     .overlay(
                         Image(systemName: "wallet.bifold")
-                            .font(.system(size: 16))
+                            .font(.bpScaled(16))
                             .foregroundStyle(amber)
                     )
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("BarPass Wallet")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.bpScaled(14, weight: .semibold))
                         .foregroundStyle(amber)
                     Text(String(format: "Balance: $%.2f", appState.walletBalance))
-                        .font(.system(size: 11))
+                        .font(.bpScaled(11))
                         .foregroundStyle(Color.bpInk.opacity(0.35))
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.bpScaled(12, weight: .semibold))
                     .foregroundStyle(Color.bpInk.opacity(0.2))
             }
             .padding(.horizontal, 14)
@@ -209,9 +209,9 @@ struct CartView: View {
         Button { BPAnalytics.track(.cartCheckout(itemCount: cart.itemCount, total: cart.total)); showCardSheet = true } label: {
             HStack(spacing: 8) {
                 Image(systemName: "creditcard")
-                    .font(.system(size: 14))
+                    .font(.bpScaled(14))
                 Text("Pagar con tarjeta")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.bpScaled(15, weight: .semibold))
             }
             .foregroundStyle(Color.bpInk.opacity(0.7))
             .frame(maxWidth: .infinity)
@@ -232,7 +232,7 @@ struct CartView: View {
     private func summaryRow(_ label: String, _ value: Double) -> some View {
         HStack {
             Text(label)
-                .font(.system(size: 14))
+                .font(.bpScaled(14))
                 .foregroundStyle(Color.bpInk.opacity(0.4))
             Spacer()
             Text(String(format: "$%.2f", value))
@@ -277,7 +277,7 @@ private struct CartItemRow: View {
         HStack(spacing: 14) {
             // Emoji container
             Text(item.emoji)
-                .font(.system(size: 28))
+                .font(.bpScaled(28))
                 .frame(width: 52, height: 52)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
@@ -288,11 +288,11 @@ private struct CartItemRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.name)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                     .lineLimit(1)
                 Text(String(format: "$%.2f c/u", item.price))
-                    .font(.system(size: 12))
+                    .font(.bpScaled(12))
                     .foregroundStyle(Color.bpInk.opacity(0.35))
             }
 
@@ -302,7 +302,7 @@ private struct CartItemRow: View {
             HStack(spacing: 0) {
                 stepBtn("minus") { onQty(-1) }
                 Text("\(item.qty)")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                     .frame(minWidth: 26)
                 stepBtn("plus")  { onQty(1) }
@@ -316,7 +316,7 @@ private struct CartItemRow: View {
 
             // Line total
             Text(String(format: "$%.0f", item.price * Double(item.qty)))
-                .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                .font(.bpScaled(13, weight: .semibold, design: .monospaced))
                 .foregroundStyle(amber)
                 .frame(minWidth: 44, alignment: .trailing)
         }
@@ -329,7 +329,7 @@ private struct CartItemRow: View {
     private func stepBtn(_ icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 11, weight: .bold))
+                .font(.bpScaled(11, weight: .bold))
                 .foregroundStyle(Color.bpInk.opacity(0.55))
                 .frame(width: 30, height: 30)
         }
@@ -364,9 +364,9 @@ private struct ApplePayButton: View {
                     ProgressView().tint(.white).scaleEffect(0.85)
                 } else {
                     Image(systemName: "apple.logo")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.bpScaled(16, weight: .semibold))
                     Text("Pay")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.bpScaled(16, weight: .semibold))
                 }
             }
             .foregroundStyle(Color.bpInk)

@@ -107,12 +107,12 @@ struct SkipLinePassView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Label("PRIORITY ENTRY", systemImage: "bolt.fill")
-                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .font(.bpScaled(10, weight: .heavy, design: .rounded))
                     .tracking(3)
                     .foregroundStyle(gold)
 
                 Text(venueName)
-                    .font(.system(size: 26, weight: .bold))
+                    .font(.bpScaled(26, weight: .bold))
                     .foregroundStyle(Color.bpInk)
 
                 HStack(spacing: 8) {
@@ -138,7 +138,7 @@ struct SkipLinePassView: View {
                 VStack(spacing: 6) {
                     Text(item.0).font(.title3)
                     Text(item.1)
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.bpScaled(11, weight: .semibold))
                         .foregroundStyle(Color.bpInk.opacity(0.55))
                         .multilineTextAlignment(.center)
                 }
@@ -161,7 +161,7 @@ struct SkipLinePassView: View {
     private var optionsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Elige tu pase")
-                .font(.system(size: 18, weight: .bold))
+                .font(.bpScaled(18, weight: .bold))
                 .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, 20)
                 .padding(.top, 24)
@@ -190,11 +190,11 @@ struct SkipLinePassView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 8) {
                         Text(option.label)
-                            .font(.system(size: 15, weight: .bold))
+                            .font(.bpScaled(15, weight: .bold))
                             .foregroundStyle(isSelected ? gold : .white)
                         if let saving = option.savings {
                             Text(saving)
-                                .font(.system(size: 10, weight: .bold))
+                                .font(.bpScaled(10, weight: .bold))
                                 .foregroundStyle(.black)
                                 .padding(.horizontal, 7)
                                 .padding(.vertical, 3)
@@ -209,7 +209,7 @@ struct SkipLinePassView: View {
                 Spacer()
 
                 Text(String(format: "$%.0f", option.price))
-                    .font(.system(size: 20, weight: .bold))
+                    .font(.bpScaled(20, weight: .bold))
                     .foregroundStyle(isSelected ? gold : Color.bpInk.opacity(0.7))
             }
             .padding(.horizontal, 16)
@@ -288,9 +288,9 @@ struct SkipLinePassView: View {
                     ProgressView().tint(.white).scaleEffect(0.85)
                 } else {
                     Image(systemName: "applelogo")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.bpScaled(16, weight: .semibold))
                     Text("Pay with Apple Pay")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.bpScaled(16, weight: .bold))
                 }
             }
             .foregroundStyle(Color.bpInk)
@@ -307,10 +307,10 @@ struct SkipLinePassView: View {
     private var walletBtn: some View {
         Button { payWithWallet() } label: {
             HStack(spacing: 12) {
-                Text("🪙").font(.system(size: 18))
+                Text("🪙").font(.bpScaled(18))
                 VStack(alignment: .leading, spacing: 1) {
                     Text("BarPass Wallet")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.bpScaled(14, weight: .bold))
                         .foregroundStyle(gold)
                     Text(String(format: "Balance: $%.2f", appState.walletBalance))
                         .font(.caption)
@@ -318,7 +318,7 @@ struct SkipLinePassView: View {
                 }
                 Spacer()
                 Text(String(format: "$%.0f", selected.price))
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.bpScaled(14, weight: .bold))
                     .foregroundStyle(gold)
             }
             .padding(.horizontal, 14)
@@ -340,7 +340,7 @@ struct SkipLinePassView: View {
                 Image(systemName: "creditcard")
                 Text("Pagar con tarjeta")
             }
-            .font(.system(size: 16, weight: .semibold))
+            .font(.bpScaled(16, weight: .semibold))
             .foregroundStyle(Color.bpInk.opacity(0.85))
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)

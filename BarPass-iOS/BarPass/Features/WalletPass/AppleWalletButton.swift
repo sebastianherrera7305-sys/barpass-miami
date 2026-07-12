@@ -151,7 +151,7 @@ struct TokenSetupSheet: View {
 
                     // Header
                     VStack(spacing: 8) {
-                        Text("🍎").font(.system(size: 44))
+                        Text("🍎").font(.bpScaled(44))
                         Text("Conectar Apple Wallet")
                             .font(.title2.bold())
                         Text("Tu token se guarda solo en este dispositivo")

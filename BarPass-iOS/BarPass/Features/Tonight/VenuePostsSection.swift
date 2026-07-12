@@ -23,8 +23,8 @@ struct VenuePostsSection: View {
                     showComposer = true
                 } label: {
                     HStack(spacing: 5) {
-                        Image(systemName: "plus.bubble.fill").font(.system(size: 12))
-                        Text("Postear").font(.system(size: 13, weight: .bold))
+                        Image(systemName: "plus.bubble.fill").font(.bpScaled(12))
+                        Text("Postear").font(.bpScaled(13, weight: .bold))
                     }
                     .foregroundStyle(.black)
                     .padding(.horizontal, 12).padding(.vertical, 8)
@@ -41,7 +41,7 @@ struct VenuePostsSection: View {
                 }
             } else if posts.isEmpty {
                 VStack(spacing: 6) {
-                    Text("🥂").font(.system(size: 30))
+                    Text("🥂").font(.bpScaled(30))
                     Text("Sé el primero en contar cómo estuvo")
                         .font(.bpCaption()).foregroundStyle(Color.bpTextSecondary)
                 }
@@ -78,17 +78,17 @@ struct VenuePostsSection: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 Circle().fill(Color.bpAmber.opacity(0.2)).frame(width: 30, height: 30)
-                    .overlay(Text(post.emoji ?? "🎉").font(.system(size: 14)))
+                    .overlay(Text(post.emoji ?? "🎉").font(.bpScaled(14)))
                 VStack(alignment: .leading, spacing: 1) {
                     Text("@\(post.authorHandle)")
-                        .font(.system(size: 13, weight: .bold)).foregroundStyle(Color.bpInk)
+                        .font(.bpScaled(13, weight: .bold)).foregroundStyle(Color.bpInk)
                     Text(post.relativeTime)
-                        .font(.system(size: 10)).foregroundStyle(Color.bpTextTertiary)
+                        .font(.bpScaled(10)).foregroundStyle(Color.bpTextTertiary)
                 }
                 Spacer()
                 if post.pendingSync {
                     Image(systemName: "icloud.and.arrow.up")
-                        .font(.system(size: 11)).foregroundStyle(Color.bpTextTertiary)
+                        .font(.bpScaled(11)).foregroundStyle(Color.bpTextTertiary)
                 }
             }
 
@@ -111,11 +111,11 @@ struct VenuePostsSection: View {
 
     private func miniRating(_ label: String, _ value: Int) -> some View {
         HStack(spacing: 3) {
-            Text(label).font(.system(size: 10)).foregroundStyle(Color.bpTextSecondary)
+            Text(label).font(.bpScaled(10)).foregroundStyle(Color.bpTextSecondary)
             HStack(spacing: 1) {
                 ForEach(1...5, id: \.self) { i in
                     Image(systemName: i <= value ? "star.fill" : "star")
-                        .font(.system(size: 7))
+                        .font(.bpScaled(7))
                         .foregroundStyle(i <= value ? Color.bpAmber : Color.bpTextTertiary)
                 }
             }
@@ -163,7 +163,7 @@ struct PostComposer: View {
                                     Button {
                                         BPHaptics.light(); emoji = e
                                     } label: {
-                                        Text(e).font(.system(size: 22))
+                                        Text(e).font(.bpScaled(22))
                                             .frame(width: 42, height: 42)
                                             .background(emoji == e ? Color.bpAmber.opacity(0.2) : Color.bpInk.opacity(0.05), in: Circle())
                                             .overlay(Circle().strokeBorder(emoji == e ? Color.bpAmber : .clear))
@@ -181,7 +181,7 @@ struct PostComposer: View {
                             publish()
                         } label: {
                             Text("Publicar")
-                                .font(.system(size: 16, weight: .bold)).foregroundStyle(.black)
+                                .font(.bpScaled(16, weight: .bold)).foregroundStyle(.black)
                                 .frame(maxWidth: .infinity).padding(.vertical, 15)
                                 .background(canPost ? Color.bpAmber : Color.bpAmber.opacity(0.4), in: Capsule())
                         }
@@ -233,12 +233,12 @@ struct PostComposer: View {
 
     private func ratingRow(_ label: String, _ value: Binding<Int>) -> some View {
         HStack {
-            Text(label).font(.system(size: 14)).foregroundStyle(Color.bpTextSecondary)
+            Text(label).font(.bpScaled(14)).foregroundStyle(Color.bpTextSecondary)
                 .frame(width: 80, alignment: .leading)
             HStack(spacing: 6) {
                 ForEach(1...5, id: \.self) { i in
                     Image(systemName: i <= value.wrappedValue ? "star.fill" : "star")
-                        .font(.system(size: 18))
+                        .font(.bpScaled(18))
                         .foregroundStyle(Color.bpAmber)
                         .onTapGesture { BPHaptics.light(); value.wrappedValue = i }
                 }

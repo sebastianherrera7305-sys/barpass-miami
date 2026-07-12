@@ -33,16 +33,16 @@ struct PlanView: View {
                     // Header
                     VStack(alignment: .leading, spacing: 6) {
                         Text("REMY")
-                            .font(.system(size: 11, weight: .heavy))
+                            .font(.bpScaled(11, weight: .heavy))
                             .tracking(3)
                             .foregroundStyle(amber)
 
                         Text("Tu concierge de noche")
-                            .font(.system(size: 26, weight: .bold))
+                            .font(.bpScaled(26, weight: .bold))
                             .foregroundStyle(Color.bpInk)
 
                         Text("Dime tu presupuesto, vibe y lo que buscas — te armo la noche perfecta en Miami.")
-                            .font(.system(size: 14))
+                            .font(.bpScaled(14))
                             .foregroundStyle(Color.bpInk.opacity(0.4))
                     }
                     .padding(.horizontal, 20)
@@ -53,7 +53,7 @@ struct PlanView: View {
                         ZStack(alignment: .topLeading) {
                             if prompt.isEmpty {
                                 Text("Ej: Primera cita, $100, queremos rooftops...")
-                                    .font(.system(size: 14))
+                                    .font(.bpScaled(14))
                                     .foregroundStyle(Color.bpInk.opacity(0.25))
                                     .padding(.horizontal, 14)
                                     .padding(.vertical, 14)
@@ -64,7 +64,7 @@ struct PlanView: View {
                                 .tint(amber)
                                 .scrollContentBackground(.hidden)
                                 .background(.clear)
-                                .font(.system(size: 14))
+                                .font(.bpScaled(14))
                                 .padding(10)
                                 .frame(minHeight: 100)
                                 .bpAccessibility(label: "Descripción de la noche", hint: "Describí cómo querés que sea tu noche")
@@ -81,7 +81,7 @@ struct PlanView: View {
                                 } else {
                                     Image(systemName: "sparkles")
                                     Text("Armar mi noche")
-                                        .font(.system(size: 16, weight: .bold))
+                                        .font(.bpScaled(16, weight: .bold))
                                 }
                             }
                             .foregroundStyle(.black)
@@ -102,7 +102,7 @@ struct PlanView: View {
                     // Quick suggestions
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Ideas rápidas")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.bpScaled(13, weight: .semibold))
                             .foregroundStyle(Color.bpInk.opacity(0.3))
                             .padding(.horizontal, 20)
 
@@ -111,7 +111,7 @@ struct PlanView: View {
                                 ForEach(suggestions, id: \.self) { s in
                                     Button { prompt = s } label: {
                                         Text(s)
-                                            .font(.system(size: 13))
+                                            .font(.bpScaled(13))
                                             .foregroundStyle(Color.bpInk.opacity(0.7))
                                             .padding(.horizontal, 14)
                                             .padding(.vertical, 9)
@@ -136,7 +136,7 @@ struct PlanView: View {
                     if !savedPlans.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Planes guardados")
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.bpScaled(13, weight: .semibold))
                                 .foregroundStyle(Color.bpInk.opacity(0.3))
                                 .padding(.horizontal, 20)
 
@@ -144,10 +144,10 @@ struct PlanView: View {
                                 Button { self.plan = p } label: {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(p.title)
-                                            .font(.system(size: 14, weight: .semibold))
+                                            .font(.bpScaled(14, weight: .semibold))
                                             .foregroundStyle(Color.bpInk)
                                         Text(p.stops.map(\.venueName).joined(separator: " → "))
-                                            .font(.system(size: 11))
+                                            .font(.bpScaled(11))
                                             .foregroundStyle(Color.bpInk.opacity(0.4))
                                     }
                                     .padding(14)
@@ -209,12 +209,12 @@ struct NightPlanView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text("TU PLAN DE NOCHE")
-                    .font(.system(size: 11, weight: .heavy))
+                    .font(.bpScaled(11, weight: .heavy))
                     .tracking(2)
                     .foregroundStyle(amber)
                 Spacer()
                 Text(plan.totalEst)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.bpScaled(12, weight: .semibold))
                     .foregroundStyle(Color.bpInk.opacity(0.4))
             }
 
@@ -238,16 +238,16 @@ struct NightPlanView: View {
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text(stop.time)
-                                .font(.system(size: 11, weight: .bold))
+                                .font(.bpScaled(11, weight: .bold))
                                 .foregroundStyle(amber)
                             Text(stop.venueName)
-                                .font(.system(size: 15, weight: .bold))
+                                .font(.bpScaled(15, weight: .bold))
                                 .foregroundStyle(Color.bpInk)
                             Text(stop.note)
-                                .font(.system(size: 12))
+                                .font(.bpScaled(12))
                                 .foregroundStyle(Color.bpInk.opacity(0.4))
                             Text("\(stop.venueNeighborhood) · \(stop.venuePriceRange)")
-                                .font(.system(size: 11))
+                                .font(.bpScaled(11))
                                 .foregroundStyle(Color.bpInk.opacity(0.3))
                         }
                         .padding(.bottom, i < plan.stops.count - 1 ? 20 : 0)
@@ -257,10 +257,10 @@ struct NightPlanView: View {
 
             HStack(alignment: .top, spacing: 10) {
                 Image(systemName: "sparkles")
-                    .font(.system(size: 13))
+                    .font(.bpScaled(13))
                     .foregroundStyle(amber)
                 Text(plan.aiInsight)
-                    .font(.system(size: 12))
+                    .font(.bpScaled(12))
                     .foregroundStyle(Color.bpInk.opacity(0.45))
             }
             .padding(14)
@@ -275,7 +275,7 @@ struct NightPlanView: View {
                         Image(systemName: "bookmark.fill")
                         Text("Guardar")
                     }
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 13)
@@ -289,7 +289,7 @@ struct NightPlanView: View {
                         Image(systemName: "square.and.arrow.up")
                         Text("Compartir")
                     }
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 13)

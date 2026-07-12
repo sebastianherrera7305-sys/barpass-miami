@@ -17,7 +17,7 @@ struct SplashView: View {
                 Spacer()
 
                 Text("BP")
-                    .font(.system(size: 36, weight: .black, design: .rounded))
+                    .font(.bpScaled(36, weight: .black, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
                             colors: [amber, Color(red: 0.98, green: 0.86, blue: 0.50)],
@@ -28,11 +28,11 @@ struct SplashView: View {
                     .padding(.bottom, 8)
 
                 Text("BARPASS")
-                    .font(.system(size: 30, weight: .black, design: .rounded))
+                    .font(.bpScaled(30, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
 
                 Text("NIGHTLIFE · MIAMI")
-                    .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                    .font(.bpScaled(9, weight: .semibold, design: .monospaced))
                     .foregroundStyle(Color.white.opacity(0.3))
                     .tracking(4)
                     .padding(.top, 12)

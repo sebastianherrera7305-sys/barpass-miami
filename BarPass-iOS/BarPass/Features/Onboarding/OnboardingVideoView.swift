@@ -44,7 +44,7 @@ struct OnboardingVideoView: View {
 
                 if let caption = scenes[safe: currentScene]?.caption {
                     Text(caption)
-                        .font(.system(size: 22, weight: .bold))
+                        .font(.bpScaled(22, weight: .bold))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .shadow(color: .black.opacity(0.6), radius: 8)
@@ -71,7 +71,7 @@ struct OnboardingVideoView: View {
                 HStack {
                     Spacer()
                     Button("Saltar") { finish() }
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.bpScaled(14, weight: .medium))
                         .foregroundStyle(Color.white.opacity(0.5))
                         .padding(.trailing, 24)
                         .padding(.top, 56)

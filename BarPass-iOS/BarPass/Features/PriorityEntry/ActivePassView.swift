@@ -45,11 +45,11 @@ struct ActivePassView: View {
     private var header: some View {
         VStack(spacing: 4) {
             Text("PRIORITY ENTRY")
-                .font(.system(size: 11, weight: .heavy, design: .rounded))
+                .font(.bpScaled(11, weight: .heavy, design: .rounded))
                 .tracking(4)
                 .foregroundStyle(gold)
             Text(pass.venueName)
-                .font(.system(size: 22, weight: .bold))
+                .font(.bpScaled(22, weight: .bold))
                 .foregroundStyle(Color.bpInk)
         }
     }
@@ -80,7 +80,7 @@ struct ActivePassView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
                         Label(quantityLabel, systemImage: "person.fill")
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.bpScaled(13, weight: .semibold))
                             .foregroundStyle(Color.bpInk)
                         Text("Skip the line")
                             .font(.caption)
@@ -116,7 +116,7 @@ struct ActivePassView: View {
 
                 // Pass code
                 Text(pass.passCode)
-                    .font(.system(size: 13, weight: .medium, design: .monospaced))
+                    .font(.bpScaled(13, weight: .medium, design: .monospaced))
                     .foregroundStyle(Color.bpInk.opacity(0.35))
                     .tracking(2)
 
@@ -127,22 +127,22 @@ struct ActivePassView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Válido hasta")
-                            .font(.system(size: 10, weight: .semibold))
+                            .font(.bpScaled(10, weight: .semibold))
                             .foregroundStyle(Color.bpInk.opacity(0.35))
                             .tracking(1)
                         Text(timeString)
-                            .font(.system(size: 20, weight: .bold, design: .monospaced))
+                            .font(.bpScaled(20, weight: .bold, design: .monospaced))
                             .foregroundStyle(timerColor)
                             .contentTransition(.numericText())
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 3) {
                         Text("Pagado con")
-                            .font(.system(size: 10, weight: .semibold))
+                            .font(.bpScaled(10, weight: .semibold))
                             .foregroundStyle(Color.bpInk.opacity(0.35))
                             .tracking(1)
                         Text(pass.payMethod)
-                            .font(.system(size: 13, weight: .semibold))
+                            .font(.bpScaled(13, weight: .semibold))
                             .foregroundStyle(Color.bpInk)
                     }
                 }
@@ -165,7 +165,7 @@ struct ActivePassView: View {
                 topVC?.present(av, animated: true)
             } label: {
                 Label("Compartir", systemImage: "square.and.arrow.up")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(gold)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
@@ -177,7 +177,7 @@ struct ActivePassView: View {
 
             Button { dismiss() } label: {
                 Text("Cerrar")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk.opacity(0.55))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)

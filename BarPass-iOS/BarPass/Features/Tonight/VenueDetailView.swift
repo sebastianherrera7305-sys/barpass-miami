@@ -85,18 +85,18 @@ struct VenueDetailView: View {
 
                 HStack(spacing: 12) {
                     HStack(spacing: 4) {
-                        Image(systemName: "star.fill").font(.system(size: 12)).foregroundStyle(Color.bpAmber)
+                        Image(systemName: "star.fill").font(.bpScaled(12)).foregroundStyle(Color.bpAmber)
                         Text(String(format: "%.1f", venue.rating))
-                            .font(.system(size: 13, weight: .bold)).foregroundStyle(.white)
+                            .font(.bpScaled(13, weight: .bold)).foregroundStyle(.white)
                         Text("(\(venue.reviewCount))")
-                            .font(.system(size: 12)).foregroundStyle(Color.white.opacity(0.65))
+                            .font(.bpScaled(12)).foregroundStyle(Color.white.opacity(0.65))
                     }
                     Text("·").foregroundStyle(Color.bpTextTertiary)
                     Text(venue.type.rawValue)
-                        .font(.system(size: 13)).foregroundStyle(Color.white.opacity(0.65))
+                        .font(.bpScaled(13)).foregroundStyle(Color.white.opacity(0.65))
                     Text("·").foregroundStyle(Color.bpTextTertiary)
                     Text(venue.neighborhood)
-                        .font(.system(size: 13)).foregroundStyle(Color.white.opacity(0.65))
+                        .font(.bpScaled(13)).foregroundStyle(Color.white.opacity(0.65))
                 }
             }
             .padding(.horizontal, BPSpacing.lg)
@@ -133,7 +133,7 @@ struct VenueDetailView: View {
                 colors: [Color(white: 0.15), Color.bpSurface],
                 startPoint: .topLeading, endPoint: .bottomTrailing
             )
-            Text(venue.emoji).font(.system(size: 120)).opacity(0.12)
+            Text(venue.emoji).font(.bpScaled(120)).opacity(0.12)
         }
     }
 
@@ -213,7 +213,7 @@ struct VenueDetailView: View {
     private func quickStat(icon: String, label: String, value: String, primary: Bool) -> some View {
         VStack(spacing: 5) {
             Image(systemName: icon)
-                .font(.system(size: primary ? 18 : 14))
+                .font(.bpScaled(primary ? 18 : 14))
                 .foregroundStyle(Color.bpAmber)
             Text(value)
                 .font(.system(size: primary ? 16 : 13, weight: primary ? .black : .bold))
@@ -239,10 +239,10 @@ struct VenueDetailView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text("Crowd")
-                        .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
+                        .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
                     Spacer()
                     Text(venue.crowdDescription)
-                        .font(.system(size: 13, weight: .semibold)).foregroundStyle(Color.bpInk)
+                        .font(.bpScaled(13, weight: .semibold)).foregroundStyle(Color.bpInk)
                 }
                 HStack(spacing: 4) {
                     ForEach(0..<5) { i in
@@ -263,7 +263,7 @@ struct VenueDetailView: View {
             HStack(spacing: 8) {
                 ForEach(venue.musicGenres, id: \.self) { genre in
                     Text(genre.rawValue)
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.bpScaled(11, weight: .semibold))
                         .foregroundStyle(Color.bpAmber)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
@@ -283,13 +283,13 @@ struct VenueDetailView: View {
             VStack(spacing: 10) {
                 ForEach(venue.popularDrinks) { drink in
                     HStack {
-                        Text(drink.emoji).font(.system(size: 22))
+                        Text(drink.emoji).font(.bpScaled(22))
                         Text(drink.name)
-                            .font(.system(size: 14))
+                            .font(.bpScaled(14))
                             .foregroundStyle(Color.bpInk.opacity(0.7))
                         Spacer()
                         Text(String(format: "$%.0f", drink.price))
-                            .font(.system(size: 14, weight: .bold, design: .monospaced))
+                            .font(.bpScaled(14, weight: .bold, design: .monospaced))
                             .foregroundStyle(Color.bpAmber)
                     }
                     .bpAccessibility(label: "\(drink.name), \(String(format: "$%.0f", drink.price))", hint: "Bebida popular en este venue")
@@ -358,19 +358,19 @@ struct VenueDetailView: View {
 
             HStack(spacing: 8) {
                 Image(systemName: "star.fill")
-                    .font(.system(size: 20))
+                    .font(.bpScaled(20))
                     .foregroundStyle(Color.bpAmber)
                 Text(String(format: "%.1f", venue.rating))
-                    .font(.system(size: 24, weight: .black))
+                    .font(.bpScaled(24, weight: .black))
                     .foregroundStyle(Color.bpInk)
                 Text("(\(venue.reviewCount) reviews)")
-                    .font(.system(size: 13))
+                    .font(.bpScaled(13))
                     .foregroundStyle(Color.bpTextSecondary)
                 Spacer()
             }
 
             Text("Rating de Google")
-                .font(.system(size: 11))
+                .font(.bpScaled(11))
                 .foregroundStyle(Color.bpTextSecondary.opacity(0.7))
 
             xpActions
@@ -385,9 +385,9 @@ struct VenueDetailView: View {
                 Button(action: attemptCheckIn) {
                     HStack(spacing: 6) {
                         if checkingIn { ProgressView().tint(.black).scaleEffect(0.7) }
-                        else { Image(systemName: points.hasCheckedInToday(venueId: venue.id) ? "checkmark.seal.fill" : "mappin.and.ellipse").font(.system(size: 13)) }
+                        else { Image(systemName: points.hasCheckedInToday(venueId: venue.id) ? "checkmark.seal.fill" : "mappin.and.ellipse").font(.bpScaled(13)) }
                         Text(points.hasCheckedInToday(venueId: venue.id) ? "Check-in hecho" : "Check-in · +50 XP")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.bpScaled(13, weight: .bold))
                     }
                     .foregroundStyle(points.hasCheckedInToday(venueId: venue.id) ? Color.bpGreen : .black)
                     .frame(maxWidth: .infinity).padding(.vertical, 12)
@@ -402,9 +402,9 @@ struct VenueDetailView: View {
                     showReviewComposer = true
                 } label: {
                     HStack(spacing: 6) {
-                        Image(systemName: points.hasReviewed(venueId: venue.id) ? "star.fill" : "square.and.pencil").font(.system(size: 13))
+                        Image(systemName: points.hasReviewed(venueId: venue.id) ? "star.fill" : "square.and.pencil").font(.bpScaled(13))
                         Text(points.hasReviewed(venueId: venue.id) ? "Review dejada" : "Dejar review · +75 XP")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.bpScaled(13, weight: .bold))
                     }
                     .foregroundStyle(points.hasReviewed(venueId: venue.id) ? Color.bpGreen : Color.bpAmber)
                     .frame(maxWidth: .infinity).padding(.vertical, 12)
@@ -418,7 +418,7 @@ struct VenueDetailView: View {
 
             if let msg = checkinMessage {
                 Text(msg)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.bpScaled(12, weight: .semibold))
                     .foregroundStyle(Color.bpAmber)
                     .transition(.opacity)
             }
@@ -485,7 +485,7 @@ struct VenueDetailView: View {
                 withAnimation(.spring(response: 0.3)) { favorites.toggle(venue.id) }
             } label: {
                 Image(systemName: favorites.isFavorite(venue.id) ? "heart.fill" : "heart")
-                    .font(.system(size: 18))
+                    .font(.bpScaled(18))
                     .foregroundStyle(favorites.isFavorite(venue.id) ? Color.bpDanger : Color.bpInk)
                     .frame(width: 48, height: 48)
                     .background(Color.bpInk.opacity(0.08), in: Circle())
@@ -500,9 +500,9 @@ struct VenueDetailView: View {
                 appState.showPriorityEntry = true
             } label: {
                 HStack(spacing: 6) {
-                    Image(systemName: "bolt.fill").font(.system(size: 12))
+                    Image(systemName: "bolt.fill").font(.bpScaled(12))
                     Text("Skip the Line")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.bpScaled(14, weight: .bold))
                 }
                 .foregroundStyle(.black)
                 .frame(maxWidth: .infinity)
@@ -522,7 +522,7 @@ struct VenueDetailView: View {
                 UIApplication.shared.open(url)
             } label: {
                 Image(systemName: "mappin.circle.fill")
-                    .font(.system(size: 18))
+                    .font(.bpScaled(18))
                     .foregroundStyle(Color.bpAmber)
                     .frame(width: 48, height: 48)
                     .background(Color.bpAmber.opacity(0.12), in: Circle())
@@ -543,7 +543,7 @@ struct VenueDetailView: View {
         HStack {
             Button { BPHaptics.light(); dismiss() } label: {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                     .frame(width: 34, height: 34)
                     .background(.ultraThinMaterial, in: Circle())
@@ -554,7 +554,7 @@ struct VenueDetailView: View {
             Spacer()
             Button { BPHaptics.light(); showShareSheet = true; BPAnalytics.track(.shareVenue(venue: venue.id)); PointsEngine.shared.award(.shareVenue) } label: {
                 Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                     .frame(width: 34, height: 34)
                     .background(.ultraThinMaterial, in: Circle())
@@ -578,22 +578,22 @@ struct VenueDetailView: View {
 
     private func sectionTitle(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 16, weight: .bold))
+            .font(.bpScaled(16, weight: .bold))
             .foregroundStyle(Color.bpInk)
     }
 
     private func infoRow(_ icon: String, _ label: String, _ value: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 13))
+                .font(.bpScaled(13))
                 .foregroundStyle(Color.bpAmber)
                 .frame(width: 18)
             Text(label)
-                .font(.system(size: 13))
+                .font(.bpScaled(13))
                 .foregroundStyle(Color.bpTextSecondary)
                 .frame(width: 80, alignment: .leading)
             Text(value)
-                .font(.system(size: 13))
+                .font(.bpScaled(13))
                 .foregroundStyle(Color.bpInk.opacity(0.7))
                 .multilineTextAlignment(.leading)
             Spacer()
@@ -603,8 +603,8 @@ struct VenueDetailView: View {
     private func linkButton(icon: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 6) {
-                Image(systemName: icon).font(.system(size: 11))
-                Text(label).font(.system(size: 12, weight: .semibold))
+                Image(systemName: icon).font(.bpScaled(11))
+                Text(label).font(.bpScaled(12, weight: .semibold))
             }
             .foregroundStyle(Color.bpInk.opacity(0.7))
             .padding(.horizontal, 12)

@@ -63,9 +63,9 @@ struct RootView: View {
                 } label: {
                     HStack(spacing: 7) {
                         Image(systemName: "bolt.fill")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.bpScaled(13, weight: .bold))
                         Text("Priority Entry")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.bpScaled(13, weight: .bold))
                     }
                     .foregroundStyle(.black)
                     .padding(.horizontal, 16)
@@ -88,7 +88,7 @@ struct RootView: View {
                 } label: {
                     ZStack(alignment: .topTrailing) {
                         Image(systemName: "cart.fill")
-                            .font(.system(size: 18, weight: .semibold))
+                            .font(.bpScaled(18, weight: .semibold))
                             .foregroundStyle(Color.bpInk)
                             .frame(width: 44, height: 44)
                             .background(Color.bpInk.opacity(0.15), in: Circle())
@@ -96,7 +96,7 @@ struct RootView: View {
 
                         if cart.itemCount > 0 {
                             Text("\(cart.itemCount)")
-                                .font(.system(size: 10, weight: .bold))
+                                .font(.bpScaled(10, weight: .bold))
                                 .foregroundStyle(.black)
                                 .frame(minWidth: 18, minHeight: 18)
                                 .background(Color(red:0.85,green:0.63,blue:0.09), in: Circle())
@@ -183,7 +183,7 @@ private struct OrderConfirmationBanner: View {
             Text("🚀").font(.title3)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Orden enviada")
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.bpScaled(14, weight: .bold))
                     .foregroundStyle(Color.bpInk)
                 Text(order.method + " · " + String(format: "$%.2f", order.total))
                     .font(.caption)

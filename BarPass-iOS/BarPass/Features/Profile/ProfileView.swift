@@ -33,19 +33,19 @@ struct ProfileView: View {
                                 .overlay(Circle().strokeBorder(Color.bpAmber.opacity(0.3), lineWidth: 1.5))
 
                             Text("🎉")
-                                .font(.system(size: 34))
+                                .font(.bpScaled(34))
                         }
                         .bpAccessibility(label: "Foto de perfil", hint: "Tu foto de perfil de usuario")
 
                         VStack(spacing: 4) {
                             Text("Miami Nightlifer")
-                                .font(.system(size: 20, weight: .bold))
+                                .font(.bpScaled(20, weight: .bold))
                                 .foregroundStyle(Color.bpInk)
                                 .bpAccessibility(label: "Miami Nightlifer", hint: "Tu nombre de usuario")
 
                             HStack(spacing: 6) {
                                 Text(level)
-                                    .font(.system(size: 12, weight: .semibold))
+                                    .font(.bpScaled(12, weight: .semibold))
                                     .foregroundStyle(Color.bpAmber)
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 4)
@@ -62,20 +62,20 @@ struct ProfileView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(l10n.t("profile.points"))
-                                    .font(.system(size: 12))
+                                    .font(.bpScaled(12))
                                     .foregroundStyle(Color.bpTextSecondary)
                                 Text("\(points) BPX")
-                                    .font(.system(size: 28, weight: .black, design: .rounded))
+                                    .font(.bpScaled(28, weight: .black, design: .rounded))
                                     .foregroundStyle(Color.bpAmber)
                                     .contentTransition(.numericText())
                             }
                             Spacer()
                             VStack(alignment: .trailing, spacing: 3) {
                                 Text(l10n.t("profile.nextLevel"))
-                                    .font(.system(size: 12))
+                                    .font(.bpScaled(12))
                                     .foregroundStyle(Color.bpTextSecondary)
                                 Text(nextLevel)
-                                    .font(.system(size: 16, weight: .bold))
+                                    .font(.bpScaled(16, weight: .bold))
                                     .foregroundStyle(Color.bpInk)
                             }
                         }
@@ -94,7 +94,7 @@ struct ProfileView: View {
                         .frame(height: 6)
 
                         Text(engine.xpForNextLevel != nil ? "\(nextPoints - points) BPX para llegar a \(nextLevel)" : "Nivel máximo alcanzado 🏆")
-                            .font(.system(size: 11))
+                            .font(.bpScaled(11))
                             .foregroundStyle(Color.bpTextTertiary)
                             .frame(maxWidth: .infinity, alignment: .trailing)
                     }
@@ -111,16 +111,16 @@ struct ProfileView: View {
                         showGames = true
                     } label: {
                         HStack(spacing: 12) {
-                            Text("🎮").font(.system(size: 22))
+                            Text("🎮").font(.bpScaled(22))
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Juegos y misiones")
-                                    .font(.system(size: 15, weight: .bold)).foregroundStyle(Color.bpInk)
+                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
                                 Text("Trivia diaria y misiones con XP extra")
-                                    .font(.system(size: 11)).foregroundStyle(Color.bpTextSecondary)
+                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                             }
                             Spacer()
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.bpScaled(13, weight: .semibold))
                                 .foregroundStyle(Color.bpAmber)
                         }
                         .padding(16)
@@ -142,7 +142,7 @@ struct ProfileView: View {
                     // How to earn
                     VStack(alignment: .leading, spacing: 14) {
                         Text(l10n.t("profile.howToEarn"))
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.bpScaled(16, weight: .bold))
                             .foregroundStyle(Color.bpInk)
 
                         VStack(spacing: 10) {
@@ -162,7 +162,7 @@ struct ProfileView: View {
                     // Language selector
                     VStack(alignment: .leading, spacing: 14) {
                         Text(l10n.t("profile.language"))
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.bpScaled(16, weight: .bold))
                             .foregroundStyle(Color.bpInk)
 
                         HStack(spacing: 10) {
@@ -175,7 +175,7 @@ struct ProfileView: View {
                                     }
                                 } label: {
                                     VStack(spacing: 4) {
-                                        Text(lang.flag).font(.system(size: 22))
+                                        Text(lang.flag).font(.bpScaled(22))
                                         Text(lang.label)
                                             .font(.system(size: 11, weight: on ? .bold : .regular))
                                             .foregroundStyle(on ? Color.bpAmber : Color.bpTextSecondary)
@@ -200,7 +200,7 @@ struct ProfileView: View {
                     // Theme selector
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Tema")
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.bpScaled(16, weight: .bold))
                             .foregroundStyle(Color.bpInk)
 
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 10)], spacing: 10) {
@@ -242,7 +242,7 @@ struct ProfileView: View {
                     // Appearance selector
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Apariencia")
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.bpScaled(16, weight: .bold))
                             .foregroundStyle(Color.bpInk)
 
                         HStack(spacing: 10) {
@@ -255,7 +255,7 @@ struct ProfileView: View {
                                     }
                                 } label: {
                                     VStack(spacing: 4) {
-                                        Text(mode.emoji).font(.system(size: 22))
+                                        Text(mode.emoji).font(.bpScaled(22))
                                         Text(mode.label)
                                             .font(.system(size: 11, weight: on ? .bold : .regular))
                                             .foregroundStyle(on ? Color.bpAmber : Color.bpTextSecondary)
@@ -280,15 +280,15 @@ struct ProfileView: View {
                     // Account
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Cuenta")
-                            .font(.system(size: 16, weight: .bold))
+                            .font(.bpScaled(16, weight: .bold))
                             .foregroundStyle(Color.bpInk)
 
                         if let session = AuthService.shared.restoreSession() {
                             HStack(spacing: 10) {
                                 Image(systemName: "person.crop.circle.badge.checkmark")
-                                    .font(.system(size: 18)).foregroundStyle(Color.bpGreen)
+                                    .font(.bpScaled(18)).foregroundStyle(Color.bpGreen)
                                 Text(session.user.email ?? "Sesión activa")
-                                    .font(.system(size: 14)).foregroundStyle(Color.bpTextSecondary)
+                                    .font(.bpScaled(14)).foregroundStyle(Color.bpTextSecondary)
                                     .lineLimit(1)
                                 Spacer()
                             }
@@ -298,7 +298,7 @@ struct ProfileView: View {
                                 appState.showNativeAuth = true
                             } label: {
                                 Text("Cerrar sesión")
-                                    .font(.system(size: 14, weight: .bold))
+                                    .font(.bpScaled(14, weight: .bold))
                                     .foregroundStyle(Color.bpDanger)
                                     .frame(maxWidth: .infinity).padding(.vertical, 12)
                                     .background(Color.bpDanger.opacity(0.1), in: Capsule())
@@ -308,9 +308,9 @@ struct ProfileView: View {
                         } else {
                             HStack(spacing: 10) {
                                 Image(systemName: "person.crop.circle.badge.questionmark")
-                                    .font(.system(size: 18)).foregroundStyle(Color.bpTextSecondary)
+                                    .font(.bpScaled(18)).foregroundStyle(Color.bpTextSecondary)
                                 Text("Estás en modo invitado")
-                                    .font(.system(size: 14)).foregroundStyle(Color.bpTextSecondary)
+                                    .font(.bpScaled(14)).foregroundStyle(Color.bpTextSecondary)
                                 Spacer()
                             }
                             Button {
@@ -318,7 +318,7 @@ struct ProfileView: View {
                                 appState.showNativeAuth = true
                             } label: {
                                 Text("Iniciar sesión")
-                                    .font(.system(size: 14, weight: .bold))
+                                    .font(.bpScaled(14, weight: .bold))
                                     .foregroundStyle(.black)
                                     .frame(maxWidth: .infinity).padding(.vertical, 12)
                                     .background(Color.bpAmber, in: Capsule())
@@ -346,7 +346,7 @@ struct ProfileView: View {
                 HStack(spacing: 8) {
                     Text("🏆")
                     Text("+\(award.xp) XP · \(award.action.label)")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.bpScaled(14, weight: .bold))
                         .foregroundStyle(.black)
                 }
                 .padding(.horizontal, 18).padding(.vertical, 11)
@@ -372,14 +372,14 @@ struct ProfileView: View {
     private func statCard(value: String, label: String, icon: String) -> some View {
         VStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 18))
+                .font(.bpScaled(18))
                 .foregroundStyle(Color.bpAmber)
             Text(value)
-                .font(.system(size: 20, weight: .black))
+                .font(.bpScaled(20, weight: .black))
                 .foregroundStyle(Color.bpInk)
                 .contentTransition(.numericText())
             Text(label)
-                .font(.system(size: 11))
+                .font(.bpScaled(11))
                 .foregroundStyle(Color.bpTextSecondary)
         }
         .frame(maxWidth: .infinity)
@@ -393,15 +393,15 @@ struct ProfileView: View {
     private func earnRow(icon: String, action: String, points: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 14))
+                .font(.bpScaled(14))
                 .foregroundStyle(Color.bpAmber)
                 .frame(width: 24)
             Text(action)
-                .font(.system(size: 14))
+                .font(.bpScaled(14))
                 .foregroundStyle(Color.bpInk.opacity(0.7))
             Spacer()
             Text(points)
-                .font(.system(size: 13, weight: .bold))
+                .font(.bpScaled(13, weight: .bold))
                 .foregroundStyle(Color.bpAmber)
         }
     }

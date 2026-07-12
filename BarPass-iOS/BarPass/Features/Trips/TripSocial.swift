@@ -16,7 +16,7 @@ struct JoinRequestModal: View {
                     VStack(spacing: 14) {
                         if stop.pendingStopRequests.isEmpty {
                             Text("Sin solicitudes pendientes para esta parada.")
-                                .font(.system(size: 13)).foregroundStyle(Color.bpTextSecondary)
+                                .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
                                 .padding(.top, 40)
                         } else {
                             ForEach(stop.pendingStopRequests, id: \.self) { user in
@@ -42,9 +42,9 @@ struct JoinRequestModal: View {
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
                 Circle().fill(Color.bpAmber.opacity(0.25)).frame(width: 44, height: 44)
-                    .overlay(Text(String(user.prefix(1)).uppercased()).font(.system(size: 18, weight: .bold)).foregroundStyle(Color.bpAmber))
+                    .overlay(Text(String(user.prefix(1)).uppercased()).font(.bpScaled(18, weight: .bold)).foregroundStyle(Color.bpAmber))
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(user).font(.system(size: 15, weight: .bold)).foregroundStyle(Color.bpInk)
+                    Text(user).font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
                     ReputationBadgeView(rep: rep)
                 }
                 Spacer()
@@ -70,13 +70,13 @@ struct JoinRequestModal: View {
 
     private func signal(_ v: String, _ l: String) -> some View {
         VStack(spacing: 1) {
-            Text(v).font(.system(size: 14, weight: .bold)).foregroundStyle(Color.bpInk)
-            Text(l).font(.system(size: 10)).foregroundStyle(Color.bpTextSecondary)
+            Text(v).font(.bpScaled(14, weight: .bold)).foregroundStyle(Color.bpInk)
+            Text(l).font(.bpScaled(10)).foregroundStyle(Color.bpTextSecondary)
         }
     }
 
     private func pill(_ t: String, bg: Color, fg: Color) -> some View {
-        Text(t).font(.system(size: 14, weight: .bold)).foregroundStyle(fg)
+        Text(t).font(.bpScaled(14, weight: .bold)).foregroundStyle(fg)
             .frame(maxWidth: .infinity).padding(.vertical, 11)
             .background(bg, in: Capsule())
     }
@@ -98,8 +98,8 @@ struct ReputationBadgeView: View {
     var body: some View {
         let (icon, label, color) = style
         HStack(spacing: 4) {
-            Image(systemName: icon).font(.system(size: 10))
-            Text(label).font(.system(size: 11, weight: .semibold))
+            Image(systemName: icon).font(.bpScaled(10))
+            Text(label).font(.bpScaled(11, weight: .semibold))
         }
         .foregroundStyle(color)
         .padding(.horizontal, 8).padding(.vertical, 3)
@@ -128,13 +128,13 @@ struct RatingPrompt: View {
                 Color.bpBackground.ignoresSafeArea()
                 VStack(spacing: 22) {
                     Text("¿Cómo estuvo salir con \(rateeName)?")
-                        .font(.system(size: 18, weight: .bold)).foregroundStyle(Color.bpInk)
+                        .font(.bpScaled(18, weight: .bold)).foregroundStyle(Color.bpInk)
                         .multilineTextAlignment(.center)
 
                     HStack(spacing: 10) {
                         ForEach(1...5, id: \.self) { i in
                             Image(systemName: i <= score ? "star.fill" : "star")
-                                .font(.system(size: 30))
+                                .font(.bpScaled(30))
                                 .foregroundStyle(Color.bpAmber)
                                 .onTapGesture { BPHaptics.light(); score = i }
                                 .bpAccessibility(label: "\(i) estrella\(i != 1 ? "s" : "")", hint: "Puntuar con \(i) estrellas", isButton: true)
@@ -149,14 +149,14 @@ struct RatingPrompt: View {
                         store.submitRating(scopeId: scopeId, rateeId: rateeId, score: score, tags: Array(tags))
                         dismiss()
                     } label: {
-                        Text("Enviar").font(.system(size: 16, weight: .bold)).foregroundStyle(.black)
+                        Text("Enviar").font(.bpScaled(16, weight: .bold)).foregroundStyle(.black)
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
                             .background(score > 0 ? Color.bpAmber : Color.bpAmber.opacity(0.4), in: Capsule())
                     }
                     .buttonStyle(.plain).bpAccessibility(label: "Enviar", hint: "Enviar la calificación", isButton: true).disabled(score == 0)
 
                     Text("Tu calificación queda oculta hasta que la otra persona también califique.")
-                        .font(.system(size: 11)).foregroundStyle(Color.bpTextSecondary)
+                        .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(BPSpacing.lg).padding(.top, 30)
@@ -177,7 +177,7 @@ private struct FlowTags: View {
             ForEach(options, id: \.self) { tag in
                 let on = selected.contains(tag)
                 Text(tag.replacingOccurrences(of: "_", with: " "))
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.bpScaled(12, weight: .semibold))
                     .foregroundStyle(on ? .black : .white)
                     .padding(.horizontal, 12).padding(.vertical, 8)
                     .background(on ? Color.bpAmber : Color.bpInk.opacity(0.08), in: Capsule())

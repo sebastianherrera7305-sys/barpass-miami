@@ -144,7 +144,7 @@ struct TripCreateFlow: View {
                                     .frame(width: 24, height: 24)
                                     .overlay(
                                         Image(systemName: selected ? "checkmark" : "")
-                                            .font(.system(size: 12, weight: .bold))
+                                            .font(.bpScaled(12, weight: .bold))
                                             .foregroundStyle(.black)
                                     )
 

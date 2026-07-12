@@ -87,7 +87,7 @@ struct ExploreView: View {
             VStack(spacing: 0) {
                 HStack {
                     Text("Explorar")
-                        .font(.system(size: 24, weight: .black))
+                        .font(.bpScaled(24, weight: .black))
                         .foregroundStyle(Color.bpInk)
                     Spacer()
                     Button {
@@ -95,7 +95,7 @@ struct ExploreView: View {
                         withAnimation(.spring(response: 0.3)) { showList.toggle() }
                     } label: {
                         Image(systemName: showList ? "map.fill" : "list.bullet")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.bpScaled(14, weight: .semibold))
                             .foregroundStyle(Color.bpAmber)
                             .frame(width: 32, height: 32)
                             .glass(radius: 16)
@@ -109,17 +109,17 @@ struct ExploreView: View {
                 HStack(spacing: 8) {
                     HStack(spacing: 8) {
                         Image(systemName: "magnifyingglass")
-                            .font(.system(size: 12))
+                            .font(.bpScaled(12))
                             .foregroundStyle(Color.bpTextTertiary)
                         TextField("", text: $searchText, prompt: Text("Buscar venues...").foregroundStyle(Color.bpTextTertiary))
-                            .font(.system(size: 13))
+                            .font(.bpScaled(13))
                             .foregroundStyle(Color.bpInk)
                             .tint(Color.bpAmber)
                             .bpAccessibility(label: "Buscar venues", hint: "Buscar venues por nombre o ubicación")
                         if !searchText.isEmpty {
                             Button { searchText = "" } label: {
                                 Image(systemName: "xmark.circle.fill")
-                                    .font(.system(size: 12))
+                                    .font(.bpScaled(12))
                                     .foregroundStyle(Color.bpTextTertiary)
                             }
                             .buttonStyle(.plain)
@@ -136,7 +136,7 @@ struct ExploreView: View {
                         BPHaptics.medium()
                     } label: {
                         Image(systemName: "sparkles")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.bpScaled(12, weight: .semibold))
                             .foregroundStyle(Color.bpAmber)
                             .frame(width: 32, height: 32)
                             .glass(radius: 16)
@@ -227,7 +227,7 @@ struct ExploreView: View {
         let n = cluster.venues.count
         let size: CGFloat = n >= 20 ? 54 : n >= 8 ? 46 : 40
         return Text("\(n)")
-            .font(.system(size: size * 0.36, weight: .black))
+            .font(.bpScaled(size * 0.36, weight: .black))
             .foregroundStyle(.black)
             .frame(width: size, height: size)
             .background(Circle().fill(Color.bpAmber))
@@ -284,7 +284,7 @@ struct ExploreView: View {
         ZStack {
             Circle().fill(Color.bpCardBackground.opacity(0.96))
             Image(systemName: Self.markerIcon(venue.type))
-                .font(.system(size: size * 0.44, weight: .semibold))
+                .font(.bpScaled(size * 0.44, weight: .semibold))
                 .foregroundStyle(Color.bpInk)
         }
     }
@@ -307,39 +307,39 @@ struct ExploreView: View {
         NavigationLink(destination: VenueDetailView(venue: venue).bpZoomDestination(id: venue.id, in: zoomNS)) {
             HStack(spacing: 14) {
                 Text(venue.emoji)
-                    .font(.system(size: 32))
+                    .font(.bpScaled(32))
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(venue.name)
-                        .font(.system(size: 15, weight: .bold))
+                        .font(.bpScaled(15, weight: .bold))
                         .foregroundStyle(Color.bpInk)
 
                     HStack(spacing: 6) {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 9))
+                            .font(.bpScaled(9))
                             .foregroundStyle(Color.bpAmber)
                         Text(String(format: "%.1f", venue.rating))
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.bpScaled(12, weight: .semibold))
                             .foregroundStyle(Color.bpAmber)
                         Text("·")
                             .foregroundStyle(Color.bpTextTertiary)
                         Text(venue.neighborhood)
-                            .font(.system(size: 11))
+                            .font(.bpScaled(11))
                             .foregroundStyle(Color.bpTextSecondary)
                     }
 
                     HStack(spacing: 8) {
                         Text(venue.priceRange)
-                            .font(.system(size: 10))
+                            .font(.bpScaled(10))
                             .foregroundStyle(Color.bpTextSecondary)
                         if venue.isOpenNow {
                             Text("· Abierto")
-                                .font(.system(size: 10))
+                                .font(.bpScaled(10))
                                 .foregroundStyle(Color.bpGreen)
                         }
                         if venue.isTrending {
                             Text("· 🔥 Trending")
-                                .font(.system(size: 10))
+                                .font(.bpScaled(10))
                                 .foregroundStyle(Color.bpAmber)
                         }
                     }
@@ -348,7 +348,7 @@ struct ExploreView: View {
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.bpScaled(10, weight: .semibold))
                     .foregroundStyle(Color.bpTextTertiary)
             }
             .padding(14)
@@ -378,8 +378,8 @@ struct ExploreView: View {
             }
         } label: {
             HStack(spacing: 4) {
-                Image(systemName: layer.icon).font(.system(size: 10))
-                Text(layer.label).font(.system(size: 11, weight: .semibold))
+                Image(systemName: layer.icon).font(.bpScaled(10))
+                Text(layer.label).font(.bpScaled(11, weight: .semibold))
             }
             .foregroundStyle(selected ? .black : .white)
             .padding(.horizontal, 10)
@@ -398,19 +398,19 @@ struct ExploreView: View {
         ScrollView(showsIndicators: false) {
             if filteredVenues.isEmpty {
                 VStack(spacing: 10) {
-                    Text("🔍").font(.system(size: 40))
+                    Text("🔍").font(.bpScaled(40))
                     Text(searchText.isEmpty ? "No hay venues con esos filtros" : "Sin resultados para \"\(searchText)\"")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.bpScaled(15, weight: .semibold))
                         .foregroundStyle(Color.bpInk)
                     Text("Probá con otro nombre, barrio o quitá los filtros.")
-                        .font(.system(size: 13))
+                        .font(.bpScaled(13))
                         .foregroundStyle(Color.bpTextSecondary)
                     Button {
                         BPHaptics.light()
                         withAnimation { searchText = "" }
                     } label: {
                         Text("Limpiar búsqueda")
-                            .font(.system(size: 13, weight: .bold))
+                            .font(.bpScaled(13, weight: .bold))
                             .foregroundStyle(Color.bpAmber)
                             .padding(.horizontal, 16).padding(.vertical, 9)
                             .background(Color.bpAmber.opacity(0.12), in: Capsule())
@@ -472,24 +472,24 @@ struct VenueListRow: View {
     var body: some View {
         HStack(spacing: 14) {
             Text(venue.emoji)
-                .font(.system(size: 28))
+                .font(.bpScaled(28))
                 .frame(width: 52, height: 52)
                 .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(venue.name)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.bpScaled(15, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                 Text("\(venue.neighborhood) · \(venue.type.rawValue)")
-                    .font(.system(size: 12))
+                    .font(.bpScaled(12))
                     .foregroundStyle(Color.bpTextSecondary)
                 HStack(spacing: 4) {
-                    Image(systemName: "star.fill").font(.system(size: 10)).foregroundStyle(Color.bpAmber)
+                    Image(systemName: "star.fill").font(.bpScaled(10)).foregroundStyle(Color.bpAmber)
                     Text(String(format: "%.1f", venue.rating))
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.bpScaled(12, weight: .semibold))
                         .foregroundStyle(Color.bpTextSecondary)
                     Text("·").foregroundStyle(Color.bpTextTertiary)
-                    Text(venue.priceRange).font(.system(size: 12)).foregroundStyle(Color.bpTextSecondary)
+                    Text(venue.priceRange).font(.bpScaled(12)).foregroundStyle(Color.bpTextSecondary)
                 }
             }
 
@@ -497,7 +497,7 @@ struct VenueListRow: View {
 
             if venue.isOpenNow {
                 Text("Abierto")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.bpScaled(10, weight: .semibold))
                     .foregroundStyle(Color.bpGreen)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)

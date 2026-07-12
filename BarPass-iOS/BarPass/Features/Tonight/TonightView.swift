@@ -62,9 +62,9 @@ struct TonightView: View {
                         // Mood Mode: the selected experience takes over the feed.
                         if moodVenues.isEmpty {
                             VStack(spacing: 8) {
-                                Text("😴").font(.system(size: 40))
+                                Text("😴").font(.bpScaled(40))
                                 Text("Nada abierto con ese mood ahora.")
-                                    .font(.system(size: 14)).foregroundStyle(Color.bpTextSecondary)
+                                    .font(.bpScaled(14)).foregroundStyle(Color.bpTextSecondary)
                             }
                             .frame(maxWidth: .infinity).padding(.vertical, 40)
                         } else {
@@ -165,7 +165,7 @@ struct TonightView: View {
                         }
                     } label: {
                         Text(tag)
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.bpScaled(12, weight: .semibold))
                             .foregroundStyle(selectedTag == tag ? .black : .white)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 7)
@@ -203,7 +203,7 @@ struct TonightView: View {
     private var eventsTonightSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("🎟️ Esta noche")
-                .font(.system(size: 20, weight: .bold))
+                .font(.bpScaled(20, weight: .bold))
                 .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, BPSpacing.lg)
 
@@ -280,7 +280,7 @@ struct HeroVenueCard: View {
                 .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
 
             Text(venue.emoji)
-                .font(.system(size: 72))
+                .font(.bpScaled(72))
                 .opacity(0.15)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                 .padding(16)
@@ -337,7 +337,7 @@ struct HeroVenueCard: View {
 
                 HStack(spacing: 8) {
                     Image(systemName: "star.fill")
-                        .font(.system(size: 10))
+                        .font(.bpScaled(10))
                         .foregroundStyle(Color.bpAmber)
                     Text(String(format: "%.1f", venue.rating))
                         .font(.bpSmall()).fontWeight(.semibold)
@@ -391,7 +391,7 @@ struct SmallVenueCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
                 } else {
                     Text(venue.emoji)
-                        .font(.system(size: 44))
+                        .font(.bpScaled(44))
                         .opacity(0.2)
                         .padding(10)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
@@ -399,7 +399,7 @@ struct SmallVenueCard: View {
 
                 if venue.hasHappyHour, let until = venue.happyHourUntil {
                     Text("HH \(until)")
-                        .font(.system(size: 8, weight: .bold))
+                        .font(.bpScaled(8, weight: .bold))
                         .foregroundStyle(.black)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
@@ -410,7 +410,7 @@ struct SmallVenueCard: View {
             }
 
             Text(venue.name)
-                .font(.system(size: 13, weight: .bold))
+                .font(.bpScaled(13, weight: .bold))
                 .foregroundStyle(Color.bpInk)
                 .lineLimit(1)
 
@@ -420,7 +420,7 @@ struct SmallVenueCard: View {
 
             HStack(spacing: 4) {
                 Image(systemName: "star.fill")
-                    .font(.system(size: 9))
+                    .font(.bpScaled(9))
                     .foregroundStyle(Color.bpAmber)
                 Text(String(format: "%.1f", venue.rating))
                     .font(.bpSmall()).fontWeight(.semibold)

@@ -40,10 +40,10 @@ struct EventFlyerCard: View {
             // Date block (top-left)
             VStack(spacing: 0) {
                 Text(Self.day.string(from: event.date))
-                    .font(.system(size: 22, weight: .black))
+                    .font(.bpScaled(22, weight: .black))
                     .foregroundStyle(.white)
                 Text(Self.month.string(from: event.date).uppercased())
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.bpScaled(10, weight: .bold))
                     .foregroundStyle(Color.bpAmber)
             }
             .padding(.horizontal, 10).padding(.vertical, 7)
@@ -55,7 +55,7 @@ struct EventFlyerCard: View {
             // Headline + venue
             VStack(alignment: .leading, spacing: 5) {
                 Text(event.title)
-                    .font(.system(size: 19, weight: .black))
+                    .font(.bpScaled(19, weight: .black))
                     .foregroundStyle(.white)
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)
@@ -67,19 +67,19 @@ struct EventFlyerCard: View {
                         if let logo = VenueLogos.url(for: venue.id) {
                             CachedImage(url: logo, targetSize: CGSize(width: 40, height: 40), priority: .hot) { img in
                                 img.resizable().scaledToFit().padding(3)
-                            } placeholder: { Text(venue.emoji).font(.system(size: 10)) }
-                        } else { Text(venue.emoji).font(.system(size: 10)) }
+                            } placeholder: { Text(venue.emoji).font(.bpScaled(10)) }
+                        } else { Text(venue.emoji).font(.bpScaled(10)) }
                     }
                     .frame(width: 20, height: 20).clipShape(Circle())
 
                     Text(venue.name)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.bpScaled(12, weight: .semibold))
                         .foregroundStyle(Color.white.opacity(0.75))
                         .lineLimit(1)
 
                     if let cover = event.coverPrice {
                         Text(cover == 0 ? "Gratis" : String(format: "$%.0f", cover))
-                            .font(.system(size: 11, weight: .bold))
+                            .font(.bpScaled(11, weight: .bold))
                             .foregroundStyle(cover == 0 ? Color.bpGreen : Color.bpAmber)
                     }
                 }

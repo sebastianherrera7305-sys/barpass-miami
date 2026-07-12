@@ -183,7 +183,7 @@ struct TripDetailView: View {
                     if !stop.joinedUserIds.isEmpty {
                         HStack(spacing: 3) {
                             Image(systemName: "person.fill.checkmark")
-                                .font(.system(size: 9))
+                                .font(.bpScaled(9))
                             Text("\(stop.joinedUserIds.count) confirmados")
                         }
                         .font(.bpTiny())
@@ -196,7 +196,7 @@ struct TripDetailView: View {
                         } label: {
                             HStack(spacing: 3) {
                                 Image(systemName: "person.fill.questionmark")
-                                    .font(.system(size: 9))
+                                    .font(.bpScaled(9))
                                 Text("\(stop.pendingStopRequests.count) solicitudes")
                             }
                             .font(.bpTiny())

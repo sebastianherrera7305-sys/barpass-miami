@@ -59,7 +59,7 @@ struct TripsListView: View {
         VStack(spacing: 12) {
             Spacer()
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 36))
+                .font(.bpScaled(36))
                 .foregroundStyle(Color.bpDanger)
             Text("Algo salió mal")
                 .font(.bpTitle1())
@@ -71,7 +71,7 @@ struct TripsListView: View {
             Button("Reintentar") {
                 Task { await tripStore.loadTrips() }
             }
-            .font(.system(size: 16, weight: .bold))
+            .font(.bpScaled(16, weight: .bold))
             .foregroundStyle(.black)
             .padding(.horizontal, 28)
             .padding(.vertical, 14)
@@ -89,7 +89,7 @@ struct TripsListView: View {
             Spacer()
 
             Text("🧳")
-                .font(.system(size: 56))
+                .font(.bpScaled(56))
 
             VStack(spacing: 6) {
                 Text("Armá tu noche")
@@ -108,7 +108,7 @@ struct TripsListView: View {
                     Image(systemName: "sparkles")
                     Text("Crear mi primer trip")
                 }
-                .font(.system(size: 16, weight: .bold))
+                .font(.bpScaled(16, weight: .bold))
                 .foregroundStyle(.black)
                 .padding(.horizontal, 28)
                 .padding(.vertical, 16)
@@ -160,7 +160,7 @@ struct TripsListView: View {
                 showCreateFlow = true
             } label: {
                 Image(systemName: "plus")
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.bpScaled(18, weight: .bold))
                     .foregroundStyle(.black)
                     .frame(width: 44, height: 44)
                     .background(amber, in: Circle())
@@ -186,7 +186,7 @@ struct TripsListView: View {
 
                 HStack(spacing: 6) {
                     Image(systemName: "mappin.circle.fill")
-                        .font(.system(size: 12))
+                        .font(.bpScaled(12))
                         .foregroundStyle(amber)
                     Text(trip.destinationCity)
                         .font(.bpCaption())
@@ -194,7 +194,7 @@ struct TripsListView: View {
                     Text("·")
                         .foregroundStyle(Color.bpTextTertiary)
                     Image(systemName: "person.2.fill")
-                        .font(.system(size: 10))
+                        .font(.bpScaled(10))
                         .foregroundStyle(Color.bpTextSecondary)
                     Text("\(trip.memberIds.count)")
                         .font(.bpCaption())
@@ -202,7 +202,7 @@ struct TripsListView: View {
                     Text("·")
                         .foregroundStyle(Color.bpTextTertiary)
                     Image(systemName: "mappin")
-                        .font(.system(size: 10))
+                        .font(.bpScaled(10))
                         .foregroundStyle(Color.bpTextSecondary)
                     Text("\(trip.stops.count) paradas")
                         .font(.bpCaption())
