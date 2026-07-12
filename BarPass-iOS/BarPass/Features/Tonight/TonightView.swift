@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct TonightView: View {
+    @Namespace private var zoomNS
     @ObservedObject private var favorites = FavoritesStore.shared
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
@@ -209,8 +210,9 @@ struct TonightView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 14) {
                     ForEach(tonightEvents, id: \.event.id) { pair in
-                        NavigationLink(destination: VenueDetailView(venue: pair.venue)) {
+                        NavigationLink(destination: VenueDetailView(venue: pair.venue).bpZoomDestination(id: pair.venue.id, in: zoomNS)) {
                             EventFlyerCard(event: pair.event, venue: pair.venue)
+                                .bpZoomSource(id: pair.venue.id, in: zoomNS)
                         }
                         .buttonStyle(.plain)
                         .bpAccessibility(label: "\(pair.event.title) en \(pair.venue.name)", hint: "Ver detalle del evento", isButton: true)
@@ -233,11 +235,14 @@ struct TonightView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: BPSpacing.md) {
                     ForEach(venues) { venue in
-                        NavigationLink(destination: VenueDetailView(venue: venue)) {
-                            switch style {
-                            case .hero: HeroVenueCard(venue: venue)
-                            case .card: SmallVenueCard(venue: venue)
+                        NavigationLink(destination: VenueDetailView(venue: venue).bpZoomDestination(id: venue.id, in: zoomNS)) {
+                            Group {
+                                switch style {
+                                case .hero: HeroVenueCard(venue: venue)
+                                case .card: SmallVenueCard(venue: venue)
+                                }
                             }
+                            .bpZoomSource(id: venue.id, in: zoomNS)
                         }
                         .buttonStyle(.plain)
                     }

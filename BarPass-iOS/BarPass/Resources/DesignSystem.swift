@@ -186,3 +186,24 @@ struct BarPassLogo: View {
         }
     }
 }
+
+
+// MARK: - Hero zoom transition (iOS 18+, no-op on 17)
+
+extension View {
+    /// Marks a card as the visual source of the zoom into a detail view.
+    @ViewBuilder
+    func bpZoomSource(id: String, in ns: Namespace.ID) -> some View {
+        if #available(iOS 18.0, *) {
+            self.matchedTransitionSource(id: id, in: ns)
+        } else { self }
+    }
+
+    /// Applies the zoom navigation transition on the destination.
+    @ViewBuilder
+    func bpZoomDestination(id: String, in ns: Namespace.ID) -> some View {
+        if #available(iOS 18.0, *) {
+            self.navigationTransition(.zoom(sourceID: id, in: ns))
+        } else { self }
+    }
+}

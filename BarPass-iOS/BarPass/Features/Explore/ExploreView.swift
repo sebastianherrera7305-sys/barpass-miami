@@ -2,6 +2,7 @@ import SwiftUI
 import MapKit
 
 struct ExploreView: View {
+    @Namespace private var zoomNS
     @EnvironmentObject private var venueStore: VenueStore
     @State private var searchText = ""
     @State private var selectedLayer = "all"
@@ -303,7 +304,7 @@ struct ExploreView: View {
     // MARK: - Callout
 
     private func venueCallout(_ venue: BarPassVenue) -> some View {
-        NavigationLink(destination: VenueDetailView(venue: venue)) {
+        NavigationLink(destination: VenueDetailView(venue: venue).bpZoomDestination(id: venue.id, in: zoomNS)) {
             HStack(spacing: 14) {
                 Text(venue.emoji)
                     .font(.system(size: 32))
@@ -422,8 +423,9 @@ struct ExploreView: View {
             }
             LazyVStack(spacing: 0) {
                 ForEach(filteredVenues) { venue in
-                    NavigationLink(destination: VenueDetailView(venue: venue)) {
+                    NavigationLink(destination: VenueDetailView(venue: venue).bpZoomDestination(id: venue.id, in: zoomNS)) {
                         VenueListRow(venue: venue)
+                            .bpZoomSource(id: venue.id, in: zoomNS)
                     }
                     .buttonStyle(.plain)
                     Divider().overlay(Color.bpInk.opacity(0.05)).padding(.leading, 76)
