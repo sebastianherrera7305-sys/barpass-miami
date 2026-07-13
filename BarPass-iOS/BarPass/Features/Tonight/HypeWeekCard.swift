@@ -13,7 +13,7 @@ struct HypeWeekCard: View {
             case .connecting:        loadingCard
             case .connected:         if let p = music.passport { hypeCard(p) }
             case .denied:            infoCard(icon: "gear", text: "Permiso de Apple Music desactivado. Activalo en Ajustes ▸ BarPass para ver tu Hype semanal.")
-            case .notEntitled:       infoCard(icon: "hourglass", text: "Music Intelligence se activa cuando BarPass complete su registro de MusicKit con Apple. Muy pronto.")
+            case .notEntitled:       notEntitledCard
             case .noData:            infoCard(icon: "music.note", text: "No encontramos escucha reciente en Apple Music. Escuchá algo esta semana y volvé 😉")
             case .error:             infoCard(icon: "wifi.slash", text: "No pudimos leer tu música. Reintentá más tarde.")
             }
@@ -23,10 +23,7 @@ struct HypeWeekCard: View {
     // MARK: - Bienvenida (primera vez)
 
     private var welcomeCard: some View {
-        Button {
-            BPHaptics.medium()
-            Task { await music.connect() }
-        } label: {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 14) {
                 ZStack {
                     Circle().fill(Color.bpAmber.opacity(0.15)).frame(width: 46, height: 46)
@@ -40,15 +37,32 @@ struct HypeWeekCard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.bpScaled(13, weight: .semibold)).foregroundStyle(Color.bpAmber)
             }
-            .padding(14)
-            .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
-            .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpAmber.opacity(0.25)))
+
+            HStack(spacing: 10) {
+                providerButton(" Apple Music", kind: .appleMusic)
+                providerButton("Spotify", kind: .spotify)
+            }
+        }
+        .padding(14)
+        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpAmber.opacity(0.25)))
+    }
+
+    private func providerButton(_ label: String, kind: MusicSourceKind) -> some View {
+        Button {
+            BPHaptics.medium()
+            Task { await music.connect(kind) }
+        } label: {
+            Text(label)
+                .font(.bpScaled(13, weight: .bold))
+                .foregroundStyle(.black)
+                .frame(maxWidth: .infinity).padding(.vertical, 10)
+                .background(kind == .spotify ? Color(red: 0.11, green: 0.84, blue: 0.38) : Color.bpAmber,
+                            in: Capsule())
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Conectar tu música", hint: "Conectar Apple Music para recomendaciones personalizadas", isButton: true)
+        .bpAccessibility(label: "Conectar \(kind.label)", hint: "Conectar \(kind.label) para recomendaciones personalizadas", isButton: true)
     }
 
     private var loadingCard: some View {
@@ -109,6 +123,21 @@ struct HypeWeekCard: View {
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpAmber.opacity(0.2)))
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: "Tu hype semanal: \(p.energy) por ciento high energy, personalidad \(p.nightPersonality)")
+    }
+
+    /// Apple Music bloqueado (falta registro MusicKit) → Spotify como alternativa real.
+    private var notEntitledCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "hourglass").font(.bpScaled(15)).foregroundStyle(Color.bpAmber)
+                Text("Apple Music se activa pronto (registro MusicKit en proceso). Mientras tanto, conectá Spotify:")
+                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            providerButton("Conectar Spotify", kind: .spotify)
+        }
+        .padding(12)
+        .background(Color.bpCardBackground.opacity(0.7), in: RoundedRectangle(cornerRadius: BPRadius.md))
     }
 
     private func infoCard(icon: String, text: String) -> some View {

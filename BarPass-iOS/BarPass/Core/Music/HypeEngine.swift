@@ -78,6 +78,34 @@ enum HypeEngine {
         return "Nightlifer"
     }
 
+    /// Fusiona snapshots de varios proveedores en uno: suma plays por artista
+    /// (case-insensitive) y re-normaliza pesos de géneros.
+    static func merge(_ snapshots: [MusicSnapshot]) -> MusicSnapshot? {
+        guard let first = snapshots.first else { return nil }
+        guard snapshots.count > 1 else { return first }
+
+        var plays: [String: (name: String, plays: Int, genres: Set<String>)] = [:]
+        var genreW: [String: Double] = [:]
+        for snap in snapshots {
+            for a in snap.artists {
+                let k = a.name.lowercased()
+                var e = plays[k] ?? (a.name, 0, [])
+                e.plays += a.plays
+                e.genres.formUnion(a.genres)
+                plays[k] = e
+            }
+            for g in snap.genres { genreW[g.genre.lowercased(), default: 0] += g.weight }
+        }
+        let artists = plays.values.sorted { $0.plays > $1.plays }.prefix(15)
+            .map { ArtistPlay(name: $0.name, plays: $0.plays, genres: Array($0.genres)) }
+        let total = max(genreW.values.reduce(0, +), 0.001)
+        let genres = genreW.sorted { $0.value > $1.value }.prefix(8)
+            .map { GenreWeight(genre: $0.key, weight: $0.value / total) }
+
+        return MusicSnapshot(artists: Array(artists), genres: Array(genres),
+                             capturedAt: Date(), source: first.source)
+    }
+
     /// Venue matching: cruza géneros del passport con venue.musicGenres (0…1).
     static func musicMatch(passport: MusicPassport, venue: BarPassVenue) -> Double {
         guard !passport.topGenres.isEmpty, !venue.musicGenres.isEmpty else { return 0 }

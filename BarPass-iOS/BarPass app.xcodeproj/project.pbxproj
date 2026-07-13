@@ -91,6 +91,7 @@
 		HYPE02000000000000RP01 /* HypeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = HYPE01000000000000RP01 /* HypeEngine.swift */; };
 		MPAS02000000000000RP01 /* MusicPassport.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPAS01000000000000RP01 /* MusicPassport.swift */; };
 		HYWC02000000000000RP01 /* HypeWeekCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = HYWC01000000000000RP01 /* HypeWeekCard.swift */; };
+		SPOT02000000000000RP01 /* SpotifySource.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPOT01000000000000RP01 /* SpotifySource.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -181,6 +182,7 @@
 		HYPE01000000000000RP01 /* HypeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HypeEngine.swift; path = BarPass/Core/Music/HypeEngine.swift; sourceTree = SOURCE_ROOT; };
 		MPAS01000000000000RP01 /* MusicPassport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicPassport.swift; path = BarPass/Models/MusicPassport.swift; sourceTree = SOURCE_ROOT; };
 		HYWC01000000000000RP01 /* HypeWeekCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HypeWeekCard.swift; path = BarPass/Features/Tonight/HypeWeekCard.swift; sourceTree = SOURCE_ROOT; };
+		SPOT01000000000000RP01 /* SpotifySource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpotifySource.swift; path = BarPass/Core/Music/SpotifySource.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -555,6 +557,7 @@
 				HYPE02000000000000RP01 /* HypeEngine.swift in Sources */,
 				AMSC02000000000000RP01 /* AppleMusicSource.swift in Sources */,
 				MSRC02000000000000RP01 /* MusicSource.swift in Sources */,
+				SPOT02000000000000RP01 /* SpotifySource.swift in Sources */,
 				FAVS02000000000000RP01 /* FavoritesStore.swift in Sources */,
 				VPSC02000000000000RP01 /* VenuePostsSection.swift in Sources */,
 				PREP02000000000000RP01 /* PostRepository.swift in Sources */,

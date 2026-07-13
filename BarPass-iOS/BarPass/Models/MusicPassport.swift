@@ -32,7 +32,7 @@ final class MusicProfileStore: ObservableObject {
     @Published private(set) var passport: MusicPassport?
     @Published private(set) var state: MusicConnectionState = .notConnected
 
-    private let source: MusicSource
+    private let sources: [MusicSourceKind: MusicSource]
 
     private static let dir: URL = {
         let base = FileManager.default
@@ -43,35 +43,63 @@ final class MusicProfileStore: ObservableObject {
     }()
     private static var passportURL: URL { dir.appendingPathComponent("music_passport.json") }
     private static var snapshotURL: URL { dir.appendingPathComponent("last_snapshot.json") }
+    private static var sourcesURL: URL { dir.appendingPathComponent("snapshots_by_source.json") }
 
-    init(source: MusicSource = AppleMusicSource()) {
-        self.source = source
+    init(sources: [MusicSource] = [AppleMusicSource(), SpotifySource()]) {
+        self.sources = Dictionary(uniqueKeysWithValues: sources.map { ($0.kind, $0) })
         passport = (try? Data(contentsOf: Self.passportURL))
             .flatMap { try? JSONDecoder().decode(MusicPassport.self, from: $0) }
         if passport != nil { state = .connected }
     }
 
+    /// Snapshots por proveedor (persistidos) — la base del merge.
+    private var snapshotsBySource: [MusicSourceKind: MusicSnapshot] {
+        get {
+            (try? Data(contentsOf: Self.sourcesURL))
+                .flatMap { try? JSONDecoder().decode([MusicSourceKind: MusicSnapshot].self, from: $0) } ?? [:]
+        }
+        set {
+            if let d = try? JSONEncoder().encode(newValue) {
+                try? d.write(to: Self.sourcesURL, options: .atomic)
+            }
+        }
+    }
+
+    var connectedSources: [MusicSourceKind] { Array(snapshotsBySource.keys) }
+
     var hasPassport: Bool { passport != nil }
 
-    /// Permiso + snapshot + HypeEngine + persistencia. Idempotente.
-    func connect() async {
+    /// Permiso + snapshot + HypeEngine + persistencia. Idempotente por proveedor.
+    func connect(_ kind: MusicSourceKind = .appleMusic) async {
+        guard let source = sources[kind] else { return }
         state = .connecting
         let auth = await source.requestAuthorization()
         switch auth {
-        case .denied:       state = .denied; return
-        case .notEntitled:  state = .notEntitled; return
+        case .denied:
+            // Si otro proveedor ya está conectado, no pisamos el passport.
+            state = passport != nil ? .connected : .denied
+            return
+        case .notEntitled:
+            state = passport != nil ? .connected : .notEntitled
+            return
         case .notDetermined, .authorized: break
         }
-        await refresh()
+        await refresh(kind)
     }
 
-    func refresh() async {
+    func refresh(_ kind: MusicSourceKind) async {
+        guard let source = sources[kind] else { return }
         do {
             let previous = (try? Data(contentsOf: Self.snapshotURL))
                 .flatMap { try? JSONDecoder().decode(MusicSnapshot.self, from: $0) }
 
             let snapshot = try await source.snapshot(days: 7)
-            let summary = HypeEngine.compute(snapshot, previous: previous)
+            var bySource = snapshotsBySource
+            bySource[kind] = snapshot
+            snapshotsBySource = bySource
+
+            guard let merged = HypeEngine.merge(Array(bySource.values)) else { return }
+            let summary = HypeEngine.compute(merged, previous: previous)
 
             let p = MusicPassport(
                 topGenres: summary.topGenres,
@@ -80,22 +108,23 @@ final class MusicProfileStore: ObservableObject {
                 energy: summary.energy,
                 nightPersonality: summary.nightPersonality,
                 newDiscoveries: summary.newDiscoveries,
-                sources: [source.kind],
+                sources: Array(bySource.keys),
                 updatedAt: Date()
             )
             passport = p
             state = .connected
-            persist(p, snapshot: snapshot)
+            persist(p, snapshot: merged)
             BPAnalytics.track(.viewScreen("MusicPassportCreated"))
         } catch let e as MusicSourceError {
+            let hasPassport = passport != nil
             switch e {
-            case .notAuthorized: state = .denied
-            case .notEntitled:   state = .notEntitled
-            case .noData:        state = .noData
-            case .network(let m): state = .error(m)
+            case .notAuthorized: state = hasPassport ? .connected : .denied
+            case .notEntitled:   state = hasPassport ? .connected : .notEntitled
+            case .noData:        state = hasPassport ? .connected : .noData
+            case .network(let m): state = hasPassport ? .connected : .error(m)
             }
         } catch {
-            state = .error(String(describing: error))
+            state = passport != nil ? .connected : .error(String(describing: error))
         }
     }
 
