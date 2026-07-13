@@ -47,7 +47,7 @@ enum NightPlanner {
         }
     }
 
-    static func plan(venues: [BarPassVenue], selected: Set<String>, prompt: String) -> [PlannedStop] {
+    static func plan(venues: [BarPassVenue], selected: Set<String>, prompt: String, passport: MusicPassport? = nil) -> [PlannedStop] {
         guard !venues.isEmpty else { return [] }
         let now = Date()
 
@@ -80,12 +80,16 @@ enum NightPlanner {
             if eventTonight(v, now: now) != nil { s += 2.5 }          // strongest live signal
             if v.isOpenNow { s += 0.75 }
             if v.hasHappyHour { s += 0.4 }
+            if let passport { s += HypeEngine.musicMatch(passport: passport, venue: v) * 1.5 }
             s += min(Double(v.reviewCount) / 10_000.0, 0.5)           // popularity, capped
             return s
         }
 
         func reason(_ v: BarPassVenue) -> String? {
             if let e = eventTonight(v, now: now) { return "🎟️ \(e.title) esta noche" }
+            if let passport, HypeEngine.musicMatch(passport: passport, venue: v) >= 0.6 {
+                return "🎵 Match con tu música"
+            }
             if v.hasHappyHour, let until = v.happyHourUntil { return "🍹 Happy hour hasta \(until)" }
             if v.isTrending { return "🔥 Trending ahora" }
             if v.reviewCount > 5000 { return "⭐ Favorito de Miami (\(v.reviewCount) reviews)" }

@@ -84,6 +84,19 @@ struct VenueDetailView: View {
                 .foregroundStyle(.white)
 
                 HStack(spacing: 12) {
+                    if let passport = MusicProfileStore.shared.passport {
+                        let match = HypeEngine.musicMatch(passport: passport, venue: venue)
+                        if match >= 0.4 {
+                            HStack(spacing: 3) {
+                                Text("🎵")
+                                Text("\(Int(match * 100))% match")
+                            }
+                            .font(.bpScaled(11, weight: .bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 8).padding(.vertical, 4)
+                            .background(Color.bpAmber, in: Capsule())
+                        }
+                    }
                     HStack(spacing: 4) {
                         Image(systemName: "star.fill").font(.bpScaled(12)).foregroundStyle(Color.bpAmber)
                         Text(String(format: "%.1f", venue.rating))

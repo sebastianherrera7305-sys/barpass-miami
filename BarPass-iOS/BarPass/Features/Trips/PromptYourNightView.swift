@@ -160,7 +160,7 @@ struct PromptYourNightView: View {
         BPHaptics.medium()
         revealedCount = 0
         revealDone = false
-        route = NightPlanner.plan(venues: venues, selected: selected, prompt: prompt)
+        route = NightPlanner.plan(venues: venues, selected: selected, prompt: prompt, passport: MusicProfileStore.shared.passport)
         didGenerate = true
 
         // Staged reveal: each stop lands with its own spring + haptic tick.

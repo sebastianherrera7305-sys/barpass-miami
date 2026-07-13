@@ -54,6 +54,9 @@ struct TonightView: View {
                         .padding(.horizontal, BPSpacing.lg)
                         .padding(.top, 60)
 
+                    HypeWeekCard()
+                        .padding(.horizontal, BPSpacing.lg)
+
                     vibeTags
 
                     if venueStore.isLoading {
