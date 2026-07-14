@@ -36,6 +36,10 @@ struct MainTabView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 72) }
 
+            MusicNowPlayingBar()
+                .padding(.bottom, 86)
+                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: MusicNowPlayingObserver.shared.title)
+
             floatingTabBar
         }
         .ignoresSafeArea(edges: .bottom)
