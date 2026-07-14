@@ -1,11 +1,11 @@
 import Foundation
 
-/// Thin client for the BarPass backend (api/server.js on Vercel).
-/// Mirrors the base URL the web app already uses in production (see
-/// barpass-miami.html → `https://barpass-miami.vercel.app`).
+/// Thin client for the BarPass backend — barpass-v2's Next.js API routes,
+/// deployed on Vercel. (The old barpass-miami.vercel.app Express/Firestore
+/// backend was never deployed and is superseded by this one.)
 enum APIClient {
 
-    static let baseURL = URL(string: "https://barpass-miami.vercel.app/api")!
+    static let baseURL = URL(string: "https://barpass-v2.vercel.app/api")!
 
     enum APIClientError: LocalizedError {
         case notAuthenticated

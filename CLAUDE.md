@@ -13,8 +13,9 @@ Miami nightlife access app. Skip the Line passes, VIP tables, event tickets, dri
 **Web (GitHub Pages):** `https://sebastianherrera7305-sys.github.io/barpass-miami/barpass-miami.html`
 **Firebase (legacy):** `barpass-app` · apiKey `AIzaSyB4uz5CaLCC3nsLz3QwOJtfp1bnBUqQUlg`
 **Google Places API Key:** `AIzaSyDuvJwTrbSCOu69fECyYi2yBE9HXRdql9k` (local only, not on Vercel)
-**Vercel Project:** `prj_c8dgoFRpNO3O6XrOICTdhPDPPuzm` (org `team_Jd4GkDOHmAEoirEFN3Jqc1W2`) — middleware.ts DELETED 2026-07-08 (was the 500-blocker; no auth-gated routes at launch). Build green: 181 venue pages SSG. Redeploy pending.
-**Stripe SPM:** `stripe-ios@23.32.0` resolved in pbxproj, CardPaymentView still uses stub.
+**Vercel Project:** `prj_c8dgoFRpNO3O6XrOICTdhPDPPuzm` (org `team_Jd4GkDOHmAEoirEFN3Jqc1W2`) — **LIVE at `https://barpass-v2.vercel.app`** (deployed 2026-07-14). Env vars set on Vercel: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, VENUE_VALIDATION_SECRET. Still missing on Vercel: STRIPE_SECRET_KEY, OPENAI_API_KEY (add when available). iOS `APIClient.baseURL` points here now (old `barpass-miami.vercel.app` Express/Firestore backend was never deployed and is dead).
+**Stripe SPM:** `stripe-ios@23.32.0` resolved in pbxproj, `CardPaymentView` does real client-side tokenization + calls `/api/transactions` (real Stripe PaymentIntent server-side) — needs `STRIPE_SECRET_KEY` set on Vercel to actually charge.
+**Apple Developer Program:** ACTIVE (paid, 2026-07-14). Team ID `7JZ8VD5L6B`. Entitlements (`BarPass.entitlements`) now wired into the build via `CODE_SIGN_ENTITLEMENTS`. Sign In with Apple code complete (`NativeAuthView` + `AuthService.signInWithApple`). **Remaining manual step:** enable Sign In with Apple / MusicKit / Apple Pay capabilities in Xcode → Signing & Capabilities (one-time, 2FA-gated, can't be done via CLI).
 
 ---
 
@@ -248,41 +249,42 @@ Sign Out
 - Design System expansion (fonts, entrance, accessibility, shimmer)
 - 0 Swift 6 warnings in Release
 
-### ❌ PENDING / KNOWN ISSUES
+### ❌ PENDING / KNOWN ISSUES (actualizado 2026-07-14)
 
-- **Vercel v2 deployment** — middleware.ts uses deprecated pattern for Next.js 16. All routes return 500.
-- **Stripe** — SPM added but `CardPaymentView` uses stub payment method. No real tokenization.
-- **Apple Sign In capability** — not enabled in Xcode. Code in `NativeAuthView` expects it.
+- **Apple capabilities** — Sign In with Apple / MusicKit / Apple Pay tienen código completo pero necesitan habilitarse en Xcode → Signing & Capabilities (2FA-gated, manual, un solo click por capability). Team ID `7JZ8VD5L6B` ya paga y listo.
+- **Stripe live** — `STRIPE_SECRET_KEY` no está seteada ni local ni en Vercel. `/api/transactions`, `/api/wallet/topup` devuelven 503 `payments_not_configured` hasta que se agregue.
 - **OpenAI key** — missing. AI Concierge (`/api/concierge`) won't work.
 - **Onboarding videos** — 6 Higgsfield clips not yet generated. View is placeholder.
 - **MapLibre** — works locally but not deployed.
 - **Supabase trips/night_plans tables** — `SupabaseTripRepository` and `SupabasePlanRepository` are placeholders. Trips persist on disk only.
-- **Apple Pay** — placeholder merchant ID `merchant.com.barpass.app`.
+- **Apple Pay merchant ID** — código apunta a `merchant.com.barpass.app` (ya no es placeholder), pero el merchant ID en sí todavía no está registrado en el portal.
 - **PrivacyInfo.xcprivacy** — declares collected data but may need App Store review confirmation.
-- **Remove `AppleSignInHelpers.swift` and `ApplePayHelpers.swift`** — if they still exist as dead references.
 
 ---
 
-## Product Readiness Checklist
+## Product Readiness Checklist (actualizado 2026-07-14)
 
 ### 🔴 Crítico (blocker para cobrar)
-- [ ] **Stripe SDK** — código listo en `CardPaymentView.swift`. Tokenización real pendiente.
-- [ ] **Apple Pay** — merchant account verificado
-- [ ] **Wallet top-up** — pago real
-- [ ] **Apple Sign In** — habilitar capability en Xcode + configurar en Apple Developer portal
-- [ ] **Privacy Policy + Terms of Service** — URLs públicas
-- [ ] **Verificación de edad** — 21+
+- [x] **Backend de pagos** — `/api/transactions` real (Stripe PaymentIntent + Supabase `orders`), deployado en `barpass-v2.vercel.app`
+- [x] **Wallet top-up** — `/api/wallet/topup` + `/api/wallet/spend`, balance atómico en Supabase
+- [x] **Privacy Policy + Terms of Service** — `/legal/privacy`, `/legal/terms`, linkeados desde el login
+- [x] **Verificación de edad 21+** — `AgeGateView`, bloqueante, post-login
+- [ ] **Stripe live** — falta pegar `STRIPE_SECRET_KEY` real (local + Vercel)
+- [ ] **Apple Pay** — merchant ID registrado en el portal + capability habilitada en Xcode
+- [ ] **Apple Sign In** — código listo, falta habilitar capability en Xcode (3 clicks)
 
 ### 🟡 Importante (App Store)
-- [ ] Apple Developer account activa ($99/año)
+- [x] Apple Developer account activa ($99/año) — **ACTIVA desde 2026-07-14**
+- [x] QR único por orden + validación en venue (`/validate`, tabla `passes`, redención atómica)
+- [x] Sistema de órdenes en Supabase (no Firestore)
 - [ ] Screenshots (6.7" y 6.1")
-- [ ] QR único por orden + validación en venue
-- [ ] Sistema de órdenes en Supabase (no Firestore)
+- [ ] TestFlight
 
 ### 🟢 Post-lanzamiento
-- [ ] Push notifications (FCM)
-- [ ] Historial de órdenes
-- [ ] Dashboard para venues
+- [x] Historial de órdenes (`OrderHistoryView` en Profile)
+- [x] Dashboard para venues (`/dashboard`)
+- [x] Recordatorios locales (pase por vencer, mesa por empezar) — sin APNs
+- [ ] Push notifications remoto (FCM/APNs) — bloqueado por certificado APNs (Xcode + portal)
 - [ ] Crashlytics + Analytics
 - [ ] TestFlight
 - [ ] Ejecutar `schema.sql` en Supabase SQL editor para crear tablas `trips`/`stops`/`night_plans`
