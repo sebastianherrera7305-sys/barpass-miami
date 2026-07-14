@@ -15,6 +15,7 @@ struct RootView: View {
                 }
                 .ignoresSafeArea()
                 .transition(.opacity)
+                .task { await AppleMusicPlaybackService.playTopSongs() }
             } else {
                 BPBackgroundView()
             }
