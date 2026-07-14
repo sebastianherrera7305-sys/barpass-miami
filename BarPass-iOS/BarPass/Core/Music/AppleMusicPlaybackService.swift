@@ -21,21 +21,8 @@ enum AppleMusicPlaybackService {
         }
 
         do {
-            var songs: [Song] = []
-
-            // Intro fija — sin esto el pedido explícito de "arrancar con
-            // Prospa" se perdería en el shuffle general. MusicKit no permite
-            // recortar solo el intro de un track: suena la canción completa.
-            if let intro = try await introSong() {
-                songs.append(intro)
-                log("intro: \(intro.title) — \(intro.artistName)")
-            } else {
-                log("intro de Prospa no encontrada en el catálogo")
-            }
-
-            let loveSongs = try await catalogSongs(term: "love songs", excluding: songs)
-            log("love songs: +\(loveSongs.count) canciones")
-            songs.append(contentsOf: loveSongs)
+            var songs = try await freeYourMindFromLoveSongs()
+            log("Free Your Mind desde 'Love Songs': \(songs.count) canciones")
 
             if songs.count < minimumQueueLength {
                 let fill = try await catalogFillSongs(excluding: songs)
@@ -49,32 +36,40 @@ enum AppleMusicPlaybackService {
 
             let player = ApplicationMusicPlayer.shared
             player.queue = ApplicationMusicPlayer.Queue(for: songs)
-            // Shuffle apagado a propósito: el intro tiene que sonar primero,
-            // no mezclado en cualquier posición.
+            // Shuffle apagado a propósito: el álbum tiene que sonar en su
+            // orden real, no mezclado.
             player.state.shuffleMode = .off
             try await player.play()
-            log("play() OK — \(songs.count) canciones en cola, intro fija + love songs")
+            log("play() OK — \(songs.count) canciones en cola")
         } catch {
             log("ERROR: \(error)")
         }
     }
 
-    /// Busca el track de Prospa del álbum "Free Your Mind" en el catálogo
-    /// de Apple Music — no reproduce archivos propios, solo cola contenido
-    /// real del catálogo (igual que el resto del autoplay).
-    private static func introSong() async throws -> Song? {
-        var request = MusicCatalogSearchRequest(term: "Prospa Free Your Mind", types: [Song.self])
-        request.limit = 1
-        let response = try await request.response()
-        return response.songs.first
-    }
+    /// Busca el álbum "Free Your Mind" de Prospa en el catálogo de Apple
+    /// Music y arma la cola en orden real de álbum, arrancando en el track
+    /// "Love Songs" (no es un mood genérico — es el nombre del track).
+    private static func freeYourMindFromLoveSongs() async throws -> [Song] {
+        var albumRequest = MusicCatalogSearchRequest(term: "Prospa Free Your Mind", types: [Album.self])
+        albumRequest.limit = 1
+        let albumResponse = try await albumRequest.response()
+        guard let album = albumResponse.albums.first else {
+            log("álbum 'Free Your Mind' de Prospa no encontrado en el catálogo")
+            return []
+        }
 
-    private static func catalogSongs(term: String, excluding: [Song]) async throws -> [Song] {
-        var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
-        request.limit = 25
-        let response = try await request.response()
-        let existingIDs = Set(excluding.map(\.id))
-        return response.songs.filter { !existingIDs.contains($0.id) }
+        let detailedAlbum = try await album.with(.tracks)
+        guard let tracks = detailedAlbum.tracks else { return [] }
+
+        let songs = tracks.compactMap { track -> Song? in
+            if case .song(let song) = track { return song }
+            return nil
+        }
+        guard let startIndex = songs.firstIndex(where: { $0.title.localizedCaseInsensitiveContains("Love Songs") }) else {
+            log("track 'Love Songs' no encontrado en el álbum — arranca desde el track 1")
+            return songs
+        }
+        return Array(songs[startIndex...])
     }
 
     private static func log(_ message: String) {
