@@ -23,6 +23,10 @@ export const nightPlanSchema = z.object({
 
 export const conciergeRequestSchema = z.object({
   prompt: z.string().min(2).max(600),
+  // Slugs ya recomendados en esta sesión — sin esto, Remy le manda el mismo
+  // catálogo completo en el mismo orden cada vez y termina repitiendo las
+  // mismas venues turno tras turno.
+  excludeSlugs: z.array(z.string()).max(30).optional(),
 });
 
 export type ValidatedNightPlan = z.infer<typeof nightPlanSchema>;

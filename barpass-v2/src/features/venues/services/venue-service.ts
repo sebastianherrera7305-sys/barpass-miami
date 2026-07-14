@@ -10,6 +10,16 @@ import { VENUES } from "../data/venues";
  * Supabase when configured, falls back to the local catalog otherwise.
  */
 
+// ── Data-source honesty ───────────────────────────────────────
+// Antes, si Supabase fallaba o no estaba configurado, el catálogo local
+// hardcodeado (VENUES) se servía en silencio como si fuera data real y
+// actualizada — el usuario no tenía forma de saber que veía precios/horarios
+// desactualizados. Este flag lo expone para que la UI pueda avisar.
+let _isServingLiveData = true;
+export function isServingLiveData(): boolean {
+  return _isServingLiveData;
+}
+
 // ── Supabase helpers ──────────────────────────────────────────
 
 interface DbVenue {
@@ -163,10 +173,14 @@ async function restGet<T>(path: string): Promise<T> {
 }
 
 async function fetchVenuesUncached(): Promise<Venue[]> {
-  if (!isSupabaseConfigured()) return VENUES;
+  if (!isSupabaseConfigured()) {
+    _isServingLiveData = false;
+    return VENUES;
+  }
   try {
     const data = await restGet<DbVenue[]>("venues?select=*&order=name");
     const venues = data.map(mapDbVenue);
+    _isServingLiveData = true;
 
     try {
       const eventData = await restGet<DbEvent[]>("events?select=*&order=starts_at");
@@ -192,6 +206,7 @@ async function fetchVenuesUncached(): Promise<Venue[]> {
     return venues;
   } catch (e) {
     console.warn("Supabase venue fetch failed, falling back to local:", e);
+    _isServingLiveData = false;
     return VENUES;
   }
 }

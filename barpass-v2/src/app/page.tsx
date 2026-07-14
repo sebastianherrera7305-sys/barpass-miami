@@ -5,6 +5,7 @@ import {
   getHappyHourVenues,
   getVenuesByNeighborhood,
   getAllEvents,
+  isServingLiveData,
 } from "@/features/venues/services/venue-service";
 import { VenueRow } from "@/features/discover/components/venue-row";
 import { getSmartCollections } from "@/features/intelligence/services/collections";
@@ -19,9 +20,15 @@ export default async function DiscoverPage() {
       getAllEvents(),
       getSmartCollections(),
     ]);
+  const isLive = isServingLiveData();
 
   return (
     <div className="mx-auto max-w-6xl space-y-10 pt-8">
+      {!isLive && (
+        <div className="mx-6 rounded-2xl border border-amber-brand/30 bg-amber-brand/10 px-4 py-3 text-sm text-amber-brand">
+          Showing demo data — live venue info is temporarily unavailable.
+        </div>
+      )}
       <section className="px-6">
         <p className="text-[11px] font-bold uppercase tracking-[4px] text-amber-brand">
           Miami · Tonight

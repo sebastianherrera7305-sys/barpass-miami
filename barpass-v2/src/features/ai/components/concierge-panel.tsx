@@ -10,12 +10,26 @@ import { NightPlanCard } from "./night-plan-card";
 
 export function ConciergePanel() {
   const [prompt, setPrompt] = useState("");
+  // Slugs de todas las venues que Remy ya recomendó en esta sesión — sin
+  // esto, cada plan nuevo vuelve a ver el catálogo completo desde cero y
+  // termina repitiendo las mismas venues turno tras turno.
+  const [shownSlugs, setShownSlugs] = useState<string[]>([]);
   const concierge = useConcierge();
 
   const submit = (text: string) => {
     const clean = text.trim();
     if (!clean || concierge.isPending) return;
-    concierge.mutate(clean);
+    concierge.mutate(
+      { prompt: clean, excludeSlugs: shownSlugs },
+      {
+        onSuccess: (plan) => {
+          setShownSlugs((prev) => [
+            ...prev,
+            ...plan.stops.map((s) => s.venueSlug),
+          ]);
+        },
+      },
+    );
   };
 
   return (
@@ -108,7 +122,7 @@ export function ConciergePanel() {
         >
           <p className="text-sm text-danger">
             {concierge.error.message === "ai_not_configured"
-              ? "Remy isn't connected yet — add OPENAI_API_KEY to the concierge."
+              ? "Remy isn't connected yet — add GEMINI_API_KEY to the concierge."
               : "Couldn't build your plan. Try again in a moment."}
           </p>
           <Button
