@@ -118,6 +118,32 @@ enum BPSpacing {
     static func error() { UINotificationFeedbackGenerator().notificationOccurred(.error) }
 }
 
+/// Fondo de la app — antes negro/blanco plano en las 24 pantallas.
+/// Ahora un resplandor "Deep Cosmos" sutil (glow púrpura-ámbar arriba,
+/// cayendo a negro en los bordes) — un solo punto de cambio para todas
+/// las pantallas, sin assets nuevos que pesen.
+struct BPBackgroundView: View {
+    var body: some View {
+        Group {
+            if AppearanceStore.isDark {
+                RadialGradient(
+                    colors: [
+                        Color(red: 0.14, green: 0.09, blue: 0.15),
+                        Color(red: 0.07, green: 0.05, blue: 0.09),
+                        Color.black,
+                    ],
+                    center: UnitPoint(x: 0.5, y: 0.15),
+                    startRadius: 0,
+                    endRadius: 650
+                )
+            } else {
+                Color.bpBackground
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
 extension Color {
     // Theme-aware accent tokens — the active theme supplies the pair, every
     // view keeps using these names (see ThemeService).

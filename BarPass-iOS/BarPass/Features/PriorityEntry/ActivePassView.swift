@@ -13,7 +13,7 @@ struct ActivePassView: View {
 
     var body: some View {
         ZStack {
-            Color.bpBackground.ignoresSafeArea()
+            BPBackgroundView()
 
             VStack(spacing: 0) {
                 // Header

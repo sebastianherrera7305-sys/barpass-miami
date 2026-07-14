@@ -16,7 +16,7 @@ struct CartView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
 
                 if cart.isEmpty {
                     emptyState

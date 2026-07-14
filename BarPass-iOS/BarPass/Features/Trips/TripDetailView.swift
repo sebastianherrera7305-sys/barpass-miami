@@ -14,7 +14,7 @@ struct TripDetailView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 20) {

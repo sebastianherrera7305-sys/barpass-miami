@@ -23,7 +23,7 @@ struct PriorityEntryHubView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
 
                 VStack(spacing: 0) {
                     header

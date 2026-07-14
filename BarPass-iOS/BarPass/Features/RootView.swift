@@ -16,7 +16,7 @@ struct RootView: View {
                 .ignoresSafeArea()
                 .transition(.opacity)
             } else {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
             }
 
             if appState.showSplash {

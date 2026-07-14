@@ -11,7 +11,7 @@ struct JoinRequestModal: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
                 ScrollView {
                     VStack(spacing: 14) {
                         if stop.pendingStopRequests.isEmpty {
@@ -125,7 +125,7 @@ struct RatingPrompt: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
                 VStack(spacing: 22) {
                     Text("¿Cómo estuvo salir con \(rateeName)?")
                         .font(.bpScaled(18, weight: .bold)).foregroundStyle(Color.bpInk)

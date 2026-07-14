@@ -18,7 +18,7 @@ struct TripCreateFlow: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
 
                 switch step {
                 case 0: titleStep

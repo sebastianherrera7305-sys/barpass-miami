@@ -53,7 +53,7 @@ struct TonightView: View {
 
     var body: some View {
         ZStack {
-            Color.bpBackground.ignoresSafeArea()
+            BPBackgroundView()
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BPSpacing.xl) {

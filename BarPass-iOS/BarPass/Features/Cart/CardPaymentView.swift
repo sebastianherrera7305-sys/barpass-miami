@@ -25,7 +25,7 @@ struct CardPaymentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
 
                 ScrollView {
                     VStack(spacing: 20) {

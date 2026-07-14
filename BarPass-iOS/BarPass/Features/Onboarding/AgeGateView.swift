@@ -14,7 +14,7 @@ struct AgeGateView: View {
 
     var body: some View {
         ZStack {
-            Color.bpBackground.ignoresSafeArea()
+            BPBackgroundView()
 
             VStack(spacing: 28) {
                 Spacer()

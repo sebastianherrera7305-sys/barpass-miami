@@ -10,7 +10,7 @@ struct OrderHistoryView: View {
 
     var body: some View {
         ZStack {
-            Color.bpBackground.ignoresSafeArea()
+            BPBackgroundView()
 
             if isLoading {
                 ProgressView().tint(Color.bpAmber)

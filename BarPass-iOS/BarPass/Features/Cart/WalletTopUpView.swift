@@ -26,7 +26,7 @@ struct WalletTopUpView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
                 ScrollView {
                     VStack(spacing: 22) {
                         amountPicker.padding(.top, 8)

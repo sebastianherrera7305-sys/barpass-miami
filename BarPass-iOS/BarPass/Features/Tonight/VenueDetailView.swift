@@ -14,7 +14,7 @@ struct VenueDetailView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.bpBackground.ignoresSafeArea()
+            BPBackgroundView()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {

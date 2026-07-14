@@ -142,7 +142,7 @@ struct PostComposer: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         Text("¿Cómo estuvo \(venue.name)?")

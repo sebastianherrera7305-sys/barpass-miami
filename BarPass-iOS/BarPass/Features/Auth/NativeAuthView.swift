@@ -78,7 +78,7 @@ struct NativeAuthView: View {
 
     var body: some View {
         ZStack {
-            Color.bpBackground.ignoresSafeArea()
+            BPBackgroundView()
 
             LinearGradient(
                 colors: [Color.bpInk.opacity(0.03), .clear],

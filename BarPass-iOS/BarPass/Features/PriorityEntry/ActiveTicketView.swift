@@ -8,13 +8,12 @@ struct ActiveTicketView: View {
 
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
-    private let bg    = Color.bpBackground
 
     @State private var pulse = false
 
     var body: some View {
         ZStack {
-            bg.ignoresSafeArea()
+            BPBackgroundView()
 
             ScrollView {
                 VStack(spacing: 0) {

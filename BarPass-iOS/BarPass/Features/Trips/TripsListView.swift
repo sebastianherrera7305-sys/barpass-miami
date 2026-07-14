@@ -15,7 +15,7 @@ struct TripsListView: View {
 
     var body: some View {
         ZStack {
-            Color.bpBackground.ignoresSafeArea()
+            BPBackgroundView()
 
             if let error = tripStore.loadError {
                 errorView(error)

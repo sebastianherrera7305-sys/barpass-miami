@@ -52,7 +52,7 @@ struct SkipLinePassView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.bpBackground.ignoresSafeArea()
+                BPBackgroundView()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
