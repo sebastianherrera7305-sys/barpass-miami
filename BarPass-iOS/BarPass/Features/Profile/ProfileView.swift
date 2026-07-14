@@ -5,6 +5,7 @@ struct ProfileView: View {
     @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var themeService = ThemeService.shared
     @ObservedObject private var appearanceStore = AppearanceStore.shared
+    @ObservedObject private var autoplay = AutoplayPreference.shared
     @ObservedObject private var engine = PointsEngine.shared
     @State private var animateStats = false
     @State private var showToast = false
@@ -328,6 +329,31 @@ struct ProfileView: View {
                     .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
                     .padding(.horizontal, BPSpacing.lg)
+
+                    // Autoplay — apagado real, no solo el X de la barra flotante.
+                    HStack {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Música automática")
+                                .font(.bpScaled(15, weight: .bold))
+                                .foregroundStyle(Color.bpInk)
+                            Text("Reproduce tu música de Apple Music al abrir la app")
+                                .font(.bpScaled(11))
+                                .foregroundStyle(Color.bpTextSecondary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: $autoplay.enabled)
+                            .labelsHidden()
+                            .tint(Color.bpAmber)
+                            .onChange(of: autoplay.enabled) { _, on in
+                                BPHaptics.light()
+                                if !on { MusicNowPlayingObserver.shared.stop() }
+                            }
+                    }
+                    .padding(18)
+                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
+                    .padding(.horizontal, BPSpacing.lg)
+                    .bpAccessibility(label: "Música automática", hint: autoplay.enabled ? "Activada, reproduce música al abrir la app" : "Desactivada", isButton: true)
 
                     // Account
                     VStack(alignment: .leading, spacing: 12) {
