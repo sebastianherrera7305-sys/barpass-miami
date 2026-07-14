@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 import { getVenues } from "@/features/venues/services/venue-service";
 import { buildConciergeSystemPrompt } from "@/features/ai/services/concierge-prompt";
 import {
@@ -12,8 +12,8 @@ import {
  * Body: { prompt: string }
  * Returns: NightPlan JSON validated against nightPlanSchema.
  *
- * The OpenAI key lives ONLY here (server-side). The client never talks to
- * the model directly.
+ * Gemini Flash (free tier at Google AI Studio) — the key lives ONLY here
+ * (server-side). The client never talks to the model directly.
  */
 export async function POST(request: Request) {
   let body: unknown;
@@ -27,25 +27,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_request" }, { status: 400 });
   }
 
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json({ error: "ai_not_configured" }, { status: 503 });
   }
 
   const venues = await getVenues();
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      response_format: { type: "json_object" },
-      temperature: 0.9,
-      messages: [
-        { role: "system", content: buildConciergeSystemPrompt(venues) },
-        { role: "user", content: parsed.data.prompt },
-      ],
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [{ role: "user", parts: [{ text: parsed.data.prompt }] }],
+      config: {
+        systemInstruction: buildConciergeSystemPrompt(venues),
+        responseMimeType: "application/json",
+        temperature: 0.9,
+      },
     });
 
-    const raw = completion.choices[0]?.message?.content ?? "{}";
+    const raw = response.text ?? "{}";
     const plan = nightPlanSchema.safeParse(JSON.parse(raw));
 
     if (!plan.success) {
