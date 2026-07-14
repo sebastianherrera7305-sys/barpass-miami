@@ -39,6 +39,7 @@ struct ArtistPlay: Codable, Hashable {
     let name: String
     let plays: Int              // aproximado; cada proveedor reporta lo que tiene
     let genres: [String]        // puede estar vacío si el proveedor no lo da
+    var imageURL: URL?          // opcional — no todos los proveedores lo dan
 }
 
 /// Peso relativo de un género en la escucha del usuario (0…1).

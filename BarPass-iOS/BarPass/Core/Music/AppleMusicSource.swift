@@ -46,6 +46,7 @@ final class AppleMusicSource: MusicSource {
         // Artistas: conteo real de apariciones en recently-played.
         var artistCounts: [String: Int] = [:]
         var artistGenres: [String: Set<String>] = [:]
+        var artistArtwork: [String: URL] = [:]
         var genreCounts: [String: Int] = [:]
 
         for song in songs {
@@ -55,12 +56,20 @@ final class AppleMusicSource: MusicSource {
                 artistGenres[artist, default: []].insert(g)
                 genreCounts[g, default: 0] += 1
             }
+            // MusicKit no expone foto de artista en recently-played — el artwork
+            // del álbum es el proxy visual más honesto sin requests extra.
+            if artistArtwork[artist] == nil, let url = song.artwork?.url(width: 300, height: 300) {
+                artistArtwork[artist] = url
+            }
         }
 
         let artists = artistCounts
             .sorted { $0.value > $1.value }
             .prefix(15)
-            .map { ArtistPlay(name: $0.key, plays: $0.value, genres: Array(artistGenres[$0.key] ?? [])) }
+            .map {
+                ArtistPlay(name: $0.key, plays: $0.value, genres: Array(artistGenres[$0.key] ?? []),
+                           imageURL: artistArtwork[$0.key])
+            }
 
         let totalGenre = max(genreCounts.values.reduce(0, +), 1)
         let genres = genreCounts

@@ -10,7 +10,7 @@ enum HypeEngine {
         let energy: Int             // 0-100
         let nightPersonality: String
         let topGenres: [GenreWeight]
-        let topArtists: [String]
+        let topArtists: [ArtistPlay]
         let newDiscoveries: [String]
     }
 
@@ -61,7 +61,7 @@ enum HypeEngine {
             energy: Int((energy * 100).rounded()),
             nightPersonality: personality(energy: energy, genres: snapshot.genres, diversity: diversity),
             topGenres: Array(snapshot.genres.prefix(5)),
-            topArtists: Array(snapshot.artists.prefix(5).map(\.name)),
+            topArtists: Array(snapshot.artists.prefix(5)),
             newDiscoveries: Array(discoveries.prefix(5))
         )
     }
@@ -84,20 +84,21 @@ enum HypeEngine {
         guard let first = snapshots.first else { return nil }
         guard snapshots.count > 1 else { return first }
 
-        var plays: [String: (name: String, plays: Int, genres: Set<String>)] = [:]
+        var plays: [String: (name: String, plays: Int, genres: Set<String>, imageURL: URL?)] = [:]
         var genreW: [String: Double] = [:]
         for snap in snapshots {
             for a in snap.artists {
                 let k = a.name.lowercased()
-                var e = plays[k] ?? (a.name, 0, [])
+                var e = plays[k] ?? (a.name, 0, [], nil)
                 e.plays += a.plays
                 e.genres.formUnion(a.genres)
+                if e.imageURL == nil { e.imageURL = a.imageURL }
                 plays[k] = e
             }
             for g in snap.genres { genreW[g.genre.lowercased(), default: 0] += g.weight }
         }
         let artists = plays.values.sorted { $0.plays > $1.plays }.prefix(15)
-            .map { ArtistPlay(name: $0.name, plays: $0.plays, genres: Array($0.genres)) }
+            .map { ArtistPlay(name: $0.name, plays: $0.plays, genres: Array($0.genres), imageURL: $0.imageURL) }
         let total = max(genreW.values.reduce(0, +), 0.001)
         let genres = genreW.sorted { $0.value > $1.value }.prefix(8)
             .map { GenreWeight(genre: $0.key, weight: $0.value / total) }
@@ -106,17 +107,48 @@ enum HypeEngine {
                              capturedAt: Date(), source: first.source)
     }
 
+    /// El vocabulario de venue.musicGenres es un set fijo de 10 categorías de
+    /// nightlife (EDM, House, Latin, Hip-Hop...). Apple Music/Spotify devuelven
+    /// géneros reales del mundo (rock, country, indie, trap...) que casi nunca
+    /// coinciden textualmente — sin esta tabla, esos usuarios daban match 0 en
+    /// TODOS los venues. Tabla transparente, no ML: cada entrada documenta a
+    /// qué categoría de venue pertenece experiencialmente ese género real.
+    private static let genreSynonyms: [MusicGenre: Set<String>] = [
+        .edm:       ["electronic", "techno", "trance", "dubstep", "dance", "drum and bass", "dnb", "big room"],
+        .house:     ["deep house", "tropical house", "dance", "disco", "afro house"],
+        .latin:     ["salsa", "bachata", "merengue", "latin trap", "latin pop", "regional mexican", "cumbia", "latin"],
+        .hipHop:    ["rap", "trap", "drill", "hip-hop", "hip hop"],
+        .reggaeton: ["latin trap", "dembow", "reggaeton"],
+        .pop:       ["dance pop", "electropop", "k-pop", "teen pop", "pop"],
+        .live:      ["rock", "indie", "alternative", "folk", "singer-songwriter", "country", "blues", "acoustic", "punk", "metal"],
+        .jazz:      ["soul", "blues", "lounge", "swing", "jazz"],
+        .techHouse: ["techno", "minimal", "deep house", "tech house"],
+        .rnb:       ["soul", "funk", "neo soul", "r&b", "rnb"],
+    ]
+
     /// Venue matching: cruza géneros del passport con venue.musicGenres (0…1).
     static func musicMatch(passport: MusicPassport, venue: BarPassVenue) -> Double {
         guard !passport.topGenres.isEmpty, !venue.musicGenres.isEmpty else { return 0 }
-        let venueGenres = venue.musicGenres.map { $0.rawValue.lowercased() }
         var score = 0.0
         for gw in passport.topGenres {
             let g = gw.genre.lowercased()
-            if venueGenres.contains(where: { g.contains($0) || $0.contains(g) }) {
-                score += gw.weight
+            let hit = venue.musicGenres.contains { venueGenre in
+                let vg = venueGenre.rawValue.lowercased()
+                if g.contains(vg) || vg.contains(g) { return true }
+                return genreSynonyms[venueGenre]?.contains { g.contains($0) || $0.contains(g) } ?? false
             }
+            if hit { score += gw.weight }
         }
         return min(score * 1.6, 1.0)   // normalización suave: 2-3 géneros cruzados ≈ match alto
+    }
+
+    /// Venues ordenados por afinidad musical — la base de "Esta noche, para vos".
+    static func matchedVenues(passport: MusicPassport, venues: [BarPassVenue], minScore: Double = 0.35, limit: Int = 10) -> [BarPassVenue] {
+        venues
+            .map { ($0, musicMatch(passport: passport, venue: $0)) }
+            .filter { $0.1 >= minScore }
+            .sorted { $0.1 > $1.1 }
+            .prefix(limit)
+            .map(\.0)
     }
 }

@@ -146,7 +146,8 @@ final class SpotifySource: NSObject, MusicSource, @unchecked Sendable {
         guard 200..<300 ~= http.statusCode else { throw MusicSourceError.network("HTTP \(http.statusCode)") }
 
         struct TopArtists: Codable {
-            struct Item: Codable { let name: String; let genres: [String] }
+            struct Image: Codable { let url: String }
+            struct Item: Codable { let name: String; let genres: [String]; let images: [Image] }
             let items: [Item]
         }
         let top = try JSONDecoder().decode(TopArtists.self, from: data)
@@ -154,10 +155,15 @@ final class SpotifySource: NSObject, MusicSource, @unchecked Sendable {
 
         // El ranking implica frecuencia: peso decreciente por posición.
         var genreCounts: [String: Double] = [:]
-        let artists = top.items.enumerated().map { i, item in
+        let artists = top.items.enumerated().map { i, item -> ArtistPlay in
             let weight = Double(top.items.count - i)
             for g in item.genres { genreCounts[g, default: 0] += weight }
-            return ArtistPlay(name: item.name, plays: top.items.count - i, genres: item.genres)
+            return ArtistPlay(
+                name: item.name,
+                plays: top.items.count - i,
+                genres: item.genres,
+                imageURL: item.images.first.flatMap { URL(string: $0.url) }
+            )
         }
         let total = max(genreCounts.values.reduce(0, +), 1)
         let genres = genreCounts.sorted { $0.value > $1.value }.prefix(8)

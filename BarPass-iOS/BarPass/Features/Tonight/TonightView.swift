@@ -38,6 +38,13 @@ struct TonightView: View {
         venueStore.venues.filter { favorites.ids.contains($0.id) }
     }
 
+    /// Venues que matchean con la música conectada del usuario — el resultado
+    /// accionable del Hype card, no solo un número decorativo.
+    private var musicMatchedVenues: [BarPassVenue] {
+        guard let passport = MusicProfileStore.shared.passport else { return [] }
+        return HypeEngine.matchedVenues(passport: passport, venues: venueStore.venues, limit: 12)
+    }
+
     private var moodVenues: [BarPassVenue] {
         guard let tag = selectedTag, let mood = moods.first(where: { $0.label == tag }) else { return [] }
         return venueStore.venues.filter { matches($0, mood) }
@@ -81,6 +88,10 @@ struct TonightView: View {
                     } else {
                         if !favoriteVenues.isEmpty {
                             section(title: "❤️ Tus favoritos", venues: favoriteVenues, style: .card)
+                        }
+
+                        if !musicMatchedVenues.isEmpty {
+                            section(title: "🎵 Esta noche, para vos", venues: musicMatchedVenues, style: .hero)
                         }
 
                         if !tonightEvents.isEmpty {

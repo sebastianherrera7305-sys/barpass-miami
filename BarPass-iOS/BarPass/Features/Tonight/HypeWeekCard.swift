@@ -109,9 +109,7 @@ struct HypeWeekCard: View {
                     .font(.bpScaled(11, weight: .semibold)).foregroundStyle(Color.bpTextSecondary)
             }
             if !p.topArtists.isEmpty {
-                Text("Definiendo tu semana: \(p.topArtists.prefix(3).joined(separator: ", "))")
-                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
-                    .lineLimit(1)
+                artistRow(p.topArtists)
             }
             if !p.newDiscoveries.isEmpty {
                 Text("✨ \(p.newDiscoveries.count) artista\(p.newDiscoveries.count == 1 ? "" : "s") nuevo\(p.newDiscoveries.count == 1 ? "" : "s") esta semana")
@@ -123,6 +121,39 @@ struct HypeWeekCard: View {
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpAmber.opacity(0.2)))
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: "Tu hype semanal: \(p.energy) por ciento high energy, personalidad \(p.nightPersonality)")
+    }
+
+    /// Fila de artistas con foto real — antes esto era solo texto plano.
+    private func artistRow(_ artists: [ArtistPlay]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Definiendo tu semana")
+                .font(.bpScaled(9, weight: .bold)).foregroundStyle(Color.bpTextTertiary)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(artists.prefix(8), id: \.name) { artist in
+                        VStack(spacing: 4) {
+                            CachedImage(url: artist.imageURL, targetSize: CGSize(width: 56, height: 56)) { image in
+                                image.resizable().scaledToFill()
+                            } placeholder: {
+                                Circle().fill(Color.bpInk.opacity(0.08))
+                                    .overlay(Text("🎤").font(.bpScaled(16)))
+                            }
+                            .frame(width: 52, height: 52)
+                            .clipShape(Circle())
+                            .overlay(Circle().strokeBorder(Color.bpAmber.opacity(0.25)))
+
+                            Text(artist.name)
+                                .font(.bpScaled(9, weight: .semibold))
+                                .foregroundStyle(Color.bpTextSecondary)
+                                .lineLimit(1)
+                                .frame(width: 56)
+                        }
+                    }
+                }
+            }
+        }
+        .bpAccessibility(label: "Tus artistas de la semana: \(artists.prefix(5).map(\.name).joined(separator: ", "))")
     }
 
     /// Apple Music bloqueado (falta registro MusicKit) → Spotify como alternativa real.

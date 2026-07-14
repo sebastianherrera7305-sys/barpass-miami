@@ -5,7 +5,7 @@ import SwiftUI
 /// La escucha cruda NUNCA sale del teléfono (ver MUSIC_INTELLIGENCE.md §0).
 struct MusicPassport: Codable {
     var topGenres: [GenreWeight]
-    var topArtists: [String]
+    var topArtists: [ArtistPlay]
     var hypeScore: Int
     var energy: Int
     var nightPersonality: String
