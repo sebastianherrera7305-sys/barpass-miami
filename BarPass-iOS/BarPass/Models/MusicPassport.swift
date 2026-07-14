@@ -85,6 +85,14 @@ final class MusicProfileStore: ObservableObject {
         case .notDetermined, .authorized: break
         }
         await refresh(kind)
+
+        // El autoplay de RootView solo corre una vez, al montar la pantalla
+        // principal — si en ese momento el usuario todavía no había
+        // conectado Apple Music (instalación nueva), nunca se reintentaba.
+        // Disparar acá también cubre "conectar recién ahora, en esta sesión".
+        if kind == .appleMusic, state == .connected {
+            await AppleMusicPlaybackService.playTopSongs()
+        }
     }
 
     func refresh(_ kind: MusicSourceKind) async {
