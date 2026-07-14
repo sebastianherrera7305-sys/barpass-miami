@@ -5,7 +5,7 @@ import CryptoKit
 /// Configuración de Spotify. Crear app gratis en developer.spotify.com,
 /// agregar redirect URI `barpass://spotify-callback` y pegar el Client ID.
 enum SpotifyConfig {
-    static let clientID = ""   // ← pegar Client ID aquí
+    static let clientID = "cd8eacb94ab34679a7c8f3484b4e803d"
     static let redirectURI = "barpass://spotify-callback"
     static let scopes = "user-top-read"
 }
