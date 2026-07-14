@@ -352,22 +352,36 @@ struct EventTicketsView: View {
     }
 
     private func purchaseWithWallet() {
+        guard let session = AuthService.shared.restoreSession() else { return }
         isProcessing = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            appState.walletBalance -= total
-            isProcessing = false
-            let ticket = EventTicket.new(
-                eventName: eventName, venueName: venueName, venueId: venueId,
-                eventDate: eventDate, quantity: quantity,
-                package: selectedPkg.name, amount: total, payMethod: "BarPass Wallet"
-            )
-            activeTicket = ticket
-            showTicket   = true
-            registerTicket(ticket)
+        Task {
+            do {
+                let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: total)
+                await MainActor.run {
+                    appState.walletBalance = newBalance
+                    isProcessing = false
+                    let ticket = EventTicket.new(
+                        eventName: eventName, venueName: venueName, venueId: venueId,
+                        eventDate: eventDate, quantity: quantity,
+                        package: selectedPkg.name, amount: total, payMethod: "BarPass Wallet"
+                    )
+                    activeTicket = ticket
+                    showTicket   = true
+                    registerTicket(ticket)
+                }
+            } catch {
+                await MainActor.run { isProcessing = false }
+            }
         }
     }
 
     private func registerTicket(_ ticket: EventTicket) {
+        NotificationService.shared.scheduleExpiryReminder(
+            title: "Tu ticket vence pronto",
+            body: "Te quedan 15 minutos para usar tu entrada a \(ticket.eventName) en \(ticket.venueName).",
+            validUntil: ticket.expiresAt
+        )
+
         guard let session = AuthService.shared.restoreSession() else { return }
         Task {
             await APIClient.registerPass(

@@ -77,6 +77,10 @@
 		L10N02000000000000RP01 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10N01000000000000RP01 /* LocalizationService.swift */; };
 		THEM02000000000000RP01 /* ThemeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = THEM01000000000000RP01 /* ThemeService.swift */; };
 		XPEN02000000000000RP01 /* PointsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = XPEN01000000000000RP01 /* PointsEngine.swift */; };
+		WLT002000000000000RP01 /* WalletService.swift in Sources */ = {isa = PBXBuildFile; fileRef = WLT001000000000000RP01 /* WalletService.swift */; };
+		WLT004000000000000RP01 /* WalletTopUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WLT003000000000000RP01 /* WalletTopUpView.swift */; };
+		WLT006000000000000RP01 /* OrderHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WLT005000000000000RP01 /* OrderHistoryView.swift */; };
+		WLT008000000000000RP01 /* OrderHistoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = WLT007000000000000RP01 /* OrderHistoryService.swift */; };
 		AGGT02000000000000RP01 /* AgeGateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AGGT01000000000000RP01 /* AgeGateService.swift */; };
 		AGGT04000000000000RP01 /* AgeGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AGGT03000000000000RP01 /* AgeGateView.swift */; };
 		RVSM02000000000000RP01 /* ReviewSummaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVSM01000000000000RP01 /* ReviewSummaryService.swift */; };
@@ -170,6 +174,10 @@
 		L10N01000000000000RP01 /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocalizationService.swift; path = BarPass/Core/Services/LocalizationService.swift; sourceTree = SOURCE_ROOT; };
 		THEM01000000000000RP01 /* ThemeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ThemeService.swift; path = BarPass/Core/Services/ThemeService.swift; sourceTree = SOURCE_ROOT; };
 		XPEN01000000000000RP01 /* PointsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PointsEngine.swift; path = BarPass/Core/Services/PointsEngine.swift; sourceTree = SOURCE_ROOT; };
+		WLT001000000000000RP01 /* WalletService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WalletService.swift; path = BarPass/Core/Services/WalletService.swift; sourceTree = SOURCE_ROOT; };
+		WLT003000000000000RP01 /* WalletTopUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WalletTopUpView.swift; path = BarPass/Features/Cart/WalletTopUpView.swift; sourceTree = SOURCE_ROOT; };
+		WLT005000000000000RP01 /* OrderHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrderHistoryView.swift; path = BarPass/Features/Profile/OrderHistoryView.swift; sourceTree = SOURCE_ROOT; };
+		WLT007000000000000RP01 /* OrderHistoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrderHistoryService.swift; path = BarPass/Core/Services/OrderHistoryService.swift; sourceTree = SOURCE_ROOT; };
 		AGGT01000000000000RP01 /* AgeGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateService.swift; path = BarPass/Core/Services/AgeGateService.swift; sourceTree = SOURCE_ROOT; };
 		AGGT03000000000000RP01 /* AgeGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateView.swift; path = BarPass/Features/Onboarding/AgeGateView.swift; sourceTree = SOURCE_ROOT; };
 		RVSM01000000000000RP01 /* ReviewSummaryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ReviewSummaryService.swift; path = BarPass/Core/Services/ReviewSummaryService.swift; sourceTree = SOURCE_ROOT; };
@@ -556,6 +564,10 @@
 				L10N02000000000000RP01 /* LocalizationService.swift in Sources */,
 				THEM02000000000000RP01 /* ThemeService.swift in Sources */,
 				XPEN02000000000000RP01 /* PointsEngine.swift in Sources */,
+				WLT002000000000000RP01 /* WalletService.swift in Sources */,
+				WLT004000000000000RP01 /* WalletTopUpView.swift in Sources */,
+				WLT006000000000000RP01 /* OrderHistoryView.swift in Sources */,
+				WLT008000000000000RP01 /* OrderHistoryService.swift in Sources */,
 				AGGT02000000000000RP01 /* AgeGateService.swift in Sources */,
 				AGGT04000000000000RP01 /* AgeGateView.swift in Sources */,
 				HYWC02000000000000RP01 /* HypeWeekCard.swift in Sources */,

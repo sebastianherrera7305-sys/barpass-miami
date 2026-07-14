@@ -419,13 +419,19 @@ struct TableReservationView: View {
     }
 
     private func payWithWallet() {
-        guard !isProcessing else { return }
+        guard !isProcessing, let session = AuthService.shared.restoreSession() else { return }
         isProcessing = true
         Task {
-            try? await Task.sleep(for: .milliseconds(700))
-            isProcessing = false
-            appState.walletBalance -= selectedPackage.deposit
-            completeReservation(method: "🪙 BarPass Wallet")
+            do {
+                let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: selectedPackage.deposit)
+                await MainActor.run {
+                    isProcessing = false
+                    appState.walletBalance = newBalance
+                    completeReservation(method: "🪙 BarPass Wallet")
+                }
+            } catch {
+                await MainActor.run { isProcessing = false }
+            }
         }
     }
 
@@ -441,6 +447,12 @@ struct TableReservationView: View {
         )
         reservation = r
         showConfirm = true
+
+        NotificationService.shared.scheduleUpcomingReminder(
+            title: "Tu mesa está por empezar",
+            body: "Tu reserva en \(r.venueName) es en 30 minutos.",
+            at: r.date
+        )
 
         if let session = AuthService.shared.restoreSession() {
             Task {

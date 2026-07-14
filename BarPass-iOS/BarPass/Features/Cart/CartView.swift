@@ -7,6 +7,7 @@ struct CartView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var showCardSheet = false
+    @State private var showTopUp     = false
     @State private var isProcessing  = false
 
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
@@ -52,6 +53,10 @@ struct CartView: View {
                 items:     cart.items,
                 onSuccess: handleOrderSuccess
             )
+        }
+        .sheet(isPresented: $showTopUp) {
+            WalletTopUpView(onSuccess: { _ in })
+                .environmentObject(appState)
         }
     }
 
@@ -148,8 +153,10 @@ struct CartView: View {
                         )
                     }
 
-                    if appState.walletBalance > 0 {
+                    if appState.walletBalance >= cart.total {
                         walletButton
+                    } else {
+                        topUpPrompt
                     }
 
                     cardButton
@@ -203,6 +210,37 @@ struct CartView: View {
         .bpAccessibility(label: "Pagar con BarPass Wallet", hint: "Usa el saldo de tu billetera BarPass para pagar", isButton: true)
     }
 
+    // MARK: - Top up prompt
+
+    private var topUpPrompt: some View {
+        Button { showTopUp = true } label: {
+            HStack(spacing: 12) {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.bpInk.opacity(0.06))
+                    .frame(width: 40, height: 40)
+                    .overlay(Image(systemName: "plus.circle").font(.bpScaled(16)).foregroundStyle(Color.bpInk.opacity(0.5)))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Cargar BarPass Wallet")
+                        .font(.bpScaled(14, weight: .semibold))
+                        .foregroundStyle(Color.bpInk.opacity(0.8))
+                    Text(appState.walletBalance > 0
+                         ? String(format: "Balance: $%.2f — no alcanza para esta orden", appState.walletBalance)
+                         : "Cargá saldo y pagá más rápido la próxima vez")
+                        .font(.bpScaled(11))
+                        .foregroundStyle(Color.bpInk.opacity(0.35))
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.bpScaled(12, weight: .semibold)).foregroundStyle(Color.bpInk.opacity(0.2))
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 13)
+            .background(RoundedRectangle(cornerRadius: 14).fill(Color.bpInk.opacity(0.04))
+                .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpInk.opacity(0.08))))
+        }
+        .buttonStyle(.plain)
+        .bpAccessibility(label: "Cargar BarPass Wallet", hint: "Abre la pantalla para agregar saldo a tu billetera", isButton: true)
+    }
+
     // MARK: - Card button
 
     private var cardButton: some View {
@@ -242,19 +280,28 @@ struct CartView: View {
     }
 
     private func payWithWallet() {
-        guard appState.walletBalance >= cart.total else { return }
+        guard appState.walletBalance >= cart.total, let session = AuthService.shared.restoreSession() else { return }
         isProcessing = true
         Task {
-            try? await Task.sleep(for: .milliseconds(600))
-            handleOrderSuccess(method: "BarPass Wallet")
+            do {
+                let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: cart.total)
+                await MainActor.run {
+                    appState.walletBalance = newBalance
+                    handleOrderSuccess(method: "BarPass Wallet")
+                }
+            } catch {
+                await MainActor.run { isProcessing = false }
+            }
         }
     }
 
+    // NOTE: wallet debits happen in payWithWallet() before this is called —
+    // this must NOT touch walletBalance, or Apple Pay/card orders (which
+    // also call this) would silently drain the wallet too.
     private func handleOrderSuccess(method: String) {
         isProcessing = false
         let total = cart.total
         let items = cart.items.map { "\($0.emoji) \($0.name)" }.joined(separator: ", ")
-        appState.walletBalance = max(0, appState.walletBalance - total)
         cart.clear()
         dismiss()
         appState.lastOrderConfirmation = OrderConfirmation(

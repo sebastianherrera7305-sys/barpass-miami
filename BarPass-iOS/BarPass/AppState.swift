@@ -53,6 +53,7 @@ final class AppState: ObservableObject {
     func completeAuth() {
         withAnimation(.easeOut(duration: 0.1)) { showNativeAuth = false }
         appReady = true
+        refreshWalletBalance()
         if !AgeGateService.isVerified {
             showAgeGate = true
         } else {
@@ -67,4 +68,14 @@ final class AppState: ObservableObject {
         withAnimation(.easeOut(duration: 0.15).delay(0.1)) { showActionBar = true }
     }
 
+    /// Pulls the real balance from Supabase — walletBalance always starts at
+    /// 0 locally, so this is the only thing that should ever raise it,
+    /// besides a successful top-up's direct response.
+    func refreshWalletBalance() {
+        guard let session = AuthService.shared.restoreSession() else { return }
+        Task {
+            let balance = await WalletService.fetchBalance(session: session)
+            await MainActor.run { self.walletBalance = balance }
+        }
+    }
 }

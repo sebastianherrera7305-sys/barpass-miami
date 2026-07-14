@@ -9,6 +9,7 @@ struct ProfileView: View {
     @State private var animateStats = false
     @State private var showToast = false
     @State private var showGames = false
+    @State private var showTopUp = false
 
     private var points: Int { engine.totalXP }
     private var level: String { engine.levelName }
@@ -103,6 +104,57 @@ struct ProfileView: View {
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.15)))
                     .accessibilityElement(children: .ignore)
                     .bpAccessibility(label: "BarPass Points \(points) BPX", hint: "Tus puntos y progreso al siguiente nivel")
+                    .padding(.horizontal, BPSpacing.lg)
+
+                    // BarPass Wallet
+                    Button {
+                        BPHaptics.light()
+                        showTopUp = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text("🪙").font(.bpScaled(22))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("BarPass Wallet")
+                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
+                                Text(String(format: "Balance: $%.2f — tocá para cargar", appState.walletBalance))
+                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.bpScaled(13, weight: .semibold))
+                                .foregroundStyle(Color.bpAmber)
+                        }
+                        .padding(16)
+                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
+                    }
+                    .buttonStyle(.plain)
+                    .bpAccessibility(label: "BarPass Wallet", hint: "Ver balance y cargar saldo", isButton: true)
+                    .padding(.horizontal, BPSpacing.lg)
+
+                    // Mis pases (historial)
+                    NavigationLink {
+                        OrderHistoryView()
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text("🎟️").font(.bpScaled(22))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Mis pases y órdenes")
+                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
+                                Text("Historial de compras y pases")
+                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.bpScaled(13, weight: .semibold))
+                                .foregroundStyle(Color.bpAmber)
+                        }
+                        .padding(16)
+                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
+                    }
+                    .buttonStyle(.plain)
+                    .bpAccessibility(label: "Mis pases y órdenes", hint: "Ver historial de compras y pases", isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
 
                     // Juegos y misiones
@@ -359,6 +411,10 @@ struct ProfileView: View {
         .sheet(isPresented: $showGames) {
             GamificationView()
                 .presentationBackground(.black)
+        }
+        .sheet(isPresented: $showTopUp) {
+            WalletTopUpView(onSuccess: { _ in })
+                .environmentObject(appState)
         }
         .onChange(of: engine.lastAward?.xp) { _, newValue in
             guard newValue != nil else { return }

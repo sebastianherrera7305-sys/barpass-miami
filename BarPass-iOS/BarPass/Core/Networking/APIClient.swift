@@ -125,4 +125,49 @@ enum APIClient {
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         _ = try? await URLSession.shared.data(for: request)
     }
+
+    /// Charges a card and credits the amount to BarPass Wallet via
+    /// POST /wallet/topup. Returns the new balance from the server —
+    /// the source of truth, never computed locally.
+    static func topUpWallet(idToken: String, amount: Double, stripePaymentMethodId: String) async throws -> Double {
+        try await postJSON(
+            path: "wallet/topup",
+            idToken: idToken,
+            body: ["amount": amount, "stripePaymentMethodId": stripePaymentMethodId]
+        )
+    }
+
+    /// Debits BarPass Wallet via POST /wallet/spend. Returns the new balance.
+    /// Throws `.server("insufficient_funds")` if the server-side balance
+    /// (not the possibly-stale local one) can't cover the amount.
+    static func spendWallet(idToken: String, amount: Double) async throws -> Double {
+        try await postJSON(path: "wallet/spend", idToken: idToken, body: ["amount": amount])
+    }
+
+    /// POSTs JSON, expects `{ success: true, balance: <number> }`, returns `balance`.
+    private static func postJSON(path: String, idToken: String, body: [String: Any]) async throws -> Double {
+        var request = URLRequest(url: baseURL.appendingPathComponent(path))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw APIClientError.network(error.localizedDescription)
+        }
+        guard let http = response as? HTTPURLResponse else { throw APIClientError.invalidResponse }
+
+        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+
+        guard (200..<300).contains(http.statusCode) else {
+            let message = (json["message"] as? String) ?? (json["error"] as? String)
+                ?? "No se pudo procesar la operación (\(http.statusCode))."
+            throw APIClientError.server(message)
+        }
+        guard let balance = json["balance"] as? Double else { throw APIClientError.invalidResponse }
+        return balance
+    }
 }

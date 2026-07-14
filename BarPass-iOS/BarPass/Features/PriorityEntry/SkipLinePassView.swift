@@ -354,13 +354,19 @@ struct SkipLinePassView: View {
     // MARK: - Completion
 
     private func payWithWallet() {
-        guard !isProcessing else { return }
+        guard !isProcessing, let session = AuthService.shared.restoreSession() else { return }
         isProcessing = true
         Task {
-            try? await Task.sleep(for: .milliseconds(600))
-            isProcessing = false
-            appState.walletBalance -= selected.price
-            completePass(method: "🪙 BarPass Wallet")
+            do {
+                let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: selected.price)
+                await MainActor.run {
+                    isProcessing = false
+                    appState.walletBalance = newBalance
+                    completePass(method: "🪙 BarPass Wallet")
+                }
+            } catch {
+                await MainActor.run { isProcessing = false }
+            }
         }
     }
 
@@ -374,6 +380,12 @@ struct SkipLinePassView: View {
         )
         activePass = pass
         showPass   = true
+
+        NotificationService.shared.scheduleExpiryReminder(
+            title: "Tu Skip the Line vence pronto",
+            body: "Te quedan 15 minutos para usar tu pase en \(pass.venueName).",
+            validUntil: pass.validUntil
+        )
 
         if let session = AuthService.shared.restoreSession() {
             Task {
