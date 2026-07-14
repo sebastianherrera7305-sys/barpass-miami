@@ -24,6 +24,9 @@ enum AppleMusicPlaybackService {
 
             let player = ApplicationMusicPlayer.shared
             player.queue = ApplicationMusicPlayer.Queue(for: songs)
+            // Sin esto, cada apertura de la app arranca por la misma canción
+            // en el mismo orden — se siente repetitivo sesión tras sesión.
+            player.state.shuffleMode = .songs
             try await player.play()
         } catch {
             // Silencioso a propósito: un fallo de reproducción de fondo
