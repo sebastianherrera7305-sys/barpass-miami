@@ -144,6 +144,43 @@ enum AppleMusicPlaybackService {
         } catch {
             log("AVAudioSession setCategory/setActive falló: \(error)")
         }
+        registerInterruptionHandling()
+    }
+
+    private static var interruptionObserverRegistered = false
+
+    /// Una llamada entrante o arrancar una grabación de pantalla interrumpe
+    /// la sesión de audio — comportamiento normal de iOS, no un bug. El bug
+    /// era no reaccionar: sin este observer, la música quedaba pausada para
+    /// siempre después de la interrupción, en vez de retomar cuando termina.
+    private static func registerInterruptionHandling() {
+        guard !interruptionObserverRegistered else { return }
+        interruptionObserverRegistered = true
+
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(),
+            queue: .main
+        ) { notification in
+            guard let info = notification.userInfo,
+                  let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+                  let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
+
+            switch type {
+            case .began:
+                log("interrupción de audio (llamada, grabación de pantalla, otra app) — pausado")
+            case .ended:
+                let optionsValue = info[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
+                let shouldResume = AVAudioSession.InterruptionOptions(rawValue: optionsValue).contains(.shouldResume)
+                log("interrupción terminó — shouldResume: \(shouldResume)")
+                guard shouldResume else { return }
+                Task { @MainActor in
+                    try? await ApplicationMusicPlayer.shared.play()
+                }
+            @unknown default:
+                break
+            }
+        }
     }
 
     private static func log(_ message: String) {
