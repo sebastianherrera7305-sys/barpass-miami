@@ -96,6 +96,21 @@ final class AuthService: @unchecked Sendable {
         return try await signIn(email: email, password: password)
     }
 
+    /// Exchanges an Apple identity token for a Supabase session via the
+    /// `id_token` grant. `nonce` is the raw (unhashed) value whose SHA-256
+    /// digest was sent to Apple in the original authorization request —
+    /// Supabase re-hashes it server-side to verify the token wasn't replayed.
+    @discardableResult
+    func signInWithApple(idToken: String, nonce: String) async throws -> AuthSession {
+        let session = try await tokenRequest(
+            grant: "id_token",
+            body: ["provider": "apple", "id_token": idToken, "nonce": nonce]
+        )
+        store(session)
+        BPAnalytics.track(.signIn(method: "apple", duration: 0))
+        return session
+    }
+
     func sendPasswordReset(email: String) async throws {
         var request = URLRequest(url: URL(string: "\(Self.baseURL)/recover")!)
         request.httpMethod = "POST"

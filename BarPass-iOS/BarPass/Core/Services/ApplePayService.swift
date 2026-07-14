@@ -31,8 +31,10 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
         let total = PKPaymentSummaryItem(label: "BarPass", amount: NSDecimalNumber(decimal: amount))
 
         let request = PKPaymentRequest()
-        /// Replace with real merchant ID from Apple Developer before App Store submission
-        request.merchantIdentifier   = "REPLACE_BEFORE_LAUNCH.merchant.com.barpass.app"
+        // Must match the merchant ID registered in the Apple Developer portal
+        // (Certificates, Identifiers & Profiles → Merchant IDs) and the
+        // com.apple.developer.in-app-payments entry in BarPass.entitlements.
+        request.merchantIdentifier   = "merchant.com.barpass.app"
         request.supportedNetworks    = [.visa, .masterCard, .amex, .discover]
         request.merchantCapabilities = .threeDSecure
         request.paymentSummaryItems  = [item, total]

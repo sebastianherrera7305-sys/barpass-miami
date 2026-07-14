@@ -1,4 +1,6 @@
 import SwiftUI
+import AuthenticationServices
+import CryptoKit
 
 // MARK: - Auth Metrics
 
@@ -65,6 +67,7 @@ struct NativeAuthView: View {
 
     // Performance tracking
     @State private var lastMetrics: AuthMetrics?
+    @State private var appleNonce = ""
 
     private let amber  = Color.bpAmber
     private let amberB = Color.bpAmberBright
@@ -151,6 +154,10 @@ struct NativeAuthView: View {
             divider
                 .padding(.horizontal, 24)
                 .padding(.top, 28)
+
+            appleSignInButton
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
 
             skipButton
                 .padding(.top, 20)
@@ -439,6 +446,71 @@ struct NativeAuthView: View {
                 .fill(Color.bpInk.opacity(0.07))
                 .frame(height: 1)
         }
+    }
+
+    // MARK: - Sign in with Apple
+
+    private var appleSignInButton: some View {
+        SignInWithAppleButton(.signIn) { request in
+            let nonce = Self.randomNonce()
+            appleNonce = nonce
+            request.requestedScopes = [.email, .fullName]
+            request.nonce = Self.sha256(nonce)
+        } onCompletion: { result in
+            handleAppleSignIn(result)
+        }
+        .signInWithAppleButtonStyle(.white)
+        .frame(height: 52)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .disabled(flowState.isLoading)
+        .bpAccessibility(label: "Continuar con Apple", hint: "Inicia sesión usando tu Apple ID", isButton: true)
+    }
+
+    private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
+        switch result {
+        case .failure(let error):
+            let nsError = error as NSError
+            // User cancelled the sheet — not a real error, don't show a toast.
+            if nsError.code == ASAuthorizationError.canceled.rawValue { return }
+            withAnimation { flowState = .failure(error.localizedDescription) }
+        case .success(let authorization):
+            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                  let tokenData = credential.identityToken,
+                  let idToken = String(data: tokenData, encoding: .utf8)
+            else {
+                withAnimation { flowState = .failure("No se pudo verificar tu Apple ID.") }
+                return
+            }
+            let nonce = appleNonce
+            withAnimation { flowState = .signingIn }
+            Task {
+                do {
+                    _ = try await AuthService.shared.signInWithApple(idToken: idToken, nonce: nonce)
+                    await MainActor.run { appState.completeAuth() }
+                } catch {
+                    await MainActor.run { withAnimation { flowState = .failure(error.localizedDescription) } }
+                }
+            }
+        }
+    }
+
+    private static func randomNonce(length: Int = 32) -> String {
+        let chars = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        var result = ""
+        var remaining = length
+        while remaining > 0 {
+            var random: UInt8 = 0
+            _ = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
+            if random < chars.count {
+                result.append(chars[Int(random)])
+                remaining -= 1
+            }
+        }
+        return result
+    }
+
+    private static func sha256(_ input: String) -> String {
+        SHA256.hash(data: Data(input.utf8)).map { String(format: "%02x", $0) }.joined()
     }
 
     // MARK: - Forgot Password
