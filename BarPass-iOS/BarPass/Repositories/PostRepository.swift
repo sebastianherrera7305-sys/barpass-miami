@@ -13,8 +13,12 @@ actor LocalPostRepository: PostRepository {
     private var cache: [VenuePost]?
 
     init() {
-        let base = FileManager.default
-            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        // .first! crasheaba en cualquier sandbox donde applicationSupportDirectory
+        // viniera vacío (raro, pero no imposible) — .temporaryDirectory siempre
+        // existe y es un fallback seguro (los posts igual se re-sincronizan del
+        // backend si se pierden).
+        let base = (FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory)
             .appendingPathComponent("BarPassPosts", isDirectory: true)
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
         fileURL = base.appendingPathComponent("posts.json")
@@ -62,6 +66,16 @@ actor SupabasePostRepository: PostRepository {
     private static let anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyaGRlenppZGRmcmt0dnRnemJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODM1NjksImV4cCI6MjA5ODk1OTU2OX0.vzgIE7JPL8vN0fWVGkf-AvUCH1iWTioHjZpxcuSRBRo"
 
     private let local = LocalPostRepository()
+
+    /// Construye URLs de PostgREST con percent-encoding real — la
+    /// interpolación directa de venueId/postId en un string podía crashear
+    /// (force-unwrap) si algún ID alguna vez traía caracteres que
+    /// necesitaran encoding.
+    private static func restURL(path: String, queryItems: [URLQueryItem]) -> URL? {
+        var components = URLComponents(string: "\(supabaseURL)/rest/v1/\(path)")
+        components?.queryItems = queryItems
+        return components?.url
+    }
 
     private struct Row: Codable {
         let id: UUID
@@ -123,7 +137,10 @@ actor SupabasePostRepository: PostRepository {
     func delete(_ post: VenuePost) async throws {
         try? await local.delete(post)
         guard let session = AuthService.shared.restoreSession() else { return }
-        var request = URLRequest(url: URL(string: "\(Self.supabaseURL)/rest/v1/venue_posts?id=eq.\(post.id.lowercased())")!)
+        guard let url = Self.restURL(path: "venue_posts", queryItems: [
+            URLQueryItem(name: "id", value: "eq.\(post.id.lowercased())"),
+        ]) else { return }
+        var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
         request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
@@ -131,7 +148,11 @@ actor SupabasePostRepository: PostRepository {
     }
 
     private func fetchRemote(venueId: String) async throws -> [VenuePost] {
-        let url = URL(string: "\(Self.supabaseURL)/rest/v1/venue_posts?venue_id=eq.\(venueId.lowercased())&order=created_at.desc&limit=50")!
+        guard let url = Self.restURL(path: "venue_posts", queryItems: [
+            URLQueryItem(name: "venue_id", value: "eq.\(venueId.lowercased())"),
+            URLQueryItem(name: "order", value: "created_at.desc"),
+            URLQueryItem(name: "limit", value: "50"),
+        ]) else { throw URLError(.badURL) }
         var request = URLRequest(url: url)
         request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")

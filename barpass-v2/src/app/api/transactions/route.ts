@@ -13,11 +13,20 @@ import { z } from "zod";
 
 const TAX_RATE = 0.07; // Florida
 
+// TODO(pricing): there is no products/menu table yet — `unitPrice` is
+// whatever the client sends, so a modified client can charge itself $0.01
+// for anything. Real fix is a server-side price catalog to validate
+// productId -> price against. Until that exists, these bounds are a stopgap
+// that blocks the obvious abuse case (near-zero or wildly inflated prices)
+// without blocking legitimate orders.
+const MIN_UNIT_PRICE = 0.5;
+const MAX_UNIT_PRICE = 5000;
+
 const itemSchema = z.object({
   productId: z.string().min(1),
   name: z.string().min(1),
-  qty: z.number().positive(),
-  unitPrice: z.number().nonnegative(),
+  qty: z.number().positive().max(50),
+  unitPrice: z.number().min(MIN_UNIT_PRICE).max(MAX_UNIT_PRICE),
 });
 
 const transactionRequestSchema = z.object({

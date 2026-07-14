@@ -12,6 +12,7 @@ struct TableReservationView: View {
     @State private var guestCount:      Int          = 2
     @State private var selectedSlot:    Int          = 0
     @State private var isProcessing:    Bool         = false
+    @State private var paymentError:    String?
     @State private var reservation:     TableReservation?
     @State private var showConfirm:     Bool         = false
 
@@ -286,6 +287,22 @@ struct TableReservationView: View {
             // Summary card
             summaryCard.padding(.horizontal, 20).padding(.top, 24)
 
+            if let paymentError {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.bpScaled(12))
+                        .foregroundStyle(Color.bpDanger)
+                    Text(paymentError)
+                        .font(.bpScaled(12, weight: .semibold))
+                        .foregroundStyle(Color.bpDanger)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+                .transition(.opacity)
+                .bpAccessibility(label: "Error de pago: \(paymentError)")
+            }
+
             VStack(spacing: 10) {
                 if PKPaymentAuthorizationController.canMakePayments() {
                     applePayBtn
@@ -421,6 +438,7 @@ struct TableReservationView: View {
     private func payWithWallet() {
         guard !isProcessing, let session = AuthService.shared.restoreSession() else { return }
         isProcessing = true
+        paymentError = nil
         Task {
             do {
                 let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: selectedPackage.deposit)
@@ -430,7 +448,12 @@ struct TableReservationView: View {
                     completeReservation(method: "🪙 BarPass Wallet")
                 }
             } catch {
-                await MainActor.run { isProcessing = false }
+                await MainActor.run {
+                    isProcessing = false
+                    paymentError = (error as? LocalizedError)?.errorDescription
+                        ?? "No pudimos procesar el pago. Intentá de nuevo."
+                    BPHaptics.error()
+                }
             }
         }
     }

@@ -9,6 +9,7 @@ struct CartView: View {
     @State private var showCardSheet = false
     @State private var showTopUp     = false
     @State private var isProcessing  = false
+    @State private var paymentError: String?
 
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
     private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
@@ -141,6 +142,21 @@ struct CartView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
+
+                if let paymentError {
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.bpScaled(12))
+                            .foregroundStyle(Color.bpDanger)
+                        Text(paymentError)
+                            .font(.bpScaled(12, weight: .semibold))
+                            .foregroundStyle(Color.bpDanger)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.horizontal, 20)
+                    .transition(.opacity)
+                    .bpAccessibility(label: "Error de pago: \(paymentError)")
+                }
 
                 // Payment options
                 VStack(spacing: 10) {
@@ -282,6 +298,7 @@ struct CartView: View {
     private func payWithWallet() {
         guard appState.walletBalance >= cart.total, let session = AuthService.shared.restoreSession() else { return }
         isProcessing = true
+        paymentError = nil
         Task {
             do {
                 let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: cart.total)
@@ -290,7 +307,12 @@ struct CartView: View {
                     handleOrderSuccess(method: "BarPass Wallet")
                 }
             } catch {
-                await MainActor.run { isProcessing = false }
+                await MainActor.run {
+                    isProcessing = false
+                    paymentError = (error as? LocalizedError)?.errorDescription
+                        ?? "No pudimos procesar el pago. Intentá de nuevo."
+                    BPHaptics.error()
+                }
             }
         }
     }

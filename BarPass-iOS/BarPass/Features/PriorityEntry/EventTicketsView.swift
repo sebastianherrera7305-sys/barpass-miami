@@ -12,6 +12,7 @@ struct EventTicketsView: View {
     @State private var selectedPkg:  TicketPackage = .vip
     @State private var quantity:     Int = 1
     @State private var isProcessing  = false
+    @State private var paymentError: String?
     @State private var activeTicket: EventTicket?
     @State private var showTicket    = false
 
@@ -289,6 +290,20 @@ struct EventTicketsView: View {
             .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
             .padding(.bottom, 4)
 
+            if let paymentError {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.bpScaled(12))
+                        .foregroundStyle(Color.bpDanger)
+                    Text(paymentError)
+                        .font(.bpScaled(12, weight: .semibold))
+                        .foregroundStyle(Color.bpDanger)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .transition(.opacity)
+                .bpAccessibility(label: "Error de pago: \(paymentError)")
+            }
+
             // Apple Pay
             Button { purchaseWithApplePay() } label: {
                 HStack(spacing: 8) {
@@ -353,6 +368,7 @@ struct EventTicketsView: View {
     private func purchaseWithWallet() {
         guard let session = AuthService.shared.restoreSession() else { return }
         isProcessing = true
+        paymentError = nil
         Task {
             do {
                 let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: total)
@@ -369,7 +385,12 @@ struct EventTicketsView: View {
                     registerTicket(ticket)
                 }
             } catch {
-                await MainActor.run { isProcessing = false }
+                await MainActor.run {
+                    isProcessing = false
+                    paymentError = (error as? LocalizedError)?.errorDescription
+                        ?? "No pudimos procesar el pago. Intentá de nuevo."
+                    BPHaptics.error()
+                }
             }
         }
     }
