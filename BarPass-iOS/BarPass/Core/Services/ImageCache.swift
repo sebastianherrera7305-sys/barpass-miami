@@ -68,13 +68,18 @@ struct CachedImage<Content: View, Placeholder: View>: View {
         guard let url else { return }
         if let cached = ImageCache.image(for: url) { uiImage = cached; return }
 
-        // View.task runs on the MainActor — CGImageSourceCreateWithURL there
-        // downloads AND decodes on the main thread, freezing the whole UI
-        // (the login was untouchable while 181 hidden cards loaded). All
+        // View.task runs on the MainActor — decoding there freezes the whole
+        // UI (the login was untouchable while 181 hidden cards loaded). All
         // network + decode now happens on a detached background task.
         let maxPixel = max(targetSize?.width ?? 512, targetSize?.height ?? 512) * 3
         let prio = priority
         let img = await Task.detached(priority: .utility) { () -> UIImage? in
+            // URLSession respeta URLCache.shared (disco, 256MB) — antes se
+            // usaba CGImageSourceCreateWithURL, que baja la imagen con su
+            // propia red por afuera de URLCache y nunca persistía nada:
+            // cada apertura de la app volvía a descargar TODAS las
+            // imágenes de cero, sin importar lo ya cacheado.
+            guard let (data, _) = try? await URLSession.shared.data(from: url) else { return nil }
             let opts: CFDictionary = [
                 kCGImageSourceShouldCache: false,
                 kCGImageSourceCreateThumbnailFromImageAlways: true,
@@ -82,7 +87,7 @@ struct CachedImage<Content: View, Placeholder: View>: View {
                 kCGImageSourceCreateThumbnailWithTransform: true,
                 kCGImageSourceThumbnailMaxPixelSize: maxPixel,
             ] as CFDictionary
-            guard let source = CGImageSourceCreateWithURL(url as CFURL, opts),
+            guard let source = CGImageSourceCreateWithData(data as CFData, opts),
                   let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, opts)
             else { return nil }
             return UIImage(cgImage: cg)

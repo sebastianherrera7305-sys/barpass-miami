@@ -11,6 +11,16 @@ final actor SupabaseVenueRepository: VenueRepository {
     private static let venueColumns = "id,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending"
     private static let eventColumns = "id,venue_id,title,description,starts_at,cover_price"
 
+    /// Cache en disco de la última lista real obtenida — antes el fallback
+    /// sin red era 1 sola venue hardcodeada de preview (LocalVenueRepository),
+    /// lo cual hacía que la app se sintiera rota sin conexión.
+    private static let cacheURL: URL = {
+        let base = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        return base.appendingPathComponent("BarPassVenueCache.json")
+    }()
+
     private func ensureVenues() async throws -> [BarPassVenue] {
         if let venues = loadedVenues { return venues }
         let venues = await fetchVenuesWithFallback()
@@ -20,11 +30,16 @@ final actor SupabaseVenueRepository: VenueRepository {
 
     private func fetchVenuesWithFallback() async -> [BarPassVenue] {
         do {
-            return try await fetchFromSupabase()
+            let venues = try await fetchFromSupabase()
+            persistCache(venues)
+            return venues
         } catch {
             #if DEBUG
-            print("⚠️ SupabaseVenueRepository: fetch failed, falling back to local. Error: \(error)")
+            print("⚠️ SupabaseVenueRepository: fetch failed, falling back to cache. Error: \(error)")
             #endif
+            if let cached = readCache(), !cached.isEmpty {
+                return cached
+            }
             do {
                 return try await LocalVenueRepository().getVenues()
             } catch {
@@ -34,6 +49,16 @@ final actor SupabaseVenueRepository: VenueRepository {
                 return []
             }
         }
+    }
+
+    private func persistCache(_ venues: [BarPassVenue]) {
+        guard let data = try? JSONEncoder().encode(venues) else { return }
+        try? data.write(to: Self.cacheURL, options: .atomic)
+    }
+
+    private func readCache() -> [BarPassVenue]? {
+        guard let data = try? Data(contentsOf: Self.cacheURL) else { return nil }
+        return try? JSONDecoder().decode([BarPassVenue].self, from: data)
     }
 
     private func fetchFromSupabase() async throws -> [BarPassVenue] {
