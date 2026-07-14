@@ -77,6 +77,8 @@
 		L10N02000000000000RP01 /* LocalizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = L10N01000000000000RP01 /* LocalizationService.swift */; };
 		THEM02000000000000RP01 /* ThemeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = THEM01000000000000RP01 /* ThemeService.swift */; };
 		XPEN02000000000000RP01 /* PointsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = XPEN01000000000000RP01 /* PointsEngine.swift */; };
+		AGGT02000000000000RP01 /* AgeGateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AGGT01000000000000RP01 /* AgeGateService.swift */; };
+		AGGT04000000000000RP01 /* AgeGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AGGT03000000000000RP01 /* AgeGateView.swift */; };
 		RVSM02000000000000RP01 /* ReviewSummaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVSM01000000000000RP01 /* ReviewSummaryService.swift */; };
 		RVSV02000000000000RP01 /* ReviewSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVSV01000000000000RP01 /* ReviewSummaryView.swift */; };
 		TRIV02000000000000RP01 /* TriviaEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = TRIV01000000000000RP01 /* TriviaEngine.swift */; };
@@ -168,6 +170,8 @@
 		L10N01000000000000RP01 /* LocalizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocalizationService.swift; path = BarPass/Core/Services/LocalizationService.swift; sourceTree = SOURCE_ROOT; };
 		THEM01000000000000RP01 /* ThemeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ThemeService.swift; path = BarPass/Core/Services/ThemeService.swift; sourceTree = SOURCE_ROOT; };
 		XPEN01000000000000RP01 /* PointsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PointsEngine.swift; path = BarPass/Core/Services/PointsEngine.swift; sourceTree = SOURCE_ROOT; };
+		AGGT01000000000000RP01 /* AgeGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateService.swift; path = BarPass/Core/Services/AgeGateService.swift; sourceTree = SOURCE_ROOT; };
+		AGGT03000000000000RP01 /* AgeGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateView.swift; path = BarPass/Features/Onboarding/AgeGateView.swift; sourceTree = SOURCE_ROOT; };
 		RVSM01000000000000RP01 /* ReviewSummaryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ReviewSummaryService.swift; path = BarPass/Core/Services/ReviewSummaryService.swift; sourceTree = SOURCE_ROOT; };
 		RVSV01000000000000RP01 /* ReviewSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ReviewSummaryView.swift; path = BarPass/Features/Tonight/ReviewSummaryView.swift; sourceTree = SOURCE_ROOT; };
 		TRIV01000000000000RP01 /* TriviaEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TriviaEngine.swift; path = BarPass/Core/Services/TriviaEngine.swift; sourceTree = SOURCE_ROOT; };
@@ -552,6 +556,8 @@
 				L10N02000000000000RP01 /* LocalizationService.swift in Sources */,
 				THEM02000000000000RP01 /* ThemeService.swift in Sources */,
 				XPEN02000000000000RP01 /* PointsEngine.swift in Sources */,
+				AGGT02000000000000RP01 /* AgeGateService.swift in Sources */,
+				AGGT04000000000000RP01 /* AgeGateView.swift in Sources */,
 				HYWC02000000000000RP01 /* HypeWeekCard.swift in Sources */,
 				MPAS02000000000000RP01 /* MusicPassport.swift in Sources */,
 				HYPE02000000000000RP01 /* HypeEngine.swift in Sources */,

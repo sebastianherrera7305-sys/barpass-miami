@@ -15,6 +15,7 @@ final class AppState: ObservableObject {
     @Published var showOnboarding         = false
     @Published var showActionBar          = false
     @Published var showNativeAuth         = true
+    @Published var showAgeGate            = false
     @Published var isOffline              = false
     @Published var deepLinkURL:            URL?
     @Published var showCart               = false
@@ -52,6 +53,17 @@ final class AppState: ObservableObject {
     func completeAuth() {
         withAnimation(.easeOut(duration: 0.1)) { showNativeAuth = false }
         appReady = true
+        if !AgeGateService.isVerified {
+            showAgeGate = true
+        } else {
+            withAnimation(.easeOut(duration: 0.15).delay(0.1)) { showActionBar = true }
+        }
+    }
+
+    /// Called once the user confirms they're 21+. Reveals the action bar the
+    /// same way completeAuth() would have if the gate hadn't been needed.
+    func completeAgeGate() {
+        withAnimation(.easeOut(duration: 0.15)) { showAgeGate = false }
         withAnimation(.easeOut(duration: 0.15).delay(0.1)) { showActionBar = true }
     }
 

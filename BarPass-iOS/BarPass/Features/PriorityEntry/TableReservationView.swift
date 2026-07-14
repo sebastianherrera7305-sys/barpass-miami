@@ -441,6 +441,16 @@ struct TableReservationView: View {
         )
         reservation = r
         showConfirm = true
+
+        if let session = AuthService.shared.restoreSession() {
+            Task {
+                await APIClient.registerPass(
+                    idToken: session.accessToken, passCode: r.confirmCode, kind: "table",
+                    venueId: r.venueId, venueName: r.venueName, quantity: r.guestCount,
+                    amount: r.deposit, validUntil: r.date.addingTimeInterval(4 * 3600)
+                )
+            }
+        }
     }
 }
 

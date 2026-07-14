@@ -347,6 +347,7 @@ struct EventTicketsView: View {
             )
             activeTicket = ticket
             showTicket   = true
+            registerTicket(ticket)
         }
     }
 
@@ -362,6 +363,18 @@ struct EventTicketsView: View {
             )
             activeTicket = ticket
             showTicket   = true
+            registerTicket(ticket)
+        }
+    }
+
+    private func registerTicket(_ ticket: EventTicket) {
+        guard let session = AuthService.shared.restoreSession() else { return }
+        Task {
+            await APIClient.registerPass(
+                idToken: session.accessToken, passCode: ticket.ticketCode, kind: "event_ticket",
+                venueId: ticket.venueId, venueName: ticket.venueName, quantity: ticket.quantity,
+                amount: ticket.amount, validUntil: ticket.expiresAt
+            )
         }
     }
 }

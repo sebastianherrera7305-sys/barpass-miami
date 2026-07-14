@@ -144,6 +144,10 @@ struct NativeAuthView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 24)
 
+            legalFooter
+                .padding(.horizontal, 24)
+                .padding(.top, 14)
+
             divider
                 .padding(.horizontal, 24)
                 .padding(.top, 28)
@@ -177,6 +181,29 @@ struct NativeAuthView: View {
             contentOpacity = 1
             contentY       = 0
         }
+    }
+
+    // MARK: - Legal footer
+
+    /// NOTE: update these URLs once barpass-v2 is deployed to its final domain.
+    private var legalFooter: some View {
+        HStack(spacing: 4) {
+            Text("Al continuar aceptás nuestros")
+                .font(.bpScaled(11))
+                .foregroundStyle(Color.bpInk.opacity(0.35))
+            Link("Términos", destination: URL(string: "https://barpass-v2.vercel.app/legal/terms")!)
+                .font(.bpScaled(11, weight: .semibold))
+                .foregroundStyle(amber)
+            Text("y")
+                .font(.bpScaled(11))
+                .foregroundStyle(Color.bpInk.opacity(0.35))
+            Link("Privacidad", destination: URL(string: "https://barpass-v2.vercel.app/legal/privacy")!)
+                .font(.bpScaled(11, weight: .semibold))
+                .foregroundStyle(amber)
+        }
+        .frame(maxWidth: .infinity)
+        .multilineTextAlignment(.center)
+        .bpAccessibility(label: "Términos y Privacidad", hint: "Abre los términos de servicio y política de privacidad")
     }
 
     // MARK: - Logo Section

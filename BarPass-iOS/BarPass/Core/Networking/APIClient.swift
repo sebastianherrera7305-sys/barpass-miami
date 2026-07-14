@@ -92,4 +92,37 @@ enum APIClient {
 
         return json
     }
+
+    /// Registers a Skip the Line / event ticket / table pass server-side so
+    /// its QR code has a real record door staff can check against (see
+    /// POST /passes/redeem, used by the web validation page). Best-effort:
+    /// the local pass still shows and works offline if this fails — it just
+    /// won't be checkable at the door until connectivity returns.
+    static func registerPass(
+        idToken: String,
+        passCode: String,
+        kind: String,
+        venueId: String,
+        venueName: String,
+        quantity: Int,
+        amount: Double,
+        validUntil: Date
+    ) async {
+        var request = URLRequest(url: baseURL.appendingPathComponent("passes"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+
+        let body: [String: Any] = [
+            "passCode":   passCode,
+            "kind":       kind,
+            "venueId":    venueId,
+            "venueName":  venueName,
+            "quantity":   quantity,
+            "amount":     amount,
+            "validUntil": ISO8601DateFormatter().string(from: validUntil)
+        ]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        _ = try? await URLSession.shared.data(for: request)
+    }
 }

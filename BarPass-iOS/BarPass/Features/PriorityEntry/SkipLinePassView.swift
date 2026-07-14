@@ -374,6 +374,16 @@ struct SkipLinePassView: View {
         )
         activePass = pass
         showPass   = true
+
+        if let session = AuthService.shared.restoreSession() {
+            Task {
+                await APIClient.registerPass(
+                    idToken: session.accessToken, passCode: pass.passCode, kind: "skip_line",
+                    venueId: pass.venueId, venueName: pass.venueName, quantity: pass.quantity,
+                    amount: pass.amount, validUntil: pass.validUntil
+                )
+            }
+        }
     }
 }
 

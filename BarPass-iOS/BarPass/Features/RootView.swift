@@ -41,6 +41,12 @@ struct RootView: View {
                     .zIndex(5)
             }
 
+            if appState.showAgeGate {
+                AgeGateView { appState.completeAgeGate() }
+                    .transition(.opacity)
+                    .zIndex(6)
+            }
+
             if appState.isOffline && !appState.showSplash {
                 VStack {
                     Spacer()
