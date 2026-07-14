@@ -85,11 +85,10 @@ struct VenueDetailView: View {
 
                 HStack(spacing: 12) {
                     if let passport = MusicProfileStore.shared.passport {
-                        let match = HypeEngine.musicMatch(passport: passport, venue: venue)
-                        if match >= 0.4 {
+                        if let tier = HypeEngine.musicMatchTier(passport: passport, venue: venue) {
                             HStack(spacing: 3) {
                                 Text("🎵")
-                                Text("\(Int(match * 100))% match")
+                                Text(tier.rawValue)
                             }
                             .font(.bpScaled(11, weight: .bold))
                             .foregroundStyle(.black)

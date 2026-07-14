@@ -127,6 +127,10 @@ enum HypeEngine {
     ]
 
     /// Venue matching: cruza géneros del passport con venue.musicGenres (0…1).
+    /// Esta puntuación es una heurística determinística (tabla de sinónimos +
+    /// suma de pesos), NO una probabilidad calibrada — por eso la UI nunca
+    /// debe mostrarla como "% match" (falsa precisión). Usar `musicMatchTier`
+    /// para lo que se muestra al usuario.
     static func musicMatch(passport: MusicPassport, venue: BarPassVenue) -> Double {
         guard !passport.topGenres.isEmpty, !venue.musicGenres.isEmpty else { return 0 }
         var score = 0.0
@@ -140,6 +144,23 @@ enum HypeEngine {
             if hit { score += gw.weight }
         }
         return min(score * 1.6, 1.0)   // normalización suave: 2-3 géneros cruzados ≈ match alto
+    }
+
+    enum MatchTier: String {
+        case good      = "Buen match"
+        case great     = "Gran match"
+        case excellent = "Match perfecto"
+    }
+
+    /// Traduce el score continuo (uso interno, para ordenar) a un nivel de
+    /// confianza que sí es honesto de mostrar — nil si no hay match real.
+    static func musicMatchTier(passport: MusicPassport, venue: BarPassVenue) -> MatchTier? {
+        switch musicMatch(passport: passport, venue: venue) {
+        case 0.75...:     return .excellent
+        case 0.55..<0.75: return .great
+        case 0.35..<0.55: return .good
+        default:          return nil
+        }
     }
 
     /// Venues ordenados por afinidad musical — la base de "Esta noche, para vos".

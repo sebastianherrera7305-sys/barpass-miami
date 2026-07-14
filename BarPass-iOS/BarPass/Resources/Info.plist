@@ -66,6 +66,7 @@
 	<string>BarPass accesses your photo library to set your profile picture.</string>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>audio</string>
 		<string>fetch</string>
 		<string>remote-notification</string>
 		<string>location</string>

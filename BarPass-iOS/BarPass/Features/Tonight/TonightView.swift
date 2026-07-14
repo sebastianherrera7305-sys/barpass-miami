@@ -51,6 +51,39 @@ struct TonightView: View {
             .sorted { ($0.isTrending ? 1 : 0, $0.rating) > ($1.isTrending ? 1 : 0, $1.rating) }
     }
 
+    /// Evita que la misma venue aparezca repetida en varias secciones del
+    /// mismo scroll — antes trending/happy hour/abiertos ahora/barrio no
+    /// tenían ninguna exclusión entre sí ni con favoritos/music match, así
+    /// que una venue popular podía salir 4 veces seguidas.
+    private struct DedupedFeed {
+        let trending: [BarPassVenue]
+        let happyHour: [BarPassVenue]
+        let openNow: [BarPassVenue]
+        let brickell: [BarPassVenue]
+        let southBeach: [BarPassVenue]
+        let wynwood: [BarPassVenue]
+    }
+
+    private var dedupedFeed: DedupedFeed {
+        var shown = Set(favoriteVenues.map(\.id))
+        shown.formUnion(musicMatchedVenues.map(\.id))
+
+        func take(_ venues: [BarPassVenue]) -> [BarPassVenue] {
+            let fresh = venues.filter { !shown.contains($0.id) }
+            shown.formUnion(fresh.map(\.id))
+            return fresh
+        }
+
+        return DedupedFeed(
+            trending:   take(venueStore.trending),
+            happyHour:  take(venueStore.happyHour),
+            openNow:    take(venueStore.openNow),
+            brickell:   take(venueStore.venues.filter { $0.neighborhood == "Brickell" }),
+            southBeach: take(venueStore.venues.filter { $0.neighborhood == "South Beach" }),
+            wynwood:    take(venueStore.venues.filter { $0.neighborhood == "Wynwood" })
+        )
+    }
+
     var body: some View {
         ZStack {
             BPBackgroundView()
@@ -98,21 +131,29 @@ struct TonightView: View {
                             eventsTonightSection
                         }
 
-                        if !venueStore.trending.isEmpty {
-                            section(title: "🔥 Trending ahora", venues: venueStore.trending, style: .hero)
+                        let feed = dedupedFeed
+
+                        if !feed.trending.isEmpty {
+                            section(title: "🔥 Trending ahora", venues: feed.trending, style: .hero)
                         }
 
-                        if !venueStore.happyHour.isEmpty {
-                            section(title: "🍹 Happy Hour activo", venues: venueStore.happyHour, style: .card)
+                        if !feed.happyHour.isEmpty {
+                            section(title: "🍹 Happy Hour activo", venues: feed.happyHour, style: .card)
                         }
 
-                        if !venueStore.openNow.isEmpty {
-                            section(title: "⚡ Abiertos ahora", venues: venueStore.openNow, style: .card)
+                        if !feed.openNow.isEmpty {
+                            section(title: "⚡ Abiertos ahora", venues: feed.openNow, style: .card)
                         }
 
-                        neighborhoodSection("Brickell")
-                        neighborhoodSection("South Beach")
-                        neighborhoodSection("Wynwood")
+                        if !feed.brickell.isEmpty {
+                            section(title: "📍 Brickell", venues: feed.brickell, style: .card)
+                        }
+                        if !feed.southBeach.isEmpty {
+                            section(title: "📍 South Beach", venues: feed.southBeach, style: .card)
+                        }
+                        if !feed.wynwood.isEmpty {
+                            section(title: "📍 Wynwood", venues: feed.wynwood, style: .card)
+                        }
                     }
 
                     Spacer(minLength: 120)
@@ -264,12 +305,6 @@ struct TonightView: View {
                 .padding(.horizontal, BPSpacing.lg)
             }
         }
-    }
-
-    private func neighborhoodSection(_ neighborhood: String) -> some View {
-        let filtered = venueStore.venues.filter { $0.neighborhood == neighborhood }
-        guard !filtered.isEmpty else { return AnyView(EmptyView()) }
-        return AnyView(section(title: "📍 \(neighborhood)", venues: filtered, style: .card))
     }
 
     private var greeting: String {
