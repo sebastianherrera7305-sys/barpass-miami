@@ -8,10 +8,10 @@
 	</array>
 	<key>aps-environment</key>
 	<string>development</string>
-	<key>com.apple.developer.pass-type-identifiers</key>
-	<array>
-		<string>pass.io.barpass.wallet</string>
-	</array>
+	<!-- Wallet pass-type-identifiers entitlement removed for now — pass.io.barpass.wallet
+	     needs to be registered manually at developer.apple.com (Certificates, IDs &
+	     Profiles → Identifiers → Pass Type IDs), a 2FA-gated portal action. Re-add once
+	     that's done; WalletPassService is a stub until then anyway. -->
 	<key>com.apple.developer.in-app-payments</key>
 	<array>
 		<string>merchant.com.barpass.app</string>
