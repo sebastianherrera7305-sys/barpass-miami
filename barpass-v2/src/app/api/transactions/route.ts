@@ -22,14 +22,14 @@ const TAX_RATE = 0.07; // Florida
 const MIN_UNIT_PRICE = 0.5;
 const MAX_UNIT_PRICE = 5000;
 
-const itemSchema = z.object({
+export const itemSchema = z.object({
   productId: z.string().min(1),
   name: z.string().min(1),
   qty: z.number().positive().max(50),
   unitPrice: z.number().min(MIN_UNIT_PRICE).max(MAX_UNIT_PRICE),
 });
 
-const transactionRequestSchema = z.object({
+export const transactionRequestSchema = z.object({
   vendorId: z.string().min(1),
   staffId: z.string().min(1),
   items: z.array(itemSchema).min(1),

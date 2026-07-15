@@ -10,7 +10,7 @@ import { z } from "zod";
  * Atomic via adjust_wallet_balance; never lets balance go negative.
  */
 
-const spendRequestSchema = z.object({
+export const spendRequestSchema = z.object({
   amount: z.number().positive(),
 });
 

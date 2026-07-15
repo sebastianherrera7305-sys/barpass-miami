@@ -10,7 +10,7 @@ import { z } from "zod";
  * wallet_balances (via the adjust_wallet_balance RPC) instead of orders.
  */
 
-const topUpRequestSchema = z.object({
+export const topUpRequestSchema = z.object({
   amount: z.number().positive().max(1000),
   stripePaymentMethodId: z.string().min(1),
 });

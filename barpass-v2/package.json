@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
     "enrich": "node --env-file=.env.local --import tsx scripts/enrich-venues.ts",
     "resolve-photos": "node --env-file=.env.local --import tsx scripts/resolve-photos.ts",
     "add-venues": "node --env-file=.env.local --import tsx scripts/add-venues.ts",
@@ -40,6 +41,7 @@
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
     "tsx": "^4.23.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }
