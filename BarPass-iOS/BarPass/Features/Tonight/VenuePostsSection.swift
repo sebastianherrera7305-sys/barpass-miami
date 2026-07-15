@@ -6,6 +6,7 @@ import SwiftUI
 struct VenuePostsSection: View {
     let venue: BarPassVenue
 
+    @ObservedObject private var l10n = L10n.shared
     @State private var posts: [VenuePost] = []
     @State private var isLoading = true
     @State private var showComposer = false
@@ -15,7 +16,7 @@ struct VenuePostsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("La gente dice")
+                Text(l10n.t("posts.title"))
                     .font(.bpTitle2()).foregroundStyle(Color.bpInk)
                 Spacer()
                 Button {
@@ -24,14 +25,14 @@ struct VenuePostsSection: View {
                 } label: {
                     HStack(spacing: 5) {
                         Image(systemName: "plus.bubble.fill").font(.bpScaled(12))
-                        Text("Postear").font(.bpScaled(13, weight: .bold))
+                        Text(l10n.t("posts.post")).font(.bpScaled(13, weight: .bold))
                     }
                     .foregroundStyle(.black)
                     .padding(.horizontal, 12).padding(.vertical, 8)
                     .background(Color.bpAmber, in: Capsule())
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Postear", hint: "Compartir tu experiencia en este venue", isButton: true)
+                .bpAccessibility(label: l10n.t("posts.post"), hint: l10n.t("posts.post.hint"), isButton: true)
             }
 
             if isLoading {
@@ -42,7 +43,7 @@ struct VenuePostsSection: View {
             } else if posts.isEmpty {
                 VStack(spacing: 6) {
                     Text("🥂").font(.bpScaled(30))
-                    Text("Sé el primero en contar cómo estuvo")
+                    Text(l10n.t("posts.empty"))
                         .font(.bpCaption()).foregroundStyle(Color.bpTextSecondary)
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 18)
@@ -97,16 +98,16 @@ struct VenuePostsSection: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 12) {
-                if let r = post.vibeRating { miniRating("Ambiente", r) }
-                if let r = post.drinksRating { miniRating("Tragos", r) }
-                if let r = post.musicRating { miniRating("Música", r) }
+                if let r = post.vibeRating { miniRating(l10n.t("posts.rating.vibe"), r) }
+                if let r = post.drinksRating { miniRating(l10n.t("posts.rating.drinks"), r) }
+                if let r = post.musicRating { miniRating(l10n.t("posts.rating.music"), r) }
             }
         }
         .padding(12)
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpInk.opacity(0.06)))
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Post de \(post.authorHandle): \(post.caption)", hint: "Publicación de la comunidad")
+        .bpAccessibility(label: String(format: l10n.t("posts.a11y.label"), post.authorHandle, post.caption), hint: l10n.t("posts.a11y.hint"))
     }
 
     private func miniRating(_ label: String, _ value: Int) -> some View {
@@ -129,6 +130,7 @@ struct PostComposer: View {
     let venue: BarPassVenue
     let onPost: (VenuePost) -> Void
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var caption = ""
     @State private var emoji = "🎉"
@@ -145,10 +147,10 @@ struct PostComposer: View {
                 BPBackgroundView()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        Text("¿Cómo estuvo \(venue.name)?")
+                        Text(String(format: l10n.t("posts.composer.title"), venue.name))
                             .font(.bpTitle2()).foregroundStyle(Color.bpInk)
 
-                        TextField("Contale a la gente…", text: $caption, axis: .vertical)
+                        TextField(l10n.t("posts.composer.placeholder"), text: $caption, axis: .vertical)
                             .lineLimit(3...5)
                             .focused($captionFocused)
                             .font(.bpBody()).foregroundStyle(Color.bpInk)
@@ -173,24 +175,24 @@ struct PostComposer: View {
                             }
                         }
 
-                        ratingRow("Ambiente", $vibe)
-                        ratingRow("Tragos", $drinks)
-                        ratingRow("Música", $music)
+                        ratingRow(l10n.t("posts.rating.vibe"), $vibe)
+                        ratingRow(l10n.t("posts.rating.drinks"), $drinks)
+                        ratingRow(l10n.t("posts.rating.music"), $music)
 
                         Button {
                             publish()
                         } label: {
-                            Text("Publicar")
+                            Text(l10n.t("posts.publish"))
                                 .font(.bpScaled(16, weight: .bold)).foregroundStyle(.black)
                                 .frame(maxWidth: .infinity).padding(.vertical, 15)
                                 .background(canPost ? Color.bpAmber : Color.bpAmber.opacity(0.4), in: Capsule())
                         }
                         .buttonStyle(.plain)
                         .disabled(!canPost)
-                        .bpAccessibility(label: "Publicar", hint: "Publicar tu post en este venue", isButton: true)
+                        .bpAccessibility(label: l10n.t("posts.publish"), hint: l10n.t("posts.publish.hint"), isButton: true)
 
                         if AuthService.shared.restoreSession() == nil {
-                            Text("Modo invitado: tu post se guarda en este dispositivo. Iniciá sesión para compartirlo con todos.")
+                            Text(l10n.t("posts.guestMode"))
                                 .font(.bpCaption()).foregroundStyle(Color.bpTextSecondary)
                         }
                     }
@@ -200,7 +202,7 @@ struct PostComposer: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancelar") { dismiss() }.foregroundStyle(Color.bpAmber)
+                    Button(l10n.t("tripCreate.cancel")) { dismiss() }.foregroundStyle(Color.bpAmber)
                 }
             }
         }
@@ -212,7 +214,7 @@ struct PostComposer: View {
 
     private func publish() {
         let session = AuthService.shared.restoreSession()
-        let handle = session?.user.email?.components(separatedBy: "@").first ?? "invitado"
+        let handle = session?.user.email?.components(separatedBy: "@").first ?? l10n.t("posts.guestHandle")
         let post = VenuePost(
             venueId: venue.id,
             userId: session?.user.id,

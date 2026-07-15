@@ -106,25 +106,25 @@ struct TonightView: View {
                         if moodVenues.isEmpty {
                             VStack(spacing: 8) {
                                 Text("😴").font(.bpScaled(40))
-                                Text("Nada abierto con ese mood ahora.")
+                                Text(l10n.t("home.mood.empty"))
                                     .font(.bpScaled(14)).foregroundStyle(Color.bpTextSecondary)
                             }
                             .frame(maxWidth: .infinity).padding(.vertical, 40)
                         } else {
-                            section(title: "\(tag) · \(moodVenues.count) lugares",
+                            section(title: String(format: l10n.t("home.mood.count"), tag, moodVenues.count),
                                     venues: Array(moodVenues.prefix(3)), style: .hero)
                             if moodVenues.count > 3 {
-                                section(title: "Más para este mood",
+                                section(title: l10n.t("home.mood.more"),
                                         venues: Array(moodVenues.dropFirst(3).prefix(12)), style: .card)
                             }
                         }
                     } else {
                         if !favoriteVenues.isEmpty {
-                            section(title: "❤️ Tus favoritos", venues: favoriteVenues, style: .card)
+                            section(title: l10n.t("home.favorites"), venues: favoriteVenues, style: .card)
                         }
 
                         if !musicMatchedVenues.isEmpty {
-                            section(title: "🎵 Esta noche, para vos", venues: musicMatchedVenues, style: .hero)
+                            section(title: l10n.t("home.forYou"), venues: musicMatchedVenues, style: .hero)
                         }
 
                         if !tonightEvents.isEmpty {
@@ -134,15 +134,15 @@ struct TonightView: View {
                         let feed = dedupedFeed
 
                         if !feed.trending.isEmpty {
-                            section(title: "🔥 Trending ahora", venues: feed.trending, style: .hero)
+                            section(title: l10n.t("home.trending"), venues: feed.trending, style: .hero)
                         }
 
                         if !feed.happyHour.isEmpty {
-                            section(title: "🍹 Happy Hour activo", venues: feed.happyHour, style: .card)
+                            section(title: l10n.t("home.happyHour"), venues: feed.happyHour, style: .card)
                         }
 
                         if !feed.openNow.isEmpty {
-                            section(title: "⚡ Abiertos ahora", venues: feed.openNow, style: .card)
+                            section(title: l10n.t("home.openNow"), venues: feed.openNow, style: .card)
                         }
 
                         if !feed.brickell.isEmpty {
@@ -257,7 +257,7 @@ struct TonightView: View {
 
     private var eventsTonightSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("🎟️ Esta noche")
+            Text(l10n.t("home.eventsTonight"))
                 .font(.bpScaled(20, weight: .bold))
                 .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, BPSpacing.lg)

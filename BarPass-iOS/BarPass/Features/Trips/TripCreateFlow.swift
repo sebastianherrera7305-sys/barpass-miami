@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct TripCreateFlow: View {
+    @ObservedObject private var l10n = L10n.shared
     let venues: [BarPassVenue]
     let tripStore: TripStore
     let onDismiss: () -> Void
@@ -28,20 +29,20 @@ struct TripCreateFlow: View {
                 default: EmptyView()
                 }
             }
-            .navigationTitle("Nuevo Trip")
+            .navigationTitle(l10n.t("tripCreate.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if step > 0 {
-                        Button("Atrás") {
+                        Button(l10n.t("tripCreate.back")) {
                             withAnimation { step -= 1 }
                         }
                         .foregroundStyle(amber)
-                        .bpAccessibility(label: "Atrás", hint: "Volver al paso anterior", isButton: true)
+                        .bpAccessibility(label: l10n.t("tripCreate.back"), hint: l10n.t("tripCreate.back.hint"), isButton: true)
                     } else {
-                        Button("Cancelar") { onDismiss() }
+                        Button(l10n.t("tripCreate.cancel")) { onDismiss() }
                             .foregroundStyle(Color.bpTextSecondary)
-                            .bpAccessibility(label: "Cancelar", hint: "Cancelar la creación del trip", isButton: true)
+                            .bpAccessibility(label: l10n.t("tripCreate.cancel"), hint: l10n.t("tripCreate.cancel.hint"), isButton: true)
                     }
                 }
             }
@@ -51,31 +52,31 @@ struct TripCreateFlow: View {
     private var titleStep: some View {
         VStack(spacing: 20) {
             Spacer()
-            Text("¿Cómo se llama tu plan?")
+            Text(l10n.t("tripCreate.step1.title"))
                 .font(.bpTitle2())
                 .foregroundStyle(Color.bpInk)
 
-            TextField("ej: Noche en South Beach", text: $title)
+            TextField(l10n.t("tripCreate.step1.placeholder"), text: $title)
                 .font(.bpBody())
                 .foregroundStyle(Color.bpInk)
                 .padding(14)
                 .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                 .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
                 .padding(.horizontal, BPSpacing.lg)
-                .bpAccessibility(label: "Nombre del plan", hint: "Escribí el nombre de tu plan")
+                .bpAccessibility(label: l10n.t("tripCreate.step1.label"), hint: l10n.t("tripCreate.step1.hint"))
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Ciudad")
+                Text(l10n.t("tripCreate.city"))
                     .font(.bpCaption())
                     .foregroundStyle(Color.bpTextSecondary)
 
-                TextField("ej: Miami", text: $destinationCity)
+                TextField(l10n.t("tripCreate.city.placeholder"), text: $destinationCity)
                     .font(.bpBody())
                     .foregroundStyle(Color.bpInk)
                     .padding(14)
                     .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
-                    .bpAccessibility(label: "Ciudad", hint: "Escribí la ciudad del plan")
+                    .bpAccessibility(label: l10n.t("tripCreate.city"), hint: l10n.t("tripCreate.city.hint"))
             }
             .padding(.horizontal, BPSpacing.lg)
 
@@ -87,29 +88,29 @@ struct TripCreateFlow: View {
     private var datesStep: some View {
         VStack(spacing: 20) {
             Spacer()
-            Text("¿Cuándo?")
+            Text(l10n.t("tripCreate.step2.title"))
                 .font(.bpTitle2())
                 .foregroundStyle(Color.bpInk)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Desde")
+                Text(l10n.t("tripCreate.from"))
                     .font(.bpCaption())
                     .foregroundStyle(Color.bpTextSecondary)
                 DatePicker("", selection: $startDate, displayedComponents: .date)
                     .datePickerStyle(.graphical)
                     .tint(amber)
-                    .bpAccessibility(label: "Fecha de inicio", hint: "Elegí la fecha de inicio del plan")
+                    .bpAccessibility(label: l10n.t("tripCreate.startDate"), hint: l10n.t("tripCreate.startDate.hint"))
             }
             .padding(.horizontal, BPSpacing.lg)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Hasta")
+                Text(l10n.t("tripCreate.to"))
                     .font(.bpCaption())
                     .foregroundStyle(Color.bpTextSecondary)
                 DatePicker("", selection: $endDate, in: startDate..., displayedComponents: .date)
                     .datePickerStyle(.graphical)
                     .tint(amber)
-                    .bpAccessibility(label: "Fecha de fin", hint: "Elegí la fecha de fin del plan")
+                    .bpAccessibility(label: l10n.t("tripCreate.endDate"), hint: l10n.t("tripCreate.endDate.hint"))
             }
             .padding(.horizontal, BPSpacing.lg)
 
@@ -120,12 +121,12 @@ struct TripCreateFlow: View {
 
     private var venuesStep: some View {
         VStack(spacing: 14) {
-            Text("Elegí venues")
+            Text(l10n.t("tripCreate.step3.title"))
                 .font(.bpTitle2())
                 .foregroundStyle(Color.bpInk)
                 .padding(.top, 20)
 
-            Text("Seleccioná los lugares que querés incluir")
+            Text(l10n.t("tripCreate.step3.subtitle"))
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
 
@@ -165,7 +166,7 @@ struct TripCreateFlow: View {
                             .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(selected ? amber.opacity(0.3) : Color.bpBorder))
                         }
                         .buttonStyle(.plain)
-                        .bpAccessibility(label: v.name, hint: "Seleccionar o deseleccionar este venue", isButton: true)
+                        .bpAccessibility(label: v.name, hint: l10n.t("tripCreate.venue.select.hint"), isButton: true)
                         .padding(.horizontal, BPSpacing.lg)
                     }
                 }
@@ -179,17 +180,17 @@ struct TripCreateFlow: View {
         VStack(spacing: 16) {
             Spacer()
 
-            Text("Resumen")
+            Text(l10n.t("tripCreate.summary.title"))
                 .font(.bpTitle1())
                 .foregroundStyle(Color.bpInk)
 
             VStack(spacing: 10) {
-                summaryRow("Título", title)
-                summaryRow("Ciudad", destinationCity)
-                summaryRow("Desde", startDate.formatted(date: .abbreviated, time: .omitted))
-                summaryRow("Hasta", endDate.formatted(date: .abbreviated, time: .omitted))
-                summaryRow("Visibilidad", visibility.label)
-                summaryRow("Venues", "\(selectedVenueIds.count) seleccionados")
+                summaryRow(l10n.t("tripCreate.summary.titleLabel"), title)
+                summaryRow(l10n.t("tripCreate.city"), destinationCity)
+                summaryRow(l10n.t("tripCreate.from"), startDate.formatted(date: .abbreviated, time: .omitted))
+                summaryRow(l10n.t("tripCreate.to"), endDate.formatted(date: .abbreviated, time: .omitted))
+                summaryRow(l10n.t("tripCreate.summary.visibility"), visibility.label)
+                summaryRow(l10n.t("tripCreate.summary.venues"), String(format: l10n.t("tripCreate.summary.venuesSelected"), selectedVenueIds.count))
             }
             .padding(16)
             .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
@@ -197,7 +198,7 @@ struct TripCreateFlow: View {
             Button {
                 createTrip()
             } label: {
-                Text("Crear Trip")
+                Text(l10n.t("tripCreate.createButton"))
                     .font(.bpHeadline())
                     .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
@@ -205,7 +206,7 @@ struct TripCreateFlow: View {
                     .background(amber, in: Capsule())
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Crear Trip", hint: "Confirmar y crear el nuevo trip", isButton: true)
+            .bpAccessibility(label: l10n.t("tripCreate.createButton"), hint: l10n.t("tripCreate.createButton.hint"), isButton: true)
             .padding(.horizontal, BPSpacing.lg)
 
             Spacer()
@@ -217,7 +218,7 @@ struct TripCreateFlow: View {
         Button {
             withAnimation { step += 1 }
         } label: {
-            Text("Siguiente")
+            Text(l10n.t("tripCreate.next"))
                 .font(.bpHeadline())
                 .foregroundStyle(.black)
                 .frame(maxWidth: .infinity)
@@ -225,7 +226,7 @@ struct TripCreateFlow: View {
                 .background(amber, in: Capsule())
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Siguiente", hint: "Avanzar al siguiente paso", isButton: true)
+        .bpAccessibility(label: l10n.t("tripCreate.next"), hint: l10n.t("tripCreate.next.hint"), isButton: true)
         .disabled(step == 0 && title.trimmingCharacters(in: .whitespaces).isEmpty)
         .opacity(step == 0 && title.trimmingCharacters(in: .whitespaces).isEmpty ? 0.4 : 1)
         .padding(.horizontal, BPSpacing.lg)

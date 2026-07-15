@@ -7,6 +7,7 @@ struct JoinRequestModal: View {
     let stop: Stop
     @EnvironmentObject private var store: TripStore
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         NavigationStack {
@@ -15,7 +16,7 @@ struct JoinRequestModal: View {
                 ScrollView {
                     VStack(spacing: 14) {
                         if stop.pendingStopRequests.isEmpty {
-                            Text("Sin solicitudes pendientes para esta parada.")
+                            Text(l10n.t("tripSocial.noRequests"))
                                 .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
                                 .padding(.top, 40)
                         } else {
@@ -27,11 +28,11 @@ struct JoinRequestModal: View {
                     .padding(BPSpacing.lg)
                 }
             }
-            .navigationTitle("Solicitudes · \(stop.venueName)")
+            .navigationTitle(String(format: l10n.t("tripSocial.requestsTitle"), stop.venueName))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cerrar") { dismiss() }.foregroundStyle(Color.bpAmber).bpAccessibility(label: "Cerrar", hint: "Cerrar el modal", isButton: true)
+                    Button(l10n.t("table.close")) { dismiss() }.foregroundStyle(Color.bpAmber).bpAccessibility(label: l10n.t("table.close"), hint: l10n.t("tripSocial.closeModal.hint"), isButton: true)
                 }
             }
         }
@@ -51,17 +52,17 @@ struct JoinRequestModal: View {
             }
             // Trust signals shown to the organizer before accepting.
             HStack(spacing: 14) {
-                signal("\(rep.completedTripsCount)", "trips")
-                signal(rep.publicScore.map { String(format: "%.1f★", $0) } ?? "—", "score")
+                signal("\(rep.completedTripsCount)", l10n.t("tripSocial.signal.trips"))
+                signal(rep.publicScore.map { String(format: "%.1f★", $0) } ?? "—", l10n.t("tripSocial.signal.score"))
             }
             HStack(spacing: 10) {
                 Button {
                     store.joinStop(stop.id, in: tripId, user: user)
                     store.promoteToMember(user, in: tripId)
-                } label: { pill("Aceptar", bg: Color.bpAmber, fg: .black) }.buttonStyle(.plain).bpAccessibility(label: "Aceptar", hint: "Aceptar la solicitud para unirse", isButton: true)
+                } label: { pill(l10n.t("tripSocial.accept"), bg: Color.bpAmber, fg: .black) }.buttonStyle(.plain).bpAccessibility(label: l10n.t("tripSocial.accept"), hint: l10n.t("tripSocial.accept.hint"), isButton: true)
                 Button {
                     store.rejectStopRequest(stop.id, in: tripId, user: user)
-                } label: { pill("Rechazar", bg: Color.bpInk.opacity(0.08), fg: .white) }.buttonStyle(.plain).bpAccessibility(label: "Rechazar", hint: "Rechazar la solicitud para unirse", isButton: true)
+                } label: { pill(l10n.t("tripSocial.reject"), bg: Color.bpInk.opacity(0.08), fg: .white) }.buttonStyle(.plain).bpAccessibility(label: l10n.t("tripSocial.reject"), hint: l10n.t("tripSocial.reject.hint"), isButton: true)
             }
         }
         .padding(14)
@@ -86,12 +87,13 @@ struct JoinRequestModal: View {
 
 struct ReputationBadgeView: View {
     let rep: UserReputation
+    @ObservedObject private var l10n = L10n.shared
 
     private var style: (String, String, Color) {
         switch rep.badge {
-        case .verified:       return ("checkmark.seal.fill", "Verified", Color.bpAmber)
-        case .trustedPlanner: return ("star.circle.fill", "Trusted Planner", Color.bpGreen)
-        case .new:            return ("sparkle", "Nuevo", Color.bpTextSecondary)
+        case .verified:       return ("checkmark.seal.fill", l10n.t("tripSocial.badge.verified"), Color.bpAmber)
+        case .trustedPlanner: return ("star.circle.fill", l10n.t("tripSocial.badge.trustedPlanner"), Color.bpGreen)
+        case .new:            return ("sparkle", l10n.t("tripSocial.badge.new"), Color.bpTextSecondary)
         }
     }
 
@@ -104,7 +106,7 @@ struct ReputationBadgeView: View {
         .foregroundStyle(color)
         .padding(.horizontal, 8).padding(.vertical, 3)
         .background(color.opacity(0.12), in: Capsule())
-        .bpAccessibility(label: label, hint: "Insignia de reputación")
+        .bpAccessibility(label: label, hint: l10n.t("tripSocial.badge.hint"))
     }
 }
 
@@ -116,6 +118,7 @@ struct RatingPrompt: View {
     let rateeName: String
     @EnvironmentObject private var store: TripStore
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var score = 0
     @State private var tags: Set<String> = []
@@ -127,7 +130,7 @@ struct RatingPrompt: View {
             ZStack {
                 BPBackgroundView()
                 VStack(spacing: 22) {
-                    Text("¿Cómo estuvo salir con \(rateeName)?")
+                    Text(String(format: l10n.t("tripSocial.rating.title"), rateeName))
                         .font(.bpScaled(18, weight: .bold)).foregroundStyle(Color.bpInk)
                         .multilineTextAlignment(.center)
 
@@ -137,7 +140,7 @@ struct RatingPrompt: View {
                                 .font(.bpScaled(30))
                                 .foregroundStyle(Color.bpAmber)
                                 .onTapGesture { BPHaptics.light(); score = i }
-                                .bpAccessibility(label: "\(i) estrella\(i != 1 ? "s" : "")", hint: "Puntuar con \(i) estrellas", isButton: true)
+                                .bpAccessibility(label: String(format: i != 1 ? l10n.t("tripSocial.stars.plural") : l10n.t("tripSocial.stars.singular"), i), hint: String(format: l10n.t("tripSocial.stars.hint"), i), isButton: true)
                         }
                     }
 
@@ -149,13 +152,13 @@ struct RatingPrompt: View {
                         store.submitRating(scopeId: scopeId, rateeId: rateeId, score: score, tags: Array(tags))
                         dismiss()
                     } label: {
-                        Text("Enviar").font(.bpScaled(16, weight: .bold)).foregroundStyle(.black)
+                        Text(l10n.t("tripSocial.send")).font(.bpScaled(16, weight: .bold)).foregroundStyle(.black)
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
                             .background(score > 0 ? Color.bpAmber : Color.bpAmber.opacity(0.4), in: Capsule())
                     }
-                    .buttonStyle(.plain).bpAccessibility(label: "Enviar", hint: "Enviar la calificación", isButton: true).disabled(score == 0)
+                    .buttonStyle(.plain).bpAccessibility(label: l10n.t("tripSocial.send"), hint: l10n.t("tripSocial.send.hint"), isButton: true).disabled(score == 0)
 
-                    Text("Tu calificación queda oculta hasta que la otra persona también califique.")
+                    Text(l10n.t("tripSocial.rating.hiddenNote"))
                         .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                         .multilineTextAlignment(.center)
                 }
@@ -170,13 +173,18 @@ private struct FlowTags: View {
     let options: [String]
     @Binding var selected: Set<String>
     let max: Int
+    @ObservedObject private var l10n = L10n.shared
+
+    private func label(for tag: String) -> String {
+        l10n.t("tripSocial.tag.\(tag)")
+    }
 
     var body: some View {
         let cols = [GridItem(.adaptive(minimum: 90), spacing: 8)]
         LazyVGrid(columns: cols, spacing: 8) {
             ForEach(options, id: \.self) { tag in
                 let on = selected.contains(tag)
-                Text(tag.replacingOccurrences(of: "_", with: " "))
+                Text(label(for: tag))
                     .font(.bpScaled(12, weight: .semibold))
                     .foregroundStyle(on ? .black : .white)
                     .padding(.horizontal, 12).padding(.vertical, 8)
@@ -185,7 +193,7 @@ private struct FlowTags: View {
                         if on { selected.remove(tag) }
                         else if selected.count < max { selected.insert(tag) }
                     }
-                    .bpAccessibility(label: tag.replacingOccurrences(of: "_", with: " "), hint: "Seleccionar esta etiqueta", isButton: true)
+                    .bpAccessibility(label: label(for: tag), hint: l10n.t("tripSocial.tag.hint"), isButton: true)
             }
         }
     }

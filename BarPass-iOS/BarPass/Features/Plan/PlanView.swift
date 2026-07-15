@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct PlanView: View {
+    @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
     @EnvironmentObject private var appState:   AppState
     @State private var prompt    = ""
@@ -12,16 +13,18 @@ struct PlanView: View {
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
     private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
 
-    private let suggestions = [
-        "Tengo $80 esta noche 💰",
-        "Somos 4 amigas 👯‍♀️",
-        "Primero cena, después club 🍽",
-        "Queremos house music 🎵",
-        "Sin cover por favor 🙏",
-        "Cumpleaños de mi amiga 🎂",
-        "Zona Brickell 📍",
-        "Algo diferente 🌟",
-    ]
+    private var suggestions: [String] {
+        [
+            l10n.t("plan.suggestion.budget"),
+            l10n.t("plan.suggestion.friends"),
+            l10n.t("plan.suggestion.dinnerClub"),
+            l10n.t("plan.suggestion.houseMusic"),
+            l10n.t("plan.suggestion.noCover"),
+            l10n.t("plan.suggestion.birthday"),
+            l10n.t("plan.suggestion.brickell"),
+            l10n.t("plan.suggestion.different"),
+        ]
+    }
 
     var body: some View {
         ZStack {
@@ -37,11 +40,11 @@ struct PlanView: View {
                             .tracking(3)
                             .foregroundStyle(amber)
 
-                        Text("Tu concierge de noche")
+                        Text(l10n.t("plan.headerTitle"))
                             .font(.bpScaled(26, weight: .bold))
                             .foregroundStyle(Color.bpInk)
 
-                        Text("Dime tu presupuesto, vibe y lo que buscas — te armo la noche perfecta en Miami.")
+                        Text(l10n.t("plan.headerSubtitle"))
                             .font(.bpScaled(14))
                             .foregroundStyle(Color.bpInk.opacity(0.4))
                     }
@@ -52,7 +55,7 @@ struct PlanView: View {
                     VStack(spacing: 12) {
                         ZStack(alignment: .topLeading) {
                             if prompt.isEmpty {
-                                Text("Ej: Primera cita, $100, queremos rooftops...")
+                                Text(l10n.t("plan.promptPlaceholder"))
                                     .font(.bpScaled(14))
                                     .foregroundStyle(Color.bpInk.opacity(0.25))
                                     .padding(.horizontal, 14)
@@ -67,7 +70,7 @@ struct PlanView: View {
                                 .font(.bpScaled(14))
                                 .padding(10)
                                 .frame(minHeight: 100)
-                                .bpAccessibility(label: "Descripción de la noche", hint: "Describí cómo querés que sea tu noche")
+                                .bpAccessibility(label: l10n.t("night.prompt.label"), hint: l10n.t("night.prompt.hint"))
                         }
                         .background(Color.bpInk.opacity(0.05), in: RoundedRectangle(cornerRadius: 16))
                         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.bpInk.opacity(0.09)))
@@ -80,7 +83,7 @@ struct PlanView: View {
                                     ProgressView().tint(.black).scaleEffect(0.85)
                                 } else {
                                     Image(systemName: "sparkles")
-                                    Text("Armar mi noche")
+                                    Text(l10n.t("plan.buildButton"))
                                         .font(.bpScaled(16, weight: .bold))
                                 }
                             }
@@ -93,7 +96,7 @@ struct PlanView: View {
                             )
                         }
                         .buttonStyle(.plain)
-                        .bpAccessibility(label: "Armar mi noche", hint: "Generar un plan personalizado", isButton: true)
+                        .bpAccessibility(label: l10n.t("plan.buildButton"), hint: l10n.t("plan.buildButton.hint"), isButton: true)
                         .disabled(prompt.trimmingCharacters(in: .whitespaces).isEmpty || isLoading)
                         .opacity(prompt.trimmingCharacters(in: .whitespaces).isEmpty ? 0.4 : 1)
                     }
@@ -101,7 +104,7 @@ struct PlanView: View {
 
                     // Quick suggestions
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Ideas rápidas")
+                        Text(l10n.t("plan.quickIdeas"))
                             .font(.bpScaled(13, weight: .semibold))
                             .foregroundStyle(Color.bpInk.opacity(0.3))
                             .padding(.horizontal, 20)
@@ -119,7 +122,7 @@ struct PlanView: View {
                                             .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.09)))
                                     }
                                     .buttonStyle(.plain)
-                                    .bpAccessibility(label: s, hint: "Usar esta sugerencia como prompt", isButton: true)
+                                    .bpAccessibility(label: s, hint: l10n.t("plan.suggestion.hint"), isButton: true)
                                 }
                             }
                             .padding(.horizontal, 20)
@@ -135,7 +138,7 @@ struct PlanView: View {
                     // Saved plans
                     if !savedPlans.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Planes guardados")
+                            Text(l10n.t("plan.savedPlans"))
                                 .font(.bpScaled(13, weight: .semibold))
                                 .foregroundStyle(Color.bpInk.opacity(0.3))
                                 .padding(.horizontal, 20)
@@ -155,7 +158,7 @@ struct PlanView: View {
                                     .background(Color.bpInk.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
                                 }
                                 .buttonStyle(.plain)
-                                .bpAccessibility(label: p.title, hint: "Cargar este plan guardado", isButton: true)
+                                .bpAccessibility(label: p.title, hint: l10n.t("plan.loadSaved.hint"), isButton: true)
                                 .padding(.horizontal, 20)
                             }
                         }
@@ -203,12 +206,13 @@ struct PlanView: View {
 struct NightPlanView: View {
     let plan: NightPlan
     let onSave: (NightPlan) -> Void
+    @ObservedObject private var l10n = L10n.shared
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("TU PLAN DE NOCHE")
+                Text(l10n.t("plan.nightPlan.kicker"))
                     .font(.bpScaled(11, weight: .heavy))
                     .tracking(2)
                     .foregroundStyle(amber)
@@ -273,7 +277,7 @@ struct NightPlanView: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "bookmark.fill")
-                        Text("Guardar")
+                        Text(l10n.t("plan.save"))
                     }
                     .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(.black)
@@ -282,12 +286,12 @@ struct NightPlanView: View {
                     .background(amber, in: RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Guardar", hint: "Guardar este plan", isButton: true)
+                .bpAccessibility(label: l10n.t("plan.save"), hint: l10n.t("plan.save.hint"), isButton: true)
 
                 Button { } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "square.and.arrow.up")
-                        Text("Compartir")
+                        Text(l10n.t("plan.share"))
                     }
                     .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
@@ -297,7 +301,7 @@ struct NightPlanView: View {
                     .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.bpInk.opacity(0.09)))
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Compartir", hint: "Compartir este plan", isButton: true)
+                .bpAccessibility(label: l10n.t("plan.share"), hint: l10n.t("plan.share.hint"), isButton: true)
             }
         }
         .padding(18)

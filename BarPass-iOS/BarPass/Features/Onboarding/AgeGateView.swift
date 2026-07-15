@@ -6,6 +6,7 @@ import SwiftUI
 struct AgeGateView: View {
     let onVerified: () -> Void
 
+    @ObservedObject private var l10n = L10n.shared
     @State private var dateOfBirth = Calendar.current.date(byAdding: .year, value: -21, to: Date()) ?? Date()
     @State private var rejected = false
 
@@ -38,22 +39,22 @@ struct AgeGateView: View {
         VStack(spacing: 20) {
             Text("🍸").font(.system(size: 44))
 
-            Text("Contenido para mayores de 21")
+            Text(l10n.t("ageGate.title"))
                 .font(.bpTitle1())
                 .foregroundStyle(Color.bpInk)
                 .multilineTextAlignment(.center)
 
-            Text("BarPass muestra bares, tragos y eventos con alcohol. Necesitamos confirmar tu fecha de nacimiento antes de continuar.")
+            Text(l10n.t("ageGate.subtitle"))
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
                 .multilineTextAlignment(.center)
 
-            DatePicker("Fecha de nacimiento", selection: $dateOfBirth, in: minDate...maxDate, displayedComponents: .date)
+            DatePicker(l10n.t("ageGate.dob"), selection: $dateOfBirth, in: minDate...maxDate, displayedComponents: .date)
                 .datePickerStyle(.wheel)
                 .labelsHidden()
                 .colorScheme(.dark)
                 .frame(maxHeight: 180)
-                .bpAccessibility(label: "Fecha de nacimiento", hint: "Selecciona tu fecha de nacimiento para verificar tu edad")
+                .bpAccessibility(label: l10n.t("ageGate.dob"), hint: l10n.t("ageGate.dob.hint"))
 
             Button {
                 BPHaptics.medium()
@@ -65,7 +66,7 @@ struct AgeGateView: View {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) { rejected = true }
                 }
             } label: {
-                Text("Confirmar")
+                Text(l10n.t("ageGate.confirm"))
                     .font(.bpScaled(17, weight: .heavy))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
@@ -73,9 +74,9 @@ struct AgeGateView: View {
                     .foregroundStyle(.black)
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Confirmar fecha de nacimiento", hint: "Verifica que sos mayor de 21 años", isButton: true)
+            .bpAccessibility(label: l10n.t("ageGate.confirm.a11y"), hint: l10n.t("ageGate.confirm.hint"), isButton: true)
 
-            Text("Tu fecha de nacimiento se guarda solo en este dispositivo.")
+            Text(l10n.t("ageGate.privacy"))
                 .font(.bpTiny())
                 .foregroundStyle(Color.bpTextTertiary)
         }
@@ -84,16 +85,16 @@ struct AgeGateView: View {
     private var rejectedState: some View {
         VStack(spacing: 16) {
             Text("🔞").font(.system(size: 44))
-            Text("No podés usar BarPass todavía")
+            Text(l10n.t("ageGate.rejected.title"))
                 .font(.bpTitle1())
                 .foregroundStyle(Color.bpInk)
                 .multilineTextAlignment(.center)
-            Text("BarPass es exclusivamente para mayores de 21 años.")
+            Text(l10n.t("ageGate.rejected.subtitle"))
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
                 .multilineTextAlignment(.center)
         }
-        .bpAccessibility(label: "Acceso denegado", hint: "Debes ser mayor de 21 años para usar esta aplicación")
+        .bpAccessibility(label: l10n.t("ageGate.rejected.a11y.label"), hint: l10n.t("ageGate.rejected.a11y.hint"))
     }
 }
 

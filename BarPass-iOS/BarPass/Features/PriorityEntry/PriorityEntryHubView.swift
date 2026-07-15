@@ -6,6 +6,7 @@ struct PriorityEntryHubView: View {
 
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var showSkipLine = false
     @State private var showTable    = false
@@ -14,11 +15,13 @@ struct PriorityEntryHubView: View {
 
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
 
-    private let options: [(icon: String, sf: String, title: String, sub: String, badge: String, delay: Double)] = [
-        ("⚡️", "bolt.fill",           "Skip the Line",  "Acceso inmediato, sin esperar",          "Desde $25",    0.05),
-        ("🍾", "wineglass.fill",       "Mesa VIP",       "Reserva con bottle service incluido",     "Desde $100",   0.12),
-        ("🎟️", "ticket.fill",          "Event Tickets",  "Tu ticket, cero cover en la puerta",      "Desde $20",    0.19),
-    ]
+    private var options: [(icon: String, sf: String, title: String, sub: String, badge: String, delay: Double)] {
+        [
+            ("⚡️", "bolt.fill",           l10n.t("priorityEntry.skipLine"),  l10n.t("priorityEntry.skipLine.sub"),          l10n.t("priorityEntry.skipLine.badge"),    0.05),
+            ("🍾", "wineglass.fill",       l10n.t("priorityEntry.vipTable"),       l10n.t("priorityEntry.vipTable.sub"),     l10n.t("priorityEntry.vipTable.badge"),   0.12),
+            ("🎟️", "ticket.fill",          l10n.t("priorityEntry.tickets"),  l10n.t("priorityEntry.tickets.sub"),      l10n.t("priorityEntry.tickets.badge"),    0.19),
+        ]
+    }
 
     var body: some View {
         NavigationStack {
@@ -39,7 +42,7 @@ struct PriorityEntryHubView: View {
 
                     Spacer()
 
-                    Text("El depósito se aplica al consumo mínimo en el venue")
+                    Text(l10n.t("priorityEntry.depositNote"))
                         .font(.bpScaled(11))
                         .foregroundStyle(Color.bpInk.opacity(0.2))
                         .multilineTextAlignment(.center)
@@ -51,9 +54,9 @@ struct PriorityEntryHubView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cerrar") { dismiss() }
+                    Button(l10n.t("table.close")) { dismiss() }
                         .foregroundStyle(amber)
-                        .bpAccessibility(label: "Cerrar", hint: "Cierra el menú de Priority Entry", isButton: true)
+                        .bpAccessibility(label: l10n.t("table.close"), hint: l10n.t("priorityEntry.close.hint"), isButton: true)
                 }
             }
             .navigationDestination(isPresented: $showSkipLine) {
@@ -75,7 +78,7 @@ struct PriorityEntryHubView: View {
                 EventTicketsView(
                     venueId:   venueId.isEmpty   ? "venue"   : venueId,
                     venueName: venueName.isEmpty ? "BarPass" : venueName,
-                    eventName: "Noche Especial",
+                    eventName: l10n.t("priorityEntry.specialNight"),
                     eventDate: Date().addingTimeInterval(3600 * 6)
                 )
                 .environmentObject(appState)
@@ -94,7 +97,7 @@ struct PriorityEntryHubView: View {
             HStack(spacing: 6) {
                 Image(systemName: "bolt.fill")
                     .font(.bpScaled(9, weight: .bold))
-                Text("PRIORITY ENTRY")
+                Text(l10n.t("priorityEntry.kicker"))
                     .font(.bpScaled(10, weight: .heavy, design: .monospaced))
                     .kerning(2)
             }
@@ -112,7 +115,7 @@ struct PriorityEntryHubView: View {
                 .foregroundStyle(Color.bpInk)
                 .padding(.top, 4)
 
-            Text("Elige cómo quieres vivir la noche")
+            Text(l10n.t("priorityEntry.header.subtitle"))
                 .font(.bpScaled(13))
                 .foregroundStyle(Color.bpInk.opacity(0.35))
         }

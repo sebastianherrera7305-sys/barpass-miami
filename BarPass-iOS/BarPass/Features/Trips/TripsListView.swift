@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct TripsListView: View {
+    @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
 
     @StateObject private var tripStore = TripStore(
@@ -28,7 +29,7 @@ struct TripsListView: View {
             }
         }
         .onAppear { BPAnalytics.track(.viewScreen("Trips")) }
-        .navigationTitle("Tus Trips")
+        .navigationTitle(l10n.t("trips.yourTrips"))
         .task { await tripStore.loadTrips() }
         .sheet(isPresented: $showCreateFlow) {
             PromptYourNightView(venues: venueStore.venues) { title, venues in
@@ -61,14 +62,14 @@ struct TripsListView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.bpScaled(36))
                 .foregroundStyle(Color.bpDanger)
-            Text("Algo salió mal")
+            Text(l10n.t("trips.error.title"))
                 .font(.bpTitle1())
                 .foregroundStyle(Color.bpInk)
             Text(error)
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
                 .multilineTextAlignment(.center)
-            Button("Reintentar") {
+            Button(l10n.t("trips.retry")) {
                 Task { await tripStore.loadTrips() }
             }
             .font(.bpScaled(16, weight: .bold))
@@ -77,7 +78,7 @@ struct TripsListView: View {
             .padding(.vertical, 14)
             .background(Color.bpAmber, in: Capsule())
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Reintentar", hint: "Intentar cargar los trips nuevamente", isButton: true)
+            .bpAccessibility(label: l10n.t("trips.retry"), hint: l10n.t("trips.retry.hint"), isButton: true)
             Spacer()
             Spacer()
         }
@@ -92,10 +93,10 @@ struct TripsListView: View {
                 .font(.bpScaled(56))
 
             VStack(spacing: 6) {
-                Text("Armá tu noche")
+                Text(l10n.t("trips.empty.title"))
                     .font(.bpTitle1())
                     .foregroundStyle(Color.bpInk)
-                Text("Crea un trip con los mejores venues de Miami.\nEmpezá con un vibe o contame qué buscás.")
+                Text(l10n.t("trips.empty.subtitle"))
                     .font(.bpBody())
                     .foregroundStyle(Color.bpTextSecondary)
                     .multilineTextAlignment(.center)
@@ -106,7 +107,7 @@ struct TripsListView: View {
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles")
-                    Text("Crear mi primer trip")
+                    Text(l10n.t("trips.empty.cta"))
                 }
                 .font(.bpScaled(16, weight: .bold))
                 .foregroundStyle(.black)
@@ -118,7 +119,7 @@ struct TripsListView: View {
                 )
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Crear mi primer trip", hint: "Empezar a crear un nuevo plan nocturno", isButton: true)
+            .bpAccessibility(label: l10n.t("trips.empty.cta"), hint: l10n.t("trips.empty.cta.hint"), isButton: true)
 
             Spacer()
             Spacer()
@@ -146,11 +147,11 @@ struct TripsListView: View {
     private var headerView: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                    Text("Tus Trips")
+                    Text(l10n.t("trips.yourTrips"))
                         .font(.bpLargeTitle())
                         .foregroundStyle(Color.bpInk)
-                        .bpAccessibility(label: "Tus Trips", hint: "Sección de tus planes nocturnos")
-                Text("\(tripStore.myTrips.count) plan\(tripStore.myTrips.count != 1 ? "es" : "")")
+                        .bpAccessibility(label: l10n.t("trips.yourTrips"), hint: l10n.t("trips.yourTrips.hint"))
+                Text(tripStore.myTrips.count != 1 ? String(format: l10n.t("trips.planCount.plural"), tripStore.myTrips.count) : String(format: l10n.t("trips.planCount.singular"), tripStore.myTrips.count))
                     .font(.bpCaption())
                     .foregroundStyle(Color.bpTextSecondary)
             }
@@ -166,7 +167,7 @@ struct TripsListView: View {
                     .background(amber, in: Circle())
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Crear nuevo trip", hint: "Abrir el asistente de creación", isButton: true)
+            .bpAccessibility(label: l10n.t("trips.createNew"), hint: l10n.t("trips.createNew.hint"), isButton: true)
         }
     }
 
@@ -204,7 +205,7 @@ struct TripsListView: View {
                     Image(systemName: "mappin")
                         .font(.bpScaled(10))
                         .foregroundStyle(Color.bpTextSecondary)
-                    Text("\(trip.stops.count) paradas")
+                    Text(String(format: l10n.t("trips.stopsCount"), trip.stops.count))
                         .font(.bpCaption())
                         .foregroundStyle(Color.bpTextSecondary)
                 }
@@ -221,13 +222,13 @@ struct TripsListView: View {
             .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: trip.title, hint: "Abrir detalle del trip", isButton: true)
+        .bpAccessibility(label: trip.title, hint: l10n.t("trips.openDetail.hint"), isButton: true)
         .contextMenu {
             Button(role: .destructive) {
                 Task { await tripStore.delete(trip) }
             } label: {
-                Label("Eliminar", systemImage: "trash")
-                    .bpAccessibility(label: "Eliminar", hint: "Eliminar este trip", isButton: true)
+                Label(l10n.t("trips.delete"), systemImage: "trash")
+                    .bpAccessibility(label: l10n.t("trips.delete"), hint: l10n.t("trips.delete.hint"), isButton: true)
             }
         }
     }
@@ -235,9 +236,9 @@ struct TripsListView: View {
     private func tripStatusBadge(_ status: TripStatus) -> some View {
         let (label, color): (String, Color) = {
             switch status {
-            case .planning:  return ("Planeando", amber)
-            case .active:    return ("Activo", Color.bpGreen)
-            case .completed: return ("Completado", Color.bpTextSecondary)
+            case .planning:  return (l10n.t("trips.status.planning"), amber)
+            case .active:    return (l10n.t("trips.status.active"), Color.bpGreen)
+            case .completed: return (l10n.t("trips.status.completed"), Color.bpTextSecondary)
             }
         }()
         return Text(label)

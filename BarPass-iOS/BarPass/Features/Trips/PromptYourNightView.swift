@@ -7,6 +7,7 @@ struct PromptYourNightView: View {
     /// (title, route) when the user saves the generated night.
     let onSave: (String, [BarPassVenue]) -> Void
 
+    @ObservedObject private var l10n = L10n.shared
     @State private var selected: Set<String> = []
     @State private var prompt = ""
     @State private var route: [NightPlanner.PlannedStop] = []
@@ -22,9 +23,9 @@ struct PromptYourNightView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("¿Qué noche buscás?")
+                Text(l10n.t("night.question"))
                     .font(.bpScaled(26, weight: .black)).foregroundStyle(Color.bpInk)
-                Text("Elegí un vibe o describilo. Yo armo la noche.")
+                Text(l10n.t("night.hint"))
                     .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
             }
 
@@ -33,32 +34,32 @@ struct PromptYourNightView: View {
             }
 
             HStack(spacing: 10) {
-                TextField("ej: cita inolvidable, rooftops, $100…", text: $prompt)
+                TextField(l10n.t("night.prompt.placeholder"), text: $prompt)
                     .focused($promptFocused)
                     .font(.bpScaled(15)).foregroundStyle(Color.bpInk)
                     .padding(.horizontal, 14).padding(.vertical, 13)
                     .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
                         .strokeBorder(promptFocused ? Color.bpAmber.opacity(0.5) : Color.bpInk.opacity(0.08)))
-                    .bpAccessibility(label: "Descripción de la noche", hint: "Escribí cómo querés que sea tu noche")
+                    .bpAccessibility(label: l10n.t("night.prompt.label"), hint: l10n.t("night.prompt.hint"))
             }
 
             Button(action: generate) {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles")
-                    Text(didGenerate ? "Armá otra noche" : "Armá mi noche")
+                    Text(didGenerate ? l10n.t("night.rebuild") : l10n.t("night.build"))
                 }
                 .font(.bpScaled(16, weight: .bold)).foregroundStyle(.black)
                 .frame(maxWidth: .infinity).padding(.vertical, 15)
                 .background(Color.bpAmber, in: Capsule())
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Armar noche", hint: "Generar un plan con tus preferencias", isButton: true)
+            .bpAccessibility(label: l10n.t("night.build.accessibility"), hint: l10n.t("night.build.hint"), isButton: true)
 
             if !route.isEmpty {
                 routeView
             } else if didGenerate {
-                Text("No encontré match — probá otro vibe o palabra.")
+                Text(l10n.t("night.noMatch"))
                     .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
             }
         }
@@ -82,12 +83,12 @@ struct PromptYourNightView: View {
             .overlay(Capsule().strokeBorder(on ? .clear : Color.bpInk.opacity(0.1)))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: vibe.label, hint: "Seleccionar este vibe", isButton: true)
+        .bpAccessibility(label: vibe.label, hint: l10n.t("night.vibe.hint"), isButton: true)
     }
 
     private var routeView: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Tu noche")
+            Text(l10n.t("night.yours"))
                 .font(.bpScaled(18, weight: .bold)).foregroundStyle(Color.bpInk)
                 .padding(.top, 4)
 
@@ -106,7 +107,7 @@ struct PromptYourNightView: View {
                     .frame(width: 40, height: 40).clipShape(Circle())
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("PARADA \(i + 1)")
+                        Text(String(format: l10n.t("night.stop"), i + 1))
                             .font(.bpScaled(9, weight: .bold)).foregroundStyle(Color.bpAmber)
                         Text(v.name).font(.bpScaled(15, weight: .semibold)).foregroundStyle(Color.bpInk)
                         Text("\(v.neighborhood) · \(v.type.rawValue)")
@@ -123,7 +124,7 @@ struct PromptYourNightView: View {
                 .padding(10)
                 .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
                 .accessibilityElement(children: .ignore)
-                .bpAccessibility(label: v.name, hint: "Parada sugerida en tu ruta")
+                .bpAccessibility(label: v.name, hint: l10n.t("night.stop.hint"))
                 .opacity(revealed ? 1 : 0)
                 .offset(y: revealed ? 0 : 26)
                 .scaleEffect(revealed ? 1 : 0.92, anchor: .top)
@@ -135,14 +136,14 @@ struct PromptYourNightView: View {
                 onSave(saveTitle, route.map(\.venue))
                 route = []; didGenerate = false; selected = []; prompt = ""; revealedCount = 0; revealDone = false
             } label: {
-                Text("Guardar como Trip")
+                Text(l10n.t("night.save"))
                     .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpAmber)
                     .frame(maxWidth: .infinity).padding(.vertical, 13)
                     .background(Color.bpAmber.opacity(0.12), in: Capsule())
                     .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.4)))
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Guardar como Trip", hint: "Guardar la ruta generada como un trip", isButton: true)
+            .bpAccessibility(label: l10n.t("night.save"), hint: l10n.t("night.save.hint"), isButton: true)
             .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
         }
@@ -152,7 +153,7 @@ struct PromptYourNightView: View {
         let p = prompt.trimmingCharacters(in: .whitespaces)
         if !p.isEmpty { return p.prefix(1).uppercased() + p.dropFirst() }
         if let first = NightPlanner.vibes.first(where: { selected.contains($0.id) }) { return "\(first.emoji) \(first.label)" }
-        return "Mi noche en Miami"
+        return l10n.t("night.defaultTitle")
     }
 
     private func generate() {

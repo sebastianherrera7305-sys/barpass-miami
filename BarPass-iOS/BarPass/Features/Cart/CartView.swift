@@ -5,6 +5,7 @@ struct CartView: View {
     @EnvironmentObject private var cart:     CartStore
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var showCardSheet = false
     @State private var showTopUp     = false
@@ -28,21 +29,21 @@ struct CartView: View {
                     }
                 }
             }
-            .navigationTitle(cart.venueName.isEmpty ? "Tu Orden" : cart.venueName)
+            .navigationTitle(cart.venueName.isEmpty ? l10n.t("cart.title") : cart.venueName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cerrar") { dismiss() }
+                    Button(l10n.t("table.close")) { dismiss() }
                         .foregroundStyle(amber)
-                        .bpAccessibility(label: "Cerrar carrito", hint: "Cierra la vista del carrito", isButton: true)
+                        .bpAccessibility(label: l10n.t("cart.close.a11y"), hint: l10n.t("cart.close.hint"), isButton: true)
                 }
                 if !cart.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Limpiar") { withAnimation { cart.clear() } }
+                        Button(l10n.t("cart.clear")) { withAnimation { cart.clear() } }
                             .foregroundStyle(Color.bpInk.opacity(0.3))
                             .font(.subheadline)
-                            .bpAccessibility(label: "Limpiar carrito", hint: "Elimina todos los artículos del carrito", isButton: true)
+                            .bpAccessibility(label: l10n.t("cart.clear.a11y"), hint: l10n.t("cart.clear.hint"), isButton: true)
                     }
                 }
             }
@@ -77,10 +78,10 @@ struct CartView: View {
             }
 
             VStack(spacing: 6) {
-                Text("Carrito vacío")
+                Text(l10n.t("cart.empty.title"))
                     .font(.bpScaled(18, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
-                Text("Agrega bebidas desde el menú del venue")
+                Text(l10n.t("cart.empty.subtitle"))
                     .font(.bpScaled(13))
                     .foregroundStyle(Color.bpInk.opacity(0.3))
                     .multilineTextAlignment(.center)
@@ -123,15 +124,15 @@ struct CartView: View {
             VStack(spacing: 16) {
                 // Summary rows
                 VStack(spacing: 10) {
-                    summaryRow("Subtotal",    cart.subtotal)
-                    summaryRow("Service fee", cart.serviceFee)
+                    summaryRow(l10n.t("cart.subtotal"),    cart.subtotal)
+                    summaryRow(l10n.t("cart.serviceFee"), cart.serviceFee)
 
                     Rectangle()
                         .fill(Color.bpInk.opacity(0.06))
                         .frame(height: 1)
 
                     HStack {
-                        Text("Total")
+                        Text(l10n.t("cart.total"))
                             .font(.bpScaled(17, weight: .bold))
                             .foregroundStyle(Color.bpInk)
                         Spacer()
@@ -155,7 +156,7 @@ struct CartView: View {
                     }
                     .padding(.horizontal, 20)
                     .transition(.opacity)
-                    .bpAccessibility(label: "Error de pago: \(paymentError)")
+                    .bpAccessibility(label: String(format: l10n.t("table.paymentError.label"), paymentError))
                 }
 
                 // Payment options
@@ -163,7 +164,7 @@ struct CartView: View {
                     if PKPaymentAuthorizationController.canMakePayments() {
                         ApplePayButton(
                             total: cart.total,
-                            label: cart.venueName.isEmpty ? "BarPass Order" : cart.venueName,
+                            label: cart.venueName.isEmpty ? l10n.t("cart.title") : cart.venueName,
                             isProcessing: $isProcessing,
                             onSuccess: handleOrderSuccess
                         )
@@ -199,10 +200,10 @@ struct CartView: View {
                     )
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("BarPass Wallet")
+                    Text(l10n.t("table.wallet.name"))
                         .font(.bpScaled(14, weight: .semibold))
                         .foregroundStyle(amber)
-                    Text(String(format: "Balance: $%.2f", appState.walletBalance))
+                    Text(String(format: l10n.t("table.wallet.balance"), appState.walletBalance))
                         .font(.bpScaled(11))
                         .foregroundStyle(Color.bpInk.opacity(0.35))
                 }
@@ -223,7 +224,7 @@ struct CartView: View {
             )
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Pagar con BarPass Wallet", hint: "Usa el saldo de tu billetera BarPass para pagar", isButton: true)
+        .bpAccessibility(label: l10n.t("cart.payWithWallet"), hint: l10n.t("cart.payWithWallet.hint"), isButton: true)
     }
 
     // MARK: - Top up prompt
@@ -236,12 +237,12 @@ struct CartView: View {
                     .frame(width: 40, height: 40)
                     .overlay(Image(systemName: "plus.circle").font(.bpScaled(16)).foregroundStyle(Color.bpInk.opacity(0.5)))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Cargar BarPass Wallet")
+                    Text(l10n.t("cart.topUp"))
                         .font(.bpScaled(14, weight: .semibold))
                         .foregroundStyle(Color.bpInk.opacity(0.8))
                     Text(appState.walletBalance > 0
-                         ? String(format: "Balance: $%.2f — no alcanza para esta orden", appState.walletBalance)
-                         : "Cargá saldo y pagá más rápido la próxima vez")
+                         ? String(format: l10n.t("cart.topUp.insufficient"), appState.walletBalance)
+                         : l10n.t("cart.topUp.subtitle"))
                         .font(.bpScaled(11))
                         .foregroundStyle(Color.bpInk.opacity(0.35))
                 }
@@ -254,7 +255,7 @@ struct CartView: View {
                 .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpInk.opacity(0.08))))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Cargar BarPass Wallet", hint: "Abre la pantalla para agregar saldo a tu billetera", isButton: true)
+        .bpAccessibility(label: l10n.t("cart.topUp"), hint: l10n.t("cart.topUp.hint"), isButton: true)
     }
 
     // MARK: - Card button
@@ -264,7 +265,7 @@ struct CartView: View {
             HStack(spacing: 8) {
                 Image(systemName: "creditcard")
                     .font(.bpScaled(14))
-                Text("Pagar con tarjeta")
+                Text(l10n.t("cart.payWithCard"))
                     .font(.bpScaled(15, weight: .semibold))
             }
             .foregroundStyle(Color.bpInk.opacity(0.7))
@@ -278,7 +279,7 @@ struct CartView: View {
             )
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Pagar con tarjeta", hint: "Abre el formulario de pago con tarjeta de crédito o débito", isButton: true)
+        .bpAccessibility(label: l10n.t("cart.payWithCard"), hint: l10n.t("cart.payWithCard.hint"), isButton: true)
     }
 
     // MARK: - Helpers
@@ -304,13 +305,13 @@ struct CartView: View {
                 let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: cart.total)
                 await MainActor.run {
                     appState.walletBalance = newBalance
-                    handleOrderSuccess(method: "BarPass Wallet")
+                    handleOrderSuccess(method: l10n.t("table.wallet.name"))
                 }
             } catch {
                 await MainActor.run {
                     isProcessing = false
                     paymentError = (error as? LocalizedError)?.errorDescription
-                        ?? "No pudimos procesar el pago. Intentá de nuevo."
+                        ?? l10n.t("table.paymentError.generic")
                     BPHaptics.error()
                 }
             }
@@ -341,6 +342,7 @@ private struct CartItemRow: View {
     let item:   CartItem
     let amber:  Color
     let onQty:  (Int) -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         HStack(spacing: 14) {
@@ -360,7 +362,7 @@ private struct CartItemRow: View {
                     .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                     .lineLimit(1)
-                Text(String(format: "$%.2f c/u", item.price))
+                Text(String(format: l10n.t("cart.item.perUnit"), item.price))
                     .font(.bpScaled(12))
                     .foregroundStyle(Color.bpInk.opacity(0.35))
             }
@@ -392,7 +394,7 @@ private struct CartItemRow: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: item.name, hint: "Artículo en el carrito, precio \(String(format: "$%.2f", item.price)) por unidad, cantidad \(item.qty)")
+        .bpAccessibility(label: item.name, hint: String(format: l10n.t("cart.item.a11y.hint"), item.price, item.qty))
     }
 
     private func stepBtn(_ icon: String, action: @escaping () -> Void) -> some View {
@@ -403,7 +405,7 @@ private struct CartItemRow: View {
                 .frame(width: 30, height: 30)
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: icon == "minus" ? "Reducir cantidad" : "Aumentar cantidad", hint: icon == "minus" ? "Resta uno a la cantidad del artículo" : "Suma uno a la cantidad del artículo", isButton: true)
+        .bpAccessibility(label: icon == "minus" ? l10n.t("cart.decreaseQty") : l10n.t("cart.increaseQty"), hint: icon == "minus" ? l10n.t("cart.decreaseQty.hint") : l10n.t("cart.increaseQty.hint"), isButton: true)
     }
 }
 
@@ -414,6 +416,7 @@ private struct ApplePayButton: View {
     let label:        String
     @Binding var isProcessing: Bool
     let onSuccess:    (String) -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var service = ApplePayService()
 
@@ -434,7 +437,7 @@ private struct ApplePayButton: View {
                 } else {
                     Image(systemName: "apple.logo")
                         .font(.bpScaled(16, weight: .semibold))
-                    Text("Pay")
+                    Text(l10n.t("cart.applePay.pay"))
                         .font(.bpScaled(16, weight: .semibold))
                 }
             }
@@ -447,7 +450,7 @@ private struct ApplePayButton: View {
         }
         .buttonStyle(.plain)
         .disabled(isProcessing)
-        .bpAccessibility(label: "Pagar con Apple Pay", hint: "Procesa el pago usando Apple Pay", isButton: true)
+        .bpAccessibility(label: l10n.t("cart.applePay.a11y"), hint: l10n.t("cart.applePay.hint"), isButton: true)
     }
 }
 

@@ -5,6 +5,7 @@ struct TableReservationView: View {
     let venueId:   String
     let venueName: String
 
+    @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss)  private var dismiss
 
@@ -55,8 +56,8 @@ struct TableReservationView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cerrar") { dismiss() }.foregroundStyle(gold)
-                        .bpAccessibility(label: "Cerrar", hint: "Cierra la vista de reservación de mesa", isButton: true)
+                    Button(l10n.t("table.close")) { dismiss() }.foregroundStyle(gold)
+                        .bpAccessibility(label: l10n.t("table.close"), hint: l10n.t("table.close.hint"), isButton: true)
                 }
             }
         }
@@ -83,14 +84,14 @@ struct TableReservationView: View {
             )
 
             VStack(alignment: .leading, spacing: 5) {
-                Label("MESA VIP", systemImage: "crown.fill")
+                Label(l10n.t("table.vipTable"), systemImage: "crown.fill")
                     .font(.bpScaled(10, weight: .heavy, design: .rounded))
                     .tracking(3)
                     .foregroundStyle(gold)
                 Text(venueName)
                     .font(.bpScaled(24, weight: .bold))
                     .foregroundStyle(Color.bpInk)
-                Text("Reserva tu mesa y garantiza la mejor experiencia")
+                Text(l10n.t("table.banner.subtitle"))
                     .font(.caption)
                     .foregroundStyle(Color.bpInk.opacity(0.5))
             }
@@ -102,7 +103,7 @@ struct TableReservationView: View {
 
     private var packagesSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionHeader("Tipo de mesa")
+            sectionHeader(l10n.t("table.type"))
             VStack(spacing: 10) {
                 ForEach(TablePackage.all) { pkg in
                     packageCard(pkg)
@@ -131,7 +132,7 @@ struct TableReservationView: View {
                                 .font(.bpScaled(15, weight: .bold))
                                 .foregroundStyle(selected ? gold : Color.bpInk)
                             if pkg.id == "premium" {
-                                Text("Popular")
+                                Text(l10n.t("table.popular"))
                                     .font(.bpScaled(9, weight: .bold))
                                     .foregroundStyle(.black)
                                     .padding(.horizontal, 7).padding(.vertical, 3)
@@ -149,7 +150,7 @@ struct TableReservationView: View {
                         Text(String(format: "$%.0f", pkg.deposit))
                             .font(.bpScaled(18, weight: .bold))
                             .foregroundStyle(selected ? gold : Color.bpInk.opacity(0.7))
-                        Text("depósito")
+                        Text(l10n.t("table.deposit"))
                             .font(.bpScaled(9))
                             .foregroundStyle(Color.bpInk.opacity(0.3))
                     }
@@ -171,7 +172,7 @@ struct TableReservationView: View {
                             }
                         }
                         HStack {
-                            Text("Consumo mínimo:")
+                            Text(l10n.t("table.minSpend.label"))
                                 .font(.bpScaled(12))
                                 .foregroundStyle(Color.bpInk.opacity(0.4))
                             Spacer()
@@ -196,14 +197,14 @@ struct TableReservationView: View {
             )
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: pkg.name, hint: "Paquete de mesa, depósito de \(String(format: "$%.0f", pkg.deposit)) dólares", isButton: true)
+        .bpAccessibility(label: pkg.name, hint: String(format: l10n.t("table.package.hint"), String(format: "$%.0f", pkg.deposit)), isButton: true)
     }
 
     // MARK: - Guest count
 
     private var guestSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionHeader("Número de invitados")
+            sectionHeader(l10n.t("table.guestCount"))
             HStack(spacing: 0) {
                 ForEach(guestOptions, id: \.self) { n in
                     Button {
@@ -226,7 +227,7 @@ struct TableReservationView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    .bpAccessibility(label: "\(n) invitados", hint: "Selecciona \(n) invitados para la mesa", isButton: true)
+                    .bpAccessibility(label: String(format: l10n.t("table.guests.label"), n), hint: String(format: l10n.t("table.guests.hint"), n), isButton: true)
                 }
             }
             .padding(.horizontal, 20)
@@ -252,7 +253,7 @@ struct TableReservationView: View {
 
     private var timeSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionHeader("Horario — Esta noche")
+            sectionHeader(l10n.t("table.timeSection"))
             HStack(spacing: 10) {
                 ForEach(Array(timeSlots.enumerated()), id: \.offset) { idx, slot in
                     Button {
@@ -272,7 +273,7 @@ struct TableReservationView: View {
                             )
                     }
                     .buttonStyle(.plain)
-                    .bpAccessibility(label: "Horario \(slot.0)", hint: "Selecciona las \(slot.0) como horario para la reservación", isButton: true)
+                    .bpAccessibility(label: String(format: l10n.t("table.slot.label"), slot.0), hint: String(format: l10n.t("table.slot.hint"), slot.0), isButton: true)
                 }
             }
             .padding(.horizontal, 20)
@@ -300,7 +301,7 @@ struct TableReservationView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 10)
                 .transition(.opacity)
-                .bpAccessibility(label: "Error de pago: \(paymentError)")
+                .bpAccessibility(label: String(format: l10n.t("table.paymentError.label"), paymentError))
             }
 
             VStack(spacing: 10) {
@@ -320,7 +321,7 @@ struct TableReservationView: View {
     private var summaryCard: some View {
         VStack(spacing: 12) {
             HStack {
-                Text("Resumen")
+                Text(l10n.t("table.summary.title"))
                     .font(.bpScaled(14, weight: .bold))
                     .foregroundStyle(Color.bpInk)
                 Spacer()
@@ -329,12 +330,12 @@ struct TableReservationView: View {
                     .foregroundStyle(gold)
             }
             Divider().background(Color.bpInk.opacity(0.07))
-            rowSummary(label: "Mesa",       value: selectedPackage.name)
-            rowSummary(label: "Invitados",  value: "\(guestCount) personas")
-            rowSummary(label: "Consumo mín.", value: String(format: "$%.0f", selectedPackage.minSpend))
+            rowSummary(label: l10n.t("table.summary.table"),       value: selectedPackage.name)
+            rowSummary(label: l10n.t("table.summary.guests"),  value: String(format: l10n.t("table.summary.guestsValue"), guestCount))
+            rowSummary(label: l10n.t("table.summary.minSpend"), value: String(format: "$%.0f", selectedPackage.minSpend))
             Divider().background(Color.bpInk.opacity(0.07))
             HStack {
-                Text("Depósito ahora").font(.subheadline).foregroundStyle(Color.bpInk.opacity(0.5))
+                Text(l10n.t("table.summary.depositNow")).font(.subheadline).foregroundStyle(Color.bpInk.opacity(0.5))
                 Spacer()
                 Text(String(format: "$%.0f", selectedPackage.deposit))
                     .font(.title3.weight(.bold)).foregroundStyle(gold)
@@ -344,7 +345,7 @@ struct TableReservationView: View {
         .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.bpInk.opacity(0.07)))
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Resumen de reservación", hint: "Muestra el resumen de la reservación incluyendo mesa, invitados y depósito")
+        .bpAccessibility(label: l10n.t("table.summary.label"), hint: l10n.t("table.summary.hint"))
     }
 
     private func rowSummary(label: String, value: String) -> some View {
@@ -373,7 +374,7 @@ struct TableReservationView: View {
                     ProgressView().tint(.white).scaleEffect(0.85)
                 } else {
                     Image(systemName: "applelogo").font(.bpScaled(16, weight: .semibold))
-                    Text("Pay with Apple Pay").font(.bpScaled(16, weight: .bold))
+                    Text(l10n.t("table.applePay")).font(.bpScaled(16, weight: .bold))
                 }
             }
             .foregroundStyle(Color.bpInk)
@@ -382,7 +383,7 @@ struct TableReservationView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpInk.opacity(0.12)))
         }
         .buttonStyle(.plain).disabled(isProcessing)
-        .bpAccessibility(label: "Pagar depósito con Apple Pay", hint: "Procesa el depósito de la mesa usando Apple Pay", isButton: true)
+        .bpAccessibility(label: l10n.t("table.applePay.hint.label"), hint: l10n.t("table.applePay.hint"), isButton: true)
     }
 
     private var walletBtn: some View {
@@ -390,8 +391,8 @@ struct TableReservationView: View {
             HStack(spacing: 12) {
                 Text("🪙").font(.bpScaled(18))
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("BarPass Wallet").font(.bpScaled(14, weight: .bold)).foregroundStyle(gold)
-                    Text(String(format: "Balance: $%.2f", appState.walletBalance))
+                    Text(l10n.t("table.wallet.name")).font(.bpScaled(14, weight: .bold)).foregroundStyle(gold)
+                    Text(String(format: l10n.t("table.wallet.balance"), appState.walletBalance))
                         .font(.caption).foregroundStyle(Color.bpInk.opacity(0.4))
                 }
                 Spacer()
@@ -403,7 +404,7 @@ struct TableReservationView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.2)))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Pagar depósito con BarPass Wallet", hint: "Usa el saldo de tu billetera BarPass para pagar el depósito", isButton: true)
+        .bpAccessibility(label: l10n.t("table.wallet.pay"), hint: l10n.t("table.wallet.pay.hint"), isButton: true)
     }
 
     private var cardBtn: some View {
@@ -414,7 +415,7 @@ struct TableReservationView: View {
         } label: {
             HStack {
                 Image(systemName: "creditcard")
-                Text("Pagar depósito con tarjeta")
+                Text(l10n.t("table.card.pay"))
             }
             .font(.bpScaled(16, weight: .semibold))
             .foregroundStyle(Color.bpInk.opacity(0.85))
@@ -423,7 +424,7 @@ struct TableReservationView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpInk.opacity(0.1)))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Pagar depósito con tarjeta", hint: "Abre el formulario para pagar el depósito con tarjeta de crédito o débito", isButton: true)
+        .bpAccessibility(label: l10n.t("table.card.pay"), hint: l10n.t("table.card.pay.hint"), isButton: true)
     }
 
     // MARK: - Helpers
@@ -451,7 +452,7 @@ struct TableReservationView: View {
                 await MainActor.run {
                     isProcessing = false
                     paymentError = (error as? LocalizedError)?.errorDescription
-                        ?? "No pudimos procesar el pago. Intentá de nuevo."
+                        ?? l10n.t("table.paymentError.generic")
                     BPHaptics.error()
                 }
             }
@@ -472,8 +473,8 @@ struct TableReservationView: View {
         showConfirm = true
 
         NotificationService.shared.scheduleUpcomingReminder(
-            title: "Tu mesa está por empezar",
-            body: "Tu reserva en \(r.venueName) es en 30 minutos.",
+            title: l10n.t("table.reminder.title"),
+            body: String(format: l10n.t("table.reminder.body"), r.venueName),
             at: r.date
         )
 

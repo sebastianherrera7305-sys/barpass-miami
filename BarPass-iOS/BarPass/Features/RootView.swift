@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct RootView: View {
+    @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var cart:     CartStore
 
@@ -71,7 +72,7 @@ struct RootView: View {
                     HStack(spacing: 7) {
                         Image(systemName: "bolt.fill")
                             .font(.bpScaled(13, weight: .bold))
-                        Text("Priority Entry")
+                        Text(l10n.t("root.priorityEntry"))
                             .font(.bpScaled(13, weight: .bold))
                     }
                     .foregroundStyle(.black)
@@ -87,7 +88,7 @@ struct RootView: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Priority Entry", hint: "Abrir acceso prioritario", isButton: true)
+                .bpAccessibility(label: l10n.t("root.priorityEntry"), hint: l10n.t("root.priorityEntry.hint"), isButton: true)
 
                 // 🛒 Cart
                 Button {
@@ -112,7 +113,7 @@ struct RootView: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Carrito", hint: "Ver tu carrito de compras", isButton: true)
+                .bpAccessibility(label: l10n.t("root.cart"), hint: l10n.t("root.cart.hint"), isButton: true)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 8)
@@ -161,11 +162,12 @@ struct RootView: View {
 // MARK: - Offline banner
 
 private struct OfflineBanner: View {
+    @ObservedObject private var l10n = L10n.shared
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "wifi.slash")
                 .font(.caption.weight(.bold))
-            Text("Sin conexión — usando versión local")
+            Text(l10n.t("root.offline"))
                 .font(.caption.weight(.medium))
         }
         .foregroundStyle(Color.bpInk)
@@ -175,7 +177,7 @@ private struct OfflineBanner: View {
         .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.12), lineWidth: 1))
         .shadow(color: .black.opacity(0.35), radius: 10, y: 3)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Sin conexión", hint: "Usando versión local de los datos")
+        .bpAccessibility(label: l10n.t("root.offline.a11y"), hint: l10n.t("root.offline.hint"))
     }
 }
 
@@ -183,13 +185,14 @@ private struct OfflineBanner: View {
 
 private struct OrderConfirmationBanner: View {
     let order: OrderConfirmation
+    @ObservedObject private var l10n = L10n.shared
     private let gold = Color(red: 0.85, green: 0.63, blue: 0.09)
 
     var body: some View {
         HStack(spacing: 12) {
             Text("🚀").font(.title3)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Orden enviada")
+                Text(l10n.t("root.orderSent"))
                     .font(.bpScaled(14, weight: .bold))
                     .foregroundStyle(Color.bpInk)
                 Text(order.method + " · " + String(format: "$%.2f", order.total))
@@ -197,7 +200,7 @@ private struct OrderConfirmationBanner: View {
                     .foregroundStyle(Color.bpInk.opacity(0.5))
             }
             Spacer()
-            Text("~8 min")
+            Text(l10n.t("root.orderEta"))
                 .font(.caption.weight(.bold))
                 .foregroundStyle(gold)
         }

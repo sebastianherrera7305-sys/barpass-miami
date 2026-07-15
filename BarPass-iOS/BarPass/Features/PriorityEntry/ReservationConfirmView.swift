@@ -4,6 +4,7 @@ import CoreImage.CIFilterBuiltins
 struct ReservationConfirmView: View {
     let reservation: TableReservation
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
@@ -31,7 +32,7 @@ struct ReservationConfirmView: View {
                     .font(.bpScaled(32))
                     .foregroundStyle(gold)
             }
-            Text("Reservación Confirmada")
+            Text(l10n.t("reservationConfirm.title"))
                 .font(.bpScaled(20, weight: .bold))
                 .foregroundStyle(Color.bpInk)
             Text(reservation.venueName)
@@ -68,7 +69,7 @@ struct ReservationConfirmView: View {
                         Text(reservation.packageName)
                             .font(.bpScaled(16, weight: .bold))
                             .foregroundStyle(Color.bpInk)
-                        Text("Mesa VIP · \(reservation.guestCount) personas")
+                        Text(String(format: l10n.t("reservationConfirm.badge"), reservation.guestCount))
                             .font(.caption)
                             .foregroundStyle(Color.bpInk.opacity(0.4))
                     }
@@ -82,11 +83,11 @@ struct ReservationConfirmView: View {
 
                 // Details grid
                 VStack(spacing: 14) {
-                    detailRow(icon: "calendar",       label: "Fecha",    value: reservation.formattedDate)
-                    detailRow(icon: "person.2.fill",  label: "Invitados",value: "\(reservation.guestCount) personas")
-                    detailRow(icon: "dollarsign.circle.fill", label: "Depósito", value: String(format: "$%.0f pagado", reservation.deposit))
-                    detailRow(icon: "star.fill",      label: "Consumo mínimo", value: String(format: "$%.0f", reservation.minSpend))
-                    detailRow(icon: "creditcard.fill", label: "Método",  value: reservation.payMethod)
+                    detailRow(icon: "calendar",       label: l10n.t("reservationConfirm.date"),    value: reservation.formattedDate)
+                    detailRow(icon: "person.2.fill",  label: l10n.t("reservationConfirm.guests"),value: String(format: l10n.t("table.summary.guestsValue"), reservation.guestCount))
+                    detailRow(icon: "dollarsign.circle.fill", label: l10n.t("reservationConfirm.deposit"), value: String(format: l10n.t("reservationConfirm.depositPaid"), reservation.deposit))
+                    detailRow(icon: "star.fill",      label: l10n.t("reservationConfirm.minSpend"), value: String(format: "$%.0f", reservation.minSpend))
+                    detailRow(icon: "creditcard.fill", label: l10n.t("reservationConfirm.method"),  value: reservation.payMethod)
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
@@ -113,24 +114,24 @@ struct ReservationConfirmView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Reservación confirmada en \(reservation.venueName)", hint: "Muestra el código QR y los detalles de la reservación de mesa VIP")
+        .bpAccessibility(label: String(format: l10n.t("reservationConfirm.a11y.label"), reservation.venueName), hint: l10n.t("reservationConfirm.a11y.hint"))
     }
 
     // MARK: - Footer
 
     private var footer: some View {
         VStack(spacing: 10) {
-            Text("Muestra este QR al llegar al venue")
+            Text(l10n.t("reservationConfirm.showQR"))
                 .font(.caption)
                 .foregroundStyle(Color.bpInk.opacity(0.35))
 
             HStack(spacing: 12) {
                 Button {
-                    let text = "Mi reservación VIP en \(reservation.venueName)\nCódigo: \(reservation.confirmCode)\n\(reservation.formattedDate)"
+                    let text = String(format: l10n.t("reservationConfirm.shareText"), reservation.venueName, reservation.confirmCode, reservation.formattedDate)
                     let av = UIActivityViewController(activityItems: [text], applicationActivities: nil)
                     topVC?.present(av, animated: true)
                 } label: {
-                    Label("Compartir", systemImage: "square.and.arrow.up")
+                    Label(l10n.t("reservationConfirm.share"), systemImage: "square.and.arrow.up")
                         .font(.bpScaled(14, weight: .semibold))
                         .foregroundStyle(gold)
                         .frame(maxWidth: .infinity)
@@ -139,10 +140,10 @@ struct ReservationConfirmView: View {
                         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.25)))
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Compartir reservación", hint: "Comparte los detalles de la reservación con otras personas", isButton: true)
+                .bpAccessibility(label: l10n.t("reservationConfirm.share"), hint: l10n.t("reservationConfirm.share.hint"), isButton: true)
 
                 Button { dismiss() } label: {
-                    Text("Listo")
+                    Text(l10n.t("reservationConfirm.done"))
                         .font(.bpScaled(14, weight: .semibold))
                         .foregroundStyle(Color.bpInk)
                         .frame(maxWidth: .infinity)
@@ -153,7 +154,7 @@ struct ReservationConfirmView: View {
                         )
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Listo", hint: "Cierra la vista de confirmación de reservación", isButton: true)
+                .bpAccessibility(label: l10n.t("reservationConfirm.done"), hint: l10n.t("reservationConfirm.done.hint"), isButton: true)
             }
             .padding(.horizontal, 24)
         }

@@ -28,13 +28,16 @@ enum AuthFlowState: Equatable {
         }
     }
 
-    var buttonLabel: String {
+    /// l10n key for the current state's button label (empty string = no key).
+    /// Resolved with `l10n.t(...)` at the call site, since this enum is not
+    /// main-actor isolated but `L10n` is.
+    var buttonLabelKey: String {
         switch self {
         case .idle, .validating, .failure: return ""
-        case .signingIn:  return "Iniciando sesión..."
-        case .signingUp:  return "Creando cuenta..."
-        case .loadingUser: return "Preparando tu experiencia..."
-        case .success:    return "¡Bienvenido!"
+        case .signingIn:  return "auth.state.signingIn"
+        case .signingUp:  return "auth.state.signingUp"
+        case .loadingUser: return "auth.state.loadingUser"
+        case .success:    return "auth.state.success"
         }
     }
 }
@@ -42,6 +45,7 @@ enum AuthFlowState: Equatable {
 // MARK: - View
 
 struct NativeAuthView: View {
+    @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var appState: AppState
 
     // State machine
@@ -94,7 +98,7 @@ struct NativeAuthView: View {
                 VStack(spacing: 16) {
                     ProgressView()
                         .tint(amber)
-                    Text("Verificando sesión...")
+                    Text(l10n.t("auth.checkingSession"))
                         .font(.bpScaled(13))
                         .foregroundStyle(Color.bpInk.opacity(0.4))
                 }
@@ -195,22 +199,22 @@ struct NativeAuthView: View {
     /// NOTE: update these URLs once barpass-v2 is deployed to its final domain.
     private var legalFooter: some View {
         HStack(spacing: 4) {
-            Text("Al continuar aceptás nuestros")
+            Text(l10n.t("auth.legal.prefix"))
                 .font(.bpScaled(11))
                 .foregroundStyle(Color.bpInk.opacity(0.35))
-            Link("Términos", destination: URL(string: "https://barpass-v2.vercel.app/legal/terms")!)
+            Link(l10n.t("auth.legal.terms"), destination: URL(string: "https://barpass-v2.vercel.app/legal/terms")!)
                 .font(.bpScaled(11, weight: .semibold))
                 .foregroundStyle(amber)
-            Text("y")
+            Text(l10n.t("auth.legal.and"))
                 .font(.bpScaled(11))
                 .foregroundStyle(Color.bpInk.opacity(0.35))
-            Link("Privacidad", destination: URL(string: "https://barpass-v2.vercel.app/legal/privacy")!)
+            Link(l10n.t("auth.legal.privacy"), destination: URL(string: "https://barpass-v2.vercel.app/legal/privacy")!)
                 .font(.bpScaled(11, weight: .semibold))
                 .foregroundStyle(amber)
         }
         .frame(maxWidth: .infinity)
         .multilineTextAlignment(.center)
-        .bpAccessibility(label: "Términos y Privacidad", hint: "Abre los términos de servicio y política de privacidad")
+        .bpAccessibility(label: l10n.t("auth.legal.a11y.label"), hint: l10n.t("auth.legal.a11y.hint"))
     }
 
     // MARK: - Logo Section
@@ -247,21 +251,21 @@ struct NativeAuthView: View {
                     .foregroundStyle(Color.bpInk)
                     .kerning(-0.4)
 
-                Text("Tu acceso a la mejor noche")
+                Text(l10n.t("auth.tagline"))
                     .font(.bpScaled(13))
                     .foregroundStyle(Color.bpInk.opacity(0.35))
             }
         }
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "BarPass", hint: "Tu acceso a la mejor noche")
+        .bpAccessibility(label: "BarPass", hint: l10n.t("auth.tagline"))
     }
 
     // MARK: - Tab Picker
 
     private var tabPicker: some View {
         HStack(spacing: 0) {
-            tabBtn("Entrar",      for: .signIn)
-            tabBtn("Registrarse", for: .signUp)
+            tabBtn(l10n.t("auth.tab.signIn"),      for: .signIn)
+            tabBtn(l10n.t("auth.tab.signUp"), for: .signUp)
         }
     }
 
@@ -287,8 +291,8 @@ struct NativeAuthView: View {
         .buttonStyle(.plain)
         .disabled(flowState.isLoading)
         .bpAccessibility(
-            label: t == .signIn ? "Iniciar sesión" : "Crear cuenta",
-            hint: t == .signIn ? "Cambiar a inicio de sesión" : "Cambiar a registro",
+            label: t == .signIn ? l10n.t("auth.tab.signIn.a11y") : l10n.t("auth.tab.signUp.a11y"),
+            hint: t == .signIn ? l10n.t("auth.tab.signIn.hint") : l10n.t("auth.tab.signUp.hint"),
             isButton: true
         )
         .animation(.easeInOut(duration: 0.2), value: active)
@@ -303,9 +307,9 @@ struct NativeAuthView: View {
                 // Name field is removed — Supabase signup only needs email + password.
                 // Profile name can be added later via a profile update screen.
             }
-            field("Email", text: $email,
+            field(l10n.t("auth.field.email"), text: $email,
                   keyboard: .emailAddress, icon: "envelope", secure: false)
-            field("Contraseña", text: $password,
+            field(l10n.t("auth.field.password"), text: $password,
                   keyboard: .default, icon: "lock", secure: true)
         }
         .animation(.spring(response: 0.3, dampingFraction: 0.85), value: tab)
@@ -332,8 +336,8 @@ struct NativeAuthView: View {
             .foregroundStyle(Color.bpInk)
             .tint(amber)
             .bpAccessibility(
-                label: placeholder == "Email" ? "Correo electrónico" : "Contraseña",
-                hint: placeholder == "Email" ? "Ingresa tu correo electrónico" : "Ingresa tu contraseña"
+                label: placeholder == l10n.t("auth.field.email") ? l10n.t("auth.field.email.a11y") : l10n.t("auth.field.password.a11y"),
+                hint: placeholder == l10n.t("auth.field.email") ? l10n.t("auth.field.email.hint") : l10n.t("auth.field.password.hint")
             )
 
             if secure {
@@ -346,8 +350,8 @@ struct NativeAuthView: View {
                 }
                 .buttonStyle(.plain)
                 .bpAccessibility(
-                    label: showPassword ? "Ocultar contraseña" : "Mostrar contraseña",
-                    hint: "Muestra u oculta la contraseña",
+                    label: showPassword ? l10n.t("auth.hidePassword") : l10n.t("auth.showPassword"),
+                    hint: l10n.t("auth.togglePassword.hint"),
                     isButton: true
                 )
             }
@@ -377,9 +381,9 @@ struct NativeAuthView: View {
         }()
 
         let label: String = {
-            if flowState.isLoading { return flowState.buttonLabel }
-            if case .failure = flowState { return "Intentar de nuevo" }
-            return tab == .signIn ? "Entrar" : "Crear cuenta"
+            if flowState.isLoading { return l10n.t(flowState.buttonLabelKey) }
+            if case .failure = flowState { return l10n.t("auth.tryAgain") }
+            return tab == .signIn ? l10n.t("auth.enter") : l10n.t("auth.createAccount")
         }()
 
         let showSpinner: Bool = {
@@ -426,8 +430,8 @@ struct NativeAuthView: View {
                 radius: 12, y: 4)
         .opacity(flowState.isLoading ? 0.9 : 1)
         .bpAccessibility(
-            label: tab == .signIn ? "Entrar" : "Crear cuenta",
-            hint: tab == .signIn ? "Iniciar sesión en tu cuenta" : "Crear una cuenta nueva",
+            label: tab == .signIn ? l10n.t("auth.enter") : l10n.t("auth.createAccount"),
+            hint: tab == .signIn ? l10n.t("auth.enter.hint") : l10n.t("auth.createAccount.hint"),
             isButton: true
         )
     }
@@ -439,7 +443,7 @@ struct NativeAuthView: View {
             Rectangle()
                 .fill(Color.bpInk.opacity(0.07))
                 .frame(height: 1)
-            Text("o")
+            Text(l10n.t("auth.or"))
                 .font(.bpScaled(12))
                 .foregroundStyle(Color.bpInk.opacity(0.2))
             Rectangle()
@@ -463,7 +467,7 @@ struct NativeAuthView: View {
         .frame(height: 52)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .disabled(flowState.isLoading)
-        .bpAccessibility(label: "Continuar con Apple", hint: "Inicia sesión usando tu Apple ID", isButton: true)
+        .bpAccessibility(label: l10n.t("auth.apple.continue"), hint: l10n.t("auth.apple.hint"), isButton: true)
     }
 
     private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
@@ -478,7 +482,7 @@ struct NativeAuthView: View {
                   let tokenData = credential.identityToken,
                   let idToken = String(data: tokenData, encoding: .utf8)
             else {
-                withAnimation { flowState = .failure("No se pudo verificar tu Apple ID.") }
+                withAnimation { flowState = .failure(L10n.shared.t("auth.apple.error")) }
                 return
             }
             let nonce = appleNonce
@@ -520,14 +524,14 @@ struct NativeAuthView: View {
             resetEmail = email
             showForgotPassword = true
         } label: {
-            Text("¿Olvidaste tu contraseña?")
+            Text(l10n.t("auth.forgotPassword"))
                 .font(.bpScaled(13, weight: .semibold))
                 .foregroundStyle(Color.bpAmber)
         }
         .buttonStyle(.plain)
         .disabled(flowState.isLoading)
         .frame(maxWidth: .infinity)
-        .bpAccessibility(label: "Olvidé mi contraseña", hint: "Recibirás un enlace para restablecerla", isButton: true)
+        .bpAccessibility(label: l10n.t("auth.forgotPassword.a11y"), hint: l10n.t("auth.forgotPassword.hint"), isButton: true)
     }
 
     // MARK: - Forgot Password Sheet
@@ -548,16 +552,16 @@ struct NativeAuthView: View {
                         .font(.bpScaled(28))
                         .foregroundStyle(Color.bpAmber)
 
-                    Text("Recuperar contraseña")
+                    Text(l10n.t("auth.reset.title"))
                         .font(.bpTitle2())
                         .foregroundStyle(Color.bpInk)
 
-                    Text("Te enviaremos un enlace a tu email para restablecerla.")
+                    Text(l10n.t("auth.reset.subtitle"))
                         .font(.bpBody())
                         .foregroundStyle(Color.bpTextSecondary)
                         .multilineTextAlignment(.center)
 
-                    TextField("Tu email", text: $resetEmail)
+                    TextField(l10n.t("auth.reset.placeholder"), text: $resetEmail)
                         .font(.bpBody())
                         .foregroundStyle(Color.bpInk)
                         .keyboardType(.emailAddress)
@@ -566,14 +570,14 @@ struct NativeAuthView: View {
                         .padding(14)
                         .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                         .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpInk.opacity(0.07)))
-                        .bpAccessibility(label: "Correo electrónico", hint: "Ingresa tu correo para recuperar contraseña")
+                        .bpAccessibility(label: l10n.t("auth.field.email.a11y"), hint: l10n.t("auth.reset.field.hint"))
                 }
                 .padding(.horizontal, 24)
 
                 Spacer()
 
                 HStack(spacing: 12) {
-                    Button("Cancelar") {
+                    Button(l10n.t("tripCreate.cancel")) {
                         showForgotPassword = false
                         resetStatusMsg = ""
                     }
@@ -582,12 +586,12 @@ struct NativeAuthView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
-                    .bpAccessibility(label: "Cancelar", hint: "Cerrar recuperación de contraseña", isButton: true)
+                    .bpAccessibility(label: l10n.t("tripCreate.cancel"), hint: l10n.t("auth.reset.cancel.hint"), isButton: true)
 
                     Button {
                         sendPasswordReset()
                     } label: {
-                        Text("Enviar")
+                        Text(l10n.t("auth.reset.send"))
                             .font(.bpHeadline())
                             .foregroundStyle(.black)
                     }
@@ -596,7 +600,7 @@ struct NativeAuthView: View {
                     .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: BPRadius.md))
                     .opacity(resetEmail.trimmingCharacters(in: .whitespaces).isEmpty ? 0.5 : 1)
                     .disabled(resetEmail.trimmingCharacters(in: .whitespaces).isEmpty || isSendingReset)
-                    .bpAccessibility(label: "Enviar", hint: "Enviar enlace de recuperación", isButton: true)
+                    .bpAccessibility(label: l10n.t("auth.reset.send"), hint: l10n.t("auth.reset.send.hint"), isButton: true)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
@@ -606,7 +610,7 @@ struct NativeAuthView: View {
                         .font(.bpScaled(48))
                         .foregroundStyle(Color.bpGreen)
 
-                    Text("Revisa tu email")
+                    Text(l10n.t("auth.reset.checkEmail"))
                         .font(.bpTitle2())
                         .foregroundStyle(Color.bpInk)
 
@@ -623,14 +627,14 @@ struct NativeAuthView: View {
                     showForgotPassword = false
                     resetStatusMsg = ""
                 } label: {
-                    Text("OK")
+                    Text(l10n.t("auth.reset.ok"))
                         .font(.bpHeadline())
                         .foregroundStyle(.black)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
                 .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: BPRadius.md))
-                .bpAccessibility(label: "OK", hint: "Confirmar cierre", isButton: true)
+                .bpAccessibility(label: l10n.t("auth.reset.ok"), hint: l10n.t("auth.reset.ok.hint"), isButton: true)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
             }
@@ -647,14 +651,14 @@ struct NativeAuthView: View {
 
     private var skipButton: some View {
         Button { submitSkip() } label: {
-            Text("Continuar como invitado")
+            Text(l10n.t("auth.continueAsGuest"))
                 .font(.bpScaled(13, weight: .regular))
                 .foregroundStyle(Color.bpInk.opacity(0.25))
                 .underline(color: Color.bpInk.opacity(0.12))
         }
         .buttonStyle(.plain)
         .disabled(flowState.isLoading)
-        .bpAccessibility(label: "Continuar como invitado", hint: "Omitir inicio de sesión", isButton: true)
+        .bpAccessibility(label: l10n.t("auth.continueAsGuest"), hint: l10n.t("auth.continueAsGuest.hint"), isButton: true)
     }
 
     // MARK: - Social Proof
@@ -670,12 +674,12 @@ struct NativeAuthView: View {
                         .overlay(Circle().strokeBorder(Color.black, lineWidth: 1.5))
                 }
             }
-            Text("+5,000 personas ya salen con BarPass")
+            Text(l10n.t("auth.socialProof"))
                 .font(.bpScaled(11))
                 .foregroundStyle(Color.bpInk.opacity(0.2))
         }
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Más de 5,000 personas ya usan BarPass")
+        .bpAccessibility(label: l10n.t("auth.socialProof.a11y"))
     }
 
     // MARK: - Actions
@@ -685,19 +689,19 @@ struct NativeAuthView: View {
 
         // --- Local validation ---
         guard !cleanEmail.isEmpty, !password.isEmpty else {
-            withAnimation { flowState = .failure("Please fill in all fields.") }
+            withAnimation { flowState = .failure(l10n.t("auth.error.fillFields")) }
             BPHaptics.heavy()
             return
         }
 
         guard isValidEmail(cleanEmail) else {
-            withAnimation { flowState = .failure("Please enter a valid email address.") }
+            withAnimation { flowState = .failure(l10n.t("auth.error.invalidEmail")) }
             BPHaptics.heavy()
             return
         }
 
         guard password.count >= 6 else {
-            withAnimation { flowState = .failure("Password must be at least 6 characters.") }
+            withAnimation { flowState = .failure(l10n.t("auth.error.shortPassword")) }
             BPHaptics.heavy()
             return
         }
@@ -758,7 +762,7 @@ struct NativeAuthView: View {
                 }
             } catch {
                 await MainActor.run {
-                    flowState = .failure("We're having trouble connecting right now. Please try again in a moment.")
+                    flowState = .failure(l10n.t("auth.error.connection"))
                     BPHaptics.heavy()
                     log("[Auth] unexpected error: \(error.localizedDescription)")
                 }
@@ -784,7 +788,7 @@ struct NativeAuthView: View {
         let target = resetEmail.trimmingCharacters(in: .whitespaces).lowercased()
         guard !target.isEmpty, !isSendingReset else { return }
         guard isValidEmail(target) else {
-            resetStatusMsg = "Please enter a valid email address."
+            resetStatusMsg = l10n.t("auth.error.invalidEmail")
             return
         }
 
@@ -793,12 +797,12 @@ struct NativeAuthView: View {
             do {
                 try await AuthService.shared.sendPasswordReset(email: target)
                 await MainActor.run {
-                    resetStatusMsg = "If \(target) has an account, a reset link has been sent."
+                    resetStatusMsg = String(format: l10n.t("auth.reset.sentMessage"), target)
                     isSendingReset = false
                 }
             } catch {
                 await MainActor.run {
-                    resetStatusMsg = "We're having trouble sending the reset email. Please try again."
+                    resetStatusMsg = l10n.t("auth.reset.error")
                     isSendingReset = false
                 }
             }
@@ -827,6 +831,7 @@ private struct ErrorToast: View {
     let message: String
     let onDismiss: () -> Void
 
+    @ObservedObject private var l10n = L10n.shared
     @State private var showDismissHint = false
 
     var body: some View {
@@ -851,7 +856,7 @@ private struct ErrorToast: View {
                     .background(Color.bpInk.opacity(0.08), in: Circle())
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Cerrar error", hint: "Descarta el mensaje de error", isButton: true)
+            .bpAccessibility(label: l10n.t("auth.dismissError"), hint: l10n.t("auth.dismissError.hint"), isButton: true)
             .opacity(showDismissHint ? 1 : 0.6)
         }
         .padding(.horizontal, 16)

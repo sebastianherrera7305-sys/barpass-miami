@@ -2,6 +2,7 @@ import SwiftUI
 import MapKit
 
 struct ExploreView: View {
+    @ObservedObject private var l10n = L10n.shared
     @Namespace private var zoomNS
     @EnvironmentObject private var venueStore: VenueStore
     @State private var searchText = ""
@@ -43,14 +44,16 @@ struct ExploreView: View {
         let id: String; let icon: String; let label: String
     }
 
-    private let layers: [Layer] = [
-        Layer(id: "all", icon: "square.grid.2x2", label: "All"),
-        Layer(id: "trending", icon: "flame.fill", label: "Trending"),
-        Layer(id: "happy_hour", icon: "clock.fill", label: "Happy Hour"),
-        Layer(id: "no_cover", icon: "ticket.fill", label: "No Cover"),
-        Layer(id: "rooftop", icon: "sun.max.fill", label: "Rooftops"),
-        Layer(id: "live", icon: "music.mic", label: "Live Music"),
-    ]
+    private var layers: [Layer] {
+        [
+            Layer(id: "all", icon: "square.grid.2x2", label: l10n.t("explore.layer.all")),
+            Layer(id: "trending", icon: "flame.fill", label: l10n.t("explore.layer.trending")),
+            Layer(id: "happy_hour", icon: "clock.fill", label: l10n.t("explore.layer.happyHour")),
+            Layer(id: "no_cover", icon: "ticket.fill", label: l10n.t("explore.layer.noCover")),
+            Layer(id: "rooftop", icon: "sun.max.fill", label: l10n.t("explore.layer.rooftops")),
+            Layer(id: "live", icon: "music.mic", label: l10n.t("explore.layer.liveMusic")),
+        ]
+    }
 
     private var filteredVenues: [BarPassVenue] {
         venueStore.venues.filter { v in
@@ -86,7 +89,7 @@ struct ExploreView: View {
 
             VStack(spacing: 0) {
                 HStack {
-                    Text("Explorar")
+                    Text(l10n.t("explore.title"))
                         .font(.bpScaled(24, weight: .black))
                         .foregroundStyle(Color.bpInk)
                     Spacer()
@@ -101,7 +104,7 @@ struct ExploreView: View {
                             .glass(radius: 16)
                     }
                     .buttonStyle(.plain)
-                    .bpAccessibility(label: showList ? "Ver mapa" : "Ver lista", hint: "Cambiar entre vista de mapa y lista", isButton: true)
+                    .bpAccessibility(label: showList ? l10n.t("explore.toggleMap") : l10n.t("explore.toggleList"), hint: l10n.t("explore.toggleView.hint"), isButton: true)
                 }
                 .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 60)
@@ -111,11 +114,11 @@ struct ExploreView: View {
                         Image(systemName: "magnifyingglass")
                             .font(.bpScaled(12))
                             .foregroundStyle(Color.bpTextTertiary)
-                        TextField("", text: $searchText, prompt: Text("Buscar venues...").foregroundStyle(Color.bpTextTertiary))
+                        TextField("", text: $searchText, prompt: Text(l10n.t("explore.search")).foregroundStyle(Color.bpTextTertiary))
                             .font(.bpScaled(13))
                             .foregroundStyle(Color.bpInk)
                             .tint(Color.bpAmber)
-                            .bpAccessibility(label: "Buscar venues", hint: "Buscar venues por nombre o ubicación")
+                            .bpAccessibility(label: l10n.t("explore.search.label"), hint: l10n.t("explore.search.hint"))
                         if !searchText.isEmpty {
                             Button { searchText = "" } label: {
                                 Image(systemName: "xmark.circle.fill")
@@ -123,7 +126,7 @@ struct ExploreView: View {
                                     .foregroundStyle(Color.bpTextTertiary)
                             }
                             .buttonStyle(.plain)
-                            .bpAccessibility(label: "Limpiar búsqueda", hint: "Borrar el texto de búsqueda", isButton: true)
+                            .bpAccessibility(label: l10n.t("explore.clearSearch"), hint: l10n.t("explore.clearSearch.hint"), isButton: true)
                         }
                     }
                     .padding(.horizontal, 10)
@@ -142,7 +145,7 @@ struct ExploreView: View {
                             .glass(radius: 16)
                     }
                     .buttonStyle(.plain)
-                    .bpAccessibility(label: "Centrar mapa", hint: "Volver al centro del mapa", isButton: true)
+                    .bpAccessibility(label: l10n.t("explore.centerMap"), hint: l10n.t("explore.centerMap.hint"), isButton: true)
                 }
                 .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 8)
@@ -233,7 +236,7 @@ struct ExploreView: View {
             .background(Circle().fill(Color.bpAmber))
             .overlay(Circle().strokeBorder(.white.opacity(0.9), lineWidth: 2))
             .shadow(color: .black.opacity(0.4), radius: 4, y: 1)
-            .bpAccessibility(label: "\(n) venues", hint: "Hacer zoom para ver venues individuales", isButton: true)
+            .bpAccessibility(label: String(format: l10n.t("explore.cluster.label"), n), hint: l10n.t("explore.cluster.hint"), isButton: true)
     }
 
     // MARK: - Marker
@@ -277,7 +280,7 @@ struct ExploreView: View {
                     .offset(x: size * 0.4, y: -size * 0.4)
             }
         }
-        .bpAccessibility(label: venue.name, hint: "Venue en el mapa. \(venue.neighborhood). Puntuación: \(venue.rating)")
+        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("explore.marker.hint"), venue.neighborhood, "\(venue.rating)"))
     }
 
     private func categoryPin(_ venue: BarPassVenue, size: CGFloat) -> some View {
@@ -333,12 +336,12 @@ struct ExploreView: View {
                             .font(.bpScaled(10))
                             .foregroundStyle(Color.bpTextSecondary)
                         if venue.isOpenNow {
-                            Text("· Abierto")
+                            Text("· \(l10n.t("explore.openBadge"))")
                                 .font(.bpScaled(10))
                                 .foregroundStyle(Color.bpGreen)
                         }
                         if venue.isTrending {
-                            Text("· 🔥 Trending")
+                            Text("· \(l10n.t("explore.trendingBadge"))")
                                 .font(.bpScaled(10))
                                 .foregroundStyle(Color.bpAmber)
                         }
@@ -363,7 +366,7 @@ struct ExploreView: View {
             )
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: venue.name, hint: "Ver detalle de \(venue.name)", isButton: true)
+        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("explore.viewDetail.hint"), venue.name), isButton: true)
     }
 
     // MARK: - Chips
@@ -389,7 +392,7 @@ struct ExploreView: View {
             .overlay(Capsule().strokeBorder(selected ? Color.clear : Color.bpInk.opacity(0.08)))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: layer.label, hint: "Filtrar venues por \(layer.label)", isButton: true)
+        .bpAccessibility(label: layer.label, hint: String(format: l10n.t("explore.filterBy.hint"), layer.label), isButton: true)
     }
 
     // MARK: - List
@@ -399,17 +402,17 @@ struct ExploreView: View {
             if filteredVenues.isEmpty {
                 VStack(spacing: 10) {
                     Text("🔍").font(.bpScaled(40))
-                    Text(searchText.isEmpty ? "No hay venues con esos filtros" : "Sin resultados para \"\(searchText)\"")
+                    Text(searchText.isEmpty ? l10n.t("explore.empty.noFilters") : String(format: l10n.t("explore.empty.noResults"), searchText))
                         .font(.bpScaled(15, weight: .semibold))
                         .foregroundStyle(Color.bpInk)
-                    Text("Probá con otro nombre, barrio o quitá los filtros.")
+                    Text(l10n.t("explore.empty.hint"))
                         .font(.bpScaled(13))
                         .foregroundStyle(Color.bpTextSecondary)
                     Button {
                         BPHaptics.light()
                         withAnimation { searchText = "" }
                     } label: {
-                        Text("Limpiar búsqueda")
+                        Text(l10n.t("explore.clearSearch"))
                             .font(.bpScaled(13, weight: .bold))
                             .foregroundStyle(Color.bpAmber)
                             .padding(.horizontal, 16).padding(.vertical, 9)
@@ -468,6 +471,7 @@ struct PulsingRing: View {
 
 struct VenueListRow: View {
     let venue: BarPassVenue
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         HStack(spacing: 14) {
@@ -496,7 +500,7 @@ struct VenueListRow: View {
             Spacer()
 
             if venue.isOpenNow {
-                Text("Abierto")
+                Text(l10n.t("explore.openBadge"))
                     .font(.bpScaled(10, weight: .semibold))
                     .foregroundStyle(Color.bpGreen)
                     .padding(.horizontal, 8)
@@ -507,6 +511,6 @@ struct VenueListRow: View {
         .padding(.horizontal, BPSpacing.lg)
         .padding(.vertical, 14)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: venue.name, hint: "\(venue.neighborhood). \(venue.type.rawValue). Puntuación: \(venue.rating)", isButton: true)
+        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("explore.listRow.hint"), venue.neighborhood, venue.type.rawValue, "\(venue.rating)"), isButton: true)
     }
 }

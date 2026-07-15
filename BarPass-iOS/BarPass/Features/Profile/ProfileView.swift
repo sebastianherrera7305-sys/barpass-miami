@@ -95,7 +95,9 @@ struct ProfileView: View {
                         }
                         .frame(height: 6)
 
-                        Text(engine.xpForNextLevel != nil ? "\(nextPoints - points) BPX para llegar a \(nextLevel)" : "Nivel máximo alcanzado 🏆")
+                        Text(engine.xpForNextLevel != nil
+                             ? String(format: l10n.t("profile.level.progress"), nextPoints - points, nextLevel)
+                             : l10n.t("profile.level.max"))
                             .font(.bpScaled(11))
                             .foregroundStyle(Color.bpTextTertiary)
                             .frame(maxWidth: .infinity, alignment: .trailing)
@@ -117,7 +119,7 @@ struct ProfileView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("BarPass Wallet")
                                     .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
-                                Text(String(format: "Balance: $%.2f — tocá para cargar", appState.walletBalance))
+                                Text(String(format: l10n.t("profile.wallet.balance"), appState.walletBalance))
                                     .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                             }
                             Spacer()
@@ -140,9 +142,9 @@ struct ProfileView: View {
                         HStack(spacing: 12) {
                             Text("🎟️").font(.bpScaled(22))
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Mis pases y órdenes")
+                                Text(l10n.t("profile.passes.title"))
                                     .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
-                                Text("Historial de compras y pases")
+                                Text(l10n.t("profile.passes.subtitle"))
                                     .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                             }
                             Spacer()
@@ -166,9 +168,9 @@ struct ProfileView: View {
                         HStack(spacing: 12) {
                             Text("🎮").font(.bpScaled(22))
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Juegos y misiones")
+                                Text(l10n.t("profile.games.title"))
                                     .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
-                                Text("Trivia diaria y misiones con XP extra")
+                                Text(l10n.t("profile.games.subtitle"))
                                     .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                             }
                             Spacer()
@@ -199,10 +201,10 @@ struct ProfileView: View {
                             .foregroundStyle(Color.bpInk)
 
                         VStack(spacing: 10) {
-                            earnRow(icon: "mappin.circle.fill", action: "Check-in en venue (×\(engine.checkinCount))", points: "+50 BPX")
-                            earnRow(icon: "camera.fill", action: "Review con foto (×\(engine.reviewCount))", points: "+75 BPX")
-                            earnRow(icon: "sparkles", action: "Crear o completar trip (×\(engine.tripCount))", points: "+100/200 BPX")
-                            earnRow(icon: "square.and.arrow.up", action: "Compartir venue (×\(engine.shareCount))", points: "+25 BPX")
+                            earnRow(icon: "mappin.circle.fill", action: String(format: l10n.t("profile.earn.checkin"), engine.checkinCount), points: "+50 BPX")
+                            earnRow(icon: "camera.fill", action: String(format: l10n.t("profile.earn.review"), engine.reviewCount), points: "+75 BPX")
+                            earnRow(icon: "sparkles", action: String(format: l10n.t("profile.earn.trip"), engine.tripCount), points: "+100/200 BPX")
+                            earnRow(icon: "square.and.arrow.up", action: String(format: l10n.t("profile.earn.share"), engine.shareCount), points: "+25 BPX")
                         }
                     }
                     .padding(18)
@@ -252,7 +254,7 @@ struct ProfileView: View {
 
                     // Theme selector
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Tema")
+                        Text(l10n.t("profile.theme"))
                             .font(.bpScaled(16, weight: .bold))
                             .foregroundStyle(Color.bpInk)
 
@@ -294,7 +296,7 @@ struct ProfileView: View {
 
                     // Appearance selector
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Apariencia")
+                        Text(l10n.t("profile.appearance"))
                             .font(.bpScaled(16, weight: .bold))
                             .foregroundStyle(Color.bpInk)
 
@@ -333,10 +335,10 @@ struct ProfileView: View {
                     // Autoplay — apagado real, no solo el X de la barra flotante.
                     HStack {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("Música automática")
+                            Text(l10n.t("profile.autoplay.title"))
                                 .font(.bpScaled(15, weight: .bold))
                                 .foregroundStyle(Color.bpInk)
-                            Text("Reproduce tu música de Apple Music al abrir la app")
+                            Text(l10n.t("profile.autoplay.subtitle"))
                                 .font(.bpScaled(11))
                                 .foregroundStyle(Color.bpTextSecondary)
                         }
@@ -357,7 +359,7 @@ struct ProfileView: View {
 
                     // Account
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Cuenta")
+                        Text(l10n.t("profile.account"))
                             .font(.bpScaled(16, weight: .bold))
                             .foregroundStyle(Color.bpInk)
 
@@ -365,7 +367,7 @@ struct ProfileView: View {
                             HStack(spacing: 10) {
                                 Image(systemName: "person.crop.circle.badge.checkmark")
                                     .font(.bpScaled(18)).foregroundStyle(Color.bpGreen)
-                                Text(session.user.email ?? "Sesión activa")
+                                Text(session.user.email ?? l10n.t("profile.account.activeSession"))
                                     .font(.bpScaled(14)).foregroundStyle(Color.bpTextSecondary)
                                     .lineLimit(1)
                                 Spacer()
@@ -375,19 +377,19 @@ struct ProfileView: View {
                                 AuthService.shared.signOut()
                                 appState.showNativeAuth = true
                             } label: {
-                                Text("Cerrar sesión")
+                                Text(l10n.t("profile.account.signOut"))
                                     .font(.bpScaled(14, weight: .bold))
                                     .foregroundStyle(Color.bpDanger)
                                     .frame(maxWidth: .infinity).padding(.vertical, 12)
                                     .background(Color.bpDanger.opacity(0.1), in: Capsule())
                             }
                             .buttonStyle(.plain)
-                            .bpAccessibility(label: "Cerrar sesión", hint: "Salir de tu cuenta", isButton: true)
+                            .bpAccessibility(label: l10n.t("profile.account.signOut"), hint: "Salir de tu cuenta", isButton: true)
                         } else {
                             HStack(spacing: 10) {
                                 Image(systemName: "person.crop.circle.badge.questionmark")
                                     .font(.bpScaled(18)).foregroundStyle(Color.bpTextSecondary)
-                                Text("Estás en modo invitado")
+                                Text(l10n.t("profile.account.guest"))
                                     .font(.bpScaled(14)).foregroundStyle(Color.bpTextSecondary)
                                 Spacer()
                             }
@@ -395,14 +397,14 @@ struct ProfileView: View {
                                 BPHaptics.medium()
                                 appState.showNativeAuth = true
                             } label: {
-                                Text("Iniciar sesión")
+                                Text(l10n.t("profile.account.signIn"))
                                     .font(.bpScaled(14, weight: .bold))
                                     .foregroundStyle(.black)
                                     .frame(maxWidth: .infinity).padding(.vertical, 12)
                                     .background(Color.bpAmber, in: Capsule())
                             }
                             .buttonStyle(.plain)
-                            .bpAccessibility(label: "Iniciar sesión", hint: "Entrar con tu cuenta para sincronizar", isButton: true)
+                            .bpAccessibility(label: l10n.t("profile.account.signIn"), hint: "Entrar con tu cuenta para sincronizar", isButton: true)
                         }
                     }
                     .padding(18)

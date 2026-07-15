@@ -5,6 +5,7 @@ import SwiftUI
 /// explicados). Sin música conectada NO muestra datos fake jamás.
 struct HypeWeekCard: View {
     @ObservedObject private var music = MusicProfileStore.shared
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         Group {
@@ -12,10 +13,10 @@ struct HypeWeekCard: View {
             case .notConnected:      welcomeCard
             case .connecting:        loadingCard
             case .connected:         if let p = music.passport { hypeCard(p) }
-            case .denied:            infoCard(icon: "gear", text: "Permiso de Apple Music desactivado. Activalo en Ajustes ▸ BarPass para ver tu Hype semanal.")
+            case .denied:            infoCard(icon: "gear", text: l10n.t("hype.denied"))
             case .notEntitled:       notEntitledCard
-            case .noData:            infoCard(icon: "music.note", text: "No encontramos escucha reciente en Apple Music. Escuchá algo esta semana y volvé 😉")
-            case .error:             infoCard(icon: "wifi.slash", text: "No pudimos leer tu música. Reintentá más tarde.")
+            case .noData:            infoCard(icon: "music.note", text: l10n.t("hype.noData"))
+            case .error:             infoCard(icon: "wifi.slash", text: l10n.t("hype.error"))
             }
         }
     }
@@ -30,9 +31,9 @@ struct HypeWeekCard: View {
                     Text("🎵").font(.bpScaled(22))
                 }
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Conectá tu música")
+                    Text(l10n.t("hype.welcome.title"))
                         .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
-                    Text("Descubrí a dónde salir según lo que escuchás. Tu música nunca sale de tu teléfono.")
+                    Text(l10n.t("hype.welcome.subtitle"))
                         .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -62,13 +63,13 @@ struct HypeWeekCard: View {
                             in: Capsule())
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Conectar \(kind.label)", hint: "Conectar \(kind.label) para recomendaciones personalizadas", isButton: true)
+        .bpAccessibility(label: String(format: l10n.t("hype.connect.label"), kind.label), hint: String(format: l10n.t("hype.connect.hint"), kind.label), isButton: true)
     }
 
     private var loadingCard: some View {
         HStack(spacing: 12) {
             ProgressView().tint(Color.bpAmber)
-            Text("Leyendo tu semana musical…")
+            Text(l10n.t("hype.loading"))
                 .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
         }
         .frame(maxWidth: .infinity).padding(.vertical, 18)
@@ -80,7 +81,7 @@ struct HypeWeekCard: View {
     private func hypeCard(_ p: MusicPassport) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Your Hype This Week 🔥")
+                Text(l10n.t("hype.title"))
                     .font(.bpScaled(15, weight: .black)).foregroundStyle(Color.bpInk)
                 Spacer()
                 Text(p.nightPersonality)
@@ -89,7 +90,7 @@ struct HypeWeekCard: View {
                     .background(Color.bpAmber.opacity(0.12), in: Capsule())
             }
 
-            Text("Tu semana fue \(p.energy)% High Energy")
+            Text(String(format: l10n.t("hype.energy"), p.energy))
                 .font(.bpScaled(13, weight: .semibold)).foregroundStyle(Color.bpInk.opacity(0.85))
 
             // Barra de energía
@@ -112,7 +113,7 @@ struct HypeWeekCard: View {
                 artistRow(p.topArtists)
             }
             if !p.newDiscoveries.isEmpty {
-                Text("✨ \(p.newDiscoveries.count) artista\(p.newDiscoveries.count == 1 ? "" : "s") nuevo\(p.newDiscoveries.count == 1 ? "" : "s") esta semana")
+                Text(String(format: p.newDiscoveries.count == 1 ? l10n.t("hype.newDiscoveries.singular") : l10n.t("hype.newDiscoveries.plural"), p.newDiscoveries.count))
                     .font(.bpScaled(10, weight: .semibold)).foregroundStyle(Color.bpGreen)
             }
         }
@@ -120,13 +121,13 @@ struct HypeWeekCard: View {
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpAmber.opacity(0.2)))
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Tu hype semanal: \(p.energy) por ciento high energy, personalidad \(p.nightPersonality)")
+        .bpAccessibility(label: String(format: l10n.t("hype.a11y.label"), p.energy, p.nightPersonality))
     }
 
     /// Fila de artistas con foto real — antes esto era solo texto plano.
     private func artistRow(_ artists: [ArtistPlay]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Definiendo tu semana")
+            Text(l10n.t("hype.defining"))
                 .font(.bpScaled(9, weight: .bold)).foregroundStyle(Color.bpTextTertiary)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -153,7 +154,7 @@ struct HypeWeekCard: View {
                 }
             }
         }
-        .bpAccessibility(label: "Tus artistas de la semana: \(artists.prefix(5).map(\.name).joined(separator: ", "))")
+        .bpAccessibility(label: String(format: l10n.t("hype.artists.a11y"), artists.prefix(5).map(\.name).joined(separator: ", ")))
     }
 
     /// Apple Music bloqueado (falta registro MusicKit) → Spotify como alternativa real.
@@ -161,11 +162,11 @@ struct HypeWeekCard: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
                 Image(systemName: "hourglass").font(.bpScaled(15)).foregroundStyle(Color.bpAmber)
-                Text("Apple Music se activa pronto (registro MusicKit en proceso). Mientras tanto, conectá Spotify:")
+                Text(l10n.t("hype.notEntitled"))
                     .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            providerButton("Conectar Spotify", kind: .spotify)
+            providerButton(l10n.t("hype.connectSpotify"), kind: .spotify)
         }
         .padding(12)
         .background(Color.bpCardBackground.opacity(0.7), in: RoundedRectangle(cornerRadius: BPRadius.md))
