@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/wallet/topup
@@ -34,6 +35,16 @@ export async function POST(request: Request) {
   const { data: userData, error: userError } = await supabase.auth.getUser(token);
   if (userError || !userData?.user) {
     return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
+  }
+
+  // 10 top-ups/minuto por usuario — deja pasar reintentos legítimos de
+  // tarjeta rechazada, frena card-testing/carding.
+  const withinLimit = await checkRateLimit(`wallet-topup:${userData.user.id}`, {
+    maxRequests: 10,
+    windowSeconds: 60,
+  });
+  if (!withinLimit) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
   let body: unknown;

@@ -25,8 +25,12 @@ const KIND_LABEL: Record<string, string> = {
 
 export default function ValidatePage() {
   const [secret, setSecret] = useState("");
+  const [venueIdInput, setVenueIdInput] = useState("");
   const [savedSecret, setSavedSecret] = useState<string | null>(() =>
     typeof window === "undefined" ? null : window.localStorage.getItem("bp_venue_secret"),
+  );
+  const [savedVenueId, setSavedVenueId] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : window.localStorage.getItem("bp_venue_id"),
   );
   const [code, setCode] = useState("");
   const [result, setResult] = useState<Result>({ state: "idle" });
@@ -41,13 +45,13 @@ export default function ValidatePage() {
   }, []);
 
   async function redeem(passCode: string) {
-    if (!savedSecret || !passCode.trim()) return;
+    if (!savedSecret || !savedVenueId || !passCode.trim()) return;
     setResult({ state: "checking" });
     try {
       const res = await fetch("/api/passes/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-venue-secret": savedSecret },
-        body: JSON.stringify({ passCode: passCode.trim() }),
+        body: JSON.stringify({ passCode: passCode.trim(), venueId: savedVenueId }),
       });
       const json = await res.json();
       if (res.ok && json.success) {
@@ -112,13 +116,19 @@ export default function ValidatePage() {
     setScanning(false);
   }
 
-  if (!savedSecret) {
+  if (!savedSecret || !savedVenueId) {
     return (
       <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-4 px-6">
         <h1 className="text-xl font-bold text-white">Validación BarPass</h1>
         <p className="text-sm text-white/60">
-          Ingresá el código de validación del venue (lo provee BarPass).
+          Ingresá el ID del venue y su código de validación (los provee BarPass — cada venue tiene el suyo).
         </p>
+        <input
+          value={venueIdInput}
+          onChange={(e) => setVenueIdInput(e.target.value)}
+          placeholder="ID del venue"
+          className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-amber-400"
+        />
         <input
           type="password"
           value={secret}
@@ -129,9 +139,11 @@ export default function ValidatePage() {
         <button
           onClick={() => {
             window.localStorage.setItem("bp_venue_secret", secret);
+            window.localStorage.setItem("bp_venue_id", venueIdInput.trim());
             setSavedSecret(secret);
+            setSavedVenueId(venueIdInput.trim());
           }}
-          disabled={!secret.trim()}
+          disabled={!secret.trim() || !venueIdInput.trim()}
           className="rounded-lg bg-amber-400 px-4 py-3 font-bold text-black disabled:opacity-40"
         >
           Continuar
@@ -183,7 +195,9 @@ export default function ValidatePage() {
       <button
         onClick={() => {
           window.localStorage.removeItem("bp_venue_secret");
+          window.localStorage.removeItem("bp_venue_id");
           setSavedSecret(null);
+          setSavedVenueId(null);
         }}
         className="mt-auto text-xs text-white/30 underline"
       >

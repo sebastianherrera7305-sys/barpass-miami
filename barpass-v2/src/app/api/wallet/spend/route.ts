@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/wallet/spend
@@ -30,6 +31,16 @@ export async function POST(request: Request) {
   const { data: userData, error: userError } = await supabase.auth.getUser(token);
   if (userError || !userData?.user) {
     return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
+  }
+
+  // 20 gastos/minuto por usuario — cubre uso normal (carrito + priority
+  // entry en la misma sesión), frena un loop de gasto automatizado.
+  const withinLimit = await checkRateLimit(`wallet-spend:${userData.user.id}`, {
+    maxRequests: 20,
+    windowSeconds: 60,
+  });
+  if (!withinLimit) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
   let body: unknown;
