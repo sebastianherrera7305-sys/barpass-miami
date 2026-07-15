@@ -43,13 +43,26 @@ final class AuthService: @unchecked Sendable {
     // MARK: Public API
 
     /// Synchronous — reads the cached session. Instant at launch.
+    ///
+    /// Lee de Keychain primero. Si no hay nada ahí pero SÍ hay una sesión
+    /// vieja en UserDefaults (versión previa a este cambio), la migra una
+    /// sola vez a Keychain y borra el original — sin esto, cada usuario
+    /// existente perdería la sesión en el próximo update.
     func restoreSession() -> AuthSession? {
         lock.lock(); defer { lock.unlock() }
-        guard let data = defaults.data(forKey: Self.sessionKey),
-              let session = try? JSONDecoder().decode(AuthSession.self, from: data)
-        else { return nil }
-        BPAnalytics.track(.sessionRestored)
-        return session
+        if let data = KeychainService.load(forKey: Self.sessionKey),
+           let session = try? JSONDecoder().decode(AuthSession.self, from: data) {
+            BPAnalytics.track(.sessionRestored)
+            return session
+        }
+        if let legacyData = defaults.data(forKey: Self.sessionKey),
+           let session = try? JSONDecoder().decode(AuthSession.self, from: legacyData) {
+            KeychainService.save(legacyData, forKey: Self.sessionKey)
+            defaults.removeObject(forKey: Self.sessionKey)
+            BPAnalytics.track(.sessionRestored)
+            return session
+        }
+        return nil
     }
 
     @discardableResult
@@ -123,7 +136,8 @@ final class AuthService: @unchecked Sendable {
 
     func signOut() {
         lock.lock(); defer { lock.unlock() }
-        defaults.removeObject(forKey: Self.sessionKey)
+        KeychainService.delete(forKey: Self.sessionKey)
+        defaults.removeObject(forKey: Self.sessionKey) // limpia cualquier resto legacy también
     }
 
     // MARK: Internals
@@ -174,7 +188,7 @@ final class AuthService: @unchecked Sendable {
     private func store(_ session: AuthSession) {
         lock.lock(); defer { lock.unlock() }
         if let data = try? JSONEncoder().encode(session) {
-            defaults.set(data, forKey: Self.sessionKey)
+            KeychainService.save(data, forKey: Self.sessionKey)
         }
     }
 }

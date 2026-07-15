@@ -82,6 +82,7 @@
 		RVSM02000000000000RP01 /* ReviewSummaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVSM01000000000000RP01 /* ReviewSummaryService.swift */; };
 		RVSV02000000000000RP01 /* ReviewSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVSV01000000000000RP01 /* ReviewSummaryView.swift */; };
 		SPOT02000000000000RP01 /* SpotifySource.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPOT01000000000000RP01 /* SpotifySource.swift */; };
+		KYCH02000000000000RP01 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = KYCH01000000000000RP01 /* KeychainService.swift */; };
 		AUTP02000000000000RP01 /* AutoplayPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTP01000000000000RP01 /* AutoplayPreference.swift */; };
 		MPBR02000000000000RP01 /* MusicNowPlayingBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPBR01000000000000RP01 /* MusicNowPlayingBar.swift */; };
 		MPOB02000000000000RP01 /* MusicNowPlayingObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPOB01000000000000RP01 /* MusicNowPlayingObserver.swift */; };
@@ -181,6 +182,7 @@
 		RVSM01000000000000RP01 /* ReviewSummaryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ReviewSummaryService.swift; path = BarPass/Core/Services/ReviewSummaryService.swift; sourceTree = SOURCE_ROOT; };
 		RVSV01000000000000RP01 /* ReviewSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ReviewSummaryView.swift; path = BarPass/Features/Tonight/ReviewSummaryView.swift; sourceTree = SOURCE_ROOT; };
 		SPOT01000000000000RP01 /* SpotifySource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpotifySource.swift; path = BarPass/Core/Music/SpotifySource.swift; sourceTree = SOURCE_ROOT; };
+		KYCH01000000000000RP01 /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeychainService.swift; path = BarPass/Core/Services/KeychainService.swift; sourceTree = SOURCE_ROOT; };
 		AUTP01000000000000RP01 /* AutoplayPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AutoplayPreference.swift; path = BarPass/Core/Music/AutoplayPreference.swift; sourceTree = SOURCE_ROOT; };
 		MPBR01000000000000RP01 /* MusicNowPlayingBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicNowPlayingBar.swift; path = BarPass/Features/Main/MusicNowPlayingBar.swift; sourceTree = SOURCE_ROOT; };
 		MPOB01000000000000RP01 /* MusicNowPlayingObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicNowPlayingObserver.swift; path = BarPass/Core/Music/MusicNowPlayingObserver.swift; sourceTree = SOURCE_ROOT; };
@@ -350,6 +352,7 @@
 				AMSC01000000000000RP01 /* AppleMusicSource.swift */,
 				MSRC01000000000000RP01 /* MusicSource.swift */,
 				SPOT01000000000000RP01 /* SpotifySource.swift */,
+				KYCH01000000000000RP01 /* KeychainService.swift */,
 				AUTP01000000000000RP01 /* AutoplayPreference.swift */,
 				MPBR01000000000000RP01 /* MusicNowPlayingBar.swift */,
 				MPOB01000000000000RP01 /* MusicNowPlayingObserver.swift */,
@@ -622,6 +625,7 @@
 				AMSC02000000000000RP01 /* AppleMusicSource.swift in Sources */,
 				MSRC02000000000000RP01 /* MusicSource.swift in Sources */,
 				SPOT02000000000000RP01 /* SpotifySource.swift in Sources */,
+				KYCH02000000000000RP01 /* KeychainService.swift in Sources */,
 				AUTP02000000000000RP01 /* AutoplayPreference.swift in Sources */,
 				MPBR02000000000000RP01 /* MusicNowPlayingBar.swift in Sources */,
 				MPOB02000000000000RP01 /* MusicNowPlayingObserver.swift in Sources */,
