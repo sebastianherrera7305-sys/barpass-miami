@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Juegos y misiones: trivia diaria + misiones que premian acciones reales.
 struct GamificationView: View {
+    @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var trivia = TriviaEngine.shared
     @ObservedObject private var missionEngine = MissionEngine.shared
     @Environment(\.dismiss) private var dismiss
@@ -22,12 +23,12 @@ struct GamificationView: View {
                     .padding(BPSpacing.lg)
                 }
             }
-            .navigationTitle("Juegos y misiones")
+            .navigationTitle(l10n.t("games.navTitle"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cerrar") { dismiss() }.foregroundStyle(Color.bpAmber)
+                    Button(l10n.t("table.close")) { dismiss() }.foregroundStyle(Color.bpAmber)
                 }
             }
             .onAppear {
@@ -43,7 +44,7 @@ struct GamificationView: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
                 Text("🎯")
-                Text("Trivia de la noche")
+                Text(l10n.t("games.trivia"))
                     .font(.bpHeadline()).foregroundStyle(Color.bpInk)
                 Spacer()
                 Text("+100 XP")
@@ -95,7 +96,7 @@ struct GamificationView: View {
             .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpInk.opacity(0.08)))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: option, hint: "Responder la trivia", isButton: true)
+        .bpAccessibility(label: option, hint: l10n.t("games.trivia.hint"), isButton: true)
     }
 
     private func answeredState(_ q: TriviaQuestion) -> some View {
@@ -119,7 +120,7 @@ struct GamificationView: View {
             }
 
             HStack(spacing: 6) {
-                Text(trivia.lastAnswerCorrect == true ? "✅ ¡Correcto! +100 XP" : "Respondida — mañana hay otra")
+                Text(trivia.lastAnswerCorrect == true ? l10n.t("games.correct") : l10n.t("games.answered"))
                     .font(.bpScaled(13, weight: .bold))
                     .foregroundStyle(trivia.lastAnswerCorrect == true ? Color.bpGreen : Color.bpTextSecondary)
             }
@@ -136,7 +137,7 @@ struct GamificationView: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
                 Text("🏆")
-                Text("Misiones de hoy").font(.bpHeadline()).foregroundStyle(Color.bpInk)
+                Text(l10n.t("games.missions")).font(.bpHeadline()).foregroundStyle(Color.bpInk)
             }
 
             if missionEngine.missions.isEmpty {
@@ -193,6 +194,6 @@ struct GamificationView: View {
             .strokeBorder(m.isCompleted ? Color.bpGreen.opacity(0.3) : Color.bpInk.opacity(0.08)))
         .opacity(m.isCompleted ? 0.75 : 1)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "\(m.title): \(m.progress) de \(m.requirement)", hint: m.description)
+        .bpAccessibility(label: String(format: l10n.t("games.mission.a11y"), m.title, m.progress, m.requirement), hint: m.description)
     }
 }

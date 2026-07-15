@@ -204,7 +204,7 @@ struct TonightView: View {
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
         }
-        .bpAccessibility(label: greeting, hint: "Bienvenido a BarPass. ¿A dónde quieres ir esta noche?")
+        .bpAccessibility(label: greeting, hint: l10n.t("tonight.greeting.hint"))
     }
 
     // MARK: - Vibe tags
@@ -236,7 +236,7 @@ struct TonightView: View {
                             )
                     }
                     .buttonStyle(.plain)
-                    .bpAccessibility(label: tag, hint: "Filtrar venues por esta categoría", isButton: true)
+                    .bpAccessibility(label: tag, hint: l10n.t("tonight.tag.hint"), isButton: true)
                 }
             }
             .padding(.horizontal, BPSpacing.lg)
@@ -270,7 +270,7 @@ struct TonightView: View {
                                 .bpZoomSource(id: pair.venue.id, in: zoomNS)
                         }
                         .buttonStyle(.plain)
-                        .bpAccessibility(label: "\(pair.event.title) en \(pair.venue.name)", hint: "Ver detalle del evento", isButton: true)
+                        .bpAccessibility(label: String(format: l10n.t("tonight.eventAt"), pair.event.title, pair.venue.name), hint: l10n.t("tonight.event.hint"), isButton: true)
                     }
                 }
                 .padding(.horizontal, BPSpacing.lg)
@@ -320,6 +320,7 @@ struct TonightView: View {
 // MARK: - Hero Card
 
 struct HeroVenueCard: View {
+    @ObservedObject private var l10n = L10n.shared
     let venue: BarPassVenue
 
     var body: some View {
@@ -357,7 +358,7 @@ struct HeroVenueCard: View {
                             .padding(.vertical, 3)
                             .background(Color.bpAmber.opacity(0.15), in: Capsule())
                             .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.3)))
-                            .bpAccessibility(label: "Tendencia", hint: "Este venue está trending")
+                            .bpAccessibility(label: l10n.t("tonight.trending.a11y"), hint: l10n.t("tonight.trending.hint"))
                     }
                     if venue.hasHappyHour {
                         Text("HH")
@@ -366,7 +367,7 @@ struct HeroVenueCard: View {
                             .padding(.horizontal, 7)
                             .padding(.vertical, 3)
                             .background(Color.bpAmber, in: Capsule())
-                            .bpAccessibility(label: "Happy hour", hint: "Happy hour activo")
+                            .bpAccessibility(label: l10n.t("tonight.hh.a11y"), hint: l10n.t("tonight.hh.hint"))
                     }
                 }
 
@@ -401,7 +402,7 @@ struct HeroVenueCard: View {
         }
         .frame(width: 280, height: 180)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: venue.name, hint: "Venue: \(venue.neighborhood). \(venue.type.rawValue). Puntuación: \(venue.rating)", isButton: true)
+        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("tonight.venue.hint"), venue.neighborhood, venue.type.rawValue, venue.rating), isButton: true)
         .bpEntrance(offset: CGSize(width: 0, height: 20), delay: 0.1)
     }
 
@@ -419,6 +420,7 @@ struct HeroVenueCard: View {
 // MARK: - Small Card
 
 struct SmallVenueCard: View {
+    @ObservedObject private var l10n = L10n.shared
     let venue: BarPassVenue
 
     var body: some View {
@@ -454,7 +456,7 @@ struct SmallVenueCard: View {
                         .padding(.vertical, 2)
                         .background(Color.bpAmber, in: Capsule())
                         .padding(6)
-                        .bpAccessibility(label: "Happy hour hasta las \(until)")
+                        .bpAccessibility(label: String(format: l10n.t("tonight.hhUntil.a11y"), until))
                 }
             }
 
@@ -482,7 +484,7 @@ struct SmallVenueCard: View {
         }
         .frame(width: 150)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: venue.name, hint: "\(venue.neighborhood). Puntuación: \(venue.rating)", isButton: true)
+        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("tonight.venueShort.hint"), venue.neighborhood, venue.rating), isButton: true)
         .bpEntrance(offset: CGSize(width: 0, height: 10), delay: 0.15)
     }
 }

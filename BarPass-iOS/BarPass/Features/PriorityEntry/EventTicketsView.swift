@@ -8,6 +8,7 @@ struct EventTicketsView: View {
 
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss)  private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var selectedPkg:  TicketPackage = .vip
     @State private var quantity:     Int = 1
@@ -38,7 +39,7 @@ struct EventTicketsView: View {
                 }
             }
         }
-        .navigationTitle("Tickets")
+        .navigationTitle(l10n.t("tickets.navTitle"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .navigationDestination(isPresented: $showTicket) {
@@ -64,7 +65,7 @@ struct EventTicketsView: View {
                     Image(systemName: "music.note")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(gold)
-                    Text("EVENTO ESPECIAL")
+                    Text(l10n.t("tickets.specialEvent"))
                         .font(.bpScaled(10, weight: .heavy))
                         .tracking(3)
                         .foregroundStyle(gold)
@@ -97,7 +98,7 @@ struct EventTicketsView: View {
 
     private var packageSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("TIPO DE TICKET")
+            Text(l10n.t("tickets.type"))
                 .font(.bpScaled(11, weight: .heavy))
                 .tracking(3)
                 .foregroundStyle(Color.bpInk.opacity(0.35))
@@ -150,7 +151,7 @@ struct EventTicketsView: View {
                     Text("$\(Int(pkg.price))")
                         .font(.bpScaled(18, weight: .bold))
                         .foregroundStyle(selected ? gold : .white)
-                    Text("por persona")
+                    Text(l10n.t("tickets.perPerson"))
                         .font(.bpScaled(10))
                         .foregroundStyle(Color.bpInk.opacity(0.3))
                 }
@@ -166,7 +167,7 @@ struct EventTicketsView: View {
             )
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: pkg.name, hint: "Selecciona el tipo de ticket \(pkg.name), \(String(format: "$%.0f", pkg.price)) por persona", isButton: true)
+        .bpAccessibility(label: pkg.name, hint: String(format: l10n.t("tickets.pkg.hint"), pkg.name, String(format: "$%.0f", pkg.price)), isButton: true)
     }
 
     // MARK: - Quantity
@@ -174,11 +175,11 @@ struct EventTicketsView: View {
     private var quantitySection: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("CANTIDAD")
+                Text(l10n.t("tickets.quantity"))
                     .font(.bpScaled(11, weight: .heavy))
                     .tracking(3)
                     .foregroundStyle(Color.bpInk.opacity(0.35))
-                Text("\(quantity) ticket\(quantity > 1 ? "s" : "")")
+                Text(String(format: l10n.t(quantity > 1 ? "tickets.count.plural" : "tickets.count.singular"), quantity))
                     .font(.bpScaled(15, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
             }
@@ -195,7 +196,7 @@ struct EventTicketsView: View {
                         .frame(width: 40, height: 40)
                 }
                 .disabled(quantity <= 1)
-                .bpAccessibility(label: "Reducir cantidad", hint: "Disminuye la cantidad de tickets en uno", isButton: true)
+                .bpAccessibility(label: l10n.t("cart.decreaseQty"), hint: l10n.t("tickets.qty.decrease.hint"), isButton: true)
 
                 Text("\(quantity)")
                     .font(.bpScaled(18, weight: .bold))
@@ -211,7 +212,7 @@ struct EventTicketsView: View {
                         .frame(width: 40, height: 40)
                 }
                 .disabled(quantity >= 8)
-                .bpAccessibility(label: "Aumentar cantidad", hint: "Aumenta la cantidad de tickets en uno, máximo ocho", isButton: true)
+                .bpAccessibility(label: l10n.t("cart.increaseQty"), hint: l10n.t("tickets.qty.increase.hint"), isButton: true)
             }
             .background(Color.bpInk.opacity(0.07), in: Capsule())
         }
@@ -224,7 +225,7 @@ struct EventTicketsView: View {
     private var summaryCard: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("\(quantity) × \(selectedPkg.name)")
+                Text(String(format: l10n.t("tickets.summary.line"), quantity, selectedPkg.name))
                     .foregroundStyle(Color.bpInk.opacity(0.6))
                 Spacer()
                 Text(String(format: "$%.0f", subtotal))
@@ -234,7 +235,7 @@ struct EventTicketsView: View {
             .padding(.bottom, 10)
 
             HStack {
-                Text("Cargo por servicio")
+                Text(l10n.t("cart.serviceFee"))
                     .foregroundStyle(Color.bpInk.opacity(0.4))
                 Spacer()
                 Text(String(format: "$%.2f", fee))
@@ -247,7 +248,7 @@ struct EventTicketsView: View {
                 .padding(.bottom, 14)
 
             HStack {
-                Text("Total")
+                Text(l10n.t("cart.total"))
                     .font(.bpScaled(16, weight: .bold))
                     .foregroundStyle(Color.bpInk)
                 Spacer()
@@ -262,7 +263,7 @@ struct EventTicketsView: View {
         .padding(.horizontal, 20)
         .padding(.top, 20)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Resumen de compra", hint: "Muestra el total de la compra incluyendo cargo por servicio")
+        .bpAccessibility(label: l10n.t("tickets.summary.a11y.label"), hint: l10n.t("tickets.summary.a11y.hint"))
     }
 
     // MARK: - Payment buttons
@@ -271,7 +272,7 @@ struct EventTicketsView: View {
         VStack(spacing: 12) {
             // Perks reminder
             VStack(alignment: .leading, spacing: 6) {
-                Text("Incluye")
+                Text(l10n.t("tickets.includes"))
                     .font(.bpScaled(11, weight: .semibold))
                     .foregroundStyle(Color.bpInk.opacity(0.3))
                 ForEach(selectedPkg.perks, id: \.self) { perk in
@@ -301,7 +302,7 @@ struct EventTicketsView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .transition(.opacity)
-                .bpAccessibility(label: "Error de pago: \(paymentError)")
+                .bpAccessibility(label: String(format: l10n.t("table.paymentError.label"), paymentError))
             }
 
             // Apple Pay
@@ -312,7 +313,7 @@ struct EventTicketsView: View {
                     } else {
                         Image(systemName: "applelogo")
                             .font(.bpScaled(15, weight: .semibold))
-                        Text("Pay")
+                        Text(l10n.t("cart.applePay.pay"))
                             .font(.bpScaled(17, weight: .semibold))
                     }
                 }
@@ -323,14 +324,14 @@ struct EventTicketsView: View {
             }
             .buttonStyle(.plain)
             .disabled(isProcessing)
-            .bpAccessibility(label: "Pagar con Apple Pay", hint: "Procesa la compra de tickets usando Apple Pay", isButton: true)
+            .bpAccessibility(label: l10n.t("cart.applePay.a11y"), hint: l10n.t("tickets.applePay.hint"), isButton: true)
 
             // Wallet
             Button { purchaseWithWallet() } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "wallet.pass.fill")
                         .font(.bpScaled(14, weight: .semibold))
-                    Text(String(format: "BarPass Wallet  ·  $%.0f", appState.walletBalance))
+                    Text(String(format: l10n.t("tickets.wallet.balance"), appState.walletBalance))
                         .font(.bpScaled(14, weight: .semibold))
                 }
                 .foregroundStyle(appState.walletBalance >= total ? gold : Color.bpInk.opacity(0.3))
@@ -342,7 +343,7 @@ struct EventTicketsView: View {
             }
             .buttonStyle(.plain)
             .disabled(appState.walletBalance < total || isProcessing)
-            .bpAccessibility(label: "Pagar con BarPass Wallet", hint: "Usa el saldo de tu billetera BarPass para comprar los tickets", isButton: true)
+            .bpAccessibility(label: l10n.t("cart.payWithWallet"), hint: l10n.t("tickets.wallet.hint"), isButton: true)
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)
@@ -388,7 +389,7 @@ struct EventTicketsView: View {
                 await MainActor.run {
                     isProcessing = false
                     paymentError = (error as? LocalizedError)?.errorDescription
-                        ?? "No pudimos procesar el pago. Intentá de nuevo."
+                        ?? l10n.t("table.paymentError.generic")
                     BPHaptics.error()
                 }
             }
@@ -397,8 +398,8 @@ struct EventTicketsView: View {
 
     private func registerTicket(_ ticket: EventTicket) {
         NotificationService.shared.scheduleExpiryReminder(
-            title: "Tu ticket vence pronto",
-            body: "Te quedan 15 minutos para usar tu entrada a \(ticket.eventName) en \(ticket.venueName).",
+            title: l10n.t("tickets.reminder.title"),
+            body: String(format: l10n.t("tickets.reminder.body"), ticket.eventName, ticket.venueName),
             validUntil: ticket.expiresAt
         )
 

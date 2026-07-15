@@ -4,6 +4,7 @@ import Combine
 
 @MainActor
 struct OnboardingVideoView: View {
+    @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var appState: AppState
     @State private var currentScene  = 0
     @State private var opacity:  Double = 0
@@ -65,22 +66,22 @@ struct OnboardingVideoView: View {
                 .padding(.bottom, 60)
             }
             .accessibilityElement(children: .ignore)
-            .bpAccessibility(label: "Escena \(currentScene + 1) de \(scenes.count)", hint: "Indicador de progreso")
+            .bpAccessibility(label: String(format: l10n.t("onboarding.scene.a11y"), currentScene + 1, scenes.count), hint: l10n.t("onboarding.scene.hint"))
 
             VStack {
                 HStack {
                     Spacer()
-                    Button("Saltar") { finish() }
+                    Button(l10n.t("onboarding.skip")) { finish() }
                         .font(.bpScaled(14, weight: .medium))
                         .foregroundStyle(Color.white.opacity(0.5))
                         .padding(.trailing, 24)
                         .padding(.top, 56)
-                        .bpAccessibility(label: "Saltar", hint: "Omitir introducción", isButton: true)
+                        .bpAccessibility(label: l10n.t("onboarding.skip"), hint: l10n.t("onboarding.skip.hint"), isButton: true)
                 }
                 Spacer()
             }
         }
-        .bpAccessibility(label: "Video de introducción", hint: "Toca para avanzar al siguiente video", isButton: true)
+        .bpAccessibility(label: l10n.t("onboarding.video.a11y"), hint: l10n.t("onboarding.video.hint"), isButton: true)
         .onTapGesture { advanceScene() }
         .onAppear {
             let hasAnyVideo = scenes.contains {

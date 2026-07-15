@@ -2,6 +2,7 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct ActivePassView: View {
+    @ObservedObject private var l10n = L10n.shared
     let pass: SkipLinePass
 
     @Environment(\.dismiss) private var dismiss
@@ -44,7 +45,7 @@ struct ActivePassView: View {
 
     private var header: some View {
         VStack(spacing: 4) {
-            Text("PRIORITY ENTRY")
+            Text(l10n.t("priorityEntry.kicker"))
                 .font(.bpScaled(11, weight: .heavy, design: .rounded))
                 .tracking(4)
                 .foregroundStyle(gold)
@@ -82,7 +83,7 @@ struct ActivePassView: View {
                         Label(quantityLabel, systemImage: "person.fill")
                             .font(.bpScaled(13, weight: .semibold))
                             .foregroundStyle(Color.bpInk)
-                        Text("Skip the line")
+                        Text(l10n.t("pass.skipLine"))
                             .font(.caption)
                             .foregroundStyle(Color.bpInk.opacity(0.45))
                     }
@@ -126,7 +127,7 @@ struct ActivePassView: View {
                 // Bottom strip: timer + purchase info
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Válido hasta")
+                        Text(l10n.t("pass.validUntil"))
                             .font(.bpScaled(10, weight: .semibold))
                             .foregroundStyle(Color.bpInk.opacity(0.35))
                             .tracking(1)
@@ -137,7 +138,7 @@ struct ActivePassView: View {
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 3) {
-                        Text("Pagado con")
+                        Text(l10n.t("pass.paidWith"))
                             .font(.bpScaled(10, weight: .semibold))
                             .foregroundStyle(Color.bpInk.opacity(0.35))
                             .tracking(1)
@@ -152,7 +153,7 @@ struct ActivePassView: View {
         }
         .onAppear { pulse = true }
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Pase Priority Entry para \(pass.venueName)", hint: "Muestra el código QR y detalles del pase para saltar la fila")
+        .bpAccessibility(label: String(format: l10n.t("pass.qr.a11y"), pass.venueName), hint: l10n.t("pass.qr.hint"))
     }
 
     // MARK: - Footer
@@ -173,10 +174,10 @@ struct ActivePassView: View {
                     .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.25)))
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Compartir pase", hint: "Comparte el código del pase con otras personas", isButton: true)
+            .bpAccessibility(label: l10n.t("reservationConfirm.share"), hint: l10n.t("pass.share.hint"), isButton: true)
 
             Button { dismiss() } label: {
-                Text("Cerrar")
+                Text(l10n.t("table.close"))
                     .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk.opacity(0.55))
                     .frame(maxWidth: .infinity)
@@ -184,7 +185,7 @@ struct ActivePassView: View {
                     .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Cerrar pase", hint: "Cierra la vista del pase activo", isButton: true)
+            .bpAccessibility(label: l10n.t("pass.close.a11y"), hint: l10n.t("pass.close.hint2"), isButton: true)
         }
         .padding(.horizontal, 28)
     }

@@ -5,6 +5,7 @@ import SwiftUI
 struct ReviewSummaryView: View {
     let venue: BarPassVenue
     var service: ReviewSummaryService = ConsoleReviewSummaryService()
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var summary: String?
     @State private var isLoading = true
@@ -15,7 +16,7 @@ struct ReviewSummaryView: View {
                 Image(systemName: "sparkles")
                     .font(.bpScaled(15))
                     .foregroundStyle(Color.bpAmber)
-                Text("Remy dice")
+                Text(l10n.t("review.remySays"))
                     .font(.bpHeadline())
                     .foregroundStyle(Color.bpInk)
                 Spacer()
@@ -34,11 +35,11 @@ struct ReviewSummaryView: View {
                     .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("Generado por IA a partir de datos reales del venue")
+                Text(l10n.t("review.aiNote"))
                     .font(.bpCaption())
                     .foregroundStyle(Color.bpTextSecondary.opacity(0.7))
             } else {
-                Text("No pudimos generar el resumen.")
+                Text(l10n.t("review.failed"))
                     .font(.bpBody())
                     .foregroundStyle(Color.bpTextSecondary)
             }
@@ -50,7 +51,7 @@ struct ReviewSummaryView: View {
                 .strokeBorder(Color.bpAmber.opacity(0.18), lineWidth: 1)
         )
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Resumen de Remy", hint: summary ?? "Cargando resumen del venue")
+        .bpAccessibility(label: l10n.t("review.a11y"), hint: summary ?? l10n.t("review.hint"))
         .task(id: venue.id) {
             isLoading = true
             summary = await service.summary(for: venue)

@@ -15,7 +15,7 @@ struct ProfileView: View {
     private var points: Int { engine.totalXP }
     private var level: String { engine.levelName }
     private var checkins: Int { engine.checkinCount }
-    private var nextLevel: String { engine.nextLevelName ?? "Max" }
+    private var nextLevel: String { engine.nextLevelName ?? l10n.t("profile.maxLevel") }
     private var nextPoints: Int { engine.xpForNextLevel ?? engine.totalXP }
 
     var body: some View {
@@ -37,13 +37,13 @@ struct ProfileView: View {
                             Text("🎉")
                                 .font(.bpScaled(34))
                         }
-                        .bpAccessibility(label: "Foto de perfil", hint: "Tu foto de perfil de usuario")
+                        .bpAccessibility(label: l10n.t("profile.avatar"), hint: l10n.t("profile.avatar.hint"))
 
                         VStack(spacing: 4) {
-                            Text("Miami Nightlifer")
+                            Text(l10n.t("profile.displayName"))
                                 .font(.bpScaled(20, weight: .bold))
                                 .foregroundStyle(Color.bpInk)
-                                .bpAccessibility(label: "Miami Nightlifer", hint: "Tu nombre de usuario")
+                                .bpAccessibility(label: l10n.t("profile.displayName"), hint: l10n.t("profile.displayName.hint"))
 
                             HStack(spacing: 6) {
                                 Text(level)
@@ -53,7 +53,7 @@ struct ProfileView: View {
                                     .padding(.vertical, 4)
                                     .background(Color.bpAmber.opacity(0.12), in: Capsule())
                                     .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.25)))
-                                    .bpAccessibility(label: level, hint: "Tu nivel actual")
+                                    .bpAccessibility(label: level, hint: l10n.t("profile.level.hint"))
                             }
                         }
                     }
@@ -66,7 +66,7 @@ struct ProfileView: View {
                                 Text(l10n.t("profile.points"))
                                     .font(.bpScaled(12))
                                     .foregroundStyle(Color.bpTextSecondary)
-                                Text("\(points) BPX")
+                                Text(String(format: l10n.t("profile.bpxValue"), points))
                                     .font(.bpScaled(28, weight: .black, design: .rounded))
                                     .foregroundStyle(Color.bpAmber)
                                     .contentTransition(.numericText())
@@ -106,7 +106,7 @@ struct ProfileView: View {
                     .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.15)))
                     .accessibilityElement(children: .ignore)
-                    .bpAccessibility(label: "BarPass Points \(points) BPX", hint: "Tus puntos y progreso al siguiente nivel")
+                    .bpAccessibility(label: String(format: l10n.t("profile.points.a11y"), points), hint: l10n.t("profile.points.hint"))
                     .padding(.horizontal, BPSpacing.lg)
 
                     // BarPass Wallet
@@ -117,7 +117,7 @@ struct ProfileView: View {
                         HStack(spacing: 12) {
                             Text("🪙").font(.bpScaled(22))
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("BarPass Wallet")
+                                Text(l10n.t("table.wallet.name"))
                                     .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
                                 Text(String(format: l10n.t("profile.wallet.balance"), appState.walletBalance))
                                     .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
@@ -132,7 +132,7 @@ struct ProfileView: View {
                         .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
                     }
                     .buttonStyle(.plain)
-                    .bpAccessibility(label: "BarPass Wallet", hint: "Ver balance y cargar saldo", isButton: true)
+                    .bpAccessibility(label: l10n.t("table.wallet.name"), hint: l10n.t("profile.wallet.hint"), isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
 
                     // Mis pases (historial)
@@ -157,7 +157,7 @@ struct ProfileView: View {
                         .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
                     }
                     .buttonStyle(.plain)
-                    .bpAccessibility(label: "Mis pases y órdenes", hint: "Ver historial de compras y pases", isButton: true)
+                    .bpAccessibility(label: l10n.t("profile.passes.title"), hint: l10n.t("profile.passes.hint"), isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
 
                     // Juegos y misiones
@@ -183,7 +183,7 @@ struct ProfileView: View {
                         .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
                     }
                     .buttonStyle(.plain)
-                    .bpAccessibility(label: "Juegos y misiones", hint: "Abrir trivia diaria y misiones", isButton: true)
+                    .bpAccessibility(label: l10n.t("profile.games.title"), hint: l10n.t("profile.games.hint"), isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
 
                     // Stats
@@ -211,7 +211,7 @@ struct ProfileView: View {
                     .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
                     .accessibilityElement(children: .ignore)
-                    .bpAccessibility(label: "Cómo ganar puntos", hint: "Sección de cómo ganar puntos de BarPass")
+                    .bpAccessibility(label: l10n.t("profile.howToEarn"), hint: l10n.t("profile.howToEarn.hint"))
                     .padding(.horizontal, BPSpacing.lg)
 
                     // Language selector
@@ -243,7 +243,7 @@ struct ProfileView: View {
                                         .strokeBorder(on ? Color.bpAmber.opacity(0.4) : Color.bpInk.opacity(0.07)))
                                 }
                                 .buttonStyle(.plain)
-                                .bpAccessibility(label: lang.label, hint: "Cambiar idioma de la app", isButton: true)
+                                .bpAccessibility(label: lang.label, hint: l10n.t("profile.language.hint"), isButton: true)
                             }
                         }
                     }
@@ -285,7 +285,7 @@ struct ProfileView: View {
                                         .strokeBorder(on ? theme.palette.0.opacity(0.45) : Color.bpInk.opacity(0.07)))
                                 }
                                 .buttonStyle(.plain)
-                                .bpAccessibility(label: theme.label, hint: "Cambiar el tema de color de la app", isButton: true)
+                                .bpAccessibility(label: theme.label, hint: l10n.t("profile.theme.hint"), isButton: true)
                             }
                         }
                     }
@@ -323,7 +323,7 @@ struct ProfileView: View {
                                         .strokeBorder(on ? Color.bpAmber.opacity(0.4) : Color.bpInk.opacity(0.07)))
                                 }
                                 .buttonStyle(.plain)
-                                .bpAccessibility(label: mode.label, hint: "Cambiar apariencia de la app", isButton: true)
+                                .bpAccessibility(label: mode.label, hint: l10n.t("profile.appearance.hint"), isButton: true)
                             }
                         }
                     }
@@ -355,7 +355,7 @@ struct ProfileView: View {
                     .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
                     .padding(.horizontal, BPSpacing.lg)
-                    .bpAccessibility(label: "Música automática", hint: autoplay.enabled ? "Activada, reproduce música al abrir la app" : "Desactivada", isButton: true)
+                    .bpAccessibility(label: l10n.t("profile.autoplay.title"), hint: autoplay.enabled ? l10n.t("profile.autoplay.on") : l10n.t("profile.autoplay.off"), isButton: true)
 
                     // Account
                     VStack(alignment: .leading, spacing: 12) {
@@ -384,7 +384,7 @@ struct ProfileView: View {
                                     .background(Color.bpDanger.opacity(0.1), in: Capsule())
                             }
                             .buttonStyle(.plain)
-                            .bpAccessibility(label: l10n.t("profile.account.signOut"), hint: "Salir de tu cuenta", isButton: true)
+                            .bpAccessibility(label: l10n.t("profile.account.signOut"), hint: l10n.t("profile.signOut.hint"), isButton: true)
                         } else {
                             HStack(spacing: 10) {
                                 Image(systemName: "person.crop.circle.badge.questionmark")

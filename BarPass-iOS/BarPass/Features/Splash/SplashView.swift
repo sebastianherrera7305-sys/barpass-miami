@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SplashView: View {
+    @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var appState: AppState
 
     @State private var logoOpacity: Double = 0
@@ -43,7 +44,7 @@ struct SplashView: View {
             .offset(y: logoY)
         }
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "BarPass", hint: "Cargando aplicación")
+        .bpAccessibility(label: "BarPass", hint: l10n.t("splash.loading.hint"))
         .onAppear {
             withAnimation(.spring(response: 0.15, dampingFraction: 0.85)) {
                 logoOpacity = 1

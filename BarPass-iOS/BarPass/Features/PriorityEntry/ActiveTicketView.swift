@@ -2,6 +2,7 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct ActiveTicketView: View {
+    @ObservedObject private var l10n = L10n.shared
     let ticket: EventTicket
 
     @Environment(\.dismiss) private var dismiss
@@ -26,16 +27,16 @@ struct ActiveTicketView: View {
                 .padding(.top, 8)
             }
         }
-        .navigationTitle("Tu Ticket")
+        .navigationTitle(l10n.t("ticket.navTitle"))
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Listo") { dismiss() }
+                Button(l10n.t("reservationConfirm.done")) { dismiss() }
                     .foregroundStyle(gold)
                     .fontWeight(.semibold)
-                    .bpAccessibility(label: "Listo", hint: "Cierra la vista del ticket", isButton: true)
+                    .bpAccessibility(label: l10n.t("reservationConfirm.done"), hint: l10n.t("ticket.done.hint"), isButton: true)
             }
         }
         .onAppear { pulse = true }
@@ -61,7 +62,7 @@ struct ActiveTicketView: View {
                     .foregroundStyle(Color.bpInk)
             }
 
-            Text("¡Ticket Confirmado!")
+            Text(l10n.t("ticket.confirmed"))
                 .font(.bpScaled(22, weight: .bold))
                 .foregroundStyle(Color.bpInk)
 
@@ -128,7 +129,7 @@ struct ActiveTicketView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "person.fill")
                         .font(.caption)
-                    Text("\(ticket.quantity) persona\(ticket.quantity > 1 ? "s" : "") · \(ticket.package)")
+                    Text(String(format: l10n.t("ticket.qtyFmt"), ticket.quantity, ticket.quantity > 1 ? l10n.t("ticket.people") : l10n.t("ticket.person"), ticket.package))
                         .font(.caption)
                 }
                 .foregroundStyle(Color.bpInk.opacity(0.45))
@@ -146,7 +147,7 @@ struct ActiveTicketView: View {
         )
         .padding(.horizontal, 20)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Ticket para \(ticket.eventName) en \(ticket.venueName)", hint: "Muestra el código QR y los detalles del ticket")
+        .bpAccessibility(label: String(format: l10n.t("ticket.qr.a11y"), ticket.eventName, ticket.venueName), hint: l10n.t("ticket.qr.hint"))
     }
 
     private var dashedDivider: some View {
@@ -229,7 +230,7 @@ struct ActiveTicketView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.bpScaled(14, weight: .semibold))
-                    Text("Compartir")
+                    Text(l10n.t("reservationConfirm.share"))
                         .font(.bpScaled(15, weight: .semibold))
                 }
                 .foregroundStyle(Color.bpInk)
@@ -240,10 +241,10 @@ struct ActiveTicketView: View {
                     .strokeBorder(Color.bpInk.opacity(0.12)))
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Compartir ticket", hint: "Comparte los detalles del ticket con otras personas", isButton: true)
+            .bpAccessibility(label: l10n.t("reservationConfirm.share"), hint: l10n.t("ticket.share.hint"), isButton: true)
 
             Button { dismiss() } label: {
-                Text("Listo")
+                Text(l10n.t("reservationConfirm.done"))
                     .font(.bpScaled(15, weight: .bold))
                     .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
@@ -254,7 +255,7 @@ struct ActiveTicketView: View {
                     )
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Listo", hint: "Cierra la vista del ticket confirmado", isButton: true)
+            .bpAccessibility(label: l10n.t("reservationConfirm.done"), hint: l10n.t("ticket.doneConfirm.hint"), isButton: true)
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)

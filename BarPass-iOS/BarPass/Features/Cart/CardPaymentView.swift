@@ -8,6 +8,7 @@ struct CardPaymentView: View {
     let onSuccess: (String) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var cardNumber  = ""
     @State private var expiry      = ""
@@ -35,7 +36,7 @@ struct CardPaymentView: View {
                         VStack(spacing: 12) {
                             nameField
 
-                            Text("Número de tarjeta, expiración y CVV")
+                            Text(l10n.t("card.numberHint"))
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(Color.bpInk.opacity(0.45))
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -58,7 +59,7 @@ struct CardPaymentView: View {
                                 if loading {
                                     ProgressView().tint(.black)
                                 } else {
-                                    Text(String(format: "Pagar $%.2f", total))
+                                    Text(String(format: l10n.t("card.pay"), total))
                                         .font(.bpScaled(17, weight: .heavy))
                                 }
                             }
@@ -74,20 +75,20 @@ struct CardPaymentView: View {
                         .disabled(!isValid || loading)
                         .opacity(isValid ? 1 : 0.45)
                         .padding(.horizontal, 20)
-                        .bpAccessibility(label: String(format: "Pagar %.2f dólares", total), hint: "Procesa el pago con la tarjeta ingresada", isButton: true)
+                        .bpAccessibility(label: String(format: l10n.t("card.pay.a11y"), total), hint: l10n.t("card.pay.hint"), isButton: true)
 
                         securityNote
                             .padding(.bottom, 30)
                     }
                 }
             }
-            .navigationTitle(String(format: "Pago · $%.2f", total))
+            .navigationTitle(String(format: l10n.t("card.navTitle"), total))
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancelar") { dismiss() }.foregroundStyle(gold)
-                        .bpAccessibility(label: "Cancelar pago", hint: "Cierra el formulario de pago sin procesar", isButton: true)
+                    Button(l10n.t("tripCreate.cancel")) { dismiss() }.foregroundStyle(gold)
+                        .bpAccessibility(label: l10n.t("card.cancel.a11y"), hint: l10n.t("card.cancel.hint"), isButton: true)
                 }
             }
         }
@@ -118,14 +119,14 @@ struct CardPaymentView: View {
 
                 Spacer()
 
-                Text(isCardValid ? "•••• •••• •••• ••••" : "Ingresa los datos de tu tarjeta")
+                Text(isCardValid ? "•••• •••• •••• ••••" : l10n.t("card.enterDetails"))
                     .font(.system(size: isCardValid ? 18 : 13, weight: .medium, design: isCardValid ? .monospaced : .default))
                     .foregroundStyle(.white.opacity(0.9))
                     .padding(.bottom, 8)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("TITULAR").font(.bpScaled(8, weight: .bold)).foregroundStyle(.white.opacity(0.35))
-                    Text(name.isEmpty ? "NOMBRE APELLIDO" : name.uppercased())
+                    Text(l10n.t("card.holderLabel")).font(.bpScaled(8, weight: .bold)).foregroundStyle(.white.opacity(0.35))
+                    Text(name.isEmpty ? l10n.t("card.nameUpperPlaceholder") : name.uppercased())
                         .font(.bpScaled(12, weight: .semibold)).foregroundStyle(.white.opacity(0.75))
                 }
             }
@@ -134,17 +135,17 @@ struct CardPaymentView: View {
         .frame(height: 190)
         .padding(.horizontal, 20)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "Vista previa de la tarjeta", hint: "Muestra una representación visual de la tarjeta ingresada")
+        .bpAccessibility(label: l10n.t("card.preview.a11y"), hint: l10n.t("card.preview.hint"))
     }
 
     // MARK: - Name field
 
     private var nameField: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Nombre en la tarjeta")
+            Text(l10n.t("card.holderName"))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(Color.bpInk.opacity(0.45))
-            TextField("Como aparece en la tarjeta", text: $name)
+            TextField(l10n.t("card.namePlaceholder"), text: $name)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.words)
                 .focused($activeFocus, equals: .name)
@@ -155,7 +156,7 @@ struct CardPaymentView: View {
                 .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
                 .overlay(RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(activeFocus == .name ? gold.opacity(0.5) : Color.bpInk.opacity(0.08), lineWidth: 1))
-                .bpAccessibility(label: "Nombre en la tarjeta", hint: "Ingresa el nombre del titular de la tarjeta")
+                .bpAccessibility(label: l10n.t("card.holderName"), hint: l10n.t("card.holderName.hint"))
         }
     }
 
@@ -181,7 +182,7 @@ struct CardPaymentView: View {
         HStack(spacing: 6) {
             Image(systemName: "lock.fill")
                 .font(.caption2)
-            Text("Tu pago se procesa de forma segura con Stripe")
+            Text(l10n.t("card.secure"))
                 .font(.caption2)
         }
         .foregroundStyle(Color.bpInk.opacity(0.25))

@@ -3,6 +3,7 @@ import SwiftUI
 struct TripDetailView: View {
     let trip: Trip
     @EnvironmentObject private var store: TripStore
+    @ObservedObject private var l10n = L10n.shared
     @Environment(\.dismiss) private var dismiss
 
     @State private var showJoinRequest: Stop? = nil
@@ -42,19 +43,19 @@ struct TripDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cerrar") { dismiss() }
+                    Button(l10n.t("table.close")) { dismiss() }
                         .foregroundStyle(amber)
-                        .bpAccessibility(label: "Cerrar", hint: "Cerrar el detalle del trip", isButton: true)
+                        .bpAccessibility(label: l10n.t("table.close"), hint: l10n.t("tripDetail.close.hint"), isButton: true)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     if trip.creatorId == TripStore.currentUserId && trip.status != .completed {
                         Button {
                             store.completeTrip(trip.id); PointsEngine.shared.award(.completeTrip)
                         } label: {
-                            Text("Completar")
+                            Text(l10n.t("tripDetail.complete"))
                                 .font(.bpCaption())
                                 .foregroundStyle(Color.bpGreen)
-                                .bpAccessibility(label: "Completar", hint: "Marcar el trip como completado", isButton: true)
+                                .bpAccessibility(label: l10n.t("tripDetail.complete"), hint: l10n.t("tripDetail.complete.hint"), isButton: true)
                         }
                     }
                 }
@@ -91,7 +92,7 @@ struct TripDetailView: View {
             HStack(spacing: 14) {
                 Label(trip.startDate.formatted(date: .abbreviated, time: .omitted),
                       systemImage: "calendar")
-                Label("\(trip.stops.count) paradas", systemImage: "mappin")
+                Label(String(format: l10n.t("trips.stopsCount"), trip.stops.count), systemImage: "mappin")
             }
             .font(.bpSmall())
             .foregroundStyle(Color.bpTextSecondary)
@@ -102,17 +103,17 @@ struct TripDetailView: View {
         HStack(spacing: 14) {
             infoCard(
                 value: "\(trip.stops.count)",
-                label: "Paradas",
+                label: l10n.t("tripDetail.stops"),
                 icon: "mappin.circle.fill"
             )
             infoCard(
                 value: "\(trip.memberIds.count)",
-                label: "Miembros",
+                label: l10n.t("tripDetail.members"),
                 icon: "person.2.circle.fill"
             )
             infoCard(
                 value: trip.visibility.label,
-                label: "Visibilidad",
+                label: l10n.t("tripCreate.summary.visibility"),
                 icon: trip.visibility == .privateTrip ? "lock.fill" : "globe"
             )
         }
@@ -135,12 +136,12 @@ struct TripDetailView: View {
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "\(value) \(label)", hint: "Información de \(label.lowercased())")
+        .bpAccessibility(label: "\(value) \(label)", hint: String(format: l10n.t("tripDetail.infoCard.hint"), label.lowercased()))
     }
 
     private var stopsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Itinerario")
+            Text(l10n.t("tripDetail.itinerary"))
                 .font(.bpTitle2())
                 .foregroundStyle(Color.bpInk)
 
@@ -184,7 +185,7 @@ struct TripDetailView: View {
                         HStack(spacing: 3) {
                             Image(systemName: "person.fill.checkmark")
                                 .font(.bpScaled(9))
-                            Text("\(stop.joinedUserIds.count) confirmados")
+                            Text(String(format: l10n.t("tripDetail.confirmed"), stop.joinedUserIds.count))
                         }
                         .font(.bpTiny())
                         .foregroundStyle(Color.bpGreen)
@@ -197,13 +198,13 @@ struct TripDetailView: View {
                             HStack(spacing: 3) {
                                 Image(systemName: "person.fill.questionmark")
                                     .font(.bpScaled(9))
-                                Text("\(stop.pendingStopRequests.count) solicitudes")
+                                Text(String(format: l10n.t("tripDetail.requests"), stop.pendingStopRequests.count))
                             }
                             .font(.bpTiny())
                             .foregroundStyle(amber)
                         }
                         .buttonStyle(.plain)
-                        .bpAccessibility(label: "Solicitudes", hint: "Ver solicitudes para unirse a esta parada", isButton: true)
+                        .bpAccessibility(label: l10n.t("tripDetail.requests.label"), hint: l10n.t("tripDetail.requests.hint"), isButton: true)
                     }
                 }
             }
@@ -211,12 +212,12 @@ struct TripDetailView: View {
         .padding(12)
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
-        .bpAccessibility(label: stop.venueName, hint: "Parada del itinerario", isButton: true)
+        .bpAccessibility(label: stop.venueName, hint: l10n.t("tripDetail.stopRow.hint"), isButton: true)
     }
 
     private var membersSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Miembros (\(trip.memberIds.count))")
+            Text(String(format: l10n.t("tripDetail.membersCount"), trip.memberIds.count))
                 .font(.bpTitle2())
                 .foregroundStyle(Color.bpInk)
 
@@ -233,7 +234,7 @@ struct TripDetailView: View {
                         )
 
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(memberId == TripStore.currentUserId ? "Vos" : memberId)
+                        Text(memberId == TripStore.currentUserId ? l10n.t("tripDetail.you") : memberId)
                             .font(.bpHeadline())
                             .foregroundStyle(Color.bpInk)
                         ReputationBadgeView(rep: rep)
@@ -242,7 +243,7 @@ struct TripDetailView: View {
                     Spacer()
 
                     if memberId == trip.creatorId {
-                        Text("Organizador")
+                        Text(l10n.t("tripDetail.organizer"))
                             .font(.bpTiny())
                             .foregroundStyle(amber)
                             .padding(.horizontal, 8)
@@ -257,7 +258,7 @@ struct TripDetailView: View {
                             Image(systemName: "star")
                                 .font(.caption)
                                 .foregroundStyle(Color.bpTextSecondary)
-                                .bpAccessibility(label: "Calificar a \(memberId)", hint: "Calificar a este miembro", isButton: true)
+                                .bpAccessibility(label: String(format: l10n.t("tripDetail.rate.label"), memberId), hint: l10n.t("tripDetail.rate.hint"), isButton: true)
                         }
                         .buttonStyle(.plain)
                     }
@@ -265,14 +266,14 @@ struct TripDetailView: View {
                 .padding(12)
                 .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
                 .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
-                .bpAccessibility(label: memberId == TripStore.currentUserId ? "Vos" : memberId, hint: "Miembro del grupo")
+                .bpAccessibility(label: memberId == TripStore.currentUserId ? l10n.t("tripDetail.you") : memberId, hint: l10n.t("tripDetail.member.hint"))
             }
         }
     }
 
     private var actionsSection: some View {
         VStack(spacing: 12) {
-            Text("Acciones")
+            Text(l10n.t("tripDetail.actions"))
                 .font(.bpTitle2())
                 .foregroundStyle(Color.bpInk)
 
@@ -285,7 +286,7 @@ struct TripDetailView: View {
                 } label: {
                     HStack {
                         Image(systemName: "person.crop.circle.badge.plus")
-                        Text("Unirse al trip")
+                        Text(l10n.t("tripDetail.join"))
                     }
                     .font(.bpHeadline())
                     .foregroundStyle(.black)
@@ -294,7 +295,7 @@ struct TripDetailView: View {
                     .background(amber, in: Capsule())
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Unirse al trip", hint: "Solicitar unirse a este trip", isButton: true)
+                .bpAccessibility(label: l10n.t("tripDetail.join"), hint: l10n.t("tripDetail.join.hint"), isButton: true)
             }
 
             if trip.creatorId == TripStore.currentUserId {
@@ -303,7 +304,7 @@ struct TripDetailView: View {
                 } label: {
                     HStack {
                         Image(systemName: "trash")
-                        Text("Eliminar trip")
+                        Text(l10n.t("tripDetail.deleteTrip"))
                     }
                     .font(.bpHeadline())
                     .foregroundStyle(Color.bpDanger)
@@ -313,7 +314,7 @@ struct TripDetailView: View {
                     .overlay(Capsule().strokeBorder(Color.bpDanger.opacity(0.3)))
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Eliminar trip", hint: "Eliminar este trip permanentemente", isButton: true)
+                .bpAccessibility(label: l10n.t("tripDetail.deleteTrip"), hint: l10n.t("trips.delete.hint"), isButton: true)
             }
         }
     }
@@ -321,9 +322,9 @@ struct TripDetailView: View {
     private func tripStatusBadge(_ status: TripStatus) -> some View {
         let (label, color): (String, Color) = {
             switch status {
-            case .planning:  return ("Planeando", amber)
-            case .active:    return ("Activo", Color.bpGreen)
-            case .completed: return ("Completado", Color.bpTextSecondary)
+            case .planning:  return (l10n.t("trips.status.planning"), amber)
+            case .active:    return (l10n.t("trips.status.active"), Color.bpGreen)
+            case .completed: return (l10n.t("trips.status.completed"), Color.bpTextSecondary)
             }
         }()
         return Text(label)

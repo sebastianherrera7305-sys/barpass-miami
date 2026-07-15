@@ -8,6 +8,7 @@ struct SkipLinePassView: View {
 
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     @State private var selected: PassOption = .solo
     @State private var isProcessing = false
@@ -21,11 +22,11 @@ struct SkipLinePassView: View {
     enum PassOption: CaseIterable {
         case solo, couple, group
 
-        var label: String {
+        var labelKey: String {
             switch self {
-            case .solo:   return "Solo yo"
-            case .couple: return "Pareja"
-            case .group:  return "Grupo"
+            case .solo:   return "pass.option.solo"
+            case .couple: return "pass.option.couple"
+            case .group:  return "pass.option.group"
             }
         }
         var emoji: String {
@@ -41,10 +42,10 @@ struct SkipLinePassView: View {
         var price: Double {
             switch self { case .solo: return 25; case .couple: return 45; case .group: return 80 }
         }
-        var savings: String? {
+        var savingsKey: String? {
             switch self {
-            case .couple: return "Ahorra $5"
-            case .group:  return "Ahorra $20"
+            case .couple: return "pass.savings.couple"
+            case .group:  return "pass.savings.group"
             default:      return nil
             }
         }
@@ -69,8 +70,8 @@ struct SkipLinePassView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cerrar") { dismiss() }.foregroundStyle(gold)
-                        .bpAccessibility(label: "Cerrar", hint: "Cierra la vista de compra de pase", isButton: true)
+                    Button(l10n.t("table.close")) { dismiss() }.foregroundStyle(gold)
+                        .bpAccessibility(label: l10n.t("table.close"), hint: l10n.t("pass.close.hint"), isButton: true)
                 }
             }
         }
@@ -107,7 +108,7 @@ struct SkipLinePassView: View {
             )
 
             VStack(alignment: .leading, spacing: 6) {
-                Label("PRIORITY ENTRY", systemImage: "bolt.fill")
+                Label(l10n.t("priorityEntry.kicker"), systemImage: "bolt.fill")
                     .font(.bpScaled(10, weight: .heavy, design: .rounded))
                     .tracking(3)
                     .foregroundStyle(gold)
@@ -117,12 +118,12 @@ struct SkipLinePassView: View {
                     .foregroundStyle(Color.bpInk)
 
                 HStack(spacing: 8) {
-                    Label("~\(waitMinutes) min de espera", systemImage: "clock.fill")
+                    Label(String(format: l10n.t("pass.wait"), waitMinutes), systemImage: "clock.fill")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(Color.bpInk.opacity(0.6))
                     Text("•")
                         .foregroundStyle(Color.bpInk.opacity(0.3))
-                    Label("Hoy", systemImage: "calendar")
+                    Label(l10n.t("pass.today"), systemImage: "calendar")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(Color.bpInk.opacity(0.6))
                 }
@@ -138,7 +139,7 @@ struct SkipLinePassView: View {
             ForEach(benefits, id: \.0) { item in
                 VStack(spacing: 6) {
                     Text(item.0).font(.title3)
-                    Text(item.1)
+                    Text(l10n.t(item.1))
                         .font(.bpScaled(11, weight: .semibold))
                         .foregroundStyle(Color.bpInk.opacity(0.55))
                         .multilineTextAlignment(.center)
@@ -151,17 +152,17 @@ struct SkipLinePassView: View {
     }
 
     private let benefits: [(String, String)] = [
-        ("⚡️", "Acceso\ninmediato"),
-        ("⏱️", "Válido\n3 horas"),
-        ("📲", "QR\ndigital"),
-        ("🔄", "Transferible"),
+        ("⚡️", "pass.benefit.access"),
+        ("⏱️", "pass.benefit.valid"),
+        ("📲", "pass.benefit.qr"),
+        ("🔄", "pass.benefit.transfer"),
     ]
 
     // MARK: - Pass options
 
     private var optionsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Elige tu pase")
+            Text(l10n.t("pass.choose"))
                 .font(.bpScaled(18, weight: .bold))
                 .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, 20)
@@ -190,11 +191,11 @@ struct SkipLinePassView: View {
 
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 8) {
-                        Text(option.label)
+                        Text(l10n.t(option.labelKey))
                             .font(.bpScaled(15, weight: .bold))
                             .foregroundStyle(isSelected ? gold : .white)
-                        if let saving = option.savings {
-                            Text(saving)
+                        if let savingKey = option.savingsKey {
+                            Text(l10n.t(savingKey))
                                 .font(.bpScaled(10, weight: .bold))
                                 .foregroundStyle(.black)
                                 .padding(.horizontal, 7)
@@ -202,7 +203,7 @@ struct SkipLinePassView: View {
                                 .background(gold, in: Capsule())
                         }
                     }
-                    Text("\(option.qty) persona\(option.qty > 1 ? "s" : "") · Pase + entrada prioritaria")
+                    Text(String(format: l10n.t(option.qty > 1 ? "pass.option.desc.plural" : "pass.option.desc.singular"), option.qty))
                         .font(.caption)
                         .foregroundStyle(Color.bpInk.opacity(0.4))
                 }
@@ -230,7 +231,7 @@ struct SkipLinePassView: View {
             )
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: option.label, hint: "Pase para \(option.qty) persona\(option.qty > 1 ? "s" : ""), precio \(String(format: "$%.0f", option.price)) dólares", isButton: true)
+        .bpAccessibility(label: l10n.t(option.labelKey), hint: String(format: l10n.t(option.qty > 1 ? "pass.option.a11y.plural" : "pass.option.a11y.singular"), option.qty, String(format: "$%.0f", option.price)), isButton: true)
     }
 
     // MARK: - Payment
@@ -239,7 +240,7 @@ struct SkipLinePassView: View {
         VStack(spacing: 10) {
             // Total line
             HStack {
-                Text("Total")
+                Text(l10n.t("cart.total"))
                     .font(.subheadline)
                     .foregroundStyle(Color.bpInk.opacity(0.4))
                 Spacer()
@@ -264,7 +265,7 @@ struct SkipLinePassView: View {
                 }
                 .padding(.horizontal, 20)
                 .transition(.opacity)
-                .bpAccessibility(label: "Error de pago: \(paymentError)")
+                .bpAccessibility(label: String(format: l10n.t("table.paymentError.label"), paymentError))
             }
 
             VStack(spacing: 10) {
@@ -292,7 +293,7 @@ struct SkipLinePassView: View {
             isProcessing = true
             let svc = ApplePayService()
             svc.requestPayment(amount: Decimal(selected.price),
-                               label: "Priority Entry · \(venueName)") { result in
+                               label: String(format: l10n.t("pass.applePayLabel"), venueName)) { result in
                 Task { @MainActor in
                     isProcessing = false
                     if result.success { completePass(method: "Apple Pay") }
@@ -305,7 +306,7 @@ struct SkipLinePassView: View {
                 } else {
                     Image(systemName: "applelogo")
                         .font(.bpScaled(16, weight: .semibold))
-                    Text("Pay with Apple Pay")
+                    Text(l10n.t("table.applePay"))
                         .font(.bpScaled(16, weight: .bold))
                 }
             }
@@ -317,7 +318,7 @@ struct SkipLinePassView: View {
         }
         .buttonStyle(.plain)
         .disabled(isProcessing)
-        .bpAccessibility(label: "Pagar con Apple Pay", hint: "Procesa el pago del pase usando Apple Pay", isButton: true)
+        .bpAccessibility(label: l10n.t("cart.applePay.a11y"), hint: l10n.t("pass.applePay.hint"), isButton: true)
     }
 
     private var walletBtn: some View {
@@ -325,10 +326,10 @@ struct SkipLinePassView: View {
             HStack(spacing: 12) {
                 Text("🪙").font(.bpScaled(18))
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("BarPass Wallet")
+                    Text(l10n.t("table.wallet.name"))
                         .font(.bpScaled(14, weight: .bold))
                         .foregroundStyle(gold)
-                    Text(String(format: "Balance: $%.2f", appState.walletBalance))
+                    Text(String(format: l10n.t("table.wallet.balance"), appState.walletBalance))
                         .font(.caption)
                         .foregroundStyle(Color.bpInk.opacity(0.4))
                 }
@@ -343,7 +344,7 @@ struct SkipLinePassView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.2)))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Pagar con BarPass Wallet", hint: "Usa el saldo de tu billetera BarPass para comprar el pase", isButton: true)
+        .bpAccessibility(label: l10n.t("cart.payWithWallet"), hint: l10n.t("pass.wallet.hint"), isButton: true)
     }
 
     private var cardBtn: some View {
@@ -354,7 +355,7 @@ struct SkipLinePassView: View {
         } label: {
             HStack {
                 Image(systemName: "creditcard")
-                Text("Pagar con tarjeta")
+                Text(l10n.t("cart.payWithCard"))
             }
             .font(.bpScaled(16, weight: .semibold))
             .foregroundStyle(Color.bpInk.opacity(0.85))
@@ -364,7 +365,7 @@ struct SkipLinePassView: View {
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpInk.opacity(0.1)))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Pagar con tarjeta", hint: "Abre el formulario para pagar el pase con tarjeta de crédito o débito", isButton: true)
+        .bpAccessibility(label: l10n.t("cart.payWithCard"), hint: l10n.t("pass.card.hint"), isButton: true)
     }
 
     // MARK: - Completion
@@ -385,7 +386,7 @@ struct SkipLinePassView: View {
                 await MainActor.run {
                     isProcessing = false
                     paymentError = (error as? LocalizedError)?.errorDescription
-                        ?? "No pudimos procesar el pago. Intentá de nuevo."
+                        ?? l10n.t("table.paymentError.generic")
                     BPHaptics.error()
                 }
             }
@@ -404,8 +405,8 @@ struct SkipLinePassView: View {
         showPass   = true
 
         NotificationService.shared.scheduleExpiryReminder(
-            title: "Tu Skip the Line vence pronto",
-            body: "Te quedan 15 minutos para usar tu pase en \(pass.venueName).",
+            title: l10n.t("pass.reminder.title"),
+            body: String(format: l10n.t("pass.reminder.body"), pass.venueName),
             validUntil: pass.validUntil
         )
 

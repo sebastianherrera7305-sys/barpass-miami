@@ -5,6 +5,7 @@ import SwiftUI
 /// than reusing CardPaymentView — that view is tightly wired to cart/pass
 /// checkout, and payment code is safer duplicated than awkwardly shared.
 struct WalletTopUpView: View {
+    @ObservedObject private var l10n = L10n.shared
     let onSuccess: (Double) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -62,17 +63,17 @@ struct WalletTopUpView: View {
                         .disabled(!isValid || loading)
                         .opacity(isValid ? 1 : 0.45)
                         .padding(.horizontal, 20)
-                        .bpAccessibility(label: String(format: "Cargar %.2f dólares a la wallet", amount), hint: "Procesa el pago y agrega el saldo a tu billetera BarPass", isButton: true)
+                        .bpAccessibility(label: String(format: l10n.t("wallet.topup.a11y"), amount), hint: l10n.t("wallet.topup.hint"), isButton: true)
                     }
                     .padding(.bottom, 30)
                 }
             }
-            .navigationTitle("Cargar saldo")
+            .navigationTitle(l10n.t("wallet.topup.navTitle"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancelar") { dismiss() }.foregroundStyle(gold)
+                    Button(l10n.t("tripCreate.cancel")) { dismiss() }.foregroundStyle(gold)
                 }
             }
         }

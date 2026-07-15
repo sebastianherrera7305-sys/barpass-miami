@@ -4,6 +4,7 @@ import MapKit
 struct VenueDetailView: View {
     let venue: BarPassVenue
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var appState: AppState
     @ObservedObject private var favorites = FavoritesStore.shared
     @State private var showShareSheet = false
@@ -40,7 +41,7 @@ struct VenueDetailView: View {
                     try? await RepositoryDependencies.post.create(post)
                     await MainActor.run {
                         NotificationCenter.default.post(name: .bpPostsChanged, object: venue.id)
-                        checkinMessage = "+75 XP · Tu review quedó publicada abajo 👇"
+                        checkinMessage = l10n.t("venueDetail.reviewPublished")
                     }
                 }
             }
@@ -211,11 +212,11 @@ struct VenueDetailView: View {
 
     private var quickStats: some View {
         HStack(spacing: 0) {
-            quickStat(icon: "clock.fill", label: "Cierra", value: venue.closeTime, primary: true)
+            quickStat(icon: "clock.fill", label: l10n.t("venueDetail.closes"), value: venue.closeTime, primary: true)
             Divider().background(Color.bpInk.opacity(0.08)).frame(height: 40)
-            quickStat(icon: "ticket.fill", label: "Cover", value: venue.priceRange, primary: false)
+            quickStat(icon: "ticket.fill", label: l10n.t("venueDetail.cover"), value: venue.priceRange, primary: false)
             Divider().background(Color.bpInk.opacity(0.08)).frame(height: 40)
-            quickStat(icon: "person.3.fill", label: "Crowd", value: venue.crowdDescription, primary: false)
+            quickStat(icon: "person.3.fill", label: l10n.t("venueDetail.crowd"), value: venue.crowdDescription, primary: false)
         }
         .padding(.vertical, 14)
         .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.lg))
@@ -241,16 +242,16 @@ struct VenueDetailView: View {
 
     private var timingSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            sectionTitle("Cuándo ir")
+            sectionTitle(l10n.t("venueDetail.whenToGo"))
 
-            infoRow("calendar", "Horario", "\(venue.openTime) – \(venue.closeTime)")
-            infoRow("clock.arrow.2.circlepath", "Mejor hora", venue.bestArrivalTime)
-            infoRow("waveform.path.ecg", "Peak hours", venue.peakHours)
-            infoRow("dollarsign.circle.fill", "Gasto prom.", venue.avgSpend + " / persona")
+            infoRow("calendar", l10n.t("venueDetail.hours"), "\(venue.openTime) – \(venue.closeTime)")
+            infoRow("clock.arrow.2.circlepath", l10n.t("venueDetail.bestTime"), venue.bestArrivalTime)
+            infoRow("waveform.path.ecg", l10n.t("venueDetail.peakHours"), venue.peakHours)
+            infoRow("dollarsign.circle.fill", l10n.t("venueDetail.avgSpend"), venue.avgSpend + l10n.t("venueDetail.perPersonSuffix"))
 
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Crowd")
+                    Text(l10n.t("venueDetail.crowd"))
                         .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
                     Spacer()
                     Text(venue.crowdDescription)
@@ -271,7 +272,7 @@ struct VenueDetailView: View {
 
     private var musicSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Música & Ambiente")
+            sectionTitle(l10n.t("venueDetail.musicAmbience"))
             HStack(spacing: 8) {
                 ForEach(venue.musicGenres, id: \.self) { genre in
                     Text(genre.rawValue)
@@ -283,7 +284,7 @@ struct VenueDetailView: View {
                         .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.2)))
                 }
             }
-            infoRow("tshirt.fill", "Dress Code", venue.dressCode)
+            infoRow("tshirt.fill", l10n.t("venueDetail.dressCode"), venue.dressCode)
         }
     }
 
@@ -291,7 +292,7 @@ struct VenueDetailView: View {
 
     private var drinksSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            sectionTitle("Bebidas populares")
+            sectionTitle(l10n.t("venueDetail.popularDrinks"))
             VStack(spacing: 10) {
                 ForEach(venue.popularDrinks) { drink in
                     HStack {
@@ -304,7 +305,7 @@ struct VenueDetailView: View {
                             .font(.bpScaled(14, weight: .bold, design: .monospaced))
                             .foregroundStyle(Color.bpAmber)
                     }
-                    .bpAccessibility(label: "\(drink.name), \(String(format: "$%.0f", drink.price))", hint: "Bebida popular en este venue")
+                    .bpAccessibility(label: "\(drink.name), \(String(format: "$%.0f", drink.price))", hint: l10n.t("venueDetail.drink.hint"))
                 }
             }
         }
@@ -314,7 +315,7 @@ struct VenueDetailView: View {
 
     private var eventsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            sectionTitle("Próximos eventos")
+            sectionTitle(l10n.t("venueDetail.upcomingEvents"))
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(venue.upcomingEvents.sorted { $0.date < $1.date }) { event in
@@ -329,7 +330,7 @@ struct VenueDetailView: View {
 
     private var photosSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Fotos")
+            sectionTitle(l10n.t("venueDetail.photos"))
                 .padding(.horizontal, BPSpacing.lg)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
@@ -366,7 +367,7 @@ struct VenueDetailView: View {
 
     private var reviewsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Reviews")
+            sectionTitle(l10n.t("profile.reviews"))
 
             HStack(spacing: 8) {
                 Image(systemName: "star.fill")
@@ -375,13 +376,13 @@ struct VenueDetailView: View {
                 Text(String(format: "%.1f", venue.rating))
                     .font(.bpScaled(24, weight: .black))
                     .foregroundStyle(Color.bpInk)
-                Text("(\(venue.reviewCount) reviews)")
+                Text(String(format: l10n.t("venueDetail.reviewsCount"), venue.reviewCount))
                     .font(.bpScaled(13))
                     .foregroundStyle(Color.bpTextSecondary)
                 Spacer()
             }
 
-            Text("Rating de Google")
+            Text(l10n.t("venueDetail.googleRating"))
                 .font(.bpScaled(11))
                 .foregroundStyle(Color.bpTextSecondary.opacity(0.7))
 
@@ -398,7 +399,7 @@ struct VenueDetailView: View {
                     HStack(spacing: 6) {
                         if checkingIn { ProgressView().tint(.black).scaleEffect(0.7) }
                         else { Image(systemName: points.hasCheckedInToday(venueId: venue.id) ? "checkmark.seal.fill" : "mappin.and.ellipse").font(.bpScaled(13)) }
-                        Text(points.hasCheckedInToday(venueId: venue.id) ? "Check-in hecho" : "Check-in · +50 XP")
+                        Text(points.hasCheckedInToday(venueId: venue.id) ? l10n.t("venueDetail.checkinDone") : l10n.t("venueDetail.checkin"))
                             .font(.bpScaled(13, weight: .bold))
                     }
                     .foregroundStyle(points.hasCheckedInToday(venueId: venue.id) ? Color.bpGreen : .black)
@@ -407,7 +408,7 @@ struct VenueDetailView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(checkingIn || points.hasCheckedInToday(venueId: venue.id))
-                .bpAccessibility(label: "Check-in", hint: "Registrar tu visita a este venue y ganar 50 XP", isButton: true)
+                .bpAccessibility(label: l10n.t("venueDetail.checkin.label"), hint: l10n.t("venueDetail.checkin.hint"), isButton: true)
 
                 Button {
                     BPHaptics.light()
@@ -415,7 +416,7 @@ struct VenueDetailView: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: points.hasReviewed(venueId: venue.id) ? "star.fill" : "square.and.pencil").font(.bpScaled(13))
-                        Text(points.hasReviewed(venueId: venue.id) ? "Review dejada" : "Dejar review · +75 XP")
+                        Text(points.hasReviewed(venueId: venue.id) ? l10n.t("venueDetail.reviewDone") : l10n.t("venueDetail.leaveReview"))
                             .font(.bpScaled(13, weight: .bold))
                     }
                     .foregroundStyle(points.hasReviewed(venueId: venue.id) ? Color.bpGreen : Color.bpAmber)
@@ -425,7 +426,7 @@ struct VenueDetailView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(points.hasReviewed(venueId: venue.id))
-                .bpAccessibility(label: "Dejar review", hint: "Dejar una review y ganar 75 XP", isButton: true)
+                .bpAccessibility(label: l10n.t("venueDetail.leaveReview.label"), hint: l10n.t("venueDetail.leaveReview.hint"), isButton: true)
             }
 
             if let msg = checkinMessage {
@@ -447,7 +448,7 @@ struct VenueDetailView: View {
             await MainActor.run {
                 checkingIn = false
                 guard let coord else {
-                    checkinMessage = "Activá la ubicación para hacer check-in."
+                    checkinMessage = l10n.t("venueDetail.enableLocation")
                     return
                 }
                 let here = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
@@ -455,10 +456,10 @@ struct VenueDetailView: View {
                 let meters = here.distance(from: there)
                 if meters <= 250 {
                     if points.checkIn(venueId: venue.id) != nil {
-                        withAnimation { checkinMessage = "+50 XP · ¡Estás en \(venue.name)!" }
+                        withAnimation { checkinMessage = String(format: l10n.t("venueDetail.checkinSuccess"), venue.name) }
                     }
                 } else {
-                    withAnimation { checkinMessage = "Estás a \(Int(meters)) m — acercate para el check-in." }
+                    withAnimation { checkinMessage = String(format: l10n.t("venueDetail.tooFar"), Int(meters)) }
                 }
             }
         }
@@ -474,9 +475,9 @@ struct VenueDetailView: View {
 
     private var locationSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("Cómo llegar")
-            infoRow("location.fill", "Dirección", venue.address)
-            infoRow("car.fill", "Parking", venue.parking)
+            sectionTitle(l10n.t("venueDetail.howToGet"))
+            infoRow("location.fill", l10n.t("venueDetail.address"), venue.address)
+            infoRow("car.fill", l10n.t("venueDetail.parking"), venue.parking)
 
             HStack(spacing: 10) {
                 linkButton(icon: "map.fill", label: "Maps") { openMaps() }
@@ -504,7 +505,7 @@ struct VenueDetailView: View {
                     .overlay(Circle().strokeBorder(Color.bpInk.opacity(0.1)))
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Guardar", hint: "Guardar o quitar de favoritos", isButton: true)
+            .bpAccessibility(label: l10n.t("venueDetail.save"), hint: l10n.t("venueDetail.save.hint"), isButton: true)
 
             Button {
                 appState.priorityVenueId = venue.id
@@ -513,7 +514,7 @@ struct VenueDetailView: View {
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "bolt.fill").font(.bpScaled(12))
-                    Text("Skip the Line")
+                    Text(l10n.t("priorityEntry.skipLine"))
                         .font(.bpScaled(14, weight: .bold))
                 }
                 .foregroundStyle(.black)
@@ -525,7 +526,7 @@ struct VenueDetailView: View {
                 )
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Skip the Line", hint: "Comprar acceso prioritario sin fila", isButton: true)
+            .bpAccessibility(label: l10n.t("priorityEntry.skipLine"), hint: l10n.t("venueDetail.skipLine.hint"), isButton: true)
 
             Button {
                 BPAnalytics.track(.openMaps(venue: venue.name))
@@ -540,7 +541,7 @@ struct VenueDetailView: View {
                     .background(Color.bpAmber.opacity(0.12), in: Circle())
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Direcciones", hint: "Abrir ubicación en Mapas", isButton: true)
+            .bpAccessibility(label: l10n.t("venueDetail.directions"), hint: l10n.t("venueDetail.directions.hint"), isButton: true)
         }
         .padding(.horizontal, BPSpacing.lg)
         .padding(.vertical, 10)
@@ -562,7 +563,7 @@ struct VenueDetailView: View {
                     .environment(\.colorScheme, .dark)
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Volver", hint: "Volver a la pantalla anterior", isButton: true)
+            .bpAccessibility(label: l10n.t("venueDetail.back"), hint: l10n.t("venueDetail.back.hint"), isButton: true)
             Spacer()
             Button { BPHaptics.light(); showShareSheet = true; BPAnalytics.track(.shareVenue(venue: venue.id)); PointsEngine.shared.award(.shareVenue) } label: {
                 Image(systemName: "square.and.arrow.up")
@@ -573,7 +574,7 @@ struct VenueDetailView: View {
                     .environment(\.colorScheme, .dark)
             }
             .buttonStyle(.plain)
-            .bpAccessibility(label: "Compartir", hint: "Compartir este venue", isButton: true)
+            .bpAccessibility(label: l10n.t("plan.share"), hint: l10n.t("venueDetail.share.hint"), isButton: true)
         }
         .padding(.horizontal, BPSpacing.lg)
         .padding(.top, 56)
@@ -625,7 +626,7 @@ struct VenueDetailView: View {
             .overlay(RoundedRectangle(cornerRadius: BPRadius.sm).strokeBorder(Color.bpInk.opacity(0.09)))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: label, hint: "Abrir en \(label)", isButton: true)
+        .bpAccessibility(label: label, hint: String(format: l10n.t("venueDetail.openIn"), label), isButton: true)
     }
 
     // MARK: - Actions
@@ -664,7 +665,7 @@ private struct ShareSheet: UIViewControllerRepresentable {
     let venue: BarPassVenue
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
-        let text = "Check out \(venue.name) in Miami! \(venue.neighborhood)"
+        let text = String(format: L10n.shared.t("venueDetail.shareText"), venue.name, venue.neighborhood)
         guard let url = URL(string: "https://barpass.app/venues/\(venue.id)") else {
             return UIActivityViewController(activityItems: [text], applicationActivities: nil)
         }

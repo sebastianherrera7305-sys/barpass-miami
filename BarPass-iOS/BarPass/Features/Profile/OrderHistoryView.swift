@@ -5,6 +5,7 @@ import SwiftUI
 /// can be forged since it mirrors exactly what the server persisted at
 /// purchase/redemption time.
 struct OrderHistoryView: View {
+    @ObservedObject private var l10n = L10n.shared
     @State private var entries: [HistoryEntry] = []
     @State private var isLoading = true
 
@@ -25,7 +26,7 @@ struct OrderHistoryView: View {
                 }
             }
         }
-        .navigationTitle("Mis pases y órdenes")
+        .navigationTitle(l10n.t("profile.passes.title"))
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
     }
@@ -33,7 +34,7 @@ struct OrderHistoryView: View {
     private var emptyState: some View {
         VStack(spacing: 10) {
             Text("🎟️").font(.system(size: 40))
-            Text("Todavía no tenés compras")
+            Text(l10n.t("orders.empty"))
                 .font(.bpScaled(15, weight: .semibold))
                 .foregroundStyle(Color.bpInk.opacity(0.6))
         }

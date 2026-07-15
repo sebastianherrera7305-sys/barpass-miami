@@ -5,6 +5,7 @@ import PassKit
 
 struct AppleWalletButton: View {
     let wallet:   BarPassWallet
+    @ObservedObject private var l10n = L10n.shared
     @StateObject private var service = WalletPassService.shared
     @State private var showSetup     = false
     @State private var showError     = false
@@ -25,7 +26,7 @@ struct AppleWalletButton: View {
                 PKAddPassButtonView(style: .blackOutline)
                     .frame(width: 256, height: 44)
                     .onTapGesture { presentWallet(url: url) }
-                    .bpAccessibility(label: "Agregar a Apple Wallet", hint: "Agregar el pase a tu Apple Wallet", isButton: true)
+                    .bpAccessibility(label: l10n.t("wallet.add.label"), hint: l10n.t("wallet.add.hint.ready"), isButton: true)
 
             // ── Generando (con barra de progreso) ─────────────────
             case .generating(let progress):
@@ -45,8 +46,8 @@ struct AppleWalletButton: View {
             ghToken = KeychainHelper.load(forKey: "bp_gh_token") ?? ""
         }
         .sheet(isPresented: $showSetup) { TokenSetupSheet(ghToken: $ghToken) }
-        .alert("Error", isPresented: $showError) {
-            Button("OK", role: .cancel) {}
+        .alert(l10n.t("common.error"), isPresented: $showError) {
+            Button(l10n.t("auth.reset.ok"), role: .cancel) {}
         } message: { Text(errorMsg) }
     }
 
@@ -64,14 +65,14 @@ struct AppleWalletButton: View {
                 .frame(width: 256, height: 44)
                 .allowsHitTesting(false)
         }
-        .bpAccessibility(label: "Agregar a Apple Wallet", hint: "Generar el pase para agregar a Apple Wallet", isButton: true)
+        .bpAccessibility(label: l10n.t("wallet.add.label"), hint: l10n.t("wallet.add.hint.generate"), isButton: true)
     }
 
     private var inWalletBadge: some View {
-        Label("Guardado en Apple Wallet", systemImage: "checkmark.circle.fill")
+        Label(l10n.t("wallet.saved"), systemImage: "checkmark.circle.fill")
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(.green)
-            .bpAccessibility(label: "Guardado en Apple Wallet", hint: "Este pase ya está en tu Apple Wallet")
+            .bpAccessibility(label: l10n.t("wallet.saved"), hint: l10n.t("wallet.saved.hint"))
     }
 
     private func generatingView(progress: Double) -> some View {
@@ -81,7 +82,7 @@ struct AppleWalletButton: View {
                     .progressViewStyle(.circular)
                     .tint(Color(hex: "#f5b830"))
                     .scaleEffect(0.85)
-                Text("Generando tu pase…")
+                Text(l10n.t("wallet.generating"))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
             }
@@ -90,31 +91,31 @@ struct AppleWalletButton: View {
                 .tint(Color(hex: "#f5b830"))
                 .frame(width: 220)
                 .animation(.linear(duration: 5), value: progress)
-            Text("~\(Int((1 - progress) * 120))s restantes")
+            Text(String(format: l10n.t("wallet.remaining"), Int((1 - progress) * 120)))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
-            Button("Cancelar") { service.cancelGeneration() }
+            Button(l10n.t("tripCreate.cancel")) { service.cancelGeneration() }
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.secondary)
-                .bpAccessibility(label: "Cancelar", hint: "Cancelar la generación del pase", isButton: true)
+                .bpAccessibility(label: l10n.t("tripCreate.cancel"), hint: l10n.t("wallet.cancel.hint"), isButton: true)
         }
         .padding(.vertical, 8)
     }
 
     private func errorView(msg: String) -> some View {
         VStack(spacing: 10) {
-            Text("❌ \(msg)")
+            Text(String(format: l10n.t("wallet.errorFormat"), msg))
                 .font(.caption)
                 .foregroundStyle(.red)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 260)
-            Button("Reintentar") {
+            Button(l10n.t("trips.retry")) {
                 service.passState = .idle
                 Task { await service.generatePass(wallet: wallet, ghToken: ghToken) }
             }
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(Color(hex: "#f5b830"))
-            .bpAccessibility(label: "Reintentar", hint: "Intentar generar el pase nuevamente", isButton: true)
+            .bpAccessibility(label: l10n.t("trips.retry"), hint: l10n.t("wallet.retry.hint"), isButton: true)
         }
     }
 
@@ -128,7 +129,7 @@ struct AppleWalletButton: View {
         Task {
             let success = await service.presentAddToWallet(passURL: url, from: rootVC)
             if !success {
-                errorMsg = "No se pudo abrir el pase. Intenta de nuevo."
+                errorMsg = l10n.t("wallet.openError")
                 showError = true
             }
         }
@@ -139,6 +140,7 @@ struct AppleWalletButton: View {
 
 struct TokenSetupSheet: View {
     @Binding var ghToken: String
+    @ObservedObject private var l10n = L10n.shared
     @Environment(\.dismiss) private var dismiss
     @State private var inputToken = ""
     @State private var isValid    = false
@@ -152,9 +154,9 @@ struct TokenSetupSheet: View {
                     // Header
                     VStack(spacing: 8) {
                         Text("🍎").font(.bpScaled(44))
-                        Text("Conectar Apple Wallet")
+                        Text(l10n.t("wallet.setup.title"))
                             .font(.title2.bold())
-                        Text("Tu token se guarda solo en este dispositivo")
+                        Text(l10n.t("wallet.setup.subtitle"))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
@@ -165,16 +167,16 @@ struct TokenSetupSheet: View {
                     // Steps
                     VStack(alignment: .leading, spacing: 12) {
                         SetupStep(number: "1", icon: "🌐",
-                            text: "Crea cuenta gratis en **app.passkit.com** → Store Card → nombre: `barpass-wallet`")
+                            text: LocalizedStringKey(l10n.t("wallet.setup.step1")))
                         SetupStep(number: "2", icon: "🔑",
-                            text: "Copia tu API Key → GitHub repo → Settings → Secrets → agrega `PASSKIT_API_KEY`")
+                            text: LocalizedStringKey(l10n.t("wallet.setup.step2")))
                         SetupStep(number: "3", icon: "🪙",
-                            text: "Crea un token en **github.com/settings/tokens** (fine-grained, Actions → Write, solo repo barpass-miami)")
+                            text: LocalizedStringKey(l10n.t("wallet.setup.step3")))
                     }
 
                     // Token input
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("GITHUB TOKEN")
+                        Text(l10n.t("wallet.setup.tokenLabel"))
                             .font(.caption.weight(.bold))
                             .foregroundStyle(.secondary)
                             .tracking(1)
@@ -209,12 +211,12 @@ struct TokenSetupSheet: View {
                         )
 
                         if !inputToken.isEmpty && !isValid {
-                            Label("Debe empezar con github_pat_", systemImage: "xmark.circle.fill")
+                            Label(l10n.t("wallet.setup.mustStart"), systemImage: "xmark.circle.fill")
                                 .font(.caption)
                                 .foregroundStyle(.red)
                         }
                         if isValid {
-                            Label("Token válido", systemImage: "checkmark.circle.fill")
+                            Label(l10n.t("wallet.setup.tokenValid"), systemImage: "checkmark.circle.fill")
                                 .font(.caption)
                                 .foregroundStyle(.green)
                         }
@@ -227,7 +229,7 @@ struct TokenSetupSheet: View {
                         ghToken = token
                         dismiss()
                     } label: {
-                        Text("Guardar y Activar")
+                        Text(l10n.t("wallet.setup.save"))
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
@@ -248,7 +250,7 @@ struct TokenSetupSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar") { dismiss() }
+                    Button(l10n.t("tripCreate.cancel")) { dismiss() }
                 }
             }
         }

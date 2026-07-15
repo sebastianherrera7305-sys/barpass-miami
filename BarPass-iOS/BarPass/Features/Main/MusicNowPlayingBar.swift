@@ -5,6 +5,7 @@ import SwiftUI
 /// parar del todo (el control que faltaba en el autoplay).
 struct MusicNowPlayingBar: View {
     @ObservedObject private var observer = MusicNowPlayingObserver.shared
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         if let title = observer.title {
@@ -40,7 +41,7 @@ struct MusicNowPlayingBar: View {
                         .frame(width: 30, height: 30)
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: observer.isPlaying ? "Pausar música" : "Reproducir música", isButton: true)
+                .bpAccessibility(label: observer.isPlaying ? l10n.t("music.pause.a11y") : l10n.t("music.play.a11y"), isButton: true)
 
                 Button { observer.skipToNext() } label: {
                     Image(systemName: "forward.fill")
@@ -49,7 +50,7 @@ struct MusicNowPlayingBar: View {
                         .frame(width: 26, height: 26)
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Siguiente canción", isButton: true)
+                .bpAccessibility(label: l10n.t("music.next.a11y"), isButton: true)
 
                 Button { observer.stop() } label: {
                     Image(systemName: "xmark")
@@ -58,7 +59,7 @@ struct MusicNowPlayingBar: View {
                         .frame(width: 24, height: 24)
                 }
                 .buttonStyle(.plain)
-                .bpAccessibility(label: "Detener música", hint: "Para la reproducción de fondo", isButton: true)
+                .bpAccessibility(label: l10n.t("music.stop.a11y"), hint: l10n.t("music.stop.hint"), isButton: true)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
