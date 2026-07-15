@@ -89,6 +89,33 @@ create policy "update own profile"
   to authenticated
   using (auth.uid() = id);
 
+-- RLS is row-level, not column-level — the policy above lets an owner PATCH
+-- any column on their own row, including bpx_points. bpx_points isn't wired
+-- to any app feature yet, but the public anon key ships inside the iOS
+-- binary, so anyone can already PATCH it directly via the REST API today.
+-- This trigger silently pins bpx_points to its previous value on any client
+-- update, so a future points feature MUST go through a SECURITY DEFINER RPC
+-- (same pattern as adjust_wallet_balance) instead of a direct client write.
+create or replace function public.protect_profile_points()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.bpx_points is distinct from old.bpx_points then
+    new.bpx_points := old.bpx_points;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists protect_profile_points_trigger on public.profiles;
+create trigger protect_profile_points_trigger
+  before update on public.profiles
+  for each row
+  execute function public.protect_profile_points();
+
 -- Auto-create profile on signup
 create or replace function public.handle_new_user()
 returns trigger
