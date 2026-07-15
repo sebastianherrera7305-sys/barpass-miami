@@ -89,7 +89,7 @@ struct TonightView: View {
             BPBackgroundView()
 
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: BPSpacing.xl) {
+                LazyVStack(alignment: .leading, spacing: BPSpacing.xl) {
                     header
                         .padding(.horizontal, BPSpacing.lg)
                         .padding(.top, 60)
@@ -263,7 +263,7 @@ struct TonightView: View {
                 .padding(.horizontal, BPSpacing.lg)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 14) {
+                LazyHStack(spacing: 14) {
                     ForEach(tonightEvents, id: \.event.id) { pair in
                         NavigationLink(destination: VenueDetailView(venue: pair.venue).bpZoomDestination(id: pair.venue.id, in: zoomNS)) {
                             EventFlyerCard(event: pair.event, venue: pair.venue)
@@ -288,7 +288,7 @@ struct TonightView: View {
                 .padding(.horizontal, BPSpacing.lg)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: BPSpacing.md) {
+                LazyHStack(spacing: BPSpacing.md) {
                     ForEach(venues) { venue in
                         NavigationLink(destination: VenueDetailView(venue: venue).bpZoomDestination(id: venue.id, in: zoomNS)) {
                             Group {
