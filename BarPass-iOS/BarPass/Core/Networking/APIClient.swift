@@ -33,14 +33,45 @@ enum APIClient {
         return "bp_\(safeVendor)_\(safeStaff)_\(timestamp)_\(random)"
     }
 
-    /// Charges a card (or Apple Pay) order through POST /transactions.
-    /// `stripePaymentMethodId` must come from a client-side Stripe tokenization call —
-    /// raw card data is never sent to this backend.
+    /// Charges a card order through POST /transactions. `stripePaymentMethodId`
+    /// must come from a client-side Stripe tokenization call — raw card data
+    /// is never sent to this backend.
     static func createCardTransaction(
         idToken: String,
         vendorId: String,
         customerId: String?,
         items: [CartItem],
+        stripePaymentMethodId: String
+    ) async throws -> [String: Any] {
+        try await createTransaction(
+            idToken: idToken, vendorId: vendorId, customerId: customerId,
+            items: items, paymentMethod: "card", stripePaymentMethodId: stripePaymentMethodId
+        )
+    }
+
+    /// Charges an Apple Pay order through the same POST /transactions route.
+    /// `stripePaymentMethodId` must come from `STPAPIClient.createPaymentMethod(with: PKPayment)` —
+    /// the raw PassKit token is never sent to this backend, only the Stripe
+    /// payment method it was exchanged for.
+    static func createApplePayTransaction(
+        idToken: String,
+        vendorId: String,
+        customerId: String?,
+        items: [CartItem],
+        stripePaymentMethodId: String
+    ) async throws -> [String: Any] {
+        try await createTransaction(
+            idToken: idToken, vendorId: vendorId, customerId: customerId,
+            items: items, paymentMethod: "apple_pay", stripePaymentMethodId: stripePaymentMethodId
+        )
+    }
+
+    private static func createTransaction(
+        idToken: String,
+        vendorId: String,
+        customerId: String?,
+        items: [CartItem],
+        paymentMethod: String,
         stripePaymentMethodId: String
     ) async throws -> [String: Any] {
         let staffId = "self_checkout"
@@ -66,7 +97,7 @@ enum APIClient {
             "staffId":                staffId,
             "customerId":             customerId ?? "",
             "items":                  itemPayload,
-            "paymentMethod":          "card",
+            "paymentMethod":          paymentMethod,
             "stripePaymentMethodId":  stripePaymentMethodId
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)

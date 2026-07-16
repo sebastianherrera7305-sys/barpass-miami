@@ -359,13 +359,31 @@ struct TableReservationView: View {
     private var applePayBtn: some View {
         Button {
             guard !isProcessing else { return }
+            guard let session = AuthService.shared.restoreSession() else {
+                paymentError = l10n.t("auth.error.connection")
+                return
+            }
             isProcessing = true
+            paymentError = nil
             let svc = ApplePayService()
             svc.requestPayment(amount: Decimal(selectedPackage.deposit),
-                               label: "Mesa VIP · \(venueName)") { result in
+                               label: "Mesa VIP · \(venueName)") { stripePaymentMethodId in
+                _ = try await APIClient.createApplePayTransaction(
+                    idToken:    session.accessToken,
+                    vendorId:   venueId,
+                    customerId: session.user.id,
+                    items:      [],
+                    stripePaymentMethodId: stripePaymentMethodId
+                )
+            } completion: { result in
                 Task { @MainActor in
                     isProcessing = false
-                    if result.success { completeReservation(method: "Apple Pay") }
+                    if result.success {
+                        completeReservation(method: "Apple Pay")
+                    } else if let error = result.error, error != "cancelled" {
+                        paymentError = error
+                        BPHaptics.error()
+                    }
                 }
             }
         } label: {

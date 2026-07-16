@@ -5,6 +5,10 @@ import Foundation
 struct AuthUser: Codable, Sendable {
     let id: String
     let email: String?
+    /// Supabase's `email_confirmed_at` — nil until the user taps the link in
+    /// their verification email (or Supabase's "Confirm email" setting is
+    /// off, in which case it's set immediately on signup).
+    let emailConfirmedAt: String?
 }
 
 struct AuthSession: Codable, Sendable {
@@ -14,6 +18,12 @@ struct AuthSession: Codable, Sendable {
     let user: AuthUser
 
     var isExpired: Bool { Date() >= expiresAt }
+
+    /// True once Supabase has recorded a confirmed email for this user.
+    /// If the Supabase project has "Confirm email" disabled, this is true
+    /// immediately after signup — verification is only actually enforced
+    /// once that dashboard setting is turned on.
+    var isEmailVerified: Bool { user.emailConfirmedAt != nil }
 }
 
 // MARK: - Supabase Auth (native, via URLSession — no SDK)
@@ -140,6 +150,48 @@ final class AuthService: @unchecked Sendable {
         defaults.removeObject(forKey: Self.sessionKey) // limpia cualquier resto legacy también
     }
 
+    /// Re-sends the signup confirmation email via Supabase GoTrue's
+    /// `/resend` endpoint. Requires "Confirm email" to be enabled on the
+    /// Supabase project — otherwise there's no pending confirmation to resend.
+    func resendVerificationEmail(email: String) async throws {
+        var request = URLRequest(url: URL(string: "\(Self.baseURL)/resend")!)
+        request.httpMethod = "POST"
+        applyHeaders(&request)
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["type": "signup", "email": email])
+        let (data, response) = try await Self.customSession.data(for: request)
+        try Self.ensureOK(response, data: data)
+    }
+
+    /// Refreshes the cached session's confirmation status from Supabase's
+    /// `/auth/v1/user` endpoint (the source of truth for `email_confirmed_at`)
+    /// and re-persists the updated session. Throws if there's no cached
+    /// session to refresh.
+    @discardableResult
+    func refreshUserStatus() async throws -> AuthSession {
+        guard let current = restoreSession() else { throw AuthError.network }
+        var request = URLRequest(url: URL(string: "\(Self.baseURL)/user")!)
+        request.httpMethod = "GET"
+        applyHeaders(&request)
+        request.setValue("Bearer \(current.accessToken)", forHTTPHeaderField: "Authorization")
+        let (data, response) = try await Self.customSession.data(for: request)
+        try Self.ensureOK(response, data: data)
+        guard let obj = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+            throw AuthError.network
+        }
+        let updated = AuthSession(
+            accessToken: current.accessToken,
+            refreshToken: current.refreshToken,
+            expiresAt: current.expiresAt,
+            user: AuthUser(
+                id: current.user.id,
+                email: (obj["email"] as? String) ?? current.user.email,
+                emailConfirmedAt: obj["email_confirmed_at"] as? String
+            )
+        )
+        store(updated)
+        return updated
+    }
+
     // MARK: Internals
 
     private func tokenRequest(grant: String, body: [String: String]) async throws -> AuthSession {
@@ -181,7 +233,11 @@ final class AuthService: @unchecked Sendable {
             accessToken: access,
             refreshToken: refresh,
             expiresAt: Date().addingTimeInterval(expiresIn - 60),
-            user: AuthUser(id: uid, email: userObj["email"] as? String)
+            user: AuthUser(
+                id: uid,
+                email: userObj["email"] as? String,
+                emailConfirmedAt: userObj["email_confirmed_at"] as? String
+            )
         )
     }
 

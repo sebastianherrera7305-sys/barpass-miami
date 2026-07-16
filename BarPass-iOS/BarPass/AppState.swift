@@ -16,6 +16,7 @@ final class AppState: ObservableObject {
     @Published var showActionBar          = false
     @Published var showNativeAuth         = true
     @Published var showAgeGate            = false
+    @Published var showEmailVerification  = false
     @Published var isOffline              = false
     @Published var deepLinkURL:            URL?
     @Published var showCart               = false
@@ -49,10 +50,53 @@ final class AppState: ObservableObject {
     }
 
     /// Called after successful auth (sign in, sign up, or session restore).
-    /// Dismisses auth UI, marks app as ready, and reveals the action bar.
+    /// Dismisses auth UI, marks app as ready, and reveals the action bar —
+    /// unless the account's email isn't verified yet, in which case it blocks
+    /// on the verification screen first. Guest mode (no session at all) skips
+    /// this entirely since there's no email to verify.
+    ///
+    /// The cached session's `emailConfirmedAt` can be stale (e.g. accounts
+    /// signed up before this field existed locally, even though Supabase
+    /// already had it confirmed server-side) — so an unverified cache is
+    /// double-checked against Supabase directly before actually gating
+    /// anyone. A network failure during that check fails open (lets the
+    /// already-authenticated user in) rather than locking out a real user
+    /// over a connectivity blip; the gate re-evaluates on the next launch.
     func completeAuth() {
         withAnimation(.easeOut(duration: 0.1)) { showNativeAuth = false }
         appReady = true
+        guard let session = AuthService.shared.restoreSession() else {
+            proceedPastAuth()
+            return
+        }
+        if session.isEmailVerified {
+            proceedPastAuth()
+            return
+        }
+        Task {
+            do {
+                let fresh = try await AuthService.shared.refreshUserStatus()
+                await MainActor.run {
+                    if fresh.isEmailVerified {
+                        self.proceedPastAuth()
+                    } else {
+                        self.showEmailVerification = true
+                    }
+                }
+            } catch {
+                await MainActor.run { self.proceedPastAuth() }
+            }
+        }
+    }
+
+    /// Called once the "I've verified my email" check confirms the account
+    /// is verified. Continues exactly where completeAuth() would have.
+    func completeEmailVerification() {
+        withAnimation(.easeOut(duration: 0.15)) { showEmailVerification = false }
+        proceedPastAuth()
+    }
+
+    private func proceedPastAuth() {
         refreshWalletBalance()
         if !AgeGateService.isVerified {
             showAgeGate = true

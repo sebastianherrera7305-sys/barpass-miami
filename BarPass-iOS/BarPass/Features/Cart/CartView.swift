@@ -163,10 +163,16 @@ struct CartView: View {
                 VStack(spacing: 10) {
                     if PKPaymentAuthorizationController.canMakePayments() {
                         ApplePayButton(
-                            total: cart.total,
-                            label: cart.venueName.isEmpty ? l10n.t("cart.title") : cart.venueName,
+                            total:    cart.total,
+                            label:    cart.venueName.isEmpty ? l10n.t("cart.title") : cart.venueName,
+                            vendorId: cart.venueId,
+                            items:    cart.items,
                             isProcessing: $isProcessing,
-                            onSuccess: handleOrderSuccess
+                            onSuccess: handleOrderSuccess,
+                            onFailure: { msg in
+                                paymentError = msg
+                                BPHaptics.error()
+                            }
                         )
                     }
 
@@ -414,8 +420,11 @@ private struct CartItemRow: View {
 private struct ApplePayButton: View {
     let total:        Double
     let label:        String
+    let vendorId:     String
+    let items:        [CartItem]
     @Binding var isProcessing: Bool
     let onSuccess:    (String) -> Void
+    let onFailure:    (String) -> Void
     @ObservedObject private var l10n = L10n.shared
 
     @State private var service = ApplePayService()
@@ -423,11 +432,27 @@ private struct ApplePayButton: View {
     var body: some View {
         Button {
             guard !isProcessing else { return }
+            guard let session = AuthService.shared.restoreSession() else {
+                onFailure(l10n.t("auth.error.connection"))
+                return
+            }
             isProcessing = true
-            service.requestPayment(amount: Decimal(total), label: label) { result in
+            service.requestPayment(amount: Decimal(total), label: label) { stripePaymentMethodId in
+                _ = try await APIClient.createApplePayTransaction(
+                    idToken:    session.accessToken,
+                    vendorId:   vendorId,
+                    customerId: session.user.id,
+                    items:      items,
+                    stripePaymentMethodId: stripePaymentMethodId
+                )
+            } completion: { result in
                 Task { @MainActor in
                     isProcessing = false
-                    if result.success { onSuccess("Apple Pay") }
+                    if result.success {
+                        onSuccess("Apple Pay")
+                    } else if let error = result.error, error != "cancelled" {
+                        onFailure(error)
+                    }
                 }
             }
         } label: {

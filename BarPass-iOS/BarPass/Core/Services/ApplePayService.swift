@@ -1,15 +1,22 @@
 import PassKit
+@preconcurrency import Stripe
 
 struct ApplePayResult {
-    let success:   Bool
-    let token:     String?   // base64 PKPaymentToken.paymentData — sent to /api/apple-pay/validate
-    let amount:    Double
-    let label:     String
-    let error:     String?
+    let success: Bool
+    let stripePaymentMethodId: String?
+    let amount:  Double
+    let label:   String
+    let error:   String?
 }
 
+/// Real Apple Pay checkout: presents the native PassKit sheet, exchanges the
+/// authorized PKPayment for a Stripe payment method, then hands that off to
+/// `charge` (the caller's own POST /api/transactions call) — the PassKit
+/// sheet only reports success to the user once `charge` has actually
+/// completed against the backend. No step here fabricates a paid order.
 final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate {
     private var completion: ((ApplePayResult) -> Void)?
+    private var charge: ((String) async throws -> Void)?
     private var pendingAmount: Double = 0
     private var pendingLabel: String  = ""
 
@@ -17,13 +24,22 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
         PKPaymentAuthorizationController.canMakePayments()
     }
 
-    func requestPayment(amount: Decimal, label: String,
-                        completion: @escaping (ApplePayResult) -> Void) {
+    /// - Parameter charge: performs the real backend transaction using the
+    ///   Stripe payment method id created from the user's PKPayment. Throw
+    ///   to fail the checkout — the PassKit sheet will show failure and
+    ///   `completion` will report `success: false`.
+    func requestPayment(
+        amount: Decimal,
+        label: String,
+        charge: @escaping (String) async throws -> Void,
+        completion: @escaping (ApplePayResult) -> Void
+    ) {
         guard canMakePayments() else {
-            completion(ApplePayResult(success: false, token: nil, amount: 0, label: label, error: "Apple Pay not available"))
+            completion(ApplePayResult(success: false, stripePaymentMethodId: nil, amount: 0, label: label, error: "Apple Pay not available"))
             return
         }
-        self.completion   = completion
+        self.completion    = completion
+        self.charge        = charge
         self.pendingAmount = (amount as NSDecimalNumber).doubleValue
         self.pendingLabel  = label
 
@@ -51,28 +67,53 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
     func paymentAuthorizationController(_ controller: PKPaymentAuthorizationController,
                                         didAuthorizePayment payment: PKPayment,
                                         handler: @escaping (PKPaymentAuthorizationResult) -> Void) {
-        let tokenData   = payment.token.paymentData
-        let tokenBase64 = tokenData.base64EncodedString()
+        let amount = pendingAmount
+        let label  = pendingLabel
+        let chargeFn = charge
 
-        // Signal success to the sheet immediately — the JS layer validates with the server
-        handler(PKPaymentAuthorizationResult(status: .success, errors: nil))
+        Task { @MainActor in
+            do {
+                let method: STPPaymentMethod = try await withCheckedThrowingContinuation { continuation in
+                    STPAPIClient.shared.createPaymentMethod(with: payment) { method, error in
+                        if let method {
+                            continuation.resume(returning: method)
+                        } else {
+                            continuation.resume(throwing: error ?? ApplePayError.tokenizationFailed)
+                        }
+                    }
+                }
+                guard let chargeFn else { throw ApplePayError.missingChargeHandler }
+                try await chargeFn(method.stripeId)
 
-        let result = ApplePayResult(
-            success: true,
-            token:   tokenBase64,
-            amount:  pendingAmount,
-            label:   pendingLabel,
-            error:   nil
-        )
-        completion?(result)
-        completion = nil
+                handler(PKPaymentAuthorizationResult(status: .success, errors: nil))
+                completion?(ApplePayResult(success: true, stripePaymentMethodId: method.stripeId, amount: amount, label: label, error: nil))
+            } catch {
+                handler(PKPaymentAuthorizationResult(status: .failure, errors: [error]))
+                completion?(ApplePayResult(success: false, stripePaymentMethodId: nil, amount: amount, label: label, error: error.localizedDescription))
+            }
+            completion = nil
+            charge     = nil
+        }
     }
 
     func paymentAuthorizationControllerDidFinish(_ controller: PKPaymentAuthorizationController) {
         controller.dismiss()
         if let c = completion {
-            c(ApplePayResult(success: false, token: nil, amount: pendingAmount, label: pendingLabel, error: "cancelled"))
+            c(ApplePayResult(success: false, stripePaymentMethodId: nil, amount: pendingAmount, label: pendingLabel, error: "cancelled"))
             completion = nil
+            charge     = nil
+        }
+    }
+}
+
+enum ApplePayError: LocalizedError {
+    case tokenizationFailed
+    case missingChargeHandler
+
+    var errorDescription: String? {
+        switch self {
+        case .tokenizationFailed:   return "No se pudo procesar el pago con Apple Pay."
+        case .missingChargeHandler: return "Error interno de Apple Pay."
         }
     }
 }
