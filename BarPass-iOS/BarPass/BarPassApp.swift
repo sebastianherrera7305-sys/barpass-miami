@@ -71,8 +71,35 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     // MARK: - Deep links
 
+    private static let allowedCustomPaths: Set<String> = [
+        "/spotify-callback"
+    ]
+
+    private static let allowedUniversalHosts: Set<String> = [
+        "\(SupabaseConfig.projectRef).supabase.co",
+        "barpass-v2.vercel.app",
+        "sebastianherrera7305-sys.github.io"
+    ]
+
+    private func isValidDeepLink(_ url: URL) -> Bool {
+        if url.scheme == "barpass" {
+            return Self.allowedCustomPaths.contains(url.path)
+        }
+        if url.scheme == "https" || url.scheme == "http" {
+            guard let host = url.host else { return false }
+            return Self.allowedUniversalHosts.contains(host)
+        }
+        return false
+    }
+
     func application(_ app: UIApplication, open url: URL,
                      options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        guard isValidDeepLink(url) else {
+            #if DEBUG
+            print("[BarPass] Rejected deep link: \(url.absoluteString)")
+            #endif
+            return false
+        }
         NotificationCenter.default.post(name: .deepLinkReceived, object: url)
         return true
     }
@@ -83,9 +110,16 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                      restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
         if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
            let url = userActivity.webpageURL {
+            guard isValidDeepLink(url) else {
+                #if DEBUG
+                print("[BarPass] Rejected universal link: \(url.absoluteString)")
+                #endif
+                return false
+            }
             NotificationCenter.default.post(name: .deepLinkReceived, object: url)
+            return true
         }
-        return true
+        return false
     }
 }
 
@@ -102,7 +136,8 @@ extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
         if let deepLink = userInfo["deep_link"] as? String,
-           let url = URL(string: deepLink) {
+           let url = URL(string: deepLink),
+           isValidDeepLink(url) {
             NotificationCenter.default.post(name: .deepLinkReceived, object: url)
         }
         completionHandler()

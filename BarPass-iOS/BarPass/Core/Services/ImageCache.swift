@@ -1,25 +1,28 @@
 import SwiftUI
 import ImageIO
+import UIKit
 
 /// App-wide image cache with priority tiers. Map-marker logos and venue
-/// preview images are the most-viewed assets, so they live in a `hot` cache
-/// that is NOT discarded under memory pressure — returning to the map or
-/// reopening a venue is instant. Everything else uses `standard`, which the
-/// system may evict first. A large shared `URLCache` backs both on disk.
+/// preview images are the most-viewed assets, so they live in a `hot` cache.
+/// Everything else uses `standard`, which gets purged on memory pressure.
+/// A large shared `URLCache` backs both on disk.
 enum ImageCache {
     enum Priority { case hot, standard }
+
+    private static let mb = 1024 * 1024
 
     // NSCache is documented thread-safe; safe to share across actors.
     nonisolated(unsafe) static let hot: NSCache<NSURL, UIImage> = {
         let c = NSCache<NSURL, UIImage>()
-        c.countLimit = 200
-        c.evictsObjectsWithDiscardedContent = false
+        c.countLimit = 100
+        c.totalCostLimit = 120 * mb
         return c
     }()
 
     nonisolated(unsafe) static let standard: NSCache<NSURL, UIImage> = {
         let c = NSCache<NSURL, UIImage>()
-        c.countLimit = 250
+        c.countLimit = 150
+        c.totalCostLimit = 80 * mb
         return c
     }()
 
@@ -29,6 +32,13 @@ enum ImageCache {
             memoryCapacity: 32 * 1024 * 1024,
             diskCapacity: 256 * 1024 * 1024
         )
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didReceiveMemoryWarningNotification,
+            object: nil, queue: .main
+        ) { _ in
+            standard.removeAllObjects()
+            hot.removeAllObjects()
+        }
     }
 
     static func image(for url: URL) -> UIImage? {
@@ -36,7 +46,8 @@ enum ImageCache {
     }
 
     static func store(_ img: UIImage, for url: URL, priority: Priority) {
-        (priority == .hot ? hot : standard).setObject(img, forKey: url as NSURL)
+        let cost = Int(img.size.width * img.size.height * 4)
+        (priority == .hot ? hot : standard).setObject(img, forKey: url as NSURL, cost: cost)
     }
 }
 

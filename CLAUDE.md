@@ -11,11 +11,11 @@ Miami nightlife access app. Skip the Line passes, VIP tables, event tickets, dri
 **Bundle ID:** `com.sebastian.barpass`
 **GitHub:** `https://github.com/sebastianherrera7305-sys/barpass-miami`
 **Web (GitHub Pages):** `https://sebastianherrera7305-sys.github.io/barpass-miami/barpass-miami.html`
-**Firebase (legacy):** `barpass-app` · apiKey `AIzaSyB4uz5CaLCC3nsLz3QwOJtfp1bnBUqQUlg`
-**Google Places API Key:** `AIzaSyDuvJwTrbSCOu69fECyYi2yBE9HXRdql9k` (local only, not on Vercel)
-**Vercel Project:** `prj_c8dgoFRpNO3O6XrOICTdhPDPPuzm` (org `team_Jd4GkDOHmAEoirEFN3Jqc1W2`) — **LIVE at `https://barpass-v2.vercel.app`** (deployed 2026-07-14). Env vars set on Vercel: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, VENUE_VALIDATION_SECRET. Still missing on Vercel: STRIPE_SECRET_KEY, OPENAI_API_KEY (add when available). iOS `APIClient.baseURL` points here now (old `barpass-miami.vercel.app` Express/Firestore backend was never deployed and is dead).
+**Firebase (legacy):** `barpass-app` · apiKey `AIzaSy<REDACTED>`
+**Google Places API Key:** `AIzaSy<REDACTED>` (local only, not on Vercel)
+**Vercel Project:** `<VERCEL_PROJECT_ID>` (org `<VERCEL_ORG_ID>`) — **LIVE at `https://barpass-v2.vercel.app`** (deployed 2026-07-14). Env vars set on Vercel: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, VENUE_VALIDATION_SECRET. Still missing on Vercel: STRIPE_SECRET_KEY, OPENAI_API_KEY (add when available). iOS `APIClient.baseURL` points here now (old `barpass-miami.vercel.app` Express/Firestore backend was never deployed and is dead).
 **Stripe SPM:** `stripe-ios@23.32.0` resolved in pbxproj, `CardPaymentView` does real client-side tokenization + calls `/api/transactions` (real Stripe PaymentIntent server-side) — needs `STRIPE_SECRET_KEY` set on Vercel to actually charge.
-**Apple Developer Program:** ACTIVE (paid, 2026-07-14). Team ID `7JZ8VD5L6B`. Entitlements (`BarPass.entitlements`) now wired into the build via `CODE_SIGN_ENTITLEMENTS`. Sign In with Apple code complete (`NativeAuthView` + `AuthService.signInWithApple`). **Remaining manual step:** enable Sign In with Apple / MusicKit / Apple Pay capabilities in Xcode → Signing & Capabilities (one-time, 2FA-gated, can't be done via CLI).
+**Apple Developer Program:** ACTIVE (paid, 2026-07-14). Team ID `<APPLE_TEAM_ID>`. Entitlements (`BarPass.entitlements`) now wired into the build via `CODE_SIGN_ENTITLEMENTS`. Sign In with Apple code complete (`NativeAuthView` + `AuthService.signInWithApple`). **Remaining manual step:** enable Sign In with Apple / MusicKit / Apple Pay capabilities in Xcode → Signing & Capabilities (one-time, 2FA-gated, can't be done via CLI).
 
 ---
 
@@ -251,13 +251,13 @@ Sign Out
 
 ### ❌ PENDING / KNOWN ISSUES (actualizado 2026-07-14)
 
-- **Apple capabilities** — Sign In with Apple / MusicKit / Apple Pay tienen código completo pero necesitan habilitarse en Xcode → Signing & Capabilities (2FA-gated, manual, un solo click por capability). Team ID `7JZ8VD5L6B` ya paga y listo.
+- **Apple capabilities** — Sign In with Apple / MusicKit / Apple Pay tienen código completo pero necesitan habilitarse en Xcode → Signing & Capabilities (2FA-gated, manual, un solo click por capability). Team ID `<APPLE_TEAM_ID>` ya paga y listo.
 - **Stripe live** — `STRIPE_SECRET_KEY` no está seteada ni local ni en Vercel. `/api/transactions`, `/api/wallet/topup` devuelven 503 `payments_not_configured` hasta que se agregue.
 - **OpenAI key** — missing. AI Concierge (`/api/concierge`) won't work.
 - **Onboarding videos** — 6 Higgsfield clips not yet generated. View is placeholder.
 - **MapLibre** — works locally but not deployed.
 - **Supabase trips/night_plans tables** — `SupabaseTripRepository` and `SupabasePlanRepository` are placeholders. Trips persist on disk only.
-- **Apple Pay merchant ID** — código apunta a `merchant.com.barpass.app` (ya no es placeholder), pero el merchant ID en sí todavía no está registrado en el portal.
+- **Apple Pay merchant ID** — código apunta a `<MERCHANT_ID>` (ya no es placeholder), pero el merchant ID en sí todavía no está registrado en el portal.
 - **PrivacyInfo.xcprivacy** — declares collected data but may need App Store review confirmation.
 
 ---
@@ -293,12 +293,12 @@ Sign Out
 
 ## Connected Tools
 
-- **Figma** — sebastianherrera7305@gmail.com (Starter)
+- **Figma** — <EMAIL> (Starter)
 - **Higgsfield** — connected, needs credits
 - **GitHub** — sebastianherrera7305-sys/barpass-miami
 - **Firebase (legacy)** — barpass-app
-- **Vercel** — barpass-v2 (broken)
-- **Supabase** — `hrhdezziddfrktvtgzbg` (tables: venues, events, profiles, favorites)
+- **Vercel** — <VERCEL_PROJECT_NAME> (broken)
+- **Supabase** — `<PROJECT_REF>` (tables: venues, events, profiles, favorites)
 
 ---
 

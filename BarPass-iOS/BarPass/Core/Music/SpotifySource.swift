@@ -121,12 +121,12 @@ final class SpotifySource: NSObject, MusicSource, @unchecked Sendable {
             expiresAt: Date().addingTimeInterval(expiresIn - 60)
         )
         if let d = try? JSONEncoder().encode(token) {
-            UserDefaults.standard.set(d, forKey: Self.tokenKey)
+            KeychainService.save(d, forKey: Self.tokenKey)
         }
     }
 
     private func loadToken() -> Token? {
-        UserDefaults.standard.data(forKey: Self.tokenKey)
+        KeychainService.load(forKey: Self.tokenKey)
             .flatMap { try? JSONDecoder().decode(Token.self, from: $0) }
     }
 

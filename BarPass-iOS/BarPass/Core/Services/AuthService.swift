@@ -32,8 +32,8 @@ final class AuthService: @unchecked Sendable {
         return URLSession(configuration: cfg)
     }()
 
-    private static let baseURL = "https://hrhdezziddfrktvtgzbg.supabase.co/auth/v1"
-    private static let anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyaGRlenppZGRmcmt0dnRnemJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODM1NjksImV4cCI6MjA5ODk1OTU2OX0.vzgIE7JPL8vN0fWVGkf-AvUCH1iWTioHjZpxcuSRBRo"
+    private static let baseURL = "\(SupabaseConfig.url)/auth/v1"
+    private static let anonKey = SupabaseConfig.anonKey
     private static let sessionKey = "bp_auth_session"
     private static let requestTimeout: TimeInterval = 8
 

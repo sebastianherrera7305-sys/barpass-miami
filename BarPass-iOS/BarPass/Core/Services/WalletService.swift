@@ -5,8 +5,8 @@ import Foundation
 /// spends always go through the server (see APIClient.topUpWallet/spendWallet)
 /// so the balance can never be forged from the client.
 enum WalletService {
-    private static let supabaseURL = "https://hrhdezziddfrktvtgzbg.supabase.co"
-    private static let anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyaGRlenppZGRmcmt0dnRnemJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODM1NjksImV4cCI6MjA5ODk1OTU2OX0.vzgIE7JPL8vN0fWVGkf-AvUCH1iWTioHjZpxcuSRBRo"
+    private static let supabaseURL = SupabaseConfig.url.absoluteString
+    private static let anonKey = SupabaseConfig.anonKey
 
     static func fetchBalance(session: AuthSession) async -> Double {
         guard let url = URL(string: "\(supabaseURL)/rest/v1/wallet_balances?user_id=eq.\(session.user.id)&select=balance") else {

@@ -4,8 +4,8 @@ import Foundation
 /// REST — RLS ("readable by owner") does the scoping, so no server route
 /// is needed just to display history.
 enum OrderHistoryService {
-    private static let supabaseURL = "https://hrhdezziddfrktvtgzbg.supabase.co"
-    private static let anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhyaGRlenppZGRmcmt0dnRnemJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODM1NjksImV4cCI6MjA5ODk1OTU2OX0.vzgIE7JPL8vN0fWVGkf-AvUCH1iWTioHjZpxcuSRBRo"
+    private static let supabaseURL = SupabaseConfig.url.absoluteString
+    private static let anonKey = SupabaseConfig.anonKey
 
     struct OrderRow: Decodable {
         let id: String
