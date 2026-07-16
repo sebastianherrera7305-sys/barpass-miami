@@ -63,33 +63,16 @@ struct RootView: View {
         .animation(.spring(response: 0.2, dampingFraction: 0.85), value: appState.isOffline)
         .animation(.easeOut(duration: 0.1), value: appState.showNativeAuth)
         // Native floating action bar
+        // El botón "⚡ Priority Entry" global vivía acá, visible en las 5
+        // tabs para siempre (showActionBar nunca vuelve a false) y sin
+        // venueId asociado — abría PriorityEntryHubView con el venue que
+        // quedó seteado de la última vez que se vio un detalle, o vacío si
+        // nunca se vio ninguno. Priority Entry (skip line/mesa/tickets) es
+        // inherentemente por venue — el CTA correcto y ya scopeado vive en
+        // VenueDetailView, que sí setea priorityVenueId antes de abrir el
+        // sheet. Sacado de acá; ver también la guarda en PriorityEntryHubView.
         .overlay(alignment: .bottom) {
             HStack(spacing: 12) {
-                // ⚡ Priority Entry
-                Button {
-                    appState.showPriorityEntry = true
-                } label: {
-                    HStack(spacing: 7) {
-                        Image(systemName: "bolt.fill")
-                            .font(.bpScaled(13, weight: .bold))
-                        Text(l10n.t("root.priorityEntry"))
-                            .font(.bpScaled(13, weight: .bold))
-                    }
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(
-                        LinearGradient(
-                            colors: [Color(red:0.85,green:0.63,blue:0.09),
-                                     Color(red:0.96,green:0.72,blue:0.19)],
-                            startPoint: .leading, endPoint: .trailing
-                        ),
-                        in: Capsule()
-                    )
-                }
-                .buttonStyle(.plain)
-                .bpAccessibility(label: l10n.t("root.priorityEntry"), hint: l10n.t("root.priorityEntry.hint"), isButton: true)
-
                 // 🛒 Cart
                 Button {
                     appState.showCart = true

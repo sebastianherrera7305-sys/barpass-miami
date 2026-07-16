@@ -28,26 +28,34 @@ struct PriorityEntryHubView: View {
             ZStack {
                 BPBackgroundView()
 
-                VStack(spacing: 0) {
-                    header
-                        .padding(.top, 28)
-                        .padding(.bottom, 36)
+                // Sin venueId real no hay nada que vender — antes las 3
+                // rutas de abajo fabricaban un venue falso ("venue"/
+                // "BarPass") y hasta un evento inventado para poder seguir.
+                // Ahora se corta acá, honesto, antes de llegar a esa lógica.
+                if venueId.isEmpty {
+                    noVenueState
+                } else {
+                    VStack(spacing: 0) {
+                        header
+                            .padding(.top, 28)
+                            .padding(.bottom, 36)
 
-                    VStack(spacing: 12) {
-                        optionCard(options[0]) { BPAnalytics.track(.buySkipLinePass(venue: venueName)); showSkipLine = true }
-                        optionCard(options[1]) { BPAnalytics.track(.buyTableReservation(venue: venueName)); showTable    = true }
-                        optionCard(options[2]) { showTickets  = true }
+                        VStack(spacing: 12) {
+                            optionCard(options[0]) { BPAnalytics.track(.buySkipLinePass(venue: venueName)); showSkipLine = true }
+                            optionCard(options[1]) { BPAnalytics.track(.buyTableReservation(venue: venueName)); showTable    = true }
+                            optionCard(options[2]) { showTickets  = true }
+                        }
+                        .padding(.horizontal, 20)
+
+                        Spacer()
+
+                        Text(l10n.t("priorityEntry.depositNote"))
+                            .font(.bpScaled(11))
+                            .foregroundStyle(Color.bpInk.opacity(0.2))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 36)
                     }
-                    .padding(.horizontal, 20)
-
-                    Spacer()
-
-                    Text(l10n.t("priorityEntry.depositNote"))
-                        .font(.bpScaled(11))
-                        .foregroundStyle(Color.bpInk.opacity(0.2))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
-                        .padding(.bottom, 36)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -61,23 +69,23 @@ struct PriorityEntryHubView: View {
             }
             .navigationDestination(isPresented: $showSkipLine) {
                 SkipLinePassView(
-                    venueId:     venueId.isEmpty   ? "venue"   : venueId,
-                    venueName:   venueName.isEmpty ? "BarPass" : venueName,
+                    venueId:     venueId,
+                    venueName:   venueName,
                     waitMinutes: 35
                 )
                 .environmentObject(appState)
             }
             .navigationDestination(isPresented: $showTable) {
                 TableReservationView(
-                    venueId:   venueId.isEmpty   ? "venue"   : venueId,
-                    venueName: venueName.isEmpty ? "BarPass" : venueName
+                    venueId:   venueId,
+                    venueName: venueName
                 )
                 .environmentObject(appState)
             }
             .navigationDestination(isPresented: $showTickets) {
                 EventTicketsView(
-                    venueId:   venueId.isEmpty   ? "venue"   : venueId,
-                    venueName: venueName.isEmpty ? "BarPass" : venueName,
+                    venueId:   venueId,
+                    venueName: venueName,
                     eventName: l10n.t("priorityEntry.specialNight"),
                     eventDate: Date().addingTimeInterval(3600 * 6)
                 )
@@ -87,6 +95,26 @@ struct PriorityEntryHubView: View {
         .onAppear {
             withAnimation(.easeOut(duration: 0.3).delay(0.05)) { appeared = true }
         }
+    }
+
+    // MARK: - Empty state (sin venue real, nada que vender)
+
+    private var noVenueState: some View {
+        VStack(spacing: 14) {
+            Image(systemName: "mappin.slash")
+                .font(.bpScaled(34))
+                .foregroundStyle(Color.bpInk.opacity(0.3))
+            Text(l10n.t("priorityEntry.noVenue.title"))
+                .font(.bpScaled(17, weight: .bold))
+                .foregroundStyle(Color.bpInk)
+            Text(l10n.t("priorityEntry.noVenue.subtitle"))
+                .font(.bpScaled(13))
+                .foregroundStyle(Color.bpTextSecondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .bpAccessibility(label: l10n.t("priorityEntry.noVenue.title"), hint: l10n.t("priorityEntry.noVenue.subtitle"))
     }
 
     // MARK: - Header
@@ -110,7 +138,7 @@ struct PriorityEntryHubView: View {
                     .overlay(Capsule().strokeBorder(amber.opacity(0.22)))
             )
 
-            Text(venueName.isEmpty ? "BarPass" : venueName)
+            Text(venueName)
                 .font(.bpScaled(24, weight: .black, design: .rounded))
                 .foregroundStyle(Color.bpInk)
                 .padding(.top, 4)
