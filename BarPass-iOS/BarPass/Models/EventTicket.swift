@@ -8,24 +8,25 @@ struct TicketPackage: Identifiable {
     let badge:     String?
     let emoji:     String
 
+    // perks and badge are l10n keys resolved at the view via L10n.shared.t(...).
     static let general = TicketPackage(
         name:  "General Admission",
         price: 20,
-        perks: ["Entrada garantizada", "Sin hacer fila de cover", "Válido toda la noche"],
+        perks: ["ticket.perk.guaranteed", "ticket.perk.general.1", "ticket.perk.general.2"],
         badge: nil,
         emoji: "🎟️"
     )
     static let vip = TicketPackage(
         name:  "VIP Access",
         price: 45,
-        perks: ["Entrada garantizada", "Acceso zona VIP", "1 drink de bienvenida", "Sin hacer fila"],
-        badge: "MÁS POPULAR",
+        perks: ["ticket.perk.guaranteed", "ticket.perk.vip.1", "ticket.perk.vip.2", "ticket.perk.vip.3"],
+        badge: "ticket.badge.popular",
         emoji: "⭐️"
     )
     static let allAccess = TicketPackage(
         name:  "All Access",
         price: 80,
-        perks: ["Todo lo de VIP", "Open bar 1 hora", "Zona privada con mesa", "Meet & greet artista"],
+        perks: ["ticket.perk.all.0", "ticket.perk.all.1", "ticket.perk.all.2", "ticket.perk.all.3"],
         badge: nil,
         emoji: "👑"
     )

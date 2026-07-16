@@ -165,7 +165,7 @@ struct TableReservationView: View {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.bpScaled(12))
                                     .foregroundStyle(gold)
-                                Text(perk)
+                                Text(l10n.t(perk))
                                     .font(.bpScaled(12))
                                     .foregroundStyle(Color.bpInk.opacity(0.6))
                                 Spacer()

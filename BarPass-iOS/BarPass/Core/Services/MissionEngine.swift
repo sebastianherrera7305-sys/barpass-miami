@@ -79,16 +79,17 @@ final class MissionEngine: ObservableObject {
         let endOfDay = Calendar.current.startOfDay(for: Date().addingTimeInterval(86400))
         // Rotate one slot by weekday so days don't feel identical.
         let weekday = Calendar.current.component(.weekday, from: Date())
+        // title/description are l10n keys resolved at the view. id/type/reward stay stable.
         let rotating: Mission = weekday % 2 == 0
-            ? Mission(id: "m-trip", title: "Armá una noche", description: "Creá 1 trip con Prompt Your Night",
+            ? Mission(id: "m-trip", title: "mission.trip.title", description: "mission.trip.desc",
                       icon: "sparkles", type: .createTrip, requirement: 1, xpReward: 100, expiresAt: endOfDay)
-            : Mission(id: "m-trivia", title: "Trivia master", description: "Acertá la trivia de hoy",
+            : Mission(id: "m-trivia", title: "mission.trivia.title", description: "mission.trivia.desc",
                       icon: "brain.head.profile", type: .triviaWin, requirement: 1, xpReward: 50, expiresAt: endOfDay)
 
         return [
-            Mission(id: "m-checkin", title: "Salí esta noche", description: "Check-in en 2 venues hoy",
+            Mission(id: "m-checkin", title: "mission.checkin.title", description: "mission.checkin.desc",
                     icon: "mappin.and.ellipse", type: .checkIn, requirement: 2, xpReward: 150, expiresAt: endOfDay),
-            Mission(id: "m-share", title: "Corré la voz", description: "Compartí 1 venue con tu gente",
+            Mission(id: "m-share", title: "mission.share.title", description: "mission.share.desc",
                     icon: "square.and.arrow.up", type: .shareVenue, requirement: 1, xpReward: 50, expiresAt: endOfDay),
             rotating,
         ]

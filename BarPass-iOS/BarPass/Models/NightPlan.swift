@@ -29,10 +29,11 @@ struct NightPlan: Identifiable, Codable, Hashable {
 
         let picks = [warm, mid, peak].compactMap { $0 }
         let times = ["8:00 PM", "10:30 PM", "12:30 AM"]
+        // Notes/insight are l10n keys resolved at the view via L10n.shared.t(...).
         let notes = [
-            "Empezá suave: tragos y ambiente para calentar la noche.",
-            "Subí el ritmo antes del plato fuerte.",
-            "El cierre — acá se baila hasta que digan basta.",
+            "nightplan.warmup",
+            "nightplan.mid",
+            "nightplan.peak",
         ]
 
         let stops = picks.enumerated().map { i, v in
@@ -45,9 +46,9 @@ struct NightPlan: Identifiable, Codable, Hashable {
             )
         }
 
-        let insight = picks.first.map {
-            "Arrancá temprano en \($0.name) para evitar filas y precios peak. Pedí el Uber entre paradas — parking en Miami un viernes es una lotería."
-        } ?? "Elegí un barrio y quedate cerca — menos traslados, más noche."
+        // Key resolved at the view. "nightplan.insight" takes the first stop's
+        // venue name as %@; the fallback key has no placeholder.
+        let insight = picks.first != nil ? "nightplan.insight" : "nightplan.insight.fallback"
 
         return NightPlan(
             title: prompt.isEmpty ? "Mi plan de noche" : prompt,

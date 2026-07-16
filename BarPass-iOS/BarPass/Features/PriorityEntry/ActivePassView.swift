@@ -90,7 +90,7 @@ struct ActivePassView: View {
                     Spacer()
                     // Valid badge
                     if pass.isValid {
-                        Label("Válido", systemImage: "checkmark.seal.fill")
+                        Label(l10n.t("pass.validBadge"), systemImage: "checkmark.seal.fill")
                             .font(.caption.weight(.bold))
                             .foregroundStyle(.black)
                             .padding(.horizontal, 10)
@@ -165,7 +165,7 @@ struct ActivePassView: View {
                 let av = UIActivityViewController(activityItems: [text], applicationActivities: nil)
                 topVC?.present(av, animated: true)
             } label: {
-                Label("Compartir", systemImage: "square.and.arrow.up")
+                Label(l10n.t("reservationConfirm.share"), systemImage: "square.and.arrow.up")
                     .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(gold)
                     .frame(maxWidth: .infinity)

@@ -9,16 +9,17 @@ struct TablePackage: Identifiable, Equatable {
     let deposit:     Double
     let perks:       [String]
 
+    // perks are l10n keys resolved at the view via L10n.shared.t(...).
     static let all: [TablePackage] = [
         TablePackage(id: "standard", name: "Standard VIP",  emoji: "🥂",
                      guestRange: "2–4 personas", minSpend: 500,  deposit: 100,
-                     perks: ["Botella premium incluida", "Área reservada", "Servicio dedicado"]),
+                     perks: ["table.perk.standard.0", "table.perk.standard.1", "table.perk.standard.2"]),
         TablePackage(id: "premium",  name: "Premium",       emoji: "🍾",
                      guestRange: "4–6 personas", minSpend: 1000, deposit: 200,
-                     perks: ["2 botellas premium", "Mesa de primera fila", "Host personal", "Acceso prioritario"]),
+                     perks: ["table.perk.premium.0", "table.perk.premium.1", "table.perk.premium.2", "table.perk.premium.3"]),
         TablePackage(id: "ultra",    name: "Ultra VIP",     emoji: "👑",
                      guestRange: "6–10 personas", minSpend: 2500, deposit: 500,
-                     perks: ["4 botellas de élite", "Mesa VIP exclusiva", "Concierge privado", "Acceso a backstage"]),
+                     perks: ["table.perk.ultra.0", "table.perk.ultra.1", "table.perk.ultra.2", "table.perk.ultra.3"]),
     ]
 }
 

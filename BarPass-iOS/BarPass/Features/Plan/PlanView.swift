@@ -247,7 +247,7 @@ struct NightPlanView: View {
                             Text(stop.venueName)
                                 .font(.bpScaled(15, weight: .bold))
                                 .foregroundStyle(Color.bpInk)
-                            Text(stop.note)
+                            Text(l10n.t(stop.note))
                                 .font(.bpScaled(12))
                                 .foregroundStyle(Color.bpInk.opacity(0.4))
                             Text("\(stop.venueNeighborhood) · \(stop.venuePriceRange)")
@@ -263,7 +263,7 @@ struct NightPlanView: View {
                 Image(systemName: "sparkles")
                     .font(.bpScaled(13))
                     .foregroundStyle(amber)
-                Text(plan.aiInsight)
+                Text(String(format: l10n.t(plan.aiInsight), plan.stops.first?.venueName ?? ""))
                     .font(.bpScaled(12))
                     .foregroundStyle(Color.bpInk.opacity(0.45))
             }

@@ -131,7 +131,7 @@ struct EventTicketsView: View {
                             .font(.bpScaled(15, weight: .bold))
                             .foregroundStyle(Color.bpInk)
                         if let badge = pkg.badge {
-                            Text(badge)
+                            Text(l10n.t(badge))
                                 .font(.bpScaled(9, weight: .heavy))
                                 .tracking(1)
                                 .foregroundStyle(.black)
@@ -139,7 +139,7 @@ struct EventTicketsView: View {
                                 .background(gold, in: Capsule())
                         }
                     }
-                    Text(pkg.perks.prefix(2).joined(separator: " · "))
+                    Text(pkg.perks.prefix(2).map { l10n.t($0) }.joined(separator: " · "))
                         .font(.bpScaled(12))
                         .foregroundStyle(Color.bpInk.opacity(0.4))
                         .lineLimit(1)
@@ -280,7 +280,7 @@ struct EventTicketsView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.bpScaled(12))
                             .foregroundStyle(gold)
-                        Text(perk)
+                        Text(l10n.t(perk))
                             .font(.bpScaled(13))
                             .foregroundStyle(Color.bpInk.opacity(0.7))
                     }

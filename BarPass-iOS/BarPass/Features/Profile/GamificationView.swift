@@ -54,7 +54,7 @@ struct GamificationView: View {
             }
 
             if let q = trivia.todayQuestion {
-                Text(q.question)
+                Text(l10n.t(q.question))
                     .font(.bpScaled(16, weight: .bold)).foregroundStyle(Color.bpInk)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -85,7 +85,7 @@ struct GamificationView: View {
             }
         } label: {
             HStack {
-                Text(option)
+                Text(l10n.t(option))
                     .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                     .multilineTextAlignment(.leading)
@@ -96,7 +96,7 @@ struct GamificationView: View {
             .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpInk.opacity(0.08)))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: option, hint: l10n.t("games.trivia.hint"), isButton: true)
+        .bpAccessibility(label: l10n.t(option), hint: l10n.t("games.trivia.hint"), isButton: true)
     }
 
     private func answeredState(_ q: TriviaQuestion) -> some View {
@@ -106,7 +106,7 @@ struct GamificationView: View {
                 let isCorrect = i == q.correctIndex
                 let wasPicked = i == selectedAnswer
                 HStack {
-                    Text(option).font(.system(size: 14, weight: isCorrect ? .bold : .regular))
+                    Text(l10n.t(option)).font(.system(size: 14, weight: isCorrect ? .bold : .regular))
                         .foregroundStyle(isCorrect ? Color.bpGreen : (wasPicked ? Color.bpDanger : Color.bpTextSecondary))
                     Spacer()
                     if isCorrect { Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.bpGreen) }
@@ -124,7 +124,7 @@ struct GamificationView: View {
                     .font(.bpScaled(13, weight: .bold))
                     .foregroundStyle(trivia.lastAnswerCorrect == true ? Color.bpGreen : Color.bpTextSecondary)
             }
-            Text("💡 \(q.funFact)")
+            Text("💡 \(l10n.t(q.funFact))")
                 .font(.bpCaption())
                 .foregroundStyle(Color.bpTextSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -169,8 +169,8 @@ struct GamificationView: View {
                     .background(Color.bpAmber.opacity(0.12), in: Capsule())
             }
 
-            Text(m.title).font(.bpScaled(14, weight: .bold)).foregroundStyle(Color.bpInk)
-            Text(m.description).font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
+            Text(l10n.t(m.title)).font(.bpScaled(14, weight: .bold)).foregroundStyle(Color.bpInk)
+            Text(l10n.t(m.description)).font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                 .lineLimit(2)
 
             // Progress
@@ -194,6 +194,6 @@ struct GamificationView: View {
             .strokeBorder(m.isCompleted ? Color.bpGreen.opacity(0.3) : Color.bpInk.opacity(0.08)))
         .opacity(m.isCompleted ? 0.75 : 1)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: String(format: l10n.t("games.mission.a11y"), m.title, m.progress, m.requirement), hint: m.description)
+        .bpAccessibility(label: String(format: l10n.t("games.mission.a11y"), l10n.t(m.title), m.progress, m.requirement), hint: l10n.t(m.description))
     }
 }
