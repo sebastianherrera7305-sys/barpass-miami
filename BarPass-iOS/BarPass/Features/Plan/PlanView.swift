@@ -222,6 +222,20 @@ struct NightPlanView: View {
                     .foregroundStyle(Color.bpInk.opacity(0.4))
             }
 
+            if plan.stops.isEmpty {
+                VStack(spacing: 8) {
+                    Text(l10n.t("plan.empty.title"))
+                        .font(.bpScaled(15, weight: .semibold))
+                        .foregroundStyle(Color.bpInk)
+                    Text(l10n.t("plan.empty.subtitle"))
+                        .font(.bpScaled(12))
+                        .foregroundStyle(Color.bpInk.opacity(0.4))
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+            }
+
             VStack(spacing: 0) {
                 ForEach(Array(plan.stops.enumerated()), id: \.element.id) { i, stop in
                     HStack(alignment: .top, spacing: 14) {

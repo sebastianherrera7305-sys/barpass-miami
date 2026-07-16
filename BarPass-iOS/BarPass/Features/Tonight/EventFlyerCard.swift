@@ -9,12 +9,32 @@ struct EventFlyerCard: View {
     var width: CGFloat = 220
     var height: CGFloat = 290
 
+    @ObservedObject private var l10n = L10n.shared
+
     private static let day: DateFormatter = {
         let f = DateFormatter(); f.dateFormat = "d"; return f
     }()
     private static let month: DateFormatter = {
         let f = DateFormatter(); f.locale = Locale(identifier: "es"); f.dateFormat = "MMM"; return f
     }()
+
+    /// (label, background color) for the top-right status badge, or nil to
+    /// hide it (far-out upcoming events don't need one — the date block
+    /// already communicates that).
+    private var statusBadge: (label: String, color: Color)? {
+        switch VenueTimeStatus.status(for: event) {
+        case .liveNow:
+            return (l10n.t("event.badge.live"), Color.bpDanger)
+        case .endingSoon(let mins):
+            return (String(format: l10n.t("event.badge.endingSoon"), max(mins, 1)), Color.bpAmber)
+        case .upcoming(let mins) where mins <= 60:
+            return (String(format: l10n.t("event.badge.startsInMin"), mins), Color.bpAmber)
+        case .upcoming(let mins) where mins <= 6 * 60:
+            return (String(format: l10n.t("event.badge.startsInHours"), max(mins / 60, 1)), Color.bpAmber.opacity(0.85))
+        case .upcoming, .finished:
+            return nil
+        }
+    }
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -51,6 +71,19 @@ struct EventFlyerCard: View {
             .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.white.opacity(0.12)))
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(10)
+
+            // Live/starting-soon status badge (top-right)
+            if let badge = statusBadge {
+                Text(badge.label)
+                    .font(.bpScaled(10, weight: .heavy))
+                    .tracking(0.5)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 9).padding(.vertical, 5)
+                    .background(badge.color, in: Capsule())
+                    .overlay(Capsule().strokeBorder(Color.white.opacity(0.25)))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(10)
+            }
 
             // Headline + venue
             VStack(alignment: .leading, spacing: 5) {

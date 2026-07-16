@@ -39,11 +39,17 @@ enum NightPlanner {
         var id: String { venue.id }
     }
 
-    /// Tonight's event for a venue, if any (next ~30h window).
+    /// Tonight's event for a venue, if any — live right now, ending soon, or
+    /// starting within the next 12h. Events already over (per
+    /// `VenueTimeStatus`'s assumed duration) never match, unlike the old
+    /// `-6h/+30h` window that kept "finished" events alive for 6 more hours.
     private static func eventTonight(_ v: BarPassVenue, now: Date) -> VenueEvent? {
-        v.upcomingEvents.first {
-            $0.date > now.addingTimeInterval(-6 * 3600) &&
-            $0.date < now.addingTimeInterval(30 * 3600)
+        v.upcomingEvents.first { event in
+            switch VenueTimeStatus.status(for: event, now: now) {
+            case .liveNow, .endingSoon:       return true
+            case .upcoming(let startsInMins): return startsInMins <= 12 * 60
+            case .finished:                   return false
+            }
         }
     }
 
@@ -99,6 +105,10 @@ enum NightPlanner {
         var scored = venues.map { ($0, score($0)) }
         if !surprise && scored.contains(where: { $0.1 >= 1 }) {
             scored = scored.filter { $0.1 >= 1 }
+        }
+        // Never recommend a closed venue while an open one is available.
+        if scored.contains(where: { $0.0.isOpenNow }) {
+            scored = scored.filter { $0.0.isOpenNow }
         }
         let ranked = scored.sorted { $0.1 > $1.1 }.map { $0.0 }
         let pool = Array(ranked.prefix(12))

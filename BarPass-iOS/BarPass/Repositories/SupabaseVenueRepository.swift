@@ -295,27 +295,7 @@ final actor SupabaseVenueRepository: VenueRepository {
     }
 
     private static func computeIsOpenNow(openTime: String, closeTime: String) -> Bool {
-        let now = Date()
-        let calendar = Calendar.current
-        let nowMinutes = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
-
-        let openParts = openTime.split(separator: ":")
-        let closeParts = closeTime.split(separator: ":")
-
-        guard openParts.count >= 2, closeParts.count >= 2,
-              let openHour = Int(openParts[0]), let openMin = Int(openParts[1]),
-              let closeHour = Int(closeParts[0]), let closeMin = Int(closeParts[1]) else {
-            return false
-        }
-
-        let openMinutes = openHour * 60 + openMin
-        let closeMinutes = closeHour * 60 + closeMin
-
-        if openMinutes <= closeMinutes {
-            return nowMinutes >= openMinutes && nowMinutes < closeMinutes
-        } else {
-            return nowMinutes >= openMinutes || nowMinutes < closeMinutes
-        }
+        VenueTimeStatus.isOpenNow(openTime: openTime, closeTime: closeTime)
     }
 
     private static func buildEditorial(hook: String?, description: String?) -> String? {

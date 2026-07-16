@@ -245,13 +245,23 @@ struct TonightView: View {
 
     // MARK: - Events tonight (flyer rail)
 
-    /// Events starting within the next 36 hours, paired with their venue.
+    /// Live-now/ending-soon events plus upcoming ones within the next 36
+    /// hours, paired with their venue. Events that have actually finished
+    /// (per `VenueTimeStatus`) are never shown — previously this used a
+    /// flat "-6h to +36h around start" window, which kept an event visible
+    /// for 6 hours after it started even once it was long over.
     private var tonightEvents: [(event: VenueEvent, venue: BarPassVenue)] {
         let now = Date()
         let horizon = now.addingTimeInterval(36 * 3600)
         return venueStore.venues
             .flatMap { v in v.upcomingEvents.map { (event: $0, venue: v) } }
-            .filter { $0.event.date > now.addingTimeInterval(-6 * 3600) && $0.event.date < horizon }
+            .filter { pair in
+                switch VenueTimeStatus.status(for: pair.event, now: now) {
+                case .liveNow, .endingSoon:       return true
+                case .upcoming(let startsInMins): return Double(startsInMins * 60) < horizon.timeIntervalSince(now)
+                case .finished:                   return false
+                }
+            }
             .sorted { $0.event.date < $1.event.date }
     }
 

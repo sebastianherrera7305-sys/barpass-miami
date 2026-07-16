@@ -29,6 +29,7 @@
 		AA000001000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000F /* Assets.xcassets */; };
 		AGGT02000000000000RP01 /* AgeGateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AGGT01000000000000RP01 /* AgeGateService.swift */; };
 		AGGT04000000000000RP01 /* AgeGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AGGT03000000000000RP01 /* AgeGateView.swift */; };
+		VTS004000000000000RP01 /* VenueTimeStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = VTS003000000000000RP01 /* VenueTimeStatus.swift */; };
 		VEVW04000000000000RP01 /* VerifyEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VEVW03000000000000RP01 /* VerifyEmailView.swift */; };
 		AMSC02000000000000RP01 /* AppleMusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AMSC01000000000000RP01 /* AppleMusicSource.swift */; };
 		AN0000010000000000000001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AN0000020000000000000001 /* AnalyticsService.swift */; };
@@ -130,6 +131,7 @@
 		AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveTicketView.swift; sourceTree = "<group>"; };
 		AGGT01000000000000RP01 /* AgeGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateService.swift; path = BarPass/Core/Services/AgeGateService.swift; sourceTree = SOURCE_ROOT; };
 		AGGT03000000000000RP01 /* AgeGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateView.swift; path = BarPass/Features/Onboarding/AgeGateView.swift; sourceTree = SOURCE_ROOT; };
+		VTS003000000000000RP01 /* VenueTimeStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueTimeStatus.swift; path = BarPass/Core/Services/VenueTimeStatus.swift; sourceTree = SOURCE_ROOT; };
 		VEVW03000000000000RP01 /* VerifyEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerifyEmailView.swift; path = BarPass/Features/Auth/VerifyEmailView.swift; sourceTree = SOURCE_ROOT; };
 		AMSC01000000000000RP01 /* AppleMusicSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleMusicSource.swift; path = BarPass/Core/Music/AppleMusicSource.swift; sourceTree = SOURCE_ROOT; };
 		AN0000020000000000000001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalyticsService.swift; path = BarPass/Core/Services/AnalyticsService.swift; sourceTree = SOURCE_ROOT; };
@@ -350,6 +352,7 @@
 				WLT007000000000000RP01 /* OrderHistoryService.swift */,
 				AGGT01000000000000RP01 /* AgeGateService.swift */,
 				AGGT03000000000000RP01 /* AgeGateView.swift */,
+				VTS003000000000000RP01 /* VenueTimeStatus.swift */,
 				VEVW03000000000000RP01 /* VerifyEmailView.swift */,
 				HYWC01000000000000RP01 /* HypeWeekCard.swift */,
 				MPAS01000000000000RP01 /* MusicPassport.swift */,
@@ -625,6 +628,7 @@
 				WLT008000000000000RP01 /* OrderHistoryService.swift in Sources */,
 				AGGT02000000000000RP01 /* AgeGateService.swift in Sources */,
 				AGGT04000000000000RP01 /* AgeGateView.swift in Sources */,
+				VTS004000000000000RP01 /* VenueTimeStatus.swift in Sources */,
 				VEVW04000000000000RP01 /* VerifyEmailView.swift in Sources */,
 				HYWC02000000000000RP01 /* HypeWeekCard.swift in Sources */,
 				MPAS02000000000000RP01 /* MusicPassport.swift in Sources */,
