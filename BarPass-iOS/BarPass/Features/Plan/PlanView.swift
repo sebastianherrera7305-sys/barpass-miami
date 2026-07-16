@@ -1,13 +1,18 @@
 import SwiftUI
+import CoreLocation
 
 struct PlanView: View {
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
     @EnvironmentObject private var appState:   AppState
+    @Environment(\.scenePhase) private var scenePhase
     @State private var prompt    = ""
     @State private var isLoading = false
     @State private var plan: NightPlan? = nil
     @State private var savedPlans: [NightPlan] = []
+    @State private var lastPrompt = ""
+    @State private var userLocation: CLLocationCoordinate2D?
+    @State private var locationService = LocationService()
 
     private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
@@ -167,22 +172,48 @@ struct PlanView: View {
                     Spacer(minLength: 120)
                 }
             }
+            .refreshable { await refresh() }
         }
         .onAppear { BPAnalytics.track(.viewPlan) }
-        .task { await loadSavedPlans() }
+        .task {
+            await loadSavedPlans()
+            userLocation = await locationService.requestOnce()
+        }
+        // Re-evaluate the current plan's real-time badges when the app comes
+        // back to the foreground — a plan built at 11pm showing "Starts in
+        // 20 min" is stale by 1am if the user just left the app open. Only
+        // regenerates if a plan is already showing; never fires on a timer.
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active, plan != nil, !lastPrompt.isEmpty else { return }
+            plan = NightPlan.sample(for: lastPrompt, venues: venueStore.venues, userLocation: userLocation)
+        }
 }
 
     private func generatePlan() {
         guard !prompt.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         isLoading = true
+        let currentPrompt = prompt
         Task {
             try? await Task.sleep(for: .seconds(1.5))
             await MainActor.run {
-                plan = NightPlan.sample(for: prompt, venues: venueStore.venues)
+                plan = NightPlan.sample(for: currentPrompt, venues: venueStore.venues, userLocation: userLocation)
+                lastPrompt = currentPrompt
                 BPAnalytics.track(.createPlan(method: "prompt"))
                 isLoading = false
                 prompt = ""
             }
+        }
+    }
+
+    /// Pull-to-refresh: re-fetches location and, if a plan is already
+    /// showing, regenerates it against the current moment. Does not fire on
+    /// any timer — only on this explicit gesture, app foreground, or a new
+    /// prompt submission.
+    private func refresh() async {
+        userLocation = await locationService.requestOnce()
+        await loadSavedPlans()
+        if !lastPrompt.isEmpty {
+            plan = NightPlan.sample(for: lastPrompt, venues: venueStore.venues, userLocation: userLocation)
         }
     }
 

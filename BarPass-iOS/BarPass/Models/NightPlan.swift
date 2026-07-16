@@ -1,4 +1,5 @@
 import Foundation
+import CoreLocation
 
 // MARK: - AI night plan (Plan tab)
 
@@ -32,8 +33,17 @@ struct NightPlan: Identifiable, Codable, Hashable {
     /// need formatted values baked in, e.g. "Starts in 20 min") — the sole
     /// call site (`PlanView.generatePlan`) already invokes this inside
     /// `MainActor.run`.
+    ///
+    /// - Parameter userLocation: last known device coordinate, if location
+    ///   permission was granted. When present, closer open venues/events
+    ///   rank higher within their tier (never overriding the live/soon/open
+    ///   priority order — just breaking ties among otherwise-equal picks).
+    ///   When nil (permission denied, unavailable, or not yet requested),
+    ///   distance is simply omitted from scoring — BarPass is single-market
+    ///   (Miami) today, so there's no separate "default market" to fall back
+    ///   to beyond the existing rating/trending signal.
     @MainActor
-    static func sample(for prompt: String, venues: [BarPassVenue]) -> NightPlan {
+    static func sample(for prompt: String, venues: [BarPassVenue], userLocation: CLLocationCoordinate2D? = nil) -> NightPlan {
         let now = Date()
         let l10n = L10n.shared
 
@@ -47,8 +57,19 @@ struct NightPlan: Identifiable, Codable, Hashable {
         func promptScore(_ v: BarPassVenue) -> Double {
             promptKeys.isEmpty ? 0 : Double(promptKeys.filter { haystack(v).contains($0) }.count)
         }
+        // Distance bonus decays to 0 by ~20km (covers metro Miami) — a tie
+        // breaker, not a hard filter, so it never buries a livelier stop
+        // further away in favor of a dead one nearby.
+        func distanceBonus(_ v: BarPassVenue) -> Double {
+            guard let userLocation else { return 0 }
+            let userLoc = CLLocation(latitude: userLocation.latitude, longitude: userLocation.longitude)
+            let venueLoc = CLLocation(latitude: v.latitude, longitude: v.longitude)
+            let km = userLoc.distance(from: venueLoc) / 1000
+            return max(0, 1 - km / 20) * 0.5
+        }
         func popularity(_ v: BarPassVenue) -> Double {
-            (v.isTrending ? 1 : 0) + v.rating * 0.2 + min(Double(v.reviewCount) / 10_000, 0.5) + promptScore(v) * 2
+            (v.isTrending ? 1 : 0) + v.rating * 0.2 + min(Double(v.reviewCount) / 10_000, 0.5)
+                + promptScore(v) * 2 + distanceBonus(v)
         }
 
         struct Candidate { let venue: BarPassVenue; let tier: Int; let rankScore: Double; let time: String; let noteKey: String }
