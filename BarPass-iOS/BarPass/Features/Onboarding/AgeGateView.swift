@@ -7,6 +7,7 @@ struct AgeGateView: View {
     let onVerified: () -> Void
 
     @ObservedObject private var l10n = L10n.shared
+    @EnvironmentObject private var appState: AppState
     @State private var dateOfBirth = Calendar.current.date(byAdding: .year, value: -21, to: Date()) ?? Date()
     @State private var rejected = false
 
@@ -93,6 +94,24 @@ struct AgeGateView: View {
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
                 .multilineTextAlignment(.center)
+
+            // Sin esto el usuario quedaba atrapado en esta pantalla para
+            // siempre — sin gesto, sin botón, sin forma de salir. No es un
+            // bypass del gate (no lo deja entrar), es la salida obligatoria
+            // que toda pantalla de iOS necesita.
+            Button {
+                BPHaptics.medium()
+                AuthService.shared.signOut()
+                appState.showAgeGate = false
+                appState.showNativeAuth = true
+            } label: {
+                Text(l10n.t("ageGate.rejected.signOut"))
+                    .font(.bpScaled(15, weight: .bold))
+                    .foregroundStyle(Color.bpTextSecondary)
+                    .padding(.top, 8)
+            }
+            .buttonStyle(.plain)
+            .bpAccessibility(label: l10n.t("ageGate.rejected.signOut"), hint: l10n.t("ageGate.rejected.signOut.hint"), isButton: true)
         }
         .bpAccessibility(label: l10n.t("ageGate.rejected.a11y.label"), hint: l10n.t("ageGate.rejected.a11y.hint"))
     }
