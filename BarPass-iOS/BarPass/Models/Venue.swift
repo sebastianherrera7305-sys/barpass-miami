@@ -75,16 +75,21 @@ struct BarPassVenue: Identifiable, Codable {
     let isOpenNow:        Bool
     let photoUrls:        [String]
     let editorial:        String?
+    /// Datos reales de Google Places — nil cuando Google no los tiene para
+    /// este venue (nunca se inventan).
+    var phone:            String? = nil
+    var website:          String? = nil
 
-    var crowdDescription: String {
+    /// Key de traducción — se resuelve en la vista (@MainActor), no acá.
+    var crowdDescriptionKey: String {
         switch crowdLevel {
-        case 0: return "Vacío"
-        case 1: return "Tranquilo"
-        case 2: return "Moderado"
-        case 3: return "Animado"
-        case 4: return "Lleno"
-        case 5: return "A tope"
-        default: return "N/A"
+        case 0: return "venue.crowd.empty"
+        case 1: return "venue.crowd.chill"
+        case 2: return "venue.crowd.moderate"
+        case 3: return "venue.crowd.lively"
+        case 4: return "venue.crowd.packed"
+        case 5: return "venue.crowd.max"
+        default: return "venue.crowd.na"
         }
     }
 

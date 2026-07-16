@@ -46,6 +46,8 @@ final class L10n: ObservableObject {
 
     private static let tables: [AppLanguage: [String: String]] = [
         .es: [
+            "venue.crowd.empty": "Vacío", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Lleno", "venue.crowd.max": "A tope", "venue.crowd.na": "N/D",
+            "venueDetail.call": "Llamar", "venueDetail.website": "Sitio web",
             "card.numberHint": "Número de tarjeta, expiración y CVV",
             "card.cancel.a11y": "Cancelar pago", "card.cancel.hint": "Cierra el formulario de pago sin procesar",
             "card.preview.a11y": "Vista previa de la tarjeta", "card.preview.hint": "Muestra una representación visual de la tarjeta ingresada",
@@ -558,6 +560,8 @@ final class L10n: ObservableObject {
             "ticket.perk.all.0": "Todo lo de VIP", "ticket.perk.all.1": "Open bar 1 hora", "ticket.perk.all.2": "Zona privada con mesa", "ticket.perk.all.3": "Meet & greet con el artista",
         ],
         .en: [
+            "venue.crowd.empty": "Empty", "venue.crowd.chill": "Chill", "venue.crowd.moderate": "Moderate", "venue.crowd.lively": "Lively", "venue.crowd.packed": "Packed", "venue.crowd.max": "Slammed", "venue.crowd.na": "N/A",
+            "venueDetail.call": "Call", "venueDetail.website": "Website",
             "card.numberHint": "Card number, expiration, and CVV",
             "card.cancel.a11y": "Cancel payment", "card.cancel.hint": "Closes the payment form without processing",
             "card.preview.a11y": "Card preview", "card.preview.hint": "Shows a visual representation of the entered card",
@@ -1070,6 +1074,8 @@ final class L10n: ObservableObject {
             "ticket.perk.all.0": "Everything in VIP", "ticket.perk.all.1": "1-hour open bar", "ticket.perk.all.2": "Private area with table", "ticket.perk.all.3": "Artist meet & greet",
         ],
         .pt: [
+            "venue.crowd.empty": "Vazio", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Cheio", "venue.crowd.max": "Lotado", "venue.crowd.na": "N/D",
+            "venueDetail.call": "Ligar", "venueDetail.website": "Site",
             "card.numberHint": "Número do cartão, validade e CVV",
             "card.cancel.a11y": "Cancelar pagamento", "card.cancel.hint": "Fecha o formulário de pagamento sem processar",
             "card.preview.a11y": "Prévia do cartão", "card.preview.hint": "Mostra uma representação visual do cartão inserido",

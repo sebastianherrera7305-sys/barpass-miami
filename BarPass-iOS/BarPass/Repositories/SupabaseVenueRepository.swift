@@ -8,7 +8,7 @@ final actor SupabaseVenueRepository: VenueRepository {
 
     /// Exact columns the decoder uses — `select=*` shipped dead columns on
     /// every app launch (egress is the free-tier bottleneck).
-    private static let venueColumns = "id,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending"
+    private static let venueColumns = "id,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website"
     private static let eventColumns = "id,venue_id,title,description,starts_at,cover_price"
 
     /// Cache en disco de la última lista real obtenida — antes el fallback
@@ -174,8 +174,12 @@ final actor SupabaseVenueRepository: VenueRepository {
             openTime: Self.formatTime24to12(row.openTime),
             closeTime: Self.formatTime24to12(row.closeTime),
             avgSpend: Self.formatAvgSpend(row.avgSpend),
-            dressCode: row.dressCode.flatMap { $0.isEmpty ? nil : $0 } ?? "Smart casual",
-            parking: row.parking.flatMap { $0.isEmpty ? nil : $0 } ?? "Street parking available",
+            // Antes inventaba "Smart casual"/"Street parking available" cuando
+            // la base no tenía el dato — eso es exactamente lo que la regla
+            // "nunca fabricar datos de venue" prohíbe. Si Google/Supabase no
+            // lo tienen, se muestra vacío en la UI, no un valor inventado.
+            dressCode: row.dressCode.flatMap { $0.isEmpty ? nil : $0 } ?? "",
+            parking: row.parking.flatMap { $0.isEmpty ? nil : $0 } ?? "",
             crowdLevel: Self.mapCrowdLevel(row.crowdLevel),
             bestArrivalTime: row.bestArrivalTime ?? "",
             peakHours: row.peakHours ?? "",
@@ -189,7 +193,9 @@ final actor SupabaseVenueRepository: VenueRepository {
             happyHourUntil: row.happyHourUntil,
             isOpenNow: Self.computeIsOpenNow(openTime: row.openTime, closeTime: row.closeTime),
             photoUrls: row.imageUrl.map { [$0] } ?? [],
-            editorial: Self.buildEditorial(hook: row.hook, description: row.description)
+            editorial: Self.buildEditorial(hook: row.hook, description: row.description),
+            phone: row.phone,
+            website: row.website
         )
     }
 
@@ -350,6 +356,8 @@ struct SupabaseVenueRow: Codable {
     let imageUrl: String?
     let instagramHandle: String?
     let isTrending: Bool?
+    let phone: String?
+    let website: String?
 }
 
 struct SupabaseEventRow: Codable {

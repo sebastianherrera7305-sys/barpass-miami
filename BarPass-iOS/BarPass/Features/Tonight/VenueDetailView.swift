@@ -216,7 +216,7 @@ struct VenueDetailView: View {
             Divider().background(Color.bpInk.opacity(0.08)).frame(height: 40)
             quickStat(icon: "ticket.fill", label: l10n.t("venueDetail.cover"), value: venue.priceRange, primary: false)
             Divider().background(Color.bpInk.opacity(0.08)).frame(height: 40)
-            quickStat(icon: "person.3.fill", label: l10n.t("venueDetail.crowd"), value: venue.crowdDescription, primary: false)
+            quickStat(icon: "person.3.fill", label: l10n.t("venueDetail.crowd"), value: l10n.t(venue.crowdDescriptionKey), primary: false)
         }
         .padding(.vertical, 14)
         .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.lg))
@@ -254,7 +254,7 @@ struct VenueDetailView: View {
                     Text(l10n.t("venueDetail.crowd"))
                         .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
                     Spacer()
-                    Text(venue.crowdDescription)
+                    Text(l10n.t(venue.crowdDescriptionKey))
                         .font(.bpScaled(13, weight: .semibold)).foregroundStyle(Color.bpInk)
                 }
                 HStack(spacing: 4) {
@@ -284,7 +284,9 @@ struct VenueDetailView: View {
                         .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.2)))
                 }
             }
-            infoRow("tshirt.fill", l10n.t("venueDetail.dressCode"), venue.dressCode)
+            if !venue.dressCode.isEmpty {
+                infoRow("tshirt.fill", l10n.t("venueDetail.dressCode"), venue.dressCode)
+            }
         }
     }
 
@@ -477,13 +479,21 @@ struct VenueDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             sectionTitle(l10n.t("venueDetail.howToGet"))
             infoRow("location.fill", l10n.t("venueDetail.address"), venue.address)
-            infoRow("car.fill", l10n.t("venueDetail.parking"), venue.parking)
+            if !venue.parking.isEmpty {
+                infoRow("car.fill", l10n.t("venueDetail.parking"), venue.parking)
+            }
 
             HStack(spacing: 10) {
                 linkButton(icon: "map.fill", label: "Maps") { openMaps() }
                 linkButton(icon: "car.fill", label: "Uber") { openUber() }
                 if let ig = venue.instagramHandle {
                     linkButton(icon: "camera.fill", label: "@\(ig)") { openInstagram(handle: ig) }
+                }
+                if let phone = venue.phone {
+                    linkButton(icon: "phone.fill", label: l10n.t("venueDetail.call")) { callVenue(phone) }
+                }
+                if venue.website != nil {
+                    linkButton(icon: "safari.fill", label: l10n.t("venueDetail.website")) { openWebsite() }
                 }
             }
         }
@@ -646,6 +656,16 @@ struct VenueDetailView: View {
         } else if let url = URL(string: "https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=\(venue.latitude)&dropoff[longitude]=\(venue.longitude)") {
             UIApplication.shared.open(url)
         }
+    }
+
+    private func callVenue(_ phone: String) {
+        let digits = phone.filter { $0.isNumber || $0 == "+" }
+        if let url = URL(string: "tel://\(digits)") { UIApplication.shared.open(url) }
+    }
+
+    private func openWebsite() {
+        guard let website = venue.website, let url = URL(string: website) else { return }
+        UIApplication.shared.open(url)
     }
 
     private func openInstagram(handle: String) {
