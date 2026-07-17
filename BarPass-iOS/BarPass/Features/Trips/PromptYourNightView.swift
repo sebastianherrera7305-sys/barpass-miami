@@ -8,7 +8,8 @@ struct PromptYourNightView: View {
     let onSave: (String, [BarPassVenue]) -> Void
 
     @ObservedObject private var l10n = L10n.shared
-    @State private var selected: Set<String> = []
+    @State private var selectedIntents: Set<String> = []
+    @State private var company: CompanyType? = nil
     @State private var prompt = ""
     @State private var route: [NightPlanner.PlannedStop] = []
     @State private var didGenerate = false
@@ -30,7 +31,18 @@ struct PromptYourNightView: View {
             }
 
             LazyVGrid(columns: cols, spacing: 10) {
-                ForEach(NightPlanner.vibes) { vibe in chip(vibe) }
+                ForEach(ExperienceIntent.allCases) { intent in intentChip(intent) }
+            }
+
+            // "Who are you going with?" — context that tunes the route shape.
+            VStack(alignment: .leading, spacing: 6) {
+                Text(l10n.t("context.company.question"))
+                    .font(.bpScaled(12, weight: .semibold)).foregroundStyle(Color.bpTextSecondary)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(CompanyType.allCases) { c in companyChip(c) }
+                    }
+                }
             }
 
             HStack(spacing: 10) {
@@ -65,15 +77,16 @@ struct PromptYourNightView: View {
         }
     }
 
-    private func chip(_ vibe: NightVibe) -> some View {
-        let on = selected.contains(vibe.id)
+    private func intentChip(_ intent: ExperienceIntent) -> some View {
+        let on = selectedIntents.contains(intent.id)
+        let label = l10n.t(intent.labelKey)
         return Button {
             BPHaptics.light()
-            if on { selected.remove(vibe.id) } else { selected.insert(vibe.id) }
+            if on { selectedIntents.remove(intent.id) } else { selectedIntents.insert(intent.id) }
         } label: {
             HStack(spacing: 6) {
-                Text(vibe.emoji)
-                Text(vibe.label).font(.bpScaled(12, weight: .semibold))
+                Text(intent.emoji)
+                Text(label).font(.bpScaled(12, weight: .semibold))
                     .lineLimit(1).minimumScaleFactor(0.8)
             }
             .foregroundStyle(on ? .black : .white)
@@ -83,7 +96,27 @@ struct PromptYourNightView: View {
             .overlay(Capsule().strokeBorder(on ? .clear : Color.bpInk.opacity(0.1)))
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: vibe.label, hint: l10n.t("night.vibe.hint"), isButton: true)
+        .bpAccessibility(label: label, hint: l10n.t("night.vibe.hint"), isButton: true)
+    }
+
+    private func companyChip(_ c: CompanyType) -> some View {
+        let on = company == c
+        let label = l10n.t(c.labelKey)
+        return Button {
+            BPHaptics.light()
+            company = on ? nil : c
+        } label: {
+            HStack(spacing: 5) {
+                Text(c.emoji)
+                Text(label).font(.bpScaled(12, weight: .semibold)).lineLimit(1)
+            }
+            .foregroundStyle(on ? .black : .white)
+            .padding(.horizontal, 12).padding(.vertical, 8)
+            .background(on ? Color.bpAmber : Color.bpInk.opacity(0.06), in: Capsule())
+            .overlay(Capsule().strokeBorder(on ? .clear : Color.bpInk.opacity(0.1)))
+        }
+        .buttonStyle(.plain)
+        .bpAccessibility(label: label, hint: l10n.t("context.company.hint"), isButton: true)
     }
 
     private var routeView: some View {
@@ -134,7 +167,7 @@ struct PromptYourNightView: View {
             Button {
                 BPHaptics.medium()
                 onSave(saveTitle, route.map(\.venue))
-                route = []; didGenerate = false; selected = []; prompt = ""; revealedCount = 0; revealDone = false
+                route = []; didGenerate = false; selectedIntents = []; company = nil; prompt = ""; revealedCount = 0; revealDone = false
             } label: {
                 Text(l10n.t("night.save"))
                     .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpAmber)
@@ -152,7 +185,9 @@ struct PromptYourNightView: View {
     private var saveTitle: String {
         let p = prompt.trimmingCharacters(in: .whitespaces)
         if !p.isEmpty { return p.prefix(1).uppercased() + p.dropFirst() }
-        if let first = NightPlanner.vibes.first(where: { selected.contains($0.id) }) { return "\(first.emoji) \(first.label)" }
+        if let first = ExperienceIntent.allCases.first(where: { selectedIntents.contains($0.id) }) {
+            return "\(first.emoji) \(l10n.t(first.labelKey))"
+        }
         return l10n.t("night.defaultTitle")
     }
 
@@ -161,7 +196,13 @@ struct PromptYourNightView: View {
         BPHaptics.medium()
         revealedCount = 0
         revealDone = false
-        route = NightPlanner.plan(venues: venues, selected: selected, prompt: prompt, passport: MusicProfileStore.shared.passport)
+        let context = TripContext(
+            intents: selectedIntents,
+            company: company,
+            date: Date(),
+            prompt: prompt
+        )
+        route = NightPlanner.plan(venues: venues, selected: [], prompt: prompt, passport: MusicProfileStore.shared.passport, context: context)
         didGenerate = true
 
         // Staged reveal: each stop lands with its own spring + haptic tick.

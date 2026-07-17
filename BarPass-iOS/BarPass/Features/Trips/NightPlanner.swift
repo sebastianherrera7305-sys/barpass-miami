@@ -53,17 +53,27 @@ enum NightPlanner {
         }
     }
 
-    static func plan(venues: [BarPassVenue], selected: Set<String>, prompt: String, passport: MusicPassport? = nil) -> [PlannedStop] {
+    static func plan(venues: [BarPassVenue], selected: Set<String>, prompt: String, passport: MusicPassport? = nil, context: TripContext? = nil) -> [PlannedStop] {
         guard !venues.isEmpty else { return [] }
         let now = Date()
 
-        let surprise = selected.contains("surprise")
-            || (selected.isEmpty && prompt.trimmingCharacters(in: .whitespaces).isEmpty)
+        // Experience-intent + company signals fold in on top of the existing
+        // vibe chips — same keyword-matching model, richer input. All map to
+        // terms that exist in real venue data (types/genres/vibes/tags).
+        let intents = context?.resolvedIntents ?? []
+        let intentKeys = intents.flatMap { $0.keywords }
+        let companyKeys = context?.company?.keywords ?? []
+        let preferredTypes = Set(intents.flatMap { $0.preferredTypes })
+
+        let noExplicitInput = selected.isEmpty && intents.isEmpty
+            && (context?.company == nil)
+            && prompt.trimmingCharacters(in: .whitespaces).isEmpty
+        let surprise = selected.contains("surprise") || noExplicitInput
 
         let vibeKeys = vibes.filter { selected.contains($0.id) }.flatMap { $0.keywords }
-        let promptKeys = prompt.lowercased()
+        let promptKeys = (prompt + " " + (context?.prompt ?? "")).lowercased()
             .split { !$0.isLetter }.map(String.init).filter { $0.count > 3 }
-        let keys = Set(vibeKeys + promptKeys)
+        let keys = Set(vibeKeys + promptKeys + intentKeys + companyKeys)
 
         func haystack(_ v: BarPassVenue) -> String {
             ([v.type.rawValue, v.name, v.neighborhood] + v.vibes + v.tags
@@ -83,6 +93,11 @@ enum NightPlanner {
                 if selected.contains("trending") && v.isTrending { s += 2 }
                 s += v.rating * 0.15
             }
+            // Experience-intent type preference: a soft boost when the venue's
+            // type is one the chosen intent leans toward (real VenueType data,
+            // never a hard filter — the closest real venue still surfaces even
+            // with no perfect type match).
+            if !preferredTypes.isEmpty && preferredTypes.contains(v.type) { s += 1.0 }
             if eventTonight(v, now: now) != nil { s += 2.5 }          // strongest live signal
             if v.isOpenNow { s += 0.75 }
             if v.hasHappyHour { s += 0.4 }
@@ -113,15 +128,23 @@ enum NightPlanner {
         let ranked = scored.sorted { $0.1 > $1.1 }.map { $0.0 }
         let pool = Array(ranked.prefix(12))
 
+        // Shorter outings get fewer stops — a 2-hour after-work relax shouldn't
+        // return a full 4-stop crawl. ~1 stop per 1.5h, clamped to 1...4.
+        let maxStops: Int = {
+            guard let hours = context?.durationHours else { return 4 }
+            return min(4, max(1, Int((hours / 1.5).rounded(.up))))
+        }()
+
         var chosen: [BarPassVenue] = []
         for p in [0, 1, 2] {
             if let cand = pool.first(where: { c in
                 phase(of: c) == p && !chosen.contains(where: { $0.id == c.id })
             }) { chosen.append(cand) }
         }
-        for v in pool where chosen.count < 4 {
+        for v in pool where chosen.count < maxStops {
             if !chosen.contains(where: { $0.id == v.id }) { chosen.append(v) }
         }
+        chosen = Array(chosen.prefix(maxStops))
         return chosen
             .sorted { phase(of: $0) < phase(of: $1) }
             .map { PlannedStop(venue: $0, reason: reason($0)) }
