@@ -47,66 +47,119 @@ enum ExperienceIntent: String, Codable, CaseIterable, Identifiable {
     /// l10n key for the display label.
     var labelKey: String { "intent.\(rawValue)" }
 
-    /// Free-text signals matched against a venue's searchable haystack
-    /// (type + name + neighborhood + vibes + tags + musicGenres). Only terms
-    /// that plausibly appear in real venue data — no invented attributes.
-    var keywords: [String] {
+    /// All of this intent's compatibility signals in one place. Previously
+    /// these lived as 4 independent switches (`keywords`, `preferredTypes`,
+    /// `relevantTagIds`, `conflictingTagIds`) — real-data validation found a
+    /// bug caused exactly by that shape: `conflictingTagIds` was added later
+    /// than the other three, after a venue surfaced the gap, because nothing
+    /// forced positive and negative signals to be defined together. One
+    /// switch, one struct, so a new intent (or a new negative signal for an
+    /// existing one) is a single edit instead of four.
+    var profile: IntentProfile {
         switch self {
-        case .celebrate:      return ["club", "party", "bottle", "vip", "packed", "edm", "house"]
-        case .relax:          return ["lounge", "chill", "rooftop", "cocktail", "wine", "speakeasy"]
-        case .meetPeople:     return ["bar", "social", "lively", "trending", "packed"]
-        case .watchSports:    return ["sports", "game", "beer", "brewery"]
-        case .liveMusic:      return ["live", "jazz", "salsa", "band", "latin", "music"]
-        case .foodExperience: return ["restaurant", "dinner", "food", "tasting", "chef"]
-        case .dateNight:      return ["romantic", "date", "intimate", "views", "rooftop", "wine", "upscale"]
-        case .familyTime:     return ["restaurant", "food", "casual"]
-        case .networking:     return ["upscale", "lounge", "cocktail", "business", "hotel"]
-        case .cultural:       return ["art", "live", "jazz", "local", "historic", "gallery"]
-        case .adventure:      return ["rooftop", "beach", "outdoor", "views", "waterfront"]
-        case .nightlife:      return ["club", "edm", "house", "techno", "late", "packed"]
+        case .celebrate:
+            return IntentProfile(
+                keywords: ["club", "party", "bottle", "vip", "packed", "edm", "house"],
+                preferredTypes: [.club, .rooftop],
+                positiveTagIds: ["group_night", "high_energy"],
+                negativeTagIds: []
+            )
+        case .relax:
+            return IntentProfile(
+                keywords: ["lounge", "chill", "rooftop", "cocktail", "wine", "speakeasy"],
+                preferredTypes: [.lounge, .rooftop, .bar],
+                positiveTagIds: ["outdoor_experience", "scenic"],
+                negativeTagIds: ["high_energy"]
+            )
+        case .meetPeople:
+            return IntentProfile(
+                keywords: ["bar", "social", "lively", "trending", "packed"],
+                preferredTypes: [.bar, .lounge],
+                positiveTagIds: ["social", "group_night"],
+                negativeTagIds: []
+            )
+        case .watchSports:
+            return IntentProfile(
+                keywords: ["sports", "game", "beer", "brewery"],
+                preferredTypes: [.sportsBar, .brewery, .bar],
+                positiveTagIds: ["sports_viewing"],
+                negativeTagIds: []
+            )
+        case .liveMusic:
+            return IntentProfile(
+                keywords: ["live", "jazz", "salsa", "band", "latin", "music"],
+                preferredTypes: [.lounge, .bar],
+                positiveTagIds: ["live_music"],
+                negativeTagIds: []
+            )
+        case .foodExperience:
+            return IntentProfile(
+                keywords: ["restaurant", "dinner", "food", "tasting", "chef"],
+                preferredTypes: [.restaurant],
+                positiveTagIds: ["vegetarian_friendly"],
+                negativeTagIds: ["high_energy"]
+            )
+        case .dateNight:
+            return IntentProfile(
+                keywords: ["romantic", "date", "intimate", "views", "rooftop", "wine", "upscale"],
+                preferredTypes: [.rooftop, .lounge, .restaurant],
+                positiveTagIds: ["date_friendly", "scenic"],
+                negativeTagIds: ["high_energy"]
+            )
+        case .familyTime:
+            return IntentProfile(
+                keywords: ["restaurant", "food", "casual"],
+                preferredTypes: [.restaurant],
+                positiveTagIds: ["accessible"],
+                negativeTagIds: ["high_energy"]
+            )
+        case .networking:
+            return IntentProfile(
+                keywords: ["upscale", "lounge", "cocktail", "business", "hotel"],
+                preferredTypes: [.lounge, .rooftop, .bar],
+                positiveTagIds: ["date_friendly", "social"],
+                negativeTagIds: ["high_energy"]
+            )
+        case .cultural:
+            return IntentProfile(
+                keywords: ["art", "live", "jazz", "local", "historic", "gallery"],
+                preferredTypes: [.lounge, .bar],
+                positiveTagIds: ["live_music", "scenic"],
+                negativeTagIds: []
+            )
+        case .adventure:
+            return IntentProfile(
+                keywords: ["rooftop", "beach", "outdoor", "views", "waterfront"],
+                preferredTypes: [.rooftop],
+                positiveTagIds: ["outdoor_experience", "scenic"],
+                negativeTagIds: []
+            )
+        case .nightlife:
+            return IntentProfile(
+                keywords: ["club", "edm", "house", "techno", "late", "packed"],
+                preferredTypes: [.club],
+                positiveTagIds: ["high_energy", "group_night"],
+                negativeTagIds: []
+            )
         }
     }
 
-    /// Experience Tag ids (see `ExperienceTag`) this intent should boost
-    /// when a venue actually has them — a second, richer signal alongside
-    /// `keywords`, sourced from real derived venue data instead of free-text
-    /// matching. Deliberately conservative: only tag ids the rule engine in
-    /// `derive-experience-tags.ts` can actually produce appear here.
-    var relevantTagIds: [String] {
-        switch self {
-        case .celebrate:      return ["group_night", "high_energy"]
-        case .relax:          return ["outdoor_experience", "scenic"]
-        case .meetPeople:     return ["social", "group_night"]
-        case .watchSports:    return ["sports_viewing"]
-        case .liveMusic:      return ["live_music"]
-        case .foodExperience: return ["vegetarian_friendly"]
-        case .dateNight:      return ["date_friendly", "scenic"]
-        case .familyTime:     return ["accessible"]
-        case .networking:     return ["date_friendly", "social"]
-        case .cultural:       return ["live_music", "scenic"]
-        case .adventure:      return ["outdoor_experience", "scenic"]
-        case .nightlife:      return ["high_energy", "group_night"]
-        }
-    }
+    // MARK: Thin forwarders (migration scaffolding)
+    //
+    // Kept so NightPlanner didn't need to change in the same commit as this
+    // consolidation. Delete once all call sites read `.profile` directly.
+    var keywords: [String] { profile.keywords }
+    var preferredTypes: [VenueType] { profile.preferredTypes }
+    var relevantTagIds: [String] { profile.positiveTagIds }
+    var conflictingTagIds: [String] { profile.negativeTagIds }
+}
 
-    /// Venue types this intent leans toward, drawn from the existing
-    /// `VenueType` enum — a soft ranking signal, never a hard filter.
-    var preferredTypes: [VenueType] {
-        switch self {
-        case .celebrate:      return [.club, .rooftop]
-        case .relax:          return [.lounge, .rooftop, .bar]
-        case .meetPeople:     return [.bar, .lounge]
-        case .watchSports:    return [.sportsBar, .brewery, .bar]
-        case .liveMusic:      return [.lounge, .bar]
-        case .foodExperience: return [.restaurant]
-        case .dateNight:      return [.rooftop, .lounge, .restaurant]
-        case .familyTime:     return [.restaurant]
-        case .networking:     return [.lounge, .rooftop, .bar]
-        case .cultural:       return [.lounge, .bar]
-        case .adventure:      return [.rooftop]
-        case .nightlife:      return [.club]
-        }
-    }
+/// One intent's full compatibility signal set — see `ExperienceIntent.profile`.
+struct IntentProfile {
+    let keywords: [String]
+    let preferredTypes: [VenueType]
+    let positiveTagIds: [String]
+    let negativeTagIds: [String]
 }
 
 // MARK: - Company context
