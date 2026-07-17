@@ -4,6 +4,10 @@ import Foundation
 /// prompt into a real, sequenced route (warm-up → peak) drawn ONLY from live
 /// venues. Deterministic and local today; the same interface can be backed by
 /// the AI Concierge later without touching the UI.
+///
+/// Scoring itself lives in `ExperienceScorer` (Core/Intelligence) — this type
+/// now owns only what's genuinely Trips-specific: the legacy vibe-chip list,
+/// phase sequencing (warm-up → mid → peak), and the duration-based stop cap.
 struct NightVibe: Identifiable, Hashable {
     let id: String
     let emoji: String
@@ -55,122 +59,15 @@ enum NightPlanner {
         var id: String { venue.id }
     }
 
-    /// Tonight's event for a venue, if any — live right now, ending soon, or
-    /// starting within the next 12h. Events already over (per
-    /// `VenueTimeStatus`'s assumed duration) never match, unlike the old
-    /// `-6h/+30h` window that kept "finished" events alive for 6 more hours.
-    private static func eventTonight(_ v: BarPassVenue, now: Date) -> VenueEvent? {
-        v.upcomingEvents.first { event in
-            switch VenueTimeStatus.status(for: event, now: now) {
-            case .liveNow, .endingSoon:       return true
-            case .upcoming(let startsInMins): return startsInMins <= 12 * 60
-            case .finished:                   return false
-            }
-        }
-    }
-
     static func plan(venues: [BarPassVenue], selected: Set<String>, prompt: String, passport: MusicPassport? = nil, context: TripContext? = nil) -> [PlannedStop] {
         guard !venues.isEmpty else { return [] }
         let now = Date()
 
-        // Experience-intent + company signals fold in on top of the existing
-        // vibe chips — same keyword-matching model, richer input. All map to
-        // terms that exist in real venue data (types/genres/vibes/tags).
-        let intents = context?.resolvedIntents ?? []
-        let intentKeys = intents.flatMap { $0.keywords }
-        let companyKeys = context?.company?.keywords ?? []
-        let preferredTypes = Set(intents.flatMap { $0.preferredTypes })
-        let relevantTagIds = Set(intents.flatMap { $0.relevantTagIds })
-        let conflictingTagIds = Set(intents.flatMap { $0.conflictingTagIds })
+        let surprise = ExperienceScorer.isSurprise(selected: selected, prompt: prompt, context: context)
 
-        func matchedExperienceTags(_ v: BarPassVenue) -> [ExperienceTag] {
-            guard !relevantTagIds.isEmpty else { return [] }
-            return v.experienceTags.filter { relevantTagIds.contains($0.id) }
+        var scored = venues.map { v in
+            (v, ExperienceScorer.score(venue: v, selected: selected, prompt: prompt, passport: passport, context: context, now: now))
         }
-
-        let noExplicitInput = selected.isEmpty && intents.isEmpty
-            && (context?.company == nil)
-            && prompt.trimmingCharacters(in: .whitespaces).isEmpty
-        let surprise = selected.contains("surprise") || noExplicitInput
-
-        let vibeKeys = vibes.filter { selected.contains($0.id) }.flatMap { $0.keywords }
-        let promptKeys = (prompt + " " + (context?.prompt ?? "")).lowercased()
-            .split { !$0.isLetter }.map(String.init).filter { $0.count > 3 }
-        let keys = Set(vibeKeys + promptKeys + intentKeys + companyKeys)
-
-        func haystack(_ v: BarPassVenue) -> String {
-            ([v.type.rawValue, v.name, v.neighborhood] + v.vibes + v.tags
-                + v.musicGenres.map { $0.rawValue }).joined(separator: " ").lowercased()
-        }
-
-        // Multi-signal score over REAL data: vibe/prompt match + live events
-        // + open-now + happy hour + popularity + rating. Weather/wait-times
-        // are intentionally absent — no data source yet, never faked.
-        func score(_ v: BarPassVenue) -> Double {
-            var s: Double
-            if surprise {
-                s = (v.isTrending ? 2 : 0) + v.rating
-            } else {
-                let h = haystack(v)
-                s = Double(keys.filter { h.contains($0) }.count)
-                if selected.contains("trending") && v.isTrending { s += 2 }
-                s += v.rating * 0.15
-            }
-            // Experience-intent type preference: a soft boost when the venue's
-            // type is one the chosen intent leans toward (real VenueType data,
-            // never a hard filter — the closest real venue still surfaces even
-            // with no perfect type match).
-            if !preferredTypes.isEmpty && preferredTypes.contains(v.type) { s += 1.0 }
-            // Experience Tags (Venue Intelligence Layer): confidence-weighted
-            // boost — a high-confidence tag (single Google attribute) counts
-            // more than a medium one (category-combined inference). Additive
-            // per matched tag, never a hard filter.
-            for tag in matchedExperienceTags(v) { s += tag.confidence.weight }
-            // Conflicting tags: found via real-data validation — "relax"
-            // surfaced a high_energy club in its top picks because nothing
-            // penalized a tag that actively contradicts the intent, only
-            // matches were rewarded. Soft penalty, same weight scale as a
-            // match, never an outright exclusion.
-            if !conflictingTagIds.isEmpty {
-                let conflicts = v.experienceTags.filter { conflictingTagIds.contains($0.id) }
-                for tag in conflicts { s -= tag.confidence.weight }
-            }
-            // Inclusive preferences: boost only when Google actually reported
-            // the attribute as true. Unknown (nil, the common case today,
-            // since no enrichment pass has populated amenities yet) is
-            // treated as neutral, never as a penalty — a venue is never
-            // excluded for lacking data it was simply never asked for.
-            if let inclusivePrefs = context?.inclusivePrefs, !inclusivePrefs.isEmpty {
-                let matched = inclusivePrefs.compactMap { InclusivePreference(rawValue: $0) }
-                    .filter { $0.value(for: v) == true }.count
-                s += Double(matched) * 0.6
-            }
-            if eventTonight(v, now: now) != nil { s += 2.5 }          // strongest live signal
-            if v.isOpenNow { s += 0.75 }
-            if v.hasHappyHour { s += 0.4 }
-            if let passport { s += HypeEngine.musicMatch(passport: passport, venue: v) * 1.5 }
-            s += min(Double(v.reviewCount) / 10_000.0, 0.5)           // popularity, capped
-            return s
-        }
-
-        func reason(_ v: BarPassVenue) -> String? {
-            if let e = eventTonight(v, now: now) { return "🎟️ \(e.title) esta noche" }
-            if let passport, HypeEngine.musicMatch(passport: passport, venue: v) >= 0.6 {
-                return "🎵 Match con tu música"
-            }
-            // Only ever state a tag-based reason for `.high` confidence — a
-            // medium/low-confidence tag still boosts score above, but is an
-            // inference, not a fact, and must not be presented as one.
-            if let tag = matchedExperienceTags(v).first(where: { $0.confidence == .high }) {
-                return "✨ " + NightPlanner.reasonLabel(for: tag.id)
-            }
-            if v.hasHappyHour, let until = v.happyHourUntil { return "🍹 Happy hour hasta \(until)" }
-            if v.isTrending { return "🔥 Trending ahora" }
-            if v.reviewCount > 5000 { return "⭐ Favorito de Miami (\(v.reviewCount) reviews)" }
-            return nil
-        }
-
-        var scored = venues.map { ($0, score($0)) }
         if !surprise && scored.contains(where: { $0.1 >= 1 }) {
             scored = scored.filter { $0.1 >= 1 }
         }
@@ -200,6 +97,6 @@ enum NightPlanner {
         chosen = Array(chosen.prefix(maxStops))
         return chosen
             .sorted { phase(of: $0) < phase(of: $1) }
-            .map { PlannedStop(venue: $0, reason: reason($0)) }
+            .map { PlannedStop(venue: $0, reason: ExperienceScorer.reason(venue: $0, prompt: prompt, passport: passport, context: context, now: now)) }
     }
 }
