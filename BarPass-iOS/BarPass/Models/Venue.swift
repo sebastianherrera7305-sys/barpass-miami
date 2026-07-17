@@ -34,6 +34,29 @@ struct PopularDrink: Identifiable, Codable {
     let emoji: String
 }
 
+/// Real amenity/accessibility data from Google Places API v1. Every field is
+/// an optional Bool — nil means "Google hasn't told us", never "false". The
+/// UI must treat nil as "don't show this badge", not as a negative claim.
+/// Only the amenities Google actually exposes are modeled here; things like
+/// noise level, LGBTQ+-friendliness, and language support have no reliable
+/// source and are deliberately NOT included (see venue_amenities_schema.sql).
+struct VenueAmenities: Codable, Hashable {
+    var wheelchairAccessible: Bool? = nil
+    var outdoorSeating:       Bool? = nil
+    var goodForGroups:        Bool? = nil
+    var goodForWatchingSports: Bool? = nil
+    var hasLiveMusic:         Bool? = nil
+    var reservable:           Bool? = nil
+    var servesVegetarianFood: Bool? = nil
+    var restroom:             Bool? = nil
+
+    var isEmpty: Bool {
+        wheelchairAccessible == nil && outdoorSeating == nil && goodForGroups == nil
+            && goodForWatchingSports == nil && hasLiveMusic == nil && reservable == nil
+            && servesVegetarianFood == nil && restroom == nil
+    }
+}
+
 struct VenueEvent: Identifiable, Codable {
     let id: String
     let title: String
@@ -79,6 +102,7 @@ struct BarPassVenue: Identifiable, Codable {
     /// este venue (nunca se inventan).
     var phone:            String? = nil
     var website:          String? = nil
+    var amenities:        VenueAmenities = VenueAmenities()
 
     /// Key de traducción — se resuelve en la vista (@MainActor), no acá.
     var crowdDescriptionKey: String {

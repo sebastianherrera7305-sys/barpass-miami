@@ -98,6 +98,16 @@ enum NightPlanner {
             // never a hard filter — the closest real venue still surfaces even
             // with no perfect type match).
             if !preferredTypes.isEmpty && preferredTypes.contains(v.type) { s += 1.0 }
+            // Inclusive preferences: boost only when Google actually reported
+            // the attribute as true. Unknown (nil, the common case today,
+            // since no enrichment pass has populated amenities yet) is
+            // treated as neutral, never as a penalty — a venue is never
+            // excluded for lacking data it was simply never asked for.
+            if let inclusivePrefs = context?.inclusivePrefs, !inclusivePrefs.isEmpty {
+                let matched = inclusivePrefs.compactMap { InclusivePreference(rawValue: $0) }
+                    .filter { $0.value(for: v) == true }.count
+                s += Double(matched) * 0.6
+            }
             if eventTonight(v, now: now) != nil { s += 2.5 }          // strongest live signal
             if v.isOpenNow { s += 0.75 }
             if v.hasHappyHour { s += 0.4 }

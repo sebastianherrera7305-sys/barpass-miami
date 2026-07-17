@@ -59,6 +59,17 @@ interface PlaceDetails {
   location?: { latitude: number; longitude: number };
   regularOpeningHours?: { weekdayDescriptions?: string[] };
   photos?: { name: string }[];
+  // Amenity/accessibility fields — Google omits the key entirely when it
+  // doesn't know, rather than sending `false`, so `typeof x === "boolean"`
+  // is the correct "did Google actually tell us" check below.
+  accessibilityOptions?: { wheelchairAccessibleEntrance?: boolean };
+  outdoorSeating?: boolean;
+  goodForGroups?: boolean;
+  goodForWatchingSports?: boolean;
+  liveMusic?: boolean;
+  reservable?: boolean;
+  servesVegetarianFood?: boolean;
+  restroom?: boolean;
 }
 
 /** Encuentra el place_id real en Google buscando por nombre + dirección. */
@@ -85,6 +96,9 @@ async function fetchPlaceDetails(placeId: string): Promise<PlaceDetails | null> 
   const fields = [
     "id", "nationalPhoneNumber", "websiteUri", "rating", "userRatingCount",
     "businessStatus", "location", "regularOpeningHours", "photos",
+    "accessibilityOptions", "outdoorSeating", "goodForGroups",
+    "goodForWatchingSports", "liveMusic", "reservable",
+    "servesVegetarianFood", "restroom",
   ].join(",");
   const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
     headers: { "X-Goog-Api-Key": PLACES_API_KEY!, "X-Goog-FieldMask": fields },
@@ -131,6 +145,20 @@ async function enrichVenue(venue: VenueRow): Promise<void> {
   if (details.businessStatus) update.business_status = details.businessStatus;
   const photoUrl = firstPhotoUrl(details);
   if (photoUrl) update.image_url = photoUrl;
+
+  // Amenities: only written when Google's response actually included the
+  // key. NULL stays NULL ("unknown") rather than ever being set to false.
+  if (typeof details.accessibilityOptions?.wheelchairAccessibleEntrance === "boolean") {
+    update.wheelchair_accessible = details.accessibilityOptions.wheelchairAccessibleEntrance;
+  }
+  if (typeof details.outdoorSeating === "boolean") update.outdoor_seating = details.outdoorSeating;
+  if (typeof details.goodForGroups === "boolean") update.good_for_groups = details.goodForGroups;
+  if (typeof details.goodForWatchingSports === "boolean") update.good_for_watching_sports = details.goodForWatchingSports;
+  if (typeof details.liveMusic === "boolean") update.has_live_music = details.liveMusic;
+  if (typeof details.reservable === "boolean") update.reservable = details.reservable;
+  if (typeof details.servesVegetarianFood === "boolean") update.serves_vegetarian_food = details.servesVegetarianFood;
+  if (typeof details.restroom === "boolean") update.restroom = details.restroom;
+  update.amenities_synced_at = new Date().toISOString();
 
   console.log(`  campos actualizados: ${Object.keys(update).filter((k) => k !== "google_synced_at").join(", ")}`);
 

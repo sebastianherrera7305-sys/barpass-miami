@@ -129,6 +129,46 @@ enum CompanyType: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Inclusive preferences
+
+/// Accessibility/atmosphere preferences a user can opt into. Each case maps
+/// 1:1 to a real, Google-sourced `VenueAmenities` field — never a fabricated
+/// attribute. As of the 2026-07-16 data audit, NO venue has amenity data
+/// populated yet (enrich-venues.ts was just extended to fetch it, and it
+/// hasn't been run against the live catalog) — so this enum and its scoring
+/// hook exist, but there is intentionally no picker UI for it yet. Shipping
+/// a filter UI that matches zero venues would look broken, not helpful;
+/// wire up the UI once a real enrichment pass has populated some data.
+enum InclusivePreference: String, Codable, CaseIterable, Identifiable {
+    case wheelchairAccessible
+    case outdoorSeating
+    case goodForGroups
+    case goodForWatchingSports
+    case liveMusic
+    case reservable
+    case vegetarianFriendly
+    case hasRestroom
+
+    var id: String { rawValue }
+    var labelKey: String { "inclusive.\(rawValue)" }
+
+    /// Reads the matching field off a venue's real amenity data. Returns nil
+    /// (unknown) rather than false when Google hasn't reported it — callers
+    /// must not treat nil as "doesn't have this."
+    func value(for venue: BarPassVenue) -> Bool? {
+        switch self {
+        case .wheelchairAccessible: return venue.amenities.wheelchairAccessible
+        case .outdoorSeating:       return venue.amenities.outdoorSeating
+        case .goodForGroups:        return venue.amenities.goodForGroups
+        case .goodForWatchingSports:return venue.amenities.goodForWatchingSports
+        case .liveMusic:            return venue.amenities.hasLiveMusic
+        case .reservable:           return venue.amenities.reservable
+        case .vegetarianFriendly:   return venue.amenities.servesVegetarianFood
+        case .hasRestroom:          return venue.amenities.restroom
+        }
+    }
+}
+
 // MARK: - Trip context
 
 /// The full "what experience, with whom, when, where" picture that drives a

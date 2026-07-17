@@ -8,7 +8,7 @@ final actor SupabaseVenueRepository: VenueRepository {
 
     /// Exact columns the decoder uses — `select=*` shipped dead columns on
     /// every app launch (egress is the free-tier bottleneck).
-    private static let venueColumns = "id,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website"
+    private static let venueColumns = "id,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom"
     private static let eventColumns = "id,venue_id,title,description,starts_at,cover_price"
 
     /// Cache en disco de la última lista real obtenida — antes el fallback
@@ -195,7 +195,17 @@ final actor SupabaseVenueRepository: VenueRepository {
             photoUrls: row.imageUrl.map { [$0] } ?? [],
             editorial: Self.buildEditorial(hook: row.hook, description: row.description),
             phone: row.phone,
-            website: row.website
+            website: row.website,
+            amenities: VenueAmenities(
+                wheelchairAccessible: row.wheelchairAccessible,
+                outdoorSeating: row.outdoorSeating,
+                goodForGroups: row.goodForGroups,
+                goodForWatchingSports: row.goodForWatchingSports,
+                hasLiveMusic: row.hasLiveMusic,
+                reservable: row.reservable,
+                servesVegetarianFood: row.servesVegetarianFood,
+                restroom: row.restroom
+            )
         )
     }
 
@@ -338,6 +348,14 @@ struct SupabaseVenueRow: Codable {
     let isTrending: Bool?
     let phone: String?
     let website: String?
+    let wheelchairAccessible: Bool?
+    let outdoorSeating: Bool?
+    let goodForGroups: Bool?
+    let goodForWatchingSports: Bool?
+    let hasLiveMusic: Bool?
+    let reservable: Bool?
+    let servesVegetarianFood: Bool?
+    let restroom: Bool?
 }
 
 struct SupabaseEventRow: Codable {
