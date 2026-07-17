@@ -245,6 +245,12 @@ struct ExperienceTag: Codable, Hashable, Identifiable {
     let category: String
     let confidence: TagConfidence
     let source: TagSource
+    /// When this tag was last (re)computed — threaded from the database's
+    /// `computed_at`. Optional for decode-safety against any cached venue
+    /// predating this field. Not yet consumed by scoring; the seam for a
+    /// future staleness-awareness pass (e.g. discount a tag not recomputed
+    /// in months), added now because the source data already exists.
+    var updatedAt: Date? = nil
 }
 
 // MARK: - Inclusive preferences

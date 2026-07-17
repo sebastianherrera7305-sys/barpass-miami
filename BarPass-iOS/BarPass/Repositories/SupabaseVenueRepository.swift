@@ -10,7 +10,7 @@ final actor SupabaseVenueRepository: VenueRepository {
     /// every app launch (egress is the free-tier bottleneck).
     private static let venueColumns = "id,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom,city,country,timezone"
     private static let eventColumns = "id,venue_id,title,description,starts_at,ends_at,cover_price"
-    private static let tagColumns = "venue_id,tag_id,category,confidence,source"
+    private static let tagColumns = "venue_id,tag_id,category,confidence,source,computed_at"
 
     /// Cache en disco de la última lista real obtenida — antes el fallback
     /// sin red era 1 sola venue hardcodeada de preview (LocalVenueRepository),
@@ -84,7 +84,7 @@ final actor SupabaseVenueRepository: VenueRepository {
                 )
             }
             let venueTags: [ExperienceTag] = (tagsByVenue[row.id.uuidString.lowercased()] ?? []).map { tag in
-                ExperienceTag(id: tag.tagId, category: tag.category, confidence: tag.confidence, source: tag.source)
+                ExperienceTag(id: tag.tagId, category: tag.category, confidence: tag.confidence, source: tag.source, updatedAt: tag.computedAt)
             }
             return Self.mapRowToVenue(row, events: venueEvents, experienceTags: venueTags)
         }
@@ -139,6 +139,7 @@ final actor SupabaseVenueRepository: VenueRepository {
 
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode([SupabaseExperienceTagRow].self, from: data)
     }
 
@@ -406,4 +407,5 @@ struct SupabaseExperienceTagRow: Codable {
     let category: String
     let confidence: TagConfidence
     let source: TagSource
+    let computedAt: Date?
 }
