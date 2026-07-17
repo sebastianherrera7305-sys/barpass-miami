@@ -212,6 +212,17 @@ enum CompanyType: String, Codable, CaseIterable, Identifiable {
 /// `.high` confidence matches.
 enum TagConfidence: String, Codable {
     case high, medium, low
+
+    /// Never claim more certainty than a tag's own confidence supports.
+    /// Used identically whether a tag is boosting a positive match or
+    /// penalizing a conflict — same scale both directions.
+    var weight: Double {
+        switch self {
+        case .high:   return 1.0
+        case .medium: return 0.6
+        case .low:    return 0.3
+        }
+    }
 }
 
 /// Where a tag came from — kept even after storage so a future audit or UI

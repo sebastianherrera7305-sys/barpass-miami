@@ -83,14 +83,6 @@ enum NightPlanner {
         let relevantTagIds = Set(intents.flatMap { $0.relevantTagIds })
         let conflictingTagIds = Set(intents.flatMap { $0.conflictingTagIds })
 
-        // Never claim more certainty than a tag's own confidence supports.
-        func tagWeight(_ c: TagConfidence) -> Double {
-            switch c {
-            case .high:   return 1.0
-            case .medium: return 0.6
-            case .low:    return 0.3
-            }
-        }
         func matchedExperienceTags(_ v: BarPassVenue) -> [ExperienceTag] {
             guard !relevantTagIds.isEmpty else { return [] }
             return v.experienceTags.filter { relevantTagIds.contains($0.id) }
@@ -133,7 +125,7 @@ enum NightPlanner {
             // boost — a high-confidence tag (single Google attribute) counts
             // more than a medium one (category-combined inference). Additive
             // per matched tag, never a hard filter.
-            for tag in matchedExperienceTags(v) { s += tagWeight(tag.confidence) }
+            for tag in matchedExperienceTags(v) { s += tag.confidence.weight }
             // Conflicting tags: found via real-data validation — "relax"
             // surfaced a high_energy club in its top picks because nothing
             // penalized a tag that actively contradicts the intent, only
@@ -141,7 +133,7 @@ enum NightPlanner {
             // match, never an outright exclusion.
             if !conflictingTagIds.isEmpty {
                 let conflicts = v.experienceTags.filter { conflictingTagIds.contains($0.id) }
-                for tag in conflicts { s -= tagWeight(tag.confidence) }
+                for tag in conflicts { s -= tag.confidence.weight }
             }
             // Inclusive preferences: boost only when Google actually reported
             // the attribute as true. Unknown (nil, the common case today,
