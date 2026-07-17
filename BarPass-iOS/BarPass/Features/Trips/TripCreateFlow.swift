@@ -15,7 +15,10 @@ struct TripCreateFlow: View {
     @State private var selectedVenueIds: Set<String> = []
     @State private var step = 0
     @State private var coverPickerItem: PhotosPickerItem?
-    @State private var coverImageData: Data?
+    /// Already downsampled (~1200px) — never the raw picked photo. A 12MP+
+    /// camera photo decoded at full resolution for a 140pt preview box was
+    /// exactly the kind of memory spike that got the app killed by jetsam.
+    @State private var coverImage: UIImage?
 
     private let amber  = Color.bpAmber
 
@@ -114,8 +117,8 @@ struct TripCreateFlow: View {
                     .fill(Color.bpInk.opacity(0.06))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
 
-                if let coverImageData, let uiImage = UIImage(data: coverImageData) {
-                    Image(uiImage: uiImage)
+                if let coverImage {
+                    Image(uiImage: coverImage)
                         .resizable()
                         .scaledToFill()
                         .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
@@ -138,9 +141,11 @@ struct TripCreateFlow: View {
         .bpAccessibility(label: l10n.t("tripCreate.coverImage.pick"), hint: l10n.t("tripCreate.coverImage.hint"), isButton: true)
         .onChange(of: coverPickerItem) { _, newItem in
             Task {
-                if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                    coverImageData = data
-                }
+                guard let data = try? await newItem?.loadTransferable(type: Data.self) else { return }
+                let resized = await Task.detached(priority: .utility) {
+                    ImageCache.downsampled(from: data, maxPixel: 1200)
+                }.value
+                coverImage = resized
             }
         }
     }
@@ -321,17 +326,20 @@ struct TripCreateFlow: View {
         onDismiss()
     }
 
-    /// Saves the picked cover photo to disk and returns its file path — no
-    /// upload backend exists for trip covers, so this stays local (same
-    /// device only) until one does; never fabricates a remote URL.
+    /// Saves the already-downsampled (~1200px) cover photo to disk and
+    /// returns its file path — writes the resized image re-encoded as
+    /// JPEG, never the original multi-MB picked photo, so both the file on
+    /// disk and every future re-read of it stay small. No upload backend
+    /// exists for trip covers, so this stays local (same device only)
+    /// until one does; never fabricates a remote URL.
     private func saveCoverImageIfNeeded(tripId: String) -> String? {
-        guard let coverImageData else { return nil }
+        guard let coverImage, let jpeg = coverImage.jpegData(compressionQuality: 0.8) else { return nil }
         let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             .appendingPathComponent("BarPassTripCovers", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let fileURL = dir.appendingPathComponent("\(tripId).jpg")
         do {
-            try coverImageData.write(to: fileURL, options: .atomic)
+            try jpeg.write(to: fileURL, options: .atomic)
             return fileURL.path
         } catch {
             return nil

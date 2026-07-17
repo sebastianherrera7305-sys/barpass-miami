@@ -98,7 +98,7 @@ struct TripDetailView: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if let path = currentTrip.coverImage, let uiImage = UIImage(contentsOfFile: path) {
+            if let path = currentTrip.coverImage, let uiImage = ImageCache.downsampled(contentsOf: URL(fileURLWithPath: path), maxPixel: 900) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFill()

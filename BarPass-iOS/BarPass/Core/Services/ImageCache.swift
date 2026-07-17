@@ -46,8 +46,46 @@ enum ImageCache {
     }
 
     static func store(_ img: UIImage, for url: URL, priority: Priority) {
-        let cost = Int(img.size.width * img.size.height * 4)
+        let pixelW = img.size.width * img.scale
+        let pixelH = img.size.height * img.scale
+        let cost = Int(pixelW * pixelH * 4)
         (priority == .hot ? hot : standard).setObject(img, forKey: url as NSURL, cost: cost)
+    }
+
+    /// Downsamples raw image bytes (a locally-picked photo, e.g. from
+    /// PhotosPicker) via ImageIO instead of decoding full-resolution —
+    /// `UIImage(data:)` on a 12MP+ camera photo decodes tens of MB into
+    /// memory for what's usually a ~150pt preview. Same technique
+    /// `CachedImage` already uses for network images.
+    static func downsampled(from data: Data, maxPixel: CGFloat) -> UIImage? {
+        let opts: CFDictionary = [
+            kCGImageSourceShouldCache: false,
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxPixel,
+        ] as CFDictionary
+        guard let source = CGImageSourceCreateWithData(data as CFData, opts),
+              let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, opts)
+        else { return nil }
+        return UIImage(cgImage: cg)
+    }
+
+    /// Same as `downsampled(from:maxPixel:)` but reads from disk without
+    /// loading the whole file into a `Data` first — used for cover images
+    /// re-read from `Application Support` on every render.
+    static func downsampled(contentsOf fileURL: URL, maxPixel: CGFloat) -> UIImage? {
+        let opts: CFDictionary = [
+            kCGImageSourceShouldCache: false,
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxPixel,
+        ] as CFDictionary
+        guard let source = CGImageSourceCreateWithURL(fileURL as CFURL, nil),
+              let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, opts)
+        else { return nil }
+        return UIImage(cgImage: cg)
     }
 }
 
@@ -82,7 +120,7 @@ struct CachedImage<Content: View, Placeholder: View>: View {
         // View.task runs on the MainActor — decoding there freezes the whole
         // UI (the login was untouchable while 181 hidden cards loaded). All
         // network + decode now happens on a detached background task.
-        let maxPixel = max(targetSize?.width ?? 512, targetSize?.height ?? 512) * 3
+        let maxPixel = min(max(targetSize?.width ?? 512, targetSize?.height ?? 512) * UIScreen.main.scale, 1536)
         let prio = priority
         let img = await Task.detached(priority: .utility) { () -> UIImage? in
             // URLSession respeta URLCache.shared (disco, 256MB) — antes se

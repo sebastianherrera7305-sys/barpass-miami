@@ -252,7 +252,7 @@ struct TripsListView: View {
             selectedTrip = trip
         } label: {
             VStack(alignment: .leading, spacing: 10) {
-                if let path = trip.coverImage, let uiImage = UIImage(contentsOfFile: path) {
+                if let path = trip.coverImage, let uiImage = ImageCache.downsampled(contentsOf: URL(fileURLWithPath: path), maxPixel: 400) {
                     Image(uiImage: uiImage)
                         .resizable()
                         .scaledToFill()
