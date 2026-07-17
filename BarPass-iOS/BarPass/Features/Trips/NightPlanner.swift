@@ -81,6 +81,7 @@ enum NightPlanner {
         let companyKeys = context?.company?.keywords ?? []
         let preferredTypes = Set(intents.flatMap { $0.preferredTypes })
         let relevantTagIds = Set(intents.flatMap { $0.relevantTagIds })
+        let conflictingTagIds = Set(intents.flatMap { $0.conflictingTagIds })
 
         // Never claim more certainty than a tag's own confidence supports.
         func tagWeight(_ c: TagConfidence) -> Double {
@@ -133,6 +134,15 @@ enum NightPlanner {
             // more than a medium one (category-combined inference). Additive
             // per matched tag, never a hard filter.
             for tag in matchedExperienceTags(v) { s += tagWeight(tag.confidence) }
+            // Conflicting tags: found via real-data validation — "relax"
+            // surfaced a high_energy club in its top picks because nothing
+            // penalized a tag that actively contradicts the intent, only
+            // matches were rewarded. Soft penalty, same weight scale as a
+            // match, never an outright exclusion.
+            if !conflictingTagIds.isEmpty {
+                let conflicts = v.experienceTags.filter { conflictingTagIds.contains($0.id) }
+                for tag in conflicts { s -= tagWeight(tag.confidence) }
+            }
             // Inclusive preferences: boost only when Google actually reported
             // the attribute as true. Unknown (nil, the common case today,
             // since no enrichment pass has populated amenities yet) is
