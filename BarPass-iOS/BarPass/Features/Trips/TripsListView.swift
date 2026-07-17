@@ -14,6 +14,7 @@ struct TripsListView: View {
     @State private var showJoinByCode = false
     @State private var joinCode = ""
     @State private var joinError: String?
+    @State private var isJoiningByCode = false
     @State private var selectedTrip: Trip? = nil
 
     private let amber  = Color.bpAmber
@@ -61,27 +62,28 @@ struct TripsListView: View {
                 .presentationDetents([.large])
                 .presentationBackground(.black)
         }
-        .alert(l10n.t("trips.joinByCode.title"), isPresented: $showJoinByCode) {
-            TextField(l10n.t("trips.joinByCode.placeholder"), text: $joinCode)
-                .textInputAutocapitalization(.characters)
-            Button(l10n.t("trips.joinByCode.join")) { joinByCode() }
-            Button(l10n.t("tripCreate.cancel"), role: .cancel) { joinCode = "" }
-        } message: {
-            if let joinError { Text(joinError) } else { Text(l10n.t("trips.joinByCode.subtitle")) }
+        .sheet(isPresented: $showJoinByCode) {
+            JoinByCodeView(joinCode: $joinCode, error: $joinError, isJoining: $isJoiningByCode) {
+                await joinByCode()
+            }
+            .presentationDetents([.height(360)])
+            .presentationBackground(.black)
         }
     }
 
-    private func joinByCode() {
-        let code = joinCode
-        joinCode = ""
-        Task {
-            do {
-                try await tripStore.joinByInviteCode(code)
-                joinError = nil
-            } catch {
-                joinError = error.localizedDescription
-                showJoinByCode = true
-            }
+    @MainActor
+    private func joinByCode() async {
+        guard !joinCode.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        isJoiningByCode = true
+        joinError = nil
+        do {
+            try await tripStore.joinByInviteCode(joinCode)
+            isJoiningByCode = false
+            joinCode = ""
+            showJoinByCode = false
+        } catch {
+            isJoiningByCode = false
+            joinError = error.localizedDescription
         }
     }
 
@@ -349,5 +351,95 @@ struct TripsListView: View {
             await tripStore.create(trip); PointsEngine.shared.award(.createTrip)
             BPAnalytics.track(.createTrip)
         }
+    }
+}
+
+// MARK: - Join by code
+
+/// Was a plain `.alert` with a bare TextField — replaced with a real sheet
+/// matching the app's design language, with a visible loading/error state
+/// instead of silently doing nothing on failure.
+private struct JoinByCodeView: View {
+    @Binding var joinCode: String
+    @Binding var error: String?
+    @Binding var isJoining: Bool
+    let onJoin: () async -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
+    @FocusState private var focused: Bool
+
+    private let amber = Color.bpAmber
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Capsule()
+                .fill(Color.bpInk.opacity(0.2))
+                .frame(width: 36, height: 4)
+                .padding(.top, 12)
+
+            Image(systemName: "ticket.fill")
+                .font(.bpScaled(32))
+                .foregroundStyle(amber)
+                .padding(.top, 8)
+
+            VStack(spacing: 6) {
+                Text(l10n.t("trips.joinByCode.title"))
+                    .font(.bpTitle2())
+                    .foregroundStyle(Color.bpInk)
+                Text(l10n.t("trips.joinByCode.subtitle"))
+                    .font(.bpBody())
+                    .foregroundStyle(Color.bpTextSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, BPSpacing.lg)
+
+            TextField(l10n.t("trips.joinByCode.placeholder"), text: $joinCode)
+                .focused($focused)
+                .font(.system(.title3, design: .monospaced).weight(.bold))
+                .multilineTextAlignment(.center)
+                .foregroundStyle(Color.bpInk)
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
+                .padding(.vertical, 14)
+                .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(error != nil ? Color.bpDanger.opacity(0.5) : Color.bpBorder))
+                .padding(.horizontal, BPSpacing.lg)
+                .bpAccessibility(label: l10n.t("trips.joinByCode.placeholder"), hint: l10n.t("trips.joinByCode.subtitle"))
+
+            if let error {
+                Text(error)
+                    .font(.bpCaption())
+                    .foregroundStyle(Color.bpDanger)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, BPSpacing.lg)
+            }
+
+            Button {
+                focused = false
+                Task { await onJoin() }
+            } label: {
+                ZStack {
+                    if isJoining {
+                        ProgressView().tint(.black)
+                    } else {
+                        Text(l10n.t("trips.joinByCode.join"))
+                            .font(.bpHeadline())
+                            .foregroundStyle(.black)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 15)
+                .background(amber.opacity(joinCode.trimmingCharacters(in: .whitespaces).isEmpty ? 0.4 : 1), in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .disabled(isJoining || joinCode.trimmingCharacters(in: .whitespaces).isEmpty)
+            .padding(.horizontal, BPSpacing.lg)
+            .bpAccessibility(label: l10n.t("trips.joinByCode.join"), hint: l10n.t("trips.joinByCode.subtitle"), isButton: true)
+
+            Spacer()
+        }
+        .background(Color.bpSurface.ignoresSafeArea())
+        .onAppear { focused = true }
     }
 }

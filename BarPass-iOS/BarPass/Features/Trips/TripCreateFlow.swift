@@ -151,36 +151,43 @@ struct TripCreateFlow: View {
     }
 
     private var datesStep: some View {
-        VStack(spacing: 20) {
-            Spacer()
-            Text(l10n.t("tripCreate.step2.title"))
-                .font(.bpTitle2())
-                .foregroundStyle(Color.bpInk)
+        // Two full graphical DatePickers (~340pt each) plus title/button
+        // overflow the screen on every real device — without a ScrollView
+        // (unlike titleStep, which has one) the "Next" button was pushed
+        // below the visible viewport with no way to reach it, reading as
+        // the whole flow being "stuck" on this step.
+        ScrollView {
+            VStack(spacing: 20) {
+                Text(l10n.t("tripCreate.step2.title"))
+                    .font(.bpTitle2())
+                    .foregroundStyle(Color.bpInk)
+                    .padding(.top, 20)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text(l10n.t("tripCreate.from"))
-                    .font(.bpCaption())
-                    .foregroundStyle(Color.bpTextSecondary)
-                DatePicker("", selection: $startDate, displayedComponents: .date)
-                    .datePickerStyle(.graphical)
-                    .tint(amber)
-                    .bpAccessibility(label: l10n.t("tripCreate.startDate"), hint: l10n.t("tripCreate.startDate.hint"))
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(l10n.t("tripCreate.from"))
+                        .font(.bpCaption())
+                        .foregroundStyle(Color.bpTextSecondary)
+                    DatePicker("", selection: $startDate, displayedComponents: .date)
+                        .datePickerStyle(.graphical)
+                        .tint(amber)
+                        .bpAccessibility(label: l10n.t("tripCreate.startDate"), hint: l10n.t("tripCreate.startDate.hint"))
+                }
+                .padding(.horizontal, BPSpacing.lg)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(l10n.t("tripCreate.to"))
+                        .font(.bpCaption())
+                        .foregroundStyle(Color.bpTextSecondary)
+                    DatePicker("", selection: $endDate, in: startDate..., displayedComponents: .date)
+                        .datePickerStyle(.graphical)
+                        .tint(amber)
+                        .bpAccessibility(label: l10n.t("tripCreate.endDate"), hint: l10n.t("tripCreate.endDate.hint"))
+                }
+                .padding(.horizontal, BPSpacing.lg)
+
+                nextButton
             }
-            .padding(.horizontal, BPSpacing.lg)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(l10n.t("tripCreate.to"))
-                    .font(.bpCaption())
-                    .foregroundStyle(Color.bpTextSecondary)
-                DatePicker("", selection: $endDate, in: startDate..., displayedComponents: .date)
-                    .datePickerStyle(.graphical)
-                    .tint(amber)
-                    .bpAccessibility(label: l10n.t("tripCreate.endDate"), hint: l10n.t("tripCreate.endDate.hint"))
-            }
-            .padding(.horizontal, BPSpacing.lg)
-
-            nextButton
-            Spacer()
+            .padding(.bottom, 20)
         }
     }
 
