@@ -107,6 +107,10 @@ struct BarPassVenue: Identifiable, Codable {
     var phone:            String? = nil
     var website:          String? = nil
     var amenities:        VenueAmenities = VenueAmenities()
+    /// Derived Experience Tags (Venue Intelligence Layer) — computed
+    /// server-side from real amenity/category data, never invented client-
+    /// side. Empty until `derive-experience-tags.ts` has run for a venue.
+    var experienceTags:   [ExperienceTag] = []
     /// Multi-city readiness (Venue Intelligence Roadmap Phase 2). Optional
     /// for decode-safety against any venue cached before these existed —
     /// nil, not "Miami", when a source genuinely doesn't say. The live

@@ -10,6 +10,7 @@ final actor SupabaseVenueRepository: VenueRepository {
     /// every app launch (egress is the free-tier bottleneck).
     private static let venueColumns = "id,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom,city,country,timezone"
     private static let eventColumns = "id,venue_id,title,description,starts_at,ends_at,cover_price"
+    private static let tagColumns = "venue_id,tag_id,category,confidence,source"
 
     /// Cache en disco de la última lista real obtenida — antes el fallback
     /// sin red era 1 sola venue hardcodeada de preview (LocalVenueRepository),
@@ -64,9 +65,12 @@ final actor SupabaseVenueRepository: VenueRepository {
     private func fetchFromSupabase() async throws -> [BarPassVenue] {
         async let venueRowsTask = fetchVenueRows()
         async let eventRowsTask = fetchEventRows()
+        async let tagRowsTask = fetchExperienceTagRows()
         let venueRows = try await venueRowsTask
         let eventRows = (try? await eventRowsTask) ?? []
+        let tagRows = (try? await tagRowsTask) ?? []
         let eventsByVenue = Dictionary(grouping: eventRows, by: { $0.venueId.uuidString.lowercased() })
+        let tagsByVenue = Dictionary(grouping: tagRows, by: { $0.venueId.uuidString.lowercased() })
 
         return venueRows.map { row in
             let venueEvents: [VenueEvent] = (eventsByVenue[row.id.uuidString.lowercased()] ?? []).map { event in
@@ -79,7 +83,10 @@ final actor SupabaseVenueRepository: VenueRepository {
                     endDate: event.endsAt
                 )
             }
-            return Self.mapRowToVenue(row, events: venueEvents)
+            let venueTags: [ExperienceTag] = (tagsByVenue[row.id.uuidString.lowercased()] ?? []).map { tag in
+                ExperienceTag(id: tag.tagId, category: tag.category, confidence: tag.confidence, source: tag.source)
+            }
+            return Self.mapRowToVenue(row, events: venueEvents, experienceTags: venueTags)
         }
     }
 
@@ -116,6 +123,23 @@ final actor SupabaseVenueRepository: VenueRepository {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode([SupabaseEventRow].self, from: data)
+    }
+
+    private func fetchExperienceTagRows() async throws -> [SupabaseExperienceTagRow] {
+        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/venue_experience_tags?select=\(Self.tagColumns)") else { throw URLError(.badURL) }
+        var request = URLRequest(url: url)
+        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
+            throw URLError(.badServerResponse)
+        }
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try decoder.decode([SupabaseExperienceTagRow].self, from: data)
     }
 
     // MARK: - VenueRepository
@@ -157,7 +181,7 @@ final actor SupabaseVenueRepository: VenueRepository {
 
     // MARK: - Mapping
 
-    private static func mapRowToVenue(_ row: SupabaseVenueRow, events: [VenueEvent]) -> BarPassVenue {
+    private static func mapRowToVenue(_ row: SupabaseVenueRow, events: [VenueEvent], experienceTags: [ExperienceTag] = []) -> BarPassVenue {
         BarPassVenue(
             id: row.id.uuidString.lowercased(),
             name: row.name,
@@ -207,6 +231,7 @@ final actor SupabaseVenueRepository: VenueRepository {
                 servesVegetarianFood: row.servesVegetarianFood,
                 restroom: row.restroom
             ),
+            experienceTags: experienceTags,
             city: row.city,
             country: row.country,
             timezoneId: row.timezone
@@ -373,4 +398,12 @@ struct SupabaseEventRow: Codable {
     let startsAt: Date
     let endsAt: Date?
     let coverPrice: Int?
+}
+
+struct SupabaseExperienceTagRow: Codable {
+    let venueId: UUID
+    let tagId: String
+    let category: String
+    let confidence: TagConfidence
+    let source: TagSource
 }

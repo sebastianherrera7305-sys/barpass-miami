@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "enrich": "node --env-file=.env.local --import tsx scripts/enrich-venues.ts",
+    "derive-tags": "node --env-file=.env.local --import tsx scripts/derive-experience-tags.ts",
     "resolve-photos": "node --env-file=.env.local --import tsx scripts/resolve-photos.ts",
     "add-venues": "node --env-file=.env.local --import tsx scripts/add-venues.ts",
     "fetch-logos": "node --env-file=.env.local --import tsx scripts/fetch-logos.ts",

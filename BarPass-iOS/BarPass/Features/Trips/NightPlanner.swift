@@ -24,6 +24,22 @@ enum NightPlanner {
         .init(id: "surprise", emoji: "🎭", label: "Sorprendeme", keywords: []),
     ]
 
+    /// Human-readable label for a high-confidence Experience Tag match —
+    /// only called for `.high` confidence, so every string here states
+    /// something the tag's source (a direct Google attribute) actually
+    /// confirms, never a guess.
+    static func reasonLabel(for tagId: String) -> String {
+        switch tagId {
+        case "live_music":           return "Música en vivo confirmada"
+        case "group_night":          return "Ideal para ir en grupo"
+        case "outdoor_experience":   return "Tiene espacio al aire libre"
+        case "sports_viewing":       return "Bueno para ver el partido"
+        case "accessible":           return "Accesible en silla de ruedas"
+        case "vegetarian_friendly":  return "Opciones vegetarianas"
+        default:                     return tagId.replacingOccurrences(of: "_", with: " ")
+        }
+    }
+
     static func phase(of v: BarPassVenue) -> Int {
         switch v.type {
         case .rooftop, .restaurant: return 0   // warm-up
@@ -64,6 +80,20 @@ enum NightPlanner {
         let intentKeys = intents.flatMap { $0.keywords }
         let companyKeys = context?.company?.keywords ?? []
         let preferredTypes = Set(intents.flatMap { $0.preferredTypes })
+        let relevantTagIds = Set(intents.flatMap { $0.relevantTagIds })
+
+        // Never claim more certainty than a tag's own confidence supports.
+        func tagWeight(_ c: TagConfidence) -> Double {
+            switch c {
+            case .high:   return 1.0
+            case .medium: return 0.6
+            case .low:    return 0.3
+            }
+        }
+        func matchedExperienceTags(_ v: BarPassVenue) -> [ExperienceTag] {
+            guard !relevantTagIds.isEmpty else { return [] }
+            return v.experienceTags.filter { relevantTagIds.contains($0.id) }
+        }
 
         let noExplicitInput = selected.isEmpty && intents.isEmpty
             && (context?.company == nil)
@@ -98,6 +128,11 @@ enum NightPlanner {
             // never a hard filter — the closest real venue still surfaces even
             // with no perfect type match).
             if !preferredTypes.isEmpty && preferredTypes.contains(v.type) { s += 1.0 }
+            // Experience Tags (Venue Intelligence Layer): confidence-weighted
+            // boost — a high-confidence tag (single Google attribute) counts
+            // more than a medium one (category-combined inference). Additive
+            // per matched tag, never a hard filter.
+            for tag in matchedExperienceTags(v) { s += tagWeight(tag.confidence) }
             // Inclusive preferences: boost only when Google actually reported
             // the attribute as true. Unknown (nil, the common case today,
             // since no enrichment pass has populated amenities yet) is
@@ -120,6 +155,12 @@ enum NightPlanner {
             if let e = eventTonight(v, now: now) { return "🎟️ \(e.title) esta noche" }
             if let passport, HypeEngine.musicMatch(passport: passport, venue: v) >= 0.6 {
                 return "🎵 Match con tu música"
+            }
+            // Only ever state a tag-based reason for `.high` confidence — a
+            // medium/low-confidence tag still boosts score above, but is an
+            // inference, not a fact, and must not be presented as one.
+            if let tag = matchedExperienceTags(v).first(where: { $0.confidence == .high }) {
+                return "✨ " + NightPlanner.reasonLabel(for: tag.id)
             }
             if v.hasHappyHour, let until = v.happyHourUntil { return "🍹 Happy hour hasta \(until)" }
             if v.isTrending { return "🔥 Trending ahora" }

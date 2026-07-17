@@ -67,6 +67,28 @@ enum ExperienceIntent: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    /// Experience Tag ids (see `ExperienceTag`) this intent should boost
+    /// when a venue actually has them — a second, richer signal alongside
+    /// `keywords`, sourced from real derived venue data instead of free-text
+    /// matching. Deliberately conservative: only tag ids the rule engine in
+    /// `derive-experience-tags.ts` can actually produce appear here.
+    var relevantTagIds: [String] {
+        switch self {
+        case .celebrate:      return ["group_night", "high_energy"]
+        case .relax:          return ["outdoor_experience", "scenic"]
+        case .meetPeople:     return ["social", "group_night"]
+        case .watchSports:    return ["sports_viewing"]
+        case .liveMusic:      return ["live_music"]
+        case .foodExperience: return ["vegetarian_friendly"]
+        case .dateNight:      return ["date_friendly", "scenic"]
+        case .familyTime:     return ["accessible"]
+        case .networking:     return ["date_friendly", "social"]
+        case .cultural:       return ["live_music", "scenic"]
+        case .adventure:      return ["outdoor_experience", "scenic"]
+        case .nightlife:      return ["high_energy", "group_night"]
+        }
+    }
+
     /// Venue types this intent leans toward, drawn from the existing
     /// `VenueType` enum — a soft ranking signal, never a hard filter.
     var preferredTypes: [VenueType] {
@@ -127,6 +149,38 @@ enum CompanyType: String, Codable, CaseIterable, Identifiable {
         case .visitors:  return ["iconic", "views", "trending", "rooftop"]
         }
     }
+}
+
+// MARK: - Experience Tags (Venue Intelligence Layer)
+
+/// How certain a tag is, given what it was derived from. Never presented
+/// to the user as a stated fact when it's actually an inference — see
+/// `NightPlanner.reason`, which only surfaces a tag-based reason for
+/// `.high` confidence matches.
+enum TagConfidence: String, Codable {
+    case high, medium, low
+}
+
+/// Where a tag came from — kept even after storage so a future audit or UI
+/// can always answer "why does BarPass think this?"
+enum TagSource: String, Codable {
+    case googleAttribute = "google_attribute"
+    case venueCategory   = "venue_category"
+    case userSignal      = "user_signal"
+    case futureAI        = "future_ai"
+}
+
+/// A single derived experience signal for a venue (e.g. "group_night",
+/// "date_friendly"). Computed server-side by
+/// `barpass-v2/scripts/derive-experience-tags.ts` from real, already-
+/// enriched venue data — never fabricated, never AI-guessed today (the
+/// `.futureAI` source exists as a reserved slot, not a live path). iOS only
+/// ever reads these; the derivation rules live in exactly one place.
+struct ExperienceTag: Codable, Hashable, Identifiable {
+    let id: String
+    let category: String
+    let confidence: TagConfidence
+    let source: TagSource
 }
 
 // MARK: - Inclusive preferences
