@@ -29,6 +29,10 @@ enum StopVisibility: String, Codable {
     case joinable
 }
 
+enum MemberRole: String, Codable {
+    case organizer, coOrganizer, member
+}
+
 struct Stop: Identifiable, Codable, Hashable {
     var id: String = UUID().uuidString
     var tripId: String
@@ -44,6 +48,54 @@ struct Stop: Identifiable, Codable, Hashable {
     var pendingStopRequests: [String] = []
 }
 
+extension Stop {
+    /// Builds a sequenced itinerary from picked venues, anchored to each
+    /// venue's actual opening time so a stop is never suggested before the
+    /// venue is even open — previously both call sites (`TripsListView` and
+    /// `TripCreateFlow`) fabricated times with plain arithmetic
+    /// (`"\(7 + i*2):00 PM"`), unrelated to any real venue data.
+    static func sequence(for venues: [BarPassVenue], tripId: String, date: Date) -> [Stop] {
+        let ordered = venues.sorted { NightPlanner.phase(of: $0) < NightPlanner.phase(of: $1) }
+        // Typical slot per phase, in minutes-since-midnight (peak wraps past
+        // midnight into the next day).
+        let phaseBaseline: [Int: Int] = [0: 20 * 60, 1: 22 * 60 + 30, 2: 24 * 60 + 30]
+
+        var cursor = 0
+        return ordered.map { v in
+            let phase = NightPlanner.phase(of: v)
+            let baseline = phaseBaseline[phase] ?? (20 * 60)
+            // Very-early-morning open times (e.g. an after-hours spot open
+            // "4:00 AM") mean "later tonight", not "earlier today" — push
+            // past midnight for comparison purposes.
+            let venueOpen = VenueTimeStatus.minutesSinceMidnight(v.openTime).map { $0 < 6 * 60 ? $0 + 24 * 60 : $0 }
+            let start = max(baseline, venueOpen ?? baseline, cursor)
+            let end = start + 120
+            cursor = start + 120
+
+            return Stop(
+                tripId: tripId,
+                refId: v.id,
+                venueName: v.name,
+                emoji: v.emoji,
+                date: date,
+                startTime: Self.formatMinutes(start),
+                endTime: Self.formatMinutes(end)
+            )
+        }
+    }
+
+    private static func formatMinutes(_ totalMinutes: Int) -> String {
+        let normalized = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60)
+        var comps = DateComponents()
+        comps.hour = normalized / 60
+        comps.minute = normalized % 60
+        guard let date = Calendar.current.date(from: comps) else { return "" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        return formatter.string(from: date)
+    }
+}
+
 struct Trip: Identifiable, Codable, Hashable {
     var id: String = UUID().uuidString
     var creatorId: String
@@ -57,12 +109,33 @@ struct Trip: Identifiable, Codable, Hashable {
     var memberIds: [String] = []
     var pendingRequests: [String] = []
     var stops: [Stop] = []
+    // Optional (not `= []`) so existing locally-persisted trips predating
+    // these fields decode cleanly — synthesized Decodable only auto-fills
+    // missing keys for Optional properties, not non-optional ones with a
+    // default value.
+    var coOrganizerIds: [String]? = nil
+    var inviteCode: String? = nil
+
+    func role(of userId: String) -> MemberRole {
+        if userId == creatorId { return .organizer }
+        if coOrganizerIds?.contains(userId) == true { return .coOrganizer }
+        return .member
+    }
 
     var stopsByDay: [(day: Date, stops: [Stop])] {
         let cal = Calendar.current
         let groups = Dictionary(grouping: stops) { cal.startOfDay(for: $0.date) }
         return groups.keys.sorted().map { day in
-            (day, groups[day]!.sorted { $0.startTime < $1.startTime })
+            (day, groups[day]!.sorted { lhs, rhs in
+                // Parse real clock times ("9:00 PM") for ordering — plain
+                // string comparison sorted "10:00 PM" before "9:00 PM".
+                let l = VenueTimeStatus.minutesSinceMidnight(lhs.startTime)
+                let r = VenueTimeStatus.minutesSinceMidnight(rhs.startTime)
+                if let l, let r, l != r { return l < r }
+                if l != nil && r == nil { return true }
+                if l == nil && r != nil { return false }
+                return lhs.startTime < rhs.startTime
+            })
         }
     }
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct TripCreateFlow: View {
     @ObservedObject private var l10n = L10n.shared
@@ -13,6 +14,8 @@ struct TripCreateFlow: View {
     @State private var visibility: TripVisibility = .privateTrip
     @State private var selectedVenueIds: Set<String> = []
     @State private var step = 0
+    @State private var coverPickerItem: PhotosPickerItem?
+    @State private var coverImageData: Data?
 
     private let amber  = Color.bpAmber
 
@@ -50,38 +53,95 @@ struct TripCreateFlow: View {
     }
 
     private var titleStep: some View {
-        VStack(spacing: 20) {
-            Spacer()
-            Text(l10n.t("tripCreate.step1.title"))
-                .font(.bpTitle2())
-                .foregroundStyle(Color.bpInk)
+        ScrollView {
+            VStack(spacing: 20) {
+                Text(l10n.t("tripCreate.step1.title"))
+                    .font(.bpTitle2())
+                    .foregroundStyle(Color.bpInk)
+                    .padding(.top, 20)
 
-            TextField(l10n.t("tripCreate.step1.placeholder"), text: $title)
-                .font(.bpBody())
-                .foregroundStyle(Color.bpInk)
-                .padding(14)
-                .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
-                .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
-                .padding(.horizontal, BPSpacing.lg)
-                .bpAccessibility(label: l10n.t("tripCreate.step1.label"), hint: l10n.t("tripCreate.step1.hint"))
+                coverImagePicker
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text(l10n.t("tripCreate.city"))
-                    .font(.bpCaption())
-                    .foregroundStyle(Color.bpTextSecondary)
-
-                TextField(l10n.t("tripCreate.city.placeholder"), text: $destinationCity)
+                TextField(l10n.t("tripCreate.step1.placeholder"), text: $title)
                     .font(.bpBody())
                     .foregroundStyle(Color.bpInk)
                     .padding(14)
                     .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
-                    .bpAccessibility(label: l10n.t("tripCreate.city"), hint: l10n.t("tripCreate.city.hint"))
-            }
-            .padding(.horizontal, BPSpacing.lg)
+                    .padding(.horizontal, BPSpacing.lg)
+                    .bpAccessibility(label: l10n.t("tripCreate.step1.label"), hint: l10n.t("tripCreate.step1.hint"))
 
-            nextButton
-            Spacer()
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(l10n.t("tripCreate.city"))
+                        .font(.bpCaption())
+                        .foregroundStyle(Color.bpTextSecondary)
+
+                    TextField(l10n.t("tripCreate.city.placeholder"), text: $destinationCity)
+                        .font(.bpBody())
+                        .foregroundStyle(Color.bpInk)
+                        .padding(14)
+                        .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
+                        .bpAccessibility(label: l10n.t("tripCreate.city"), hint: l10n.t("tripCreate.city.hint"))
+                }
+                .padding(.horizontal, BPSpacing.lg)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(l10n.t("tripCreate.summary.visibility"))
+                        .font(.bpCaption())
+                        .foregroundStyle(Color.bpTextSecondary)
+
+                    Picker(l10n.t("tripCreate.summary.visibility"), selection: $visibility) {
+                        ForEach(TripVisibility.allCases, id: \.self) { v in
+                            Text(v.label).tag(v)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .bpAccessibility(label: l10n.t("tripCreate.summary.visibility"), hint: l10n.t("tripCreate.visibility.hint"))
+                }
+                .padding(.horizontal, BPSpacing.lg)
+
+                nextButton
+            }
+            .padding(.bottom, 20)
+        }
+    }
+
+    private var coverImagePicker: some View {
+        PhotosPicker(selection: $coverPickerItem, matching: .images) {
+            ZStack {
+                RoundedRectangle(cornerRadius: BPRadius.lg)
+                    .fill(Color.bpInk.opacity(0.06))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
+
+                if let coverImageData, let uiImage = UIImage(data: coverImageData) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
+                } else {
+                    VStack(spacing: 6) {
+                        Image(systemName: "photo.badge.plus")
+                            .font(.title2)
+                            .foregroundStyle(amber)
+                        Text(l10n.t("tripCreate.coverImage.pick"))
+                            .font(.bpCaption())
+                            .foregroundStyle(Color.bpTextSecondary)
+                    }
+                }
+            }
+            .frame(height: 140)
+            .clipped()
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, BPSpacing.lg)
+        .bpAccessibility(label: l10n.t("tripCreate.coverImage.pick"), hint: l10n.t("tripCreate.coverImage.hint"), isButton: true)
+        .onChange(of: coverPickerItem) { _, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                    coverImageData = data
+                }
+            }
         }
     }
 
@@ -246,18 +306,8 @@ struct TripCreateFlow: View {
 
     private func createTrip() {
         let selectedVenues = venues.filter { selectedVenueIds.contains($0.id) }
-        let stops = selectedVenues.enumerated().map { i, v in
-            Stop(
-                tripId: "",
-                refId: v.id,
-                venueName: v.name,
-                emoji: v.emoji,
-                date: startDate,
-                startTime: "\(7 + i * 2):00 PM",
-                endTime: "\(9 + i * 2):00 PM"
-            )
-        }
-        let trip = Trip(
+        let stops = Stop.sequence(for: selectedVenues, tripId: "", date: startDate)
+        var trip = Trip(
             creatorId: TripStore.currentUserId,
             title: title,
             destinationCity: destinationCity,
@@ -266,7 +316,25 @@ struct TripCreateFlow: View {
             visibility: visibility,
             stops: stops
         )
+        trip.coverImage = saveCoverImageIfNeeded(tripId: trip.id)
         Task { await tripStore.create(trip) }
         onDismiss()
+    }
+
+    /// Saves the picked cover photo to disk and returns its file path — no
+    /// upload backend exists for trip covers, so this stays local (same
+    /// device only) until one does; never fabricates a remote URL.
+    private func saveCoverImageIfNeeded(tripId: String) -> String? {
+        guard let coverImageData else { return nil }
+        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("BarPassTripCovers", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let fileURL = dir.appendingPathComponent("\(tripId).jpg")
+        do {
+            try coverImageData.write(to: fileURL, options: .atomic)
+            return fileURL.path
+        } catch {
+            return nil
+        }
     }
 }

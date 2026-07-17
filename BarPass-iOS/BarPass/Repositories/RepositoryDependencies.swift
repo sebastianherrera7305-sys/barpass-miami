@@ -4,9 +4,10 @@ import Foundation
 /// Swap implementations here — views and stores never change.
 enum RepositoryDependencies {
     nonisolated(unsafe) static var venue: VenueRepository = SupabaseVenueRepository()
-    // Disk-backed until Supabase Auth + trips/night_plans schemas land
-    // (the Supabase implementations are registered and ready to swap in).
-    nonisolated(unsafe) static var trip: TripRepository = LocalTripRepository()
+    // Real shared backend — requires barpass-v2/supabase/trips_schema.sql to
+    // have been run in the Supabase SQL editor. Needs a signed-in session;
+    // guest mode can't read/write trips (RLS scopes everything to auth.uid()).
+    nonisolated(unsafe) static var trip: TripRepository = SupabaseTripRepository()
     nonisolated(unsafe) static var plan: PlanRepository = LocalPlanRepository()
     nonisolated(unsafe) static var post: PostRepository = SupabasePostRepository()
 }

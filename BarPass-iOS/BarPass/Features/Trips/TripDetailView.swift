@@ -7,10 +7,23 @@ struct TripDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var showJoinRequest: Stop? = nil
-    @State private var showRating: (scopeId: String, rateeId: String, name: String)? = nil
+    @State private var ratingTarget: RatingTarget? = nil
     @State private var selectedStop: Stop? = nil
 
     private let amber = Color.bpAmber
+
+    private struct RatingTarget: Identifiable { let id: String; let name: String }
+
+    /// Pulled fresh from the store on every render — `trip` (the initial
+    /// param) is a snapshot from when the sheet was presented, so without
+    /// this, promoting/removing a member or regenerating an invite code
+    /// wouldn't show up until the sheet was dismissed and reopened.
+    private var currentTrip: Trip {
+        store.trips.first(where: { $0.id == trip.id }) ?? trip
+    }
+
+    private var myRole: MemberRole { currentTrip.role(of: TripStore.currentUserId) }
+    private var canManageMembers: Bool { myRole == .organizer || myRole == .coOrganizer }
 
     var body: some View {
         NavigationStack {
@@ -24,13 +37,17 @@ struct TripDetailView: View {
 
                         infoSection
 
-                        if !trip.stops.isEmpty {
+                        if !currentTrip.stops.isEmpty {
                             stopsSection
                         }
 
                         membersSection
 
-                        if trip.status != .completed {
+                        if canManageMembers {
+                            inviteSection
+                        }
+
+                        if currentTrip.status != .completed {
                             actionsSection
                         }
 
@@ -39,7 +56,7 @@ struct TripDetailView: View {
                     .padding(.horizontal, BPSpacing.lg)
                 }
             }
-            .navigationTitle(trip.title)
+            .navigationTitle(currentTrip.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -48,9 +65,9 @@ struct TripDetailView: View {
                         .bpAccessibility(label: l10n.t("table.close"), hint: l10n.t("tripDetail.close.hint"), isButton: true)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    if trip.creatorId == TripStore.currentUserId && trip.status != .completed {
+                    if myRole == .organizer && currentTrip.status != .completed {
                         Button {
-                            store.completeTrip(trip.id); PointsEngine.shared.award(.completeTrip)
+                            store.completeTrip(currentTrip.id); PointsEngine.shared.award(.completeTrip)
                         } label: {
                             Text(l10n.t("tripDetail.complete"))
                                 .font(.bpCaption())
@@ -61,38 +78,50 @@ struct TripDetailView: View {
                 }
             }
             .sheet(item: $showJoinRequest) { stop in
-                JoinRequestModal(tripId: trip.id, stop: stop)
+                JoinRequestModal(tripId: currentTrip.id, stop: stop)
                     .environmentObject(store)
             }
             .sheet(item: $selectedStop) { stop in
                 RatingPrompt(
                     scopeId: stop.id,
-                    rateeId: trip.creatorId,
-                    rateeName: trip.title
+                    rateeId: currentTrip.creatorId,
+                    rateeName: currentTrip.title
                 )
                 .environmentObject(store)
+            }
+            .sheet(item: $ratingTarget) { target in
+                RatingPrompt(scopeId: currentTrip.id, rateeId: target.id, rateeName: target.name)
+                    .environmentObject(store)
             }
         }
     }
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 10) {
+            if let path = currentTrip.coverImage, let uiImage = UIImage(contentsOfFile: path) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 140)
+                    .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
+            }
+
             HStack {
-                Text(trip.destinationCity)
+                Text(currentTrip.destinationCity)
                     .font(.bpCaption())
                     .foregroundStyle(amber)
                 Spacer()
-                tripStatusBadge(trip.status)
+                tripStatusBadge(currentTrip.status)
             }
 
-            Text(trip.title)
+            Text(currentTrip.title)
                 .font(.bpLargeTitle())
                 .foregroundStyle(Color.bpInk)
 
             HStack(spacing: 14) {
-                Label(trip.startDate.formatted(date: .abbreviated, time: .omitted),
+                Label(currentTrip.startDate.formatted(date: .abbreviated, time: .omitted),
                       systemImage: "calendar")
-                Label(String(format: l10n.t("trips.stopsCount"), trip.stops.count), systemImage: "mappin")
+                Label(String(format: l10n.t("trips.stopsCount"), currentTrip.stops.count), systemImage: "mappin")
             }
             .font(.bpSmall())
             .foregroundStyle(Color.bpTextSecondary)
@@ -102,19 +131,19 @@ struct TripDetailView: View {
     private var infoSection: some View {
         HStack(spacing: 14) {
             infoCard(
-                value: "\(trip.stops.count)",
+                value: "\(currentTrip.stops.count)",
                 label: l10n.t("tripDetail.stops"),
                 icon: "mappin.circle.fill"
             )
             infoCard(
-                value: "\(trip.memberIds.count)",
+                value: "\(currentTrip.memberIds.count)",
                 label: l10n.t("tripDetail.members"),
                 icon: "person.2.circle.fill"
             )
             infoCard(
-                value: trip.visibility.label,
+                value: currentTrip.visibility.label,
                 label: l10n.t("tripCreate.summary.visibility"),
-                icon: trip.visibility == .privateTrip ? "lock.fill" : "globe"
+                icon: currentTrip.visibility == .privateTrip ? "lock.fill" : "globe"
             )
         }
     }
@@ -145,7 +174,7 @@ struct TripDetailView: View {
                 .font(.bpTitle2())
                 .foregroundStyle(Color.bpInk)
 
-            ForEach(Array(trip.stopsByDay.enumerated()), id: \.offset) { _, dayGroup in
+            ForEach(Array(currentTrip.stopsByDay.enumerated()), id: \.offset) { _, dayGroup in
                 VStack(alignment: .leading, spacing: 8) {
                     Text(dayGroup.day.formatted(date: .abbreviated, time: .omitted))
                         .font(.bpCaption())
@@ -215,59 +244,158 @@ struct TripDetailView: View {
         .bpAccessibility(label: stop.venueName, hint: l10n.t("tripDetail.stopRow.hint"), isButton: true)
     }
 
+    // MARK: - Members
+
     private var membersSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(String(format: l10n.t("tripDetail.membersCount"), trip.memberIds.count))
+            Text(String(format: l10n.t("tripDetail.membersCount"), currentTrip.memberIds.count))
                 .font(.bpTitle2())
                 .foregroundStyle(Color.bpInk)
 
-            ForEach(trip.memberIds, id: \.self) { memberId in
-                let rep = store.reputation(for: memberId)
-                HStack(spacing: 12) {
-                    Circle()
-                        .fill(amber.opacity(0.2))
-                        .frame(width: 40, height: 40)
-                        .overlay(
-                            Text(String(memberId.prefix(1)).uppercased())
-                                .font(.bpHeadline())
-                                .foregroundStyle(amber)
-                        )
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(memberId == TripStore.currentUserId ? l10n.t("tripDetail.you") : memberId)
-                            .font(.bpHeadline())
-                            .foregroundStyle(Color.bpInk)
-                        ReputationBadgeView(rep: rep)
-                    }
-
-                    Spacer()
-
-                    if memberId == trip.creatorId {
-                        Text(l10n.t("tripDetail.organizer"))
-                            .font(.bpTiny())
-                            .foregroundStyle(amber)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(amber.opacity(0.12), in: Capsule())
-                    }
-
-                    if trip.status == .completed && memberId != TripStore.currentUserId {
-                        Button {
-                            showRating = (trip.id, memberId, memberId)
-                        } label: {
-                            Image(systemName: "star")
-                                .font(.caption)
-                                .foregroundStyle(Color.bpTextSecondary)
-                                .bpAccessibility(label: String(format: l10n.t("tripDetail.rate.label"), memberId), hint: l10n.t("tripDetail.rate.hint"), isButton: true)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(12)
-                .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
-                .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
-                .bpAccessibility(label: memberId == TripStore.currentUserId ? l10n.t("tripDetail.you") : memberId, hint: l10n.t("tripDetail.member.hint"))
+            ForEach(currentTrip.memberIds, id: \.self) { memberId in
+                memberRow(memberId)
             }
+        }
+    }
+
+    private func roleBadge(_ role: MemberRole) -> some View {
+        let (label, color): (String, Color) = {
+            switch role {
+            case .organizer:   return (l10n.t("tripDetail.organizer"), amber)
+            case .coOrganizer: return (l10n.t("tripDetail.coOrganizer"), Color.bpGreen)
+            case .member:      return ("", .clear)
+            }
+        }()
+        return Group {
+            if role != .member {
+                Text(label)
+                    .font(.bpTiny())
+                    .foregroundStyle(color)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(color.opacity(0.12), in: Capsule())
+            }
+        }
+    }
+
+    private func memberRow(_ memberId: String) -> some View {
+        let rep = store.reputation(for: memberId)
+        let role = currentTrip.role(of: memberId)
+        let isSelf = memberId == TripStore.currentUserId
+
+        return HStack(spacing: 12) {
+            Circle()
+                .fill(amber.opacity(0.2))
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Text(String(memberId.prefix(1)).uppercased())
+                        .font(.bpHeadline())
+                        .foregroundStyle(amber)
+                )
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(isSelf ? l10n.t("tripDetail.you") : memberId)
+                    .font(.bpHeadline())
+                    .foregroundStyle(Color.bpInk)
+                ReputationBadgeView(rep: rep)
+            }
+
+            Spacer()
+
+            roleBadge(role)
+
+            if currentTrip.status == .completed && !isSelf {
+                Button {
+                    ratingTarget = RatingTarget(id: memberId, name: memberId)
+                } label: {
+                    Image(systemName: "star")
+                        .font(.caption)
+                        .foregroundStyle(Color.bpTextSecondary)
+                        .bpAccessibility(label: String(format: l10n.t("tripDetail.rate.label"), memberId), hint: l10n.t("tripDetail.rate.hint"), isButton: true)
+                }
+                .buttonStyle(.plain)
+            }
+
+            if !isSelf, canManageMembers, role != .organizer {
+                Menu {
+                    if myRole == .organizer {
+                        Button {
+                            store.setCoOrganizer(memberId, in: currentTrip.id, isCoOrganizer: role != .coOrganizer)
+                        } label: {
+                            Label(role == .coOrganizer ? l10n.t("tripDetail.demote") : l10n.t("tripDetail.promote"), systemImage: "star")
+                        }
+                        Button {
+                            store.transferOwnership(to: memberId, in: currentTrip.id)
+                        } label: {
+                            Label(l10n.t("tripDetail.transferOwnership"), systemImage: "crown")
+                        }
+                    }
+                    Button(role: .destructive) {
+                        store.removeMember(memberId, from: currentTrip.id)
+                    } label: {
+                        Label(l10n.t("tripDetail.removeMember"), systemImage: "person.fill.xmark")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .font(.body)
+                        .foregroundStyle(Color.bpTextSecondary)
+                }
+                .bpAccessibility(label: l10n.t("tripDetail.memberActions"), hint: l10n.t("tripDetail.memberActions.hint"), isButton: true)
+            } else if isSelf, role != .organizer {
+                Button {
+                    store.leaveTrip(currentTrip.id)
+                    dismiss()
+                } label: {
+                    Text(l10n.t("tripDetail.leave"))
+                        .font(.bpTiny())
+                        .foregroundStyle(Color.bpDanger)
+                }
+                .buttonStyle(.plain)
+                .bpAccessibility(label: l10n.t("tripDetail.leave"), hint: l10n.t("tripDetail.leave.hint"), isButton: true)
+            }
+        }
+        .padding(12)
+        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
+        .bpAccessibility(label: isSelf ? l10n.t("tripDetail.you") : memberId, hint: l10n.t("tripDetail.member.hint"))
+    }
+
+    // MARK: - Invite
+
+    private var inviteSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(l10n.t("tripDetail.invite.title"))
+                .font(.bpTitle2())
+                .foregroundStyle(Color.bpInk)
+
+            HStack(spacing: 12) {
+                Text(currentTrip.inviteCode ?? "······")
+                    .font(.system(.title3, design: .monospaced).weight(.bold))
+                    .foregroundStyle(amber)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if let code = currentTrip.inviteCode {
+                    ShareLink(item: String(format: l10n.t("tripDetail.invite.shareText"), currentTrip.title, code)) {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundStyle(amber)
+                    }
+                    .bpAccessibility(label: l10n.t("tripDetail.invite.share"), hint: l10n.t("tripDetail.invite.share.hint"), isButton: true)
+                }
+
+                Button {
+                    _ = store.ensureInviteCode(for: currentTrip.id)
+                } label: {
+                    Image(systemName: currentTrip.inviteCode == nil ? "sparkles" : "arrow.clockwise")
+                        .foregroundStyle(Color.bpTextSecondary)
+                }
+                .bpAccessibility(label: l10n.t("tripDetail.invite.generate"), hint: l10n.t("tripDetail.invite.generate.hint"), isButton: true)
+            }
+            .padding(12)
+            .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
+            .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
+        }
+        .onAppear {
+            if currentTrip.inviteCode == nil { _ = store.ensureInviteCode(for: currentTrip.id) }
         }
     }
 
@@ -277,11 +405,11 @@ struct TripDetailView: View {
                 .font(.bpTitle2())
                 .foregroundStyle(Color.bpInk)
 
-            if trip.visibility == .publicTrip || trip.visibility == .semiOpen {
+            if currentTrip.visibility == .publicTrip || currentTrip.visibility == .semiOpen {
                 Button {
                     let uid = TripStore.currentUserId
-                    if !trip.memberIds.contains(uid) {
-                        store.promoteToMember(uid, in: trip.id)
+                    if !currentTrip.memberIds.contains(uid) {
+                        store.promoteToMember(uid, in: currentTrip.id)
                     }
                 } label: {
                     HStack {
@@ -298,9 +426,9 @@ struct TripDetailView: View {
                 .bpAccessibility(label: l10n.t("tripDetail.join"), hint: l10n.t("tripDetail.join.hint"), isButton: true)
             }
 
-            if trip.creatorId == TripStore.currentUserId {
+            if myRole == .organizer {
                 Button(role: .destructive) {
-                    Task { await store.delete(trip); dismiss() }
+                    Task { await store.delete(currentTrip); dismiss() }
                 } label: {
                     HStack {
                         Image(systemName: "trash")

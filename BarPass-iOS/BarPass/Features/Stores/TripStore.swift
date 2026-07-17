@@ -42,6 +42,16 @@ final class TripStore: ObservableObject {
             .sorted { $0.startDate < $1.startDate }
     }
 
+    /// Public/semi-open trips from other users that this account hasn't
+    /// joined yet — only visible at all because the backend's RLS already
+    /// scopes `getTrips()` to "mine + joinable", so no extra fetch needed.
+    var discoverableTrips: [Trip] {
+        let uid = Self.currentUserId
+        return trips
+            .filter { $0.visibility != .privateTrip && $0.creatorId != uid && !$0.memberIds.contains(uid) }
+            .sorted { $0.startDate < $1.startDate }
+    }
+
     func loadTrips() async {
         isLoading = true
         let repo = repository
@@ -120,6 +130,96 @@ final class TripStore: ObservableObject {
 
     func completeTrip(_ tripId: String) {
         mutate(tripId) { $0.status = .completed }
+    }
+
+    // MARK: - Group management
+
+    /// Grants or revokes co-organizer status. Only meaningful for existing
+    /// members — the creator's organizer role can't be changed this way,
+    /// use `transferOwnership` for that.
+    func setCoOrganizer(_ userId: String, in tripId: String, isCoOrganizer: Bool) {
+        mutate(tripId) { t in
+            guard userId != t.creatorId, t.memberIds.contains(userId) else { return }
+            var ids = t.coOrganizerIds ?? []
+            if isCoOrganizer {
+                if !ids.contains(userId) { ids.append(userId) }
+            } else {
+                ids.removeAll { $0 == userId }
+            }
+            t.coOrganizerIds = ids
+        }
+    }
+
+    /// Removes a member entirely: from the trip, from co-organizers, and
+    /// from every stop's joined/pending lists. Can't remove the creator —
+    /// use `transferOwnership` first if the creator wants to leave.
+    func removeMember(_ userId: String, from tripId: String) {
+        mutate(tripId) { t in
+            guard userId != t.creatorId else { return }
+            t.memberIds.removeAll { $0 == userId }
+            t.coOrganizerIds?.removeAll { $0 == userId }
+            t.pendingRequests.removeAll { $0 == userId }
+            for i in t.stops.indices {
+                t.stops[i].joinedUserIds.removeAll { $0 == userId }
+                t.stops[i].pendingStopRequests.removeAll { $0 == userId }
+            }
+        }
+    }
+
+    /// A non-creator member leaving voluntarily — same cleanup as
+    /// `removeMember`, exposed separately so the UI can label/gate it
+    /// differently (no permission check needed, you can always remove
+    /// yourself).
+    func leaveTrip(_ tripId: String, userId: String = currentUserId) {
+        removeMember(userId, from: tripId)
+    }
+
+    /// Transfers the organizer role to another current member. The old
+    /// creator is kept on as a co-organizer rather than dropped to a plain
+    /// member, so they don't lose all control by handing off ownership.
+    func transferOwnership(to newOwnerId: String, in tripId: String) {
+        mutate(tripId) { t in
+            guard t.memberIds.contains(newOwnerId), newOwnerId != t.creatorId else { return }
+            let oldOwner = t.creatorId
+            t.creatorId = newOwnerId
+            var coOrgs = t.coOrganizerIds ?? []
+            coOrgs.removeAll { $0 == newOwnerId }
+            if !coOrgs.contains(oldOwner) { coOrgs.append(oldOwner) }
+            t.coOrganizerIds = coOrgs
+        }
+    }
+
+    /// Generates (or returns the existing) invite code for a trip. Codes are
+    /// short and human-shareable — meant to be copied/shared via the
+    /// system share sheet, not a full custom invite-channel integration.
+    @discardableResult
+    func ensureInviteCode(for tripId: String) -> String {
+        if let existing = trips.first(where: { $0.id == tripId })?.inviteCode, !existing.isEmpty {
+            return existing
+        }
+        let code = Self.randomInviteCode()
+        mutate(tripId) { $0.inviteCode = code }
+        return code
+    }
+
+    private static func randomInviteCode(length: Int = 6) -> String {
+        // Avoids visually-ambiguous characters (0/O, 1/I/L).
+        let chars = Array("23456789ABCDEFGHJKMNPQRSTUVWXYZ")
+        return String((0..<length).compactMap { _ in chars.randomElement() })
+    }
+
+    /// Joins a trip by its invite code — delegates to the repository, which
+    /// does the lookup+join server-side (via a SECURITY DEFINER RPC on
+    /// Supabase) rather than a plain client-side filter, so this can resolve
+    /// even private trips the caller has never seen without leaking anyone
+    /// else's private trips in the process.
+    func joinByInviteCode(_ code: String) async throws {
+        let trip = try await repository.joinByInviteCode(code)
+        if let i = trips.firstIndex(where: { $0.id == trip.id }) {
+            trips[i] = trip
+        } else {
+            trips.insert(trip, at: 0)
+        }
     }
 
     func submitRating(scopeId: String, rateeId: String, score: Int, tags: [String]) {

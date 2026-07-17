@@ -9,6 +9,11 @@ struct TripsListView: View {
     )
 
     @State private var showCreateFlow = false
+    @State private var showManualCreate = false
+    @State private var showCreateChoice = false
+    @State private var showJoinByCode = false
+    @State private var joinCode = ""
+    @State private var joinError: String?
     @State private var selectedTrip: Trip? = nil
 
     private let amber  = Color.bpAmber
@@ -22,7 +27,7 @@ struct TripsListView: View {
                 errorView(error)
             } else if tripStore.isLoading && tripStore.trips.isEmpty {
                 loadingView
-            } else if tripStore.myTrips.isEmpty {
+            } else if tripStore.myTrips.isEmpty && tripStore.discoverableTrips.isEmpty {
                 emptyView
             } else {
                 contentView
@@ -31,9 +36,21 @@ struct TripsListView: View {
         .onAppear { BPAnalytics.track(.viewScreen("Trips")) }
         .navigationTitle(l10n.t("trips.yourTrips"))
         .task { await tripStore.loadTrips() }
+        .confirmationDialog(l10n.t("trips.createChoice.title"), isPresented: $showCreateChoice, titleVisibility: .visible) {
+            Button(l10n.t("trips.createChoice.ai")) { showCreateFlow = true }
+            Button(l10n.t("trips.createChoice.manual")) { showManualCreate = true }
+            Button(l10n.t("tripCreate.cancel"), role: .cancel) { }
+        }
         .sheet(isPresented: $showCreateFlow) {
             PromptYourNightView(venues: venueStore.venues) { title, venues in
                 createTrip(title: title, venues: venues)
+            }
+            .presentationDetents([.large])
+            .presentationBackground(.black)
+        }
+        .sheet(isPresented: $showManualCreate) {
+            TripCreateFlow(venues: venueStore.venues, tripStore: tripStore) {
+                showManualCreate = false
             }
             .presentationDetents([.large])
             .presentationBackground(.black)
@@ -43,6 +60,28 @@ struct TripsListView: View {
                 .environmentObject(tripStore)
                 .presentationDetents([.large])
                 .presentationBackground(.black)
+        }
+        .alert(l10n.t("trips.joinByCode.title"), isPresented: $showJoinByCode) {
+            TextField(l10n.t("trips.joinByCode.placeholder"), text: $joinCode)
+                .textInputAutocapitalization(.characters)
+            Button(l10n.t("trips.joinByCode.join")) { joinByCode() }
+            Button(l10n.t("tripCreate.cancel"), role: .cancel) { joinCode = "" }
+        } message: {
+            if let joinError { Text(joinError) } else { Text(l10n.t("trips.joinByCode.subtitle")) }
+        }
+    }
+
+    private func joinByCode() {
+        let code = joinCode
+        joinCode = ""
+        Task {
+            do {
+                try await tripStore.joinByInviteCode(code)
+                joinError = nil
+            } catch {
+                joinError = error.localizedDescription
+                showJoinByCode = true
+            }
         }
     }
 
@@ -103,7 +142,7 @@ struct TripsListView: View {
             }
 
             Button {
-                showCreateFlow = true
+                showCreateChoice = true
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles")
@@ -121,6 +160,17 @@ struct TripsListView: View {
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("trips.empty.cta"), hint: l10n.t("trips.empty.cta.hint"), isButton: true)
 
+            Button {
+                joinError = nil
+                showJoinByCode = true
+            } label: {
+                Text(l10n.t("trips.joinByCode.cta"))
+                    .font(.bpScaled(14, weight: .semibold))
+                    .foregroundStyle(amber)
+            }
+            .buttonStyle(.plain)
+            .bpAccessibility(label: l10n.t("trips.joinByCode.cta"), hint: l10n.t("trips.joinByCode.cta.hint"), isButton: true)
+
             Spacer()
             Spacer()
         }
@@ -137,6 +187,19 @@ struct TripsListView: View {
                 ForEach(tripStore.myTrips) { trip in
                     tripCard(trip)
                         .padding(.horizontal, BPSpacing.lg)
+                }
+
+                if !tripStore.discoverableTrips.isEmpty {
+                    Text(l10n.t("trips.discoverable.title"))
+                        .font(.bpTitle2())
+                        .foregroundStyle(Color.bpInk)
+                        .padding(.horizontal, BPSpacing.lg)
+                        .padding(.top, 8)
+
+                    ForEach(tripStore.discoverableTrips) { trip in
+                        tripCard(trip)
+                            .padding(.horizontal, BPSpacing.lg)
+                    }
                 }
 
                 Spacer(minLength: 120)
@@ -157,8 +220,21 @@ struct TripsListView: View {
             }
             Spacer()
             Button {
+                joinError = nil
+                showJoinByCode = true
+            } label: {
+                Image(systemName: "ticket")
+                    .font(.bpScaled(16, weight: .semibold))
+                    .foregroundStyle(amber)
+                    .frame(width: 44, height: 44)
+                    .background(Color.bpInk.opacity(0.06), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .bpAccessibility(label: l10n.t("trips.joinByCode.cta"), hint: l10n.t("trips.joinByCode.cta.hint"), isButton: true)
+
+            Button {
                 BPHaptics.light()
-                showCreateFlow = true
+                showCreateChoice = true
             } label: {
                 Image(systemName: "plus")
                     .font(.bpScaled(18, weight: .bold))
@@ -176,6 +252,14 @@ struct TripsListView: View {
             selectedTrip = trip
         } label: {
             VStack(alignment: .leading, spacing: 10) {
+                if let path = trip.coverImage, let uiImage = UIImage(contentsOfFile: path) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: 90)
+                        .clipShape(RoundedRectangle(cornerRadius: BPRadius.md))
+                }
+
                 HStack {
                     Text(trip.title)
                         .font(.bpHeadline())
@@ -251,17 +335,7 @@ struct TripsListView: View {
 
     private func createTrip(title: String, venues: [BarPassVenue]) {
         let now = Date()
-        let stops = venues.enumerated().map { i, v in
-            Stop(
-                tripId: "",
-                refId: v.id,
-                venueName: v.name,
-                emoji: v.emoji,
-                date: now,
-                startTime: "\(7 + i * 2):00 PM",
-                endTime: "\(9 + i * 2):00 PM"
-            )
-        }
+        let stops = Stop.sequence(for: venues, tripId: "", date: now)
         let trip = Trip(
             creatorId: TripStore.currentUserId,
             title: title,

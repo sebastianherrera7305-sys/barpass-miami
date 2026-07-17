@@ -45,6 +45,24 @@ actor LocalTripRepository: TripRepository {
         try write(trips)
     }
 
+    struct InviteNotFoundError: LocalizedError {
+        var errorDescription: String? { "No encontramos ningún trip con ese código." }
+    }
+
+    /// Local-only, single-device best-effort: no RLS to worry about since
+    /// this store only ever holds trips this device already had access to.
+    func joinByInviteCode(_ code: String) async throws -> Trip {
+        var trips = try await getTrips()
+        let normalized = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard let i = trips.firstIndex(where: { $0.inviteCode == normalized }) else {
+            throw InviteNotFoundError()
+        }
+        let uid = AuthService.shared.restoreSession()?.user.id ?? "me"
+        if !trips[i].memberIds.contains(uid) { trips[i].memberIds.append(uid) }
+        try write(trips)
+        return trips[i]
+    }
+
     private func write(_ trips: [Trip]) throws {
         cache = trips
         try JSONEncoder().encode(trips).write(to: fileURL, options: .atomic)
