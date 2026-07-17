@@ -103,6 +103,14 @@ struct BarPassVenue: Identifiable, Codable {
     var phone:            String? = nil
     var website:          String? = nil
     var amenities:        VenueAmenities = VenueAmenities()
+    /// Multi-city readiness (Venue Intelligence Roadmap Phase 2). Optional
+    /// for decode-safety against any venue cached before these existed —
+    /// nil, not "Miami", when a source genuinely doesn't say. The live
+    /// Supabase-backed catalog is 100% Miami today; these fields describe
+    /// where a venue actually is, they don't imply other cities are seeded.
+    var city:             String? = nil
+    var country:          String? = nil
+    var timezoneId:       String? = nil
 
     /// Key de traducción — se resuelve en la vista (@MainActor), no acá.
     var crowdDescriptionKey: String {

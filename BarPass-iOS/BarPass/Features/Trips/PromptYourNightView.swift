@@ -10,6 +10,8 @@ struct PromptYourNightView: View {
     @ObservedObject private var l10n = L10n.shared
     @State private var selectedIntents: Set<String> = []
     @State private var company: CompanyType? = nil
+    @State private var inclusivePrefs: Set<String> = []
+    @State private var showInclusivePrefs = false
     @State private var prompt = ""
     @State private var route: [NightPlanner.PlannedStop] = []
     @State private var didGenerate = false
@@ -42,6 +44,34 @@ struct PromptYourNightView: View {
                     HStack(spacing: 8) {
                         ForEach(CompanyType.allCases) { c in companyChip(c) }
                     }
+                }
+            }
+
+            // Inclusive preferences — collapsed by default (8 chips would
+            // clutter a screen most people won't need every time), backed
+            // by real Google-sourced amenity data now that enrichment has
+            // actually run against the live catalog.
+            VStack(alignment: .leading, spacing: 8) {
+                Button {
+                    BPHaptics.light()
+                    withAnimation(.easeInOut(duration: 0.2)) { showInclusivePrefs.toggle() }
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: showInclusivePrefs ? "chevron.down" : "chevron.right")
+                            .font(.bpScaled(10, weight: .semibold))
+                        Text(l10n.t("inclusive.question"))
+                            .font(.bpScaled(12, weight: .semibold))
+                    }
+                    .foregroundStyle(Color.bpTextSecondary)
+                }
+                .buttonStyle(.plain)
+                .bpAccessibility(label: l10n.t("inclusive.question"), hint: l10n.t("inclusive.hint"), isButton: true)
+
+                if showInclusivePrefs {
+                    LazyVGrid(columns: cols, spacing: 8) {
+                        ForEach(InclusivePreference.allCases) { pref in inclusiveChip(pref) }
+                    }
+                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
             }
 
@@ -119,6 +149,26 @@ struct PromptYourNightView: View {
         .bpAccessibility(label: label, hint: l10n.t("context.company.hint"), isButton: true)
     }
 
+    private func inclusiveChip(_ pref: InclusivePreference) -> some View {
+        let on = inclusivePrefs.contains(pref.id)
+        let label = l10n.t(pref.labelKey)
+        return Button {
+            BPHaptics.light()
+            if on { inclusivePrefs.remove(pref.id) } else { inclusivePrefs.insert(pref.id) }
+        } label: {
+            Text(label)
+                .font(.bpScaled(11, weight: .semibold))
+                .lineLimit(1).minimumScaleFactor(0.85)
+                .foregroundStyle(on ? .black : .white)
+                .padding(.horizontal, 10).padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
+                .background(on ? Color.bpAmber : Color.bpInk.opacity(0.06), in: Capsule())
+                .overlay(Capsule().strokeBorder(on ? .clear : Color.bpInk.opacity(0.1)))
+        }
+        .buttonStyle(.plain)
+        .bpAccessibility(label: label, hint: l10n.t("inclusive.hint"), isButton: true)
+    }
+
     private var routeView: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(l10n.t("night.yours"))
@@ -167,7 +217,7 @@ struct PromptYourNightView: View {
             Button {
                 BPHaptics.medium()
                 onSave(saveTitle, route.map(\.venue))
-                route = []; didGenerate = false; selectedIntents = []; company = nil; prompt = ""; revealedCount = 0; revealDone = false
+                route = []; didGenerate = false; selectedIntents = []; company = nil; inclusivePrefs = []; showInclusivePrefs = false; prompt = ""; revealedCount = 0; revealDone = false
             } label: {
                 Text(l10n.t("night.save"))
                     .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpAmber)
@@ -200,7 +250,8 @@ struct PromptYourNightView: View {
             intents: selectedIntents,
             company: company,
             date: Date(),
-            prompt: prompt
+            prompt: prompt,
+            inclusivePrefs: inclusivePrefs
         )
         route = NightPlanner.plan(venues: venues, selected: [], prompt: prompt, passport: MusicProfileStore.shared.passport, context: context)
         didGenerate = true

@@ -8,7 +8,7 @@ final actor SupabaseVenueRepository: VenueRepository {
 
     /// Exact columns the decoder uses — `select=*` shipped dead columns on
     /// every app launch (egress is the free-tier bottleneck).
-    private static let venueColumns = "id,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom"
+    private static let venueColumns = "id,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom,city,country,timezone"
     private static let eventColumns = "id,venue_id,title,description,starts_at,cover_price"
 
     /// Cache en disco de la última lista real obtenida — antes el fallback
@@ -205,7 +205,10 @@ final actor SupabaseVenueRepository: VenueRepository {
                 reservable: row.reservable,
                 servesVegetarianFood: row.servesVegetarianFood,
                 restroom: row.restroom
-            )
+            ),
+            city: row.city,
+            country: row.country,
+            timezoneId: row.timezone
         )
     }
 
@@ -356,6 +359,9 @@ struct SupabaseVenueRow: Codable {
     let reservable: Bool?
     let servesVegetarianFood: Bool?
     let restroom: Bool?
+    let city: String?
+    let country: String?
+    let timezone: String?
 }
 
 struct SupabaseEventRow: Codable {
