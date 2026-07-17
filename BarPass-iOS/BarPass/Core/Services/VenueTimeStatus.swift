@@ -79,11 +79,12 @@ enum VenueTimeStatus {
         var isVisible: Bool { self != .finished }
     }
 
-    /// Classifies an event's status relative to `now`, assuming
-    /// `defaultEventDuration` since `VenueEvent` has no explicit end time.
+    /// Classifies an event's status relative to `now`. Prefers the event's
+    /// real `endDate` when the source actually provided one; only falls
+    /// back to the fixed `duration` assumption when it's nil.
     static func status(for event: VenueEvent, now: Date = Date(), duration: TimeInterval = defaultEventDuration) -> EventStatus {
         let start = event.date
-        let end = start.addingTimeInterval(duration)
+        let end = event.endDate ?? start.addingTimeInterval(duration)
         if now < start {
             return .upcoming(startsInMinutes: Int(start.timeIntervalSince(now) / 60))
         }

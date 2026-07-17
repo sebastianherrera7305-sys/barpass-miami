@@ -48,6 +48,9 @@ export interface VenueEvent {
   id: string;
   title: string;
   date: string; // ISO
+  /// Real end time (ISO) when the source actually knows it — null, not an
+  /// invented time, when it doesn't.
+  endDate: string | null;
   coverPrice: number | null;
   description: string;
 }

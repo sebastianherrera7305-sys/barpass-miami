@@ -121,6 +121,7 @@ interface DbEvent {
   title: string;
   description: string;
   starts_at: string;
+  ends_at: string | null;
   cover_price: number | null;
 }
 
@@ -191,6 +192,7 @@ async function fetchVenuesUncached(): Promise<Venue[]> {
           id: e.id,
           title: e.title,
           date: e.starts_at,
+          endDate: e.ends_at,
           coverPrice: e.cover_price,
           description: e.description,
         });

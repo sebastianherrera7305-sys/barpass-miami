@@ -63,6 +63,10 @@ struct VenueEvent: Identifiable, Codable {
     let date: Date
     let coverPrice: Double?
     let description: String
+    /// Real end time when the source actually knows it — nil (not an
+    /// invented time) when it doesn't, in which case `VenueTimeStatus`
+    /// falls back to its fixed-duration assumption.
+    var endDate: Date? = nil
 }
 
 struct BarPassVenue: Identifiable, Codable {
