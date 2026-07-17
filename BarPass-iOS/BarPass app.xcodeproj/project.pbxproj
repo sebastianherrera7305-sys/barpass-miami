@@ -29,6 +29,7 @@
 		AA000001000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000F /* Assets.xcassets */; };
 		AGGT02000000000000RP01 /* AgeGateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AGGT01000000000000RP01 /* AgeGateService.swift */; };
 		AGGT04000000000000RP01 /* AgeGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AGGT03000000000000RP01 /* AgeGateView.swift */; };
+		EDTV04000000000000RP01 /* EditTripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDTV03000000000000RP01 /* EditTripView.swift */; };
 		EXEN04000000000000RP01 /* ExperienceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXEN03000000000000RP01 /* ExperienceEngine.swift */; };
 		VTS004000000000000RP01 /* VenueTimeStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = VTS003000000000000RP01 /* VenueTimeStatus.swift */; };
 		EXSC04000000000000RP01 /* ExperienceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXSC03000000000000RP01 /* ExperienceScorer.swift */; };
@@ -133,6 +134,7 @@
 		AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveTicketView.swift; sourceTree = "<group>"; };
 		AGGT01000000000000RP01 /* AgeGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateService.swift; path = BarPass/Core/Services/AgeGateService.swift; sourceTree = SOURCE_ROOT; };
 		AGGT03000000000000RP01 /* AgeGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateView.swift; path = BarPass/Features/Onboarding/AgeGateView.swift; sourceTree = SOURCE_ROOT; };
+		EDTV03000000000000RP01 /* EditTripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EditTripView.swift; path = BarPass/Features/Trips/EditTripView.swift; sourceTree = SOURCE_ROOT; };
 		EXEN03000000000000RP01 /* ExperienceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceEngine.swift; path = BarPass/Models/ExperienceEngine.swift; sourceTree = SOURCE_ROOT; };
 		VTS003000000000000RP01 /* VenueTimeStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueTimeStatus.swift; path = BarPass/Core/Services/VenueTimeStatus.swift; sourceTree = SOURCE_ROOT; };
 		EXSC03000000000000RP01 /* ExperienceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceScorer.swift; path = BarPass/Core/Intelligence/ExperienceScorer.swift; sourceTree = SOURCE_ROOT; };
@@ -356,6 +358,7 @@
 				WLT007000000000000RP01 /* OrderHistoryService.swift */,
 				AGGT01000000000000RP01 /* AgeGateService.swift */,
 				AGGT03000000000000RP01 /* AgeGateView.swift */,
+				EDTV03000000000000RP01 /* EditTripView.swift */,
 				EXEN03000000000000RP01 /* ExperienceEngine.swift */,
 				VTS003000000000000RP01 /* VenueTimeStatus.swift */,
 				EXSC03000000000000RP01 /* ExperienceScorer.swift */,
@@ -634,6 +637,7 @@
 				WLT008000000000000RP01 /* OrderHistoryService.swift in Sources */,
 				AGGT02000000000000RP01 /* AgeGateService.swift in Sources */,
 				AGGT04000000000000RP01 /* AgeGateView.swift in Sources */,
+				EDTV04000000000000RP01 /* EditTripView.swift in Sources */,
 				EXEN04000000000000RP01 /* ExperienceEngine.swift in Sources */,
 				VTS004000000000000RP01 /* VenueTimeStatus.swift in Sources */,
 				EXSC04000000000000RP01 /* ExperienceScorer.swift in Sources */,

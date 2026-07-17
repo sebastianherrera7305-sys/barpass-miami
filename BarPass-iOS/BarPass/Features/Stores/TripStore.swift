@@ -132,6 +132,27 @@ final class TripStore: ObservableObject {
         mutate(tripId) { $0.status = .completed }
     }
 
+    /// Basic edit — title/city/dates/visibility/cover. Doesn't touch stops;
+    /// itinerary editing is a separate, larger feature not built yet.
+    func updateBasicInfo(
+        _ tripId: String,
+        title: String,
+        destinationCity: String,
+        startDate: Date,
+        endDate: Date,
+        visibility: TripVisibility,
+        coverImage: String?
+    ) {
+        mutate(tripId) { t in
+            t.title = title
+            t.destinationCity = destinationCity
+            t.startDate = startDate
+            t.endDate = endDate
+            t.visibility = visibility
+            if let coverImage { t.coverImage = coverImage }
+        }
+    }
+
     // MARK: - Group management
 
     /// Grants or revokes co-organizer status. Only meaningful for existing

@@ -9,6 +9,7 @@ struct TripDetailView: View {
     @State private var showJoinRequest: Stop? = nil
     @State private var ratingTarget: RatingTarget? = nil
     @State private var selectedStop: Stop? = nil
+    @State private var showEditTrip = false
 
     private let amber = Color.bpAmber
 
@@ -91,6 +92,10 @@ struct TripDetailView: View {
             }
             .sheet(item: $ratingTarget) { target in
                 RatingPrompt(scopeId: currentTrip.id, rateeId: target.id, rateeName: target.name)
+                    .environmentObject(store)
+            }
+            .sheet(isPresented: $showEditTrip) {
+                EditTripView(trip: currentTrip)
                     .environmentObject(store)
             }
         }
@@ -424,6 +429,25 @@ struct TripDetailView: View {
                 }
                 .buttonStyle(.plain)
                 .bpAccessibility(label: l10n.t("tripDetail.join"), hint: l10n.t("tripDetail.join.hint"), isButton: true)
+            }
+
+            if canManageMembers {
+                Button {
+                    showEditTrip = true
+                } label: {
+                    HStack {
+                        Image(systemName: "pencil")
+                        Text(l10n.t("tripDetail.editTrip"))
+                    }
+                    .font(.bpHeadline())
+                    .foregroundStyle(Color.bpInk)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.bpInk.opacity(0.06), in: Capsule())
+                    .overlay(Capsule().strokeBorder(Color.bpBorder))
+                }
+                .buttonStyle(.plain)
+                .bpAccessibility(label: l10n.t("tripDetail.editTrip"), hint: l10n.t("tripDetail.editTrip.hint"), isButton: true)
             }
 
             if myRole == .organizer {
