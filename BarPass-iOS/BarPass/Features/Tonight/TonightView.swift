@@ -45,6 +45,30 @@ struct TonightView: View {
         return HypeEngine.matchedVenues(passport: passport, venues: venueStore.venues, limit: 12)
     }
 
+    /// Home Feed's Experience Scorer section (Venue Intelligence Roadmap,
+    /// Home Feed Step 1) — ranks by rating/trending/open-now/event/
+    /// experience-tag/music-taste signals via the same ExperienceScorer
+    /// Trips uses, called with an empty TripContext since Home has no
+    /// "what are you feeling" prompt UI (unlike PromptYourNightView).
+    /// Unlike musicMatchedVenues below, this never returns empty just
+    /// because Apple Music isn't connected — passport is one signal among
+    /// several here, not a hard requirement.
+    private var recommendedForYou: [BarPassVenue] {
+        let context = TripContext()
+        return venueStore.venues
+            .map { venue in
+                (venue, ExperienceScorer.score(
+                    venue: venue,
+                    passport: MusicProfileStore.shared.passport,
+                    context: context,
+                    now: Date()
+                ))
+            }
+            .sorted { $0.1 > $1.1 }
+            .prefix(12)
+            .map(\.0)
+    }
+
     private var moodVenues: [BarPassVenue] {
         guard let tag = selectedTag, let mood = moods.first(where: { $0.label == tag }) else { return [] }
         return venueStore.venues.filter { matches($0, mood) }
@@ -67,6 +91,7 @@ struct TonightView: View {
     private var dedupedFeed: DedupedFeed {
         var shown = Set(favoriteVenues.map(\.id))
         shown.formUnion(musicMatchedVenues.map(\.id))
+        shown.formUnion(recommendedForYou.map(\.id))
 
         func take(_ venues: [BarPassVenue]) -> [BarPassVenue] {
             let fresh = venues.filter { !shown.contains($0.id) }
@@ -125,6 +150,10 @@ struct TonightView: View {
 
                         if !musicMatchedVenues.isEmpty {
                             section(title: l10n.t("home.forYou"), venues: musicMatchedVenues, style: .hero)
+                        }
+
+                        if !recommendedForYou.isEmpty {
+                            section(title: l10n.t("home.recommended"), venues: recommendedForYou, style: .hero)
                         }
 
                         if !tonightEvents.isEmpty {
