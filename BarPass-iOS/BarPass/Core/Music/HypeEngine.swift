@@ -36,14 +36,25 @@ enum HypeEngine {
         // 20% recencia — recently-played ES reciente por definición en v1
         let recency = 1.0
 
-        // 15% descubrimientos vs snapshot anterior
-        let prevArtists = Set((previous?.artists ?? []).map { $0.name.lowercased() })
-        let discoveries = snapshot.artists
-            .filter { !prevArtists.contains($0.name.lowercased()) }
-            .map(\.name)
-        let discoveryRatio = previous == nil
-            ? 0.5   // primera vez: neutro, no inflado
-            : min(Double(discoveries.count) / Double(max(snapshot.artists.count, 1)), 1.0)
+        // 15% descubrimientos vs snapshot anterior. Sin snapshot previo no hay
+        // base de comparación real — antes esto trataba TODOS los artistas
+        // como "nuevo descubrimiento" en la primera conexión (comparaba
+        // contra un set vacío), así que un usuario que recién conecta Apple
+        // Music veía sus artistas de toda la vida marcados como "nuevos".
+        // El puntaje de hype ya trataba este caso como neutro (0.5) — la
+        // lista de nombres mostrada al usuario no.
+        let discoveries: [String]
+        let discoveryRatio: Double
+        if let previous {
+            let prevArtists = Set(previous.artists.map { $0.name.lowercased() })
+            discoveries = snapshot.artists
+                .filter { !prevArtists.contains($0.name.lowercased()) }
+                .map(\.name)
+            discoveryRatio = min(Double(discoveries.count) / Double(max(snapshot.artists.count, 1)), 1.0)
+        } else {
+            discoveries = []
+            discoveryRatio = 0.5   // primera vez: neutro, no inflado
+        }
 
         let hype = 40 * concentration + 25 * diversity + 20 * recency + 15 * discoveryRatio
 
@@ -143,7 +154,13 @@ enum HypeEngine {
             }
             if hit { score += gw.weight }
         }
-        return min(score * 1.6, 1.0)   // normalización suave: 2-3 géneros cruzados ≈ match alto
+        // Normalización suave: 2-3 géneros cruzados ≈ match alto. Antes este
+        // multiplicador era 1.6 — para un passport típico (pesos que suman
+        // ~1.0 entre sus top genres), CUALQUIER match de un solo género con
+        // peso ≥0.63 ya saturaba el clamp de 1.0, empatando exactamente con
+        // un match de 2-3 géneros — perdiendo la distinción que
+        // matchedVenues necesita para ordenar bien "Esta noche, para ti".
+        return min(score * 1.15, 1.0)
     }
 
     enum MatchTier: String {

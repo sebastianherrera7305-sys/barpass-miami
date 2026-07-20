@@ -47,7 +47,7 @@ final class KeychainServiceTests: XCTestCase {
         let session = AuthSession(
             accessToken: "old-access", refreshToken: "old-refresh",
             expiresAt: Date().addingTimeInterval(3600),
-            user: AuthUser(id: "u1", email: "test@barpass.app")
+            user: AuthUser(id: "u1", email: "test@barpass.app", emailConfirmedAt: nil)
         )
         let data = try JSONEncoder().encode(session)
 
@@ -73,7 +73,7 @@ final class KeychainServiceTests: XCTestCase {
         let session = AuthSession(
             accessToken: "token", refreshToken: "refresh",
             expiresAt: Date().addingTimeInterval(3600),
-            user: AuthUser(id: "u1", email: nil)
+            user: AuthUser(id: "u1", email: nil, emailConfirmedAt: nil)
         )
         KeychainService.save(try JSONEncoder().encode(session), forKey: legacyKey)
 
