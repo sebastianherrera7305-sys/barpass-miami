@@ -16,6 +16,9 @@ struct TableReservationView: View {
     @State private var paymentError:    String?
     @State private var reservation:     TableReservation?
     @State private var showConfirm:     Bool         = false
+    /// Set by `CardPaymentView.onOrderId` just before `onSuccess` fires for
+    /// the card flow — bridges the real order id into `completeReservation`.
+    @State private var pendingCardOrderId: String?
 
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
@@ -368,18 +371,22 @@ struct TableReservationView: View {
             let svc = ApplePayService()
             svc.requestPayment(amount: Decimal(selectedPackage.deposit),
                                label: "Mesa VIP · \(venueName)") { stripePaymentMethodId in
-                _ = try await APIClient.createApplePayTransaction(
+                let json = try await APIClient.createApplePayTransaction(
                     idToken:    session.accessToken,
                     vendorId:   venueId,
                     customerId: session.user.id,
                     items:      [],
                     stripePaymentMethodId: stripePaymentMethodId
                 )
+                guard let orderId = (json["transaction"] as? [String: Any])?["id"] as? String else {
+                    throw APIClient.APIClientError.invalidResponse
+                }
+                return orderId
             } completion: { result in
                 Task { @MainActor in
                     isProcessing = false
-                    if result.success {
-                        completeReservation(method: "Apple Pay")
+                    if result.success, let orderId = result.orderId {
+                        completeReservation(method: "Apple Pay", paymentSource: .order(orderId: orderId))
                     } else if let error = result.error, error != "cancelled" {
                         paymentError = error
                         BPHaptics.error()
@@ -427,9 +434,12 @@ struct TableReservationView: View {
 
     private var cardBtn: some View {
         NavigationLink {
-            CardPaymentView(total: selectedPackage.deposit, vendorId: venueId, items: []) { method in
-                completeReservation(method: method)
-            }
+            CardPaymentView(total: selectedPackage.deposit, vendorId: venueId, items: [], onSuccess: { method in
+                guard let orderId = pendingCardOrderId else { return }
+                completeReservation(method: method, paymentSource: .order(orderId: orderId))
+            }, onOrderId: { orderId in
+                pendingCardOrderId = orderId
+            })
         } label: {
             HStack {
                 Image(systemName: "creditcard")
@@ -460,11 +470,11 @@ struct TableReservationView: View {
         paymentError = nil
         Task {
             do {
-                let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: selectedPackage.deposit)
+                let (newBalance, transactionId) = try await APIClient.spendWallet(idToken: session.accessToken, amount: selectedPackage.deposit)
                 await MainActor.run {
                     isProcessing = false
                     appState.walletBalance = newBalance
-                    completeReservation(method: "🪙 BarPass Wallet")
+                    completeReservation(method: "🪙 BarPass Wallet", paymentSource: .wallet(transactionId: transactionId))
                 }
             } catch {
                 await MainActor.run {
@@ -477,7 +487,7 @@ struct TableReservationView: View {
         }
     }
 
-    private func completeReservation(method: String) {
+    private func completeReservation(method: String, paymentSource: APIClient.PassPaymentSource) {
         let r = TableReservation.new(
             venueId:    venueId,
             venueName:  venueName,
@@ -501,7 +511,7 @@ struct TableReservationView: View {
                 await APIClient.registerPass(
                     idToken: session.accessToken, passCode: r.confirmCode, kind: "table",
                     venueId: r.venueId, venueName: r.venueName, quantity: r.guestCount,
-                    amount: r.deposit, validUntil: r.date.addingTimeInterval(4 * 3600)
+                    validUntil: r.date.addingTimeInterval(4 * 3600), paymentSource: paymentSource
                 )
             }
         }

@@ -1,4 +1,5 @@
 import SwiftUI
+import PassKit
 
 struct EventTicketsView: View {
     let venueId:   String
@@ -351,18 +352,50 @@ struct EventTicketsView: View {
 
     // MARK: - Actions
 
+    // SECURITY FIX (Pre-Launch Audit, Phase 1): this was previously a pure
+    // UI stub — a 1.4s fake delay that issued a real, redeemable ticket with
+    // NO charge of any kind (no Stripe call, no /api/transactions, nothing).
+    // Now a real Apple Pay flow, same pattern as SkipLinePassView/
+    // TableReservationView: the PassKit sheet only reports success once
+    // POST /api/transactions has actually confirmed the charge.
     private func purchaseWithApplePay() {
+        guard !isProcessing, let session = AuthService.shared.restoreSession() else {
+            paymentError = l10n.t("auth.error.connection")
+            return
+        }
         isProcessing = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
-            isProcessing = false
-            let ticket = EventTicket.new(
-                eventName: eventName, venueName: venueName, venueId: venueId,
-                eventDate: eventDate, quantity: quantity,
-                package: selectedPkg.name, amount: total, payMethod: "Apple Pay"
+        paymentError = nil
+        let svc = ApplePayService()
+        svc.requestPayment(amount: Decimal(total),
+                           label: String(format: l10n.t("pass.applePayLabel"), venueName)) { stripePaymentMethodId in
+            let json = try await APIClient.createApplePayTransaction(
+                idToken:    session.accessToken,
+                vendorId:   venueId,
+                customerId: session.user.id,
+                items:      [],
+                stripePaymentMethodId: stripePaymentMethodId
             )
-            activeTicket = ticket
-            showTicket   = true
-            registerTicket(ticket)
+            guard let orderId = (json["transaction"] as? [String: Any])?["id"] as? String else {
+                throw APIClient.APIClientError.invalidResponse
+            }
+            return orderId
+        } completion: { result in
+            Task { @MainActor in
+                isProcessing = false
+                if result.success, let orderId = result.orderId {
+                    let ticket = EventTicket.new(
+                        eventName: eventName, venueName: venueName, venueId: venueId,
+                        eventDate: eventDate, quantity: quantity,
+                        package: selectedPkg.name, amount: total, payMethod: "Apple Pay"
+                    )
+                    activeTicket = ticket
+                    showTicket   = true
+                    registerTicket(ticket, paymentSource: .order(orderId: orderId))
+                } else if let error = result.error, error != "cancelled" {
+                    paymentError = error
+                    BPHaptics.error()
+                }
+            }
         }
     }
 
@@ -372,7 +405,7 @@ struct EventTicketsView: View {
         paymentError = nil
         Task {
             do {
-                let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: total)
+                let (newBalance, transactionId) = try await APIClient.spendWallet(idToken: session.accessToken, amount: total)
                 await MainActor.run {
                     appState.walletBalance = newBalance
                     isProcessing = false
@@ -383,7 +416,7 @@ struct EventTicketsView: View {
                     )
                     activeTicket = ticket
                     showTicket   = true
-                    registerTicket(ticket)
+                    registerTicket(ticket, paymentSource: .wallet(transactionId: transactionId))
                 }
             } catch {
                 await MainActor.run {
@@ -396,7 +429,7 @@ struct EventTicketsView: View {
         }
     }
 
-    private func registerTicket(_ ticket: EventTicket) {
+    private func registerTicket(_ ticket: EventTicket, paymentSource: APIClient.PassPaymentSource) {
         NotificationService.shared.scheduleExpiryReminder(
             title: l10n.t("tickets.reminder.title"),
             body: String(format: l10n.t("tickets.reminder.body"), ticket.eventName, ticket.venueName),
@@ -408,7 +441,7 @@ struct EventTicketsView: View {
             await APIClient.registerPass(
                 idToken: session.accessToken, passCode: ticket.ticketCode, kind: "event_ticket",
                 venueId: ticket.venueId, venueName: ticket.venueName, quantity: ticket.quantity,
-                amount: ticket.amount, validUntil: ticket.expiresAt
+                validUntil: ticket.expiresAt, paymentSource: paymentSource
             )
         }
     }

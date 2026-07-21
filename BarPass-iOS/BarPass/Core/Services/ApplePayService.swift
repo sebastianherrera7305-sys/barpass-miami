@@ -4,6 +4,11 @@ import PassKit
 struct ApplePayResult {
     let success: Bool
     let stripePaymentMethodId: String?
+    /// The real `orders.id` returned by POST /api/transactions once the
+    /// charge succeeded server-side — callers that register a pass
+    /// (Skip the Line, tickets, table deposits) need this to prove to
+    /// POST /api/passes that a real payment backs the pass being created.
+    let orderId: String?
     let amount:  Double
     let label:   String
     let error:   String?
@@ -16,7 +21,7 @@ struct ApplePayResult {
 /// completed against the backend. No step here fabricates a paid order.
 final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate {
     private var completion: ((ApplePayResult) -> Void)?
-    private var charge: ((String) async throws -> Void)?
+    private var charge: ((String) async throws -> String)?
     private var pendingAmount: Double = 0
     private var pendingLabel: String  = ""
 
@@ -25,17 +30,18 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
     }
 
     /// - Parameter charge: performs the real backend transaction using the
-    ///   Stripe payment method id created from the user's PKPayment. Throw
-    ///   to fail the checkout — the PassKit sheet will show failure and
-    ///   `completion` will report `success: false`.
+    ///   Stripe payment method id created from the user's PKPayment, and
+    ///   returns the resulting `orders.id`. Throw to fail the checkout —
+    ///   the PassKit sheet will show failure and `completion` will report
+    ///   `success: false`.
     func requestPayment(
         amount: Decimal,
         label: String,
-        charge: @escaping (String) async throws -> Void,
+        charge: @escaping (String) async throws -> String,
         completion: @escaping (ApplePayResult) -> Void
     ) {
         guard canMakePayments() else {
-            completion(ApplePayResult(success: false, stripePaymentMethodId: nil, amount: 0, label: label, error: "Apple Pay not available"))
+            completion(ApplePayResult(success: false, stripePaymentMethodId: nil, orderId: nil, amount: 0, label: label, error: "Apple Pay not available"))
             return
         }
         self.completion    = completion
@@ -83,13 +89,13 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
                     }
                 }
                 guard let chargeFn else { throw ApplePayError.missingChargeHandler }
-                try await chargeFn(method.stripeId)
+                let orderId = try await chargeFn(method.stripeId)
 
                 handler(PKPaymentAuthorizationResult(status: .success, errors: nil))
-                completion?(ApplePayResult(success: true, stripePaymentMethodId: method.stripeId, amount: amount, label: label, error: nil))
+                completion?(ApplePayResult(success: true, stripePaymentMethodId: method.stripeId, orderId: orderId, amount: amount, label: label, error: nil))
             } catch {
                 handler(PKPaymentAuthorizationResult(status: .failure, errors: [error]))
-                completion?(ApplePayResult(success: false, stripePaymentMethodId: nil, amount: amount, label: label, error: error.localizedDescription))
+                completion?(ApplePayResult(success: false, stripePaymentMethodId: nil, orderId: nil, amount: amount, label: label, error: error.localizedDescription))
             }
             completion = nil
             charge     = nil
@@ -99,7 +105,7 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
     func paymentAuthorizationControllerDidFinish(_ controller: PKPaymentAuthorizationController) {
         controller.dismiss()
         if let c = completion {
-            c(ApplePayResult(success: false, stripePaymentMethodId: nil, amount: pendingAmount, label: pendingLabel, error: "cancelled"))
+            c(ApplePayResult(success: false, stripePaymentMethodId: nil, orderId: nil, amount: pendingAmount, label: pendingLabel, error: "cancelled"))
             completion = nil
             charge     = nil
         }

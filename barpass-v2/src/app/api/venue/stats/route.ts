@@ -4,11 +4,12 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * GET /api/venue/stats?venueId=liv-miami
- * Today's numbers for one venue — validated against that venue's own secret
- * (per-venue since supabase/venue_secrets_migration.sql), since this is
- * staff tooling, not a customer-facing endpoint. Reads across orders/passes
- * need the service role because RLS on those tables scopes rows to the
- * customer, not the venue.
+ * Today's numbers for one venue — validated against that venue's own secret,
+ * read from the locked-down `venue_secrets` table (supabase/
+ * venue_secrets_lockdown.sql), since this is staff tooling, not a
+ * customer-facing endpoint. Reads across orders/passes need the service
+ * role because RLS on those tables scopes rows to the customer, not the
+ * venue.
  */
 export async function GET(request: Request) {
   const secret = request.headers.get("x-venue-secret");
@@ -36,15 +37,15 @@ export async function GET(request: Request) {
   }
   const supabase = createServiceClient(supabaseUrl, serviceRoleKey);
 
-  const { data: venue, error: venueError } = await supabase
-    .from("venues")
+  const { data: venueSecret, error: venueError } = await supabase
+    .from("venue_secrets")
     .select("validation_secret")
-    .eq("id", venueId)
+    .eq("venue_id", venueId)
     .maybeSingle();
-  if (venueError || !venue?.validation_secret) {
+  if (venueError || !venueSecret?.validation_secret) {
     return NextResponse.json({ error: "venue_not_found" }, { status: 404 });
   }
-  if (secret !== venue.validation_secret) {
+  if (secret !== venueSecret.validation_secret) {
     return NextResponse.json({ error: "not_authorized" }, { status: 401 });
   }
 

@@ -124,11 +124,32 @@ enum APIClient {
         return json
     }
 
+    /// Which verified payment backs a pass being registered — POST /passes
+    /// requires one of these; a pass can no longer be created from a raw
+    /// client-supplied amount (see barpass-v2/supabase/pass_payment_verification.sql).
+    enum PassPaymentSource {
+        /// A real Stripe-backed order, from POST /transactions' response.
+        case order(orderId: String)
+        /// A real BarPass Wallet debit, from POST /wallet/spend's response.
+        case wallet(transactionId: String)
+
+        fileprivate var jsonValue: [String: Any] {
+            switch self {
+            case .order(let orderId):
+                return ["type": "order", "orderId": orderId]
+            case .wallet(let transactionId):
+                return ["type": "wallet", "walletTransactionId": transactionId]
+            }
+        }
+    }
+
     /// Registers a Skip the Line / event ticket / table pass server-side so
     /// its QR code has a real record door staff can check against (see
-    /// POST /passes/redeem, used by the web validation page). Best-effort:
-    /// the local pass still shows and works offline if this fails — it just
-    /// won't be checkable at the door until connectivity returns.
+    /// POST /passes/redeem, used by the web validation page). `amount` is
+    /// derived server-side from `paymentSource` — never trusted from here.
+    /// Best-effort: the local pass still shows and works offline if this
+    /// fails — it just won't be checkable at the door until connectivity
+    /// returns.
     static func registerPass(
         idToken: String,
         passCode: String,
@@ -136,8 +157,8 @@ enum APIClient {
         venueId: String,
         venueName: String,
         quantity: Int,
-        amount: Double,
-        validUntil: Date
+        validUntil: Date,
+        paymentSource: PassPaymentSource
     ) async {
         var request = URLRequest(url: baseURL.appendingPathComponent("passes"))
         request.httpMethod = "POST"
@@ -145,13 +166,13 @@ enum APIClient {
         request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
 
         let body: [String: Any] = [
-            "passCode":   passCode,
-            "kind":       kind,
-            "venueId":    venueId,
-            "venueName":  venueName,
-            "quantity":   quantity,
-            "amount":     amount,
-            "validUntil": ISO8601DateFormatter().string(from: validUntil)
+            "passCode":      passCode,
+            "kind":          kind,
+            "venueId":       venueId,
+            "venueName":     venueName,
+            "quantity":      quantity,
+            "validUntil":    ISO8601DateFormatter().string(from: validUntil),
+            "paymentSource": paymentSource.jsonValue
         ]
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
         _ = try? await URLSession.shared.data(for: request)
@@ -165,18 +186,25 @@ enum APIClient {
             path: "wallet/topup",
             idToken: idToken,
             body: ["amount": amount, "stripePaymentMethodId": stripePaymentMethodId]
-        )
+        ).balance
     }
 
-    /// Debits BarPass Wallet via POST /wallet/spend. Returns the new balance.
-    /// Throws `.server("insufficient_funds")` if the server-side balance
-    /// (not the possibly-stale local one) can't cover the amount.
-    static func spendWallet(idToken: String, amount: Double) async throws -> Double {
-        try await postJSON(path: "wallet/spend", idToken: idToken, body: ["amount": amount])
+    /// Debits BarPass Wallet via POST /wallet/spend. Returns the new balance
+    /// and the ledger transaction id — the latter is required by
+    /// `registerPass(paymentSource: .wallet(transactionId:))` to prove this
+    /// specific debit happened. Throws `.server("insufficient_funds")` if
+    /// the server-side balance (not the possibly-stale local one) can't
+    /// cover the amount.
+    static func spendWallet(idToken: String, amount: Double) async throws -> (balance: Double, transactionId: String) {
+        let result = try await postJSON(path: "wallet/spend", idToken: idToken, body: ["amount": amount])
+        guard let transactionId = result.transactionId else { throw APIClientError.invalidResponse }
+        return (result.balance, transactionId)
     }
 
-    /// POSTs JSON, expects `{ success: true, balance: <number> }`, returns `balance`.
-    private static func postJSON(path: String, idToken: String, body: [String: Any]) async throws -> Double {
+    /// POSTs JSON, expects `{ success: true, balance: <number>, transactionId?: <string> }`.
+    private static func postJSON(
+        path: String, idToken: String, body: [String: Any]
+    ) async throws -> (balance: Double, transactionId: String?) {
         var request = URLRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -199,6 +227,6 @@ enum APIClient {
             throw APIClientError.server(message)
         }
         guard let balance = json["balance"] as? Double else { throw APIClientError.invalidResponse }
-        return balance
+        return (balance, json["transactionId"] as? String)
     }
 }

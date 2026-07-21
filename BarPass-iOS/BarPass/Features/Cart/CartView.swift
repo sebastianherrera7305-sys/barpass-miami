@@ -308,7 +308,7 @@ struct CartView: View {
         paymentError = nil
         Task {
             do {
-                let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: cart.total)
+                let (newBalance, _) = try await APIClient.spendWallet(idToken: session.accessToken, amount: cart.total)
                 await MainActor.run {
                     appState.walletBalance = newBalance
                     handleOrderSuccess(method: l10n.t("table.wallet.name"))
@@ -438,13 +438,14 @@ private struct ApplePayButton: View {
             }
             isProcessing = true
             service.requestPayment(amount: Decimal(total), label: label) { stripePaymentMethodId in
-                _ = try await APIClient.createApplePayTransaction(
+                let json = try await APIClient.createApplePayTransaction(
                     idToken:    session.accessToken,
                     vendorId:   vendorId,
                     customerId: session.user.id,
                     items:      items,
                     stripePaymentMethodId: stripePaymentMethodId
                 )
+                return (json["transaction"] as? [String: Any])?["id"] as? String ?? ""
             } completion: { result in
                 Task { @MainActor in
                     isProcessing = false

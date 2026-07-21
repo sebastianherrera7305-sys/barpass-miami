@@ -86,18 +86,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "stripe_error", message: stripeErr.message }, { status: 500 });
   }
 
-  const { data: newBalance, error: rpcError } = await supabase.rpc("adjust_wallet_balance", {
+  const { data: rpcData, error: rpcError } = await supabase.rpc("adjust_wallet_balance", {
     p_user_id: userData.user.id,
     p_amount: amount,
+    p_kind: "topup",
   });
 
-  if (rpcError) {
+  if (rpcError || !rpcData?.[0]) {
     // Charge already succeeded — surface clearly rather than silently losing the top-up.
     return NextResponse.json(
-      { error: "credit_failed", message: rpcError.message },
+      { error: "credit_failed", message: rpcError?.message },
       { status: 500 },
     );
   }
 
-  return NextResponse.json({ success: true, balance: newBalance });
+  return NextResponse.json({ success: true, balance: rpcData[0].balance });
 }

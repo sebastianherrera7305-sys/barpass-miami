@@ -6,6 +6,11 @@ struct CardPaymentView: View {
     let vendorId:  String
     let items:     [CartItem]
     let onSuccess: (String) -> Void
+    /// Real `orders.id` from the completed Stripe charge — callers that
+    /// register a pass afterward (Skip the Line, table deposits) need this
+    /// to prove to POST /api/passes that a real payment backs it. Cart
+    /// checkout (drink orders, no pass) leaves this nil.
+    var onOrderId: ((String) -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var l10n = L10n.shared
@@ -253,17 +258,21 @@ struct CardPaymentView: View {
                 let paymentParams = STPPaymentMethodParams(card: cardParams, billingDetails: billingDetails, metadata: nil)
                 let paymentMethod = try await STPAPIClient.shared.createPaymentMethod(with: paymentParams, additionalPaymentUserAgentValues: [])
 
-                _ = try await APIClient.createCardTransaction(
+                let json = try await APIClient.createCardTransaction(
                     idToken:    session.accessToken,
                     vendorId:   self.vendorId,
                     customerId: session.user.id,
                     items:      self.items,
                     stripePaymentMethodId: paymentMethod.stripeId
                 )
+                let orderId = (json["transaction"] as? [String: Any])?["id"] as? String
                 await MainActor.run {
                     self.loading = false
                     BPAnalytics.track(.paymentSuccess(method: "card", amount: self.total))
                     PointsEngine.shared.award(.completeTrip)
+                    if let orderId {
+                        self.onOrderId?(orderId)
+                    }
                     self.onSuccess("💳 •••• \(last4)")
                     self.dismiss()
                 }

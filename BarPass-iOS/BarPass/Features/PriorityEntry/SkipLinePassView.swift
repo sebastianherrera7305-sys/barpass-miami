@@ -15,6 +15,9 @@ struct SkipLinePassView: View {
     @State private var activePass: SkipLinePass?
     @State private var showPass = false
     @State private var paymentError: String?
+    /// Set by `CardPaymentView.onOrderId` just before `onSuccess` fires for
+    /// the card flow — bridges the real order id into `completePass`.
+    @State private var pendingCardOrderId: String?
 
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
@@ -299,18 +302,22 @@ struct SkipLinePassView: View {
             let svc = ApplePayService()
             svc.requestPayment(amount: Decimal(selected.price),
                                label: String(format: l10n.t("pass.applePayLabel"), venueName)) { stripePaymentMethodId in
-                _ = try await APIClient.createApplePayTransaction(
+                let json = try await APIClient.createApplePayTransaction(
                     idToken:    session.accessToken,
                     vendorId:   venueId,
                     customerId: session.user.id,
                     items:      [],
                     stripePaymentMethodId: stripePaymentMethodId
                 )
+                guard let orderId = (json["transaction"] as? [String: Any])?["id"] as? String else {
+                    throw APIClient.APIClientError.invalidResponse
+                }
+                return orderId
             } completion: { result in
                 Task { @MainActor in
                     isProcessing = false
-                    if result.success {
-                        completePass(method: "Apple Pay")
+                    if result.success, let orderId = result.orderId {
+                        completePass(method: "Apple Pay", paymentSource: .order(orderId: orderId))
                     } else if let error = result.error, error != "cancelled" {
                         paymentError = error
                         BPHaptics.error()
@@ -367,9 +374,12 @@ struct SkipLinePassView: View {
 
     private var cardBtn: some View {
         NavigationLink {
-            CardPaymentView(total: selected.price, vendorId: venueId, items: []) { method in
-                completePass(method: method)
-            }
+            CardPaymentView(total: selected.price, vendorId: venueId, items: [], onSuccess: { method in
+                guard let orderId = pendingCardOrderId else { return }
+                completePass(method: method, paymentSource: .order(orderId: orderId))
+            }, onOrderId: { orderId in
+                pendingCardOrderId = orderId
+            })
         } label: {
             HStack {
                 Image(systemName: "creditcard")
@@ -394,11 +404,11 @@ struct SkipLinePassView: View {
         paymentError = nil
         Task {
             do {
-                let newBalance = try await APIClient.spendWallet(idToken: session.accessToken, amount: selected.price)
+                let (newBalance, transactionId) = try await APIClient.spendWallet(idToken: session.accessToken, amount: selected.price)
                 await MainActor.run {
                     isProcessing = false
                     appState.walletBalance = newBalance
-                    completePass(method: "🪙 BarPass Wallet")
+                    completePass(method: "🪙 BarPass Wallet", paymentSource: .wallet(transactionId: transactionId))
                 }
             } catch {
                 await MainActor.run {
@@ -411,7 +421,7 @@ struct SkipLinePassView: View {
         }
     }
 
-    private func completePass(method: String) {
+    private func completePass(method: String, paymentSource: APIClient.PassPaymentSource) {
         let pass = SkipLinePass.new(
             venueId:   venueId,
             venueName: venueName,
@@ -433,7 +443,7 @@ struct SkipLinePassView: View {
                 await APIClient.registerPass(
                     idToken: session.accessToken, passCode: pass.passCode, kind: "skip_line",
                     venueId: pass.venueId, venueName: pass.venueName, quantity: pass.quantity,
-                    amount: pass.amount, validUntil: pass.validUntil
+                    validUntil: pass.validUntil, paymentSource: paymentSource
                 )
             }
         }

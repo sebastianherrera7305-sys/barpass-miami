@@ -54,17 +54,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_payload" }, { status: 422 });
   }
 
-  const { data: newBalance, error: rpcError } = await supabase.rpc("adjust_wallet_balance", {
+  const { data: rpcData, error: rpcError } = await supabase.rpc("adjust_wallet_balance", {
     p_user_id: userData.user.id,
     p_amount: -parsed.data.amount,
+    p_kind: "spend",
   });
 
-  if (rpcError) {
-    if (rpcError.message.includes("insufficient_funds")) {
+  if (rpcError || !rpcData?.[0]) {
+    if (rpcError?.message.includes("insufficient_funds")) {
       return NextResponse.json({ error: "insufficient_funds" }, { status: 402 });
     }
-    return NextResponse.json({ error: "debit_failed", message: rpcError.message }, { status: 500 });
+    return NextResponse.json({ error: "debit_failed", message: rpcError?.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true, balance: newBalance });
+  // transactionId is the server-side proof this specific debit happened —
+  // POST /api/passes requires it to mint a pass, so a client can no longer
+  // create a valid pass without a matching, unreused wallet debit.
+  return NextResponse.json({
+    success: true,
+    balance: rpcData[0].balance,
+    transactionId: rpcData[0].transaction_id,
+  });
 }

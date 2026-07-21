@@ -5,11 +5,12 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/passes/redeem
- * Door-staff validation. Requires that venue's own secret (per-venue since
- * supabase/venue_secrets_migration.sql — a leaked secret used to compromise
- * every venue's redemption at once, now only compromises one) rather than a
- * customer Supabase session — the person scanning is staff, not the pass
- * holder. Redemption is atomic: a pass can only ever be marked used once.
+ * Door-staff validation. Requires that venue's own secret, read from the
+ * locked-down `venue_secrets` table (supabase/venue_secrets_lockdown.sql —
+ * previously stored on the publicly-readable `venues` table and exposed to
+ * any anon client) rather than a customer Supabase session — the person
+ * scanning is staff, not the pass holder. Redemption is atomic: a pass can
+ * only ever be marked used once.
  */
 
 const redeemRequestSchema = z.object({
@@ -52,15 +53,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
-  const { data: venue, error: venueError } = await supabase
-    .from("venues")
+  const { data: venueSecret, error: venueError } = await supabase
+    .from("venue_secrets")
     .select("validation_secret")
-    .eq("id", venueId)
+    .eq("venue_id", venueId)
     .maybeSingle();
-  if (venueError || !venue?.validation_secret) {
+  if (venueError || !venueSecret?.validation_secret) {
     return NextResponse.json({ error: "venue_not_found" }, { status: 404 });
   }
-  if (secret !== venue.validation_secret) {
+  if (secret !== venueSecret.validation_secret) {
     return NextResponse.json({ error: "not_authorized" }, { status: 401 });
   }
 

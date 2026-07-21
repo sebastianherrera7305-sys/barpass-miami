@@ -6,6 +6,7 @@ import {
   conciergeRequestSchema,
   nightPlanSchema,
 } from "@/features/ai/services/plan-schema";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/concierge
@@ -14,8 +15,27 @@ import {
  *
  * Gemini Flash (free tier at Google AI Studio) — the key lives ONLY here
  * (server-side). The client never talks to the model directly.
+ *
+ * SECURITY (Pre-Launch Audit, Phase 1 #6): this route had no rate limiting
+ * at all — harmless only because GEMINI_API_KEY isn't set yet (every call
+ * 503s). Rate-limited by IP rather than gated behind auth: the Concierge is
+ * a guest-accessible feature today (no login wall anywhere else in its
+ * flow), so requiring auth here would be a product change, not a security
+ * fix — this closes the actual gap (unauthenticated cost/DoS abuse of the
+ * AI budget) without silently login-walling a feature that never had one.
  */
 export async function POST(request: Request) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  // 10 requests/minuto por IP — cubre uso normal (varios intentos de prompt
+  // en una sesión), frena abuso automatizado del presupuesto de Gemini.
+  const withinLimit = await checkRateLimit(`concierge:${ip}`, {
+    maxRequests: 10,
+    windowSeconds: 60,
+  });
+  if (!withinLimit) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   let body: unknown;
   try {
     body = await request.json();
