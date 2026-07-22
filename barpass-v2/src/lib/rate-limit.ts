@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 
 /**
@@ -25,7 +24,7 @@ export async function checkRateLimit(
   key: string,
   { maxRequests, windowSeconds }: { maxRequests: number; windowSeconds: number },
 ): Promise<boolean> {
-  const requestId = randomUUID();
+  const requestId = crypto.randomUUID();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceRoleKey) {
