@@ -150,6 +150,18 @@ final class AuthService: @unchecked Sendable {
         defaults.removeObject(forKey: Self.sessionKey) // limpia cualquier resto legacy también
     }
 
+    /// Permanently deletes the signed-in user's account server-side (Apple
+    /// Guideline 5.1.1(v)), then clears the local session. Only signs the
+    /// user out if the server confirms deletion — if the call throws, the
+    /// account still exists and the session is left intact so the caller can
+    /// surface the error. Throws `AuthError.notAuthenticated` if there's no
+    /// active session to delete.
+    func deleteAccount() async throws {
+        guard let session = restoreSession() else { throw AuthError.notAuthenticated }
+        try await APIClient.deleteAccount(idToken: session.accessToken)
+        signOut()
+    }
+
     /// Re-sends the signup confirmation email via Supabase GoTrue's
     /// `/resend` endpoint. Requires "Confirm email" to be enabled on the
     /// Supabase project — otherwise there's no pending confirmation to resend.
@@ -252,11 +264,13 @@ final class AuthService: @unchecked Sendable {
 enum AuthError: LocalizedError {
     case badCredentials(String)
     case network
+    case notAuthenticated
 
     var errorDescription: String? {
         switch self {
         case .badCredentials(let msg): return msg
         case .network: return "No se pudo conectar. Revisa tu internet."
+        case .notAuthenticated: return "No hay una sesión activa."
         }
     }
 }

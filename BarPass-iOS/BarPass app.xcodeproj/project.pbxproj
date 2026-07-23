@@ -12,6 +12,7 @@
 		247910BD9F5933841A403D3A /* ExperienceScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B25282D5543608685CFCACF /* ExperienceScorerTests.swift */; };
 		2A0BC0EA1346366A63326961 /* CartItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8568370BB34F88D6D61CD5B2 /* CartItem.swift */; };
 		30D51A75A5B95FDE56B0FBB0 /* CartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECEA1F54438283EF27ED535E /* CartView.swift */; };
+		345EF762F181F05CFC873285 /* DeleteAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */; };
 		3B997A737FD4B9BDABFA9D2B /* ModelCodableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF31AC3E1809B2072DE6CA9C /* ModelCodableTests.swift */; };
 		4AD4CD88E1366A6ACA462B08 /* CardPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */; };
 		4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */; };
@@ -139,6 +140,7 @@
 		856638E27CF7A56A57535A80 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KeychainServiceTests.swift; path = BarPassTests/KeychainServiceTests.swift; sourceTree = "<group>"; };
 		8568370BB34F88D6D61CD5B2 /* CartItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartItem.swift; sourceTree = "<group>"; };
 		8C54DE23E3FEFE20783A41C3 /* SkipLinePassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipLinePassView.swift; sourceTree = "<group>"; };
+		93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAccountView.swift; sourceTree = "<group>"; };
 		AA0000020000000000000001 /* BarPassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarPassApp.swift; sourceTree = "<group>"; };
 		AA0000020000000000000002 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		AA0000020000000000000003 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -538,6 +540,7 @@
 			isa = PBXGroup;
 			children = (
 				FF000001000000000000AA06 /* ProfileView.swift */,
+				93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -785,6 +788,7 @@
 				RE0000020000000000000004 /* SupabasePlanRepository.swift in Sources */,
 				NP0000020000000000000001 /* NightPlan.swift in Sources */,
 				TS0000020000000000000001 /* TripStore.swift in Sources */,
+				345EF762F181F05CFC873285 /* DeleteAccountView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

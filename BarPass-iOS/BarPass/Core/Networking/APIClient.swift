@@ -201,6 +201,32 @@ enum APIClient {
         return (result.balance, transactionId)
     }
 
+    /// Permanently deletes the authenticated user's account (Apple Guideline
+    /// 5.1.1(v)). The server deletes only the user the token belongs to; the
+    /// client never names a user id. Throws on any non-2xx so the caller can
+    /// keep the user signed in and surface the error rather than logging them
+    /// out of an account that still exists.
+    static func deleteAccount(idToken: String) async throws {
+        var request = URLRequest(url: baseURL.appendingPathComponent("account/delete"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw APIClientError.network(error.localizedDescription)
+        }
+        guard let http = response as? HTTPURLResponse else { throw APIClientError.invalidResponse }
+        guard (200..<300).contains(http.statusCode) else {
+            let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+            let message = (json["message"] as? String) ?? (json["error"] as? String)
+                ?? "No se pudo eliminar la cuenta (\(http.statusCode))."
+            throw APIClientError.server(message)
+        }
+    }
+
     /// POSTs JSON, expects `{ success: true, balance: <number>, transactionId?: <string> }`.
     private static func postJSON(
         path: String, idToken: String, body: [String: Any]

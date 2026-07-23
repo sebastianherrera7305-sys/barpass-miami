@@ -11,6 +11,7 @@ struct ProfileView: View {
     @State private var showToast = false
     @State private var showGames = false
     @State private var showTopUp = false
+    @State private var showDeleteAccount = false
 
     private var points: Int { engine.totalXP }
     private var level: String { engine.levelName }
@@ -385,6 +386,18 @@ struct ProfileView: View {
                             }
                             .buttonStyle(.plain)
                             .bpAccessibility(label: l10n.t("profile.account.signOut"), hint: l10n.t("profile.signOut.hint"), isButton: true)
+
+                            Button {
+                                BPHaptics.light()
+                                showDeleteAccount = true
+                            } label: {
+                                Text(l10n.t("profile.account.deleteAccount"))
+                                    .font(.bpScaled(13, weight: .semibold))
+                                    .foregroundStyle(Color.bpTextSecondary)
+                                    .frame(maxWidth: .infinity).padding(.vertical, 10)
+                            }
+                            .buttonStyle(.plain)
+                            .bpAccessibility(label: l10n.t("profile.account.deleteAccount"), hint: l10n.t("deleteAccount.hint"), isButton: true)
                         } else {
                             HStack(spacing: 10) {
                                 Image(systemName: "person.crop.circle.badge.questionmark")
@@ -443,6 +456,11 @@ struct ProfileView: View {
         .sheet(isPresented: $showTopUp) {
             WalletTopUpView(onSuccess: { _ in })
                 .environmentObject(appState)
+        }
+        .sheet(isPresented: $showDeleteAccount) {
+            DeleteAccountView(walletBalance: appState.walletBalance) {
+                appState.showNativeAuth = true
+            }
         }
         .onChange(of: engine.lastAward?.xp) { _, newValue in
             guard newValue != nil else { return }
