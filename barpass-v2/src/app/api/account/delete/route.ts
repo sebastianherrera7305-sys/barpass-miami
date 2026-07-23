@@ -19,8 +19,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
  *   - orders / passes / venue_posts     → KEPT, customer_id/user_id SET NULL
  *                                          (financial + venue audit trail
  *                                          preserved, anonymized)
- *   - stale membership in OTHER users'  → stripped via remove_user_from_all_trips
- *     trips (uuid[] arrays, no FK)
+ *   - stale membership in OTHER users'  → stripped inline with the service-
+ *     trips (uuid[] arrays, no FK)         role client (no manual migration)
  * The wallet balance is intentionally forfeited on delete; the iOS flow warns
  * the user of any nonzero balance and requires explicit confirmation first.
  */
@@ -55,12 +55,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
-  // 1) Strip the user from other people's trip arrays (no FK cascade covers these).
-  const { error: tripsError } = await supabase.rpc("remove_user_from_all_trips", {
-    p_user_id: userId,
-  });
-  if (tripsError) {
+  // 1) Strip the user from other people's trip arrays. These are plain
+  //    uuid[] columns with no FK, so nothing cascades them. Done inline with
+  //    the service-role client (which bypasses RLS) rather than via a
+  //    SECURITY DEFINER RPC, so account deletion needs zero manual DB
+  //    migration to work. Deletion is rare and scoped to one user's own
+  //    memberships, so a select-then-update is fine — no atomicity concern.
+  const { data: memberTrips, error: fetchError } = await supabase
+    .from("trips")
+    .select("id, member_ids, co_organizer_ids, pending_requests")
+    .or(
+      `member_ids.cs.{${userId}},co_organizer_ids.cs.{${userId}},pending_requests.cs.{${userId}}`,
+    );
+  if (fetchError) {
     return NextResponse.json({ error: "deletion_failed", stage: "trips" }, { status: 500 });
+  }
+  for (const trip of memberTrips ?? []) {
+    const strip = (arr: string[] | null) => (arr ?? []).filter((id) => id !== userId);
+    const { error: updateError } = await supabase
+      .from("trips")
+      .update({
+        member_ids: strip(trip.member_ids),
+        co_organizer_ids: strip(trip.co_organizer_ids),
+        pending_requests: strip(trip.pending_requests),
+      })
+      .eq("id", trip.id);
+    if (updateError) {
+      return NextResponse.json({ error: "deletion_failed", stage: "trips" }, { status: 500 });
+    }
   }
 
   // 2) Delete the auth user. FK CASCADE / SET NULL handle every other table.
