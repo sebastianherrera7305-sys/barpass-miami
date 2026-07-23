@@ -51,15 +51,11 @@
 	<key>NSAppleMusicUsageDescription</key>
 	<string>BarPass usa tu música de Apple Music para recomendarte venues y eventos que van con tu vibra. Tu escucha nunca sale de tu teléfono.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>BarPass uses your camera to scan QR codes and capture profile photos.</string>
+	<string>BarPass uses your camera to capture profile photos and enhance your venue experience.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID for quick and secure sign-in to BarPass.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>BarPass uses your location to show nearby venues in the background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>BarPass uses your location to show nearby venues and calculate distances.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>BarPass uses the microphone for voice search.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>BarPass saves QR codes and venue passes to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -69,7 +65,6 @@
 		<string>audio</string>
 		<string>fetch</string>
 		<string>remote-notification</string>
-		<string>location</string>
 	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
