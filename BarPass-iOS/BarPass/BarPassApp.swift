@@ -21,6 +21,20 @@ struct BarPassApp: App {
                 .environmentObject(appState)
                 .environmentObject(cart)
                 .preferredColorScheme(appearanceStore.appearance == .dark ? .dark : .light)
+                // SwiftUI's own hook for incoming URLs (custom scheme + universal
+                // links), alongside AppDelegate.application(open:). Belt-and-
+                // suspenders, and in practice the one that actually fires: with
+                // this app's WindowGroup-only Scene (no explicit UIScene
+                // manifest), the UIKit AppDelegate path never invoked
+                // application(open:) in testing — every delivery came through
+                // here. Kept both since they're independent and idempotent (both
+                // just parse the same URL into the same route), but .onOpenURL
+                // is the one this app can actually rely on.
+                .onOpenURL { url in
+                    guard let route = DeepLinkRouter.parse(url) else { return }
+                    appState.deepLinkURL = url
+                    appState.pendingRoute = route
+                }
         }
     }
 }
@@ -83,7 +97,15 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     private func isValidDeepLink(_ url: URL) -> Bool {
         if url.scheme == "barpass" {
-            return Self.allowedCustomPaths.contains(url.path)
+            // allowedCustomPaths covers exact-match, non-routable paths (e.g. the
+            // Spotify OAuth callback). Everything else goes through
+            // DeepLinkRouter.parse — the same parser AppState uses to build a
+            // navigable route — so a link is accepted here if and only if
+            // something can actually act on it downstream. Before this, any
+            // barpass://trip/{id} or barpass://venue/{id} was silently rejected
+            // right here, before ever reaching AppState/DeepLinkRouter: the
+            // static allowlist only ever contained "/spotify-callback".
+            return Self.allowedCustomPaths.contains(url.path) || DeepLinkRouter.parse(url) != nil
         }
         if url.scheme == "https" || url.scheme == "http" {
             guard let host = url.host else { return false }

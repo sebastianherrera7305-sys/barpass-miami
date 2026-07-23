@@ -19,6 +19,11 @@ final class AppState: ObservableObject {
     @Published var showEmailVerification  = false
     @Published var isOffline              = false
     @Published var deepLinkURL:            URL?
+    /// The parsed, navigable destination for the most recent deep link, if it
+    /// mapped to a supported route. Consumers (MainTabView, TripsListView) act
+    /// on it and call `consumeRoute()` to clear it. Nil when there's no pending
+    /// deep-link navigation.
+    @Published var pendingRoute:           DeepLinkRoute?
     @Published var showCart               = false
     @Published var walletBalance:          Double = 0
     @Published var lastOrderConfirmation:  OrderConfirmation?
@@ -35,7 +40,10 @@ final class AppState: ObservableObject {
         NotificationCenter.default.publisher(for: .deepLinkReceived)
             .compactMap { $0.object as? URL }
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] url in self?.deepLinkURL = url }
+            .sink { [weak self] url in
+                self?.deepLinkURL = url
+                self?.pendingRoute = DeepLinkRouter.parse(url)
+            }
             .store(in: &cancellables)
 
         networkMonitor.pathUpdateHandler = { [weak self] path in
@@ -44,6 +52,10 @@ final class AppState: ObservableObject {
         }
         networkMonitor.start(queue: networkQueue)
     }
+
+    /// Clears the pending deep-link route once a consumer has navigated to it,
+    /// so it doesn't re-fire on the next view refresh.
+    func consumeRoute() { pendingRoute = nil }
 
     func splashComplete() {
         withAnimation(.easeOut(duration: 0.15)) { showSplash = false }

@@ -3,6 +3,7 @@ import SwiftUI
 struct TripsListView: View {
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
+    @EnvironmentObject private var appState: AppState
 
     @StateObject private var tripStore = TripStore(
         repository: RepositoryDependencies.trip
@@ -37,6 +38,20 @@ struct TripsListView: View {
         .onAppear { BPAnalytics.track(.viewScreen("Trips")) }
         .navigationTitle(l10n.t("trips.yourTrips"))
         .task { await tripStore.loadTrips() }
+        // Deep link `barpass://trip/{id}` — MainTabView has already switched to
+        // this tab; load trips if needed, then open the existing detail sheet.
+        // If the trip isn't accessible, clear the route (controlled no-op, no
+        // dead-end, no crash).
+        .onReceive(appState.$pendingRoute.compactMap { $0 }) { route in
+            guard case .trip(let id) = route else { return }
+            Task {
+                if tripStore.trips.isEmpty { await tripStore.loadTrips() }
+                if let trip = tripStore.trips.first(where: { $0.id == id }) {
+                    selectedTrip = trip
+                }
+                appState.consumeRoute()
+            }
+        }
         .confirmationDialog(l10n.t("trips.createChoice.title"), isPresented: $showCreateChoice, titleVisibility: .visible) {
             Button(l10n.t("trips.createChoice.ai")) { showCreateFlow = true }
             Button(l10n.t("trips.createChoice.manual")) { showManualCreate = true }

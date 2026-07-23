@@ -9,6 +9,10 @@ struct MainTabView: View {
     @ObservedObject private var appearanceStore = AppearanceStore.shared
 
     @State private var selectedTab = 0
+    /// A venue opened from a deep link (`barpass://venue/{id}`). Presented as a
+    /// covering detail so it works from any tab without retrofitting the
+    /// NavigationLink-based push used inside Tonight/Explore.
+    @State private var deepLinkedVenue: BarPassVenue?
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -46,6 +50,39 @@ struct MainTabView: View {
         // Theme switch rebuilds the whole tree so every Color.bpAmber re-resolves.
         .id("\(themeService.theme.rawValue)-\(appearanceStore.appearance.rawValue)")
         .task { await venueStore.loadVenues() }
+        // Deep-link routing. Trip → switch to the Trips tab (TripsListView opens
+        // its detail sheet and consumes the route). Venue → resolve + present.
+        .onReceive(appState.$pendingRoute.compactMap { $0 }) { route in
+            handleDeepLink(route)
+        }
+        // Cold start: a venue link can arrive before venues finish loading. Retry
+        // resolution whenever the catalog updates while a venue route is pending.
+        .onReceive(venueStore.$venues) { _ in
+            if let route = appState.pendingRoute, case .venue = route {
+                handleDeepLink(route)
+            }
+        }
+        .fullScreenCover(item: $deepLinkedVenue) { venue in
+            NavigationStack { VenueDetailView(venue: venue) }
+        }
+    }
+
+    /// Acts on a parsed deep-link route using the existing navigation surfaces.
+    /// Unwired route types (pass/invite/profile) are cleared rather than left to
+    /// dead-end — S1 only navigates trip and venue.
+    private func handleDeepLink(_ route: DeepLinkRoute) {
+        switch route {
+        case .trip:
+            selectedTab = 2 // TripsListView observes pendingRoute and opens the sheet.
+        case .venue(let id):
+            if let venue = venueStore.venues.first(where: { $0.id == id }) {
+                deepLinkedVenue = venue
+                appState.consumeRoute()
+            }
+            // Not found yet → leave pending; venueStore.$venues retries on load.
+        case .pass, .invite, .profile:
+            appState.consumeRoute()
+        }
     }
 
     private var floatingTabBar: some View {
