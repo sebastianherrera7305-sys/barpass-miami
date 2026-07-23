@@ -127,9 +127,7 @@ struct ReservationConfirmView: View {
 
             HStack(spacing: 12) {
                 Button {
-                    let text = String(format: l10n.t("reservationConfirm.shareText"), reservation.venueName, reservation.confirmCode, reservation.formattedDate)
-                    let av = UIActivityViewController(activityItems: [text], applicationActivities: nil)
-                    topVC?.present(av, animated: true)
+                    ShareManager.present(ShareManager.shareReservation(reservation))
                 } label: {
                     Label(l10n.t("reservationConfirm.share"), systemImage: "square.and.arrow.up")
                         .font(.bpScaled(14, weight: .semibold))
@@ -204,13 +202,6 @@ struct ReservationConfirmView: View {
                   from: out.transformed(by: CGAffineTransform(scaleX: 10, y: 10)).extent)
         else { return Image(systemName: "qrcode") }
         return Image(uiImage: UIImage(cgImage: cg))
-    }
-
-    private var topVC: UIViewController? {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap { $0.windows }
-            .first { $0.isKeyWindow }?.rootViewController
     }
 }
 

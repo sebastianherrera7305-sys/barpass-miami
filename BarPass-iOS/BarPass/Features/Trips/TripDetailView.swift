@@ -379,8 +379,11 @@ struct TripDetailView: View {
                     .foregroundStyle(amber)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                if let code = currentTrip.inviteCode {
-                    ShareLink(item: String(format: l10n.t("tripDetail.invite.shareText"), currentTrip.title, code)) {
+                if currentTrip.inviteCode != nil {
+                    Button {
+                        BPHaptics.light()
+                        ShareManager.present(ShareManager.shareTrip(currentTrip))
+                    } label: {
                         Image(systemName: "square.and.arrow.up")
                             .foregroundStyle(amber)
                     }

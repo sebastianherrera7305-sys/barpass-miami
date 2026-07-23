@@ -14,7 +14,9 @@
 		2FD00D94265BF1B464B7C912 /* DeepLinkRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F14D299B6CF077F28A63D3 /* DeepLinkRouterTests.swift */; };
 		30D51A75A5B95FDE56B0FBB0 /* CartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECEA1F54438283EF27ED535E /* CartView.swift */; };
 		345EF762F181F05CFC873285 /* DeleteAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */; };
+		35C0EF5692CBE8A6227C1745 /* ShareManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 721FC3825B9184C905EB3EF0 /* ShareManager.swift */; };
 		3B997A737FD4B9BDABFA9D2B /* ModelCodableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF31AC3E1809B2072DE6CA9C /* ModelCodableTests.swift */; };
+		40CD7131F382690E2735FB1C /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB6374016627134BFCC83D6 /* ShareCardView.swift */; };
 		4AD4CD88E1366A6ACA462B08 /* CardPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */; };
 		4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */; };
 		6DB2BBFD9C2F38D3220A684A /* HypeEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3963062AE9823148A85E40 /* HypeEngineTests.swift */; };
@@ -23,6 +25,7 @@
 		7E5EB2897A93841F178719A9 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4534C465198E6FF9A92B4C7D /* DeepLinkRouter.swift */; };
 		80A5280DA8DF78405C1E0A01 /* TableReservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA759652D778C1B0CD58E463 /* TableReservation.swift */; };
 		8A1DDE6046186E41A8635D09 /* ActivePassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0C516E6C74A66937CBB9B8F /* ActivePassView.swift */; };
+		98E6980599177FA54192F939 /* ShareManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66E768A00F7416F3E940CCD /* ShareManagerTests.swift */; };
 		A957F031255C8A30AB61608E /* EventTicketsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 138CCFF5EDE420FFDFA78DC8 /* EventTicketsView.swift */; };
 		AA0000010000000000000001 /* BarPassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000001 /* BarPassApp.swift */; };
 		AA0000010000000000000002 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000002 /* AppState.swift */; };
@@ -138,6 +141,8 @@
 		4534C465198E6FF9A92B4C7D /* DeepLinkRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		4C3963062AE9823148A85E40 /* HypeEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HypeEngineTests.swift; path = BarPassTests/HypeEngineTests.swift; sourceTree = "<group>"; };
 		5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPaymentView.swift; sourceTree = "<group>"; };
+		6EB6374016627134BFCC83D6 /* ShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
+		721FC3825B9184C905EB3EF0 /* ShareManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareManager.swift; sourceTree = "<group>"; };
 		7B25282D5543608685CFCACF /* ExperienceScorerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExperienceScorerTests.swift; path = BarPassTests/ExperienceScorerTests.swift; sourceTree = "<group>"; };
 		7DF352B37244C7C0F8C8D874 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		83F14D299B6CF077F28A63D3 /* DeepLinkRouterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/DeepLinkRouterTests.swift; sourceTree = "<group>"; };
@@ -172,6 +177,7 @@
 		CC000002000000000000LG02 /* VenueLogos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueLogos.swift; sourceTree = "<group>"; };
 		CC000002000000000000ME01 /* venue_media.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = venue_media.json; sourceTree = "<group>"; };
 		D0C516E6C74A66937CBB9B8F /* ActivePassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePassView.swift; sourceTree = "<group>"; };
+		E66E768A00F7416F3E940CCD /* ShareManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/ShareManagerTests.swift; sourceTree = "<group>"; };
 		EA727DF04AFC4355197DDF95 /* ReservationConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservationConfirmView.swift; sourceTree = "<group>"; };
 		ECEA1F54438283EF27ED535E /* CartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartView.swift; sourceTree = "<group>"; };
 		EDTV03000000000000RP01 /* EditTripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EditTripView.swift; path = BarPass/Features/Trips/EditTripView.swift; sourceTree = SOURCE_ROOT; };
@@ -264,6 +270,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0B12F135A9AD84E8072D58F5 /* Sharing */ = {
+			isa = PBXGroup;
+			children = (
+				6EB6374016627134BFCC83D6 /* ShareCardView.swift */,
+				721FC3825B9184C905EB3EF0 /* ShareManager.swift */,
+			);
+			name = Sharing;
+			path = Sharing;
+			sourceTree = "<group>";
+		};
 		820A49C80BD0D6C92D69A3BC /* iOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -280,6 +296,7 @@
 				856638E27CF7A56A57535A80 /* KeychainServiceTests.swift */,
 				BF31AC3E1809B2072DE6CA9C /* ModelCodableTests.swift */,
 				83F14D299B6CF077F28A63D3 /* DeepLinkRouterTests.swift */,
+				E66E768A00F7416F3E940CCD /* ShareManagerTests.swift */,
 			);
 			name = BarPassTests;
 			sourceTree = SOURCE_ROOT;
@@ -315,6 +332,7 @@
 			children = (
 				AA0000040000000000000006 /* Services */,
 				AA0000040000000000000009 /* Cache */,
+				0B12F135A9AD84E8072D58F5 /* Sharing */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -692,6 +710,7 @@
 				045900B0B0374875CD4DF42D /* KeychainServiceTests.swift in Sources */,
 				3B997A737FD4B9BDABFA9D2B /* ModelCodableTests.swift in Sources */,
 				2FD00D94265BF1B464B7C912 /* DeepLinkRouterTests.swift in Sources */,
+				98E6980599177FA54192F939 /* ShareManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -797,6 +816,8 @@
 				TS0000020000000000000001 /* TripStore.swift in Sources */,
 				345EF762F181F05CFC873285 /* DeleteAccountView.swift in Sources */,
 				7E5EB2897A93841F178719A9 /* DeepLinkRouter.swift in Sources */,
+				40CD7131F382690E2735FB1C /* ShareCardView.swift in Sources */,
+				35C0EF5692CBE8A6227C1745 /* ShareManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

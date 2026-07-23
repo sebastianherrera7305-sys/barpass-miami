@@ -106,6 +106,10 @@ struct BarPassVenue: Identifiable, Codable {
     /// este venue (nunca se inventan).
     var phone:            String? = nil
     var website:          String? = nil
+    /// The web venue page's real key (barpass-v2 `/venues/[slug]`), not `id`.
+    /// Optional (decode-safe: nil for anything cached before this field
+    /// existed) — ShareManager only builds a web link when this is present.
+    var slug:             String? = nil
     var amenities:        VenueAmenities = VenueAmenities()
     /// Derived Experience Tags (Venue Intelligence Layer) — computed
     /// server-side from real amenity/category data, never invented client-
@@ -181,7 +185,8 @@ extension BarPassVenue {
         happyHourUntil: nil,
         isOpenNow: true,
         photoUrls: [],
-        editorial: "Trendy, opulent Fontainebleau Hotel club."
+        editorial: "Trendy, opulent Fontainebleau Hotel club.",
+        slug: "liv-miami"
     )
 }
 

@@ -7,7 +7,6 @@ struct VenueDetailView: View {
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var appState: AppState
     @ObservedObject private var favorites = FavoritesStore.shared
-    @State private var showShareSheet = false
     @ObservedObject private var points = PointsEngine.shared
     @State private var checkinMessage: String?
     @State private var checkingIn = false
@@ -31,10 +30,6 @@ struct VenueDetailView: View {
             .onAppear { BPAnalytics.track(.viewVenue(venue.id)) }
             .navigationBarHidden(true)
         .overlay(alignment: .topLeading) { navBar }
-        .sheet(isPresented: $showShareSheet) {
-            ShareSheet(venue: venue)
-                .presentationDetents([.medium, .large])
-        }
         .sheet(isPresented: $showReviewComposer) {
             PostComposer(venue: venue) { post in
                 Task {
@@ -575,7 +570,12 @@ struct VenueDetailView: View {
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("venueDetail.back"), hint: l10n.t("venueDetail.back.hint"), isButton: true)
             Spacer()
-            Button { BPHaptics.light(); showShareSheet = true; BPAnalytics.track(.shareVenue(venue: venue.id)); PointsEngine.shared.award(.shareVenue) } label: {
+            Button {
+                BPHaptics.light()
+                ShareManager.present(ShareManager.shareVenue(venue))
+                BPAnalytics.track(.shareVenue(venue: venue.id))
+                PointsEngine.shared.award(.shareVenue)
+            } label: {
                 Image(systemName: "square.and.arrow.up")
                     .font(.bpScaled(14, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
@@ -677,22 +677,6 @@ struct VenueDetailView: View {
             UIApplication.shared.open(url)
         }
     }
-}
-
-// MARK: - Share Sheet
-
-private struct ShareSheet: UIViewControllerRepresentable {
-    let venue: BarPassVenue
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        let text = String(format: L10n.shared.t("venueDetail.shareText"), venue.name, venue.neighborhood)
-        guard let url = URL(string: "https://barpass.app/venues/\(venue.id)") else {
-            return UIActivityViewController(activityItems: [text], applicationActivities: nil)
-        }
-        return UIActivityViewController(activityItems: [text, url], applicationActivities: nil)
-    }
-
-    func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
 }
 
 #Preview {

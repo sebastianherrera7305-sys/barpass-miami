@@ -161,9 +161,7 @@ struct ActivePassView: View {
     private var footer: some View {
         HStack(spacing: 16) {
             Button {
-                let text = "Mi BarPass Priority Entry para \(pass.venueName) — Código: \(pass.passCode)"
-                let av = UIActivityViewController(activityItems: [text], applicationActivities: nil)
-                topVC?.present(av, animated: true)
+                ShareManager.present(ShareManager.sharePass(pass))
             } label: {
                 Label(l10n.t("reservationConfirm.share"), systemImage: "square.and.arrow.up")
                     .font(.bpScaled(14, weight: .semibold))
@@ -235,13 +233,6 @@ struct ActivePassView: View {
                   from: output.transformed(by: CGAffineTransform(scaleX: 12, y: 12)).extent)
         else { return Image(systemName: "qrcode") }
         return Image(uiImage: UIImage(cgImage: cgImg))
-    }
-
-    private var topVC: UIViewController? {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .flatMap { $0.windows }
-            .first { $0.isKeyWindow }?.rootViewController
     }
 }
 

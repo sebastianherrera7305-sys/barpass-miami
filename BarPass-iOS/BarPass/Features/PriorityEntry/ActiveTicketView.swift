@@ -220,12 +220,7 @@ struct ActiveTicketView: View {
     private var actionButtons: some View {
         HStack(spacing: 12) {
             Button {
-                let text = "🎟️ \(ticket.eventName)\n📍 \(ticket.venueName)\n📅 \(ticket.formattedDate)\nCódigo: \(ticket.ticketCode)"
-                let vc = UIActivityViewController(activityItems: [text], applicationActivities: nil)
-                if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let root  = scene.windows.first?.rootViewController {
-                    root.present(vc, animated: true)
-                }
+                ShareManager.present(ShareManager.shareTicket(ticket))
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "square.and.arrow.up")
