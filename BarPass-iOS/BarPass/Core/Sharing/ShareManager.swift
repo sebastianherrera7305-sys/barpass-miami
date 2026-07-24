@@ -22,12 +22,12 @@ enum ShareManager {
 
     static func shareTrip(_ trip: Trip) -> Content {
         let text = String(format: L10n.shared.t("tripDetail.invite.shareText"), trip.title, trip.inviteCode ?? "")
-        // No web landing page exists yet for trips (barpass-v2 has no
-        // /trip/[id] route — confirmed in the audit). Using the custom
-        // scheme only avoids repeating the exact "broken web URL" bug just
-        // fixed for venues; it resolves for anyone who already has the app,
-        // and is a documented limitation until the web landing (S3) exists.
-        let url = URL(string: "barpass://trip/\(trip.id)")
+        // Real web landing (S3): barpass-v2's /trip/[id] renders a public
+        // preview — title, city, dates, member count — via a service-role
+        // read confined to an explicit DTO (never the itinerary or member
+        // ids; see TripPreviewService). Works for anyone, browser or not,
+        // unlike the old scheme-only link which dead-ended for non-app-users.
+        let url = URL(string: "https://barpass.app/trip/\(trip.id)")
         let card = renderCard(.trip(
             title: trip.title,
             city: trip.destinationCity,

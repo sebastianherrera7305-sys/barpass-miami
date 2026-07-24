@@ -41,12 +41,14 @@ final class ShareManagerTests: XCTestCase {
 
     // MARK: - Trip
 
-    func test_shareTrip_url_matchesDeepLinkRouterShape() {
+    func test_shareTrip_url_isWebLandingAndMatchesDeepLinkRouterShape() {
         let trip = Trip(creatorId: "u1", title: "Miami Weekend", destinationCity: "Miami",
                          startDate: Date(), endDate: Date().addingTimeInterval(86400))
         let content = ShareManager.shareTrip(trip)
-        XCTAssertEqual(content.url?.absoluteString, "barpass://trip/\(trip.id)")
-        // The URL ShareManager builds must be exactly what DeepLinkRouter parses.
+        // S3: shares the real web landing (works for non-app-users too), not
+        // the scheme-only link — but it must still be exactly what
+        // DeepLinkRouter parses, so tapping it from an installed app works.
+        XCTAssertEqual(content.url?.absoluteString, "https://barpass.app/trip/\(trip.id)")
         XCTAssertEqual(DeepLinkRouter.parse(content.url!), .trip(id: trip.id))
     }
 
