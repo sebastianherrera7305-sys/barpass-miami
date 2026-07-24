@@ -11,7 +11,10 @@ BarPass*.html
 !BarPass_v10.html
 service-account-key.json
 node_modules/
-.env
+.env*
+!.env.example
+*.pem
+credentials*
 seed-venues.js
 !barpass-map.html
-.vercel
+.vercel/
