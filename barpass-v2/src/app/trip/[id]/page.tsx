@@ -19,17 +19,22 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const trip = await getTripPreview(id);
   if (!trip) return { title: "Trip not found" };
 
-  const title = `${trip.title} · BarPass`;
+  // The root layout's title template ("%s · BarPass") already suffixes the
+  // <title> tag — pass the bare trip title there (same convention as
+  // venues/[slug]/page.tsx) or it renders "X · BarPass · BarPass". Open
+  // Graph/Twitter titles are NOT run through that template (confirmed: no
+  // openGraph default in layout.tsx), so they need the suffix explicitly.
   const description = `${trip.destinationCity} · ${formatDateRange(trip.startDate, trip.endDate)} · ${trip.memberCount} ${trip.memberCount === 1 ? "persona" : "personas"}`;
+  const socialTitle = `${trip.title} · BarPass`;
   return {
-    title,
+    title: trip.title,
     description,
     openGraph: {
-      title,
+      title: socialTitle,
       description,
       images: trip.coverImage ? [{ url: trip.coverImage }] : undefined,
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title: socialTitle, description },
   };
 }
 
