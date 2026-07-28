@@ -50,6 +50,9 @@ struct MainTabView: View {
         // Theme switch rebuilds the whole tree so every Color.bpAmber re-resolves.
         .id("\(themeService.theme.rawValue)-\(appearanceStore.appearance.rawValue)")
         .task { await venueStore.loadVenues() }
+        // MainTabView only renders once authenticated, so this is the natural
+        // point to flush any referral code captured from a pre-auth deep link.
+        .task { await ReferralService.shared.attributePendingIfNeeded() }
         // Deep-link routing. Trip → switch to the Trips tab (TripsListView opens
         // its detail sheet and consumes the route). Venue → resolve + present.
         .onReceive(appState.$pendingRoute.compactMap { $0 }) { route in
@@ -80,7 +83,12 @@ struct MainTabView: View {
                 appState.consumeRoute()
             }
             // Not found yet → leave pending; venueStore.$venues retries on load.
-        case .pass, .invite, .profile:
+        case .invite(let code):
+            // Hold the referral code across the (possible) pre-auth → post-auth
+            // boundary; attribution is a server call made once a session exists.
+            ReferralService.shared.capturePendingCode(code)
+            appState.consumeRoute()
+        case .pass, .profile:
             appState.consumeRoute()
         }
     }

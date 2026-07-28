@@ -19,6 +19,7 @@
 		40CD7131F382690E2735FB1C /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB6374016627134BFCC83D6 /* ShareCardView.swift */; };
 		4AD4CD88E1366A6ACA462B08 /* CardPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */; };
 		4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */; };
+		67538855A4392738D84D703B /* ReferralService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE1AEB039250C8DA5E41CE1 /* ReferralService.swift */; };
 		6DB2BBFD9C2F38D3220A684A /* HypeEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3963062AE9823148A85E40 /* HypeEngineTests.swift */; };
 		7B6B03398BDEC6245300D80C /* SkipLinePass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */; };
 		7D22239A32057DDDC1688082 /* ReservationConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA727DF04AFC4355197DDF95 /* ReservationConfirmView.swift */; };
@@ -187,6 +188,7 @@
 		EXSC03000000000000RP01 /* ExperienceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceScorer.swift; path = BarPass/Core/Intelligence/ExperienceScorer.swift; sourceTree = SOURCE_ROOT; };
 		FAVS01000000000000RP01 /* FavoritesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FavoritesStore.swift; path = BarPass/Core/Services/FavoritesStore.swift; sourceTree = SOURCE_ROOT; };
 		FB5086AAE9CBD601116597BE /* EventTicket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTicket.swift; sourceTree = "<group>"; };
+		FDE1AEB039250C8DA5E41CE1 /* ReferralService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReferralService.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA01 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA02 /* TonightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA03 /* VenueDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueDetailView.swift; sourceTree = "<group>"; };
@@ -350,6 +352,7 @@
 				FF000001000000000000AA20 /* AuthService.swift */,
 				AN0000020000000000000001 /* AnalyticsService.swift */,
 				4534C465198E6FF9A92B4C7D /* DeepLinkRouter.swift */,
+				FDE1AEB039250C8DA5E41CE1 /* ReferralService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -818,6 +821,7 @@
 				7E5EB2897A93841F178719A9 /* DeepLinkRouter.swift in Sources */,
 				40CD7131F382690E2735FB1C /* ShareCardView.swift in Sources */,
 				35C0EF5692CBE8A6227C1745 /* ShareManager.swift in Sources */,
+				67538855A4392738D84D703B /* ReferralService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

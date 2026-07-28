@@ -105,5 +105,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "already_redeemed" }, { status: 409 });
   }
 
+  // Referral qualification (S4): a redeemed pass is the referred user's first
+  // real venue presence. The RPC is idempotent and only acts on a still-
+  // 'attributed' referral, so this is safe to call on every redemption. It
+  // must never affect the redemption result — a referral failure is logged
+  // and swallowed (same fail-open stance as rate limiting).
+  if (updated.customer_id) {
+    const { error: referralError } = await supabase.rpc("qualify_and_reward_referral", {
+      p_referred_id: updated.customer_id,
+    });
+    if (referralError) {
+      console.error("[redeem] referral qualification failed (non-fatal)", {
+        customerId: updated.customer_id,
+        code: referralError.code,
+        message: referralError.message,
+      });
+    }
+  }
+
   return NextResponse.json({ success: true, pass: updated });
 }

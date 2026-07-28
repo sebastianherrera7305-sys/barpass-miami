@@ -227,6 +227,52 @@ enum APIClient {
         }
     }
 
+    /// Returns the authenticated user's own referral code (server-generated,
+    /// created on first call). Feeds ShareManager.shareReferral with a real
+    /// code instead of a placeholder. GET /api/referral/code.
+    static func fetchReferralCode(idToken: String) async throws -> String {
+        var request = URLRequest(url: baseURL.appendingPathComponent("referral/code"))
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw APIClientError.network(error.localizedDescription)
+        }
+        guard let http = response as? HTTPURLResponse else { throw APIClientError.invalidResponse }
+        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+        guard (200..<300).contains(http.statusCode), let code = json["code"] as? String else {
+            throw APIClientError.server((json["error"] as? String) ?? "referral_code_unavailable")
+        }
+        return code
+    }
+
+    /// Attributes the authenticated user (the referred one) to the referrer
+    /// who owns `code`. Server-side, idempotent, no points granted here.
+    /// POST /api/referral/attribute. Throws on hard failure; `invalid_code`
+    /// and `self_referral` surface as `.server` errors the caller can ignore.
+    static func attributeReferral(idToken: String, code: String) async throws {
+        var request = URLRequest(url: baseURL.appendingPathComponent("referral/attribute"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["code": code])
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw APIClientError.network(error.localizedDescription)
+        }
+        guard let http = response as? HTTPURLResponse else { throw APIClientError.invalidResponse }
+        guard (200..<300).contains(http.statusCode) else {
+            let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+            throw APIClientError.server((json["error"] as? String) ?? "attribution_failed")
+        }
+    }
+
     /// POSTs JSON, expects `{ success: true, balance: <number>, transactionId?: <string> }`.
     private static func postJSON(
         path: String, idToken: String, body: [String: Any]
