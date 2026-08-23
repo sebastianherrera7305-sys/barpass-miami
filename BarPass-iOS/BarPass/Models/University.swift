@@ -51,13 +51,13 @@ enum GreekCouncil: String, Codable, CaseIterable {
 enum ChapterStatus: String, Codable {
     case active, suspended, inactive, historical, unknown
 
-    var label: String {
+    @MainActor var label: String {
         switch self {
-        case .active: return "Activo"
-        case .suspended: return "Suspendido"
-        case .inactive: return "Inactivo"
-        case .historical: return "Histórico"
-        case .unknown: return "Sin confirmar"
+        case .active: return L10n.shared.t("greek.status.active")
+        case .suspended: return L10n.shared.t("greek.status.suspended")
+        case .inactive: return L10n.shared.t("greek.status.inactive")
+        case .historical: return L10n.shared.t("greek.status.historical")
+        case .unknown: return L10n.shared.t("greek.status.unknown")
         }
     }
 }

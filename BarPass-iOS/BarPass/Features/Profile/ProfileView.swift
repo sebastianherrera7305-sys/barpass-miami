@@ -18,7 +18,7 @@ struct ProfileView: View {
     @State private var showAffiliationPicker = false
 
     private var affiliationSubtitle: String {
-        guard let uni = affiliatedUniversity else { return "Sin afiliación — tocá para elegir" }
+        guard let uni = affiliatedUniversity else { return l10n.t("greek.profile.noneHint") }
         if let chapter = affiliatedChapter { return "\(uni.shortName ?? uni.name) · \(chapter.fraternityName)" }
         return uni.shortName ?? uni.name
     }
@@ -411,7 +411,7 @@ struct ProfileView: View {
                                 .foregroundStyle(Color.bpAmber)
                                 .frame(width: 28)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Universidad")
+                                Text(l10n.t("greek.profile.title"))
                                     .font(.bpScaled(15, weight: .bold))
                                     .foregroundStyle(Color.bpInk)
                                 Text(affiliationSubtitle)
@@ -430,7 +430,7 @@ struct ProfileView: View {
                     }
                     .buttonStyle(.plain)
                     .padding(.horizontal, BPSpacing.lg)
-                    .bpAccessibility(label: "Universidad", hint: affiliationSubtitle, isButton: true)
+                    .bpAccessibility(label: l10n.t("greek.profile.title"), hint: affiliationSubtitle, isButton: true)
 
                     // Account
                     VStack(alignment: .leading, spacing: 12) {

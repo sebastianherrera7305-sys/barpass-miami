@@ -6,6 +6,7 @@ import SwiftUI
 struct AffiliationPickerView: View {
     let onSaved: (University?, GreekChapter?) -> Void
 
+    @ObservedObject private var l10n = L10n.shared
     @Environment(\.dismiss) private var dismiss
     @State private var universities: [University] = []
     @State private var selectedUniversity: University?
@@ -31,15 +32,15 @@ struct AffiliationPickerView: View {
                     universityStep
                 }
             }
-            .navigationTitle(selectedUniversity == nil ? "Tu universidad" : "Tu capítulo")
+            .navigationTitle(selectedUniversity == nil ? l10n.t("greek.affiliation.yourUniversity") : l10n.t("greek.affiliation.yourChapter"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cerrar") { dismiss() }
+                    Button(l10n.t("greek.affiliation.close")) { dismiss() }
                 }
                 if selectedUniversity != nil {
                     ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Atrás") { selectedUniversity = nil; chapters = [] }
+                        Button(l10n.t("greek.affiliation.back")) { selectedUniversity = nil; chapters = [] }
                     }
                 }
             }
@@ -62,7 +63,7 @@ struct AffiliationPickerView: View {
                             dismiss()
                         }
                     } label: {
-                        Text("Sin afiliación").foregroundStyle(Color.bpTextSecondary)
+                        Text(l10n.t("greek.affiliation.none")).foregroundStyle(Color.bpTextSecondary)
                     }
                     ForEach(filteredUniversities) { uni in
                         Button {
@@ -78,7 +79,7 @@ struct AffiliationPickerView: View {
                     }
                 }
                 .listStyle(.plain)
-                .searchable(text: $searchText, prompt: "Buscar universidad")
+                .searchable(text: $searchText, prompt: l10n.t("greek.affiliation.search"))
             }
         }
     }
@@ -90,7 +91,7 @@ struct AffiliationPickerView: View {
                 Spacer()
             } else if chapters.isEmpty {
                 Spacer()
-                Text("Todavía no verificamos capítulos para \(university.name)")
+                Text(String(format: l10n.t("greek.affiliation.noChapters"), university.name))
                     .font(.bpBody())
                     .foregroundStyle(Color.bpTextSecondary)
                     .multilineTextAlignment(.center)
@@ -101,7 +102,7 @@ struct AffiliationPickerView: View {
                     Button {
                         save(university: university, chapter: nil)
                     } label: {
-                        Text("Solo la universidad, sin capítulo").foregroundStyle(Color.bpTextSecondary)
+                        Text(l10n.t("greek.affiliation.onlyUniversity")).foregroundStyle(Color.bpTextSecondary)
                     }
                     ForEach(GreekCouncil.allCases, id: \.self) { council in
                         let list = chapters.filter { $0.council == council }

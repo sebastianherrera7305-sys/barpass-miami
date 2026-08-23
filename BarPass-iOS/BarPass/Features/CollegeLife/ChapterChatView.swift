@@ -6,6 +6,7 @@ import SwiftUI
 struct ChapterChatView: View {
     let chapter: GreekChapter
 
+    @ObservedObject private var l10n = L10n.shared
     @State private var messages: [ChapterMessage] = []
     @State private var draft = ""
     @State private var isLoading = true
@@ -48,10 +49,10 @@ struct ChapterChatView: View {
         .navigationTitle(chapter.fraternityName)
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
-        .confirmationDialog("Reportar mensaje", isPresented: Binding(get: { reportingMessageId != nil }, set: { if !$0 { reportingMessageId = nil } })) {
-            Button("Contenido inapropiado", role: .destructive) { report(reason: "contenido_inapropiado") }
-            Button("Acoso o abuso", role: .destructive) { report(reason: "acoso") }
-            Button("Cancelar", role: .cancel) { reportingMessageId = nil }
+        .confirmationDialog(l10n.t("greek.chat.reportTitle"), isPresented: Binding(get: { reportingMessageId != nil }, set: { if !$0 { reportingMessageId = nil } })) {
+            Button(l10n.t("greek.chat.reportInappropriate"), role: .destructive) { report(reason: "inappropriate_content") }
+            Button(l10n.t("greek.chat.reportHarassment"), role: .destructive) { report(reason: "harassment") }
+            Button(l10n.t("greek.chat.cancel"), role: .cancel) { reportingMessageId = nil }
         }
     }
 
@@ -74,7 +75,7 @@ struct ChapterChatView: View {
                 .padding(BPSpacing.sm)
                 .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.sm))
                 .contextMenu {
-                    Button("Reportar", role: .destructive) { reportingMessageId = message.id }
+                    Button(l10n.t("greek.chat.report"), role: .destructive) { reportingMessageId = message.id }
                 }
             }
         }
@@ -83,7 +84,7 @@ struct ChapterChatView: View {
 
     private var composer: some View {
         HStack(spacing: 10) {
-            TextField("Mensaje", text: $draft, axis: .vertical)
+            TextField(l10n.t("greek.chat.messagePlaceholder"), text: $draft, axis: .vertical)
                 .textFieldStyle(.plain)
                 .padding(10)
                 .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.md))
@@ -104,7 +105,7 @@ struct ChapterChatView: View {
         do {
             messages = try await RepositoryDependencies.chapterChat.messages(chapterId: chapter.id)
         } catch {
-            errorMessage = "No se pudo cargar el chat."
+            errorMessage = l10n.t("greek.chat.loadError")
         }
         isLoading = false
     }

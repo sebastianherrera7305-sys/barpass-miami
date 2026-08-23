@@ -7,6 +7,7 @@ import SwiftUI
 struct FraternityListView: View {
     let university: University
 
+    @ObservedObject private var l10n = L10n.shared
     @State private var chapters: [GreekChapter] = []
     @State private var isLoading = true
     @State private var myChapterId: String?
@@ -49,13 +50,13 @@ struct FraternityListView: View {
                 }
             }
         }
-        .navigationTitle("Fraternidades")
+        .navigationTitle(l10n.t("greek.fraternityList.title"))
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
-        .alert("Iniciá sesión", isPresented: $showSignInAlert) {
-            Button("Ok", role: .cancel) {}
+        .alert(l10n.t("greek.signIn.title"), isPresented: $showSignInAlert) {
+            Button(l10n.t("greek.signIn.ok"), role: .cancel) {}
         } message: {
-            Text("Necesitás una cuenta para marcar tu capítulo.")
+            Text(l10n.t("greek.signIn.message"))
         }
     }
 
@@ -70,7 +71,7 @@ struct FraternityListView: View {
             }
 
             if chapter.needsReview {
-                Label("Fuentes en conflicto — en revisión", systemImage: "exclamationmark.triangle.fill")
+                Label(l10n.t("greek.chapter.needsReview"), systemImage: "exclamationmark.triangle.fill")
                     .font(.bpScaled(11))
                     .foregroundStyle(Color.bpDanger)
             }
@@ -78,7 +79,7 @@ struct FraternityListView: View {
             HStack {
                 if let url = URL(string: chapter.officialSourceURL) {
                     Link(destination: url) {
-                        Label("Fuente oficial", systemImage: "checkmark.seal.fill")
+                        Label(l10n.t("greek.chapter.officialSource"), systemImage: "checkmark.seal.fill")
                             .font(.bpScaled(11, weight: .semibold))
                             .foregroundStyle(Color.bpAmber)
                     }
@@ -89,7 +90,7 @@ struct FraternityListView: View {
 
             if myChapterId == chapter.id {
                 NavigationLink(destination: ChapterChatView(chapter: chapter)) {
-                    Label("Chat del capítulo", systemImage: "bubble.left.and.bubble.right.fill")
+                    Label(l10n.t("greek.chapter.chat"), systemImage: "bubble.left.and.bubble.right.fill")
                         .font(.bpScaled(12, weight: .semibold))
                         .foregroundStyle(Color.bpAmber)
                 }
@@ -106,7 +107,7 @@ struct FraternityListView: View {
     @ViewBuilder
     private func affiliationButton(_ chapter: GreekChapter) -> some View {
         if myChapterId == chapter.id {
-            Label("Tu capítulo", systemImage: "checkmark.circle.fill")
+            Label(l10n.t("greek.chapter.yours"), systemImage: "checkmark.circle.fill")
                 .font(.bpScaled(11, weight: .semibold))
                 .foregroundStyle(Color.bpGreen)
         } else if savingChapterId == chapter.id {
@@ -115,7 +116,7 @@ struct FraternityListView: View {
             Button {
                 markAsMine(chapter)
             } label: {
-                Text("Marcar como mío")
+                Text(l10n.t("greek.chapter.markMine"))
                     .font(.bpScaled(11, weight: .semibold))
                     .foregroundStyle(Color.bpTextSecondary)
             }
@@ -144,7 +145,7 @@ struct FraternityListView: View {
             Image(systemName: "person.3")
                 .font(.bpScaled(34))
                 .foregroundStyle(Color.bpTextTertiary)
-            Text("Todavía no verificamos fraternidades para \(university.name)")
+            Text(String(format: l10n.t("greek.fraternityList.empty"), university.name))
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
                 .multilineTextAlignment(.center)

@@ -8,6 +8,7 @@ struct UniversityDetailView: View {
     let university: University
 
     @EnvironmentObject private var appState: AppState
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         ZStack {
@@ -18,7 +19,7 @@ struct UniversityDetailView: View {
                     header
 
                     NavigationLink(destination: FraternityListView(university: university)) {
-                        rowCard(icon: "person.3.fill", title: "Greek Life", subtitle: "Fraternidades verificadas")
+                        rowCard(icon: "person.3.fill", title: l10n.t("greek.detail.greekLife"), subtitle: l10n.t("greek.detail.greekLifeSubtitle"))
                     }
                     .buttonStyle(.plain)
 
@@ -27,13 +28,17 @@ struct UniversityDetailView: View {
                         SelectedCityStore.select(university.venueCity)
                         appState.requestedTab = 1 // Explore — never push ExploreView() as a child, it owns its own map/search state.
                     } label: {
-                        rowCard(icon: "map.fill", title: "Vida nocturna en \(university.city)", subtitle: "Bares y clubes en \(university.venueCity)")
+                        rowCard(
+                            icon: "map.fill",
+                            title: String(format: l10n.t("greek.detail.nightlife"), university.city),
+                            subtitle: String(format: l10n.t("greek.detail.nightlifeSubtitle"), university.venueCity)
+                        )
                     }
                     .buttonStyle(.plain)
 
                     if let officialURL = university.officialURL, let url = URL(string: officialURL) {
                         Link(destination: url) {
-                            rowCard(icon: "link", title: "Sitio oficial", subtitle: officialURL)
+                            rowCard(icon: "link", title: l10n.t("greek.detail.officialSite"), subtitle: officialURL)
                         }
                         .buttonStyle(.plain)
                     }
