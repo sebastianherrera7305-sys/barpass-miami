@@ -12,6 +12,16 @@ struct ProfileView: View {
     @State private var showGames = false
     @State private var showTopUp = false
     @State private var showDeleteAccount = false
+    @State private var currentCity: String? = SelectedCityStore.selectedCity
+    @State private var affiliatedUniversity: University?
+    @State private var affiliatedChapter: GreekChapter?
+    @State private var showAffiliationPicker = false
+
+    private var affiliationSubtitle: String {
+        guard let uni = affiliatedUniversity else { return "Sin afiliación — tocá para elegir" }
+        if let chapter = affiliatedChapter { return "\(uni.shortName ?? uni.name) · \(chapter.fraternityName)" }
+        return uni.shortName ?? uni.name
+    }
 
     private var points: Int { engine.totalXP }
     private var level: String { engine.levelName }
@@ -358,6 +368,70 @@ struct ProfileView: View {
                     .padding(.horizontal, BPSpacing.lg)
                     .bpAccessibility(label: l10n.t("profile.autoplay.title"), hint: autoplay.enabled ? l10n.t("profile.autoplay.on") : l10n.t("profile.autoplay.off"), isButton: true)
 
+                    // City
+                    Button {
+                        BPHaptics.medium()
+                        appState.showCityPicker = true
+                    } label: {
+                        let identity = CityIdentity.forCity(currentCity)
+                        HStack(spacing: 10) {
+                            CityMascotIcon(city: currentCity, size: 28)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(l10n.t("cityGate.title"))
+                                    .font(.bpScaled(15, weight: .bold))
+                                    .foregroundStyle(Color.bpInk)
+                                Text(currentCity.map { identity.nickname.isEmpty ? $0 : "\($0) · \(identity.nickname)" } ?? l10n.t("cityGate.change.hint"))
+                                    .font(.bpScaled(11))
+                                    .foregroundStyle(Color.bpTextSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.bpScaled(13, weight: .semibold))
+                                .foregroundStyle(Color.bpTextTertiary)
+                        }
+                        .padding(18)
+                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, BPSpacing.lg)
+                    .bpAccessibility(label: currentCity.map { "\(l10n.t("cityGate.title")): \($0)" } ?? l10n.t("cityGate.title"), hint: l10n.t("cityGate.change.hint"), isButton: true)
+                    .onReceive(NotificationCenter.default.publisher(for: .selectedCityChanged)) { note in
+                        currentCity = note.object as? String
+                    }
+
+                    // University / Greek Life affiliation (self-declared, optional)
+                    Button {
+                        BPHaptics.medium()
+                        showAffiliationPicker = true
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "graduationcap.fill")
+                                .font(.bpScaled(20))
+                                .foregroundStyle(Color.bpAmber)
+                                .frame(width: 28)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Universidad")
+                                    .font(.bpScaled(15, weight: .bold))
+                                    .foregroundStyle(Color.bpInk)
+                                Text(affiliationSubtitle)
+                                    .font(.bpScaled(11))
+                                    .foregroundStyle(Color.bpTextSecondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.bpScaled(13, weight: .semibold))
+                                .foregroundStyle(Color.bpTextTertiary)
+                        }
+                        .padding(18)
+                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, BPSpacing.lg)
+                    .bpAccessibility(label: "Universidad", hint: affiliationSubtitle, isButton: true)
+
                     // Account
                     VStack(alignment: .leading, spacing: 12) {
                         Text(l10n.t("profile.account"))
@@ -462,6 +536,13 @@ struct ProfileView: View {
                 appState.showNativeAuth = true
             }
         }
+        .sheet(isPresented: $showAffiliationPicker) {
+            AffiliationPickerView { uni, chapter in
+                affiliatedUniversity = uni
+                affiliatedChapter = chapter
+            }
+        }
+        .task { await loadAffiliation() }
         .onChange(of: engine.lastAward?.xp) { _, newValue in
             guard newValue != nil else { return }
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { showToast = true }
@@ -505,6 +586,16 @@ struct ProfileView: View {
             Text(points)
                 .font(.bpScaled(13, weight: .bold))
                 .foregroundStyle(Color.bpAmber)
+        }
+    }
+
+    private func loadAffiliation() async {
+        guard let affiliation = try? await RepositoryDependencies.profileAffiliation.getAffiliation() else { return }
+        if let uid = affiliation.universityId {
+            affiliatedUniversity = try? await RepositoryDependencies.greekLife.university(id: uid)
+        }
+        if let cid = affiliation.chapterId {
+            affiliatedChapter = try? await RepositoryDependencies.greekLife.chapter(id: cid)
         }
     }
 }

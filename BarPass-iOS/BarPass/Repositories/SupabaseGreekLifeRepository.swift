@@ -9,6 +9,7 @@ final actor SupabaseGreekLifeRepository: GreekLifeRepository {
 
     private var universitiesByCity: [String: [University]] = [:]
     private var chaptersByUniversity: [String: [GreekChapter]] = [:]
+    private var allUniversitiesCache: [University]?
 
     func universities(forCity city: String) async throws -> [University] {
         if let cached = universitiesByCity[city] { return cached }
@@ -63,6 +64,64 @@ final actor SupabaseGreekLifeRepository: GreekLifeRepository {
         let result = rows.map(Self.mapChapter)
         chaptersByUniversity[universityId] = result
         return result
+    }
+
+    func allUniversities() async throws -> [University] {
+        if let cached = allUniversitiesCache { return cached }
+        guard var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/universities") else { throw URLError(.badURL) }
+        components.queryItems = [
+            URLQueryItem(name: "select", value: Self.universityColumns),
+            URLQueryItem(name: "order", value: "name.asc"),
+        ]
+        guard let url = components.url else { throw URLError(.badURL) }
+
+        var request = URLRequest(url: url)
+        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
+            throw URLError(.badServerResponse)
+        }
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let rows = try decoder.decode([SupabaseUniversityRow].self, from: data)
+        let result = rows.map(Self.mapUniversity)
+        allUniversitiesCache = result
+        return result
+    }
+
+    func university(id: String) async throws -> University? {
+        try await allUniversities().first { $0.id == id }
+    }
+
+    func chapter(id: String) async throws -> GreekChapter? {
+        for (_, chapters) in chaptersByUniversity {
+            if let match = chapters.first(where: { $0.id == id }) { return match }
+        }
+        guard var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/greek_chapters") else { throw URLError(.badURL) }
+        components.queryItems = [
+            URLQueryItem(name: "select", value: Self.chapterColumns),
+            URLQueryItem(name: "id", value: "eq.\(id)"),
+        ]
+        guard let url = components.url else { throw URLError(.badURL) }
+
+        var request = URLRequest(url: url)
+        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
+            throw URLError(.badServerResponse)
+        }
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let rows = try decoder.decode([SupabaseChapterRow].self, from: data)
+        return rows.first.map(Self.mapChapter)
     }
 
     private static func mapUniversity(_ row: SupabaseUniversityRow) -> University {
