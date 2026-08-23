@@ -51,13 +51,18 @@ struct UniversityDetailView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(university.name)
-                .font(.bpTitle1())
-                .foregroundStyle(Color.bpInk)
-            Text([university.city, university.state].compactMap { $0 }.joined(separator: ", "))
-                .font(.bpBody())
-                .foregroundStyle(Color.bpTextSecondary)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 14) {
+                UniversityMonogramBadge(university: university, size: 56)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(university.name)
+                        .font(.bpTitle1())
+                        .foregroundStyle(Color.bpInk)
+                    Text([university.city, university.state].compactMap { $0 }.joined(separator: ", "))
+                        .font(.bpBody())
+                        .foregroundStyle(Color.bpTextSecondary)
+                }
+            }
             if let notes = university.partyLifeNotes, !notes.isEmpty {
                 Text(notes)
                     .font(.bpCaption())

@@ -43,6 +43,7 @@ struct UniversityListView: View {
 
     private func universityCard(_ uni: University) -> some View {
         HStack(spacing: 14) {
+            UniversityMonogramBadge(university: uni)
             VStack(alignment: .leading, spacing: 4) {
                 Text(uni.name)
                     .font(.bpHeadline())

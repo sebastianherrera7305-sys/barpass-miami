@@ -12,6 +12,7 @@
 		523167EE1BE844FD9D19B062 /* SupabaseGreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */; };
 		7AC8FF76E544F30232283F9E /* ProfileAffiliationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */; };
 		E453AE48EC805F573934230C /* ChapterChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */; };
+		0058F433096FE68B59B9F1EE /* UniversityIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */; };
 		A44EFDEC59D7784580819FD3 /* ChapterChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 792335E55D9363A086C6C79B /* ChapterChatView.swift */; };
 		C4DE0A26B74D4F5DBEE8F764 /* UniversityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F863CE708ACF44B3A96D654A /* UniversityListView.swift */; };
 		C577FAF109A04AFC978B06E4 /* UniversityDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */; };
@@ -209,6 +210,7 @@
 		61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseGreekLifeRepository.swift; path = BarPass/Repositories/SupabaseGreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
 		F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileAffiliationRepository.swift; path = BarPass/Repositories/ProfileAffiliationRepository.swift; sourceTree = SOURCE_ROOT; };
 		5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatRepository.swift; path = BarPass/Repositories/ChapterChatRepository.swift; sourceTree = SOURCE_ROOT; };
+		B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityIdentity.swift; path = BarPass/Resources/UniversityIdentity.swift; sourceTree = SOURCE_ROOT; };
 		792335E55D9363A086C6C79B /* ChapterChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatView.swift; path = BarPass/Features/CollegeLife/ChapterChatView.swift; sourceTree = SOURCE_ROOT; };
 		F863CE708ACF44B3A96D654A /* UniversityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityListView.swift; path = BarPass/Features/CollegeLife/UniversityListView.swift; sourceTree = SOURCE_ROOT; };
 		02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityDetailView.swift; path = BarPass/Features/CollegeLife/UniversityDetailView.swift; sourceTree = SOURCE_ROOT; };
@@ -527,6 +529,7 @@
 				CE8C91D8ECDD43B6AE34CEA4 /* BarPassLoadingView.swift */,
 				DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */,
 				656968298CED42FFBA49231A /* CityIdentity.swift */,
+				B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */,
 				F35C2CF95EBF470399C6196E /* SelectedCityStore.swift */,
 				28C5D564990D482ABF8A0AE5 /* CityPickerView.swift */,
 				163C5D5B580F4F5CB17391D4 /* LiquidGlassButtonStyle.swift */,
@@ -946,6 +949,7 @@
 				D8865A1397474618901E5092 /* BarPassLoadingView.swift in Sources */,
 				1E6D56BE3ACE427DB3D6D36B /* CityMascotIcon.swift in Sources */,
 				C79F0EA45A09405485E0FC4D /* CityIdentity.swift in Sources */,
+				0058F433096FE68B59B9F1EE /* UniversityIdentity.swift in Sources */,
 				BBD8BC9C0B40435594795411 /* SelectedCityStore.swift in Sources */,
 				7A79EB5E27ED4C56B9B794AF /* CityPickerView.swift in Sources */,
 				64BC73EEB97843B5A2ADC6DC /* LiquidGlassButtonStyle.swift in Sources */,
