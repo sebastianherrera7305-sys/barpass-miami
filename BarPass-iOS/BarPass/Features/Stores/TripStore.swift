@@ -12,8 +12,8 @@ final class TripStore: ObservableObject {
     /// Blind ratings persist to disk — they were memory-only and vanished
     /// on every app restart (defeating the whole reputation system).
     private static let ratingsURL: URL = {
-        let base = FileManager.default
-            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let base = (FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory)
             .appendingPathComponent("BarPassTrips", isDirectory: true)
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
         return base.appendingPathComponent("ratings.json")

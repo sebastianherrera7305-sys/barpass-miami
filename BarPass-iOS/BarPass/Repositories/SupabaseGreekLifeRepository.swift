@@ -4,7 +4,7 @@ final actor SupabaseGreekLifeRepository: GreekLifeRepository {
     private static let supabaseURL = SupabaseConfig.url.absoluteString
     private static let anonKey = SupabaseConfig.anonKey
 
-    private static let universityColumns = "id,name,short_name,city,state,country,official_url,greek_life_url,lat,lng,party_life_notes"
+    private static let universityColumns = "id,name,short_name,city,metro_city,state,country,official_url,greek_life_url,lat,lng,party_life_notes"
     private static let chapterColumns = "id,university_id,fraternity_name,chapter_designation,council,status,official_source_url,chapter_url,address,lat,lng,address_verified,needs_review,review_reason"
 
     private var universitiesByCity: [String: [University]] = [:]
@@ -14,9 +14,12 @@ final actor SupabaseGreekLifeRepository: GreekLifeRepository {
     func universities(forCity city: String) async throws -> [University] {
         if let cached = universitiesByCity[city] { return cached }
         guard var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/universities") else { throw URLError(.badURL) }
+        // Matches either the university's real city or its metro_city (e.g.
+        // Coral Gables schools surface under "Miami") — never a fuzzy/ilike
+        // match, both sides are exact real values.
         components.queryItems = [
             URLQueryItem(name: "select", value: Self.universityColumns),
-            URLQueryItem(name: "city", value: "eq.\(city)"),
+            URLQueryItem(name: "or", value: "(city.eq.\(city),metro_city.eq.\(city))"),
         ]
         guard let url = components.url else { throw URLError(.badURL) }
 
@@ -130,6 +133,7 @@ final actor SupabaseGreekLifeRepository: GreekLifeRepository {
             name: row.name,
             shortName: row.shortName,
             city: row.city,
+            metroCity: row.metroCity,
             state: row.state,
             country: row.country,
             officialURL: row.officialUrl,
@@ -165,6 +169,7 @@ private struct SupabaseUniversityRow: Decodable {
     let name: String
     let shortName: String?
     let city: String
+    let metroCity: String?
     let state: String?
     let country: String
     let officialUrl: String?

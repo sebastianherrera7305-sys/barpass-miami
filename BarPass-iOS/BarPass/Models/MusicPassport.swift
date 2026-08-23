@@ -35,8 +35,8 @@ final class MusicProfileStore: ObservableObject {
     private let sources: [MusicSourceKind: MusicSource]
 
     private static let dir: URL = {
-        let base = FileManager.default
-            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let base = (FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory)
             .appendingPathComponent("BarPassMusic", isDirectory: true)
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
         return base

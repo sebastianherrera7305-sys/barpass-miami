@@ -150,27 +150,37 @@ create policy "manage own favorites"
   with check (auth.uid() = user_id);
 
 -- TRIPS ─────────────────────────────────────────────────────
-create table if not exists public.trips (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  title text not null,
-  destination_city text not null,
-  start_date text not null,
-  end_date text not null,
-  visibility text not null default 'private',
-  status text not null default 'planning',
-  trip_data jsonb not null default '{}',
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-alter table public.trips enable row level security;
-
-create policy "manage own trips"
-  on public.trips for all
-  to authenticated
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+-- SUPERSEDED — do not run this block. The `public.trips` table actually
+-- live in Supabase (verified via REST against the real DB) matches
+-- trips_schema.sql (member_ids, co_organizer_ids, stops jsonb, invite_code,
+-- timestamptz dates), not the `trip_data`/text-date shape this block used
+-- to define. This block used `create table if not exists`, so once
+-- trips_schema.sql's version existed, re-running this file was already a
+-- silent no-op — but it's left here (commented, not deleted) so nobody
+-- resurrects the wrong shape after a future `drop table public.trips`.
+-- See trips_schema.sql for the real, current schema.
+--
+-- create table if not exists public.trips (
+--   id uuid primary key default gen_random_uuid(),
+--   user_id uuid not null references auth.users(id) on delete cascade,
+--   title text not null,
+--   destination_city text not null,
+--   start_date text not null,
+--   end_date text not null,
+--   visibility text not null default 'private',
+--   status text not null default 'planning',
+--   trip_data jsonb not null default '{}',
+--   created_at timestamptz not null default now(),
+--   updated_at timestamptz not null default now()
+-- );
+--
+-- alter table public.trips enable row level security;
+--
+-- create policy "manage own trips"
+--   on public.trips for all
+--   to authenticated
+--   using (auth.uid() = user_id)
+--   with check (auth.uid() = user_id);
 
 -- SAVED PLANS (AI Concierge output) ───────────────────────────
 create table if not exists public.night_plans (

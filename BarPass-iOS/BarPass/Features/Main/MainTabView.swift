@@ -7,12 +7,32 @@ struct MainTabView: View {
     @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var themeService = ThemeService.shared
     @ObservedObject private var appearanceStore = AppearanceStore.shared
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var selectedTab = 0
+    /// Tracks the previous `appState.isOffline` value so a reconnect refresh
+    /// only fires on the actual offline→online transition, not on every
+    /// publish of the initial (already-online) value at launch.
+    @State private var wasOffline = false
     /// A venue opened from a deep link (`barpass://venue/{id}`). Presented as a
     /// covering detail so it works from any tab without retrofitting the
     /// NavigationLink-based push used inside Tonight/Explore.
     @State private var deepLinkedVenue: BarPassVenue?
+    @ObservedObject private var helpStore = HelpGuideStore.shared
+    @State private var showHelpIntro = false
+
+    /// nil for tabs with no registered Help content yet (Plan) — the button
+    /// simply doesn't render rather than opening an overlay with nothing to
+    /// explain.
+    private var currentHelpRoute: HelpRoute? {
+        switch selectedTab {
+        case 0: return .tonight
+        case 1: return .explore
+        case 2: return .trips
+        case 4: return .profile
+        default: return nil
+        }
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -45,6 +65,39 @@ struct MainTabView: View {
                 .animation(.spring(response: 0.4, dampingFraction: 0.85), value: MusicNowPlayingObserver.shared.title)
 
             floatingTabBar
+
+            if let route = currentHelpRoute, !helpStore.isActive {
+                VStack {
+                    HStack {
+                        Spacer()
+                        HelpButton(route: route)
+                            .padding(.top, 56)
+                            .padding(.trailing, BPSpacing.lg)
+                    }
+                    Spacer()
+                }
+            }
+
+            if showHelpIntro {
+                helpIntroBanner
+            }
+        }
+        // Attached to the OUTER ZStack, not the inner Group — anchors from
+        // .helpTarget() still bubble up through the whole tree either way,
+        // but the resulting overlay must render on top of literally
+        // everything (tab bar, music bar, the Help button itself). Reading
+        // this preference on the Group alone put the overlay UNDER those —
+        // it could activate and never be visible, tap or no tap.
+        .overlayPreferenceValue(HelpAnchorPreferenceKey.self) { anchors in
+            if helpStore.isActive {
+                HelpOverlayView(anchors: anchors)
+            }
+        }
+        .task {
+            if helpStore.shouldShowIntro {
+                try? await Task.sleep(nanoseconds: 800_000_000)
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { showHelpIntro = true }
+            }
         }
         .ignoresSafeArea(edges: .bottom)
         // Theme switch rebuilds the whole tree so every Color.bpAmber re-resolves.
@@ -53,10 +106,31 @@ struct MainTabView: View {
         // MainTabView only renders once authenticated, so this is the natural
         // point to flush any referral code captured from a pre-auth deep link.
         .task { await ReferralService.shared.attributePendingIfNeeded() }
+        // Coming back from background is when venues are most likely stale
+        // (user left the app open for a while). loadVenues() is cheap to call
+        // here — it only hits the network if the repository's freshness
+        // window has actually expired, otherwise it's a no-op cache hit.
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                Task { await venueStore.loadVenues() }
+            }
+        }
+        // Reconnecting after being offline should recover on its own — the
+        // user shouldn't have to force-quit the app to see current data.
+        .onReceive(appState.$isOffline) { offline in
+            if wasOffline && !offline {
+                Task { await venueStore.loadVenues() }
+            }
+            wasOffline = offline
+        }
         // Deep-link routing. Trip → switch to the Trips tab (TripsListView opens
         // its detail sheet and consumes the route). Venue → resolve + present.
         .onReceive(appState.$pendingRoute.compactMap { $0 }) { route in
             handleDeepLink(route)
+        }
+        .onReceive(appState.$requestedTab.compactMap { $0 }) { tab in
+            selectedTab = tab
+            appState.requestedTab = nil
         }
         // Cold start: a venue link can arrive before venues finish loading. Retry
         // resolution whenever the catalog updates while a venue route is pending.
@@ -93,6 +167,48 @@ struct MainTabView: View {
         }
     }
 
+    /// First-launch-only, non-blocking — a single small banner, never a
+    /// forced tour. Taps either open Help right away or just dismiss.
+    private var helpIntroBanner: some View {
+        VStack {
+            HStack(spacing: 10) {
+                Image(systemName: "questionmark.circle.fill")
+                    .foregroundStyle(Color.bpAmber)
+                Text("Let us show you around.")
+                    .font(.bpScaled(13, weight: .semibold))
+                    .foregroundStyle(Color.bpInk)
+                Spacer()
+                Button("Ver") {
+                    BPHaptics.light()
+                    helpStore.markIntroShown()
+                    withAnimation { showHelpIntro = false }
+                    if let route = currentHelpRoute { helpStore.open(route: route) }
+                }
+                .font(.bpScaled(13, weight: .bold))
+                .foregroundStyle(Color.bpAmber)
+
+                Button {
+                    BPHaptics.light()
+                    helpStore.markIntroShown()
+                    withAnimation { showHelpIntro = false }
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.bpScaled(11, weight: .semibold))
+                        .foregroundStyle(Color.bpTextSecondary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(BPSpacing.md)
+            .glass(radius: BPRadius.lg)
+            .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpAmber.opacity(0.2)))
+            .shadow(color: .black.opacity(0.35), radius: 14, y: 4)
+            .padding(.horizontal, BPSpacing.lg)
+            .padding(.top, 104)
+            Spacer()
+        }
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
     private var floatingTabBar: some View {
         HStack(spacing: 0) {
             ForEach(0..<5) { i in
@@ -103,7 +219,11 @@ struct MainTabView: View {
         .padding(.vertical, 6)
         .background(
             Capsule()
-                .fill(Color(red: 0.06, green: 0.04, blue: 0.10).opacity(0.96))
+                // Was this exact colour hardcoded, so the bar stayed dark in
+                // Light Mode while its icons/labels use bpInk — dark on dark,
+                // i.e. invisible. bpCardBackground is identical in Dark Mode
+                // and flips to white in Light, restoring contrast both ways.
+                .fill(Color.bpCardBackground.opacity(0.96))
                 .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.08), lineWidth: 1))
                 .shadow(color: .black.opacity(0.5), radius: 20, y: 8)
         )

@@ -16,6 +16,7 @@ final class AppState: ObservableObject {
     @Published var showActionBar          = false
     @Published var showNativeAuth         = true
     @Published var showAgeGate            = false
+    @Published var showCityPicker         = false
     @Published var showEmailVerification  = false
     @Published var isOffline              = false
     @Published var deepLinkURL:            URL?
@@ -25,6 +26,12 @@ final class AppState: ObservableObject {
     /// deep-link navigation.
     @Published var pendingRoute:           DeepLinkRoute?
     @Published var showCart               = false
+    /// Set by a nested screen (e.g. a university's "nightlife nearby" row)
+    /// that wants to jump to a top-level tab. MainTabView observes this and
+    /// clears it after switching — never push a tab-root view (ExploreView,
+    /// TripsListView, etc.) as a child of a NavigationLink; those views own
+    /// their own map/search state and aren't designed to be nested.
+    @Published var requestedTab:           Int?
     @Published var walletBalance:          Double = 0
     @Published var lastOrderConfirmation:  OrderConfirmation?
     @Published var showPriorityEntry       = false
@@ -113,14 +120,34 @@ final class AppState: ObservableObject {
         if !AgeGateService.isVerified {
             showAgeGate = true
         } else {
+            proceedPastAgeGate()
+        }
+    }
+
+    /// Called once the user confirms they're 21+. Continues to the city
+    /// picker (or straight to the app) the same way proceedPastAuth() would
+    /// have if the age gate hadn't been needed.
+    func completeAgeGate() {
+        withAnimation(.easeOut(duration: 0.15)) { showAgeGate = false }
+        proceedPastAgeGate()
+    }
+
+    /// A city choice is required before the action bar/main app appears —
+    /// without it every city's venues render mixed together with no way to
+    /// tell them apart. Only asked once per install; changeable later from
+    /// Profile via SelectedCityStore.reset() + select().
+    private func proceedPastAgeGate() {
+        if SelectedCityStore.selectedCity == nil {
+            showCityPicker = true
+        } else {
             withAnimation(.easeOut(duration: 0.15).delay(0.1)) { showActionBar = true }
         }
     }
 
-    /// Called once the user confirms they're 21+. Reveals the action bar the
-    /// same way completeAuth() would have if the gate hadn't been needed.
-    func completeAgeGate() {
-        withAnimation(.easeOut(duration: 0.15)) { showAgeGate = false }
+    /// Called once the user picks a city (or confirms there was only one to
+    /// pick). Reveals the action bar the same way completeAgeGate() would have.
+    func completeCityPicker() {
+        withAnimation(.easeOut(duration: 0.15)) { showCityPicker = false }
         withAnimation(.easeOut(duration: 0.15).delay(0.1)) { showActionBar = true }
     }
 

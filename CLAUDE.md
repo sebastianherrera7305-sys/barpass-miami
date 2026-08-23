@@ -29,7 +29,7 @@ Splash → Onboarding Video → Native Auth → MainTabView (5 tabs)
 | Layer | Directory | Description |
 |-------|-----------|-------------|
 | **Domain Models** | `Models/` | `BarPassVenue`, `VenueType`, `Trip`, `NightPlan`, `CartItem`, `EventTicket`, `SkipLinePass`, `TableReservation` |
-| **Repositories** | `Repositories/` | `VenueRepository`, `TripRepository`, `PlanRepository` (protocols). `SupabaseVenueRepository` (actor), `LocalVenueRepository`, `LocalTripRepository`, `LocalPlanRepository`, `SupabasePlanRepository` (placeholder), `SupabaseTripRepository` (placeholder) |
+| **Repositories** | `Repositories/` | `VenueRepository`, `TripRepository`, `PlanRepository` (protocols). `SupabaseVenueRepository` (actor), `LocalVenueRepository`, `LocalTripRepository`, `LocalPlanRepository`, `SupabasePlanRepository` (placeholder — `RepositoryDependencies` uses `LocalPlanRepository`), `SupabaseTripRepository` (**live, wired as the real dependency** — real shared backend against `trips_schema.sql`, not a placeholder) |
 | **DI** | `Repositories/RepositoryDependencies.swift` | `nonisolated(unsafe) static var venue/trip/plan` — swap implementations one line |
 | **Stores** | `Models/VenueStore.swift`, `Models/TripStore.swift` | `@MainActor`, `@Published`, repository injected via init |
 | **UI** | `Features/` | `MainTabView` (5 tabs), `TonightView`, `ExploreView`, `TripsListView`, `PlanView`, `ProfileView`, `CartView`, `CardPaymentView`, PriorityEntry hub, Trip detail/creation flow |
@@ -97,7 +97,7 @@ barpass/
     │   ├── SupabaseVenueRepository.swift  ← Actor, real Supabase fetch + row mapping
     │   ├── TripRepository.swift           ← Protocol (CRUD)
     │   ├── LocalTripRepository.swift      ← Actor, disk-backed JSON
-    │   ├── SupabaseTripRepository.swift   ← Placeholder (throws)
+    │   ├── SupabaseTripRepository.swift   ← Live, real Supabase (trips_schema.sql) — used by RepositoryDependencies
     │   ├── PlanRepository.swift           ← Protocol + LocalPlanRepository (actor)
     │   ├── SupabasePlanRepository.swift   ← Placeholder (throws)
     │   └── RepositoryDependencies.swift   ← DI point (venue, trip, plan)
@@ -256,7 +256,7 @@ Sign Out
 - **OpenAI key** — missing. AI Concierge (`/api/concierge`) won't work.
 - **Onboarding videos** — 6 Higgsfield clips not yet generated. View is placeholder.
 - **MapLibre** — works locally but not deployed.
-- **Supabase trips/night_plans tables** — `SupabaseTripRepository` and `SupabasePlanRepository` are placeholders. Trips persist on disk only.
+- **Supabase night_plans table** — `SupabasePlanRepository` is a placeholder; `RepositoryDependencies` uses `LocalPlanRepository`, plans persist on disk only. Trips are NOT disk-only anymore — `SupabaseTripRepository` is live against `trips_schema.sql` (verified against the real DB 2026-08-22); `LocalTripRepository`'s old disk-based trips are orphaned since this migration.
 - **Apple Pay merchant ID** — código apunta a `<MERCHANT_ID>` (ya no es placeholder), pero el merchant ID en sí todavía no está registrado en el portal.
 - **PrivacyInfo.xcprivacy** — declares collected data but may need App Store review confirmation.
 

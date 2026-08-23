@@ -5,6 +5,7 @@ import PhotosUI
 /// the current trip. One screen, not a wizard (unlike TripCreateFlow), since
 /// there's no "collect info step by step" need when the info already
 /// exists. Doesn't touch the itinerary — that's a separate, larger feature.
+@MainActor
 struct EditTripView: View {
     let trip: Trip
     @EnvironmentObject private var store: TripStore
@@ -134,20 +135,35 @@ struct EditTripView: View {
         }
     }
 
+
     private var coverImagePicker: some View {
-        PhotosPicker(selection: $coverPickerItem, matching: .images) {
+        // PhotosPicker's `label` closure is typed `@Sendable () -> Label` —
+        // reading @MainActor-isolated properties (`coverImage`,
+        // `existingCoverPath`, `l10n`) directly inside it is what produced
+        // the isolation warning. Snapshotting them to plain, Sendable local
+        // constants first means the closure captures values, not isolated
+        // state, so it satisfies @Sendable without an explicit @MainActor
+        // annotation on the closure (which breaks the required conversion).
+        let image = coverImage
+        let existingImage = image == nil
+            ? existingCoverPath.flatMap { ImageCache.downsampled(contentsOf: URL(fileURLWithPath: $0), maxPixel: 900) }
+            : nil
+        let pickLabel = l10n.t("tripCreate.coverImage.pick")
+        let pickHint = l10n.t("tripCreate.coverImage.hint")
+
+        return PhotosPicker(selection: $coverPickerItem, matching: .images) {
             ZStack {
                 RoundedRectangle(cornerRadius: BPRadius.lg)
                     .fill(Color.bpInk.opacity(0.06))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
 
-                if let coverImage {
-                    Image(uiImage: coverImage)
+                if let image {
+                    Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
                         .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
-                } else if let path = existingCoverPath, let uiImage = ImageCache.downsampled(contentsOf: URL(fileURLWithPath: path), maxPixel: 900) {
-                    Image(uiImage: uiImage)
+                } else if let existingImage {
+                    Image(uiImage: existingImage)
                         .resizable()
                         .scaledToFill()
                         .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
@@ -156,7 +172,7 @@ struct EditTripView: View {
                         Image(systemName: "photo.badge.plus")
                             .font(.title2)
                             .foregroundStyle(amber)
-                        Text(l10n.t("tripCreate.coverImage.pick"))
+                        Text(pickLabel)
                             .font(.bpCaption())
                             .foregroundStyle(Color.bpTextSecondary)
                     }
@@ -167,7 +183,7 @@ struct EditTripView: View {
         }
         .buttonStyle(.plain)
         .padding(.horizontal, BPSpacing.lg)
-        .bpAccessibility(label: l10n.t("tripCreate.coverImage.pick"), hint: l10n.t("tripCreate.coverImage.hint"), isButton: true)
+        .bpAccessibility(label: pickLabel, hint: pickHint, isButton: true)
         .onChange(of: coverPickerItem) { _, newItem in
             Task {
                 guard let data = try? await newItem?.loadTransferable(type: Data.self) else { return }
@@ -195,7 +211,7 @@ struct EditTripView: View {
 
     private func saveCoverImageIfNeeded() -> String? {
         guard let coverImage, let jpeg = coverImage.jpegData(compressionQuality: 0.8) else { return nil }
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let dir = (FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory)
             .appendingPathComponent("BarPassTripCovers", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let fileURL = dir.appendingPathComponent("\(trip.id).jpg")

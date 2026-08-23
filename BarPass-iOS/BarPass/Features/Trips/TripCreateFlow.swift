@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 
+@MainActor
 struct TripCreateFlow: View {
     @ObservedObject private var l10n = L10n.shared
     let venues: [BarPassVenue]
@@ -111,14 +112,25 @@ struct TripCreateFlow: View {
     }
 
     private var coverImagePicker: some View {
-        PhotosPicker(selection: $coverPickerItem, matching: .images) {
+        // PhotosPicker's `label` closure is typed `@Sendable () -> Label` —
+        // reading `self.coverImage`/`self.l10n` (both @MainActor-isolated)
+        // directly inside it is what produced the isolation warning.
+        // Snapshotting them to plain, Sendable local constants first means
+        // the closure captures values, not isolated state, so it satisfies
+        // @Sendable without needing (and breaking on) an explicit @MainActor
+        // annotation on the closure itself.
+        let image = coverImage
+        let pickLabel = l10n.t("tripCreate.coverImage.pick")
+        let pickHint = l10n.t("tripCreate.coverImage.hint")
+
+        return PhotosPicker(selection: $coverPickerItem, matching: .images) {
             ZStack {
                 RoundedRectangle(cornerRadius: BPRadius.lg)
                     .fill(Color.bpInk.opacity(0.06))
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
 
-                if let coverImage {
-                    Image(uiImage: coverImage)
+                if let image {
+                    Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
                         .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
@@ -127,7 +139,7 @@ struct TripCreateFlow: View {
                         Image(systemName: "photo.badge.plus")
                             .font(.title2)
                             .foregroundStyle(amber)
-                        Text(l10n.t("tripCreate.coverImage.pick"))
+                        Text(pickLabel)
                             .font(.bpCaption())
                             .foregroundStyle(Color.bpTextSecondary)
                     }
@@ -138,7 +150,7 @@ struct TripCreateFlow: View {
         }
         .buttonStyle(.plain)
         .padding(.horizontal, BPSpacing.lg)
-        .bpAccessibility(label: l10n.t("tripCreate.coverImage.pick"), hint: l10n.t("tripCreate.coverImage.hint"), isButton: true)
+        .bpAccessibility(label: pickLabel, hint: pickHint, isButton: true)
         .onChange(of: coverPickerItem) { _, newItem in
             Task {
                 guard let data = try? await newItem?.loadTransferable(type: Data.self) else { return }
@@ -341,7 +353,7 @@ struct TripCreateFlow: View {
     /// until one does; never fabricates a remote URL.
     private func saveCoverImageIfNeeded(tripId: String) -> String? {
         guard let coverImage, let jpeg = coverImage.jpegData(compressionQuality: 0.8) else { return nil }
-        let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let dir = (FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory)
             .appendingPathComponent("BarPassTripCovers", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let fileURL = dir.appendingPathComponent("\(tripId).jpg")

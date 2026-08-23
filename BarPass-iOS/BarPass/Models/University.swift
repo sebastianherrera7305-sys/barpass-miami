@@ -9,6 +9,10 @@ struct University: Identifiable, Codable, Hashable {
     let name: String
     let shortName: String?
     let city: String
+    /// The BarPass venue-city metro area this university belongs to, when it
+    /// differs from `city` (e.g. Coral Gables → Miami). A real geographic
+    /// fact, never invented. Falls back to `city` when nil.
+    let metroCity: String?
     let state: String?
     let country: String
     let officialURL: String?
@@ -19,6 +23,9 @@ struct University: Identifiable, Codable, Hashable {
     /// official office") — never a vibe/marketing line. nil when no such
     /// fact was found during research.
     let partyLifeNotes: String?
+
+    /// Which BarPass venue city to filter by for "nightlife near here".
+    var venueCity: String { metroCity ?? city }
 }
 
 enum GreekCouncil: String, Codable, CaseIterable {

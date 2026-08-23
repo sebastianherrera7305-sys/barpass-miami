@@ -244,12 +244,17 @@ struct CardPaymentView: View {
             do {
                 let parts = expiry.split(separator: "/")
                 let month = parts.first.flatMap { UInt($0) } ?? 0
-                let year = parts.count > 1 ? UInt(parts[1]) ?? 0 : 0
+                let rawYear = parts.count > 1 ? UInt(parts[1]) ?? 0 : 0
+                // The field's placeholder is "MM/AA" but nothing enforces a
+                // 2-digit year — a user typing "12/2028" would otherwise get
+                // 2000 + 2028 = 4028 sent to Stripe. Only add the century when
+                // it looks like a 2-digit year was actually entered.
+                let year = rawYear >= 100 ? rawYear : 2000 + rawYear
 
                 let cardParams = STPPaymentMethodCardParams()
                 cardParams.number = cardNumber
                 cardParams.expMonth = NSNumber(value: month)
-                cardParams.expYear = NSNumber(value: 2000 + year)
+                cardParams.expYear = NSNumber(value: year)
                 cardParams.cvc = cvv
 
                 let billingDetails = STPPaymentMethodBillingDetails()
@@ -288,8 +293,5 @@ struct CardPaymentView: View {
 }
 
 #Preview {
-    CardPaymentView(total: 38.99, vendorId: "venue_demo", items: []) { method in
-        print("Paid with \(method)")
-    }
-
+    CardPaymentView(total: 38.99, vendorId: "venue_demo", items: []) { _ in }
 }

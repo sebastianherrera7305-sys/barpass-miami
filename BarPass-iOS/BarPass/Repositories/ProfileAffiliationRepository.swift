@@ -17,28 +17,35 @@ final actor SupabaseProfileAffiliationRepository: ProfileAffiliationRepository {
     private static let supabaseURL = SupabaseConfig.url.absoluteString
     private static let anonKey = SupabaseConfig.anonKey
 
-    private func authorizedRequest(url: URL) throws -> URLRequest {
-        guard let session = AuthService.shared.restoreSession() else {
+    /// Refreshes the session first (ADR-012) — the JWT lives ~59 minutes and
+    /// nothing outside the login screen refreshes it otherwise, so a
+    /// long-lived session would otherwise hit an expired token here — then
+    /// returns the guaranteed-fresh session.
+    private func freshSession() async throws -> AuthSession {
+        guard await AuthService.shared.refreshIfNeeded(),
+              let session = AuthService.shared.restoreSession() else {
             throw URLError(.userAuthenticationRequired)
         }
+        return session
+    }
+
+    private func request(url: URL, accessToken: String) -> URLRequest {
         var request = URLRequest(url: url)
         request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         return request
     }
 
     func getAffiliation() async throws -> ProfileAffiliation {
-        guard let session = AuthService.shared.restoreSession() else {
-            throw URLError(.userAuthenticationRequired)
-        }
+        let session = try await freshSession()
         guard var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/profiles") else { throw URLError(.badURL) }
         components.queryItems = [
             URLQueryItem(name: "select", value: "university_id,chapter_id"),
             URLQueryItem(name: "id", value: "eq.\(session.user.id)"),
         ]
         guard let url = components.url else { throw URLError(.badURL) }
-        let request = try authorizedRequest(url: url)
+        let request = request(url: url, accessToken: session.accessToken)
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
@@ -52,14 +59,12 @@ final actor SupabaseProfileAffiliationRepository: ProfileAffiliationRepository {
     }
 
     func setAffiliation(universityId: String?, chapterId: String?) async throws {
-        guard let session = AuthService.shared.restoreSession() else {
-            throw URLError(.userAuthenticationRequired)
-        }
+        let session = try await freshSession()
         guard var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/profiles") else { throw URLError(.badURL) }
         components.queryItems = [URLQueryItem(name: "id", value: "eq.\(session.user.id)")]
         guard let url = components.url else { throw URLError(.badURL) }
 
-        var request = try authorizedRequest(url: url)
+        var request = request(url: url, accessToken: session.accessToken)
         request.httpMethod = "PATCH"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("return=minimal", forHTTPHeaderField: "Prefer")
