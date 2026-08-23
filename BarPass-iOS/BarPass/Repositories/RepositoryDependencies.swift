@@ -10,4 +10,5 @@ enum RepositoryDependencies {
     nonisolated(unsafe) static var trip: TripRepository = SupabaseTripRepository()
     nonisolated(unsafe) static var plan: PlanRepository = LocalPlanRepository()
     nonisolated(unsafe) static var post: PostRepository = SupabasePostRepository()
+    nonisolated(unsafe) static var greekLife: GreekLifeRepository = SupabaseGreekLifeRepository()
 }

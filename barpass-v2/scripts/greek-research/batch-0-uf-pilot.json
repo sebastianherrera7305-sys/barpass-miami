@@ -1,0 +1,43 @@
+{
+  "universities": [
+    {
+      "name": "University of Florida",
+      "short_name": "UF",
+      "city": "Gainesville",
+      "state": "FL",
+      "country": "US",
+      "official_url": "https://www.ufl.edu",
+      "greek_life_url": "https://greeks.ufl.edu",
+      "party_life_notes": "IFC governs 26 men's fraternities per the official UF Office of Sorority & Fraternity Life.",
+      "chapters": [
+        {"fraternity_name": "Zeta Beta Tau", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Theta Chi", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Tau Kappa Epsilon", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Tau Epsilon Phi", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Sigma Alpha Epsilon", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Sigma Nu", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Sigma Chi", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Sigma Phi Epsilon", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Sigma Alpha Mu", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Pi Lambda Phi", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Pi Kappa Phi", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Pi Kappa Alpha", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Phi Kappa Tau", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Phi Gamma Delta", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Lambda Chi Alpha", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Kappa Sigma", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Kappa Alpha Order", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Delta Upsilon", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Delta Tau Delta", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Delta Sigma Phi", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Delta Chi", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Chi Phi", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Beta Theta Pi", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Alpha Tau Omega", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Alpha Gamma Rho", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null},
+        {"fraternity_name": "Alpha Epsilon Pi", "chapter_designation": null, "council": "IFC", "status": "unknown", "official_source_url": "https://www.ufifc.org/fraternities", "chapter_url": null, "needs_review": false, "review_reason": null}
+      ],
+      "research_notes": "Pilot batch, validated with the user before scaling. Only IFC verified — NPHC/MGC not yet researched for UF specifically; the official page listed no per-chapter status (active/suspended), so all are 'unknown' per the no-default-to-active rule."
+    }
+  ]
+}
