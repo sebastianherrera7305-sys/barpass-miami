@@ -23,6 +23,7 @@ struct VenueDetailView: View {
                         .padding(.bottom, 100)
                 }
             }
+            .coordinateSpace(name: "venueDetailScroll")
             .ignoresSafeArea(edges: .top)
 
             ctaBar
@@ -49,10 +50,19 @@ struct VenueDetailView: View {
 
     private var heroSection: some View {
         ZStack(alignment: .bottomLeading) {
-            heroBackground
-                .frame(height: 300)
-                .frame(maxWidth: .infinity)
-                .clipped()
+            // Stretchy header: without this, pulling down past the top of
+            // the ScrollView reveals BPBackgroundView's city art behind the
+            // fixed-height hero — a visible, mismatched background flash
+            // that doesn't relate to this venue's own photo/colors at all.
+            GeometryReader { geo in
+                let minY = geo.frame(in: .named("venueDetailScroll")).minY
+                let stretch = max(0, minY)
+                heroBackground
+                    .frame(width: geo.size.width, height: 300 + stretch)
+                    .clipped()
+                    .offset(y: -stretch)
+            }
+            .frame(height: 300)
 
             LinearGradient(
                 colors: [.clear, .black],
@@ -99,10 +109,10 @@ struct VenueDetailView: View {
                         Text("(\(venue.reviewCount))")
                             .font(.bpScaled(12)).foregroundStyle(Color.white.opacity(0.65))
                     }
-                    Text("·").foregroundStyle(Color.bpTextTertiary)
+                    Text("·").foregroundStyle(.white.opacity(0.35))
                     Text(venue.type.rawValue)
                         .font(.bpScaled(13)).foregroundStyle(Color.white.opacity(0.65))
-                    Text("·").foregroundStyle(Color.bpTextTertiary)
+                    Text("·").foregroundStyle(.white.opacity(0.35))
                     Text(venue.neighborhood)
                         .font(.bpScaled(13)).foregroundStyle(Color.white.opacity(0.65))
                 }
@@ -127,7 +137,7 @@ struct VenueDetailView: View {
             } placeholder: {
                 ZStack {
                     heroEmojiFallback
-                    ProgressView().tint(Color.bpAmber)
+                    BarPassLoadingView(size: 48)
                 }
             }
         } else {
@@ -152,6 +162,11 @@ struct VenueDetailView: View {
             quickStats
                 .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 20)
+
+            if !goodToKnowChips.isEmpty {
+                goodToKnowSection
+                    .padding(.horizontal, BPSpacing.lg)
+            }
 
             divider
 
@@ -209,9 +224,21 @@ struct VenueDetailView: View {
         HStack(spacing: 0) {
             quickStat(icon: "clock.fill", label: l10n.t("venueDetail.closes"), value: venue.closeTime, primary: true)
             Divider().background(Color.bpInk.opacity(0.08)).frame(height: 40)
-            quickStat(icon: "ticket.fill", label: l10n.t("venueDetail.cover"), value: venue.priceRange, primary: false)
+            // Real price_tier ($–$$$$) replaces the old "Cover" stat, which
+            // always read "Sin cover" — coverMen/coverWomen are NULL for
+            // every venue in the catalog, so it was a false claim shown with
+            // full confidence, never an honest "unknown."
+            quickStat(icon: "dollarsign.circle.fill", label: l10n.t("venueDetail.priceTier"), value: venue.priceTier.symbol ?? l10n.t("venue.crowd.na"), primary: false)
             Divider().background(Color.bpInk.opacity(0.08)).frame(height: 40)
-            quickStat(icon: "person.3.fill", label: l10n.t("venueDetail.crowd"), value: l10n.t(venue.crowdDescriptionKey), primary: false)
+            // "Crowd" used to show crowdDescriptionKey, driven by
+            // crowd_level — confirmed 100% "steady" for all 1,817 venues
+            // (no real live-busyness source), so this was a fake indicator
+            // shown with full confidence, same class of bug as the old
+            // "Sin cover" claim above. Rating is a real per-venue signal we
+            // do have, even though the hero header already shows it — this
+            // stat row's job is "3 quick facts," and 2 honest facts beats
+            // 3 where one is fabricated.
+            quickStat(icon: "star.fill", label: l10n.t("venueDetail.rating"), value: String(format: "%.1f", venue.rating), primary: false)
         }
         .padding(.vertical, 14)
         .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.lg))
@@ -233,6 +260,42 @@ struct VenueDetailView: View {
         .frame(maxWidth: .infinity)
     }
 
+    // MARK: - Good to know (real amenity data only — no chip for a nil/false value)
+
+    private var goodToKnowChips: [(icon: String, labelKey: String)] {
+        let a = venue.amenities
+        var chips: [(String, String)] = []
+        if a.goodForGroups == true          { chips.append(("🎉", "venueDetail.chip.groups")) }
+        if a.outdoorSeating == true         { chips.append(("🌳", "venueDetail.chip.outdoor")) }
+        if a.hasLiveMusic == true           { chips.append(("🎤", "venueDetail.chip.liveMusic")) }
+        if a.goodForWatchingSports == true  { chips.append(("🏈", "venueDetail.chip.sports")) }
+        if a.wheelchairAccessible == true   { chips.append(("♿", "venueDetail.chip.accessible")) }
+        if a.servesVegetarianFood == true   { chips.append(("🥗", "venueDetail.chip.vegetarian")) }
+        return chips
+    }
+
+    private var goodToKnowSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle(l10n.t("venueDetail.goodToKnow"))
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(goodToKnowChips, id: \.labelKey) { chip in
+                        HStack(spacing: 6) {
+                            Text(chip.icon)
+                            Text(l10n.t(chip.labelKey))
+                                .font(.bpScaled(12, weight: .semibold))
+                                .foregroundStyle(Color.bpInk.opacity(0.85))
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.bpInk.opacity(0.06), in: Capsule())
+                        .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.08)))
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - Timing
 
     private var timingSection: some View {
@@ -243,43 +306,28 @@ struct VenueDetailView: View {
             infoRow("clock.arrow.2.circlepath", l10n.t("venueDetail.bestTime"), venue.bestArrivalTime)
             infoRow("waveform.path.ecg", l10n.t("venueDetail.peakHours"), venue.peakHours)
             infoRow("dollarsign.circle.fill", l10n.t("venueDetail.avgSpend"), venue.avgSpend + l10n.t("venueDetail.perPersonSuffix"))
-
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(l10n.t("venueDetail.crowd"))
-                        .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
-                    Spacer()
-                    Text(l10n.t(venue.crowdDescriptionKey))
-                        .font(.bpScaled(13, weight: .semibold)).foregroundStyle(Color.bpInk)
-                }
-                HStack(spacing: 4) {
-                    ForEach(0..<5) { i in
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(i < venue.crowdLevel ? Color.bpAmber : Color.bpInk.opacity(0.1))
-                            .frame(height: 8)
-                    }
-                }
-            }
+            // The "Crowd" bar used to render here, driven by crowd_level —
+            // confirmed 100% "steady" for all 1,817 venues (no real live-
+            // busyness source exists), so the 5-segment bar always showed
+            // the exact same fake reading for every venue. Removed rather
+            // than shown with false confidence; see quickStats above for
+            // the same fix applied to the summary row.
         }
     }
 
     // MARK: - Music
 
+    // `music_genres` is never a real per-venue signal today — it's either
+    // empty (90% of venues) or the identical ["house","hip_hop"] literal
+    // stuck on one 2026-07-07 Miami seed batch regardless of venue type
+    // (confirmed via direct Supabase audit). Showing it as a fact about the
+    // venue would be fabricating data, so this section no longer renders
+    // genre chips at all — only real per-venue dress code, when present.
+    @ViewBuilder
     private var musicSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionTitle(l10n.t("venueDetail.musicAmbience"))
-            HStack(spacing: 8) {
-                ForEach(venue.musicGenres, id: \.self) { genre in
-                    Text(genre.rawValue)
-                        .font(.bpScaled(11, weight: .semibold))
-                        .foregroundStyle(Color.bpAmber)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Color.bpAmber.opacity(0.1), in: Capsule())
-                        .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.2)))
-                }
-            }
-            if !venue.dressCode.isEmpty {
+        if !venue.dressCode.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                sectionTitle(l10n.t("venueDetail.musicAmbience"))
                 infoRow("tshirt.fill", l10n.t("venueDetail.dressCode"), venue.dressCode)
             }
         }
@@ -511,6 +559,7 @@ struct VenueDetailView: View {
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("venueDetail.save"), hint: l10n.t("venueDetail.save.hint"), isButton: true)
+            .helpTarget("venueDetail.save")
 
             Button {
                 appState.priorityVenueId = venue.id
@@ -532,6 +581,7 @@ struct VenueDetailView: View {
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("priorityEntry.skipLine"), hint: l10n.t("venueDetail.skipLine.hint"), isButton: true)
+            .helpTarget("venueDetail.skipLine")
 
             Button {
                 BPAnalytics.track(.openMaps(venue: venue.name))
@@ -566,6 +616,8 @@ struct VenueDetailView: View {
                     .frame(width: 34, height: 34)
                     .background(.ultraThinMaterial, in: Circle())
                     .environment(\.colorScheme, .dark)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("venueDetail.back"), hint: l10n.t("venueDetail.back.hint"), isButton: true)
@@ -582,9 +634,13 @@ struct VenueDetailView: View {
                     .frame(width: 34, height: 34)
                     .background(.ultraThinMaterial, in: Circle())
                     .environment(\.colorScheme, .dark)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("plan.share"), hint: l10n.t("venueDetail.share.hint"), isButton: true)
+
+            HelpButton(route: .venueDetail)
         }
         .padding(.horizontal, BPSpacing.lg)
         .padding(.top, 56)
@@ -679,8 +735,52 @@ struct VenueDetailView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        VenueDetailView(venue: BarPassVenue.preview)
-    }
+// MARK: - Previews
+//
+// The states below can't be reached by tapping through a running app: they
+// depend on system settings (colour scheme, type size) or on venue data we
+// don't control at runtime (no amenities vs. every amenity, very long name).
+// Each is a separate canvas entry so a regression in any one is visible.
+//
+// All of them inject AppState — `ctaBar` reads it, so a preview without it
+// traps at render time.
+
+// @MainActor because AppState is main-actor isolated: the `#Preview` macro
+// body is already isolated, but this free function is not, so constructing
+// AppState here is an error under Swift 6 strict concurrency.
+@MainActor
+private func previewDetail(_ venue: BarPassVenue) -> some View {
+    NavigationStack { VenueDetailView(venue: venue) }
+        .environmentObject(AppState())
 }
+
+#Preview("Dark · sin chips") {
+    previewDetail(.preview)
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Light · sin chips") {
+    previewDetail(.preview)
+        .preferredColorScheme(.light)
+}
+
+// These three consume fixtures that live behind `#if DEBUG` in Venue.swift,
+// so they need the same guard — `#Preview` bodies are compiled in Release
+// too, and without this the Release build fails to resolve the symbols.
+#if DEBUG
+#Preview("Todos los chips · $$$$") {
+    previewDetail(.previewAllAmenities)
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Nombre largo") {
+    previewDetail(.previewLongName)
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Dynamic Type XXXL") {
+    previewDetail(.previewAllAmenities)
+        .preferredColorScheme(.dark)
+        .environment(\.dynamicTypeSize, .accessibility3)
+}
+#endif
