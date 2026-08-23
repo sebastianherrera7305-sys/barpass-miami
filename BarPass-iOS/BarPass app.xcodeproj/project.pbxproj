@@ -11,6 +11,8 @@
 		A8A6CC267A4D4BA7B9F79410 /* GreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF98E2E20484C3784F7D613 /* GreekLifeRepository.swift */; };
 		523167EE1BE844FD9D19B062 /* SupabaseGreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */; };
 		7AC8FF76E544F30232283F9E /* ProfileAffiliationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */; };
+		E453AE48EC805F573934230C /* ChapterChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */; };
+		A44EFDEC59D7784580819FD3 /* ChapterChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 792335E55D9363A086C6C79B /* ChapterChatView.swift */; };
 		C4DE0A26B74D4F5DBEE8F764 /* UniversityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F863CE708ACF44B3A96D654A /* UniversityListView.swift */; };
 		C577FAF109A04AFC978B06E4 /* UniversityDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */; };
 		75652242527C4F55B1D4A669 /* FraternityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1A059688C549A88BABFEBB /* FraternityListView.swift */; };
@@ -206,6 +208,8 @@
 		EDF98E2E20484C3784F7D613 /* GreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GreekLifeRepository.swift; path = BarPass/Repositories/GreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
 		61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseGreekLifeRepository.swift; path = BarPass/Repositories/SupabaseGreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
 		F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileAffiliationRepository.swift; path = BarPass/Repositories/ProfileAffiliationRepository.swift; sourceTree = SOURCE_ROOT; };
+		5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatRepository.swift; path = BarPass/Repositories/ChapterChatRepository.swift; sourceTree = SOURCE_ROOT; };
+		792335E55D9363A086C6C79B /* ChapterChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatView.swift; path = BarPass/Features/CollegeLife/ChapterChatView.swift; sourceTree = SOURCE_ROOT; };
 		F863CE708ACF44B3A96D654A /* UniversityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityListView.swift; path = BarPass/Features/CollegeLife/UniversityListView.swift; sourceTree = SOURCE_ROOT; };
 		02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityDetailView.swift; path = BarPass/Features/CollegeLife/UniversityDetailView.swift; sourceTree = SOURCE_ROOT; };
 		1D1A059688C549A88BABFEBB /* FraternityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FraternityListView.swift; path = BarPass/Features/CollegeLife/FraternityListView.swift; sourceTree = SOURCE_ROOT; };
@@ -513,7 +517,9 @@
 				EDF98E2E20484C3784F7D613 /* GreekLifeRepository.swift */,
 				61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */,
 				F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */,
+				5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */,
 				F863CE708ACF44B3A96D654A /* UniversityListView.swift */,
+				792335E55D9363A086C6C79B /* ChapterChatView.swift */,
 				02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */,
 				1D1A059688C549A88BABFEBB /* FraternityListView.swift */,
 				43EAE48B333A4F13A08FC333 /* ComicHalftoneBackground.swift */,
@@ -931,6 +937,8 @@
 				523167EE1BE844FD9D19B062 /* SupabaseGreekLifeRepository.swift in Sources */,
 				7AC8FF76E544F30232283F9E /* ProfileAffiliationRepository.swift in Sources */,
 				C4DE0A26B74D4F5DBEE8F764 /* UniversityListView.swift in Sources */,
+				A44EFDEC59D7784580819FD3 /* ChapterChatView.swift in Sources */,
+				E453AE48EC805F573934230C /* ChapterChatRepository.swift in Sources */,
 				C577FAF109A04AFC978B06E4 /* UniversityDetailView.swift in Sources */,
 				75652242527C4F55B1D4A669 /* FraternityListView.swift in Sources */,
 				BF6F4AE4A5514E81881AF641 /* ComicHalftoneBackground.swift in Sources */,

@@ -86,6 +86,14 @@ struct FraternityListView: View {
                 Spacer()
                 affiliationButton(chapter)
             }
+
+            if myChapterId == chapter.id {
+                NavigationLink(destination: ChapterChatView(chapter: chapter)) {
+                    Label("Chat del capítulo", systemImage: "bubble.left.and.bubble.right.fill")
+                        .font(.bpScaled(12, weight: .semibold))
+                        .foregroundStyle(Color.bpAmber)
+                }
+            }
         }
         .padding(BPSpacing.md)
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
