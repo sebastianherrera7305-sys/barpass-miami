@@ -56,3 +56,14 @@ struct StadiumPOI: Identifiable, Codable, Hashable {
     let sourceURL: String
     let confidence: String
 }
+
+/// Real events from Ticketmaster Discovery API (sync-stadium-events.ts) —
+/// never invented. `ticketURL` links to the real Ticketmaster listing.
+struct StadiumEvent: Identifiable, Codable, Hashable {
+    let id: String
+    let stadiumId: String
+    let name: String
+    let startsAt: Date
+    let ticketURL: String?
+    let imageURL: String?
+}

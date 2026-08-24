@@ -3,6 +3,7 @@ import Foundation
 protocol StadiumRepository: Sendable {
     func allStadiums() async throws -> [Stadium]
     func pois(stadiumId: String) async throws -> [StadiumPOI]
+    func events(stadiumId: String) async throws -> [StadiumEvent]
 }
 
 final actor SupabaseStadiumRepository: StadiumRepository {
@@ -10,6 +11,7 @@ final actor SupabaseStadiumRepository: StadiumRepository {
     private static let anonKey = SupabaseConfig.anonKey
     private static let stadiumColumns = "id,name,address,lat,lng,source_url"
     private static let poiColumns = "id,stadium_id,level_name,level_order,name,poi_type,section_or_concourse,source_url,confidence"
+    private static let eventColumns = "id,stadium_id,name,starts_at,ticket_url,image_url"
 
     private func get<T: Decodable>(_ path: String, queryItems: [URLQueryItem]) async throws -> T {
         var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/\(path)")
@@ -26,6 +28,7 @@ final actor SupabaseStadiumRepository: StadiumRepository {
         }
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(T.self, from: data)
     }
 
@@ -51,6 +54,17 @@ final actor SupabaseStadiumRepository: StadiumRepository {
             )
         }
     }
+
+    func events(stadiumId: String) async throws -> [StadiumEvent] {
+        let rows: [EventRow] = try await get("stadium_events", queryItems: [
+            URLQueryItem(name: "select", value: Self.eventColumns),
+            URLQueryItem(name: "stadium_id", value: "eq.\(stadiumId)"),
+            URLQueryItem(name: "order", value: "starts_at.asc"),
+        ])
+        return rows.map {
+            StadiumEvent(id: $0.id, stadiumId: $0.stadiumId, name: $0.name, startsAt: $0.startsAt, ticketURL: $0.ticketUrl, imageURL: $0.imageUrl)
+        }
+    }
 }
 
 private struct StadiumRow: Decodable {
@@ -60,4 +74,8 @@ private struct StadiumRow: Decodable {
 private struct POIRow: Decodable {
     let id: String, stadiumId: String, levelName: String, levelOrder: Int, name: String
     let poiType: String, sectionOrConcourse: String?, sourceUrl: String, confidence: String
+}
+
+private struct EventRow: Decodable {
+    let id: String, stadiumId: String, name: String, startsAt: Date, ticketUrl: String?, imageUrl: String?
 }

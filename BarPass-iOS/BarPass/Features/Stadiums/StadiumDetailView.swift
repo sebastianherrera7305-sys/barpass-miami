@@ -9,8 +9,10 @@ struct StadiumDetailView: View {
     let stadium: Stadium
 
     @State private var pois: [StadiumPOI] = []
+    @State private var events: [StadiumEvent] = []
     @State private var isLoading = true
     @State private var selectedLevel: String?
+    @ObservedObject private var l10n = L10n.shared
 
     private var levels: [(name: String, order: Int)] {
         let unique = Dictionary(grouping: pois, by: \.levelName)
@@ -42,6 +44,10 @@ struct StadiumDetailView: View {
             } else {
                 VStack(spacing: 0) {
                     header
+
+                    if !events.isEmpty {
+                        eventsRail
+                    }
 
                     HStack(alignment: .top, spacing: 0) {
                         levelRail
@@ -99,6 +105,56 @@ struct StadiumDetailView: View {
             }
         }
         .padding(BPSpacing.lg)
+    }
+
+    // MARK: - Events
+
+    /// Real events from Ticketmaster (sync-stadium-events.ts) — never
+    /// invented. Horizontal rail up top since events aren't tied to a
+    /// single level the way POIs are.
+    private var eventsRail: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(l10n.t("stadiums.upcomingEvents"))
+                .font(.bpCaption())
+                .foregroundStyle(Color.bpAmber)
+                .textCase(.uppercase)
+                .padding(.horizontal, BPSpacing.lg)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(events) { event in
+                        eventCard(event)
+                    }
+                }
+                .padding(.horizontal, BPSpacing.lg)
+            }
+        }
+        .padding(.bottom, BPSpacing.md)
+    }
+
+    private func eventCard(_ event: StadiumEvent) -> some View {
+        let content = VStack(alignment: .leading, spacing: 6) {
+            Text(event.startsAt, format: .dateTime.weekday(.abbreviated).month(.abbreviated).day())
+                .font(.bpTiny())
+                .foregroundStyle(Color.bpAmber)
+            Text(event.name)
+                .font(.bpScaled(13, weight: .bold))
+                .foregroundStyle(Color.bpInk)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+            Text(event.startsAt, format: .dateTime.hour().minute())
+                .font(.bpSmall())
+                .foregroundStyle(Color.bpTextSecondary)
+        }
+        .padding(BPSpacing.md)
+        .frame(width: 180, alignment: .leading)
+        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
+
+        if let urlString = event.ticketURL, let url = URL(string: urlString) {
+            return AnyView(Link(destination: url) { content })
+        }
+        return AnyView(content)
     }
 
     // MARK: - Level rail
@@ -187,7 +243,7 @@ struct StadiumDetailView: View {
             Spacer()
 
             if poi.confidence == "unverified" {
-                Text("sin verificar")
+                Text(l10n.t("stadiums.unverified"))
                     .font(.bpTiny())
                     .padding(.horizontal, 6).padding(.vertical, 3)
                     .background(Color.bpDanger.opacity(0.15), in: Capsule())
@@ -206,7 +262,10 @@ struct StadiumDetailView: View {
     }
 
     private func load() async {
-        pois = (try? await RepositoryDependencies.stadium.pois(stadiumId: stadium.id)) ?? []
+        async let poisTask = RepositoryDependencies.stadium.pois(stadiumId: stadium.id)
+        async let eventsTask = RepositoryDependencies.stadium.events(stadiumId: stadium.id)
+        pois = (try? await poisTask) ?? []
+        events = (try? await eventsTask) ?? []
         if selectedLevel == nil {
             selectedLevel = levels.first?.name
         }

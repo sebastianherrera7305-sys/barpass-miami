@@ -669,6 +669,7 @@ final class L10n: ObservableObject {
             "ageReport.skip": "Prefiero no decir",
             "stadiums.title": "Estadios", "stadiums.empty": "Todavía no investigamos estadios.",
             "stadiums.entry.title": "Estadios", "stadiums.entry.hint": "Bares, comida y servicios por nivel",
+            "stadiums.upcomingEvents": "Próximos eventos", "stadiums.unverified": "sin verificar",
         ],
         .en: [
             "venue.crowd.empty": "Empty", "venue.crowd.chill": "Chill", "venue.crowd.moderate": "Moderate", "venue.crowd.lively": "Lively", "venue.crowd.packed": "Packed", "venue.crowd.max": "Slammed", "venue.crowd.na": "N/A",
@@ -1294,6 +1295,7 @@ final class L10n: ObservableObject {
             "ageReport.skip": "Prefer not to say",
             "stadiums.title": "Stadiums", "stadiums.empty": "We haven't researched stadiums yet.",
             "stadiums.entry.title": "Stadiums", "stadiums.entry.hint": "Bars, food and services by level",
+            "stadiums.upcomingEvents": "Upcoming events", "stadiums.unverified": "unverified",
         ],
         .pt: [
             "venue.crowd.empty": "Vazio", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Cheio", "venue.crowd.max": "Lotado", "venue.crowd.na": "N/D",
@@ -1919,6 +1921,7 @@ final class L10n: ObservableObject {
             "ageReport.skip": "Prefiro não dizer",
             "stadiums.title": "Estádios", "stadiums.empty": "Ainda não pesquisamos estádios.",
             "stadiums.entry.title": "Estádios", "stadiums.entry.hint": "Bares, comida e serviços por nível",
+            "stadiums.upcomingEvents": "Próximos eventos", "stadiums.unverified": "não verificado",
         ],
     ]
 }
