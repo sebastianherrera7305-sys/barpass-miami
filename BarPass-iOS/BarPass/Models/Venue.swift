@@ -27,6 +27,28 @@ enum MusicGenre: String, Codable, CaseIterable {
 
 // MARK: - Domain Models
 
+/// Real 1-4 scale from Supabase `price_tier` (Google Places price level).
+/// `.unknown` is the explicit normalization target for any value outside
+/// 1...4 (missing, 0, negative, or a future out-of-range value) — chosen
+/// once at the Supabase mapping boundary, never re-clamped in the UI.
+/// Pure data: no display text lives here — see `PriceTier.symbol` in
+/// DesignSystem.swift for how the UI layer renders it.
+enum PriceTier: Int, Codable, CaseIterable, Sendable {
+    case unknown = 0
+    case tier1 = 1
+    case tier2 = 2
+    case tier3 = 3
+    case tier4 = 4
+
+    init(rawSupabaseValue: Int?) {
+        guard let rawSupabaseValue, let tier = PriceTier(rawValue: rawSupabaseValue) else {
+            self = .unknown
+            return
+        }
+        self = tier
+    }
+}
+
 struct PopularDrink: Identifiable, Codable {
     let id: String
     let name: String
@@ -83,6 +105,10 @@ struct BarPassVenue: Identifiable, Codable {
     let reviewCount:      Int
     let coverMen:         Int?
     let coverWomen:       Int?
+    /// `.unknown` for venues cached before this field existed, and the
+    /// explicit normalization target for any DB value outside 1...4 — see
+    /// `PriceTier.init(rawSupabaseValue:)`, used once at the mapping layer.
+    var priceTier:        PriceTier = .unknown
     let openTime:         String
     let closeTime:        String
     let avgSpend:         String
@@ -115,6 +141,10 @@ struct BarPassVenue: Identifiable, Codable {
     /// server-side from real amenity/category data, never invented client-
     /// side. Empty until `derive-experience-tags.ts` has run for a venue.
     var experienceTags:   [ExperienceTag] = []
+    /// Which age brackets ("18_25", "25_35", "35_50") this venue was
+    /// research-verified to fit, from `venue_age_brackets`. Empty — never a
+    /// guessed default — for venues research hasn't tagged yet.
+    var ageBrackets:       [String] = []
     /// Multi-city readiness (Venue Intelligence Roadmap Phase 2). Optional
     /// for decode-safety against any venue cached before these existed —
     /// nil, not "Miami", when a source genuinely doesn't say. The live
@@ -135,11 +165,6 @@ struct BarPassVenue: Identifiable, Codable {
         case 5: return "venue.crowd.max"
         default: return "venue.crowd.na"
         }
-    }
-
-    var priceRange: String {
-        guard let cover = coverMen else { return "Sin cover" }
-        return cover == 0 ? "Sin cover" : "$\(cover)+ cover"
     }
 
     var coordinate: CLLocationCoordinate2D {
@@ -189,5 +214,72 @@ extension BarPassVenue {
         slug: "liv-miami"
     )
 }
+
+#if DEBUG
+/// Fixtures for the SwiftUI canvas only — DEBUG-gated so they never ship.
+/// `preview` above is deliberately NOT in here: `LocalVenueRepository` uses
+/// it as the real offline fallback, so it is production code.
+extension BarPassVenue {
+    /// Every amenity Google can report, all true — the "many chips" extreme
+    /// for the Good-to-know row.
+    static var previewAllAmenities: BarPassVenue {
+        var venue = Self.preview
+        venue.amenities = VenueAmenities(
+            wheelchairAccessible: true,
+            outdoorSeating: true,
+            goodForGroups: true,
+            goodForWatchingSports: true,
+            hasLiveMusic: true,
+            reservable: true,
+            servesVegetarianFood: true,
+            restroom: true
+        )
+        venue.priceTier = .tier4
+        return venue
+    }
+
+    /// Longest real-world-plausible name, to catch truncation and wrapping in
+    /// the hero title. `name` is `let`, so this needs a full initializer
+    /// rather than a copy-and-mutate.
+    static var previewLongName: BarPassVenue {
+        BarPassVenue(
+            id: "long-name-fixture",
+            name: "The Grand Rooftop Lounge & Cocktail Terrace at Brickell Bay",
+            neighborhood: "Downtown / Brickell Financial District",
+            address: "1234 Brickell Bay Drive, Miami, FL 33131",
+            latitude: 25.7617,
+            longitude: -80.1918,
+            type: .rooftop,
+            vibes: ["Rooftop", "Sunset", "Craft Cocktails", "Date Night"],
+            musicGenres: [.house, .jazz],
+            rating: 4.7,
+            reviewCount: 1284,
+            coverMen: nil,
+            coverWomen: nil,
+            openTime: "5:00 PM",
+            closeTime: "2:00 AM",
+            avgSpend: "$60–120",
+            dressCode: "Smart casual — no beachwear after 8 PM",
+            parking: "Valet $25",
+            crowdLevel: 3,
+            bestArrivalTime: "7:00 PM – 9:00 PM",
+            peakHours: "9:00 PM – 12:00 AM",
+            popularDrinks: [],
+            upcomingEvents: [],
+            tags: ["Rooftop", "Brickell"],
+            emoji: "🌇",
+            instagramHandle: nil,
+            isTrending: false,
+            hasHappyHour: true,
+            happyHourUntil: "8:00 PM",
+            isOpenNow: true,
+            photoUrls: [],
+            editorial: nil,
+            slug: "grand-rooftop-lounge",
+            amenities: VenueAmenities(outdoorSeating: true, goodForGroups: true, reservable: true)
+        )
+    }
+}
+#endif
 
 // MARK: - Design system tokens live in Resources/DesignSystem.swift

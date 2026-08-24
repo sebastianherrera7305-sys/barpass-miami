@@ -2,15 +2,24 @@ import Foundation
 
 final actor SupabaseVenueRepository: VenueRepository {
     private var loadedVenues: [BarPassVenue]?
+    private var loadedAt: Date?
+
+    /// How long the in-memory snapshot is trusted before a call to
+    /// `getVenues()` triggers a real network fetch again. Without this, the
+    /// actor cached the first launch's data for the entire process lifetime —
+    /// venues, events, and trending status never updated no matter how long
+    /// the app stayed open or how many times it came back from background.
+    private static let freshnessWindow: TimeInterval = 10 * 60
 
     private static let supabaseURL = SupabaseConfig.url.absoluteString
     private static let anonKey = SupabaseConfig.anonKey
 
     /// Exact columns the decoder uses — `select=*` shipped dead columns on
     /// every app launch (egress is the free-tier bottleneck).
-    private static let venueColumns = "id,slug,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom,city,country,timezone"
+    private static let venueColumns = "id,slug,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,price_tier,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom,city,country,timezone"
     private static let eventColumns = "id,venue_id,title,description,starts_at,ends_at,cover_price"
     private static let tagColumns = "venue_id,tag_id,category,confidence,source,computed_at"
+    private static let ageBracketColumns = "venue_id,bracket"
 
     /// Cache en disco de la última lista real obtenida — antes el fallback
     /// sin red era 1 sola venue hardcodeada de preview (LocalVenueRepository),
@@ -22,10 +31,16 @@ final actor SupabaseVenueRepository: VenueRepository {
         return base.appendingPathComponent("BarPassVenueCache.json")
     }()
 
-    private func ensureVenues() async throws -> [BarPassVenue] {
-        if let venues = loadedVenues { return venues }
+    private func ensureVenues(forceRefresh: Bool = false) async throws -> [BarPassVenue] {
+        if !forceRefresh,
+           let venues = loadedVenues,
+           let loadedAt,
+           Date().timeIntervalSince(loadedAt) < Self.freshnessWindow {
+            return venues
+        }
         let venues = await fetchVenuesWithFallback()
         loadedVenues = venues
+        loadedAt = Date()
         return venues
     }
 
@@ -66,11 +81,14 @@ final actor SupabaseVenueRepository: VenueRepository {
         async let venueRowsTask = fetchVenueRows()
         async let eventRowsTask = fetchEventRows()
         async let tagRowsTask = fetchExperienceTagRows()
+        async let ageBracketRowsTask = fetchAgeBracketRows()
         let venueRows = try await venueRowsTask
         let eventRows = (try? await eventRowsTask) ?? []
         let tagRows = (try? await tagRowsTask) ?? []
+        let ageBracketRows = (try? await ageBracketRowsTask) ?? []
         let eventsByVenue = Dictionary(grouping: eventRows, by: { $0.venueId.uuidString.lowercased() })
         let tagsByVenue = Dictionary(grouping: tagRows, by: { $0.venueId.uuidString.lowercased() })
+        let ageBracketsByVenue = Dictionary(grouping: ageBracketRows, by: { $0.venueId.uuidString.lowercased() })
 
         return venueRows.map { row in
             let venueEvents: [VenueEvent] = (eventsByVenue[row.id.uuidString.lowercased()] ?? []).map { event in
@@ -86,7 +104,8 @@ final actor SupabaseVenueRepository: VenueRepository {
             let venueTags: [ExperienceTag] = (tagsByVenue[row.id.uuidString.lowercased()] ?? []).map { tag in
                 ExperienceTag(id: tag.tagId, category: tag.category, confidence: tag.confidence, source: tag.source, updatedAt: tag.computedAt)
             }
-            return Self.mapRowToVenue(row, events: venueEvents, experienceTags: venueTags)
+            let venueAgeBrackets = (ageBracketsByVenue[row.id.uuidString.lowercased()] ?? []).map(\.bracket)
+            return Self.mapRowToVenue(row, events: venueEvents, experienceTags: venueTags, ageBrackets: venueAgeBrackets)
         }
     }
 
@@ -143,10 +162,31 @@ final actor SupabaseVenueRepository: VenueRepository {
         return try decoder.decode([SupabaseExperienceTagRow].self, from: data)
     }
 
+    private func fetchAgeBracketRows() async throws -> [SupabaseAgeBracketRow] {
+        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/venue_age_brackets?select=\(Self.ageBracketColumns)") else { throw URLError(.badURL) }
+        var request = URLRequest(url: url)
+        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
+            throw URLError(.badServerResponse)
+        }
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try decoder.decode([SupabaseAgeBracketRow].self, from: data)
+    }
+
     // MARK: - VenueRepository
 
     func getVenues() async throws -> [BarPassVenue] {
         try await ensureVenues()
+    }
+
+    func refresh() async throws -> [BarPassVenue] {
+        try await ensureVenues(forceRefresh: true)
     }
 
     func getVenue(id: String) async throws -> BarPassVenue? {
@@ -182,7 +222,7 @@ final actor SupabaseVenueRepository: VenueRepository {
 
     // MARK: - Mapping
 
-    private static func mapRowToVenue(_ row: SupabaseVenueRow, events: [VenueEvent], experienceTags: [ExperienceTag] = []) -> BarPassVenue {
+    private static func mapRowToVenue(_ row: SupabaseVenueRow, events: [VenueEvent], experienceTags: [ExperienceTag] = [], ageBrackets: [String] = []) -> BarPassVenue {
         BarPassVenue(
             id: row.id.uuidString.lowercased(),
             name: row.name,
@@ -197,9 +237,10 @@ final actor SupabaseVenueRepository: VenueRepository {
             reviewCount: row.reviewCount,
             coverMen: row.coverMen,
             coverWomen: row.coverWomen,
+            priceTier: PriceTier(rawSupabaseValue: row.priceTier),
             openTime: Self.formatTime24to12(row.openTime),
             closeTime: Self.formatTime24to12(row.closeTime),
-            avgSpend: Self.formatAvgSpend(row.avgSpend),
+            avgSpend: Self.formatAvgSpend(row.avgSpend, priceTier: row.priceTier),
             // Antes inventaba "Smart casual"/"Street parking available" cuando
             // la base no tenía el dato — eso es exactamente lo que la regla
             // "nunca fabricar datos de venue" prohíbe. Si Google/Supabase no
@@ -234,6 +275,7 @@ final actor SupabaseVenueRepository: VenueRepository {
                 restroom: row.restroom
             ),
             experienceTags: experienceTags,
+            ageBrackets: ageBrackets,
             city: row.city,
             country: row.country,
             timezoneId: row.timezone
@@ -284,9 +326,22 @@ final actor SupabaseVenueRepository: VenueRepository {
         return formatter.string(from: date)
     }
 
-    private static func formatAvgSpend(_ spend: Int?) -> String {
-        guard let spend, spend > 0 else { return "N/A" }
-        return "$\(spend)+"
+    /// A real per-venue `avg_spend` always wins. When it's unset (true for
+    /// every venue added via add-venues.ts — Google Places has no per-drink
+    /// spend field to pull), fall back to a range derived from the venue's
+    /// real Google `price_tier` instead of showing "N/A" for 1,600+ venues.
+    /// The $ ranges are Google's own published price-level convention
+    /// (Google Business Profile help center), not a per-venue guess — the
+    /// input (price_tier) is real, only the mapping to a dollar range is
+    /// a standard convention applied to it.
+    /// price_tier is a real, coarse 1-4 signal when present, but mapping it
+    /// to a specific dollar range ("$20–35") presented it as a fact known
+    /// about THIS venue when it was really a generic bucket guess — exactly
+    /// the "looks real, isn't" placeholder this app's data rules forbid.
+    /// N/A when the real per-venue avg_spend isn't known, full stop.
+    private static func formatAvgSpend(_ spend: Int?, priceTier: Int?) -> String {
+        if let spend, spend > 0 { return "$\(spend)+" }
+        return "N/A"
     }
 
     private static func mapCrowdLevel(_ level: String?) -> Int {
@@ -362,6 +417,7 @@ struct SupabaseVenueRow: Codable {
     let reviewCount: Int
     let coverMen: Int?
     let coverWomen: Int?
+    let priceTier: Int?
     let avgSpend: Int?
     let openTime: String
     let closeTime: String
@@ -410,4 +466,9 @@ struct SupabaseExperienceTagRow: Codable {
     let confidence: TagConfidence
     let source: TagSource
     let computedAt: Date?
+}
+
+struct SupabaseAgeBracketRow: Codable {
+    let venueId: UUID
+    let bracket: String
 }

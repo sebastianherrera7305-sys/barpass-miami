@@ -25,10 +25,20 @@ struct TonightView: View {
         .init(label: "🎵 Live Music", keywords: ["live", "jazz", "salsa", "latin", "band"]),
         .init(label: "🌇 Rooftop",    keywords: ["rooftop", "sunset", "views", "terrace"]),
         .init(label: "🏈 Sports",     keywords: ["sports", "sport", "game", "screens"]),
+        // "age:" keywords are a marker read by matches() below, not text
+        // searched against venue fields — these check the real, research-
+        // verified venue.ageBrackets instead of a keyword heuristic, same
+        // distinction as the Trending case.
+        .init(label: "🎓 18-25",      keywords: ["age:18_25"]),
+        .init(label: "💼 25-35",      keywords: ["age:25_35"]),
+        .init(label: "🥂 35-50",      keywords: ["age:35_50"]),
     ]
 
     private func matches(_ venue: BarPassVenue, _ mood: Mood) -> Bool {
         if mood.label.contains("Trending") { return venue.isTrending }
+        if let marker = mood.keywords.first, marker.hasPrefix("age:") {
+            return venue.ageBrackets.contains(String(marker.dropFirst(4)))
+        }
         let haystack = ([venue.type.rawValue, venue.name] + venue.vibes + venue.tags
             + venue.musicGenres.map { $0.rawValue }).joined(separator: " ").lowercased()
         return mood.keywords.contains { haystack.contains($0) }
@@ -53,20 +63,56 @@ struct TonightView: View {
     /// Unlike musicMatchedVenues below, this never returns empty just
     /// because Apple Music isn't connected — passport is one signal among
     /// several here, not a hard requirement.
+    /// Real per-type preference from the user's own favorites (FavoritesStore)
+    /// — a type only counts once there are ≥2 favorites of it, so a single
+    /// one-off favorite doesn't skew the whole feed. Empty for a user with
+    /// no favorites, never a guessed preference.
+    private var favoriteTypeSignal: Set<VenueType> {
+        let counts = Dictionary(grouping: favoriteVenues, by: \.type).mapValues(\.count)
+        return Set(counts.filter { $0.value >= 2 }.keys)
+    }
+
     private var recommendedForYou: [BarPassVenue] {
         let context = TripContext()
-        return venueStore.venues
+        let now = Date()
+        let coordinate = UserLocationProvider.shared.coordinate
+        let favTypes = favoriteTypeSignal
+        let ranked = venueStore.venues
             .map { venue in
                 (venue, ExperienceScorer.score(
                     venue: venue,
                     passport: MusicProfileStore.shared.passport,
                     context: context,
-                    now: Date()
+                    now: now,
+                    userCoordinate: coordinate,
+                    favoriteTypes: favTypes
                 ))
             }
             .sorted { $0.1 > $1.1 }
-            .prefix(12)
             .map(\.0)
+
+        // Best-first, not a strict round-robin: a genuinely excellent venue
+        // can still rank above a mediocre one of a different type. The cap
+        // only kicks in once a single type would otherwise fill the whole
+        // section (e.g. every club scoring high on a Friday night) — real
+        // variety without discarding the top scorer for looking "too club-y".
+        let maxPerType = 5
+        var picked: [BarPassVenue] = []
+        var countByType: [VenueType: Int] = [:]
+        for v in ranked {
+            guard countByType[v.type, default: 0] < maxPerType else { continue }
+            picked.append(v)
+            countByType[v.type, default: 0] += 1
+            if picked.count == 12 { break }
+        }
+        if picked.count < 12 {
+            let pickedIds = Set(picked.map(\.id))
+            for v in ranked where !pickedIds.contains(v.id) {
+                picked.append(v)
+                if picked.count == 12 { break }
+            }
+        }
+        return picked
     }
 
     private var moodVenues: [BarPassVenue] {
@@ -122,6 +168,14 @@ struct TonightView: View {
                     HypeWeekCard()
                         .padding(.horizontal, BPSpacing.lg)
 
+                    if let city = venueStore.selectedCity {
+                        NavigationLink(destination: UniversityListView(city: city)) {
+                            universitiesEntryCard
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, BPSpacing.lg)
+                    }
+
                     vibeTags
 
                     if venueStore.isLoading {
@@ -154,6 +208,7 @@ struct TonightView: View {
 
                         if !recommendedForYou.isEmpty {
                             section(title: l10n.t("home.recommended"), venues: recommendedForYou, style: .hero)
+                                .helpTarget("tonight.recommendedForYou")
                         }
 
                         if !tonightEvents.isEmpty {
@@ -188,6 +243,21 @@ struct TonightView: View {
                     Spacer(minLength: 120)
                 }
             }
+            .refreshable { await venueStore.forceRefresh() }
+        }
+        // One-shot, cached in UserLocationProvider — never a per-card fetch.
+        // If permission is denied, `coordinate` just stays nil and every
+        // distance-based signal in the scorer is silently absent.
+        //
+        // Delayed ~2.5s so the system permission dialog doesn't fire the
+        // instant Tonight appears — it was racing the first-launch Help
+        // intro banner (shown after 800ms) and covering the whole screen
+        // before a user could even see it, let alone try Help. Not a
+        // functional change: the location request still fires every
+        // session, just not in the first eyeblink.
+        .task {
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            UserLocationProvider.shared.refreshOnce()
         }
     }
 
@@ -216,6 +286,7 @@ struct TonightView: View {
                 .padding(.horizontal, BPSpacing.lg)
             }
         }
+        .bpLoadingRegion(l10n.t("a11y.loading"))
     }
 
     // MARK: - Header
@@ -236,6 +307,33 @@ struct TonightView: View {
         .bpAccessibility(label: greeting, hint: l10n.t("tonight.greeting.hint"))
     }
 
+    // MARK: - Universities entry
+
+    private var universitiesEntryCard: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "graduationcap.fill")
+                .font(.bpScaled(20))
+                .foregroundStyle(Color.bpAmber)
+                .frame(width: 34)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Universidades")
+                    .font(.bpHeadline())
+                    .foregroundStyle(Color.bpInk)
+                Text("Greek Life verificado, campus por campus")
+                    .font(.bpCaption())
+                    .foregroundStyle(Color.bpTextSecondary)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.bpScaled(13, weight: .semibold))
+                .foregroundStyle(Color.bpTextTertiary)
+        }
+        .padding(BPSpacing.md)
+        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
+        .bpAccessibility(label: "Universidades", hint: "Ver Greek Life verificado por universidad", isButton: true)
+    }
+
     // MARK: - Vibe tags
 
     private var vibeTags: some View {
@@ -250,7 +348,7 @@ struct TonightView: View {
                     } label: {
                         Text(tag)
                             .font(.bpScaled(12, weight: .semibold))
-                            .foregroundStyle(selectedTag == tag ? .black : .white)
+                            .foregroundStyle(selectedTag == tag ? .black : Color.bpInk)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 7)
                             .background(
@@ -315,6 +413,7 @@ struct TonightView: View {
                 .padding(.horizontal, BPSpacing.lg)
             }
         }
+        .helpTarget("tonight.events")
     }
 
     // MARK: - Sections
@@ -362,6 +461,19 @@ struct HeroVenueCard: View {
     @ObservedObject private var l10n = L10n.shared
     let venue: BarPassVenue
 
+    /// Same call `recommendedForYou` scores with, so the badge shown here
+    /// always matches the real reason this card ranked where it did — never
+    /// independent, possibly-inconsistent copy.
+    private var reasonText: String? {
+        ExperienceScorer.reason(
+            venue: venue,
+            passport: MusicProfileStore.shared.passport,
+            context: TripContext(),
+            now: Date(),
+            userCoordinate: UserLocationProvider.shared.coordinate
+        )
+    }
+
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             RoundedRectangle(cornerRadius: BPRadius.xl)
@@ -383,7 +495,12 @@ struct HeroVenueCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: BPRadius.xl))
             }
 
-            LinearGradient(colors: [.clear, .black.opacity(0.85)], startPoint: .center, endPoint: .bottom)
+            // Starts darkening higher up the card (not just from center) and
+            // reaches near-opaque black — a photo this small can't rely on
+            // "most real venue photos are already dark at the bottom." Bright
+            // or busy photos (string lights, white decor) washed out the
+            // text with the old .center/0.85 gradient.
+            LinearGradient(colors: [.clear, .black.opacity(0.94)], startPoint: UnitPoint(x: 0.5, y: 0.25), endPoint: .bottom)
                 .clipShape(RoundedRectangle(cornerRadius: BPRadius.xl))
 
             VStack(alignment: .leading, spacing: 6) {
@@ -410,18 +527,23 @@ struct HeroVenueCard: View {
                     }
                 }
 
+                // This block sits on a hardcoded-dark photo scrim (line 458)
+                // that doesn't change with app appearance — so its text must
+                // always render light, never the theme-aware bpInk/
+                // bpTextSecondary tokens (those go near-black in Light Mode,
+                // which was unreadable against this permanently-dark card).
                 Text(venue.name)
                     .font(.bpTitle2())
-                    .foregroundStyle(Color.bpInk)
+                    .foregroundStyle(.white)
 
                 HStack(spacing: 10) {
                     Label(venue.neighborhood, systemImage: "location.fill")
                         .font(.bpSmall())
-                        .foregroundStyle(Color.bpTextSecondary)
-                    Text("·").foregroundStyle(Color.bpTextTertiary)
+                        .foregroundStyle(.white.opacity(0.75))
+                    Text("·").foregroundStyle(.white.opacity(0.5))
                     Label(venue.type.rawValue, systemImage: "music.note")
                         .font(.bpSmall())
-                        .foregroundStyle(Color.bpTextSecondary)
+                        .foregroundStyle(.white.opacity(0.75))
                 }
 
                 HStack(spacing: 8) {
@@ -430,30 +552,40 @@ struct HeroVenueCard: View {
                         .foregroundStyle(Color.bpAmber)
                     Text(String(format: "%.1f", venue.rating))
                         .font(.bpSmall()).fontWeight(.semibold)
-                        .foregroundStyle(Color.bpInk)
-                    Text(venue.priceRange)
+                        .foregroundStyle(.white)
+                    Text(venue.priceTier.symbol ?? l10n.t("venue.crowd.na"))
                         .font(.bpSmall())
-                        .foregroundStyle(Color.bpTextSecondary)
-                    crowdBar
+                        .foregroundStyle(.white.opacity(0.75))
+                    // crowdBar removed — crowd_level is confirmed 100%
+                    // "steady" for all 1,817 venues, no real live-busyness
+                    // source, so the bar always showed the same fake
+                    // reading for every card.
                 }
             }
             .padding(16)
         }
         .frame(width: 280, height: 180)
+        .overlay(alignment: .topLeading) {
+            // Own opaque-ish background, independent of the photo gradient
+            // below — top-leading sits above where that gradient darkens,
+            // so this can't inherit the exact legibility bug just fixed for
+            // the bottom text block.
+            if let reasonText {
+                Text(reasonText)
+                    .font(.bpScaled(10, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.black.opacity(0.6), in: Capsule())
+                    .padding(10)
+            }
+        }
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: venue.name, hint: String(format: l10n.t("tonight.venue.hint"), venue.neighborhood, venue.type.rawValue, venue.rating), isButton: true)
         .bpEntrance(offset: CGSize(width: 0, height: 20), delay: 0.1)
     }
 
-    private var crowdBar: some View {
-        HStack(spacing: 2) {
-            ForEach(0..<5) { i in
-                RoundedRectangle(cornerRadius: 1.5)
-                    .fill(i < venue.crowdLevel ? Color.bpAmber : Color.bpInk.opacity(0.15))
-                    .frame(width: 3, height: 8)
-            }
-        }
-    }
 }
 
 // MARK: - Small Card
@@ -516,7 +648,7 @@ struct SmallVenueCard: View {
                     .font(.bpSmall()).fontWeight(.semibold)
                     .foregroundStyle(Color.bpTextSecondary)
                 Text("·").foregroundStyle(Color.bpTextTertiary)
-                Text(venue.priceRange)
+                Text(venue.priceTier.symbol ?? l10n.t("venue.crowd.na"))
                     .font(.bpSmall())
                     .foregroundStyle(Color.bpTextSecondary)
             }
