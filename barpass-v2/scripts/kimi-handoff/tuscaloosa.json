@@ -1,0 +1,39 @@
+{
+  "Tuscaloosa": {
+    "18_25": [
+      { "name": "Gallettes", "address": "1021 University Blvd, Tuscaloosa, AL 35401", "why": "Legendary college bar on The Strip, home of the Yellowhammer, Tuscaloosa's official gameday cocktail.", "action": "keep_existing" },
+      { "name": "Rounders", "address": "1215 University Blvd, Tuscaloosa, AL 35401", "why": "Staple of The Strip with cheap drinks, dance floor, two-story bar with balcony.", "action": "keep_existing" },
+      { "name": "The Houndstooth Sports Bar", "why": "Sports bar on The Strip with multiple TVs, pool tables, party atmosphere. Popular with Greek life.", "action": "keep_existing" },
+      { "name": "Innisfree Irish Pub", "why": "Irish pub in downtown Tuscaloosa with patio, live music, trivia nights, karaoke.", "action": "keep_existing" },
+      { "name": "Mugshots Grill and Bar", "why": "Burger and beer bar with a college crowd, massive burgers, extensive beer list.", "action": "keep_existing" },
+      { "name": "Harry's Bar", "address": "1330 Hargrove Rd, Tuscaloosa, AL 35401", "google_rating": 3.5, "why": "Local bar with a mixed crowd of students and locals, casual, affordable drinks.", "action": "keep_existing" },
+      { "name": "Egan's Bar", "address": "1229 University Blvd, Tuscaloosa, AL 35401", "why": "Iconic dive bar near campus, cheap beer, live music, gritty authentic atmosphere. Cash-only.", "action": "keep_existing" },
+      { "name": "Loosa Brews", "why": "Craft beer bar with rotating taps, casual vibe, board games.", "action": "keep_existing" },
+      { "name": "Twelve25 Sports Bar", "why": "Sports bar on The Strip with multiple screens, pool tables, party atmosphere.", "action": "keep_existing" },
+      { "name": "Icon Tuscaloosa", "why": "Nightclub and event venue with DJ nights, themed parties, dance floor.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Alcove", "address": "730 22nd Ave, Tuscaloosa, AL 35401", "google_rating": 4.5, "why": "International tavern with curated global beer list, chill vibes, neighborhood feel.", "action": "add_new" },
+      { "name": "Urban Bar & Kitchen", "address": "2321 University Blvd, Tuscaloosa, AL 35401", "google_rating": 4.7, "why": "Upscale-casual bar and restaurant, favorite date spot, attentive service.", "action": "add_new" },
+      { "name": "Session Cocktails", "address": "2221 University Blvd, Tuscaloosa, AL 35401", "why": "Cocktail bar known for pre-Prohibition classics, 'Cocktail for a Cause' program.", "action": "keep_existing" },
+      { "name": "Catch 22", "address": "2328 6th St, Tuscaloosa, AL 35401", "why": "Downtown bar and restaurant with craft cocktails, wine selection, upscale pub food.", "action": "keep_existing" },
+      { "name": "The Gray Lady", "why": "Upscale cocktail lounge, sophisticated atmosphere, craft cocktails, wine list.", "action": "keep_existing" },
+      { "name": "The Lookout", "address": "111 Greensboro Ave, Tuscaloosa, AL 35401", "why": "Rooftop bar in downtown Tuscaloosa with views of the city, sunset drinks.", "action": "keep_existing" },
+      { "name": "Cocktail Collection", "address": "2308 University Blvd, Tuscaloosa, AL 35401", "why": "Speakeasy-style bar, entrance behind a secret Pepsi door.", "action": "add_new" },
+      { "name": "Five Bar", "address": "2324 6th St, Tuscaloosa, AL 35401", "why": "Restaurant and bar, elevated American cuisine, half-price happy hour 4-6pm.", "action": "add_new" },
+      { "name": "Top Shelf Tavern", "address": "407 23rd Ave, Tuscaloosa, AL 35401", "why": "Neighborhood bar with a solid whiskey selection, craft beer taps.", "action": "keep_existing" },
+      { "name": "Rhythm & Brews", "why": "Live music venue and bar with local bands, craft beer, laid-back atmosphere.", "action": "keep_existing" },
+      { "name": "The Sanctuary on 25th", "why": "Upscale lounge, warm hospitality, bourbon-forward cocktails, Southern fare.", "action": "keep_existing" },
+      { "name": "Brown's Corner", "why": "Vintage-charm bar with bourbon-forward cocktails and Southern fare.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Avenue Pub - Downtown Tuscaloosa", "address": "2230 University Blvd, Tuscaloosa, AL 35401", "why": "Established pub in downtown, diverse menu, craft beer selection.", "action": "keep_existing" },
+      { "name": "Druid City Brewing Company Taproom & Ell's Kitchen", "address": "700 14th St, Tuscaloosa, AL 35401", "why": "Local brewery taproom, craft beers, food from Ell's Kitchen, live music in the Moon Room.", "action": "keep_existing" },
+      { "name": "Baumhower's Victory Grille", "address": "4251 Courtney Dr, Tuscaloosa, AL 35405", "why": "Sports bar and restaurant, multiple screens, American fare, family-friendly.", "action": "keep_existing" },
+      { "name": "Walk-On's Sports Bistreaux", "why": "Louisiana-inspired sports bar, extensive menu, craft beers, family-friendly.", "action": "keep_existing" },
+      { "name": "The 205 Bar & Restaurant", "address": "2451 Jack Warner Pkwy, Tuscaloosa, AL 35401", "why": "Bar and restaurant on the river with views, weekend brunch and sunset drinks.", "action": "keep_existing" },
+      { "name": "R&R Cigar", "why": "Cigar lounge with premium spirits, comfortable seating, relaxed atmosphere.", "action": "add_new" },
+      { "name": "Vitola Fine Cigars", "why": "Upscale cigar bar with extensive humidor, premium whiskey selection, leather seating.", "action": "add_new" }
+    ]
+  }
+}

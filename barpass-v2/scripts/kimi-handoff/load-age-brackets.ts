@@ -143,6 +143,21 @@ async function main() {
         continue;
       }
 
+      // Google's Text Search can return a different, real, nearby venue
+      // when the requested one doesn't exist under that name — happened in
+      // Tuscaloosa: searching "Cocktail Collection" matched a different
+      // real speakeasy ("Session Cocktails") a few doors down, silently
+      // creating a duplicate of a venue we already had. If the returned
+      // name shares no word with what we asked for, treat it as no match
+      // rather than trust it.
+      const gotWords = new Set(normalize(place.displayName?.text ?? "").split(" ").filter((w) => w.length > 2));
+      const wantWords = normalize(entry.name).split(" ").filter((w) => w.length > 2);
+      if (wantWords.length > 0 && !wantWords.some((w) => gotWords.has(w))) {
+        console.log(`  (nombre no coincide, salteado) pedí "${entry.name}", Google devolvió "${place.displayName?.text}"`);
+        skipped.push(entry.name);
+        continue;
+      }
+
       const hours = hoursFrom(place);
       const slug = entry.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
