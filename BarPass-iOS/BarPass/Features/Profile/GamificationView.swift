@@ -144,6 +144,7 @@ struct GamificationView: View {
                 HStack(spacing: 12) {
                     ForEach(0..<3, id: \.self) { _ in ShimmerSkeleton(height: 120) }
                 }
+                .bpLoadingRegion(l10n.t("a11y.loading"))
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {

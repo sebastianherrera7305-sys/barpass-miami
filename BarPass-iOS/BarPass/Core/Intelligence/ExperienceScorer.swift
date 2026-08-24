@@ -1,4 +1,5 @@
 import Foundation
+import CoreLocation
 
 /// General-purpose "how good is this venue for this intent+context" scoring
 /// — Engine V2 consolidation, Step 3 (see EXPERIENCE_ENGINE_V2_ARCHITECTURE.md
@@ -38,7 +39,9 @@ enum ExperienceScorer {
         prompt: String = "",
         passport: MusicPassport? = nil,
         context: TripContext? = nil,
-        now: Date = Date()
+        now: Date = Date(),
+        userCoordinate: CLLocationCoordinate2D? = nil,
+        favoriteTypes: Set<VenueType> = []
     ) -> Double {
         let intents = context?.resolvedIntents ?? []
         let intentKeys = intents.flatMap { $0.keywords }
@@ -101,10 +104,46 @@ enum ExperienceScorer {
                 .filter { $0.value(for: v) == true }.count
             s += Double(matched) * 0.6
         }
-        if eventTonight(v, now: now) != nil { s += 2.5 }          // strongest live signal
+        // Event proximity is tiered, not flat — a show starting in 10
+        // minutes is a stronger reason to go than one nine hours out, and
+        // both outrank a venue with no real event at all. Every tier comes
+        // from `VenueTimeStatus`, which itself refuses to fabricate an end
+        // time it wasn't given (see that type's doc comment).
+        switch eventStatus(v, now: now) {
+        case .liveNow:                          s += 3.0
+        case .endingSoon:                       s += 2.0
+        case .upcoming(let mins) where mins <= 180: s += 2.5
+        case .upcoming:                         s += 1.5
+        case .finished, .none:                  break
+        }
+        // College/young-adult nightlife curation — editorial, not a
+        // production data field (see CollegeNightlifeCuration doc comment).
+        // Only boosts on the nights this crowd actually goes out, so a
+        // curated sports bar doesn't outrank a real Tuesday-night event.
+        if CollegeNightlifeCuration.isCurated(v) && CollegeNightlifeCuration.isGoingOutNight(now) { s += 1.5 }
+        // Time-of-day fit — only applies to a venue verified open right now
+        // (`isOpenNow` is computed from the venue's real open/close times
+        // and is false whenever those can't be parsed, never assumed true).
+        // A rooftop at 3pm and a club at 1am both make sense; a club at
+        // 3pm doesn't, so it gets no boost here — never a penalty, since a
+        // club that's genuinely open at 3pm is still a real option.
+        if v.isOpenNow && DayPart.current(now).preferredTypes.contains(v.type) { s += 1.0 }
         if v.isOpenNow { s += 0.75 }
         if v.hasHappyHour { s += 0.4 }
         if let passport { s += HypeEngine.musicMatch(passport: passport, venue: v) * 1.5 }
+        // Personalization from real local history (FavoritesStore) — never
+        // a fabricated profile. Capped low and only applies with a
+        // favorited type on record, so a first-time user with zero
+        // favorites gets exactly zero contribution here, not a guess.
+        if favoriteTypes.contains(v.type) { s += 0.5 }
+        // Distance — real haversine against a real device coordinate only;
+        // nil userCoordinate (permission never granted/denied) contributes
+        // nothing, never an assumed location. Capped at 1.0 so it nudges
+        // rather than dominates the ranking.
+        if let userCoordinate {
+            let km = haversineKm(userCoordinate, CLLocationCoordinate2D(latitude: v.latitude, longitude: v.longitude))
+            s += max(0, 1.0 - km / 15.0)
+        }
         s += min(Double(v.reviewCount) / 10_000.0, 0.5)           // popularity, capped
         return s
     }
@@ -118,7 +157,8 @@ enum ExperienceScorer {
         prompt: String = "",
         passport: MusicPassport? = nil,
         context: TripContext? = nil,
-        now: Date = Date()
+        now: Date = Date(),
+        userCoordinate: CLLocationCoordinate2D? = nil
     ) -> String? {
         let intents = context?.resolvedIntents ?? []
         let relevantTagIds = Set(intents.flatMap { $0.relevantTagIds })
@@ -127,7 +167,23 @@ enum ExperienceScorer {
             return v.experienceTags.filter { relevantTagIds.contains($0.id) }
         }
 
-        if let e = eventTonight(v, now: now) { return "🎟️ \(e.title) esta noche" }
+        switch eventStatus(v, now: now) {
+        case .liveNow, .endingSoon:
+            if let e = eventTonight(v, now: now) { return "🔥 \(e.title) ahora mismo" }
+        case .upcoming(let mins) where mins <= 180:
+            if let e = eventTonight(v, now: now) { return "🎟️ \(e.title) pronto" }
+        case .upcoming:
+            if let e = eventTonight(v, now: now) { return "🎟️ \(e.title) esta noche" }
+        case .finished, .none:
+            break
+        }
+        if CollegeNightlifeCuration.isCurated(v) && CollegeNightlifeCuration.isGoingOutNight(now) {
+            return "🎓 Popular para salir"
+        }
+        if let userCoordinate {
+            let km = haversineKm(userCoordinate, CLLocationCoordinate2D(latitude: v.latitude, longitude: v.longitude))
+            if km < 2.0 { return "📍 Cerca de ti" }
+        }
         if let passport, HypeEngine.musicMatch(passport: passport, venue: v) >= 0.6 {
             return "🎵 Match con tu música"
         }
@@ -151,5 +207,24 @@ enum ExperienceScorer {
             case .finished:                   return false
             }
         }
+    }
+
+    /// Same matching window as `eventTonight`, but returns the real status
+    /// enum instead of collapsing it to a bool — lets `score`/`reason` tell
+    /// "starting in 10 minutes" apart from "starting in 11 hours".
+    fileprivate static func eventStatus(_ v: BarPassVenue, now: Date) -> VenueTimeStatus.EventStatus? {
+        guard let event = eventTonight(v, now: now) else { return nil }
+        return VenueTimeStatus.status(for: event, now: now)
+    }
+
+    /// Great-circle distance in km — real math over real coordinates, no
+    /// external geocoding call.
+    fileprivate static func haversineKm(_ a: CLLocationCoordinate2D, _ b: CLLocationCoordinate2D) -> Double {
+        let r = 6371.0
+        let lat1 = a.latitude * .pi / 180, lat2 = b.latitude * .pi / 180
+        let dLat = (b.latitude - a.latitude) * .pi / 180
+        let dLon = (b.longitude - a.longitude) * .pi / 180
+        let h = sin(dLat / 2) * sin(dLat / 2) + cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2)
+        return 2 * r * asin(min(1, sqrt(h)))
     }
 }

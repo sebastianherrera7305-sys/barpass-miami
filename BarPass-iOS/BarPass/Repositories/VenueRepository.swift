@@ -9,4 +9,13 @@ protocol VenueRepository: Sendable {
     func getHappyHourVenues() async throws -> [BarPassVenue]
     func getVenuesByNeighborhood(_ neighborhood: String) async throws -> [BarPassVenue]
     func searchVenues(query: String) async throws -> [BarPassVenue]
+
+    /// Bypasses any freshness cache and forces a real fetch — for pull-to-refresh
+    /// and other explicit user-initiated refreshes. Default just calls
+    /// `getVenues()`, which is correct for repositories with no cache of their own.
+    func refresh() async throws -> [BarPassVenue]
+}
+
+extension VenueRepository {
+    func refresh() async throws -> [BarPassVenue] { try await getVenues() }
 }

@@ -21,6 +21,16 @@ struct MainTabView: View {
     @ObservedObject private var helpStore = HelpGuideStore.shared
     @State private var showHelpIntro = false
 
+    /// The REAL, measured height of whatever's floating at the bottom right
+    /// now (tab bar alone, or tab bar + music player) — not a guess. Content
+    /// below reserves exactly this much space via `.safeAreaInset`, so it
+    /// grows the moment the music player appears/changes height (Dynamic
+    /// Type, a longer track title wrapping, etc.) instead of a hardcoded 72
+    /// that only ever accounted for the tab bar. 72 here is just the
+    /// pre-first-layout-pass fallback, matching the tab bar's typical height
+    /// so there's no visible jump on first frame.
+    @State private var bottomChromeHeight: CGFloat = 72
+
     /// nil for tabs with no registered Help content yet (Plan) — the button
     /// simply doesn't render rather than opening an overlay with nothing to
     /// explain.
@@ -58,13 +68,23 @@ struct MainTabView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 72) }
+            .safeAreaInset(edge: .bottom) { Color.clear.frame(height: bottomChromeHeight) }
 
-            MusicNowPlayingBar()
-                .padding(.bottom, 86)
-                .animation(.spring(response: 0.4, dampingFraction: 0.85), value: MusicNowPlayingObserver.shared.title)
-
-            floatingTabBar
+            // Music player + tab bar in ONE stack, top-to-bottom, so their
+            // combined height is what gets measured and fed back into the
+            // content's bottom inset above — the two floating layers can
+            // never silently drift out of sync with what content thinks it
+            // needs to clear.
+            VStack(spacing: 14) {
+                MusicNowPlayingBar()
+                    .animation(.spring(response: 0.4, dampingFraction: 0.85), value: MusicNowPlayingObserver.shared.title)
+                floatingTabBar
+            }
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(key: BottomChromeHeightPreferenceKey.self, value: geo.size.height)
+                }
+            )
 
             if let route = currentHelpRoute, !helpStore.isActive {
                 VStack {
@@ -81,6 +101,10 @@ struct MainTabView: View {
             if showHelpIntro {
                 helpIntroBanner
             }
+        }
+        .onPreferenceChange(BottomChromeHeightPreferenceKey.self) { height in
+            guard height > 0 else { return }
+            withAnimation(.easeOut(duration: 0.2)) { bottomChromeHeight = height }
         }
         // Attached to the OUTER ZStack, not the inner Group — anchors from
         // .helpTarget() still bubble up through the whole tree either way,
@@ -277,6 +301,16 @@ struct MainTabView: View {
             hint: ["Eventos de esta noche", "Explorar lugares", "Tus viajes", "Planificar tu noche", "Tu perfil"][index],
             isButton: true
         )
+    }
+}
+
+/// The real, rendered height of the floating tab bar (+ music player when
+/// visible) — read via GeometryReader, never assumed. `reduce` keeps the
+/// max in case of any transient double-report during a layout pass.
+private struct BottomChromeHeightPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat { 0 }
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
 

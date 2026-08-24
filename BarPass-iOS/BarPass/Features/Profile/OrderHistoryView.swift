@@ -14,7 +14,7 @@ struct OrderHistoryView: View {
             BPBackgroundView()
 
             if isLoading {
-                ProgressView().tint(Color.bpAmber)
+                BarPassLoadingView()
             } else if entries.isEmpty {
                 emptyState
             } else {

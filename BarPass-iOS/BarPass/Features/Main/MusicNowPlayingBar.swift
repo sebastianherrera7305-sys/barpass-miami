@@ -39,6 +39,8 @@ struct MusicNowPlayingBar: View {
                         .font(.bpScaled(14))
                         .foregroundStyle(Color.bpInk)
                         .frame(width: 30, height: 30)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .bpAccessibility(label: observer.isPlaying ? l10n.t("music.pause.a11y") : l10n.t("music.play.a11y"), isButton: true)
@@ -48,6 +50,8 @@ struct MusicNowPlayingBar: View {
                         .font(.bpScaled(13))
                         .foregroundStyle(Color.bpInk.opacity(0.7))
                         .frame(width: 26, height: 26)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .bpAccessibility(label: l10n.t("music.next.a11y"), isButton: true)
@@ -57,6 +61,8 @@ struct MusicNowPlayingBar: View {
                         .font(.bpScaled(12, weight: .semibold))
                         .foregroundStyle(Color.bpTextSecondary)
                         .frame(width: 24, height: 24)
+                        .frame(minWidth: 44, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .bpAccessibility(label: l10n.t("music.stop.a11y"), hint: l10n.t("music.stop.hint"), isButton: true)

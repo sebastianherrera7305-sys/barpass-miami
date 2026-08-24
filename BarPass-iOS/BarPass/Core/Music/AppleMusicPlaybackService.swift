@@ -168,11 +168,15 @@ enum AppleMusicPlaybackService {
 
             switch type {
             case .began:
-                log("interrupción de audio (llamada, grabación de pantalla, otra app) — pausado")
+                Task { @MainActor in
+                    log("interrupción de audio (llamada, grabación de pantalla, otra app) — pausado")
+                }
             case .ended:
                 let optionsValue = info[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
                 let shouldResume = AVAudioSession.InterruptionOptions(rawValue: optionsValue).contains(.shouldResume)
-                log("interrupción terminó — shouldResume: \(shouldResume)")
+                Task { @MainActor in
+                    log("interrupción terminó — shouldResume: \(shouldResume)")
+                }
                 guard shouldResume else { return }
                 Task { @MainActor in
                     try? await ApplicationMusicPlayer.shared.play()

@@ -33,6 +33,29 @@ create policy "wallet transactions readable by owner" on public.wallet_transacti
 create index if not exists wallet_transactions_user_idx
   on public.wallet_transactions (user_id, created_at desc);
 
+-- ============================================================
+-- ✅ CANONICAL / AUTHORITATIVE DEFINITION of adjust_wallet_balance.
+--
+-- This is the version production runs. Any other copy in this repo is
+-- historical: V1 in `wallet_schema.sql` (superseded) and the archived
+-- one-paste script in `archive/phase1_run_this_now.sql`. Change the
+-- wallet RPC HERE and nowhere else.
+--
+--   signature   : (p_user_id uuid, p_amount numeric,
+--                  p_kind text default 'spend')
+--   returns     : table(balance numeric, transaction_id uuid) — callers
+--                 read `rpcData[0]`, so this is not interchangeable with
+--                 V1's bare numeric return
+--   p_kind      : labels the movement ('topup' | 'spend') in the ledger
+--   side effect : inserts one row into `wallet_transactions`, which is
+--                 what lets a pass reference a verified payment
+--   security    : SECURITY DEFINER with `search_path = public` pinned —
+--                 the pinning is what stops the classic privilege
+--                 escalation against definer functions
+--   safety      : raises `insufficient_funds` before committing if the
+--                 resulting balance would go negative
+-- ============================================================
+--
 -- Return type changes (numeric -> table), so the old function must be
 -- dropped first — Postgres won't let you change a return type in place.
 drop function if exists public.adjust_wallet_balance(uuid, numeric);

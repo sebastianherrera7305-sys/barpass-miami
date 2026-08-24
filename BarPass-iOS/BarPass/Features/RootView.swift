@@ -55,6 +55,12 @@ struct RootView: View {
                     .zIndex(6)
             }
 
+            if appState.showCityPicker {
+                CityPickerView { appState.completeCityPicker() }
+                    .transition(.opacity)
+                    .zIndex(7)
+            }
+
             if appState.isOffline && !appState.showSplash {
                 VStack {
                     Spacer()
@@ -108,7 +114,10 @@ struct RootView: View {
             .padding(.vertical, 8)
             .background(
                 Capsule()
-                    .fill(Color(red:0.06,green:0.04,blue:0.10).opacity(0.97))
+                    // Same Light Mode bug as the tab bar: hardcoded dark fill
+                    // under a bpInk cart icon. bpCardBackground is the identical
+                    // colour in Dark Mode and adapts in Light.
+                    .fill(Color.bpCardBackground.opacity(0.97))
                     .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.15), lineWidth: 1))
                     .shadow(color: .black.opacity(0.6), radius: 16, y: 4)
             )
@@ -159,11 +168,16 @@ private struct OfflineBanner: View {
             Text(l10n.t("root.offline"))
                 .font(.caption.weight(.medium))
         }
-        .foregroundStyle(Color.bpInk)
+        // Hardcoded-dark background regardless of app appearance — bpInk
+        // (near-black in Light Mode) was unreadable against it. Same bug
+        // class as HeroVenueCard's photo scrim: text color must be fixed
+        // light, not theme-aware, whenever the surface behind it is
+        // hardcoded dark on purpose.
+        .foregroundStyle(.white)
         .padding(.horizontal, 14)
         .padding(.vertical, 9)
         .background(.black.opacity(0.84), in: Capsule())
-        .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.12), lineWidth: 1))
+        .overlay(Capsule().strokeBorder(Color.white.opacity(0.12), lineWidth: 1))
         .shadow(color: .black.opacity(0.35), radius: 10, y: 3)
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: l10n.t("root.offline.a11y"), hint: l10n.t("root.offline.hint"))
@@ -181,12 +195,14 @@ private struct OrderConfirmationBanner: View {
         HStack(spacing: 12) {
             Text("🚀").font(.title3)
             VStack(alignment: .leading, spacing: 2) {
+                // Same hardcoded-dark-background bug as OfflineBanner above —
+                // this card's fill (below) never changes with app appearance.
                 Text(l10n.t("root.orderSent"))
                     .font(.bpScaled(14, weight: .bold))
-                    .foregroundStyle(Color.bpInk)
+                    .foregroundStyle(.white)
                 Text(order.method + " · " + String(format: "$%.2f", order.total))
                     .font(.caption)
-                    .foregroundStyle(Color.bpInk.opacity(0.5))
+                    .foregroundStyle(.white.opacity(0.5))
             }
             Spacer()
             Text(l10n.t("root.orderEta"))

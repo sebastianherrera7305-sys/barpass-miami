@@ -201,7 +201,13 @@ struct TokenSetupSheet: View {
                             } label: {
                                 Image(systemName: showToken ? "eye.slash" : "eye")
                                     .foregroundStyle(.secondary)
+                                    .frame(minWidth: 44, minHeight: 44)
+                                    .contentShape(Rectangle())
                             }
+                            .bpAccessibility(
+                                label: showToken ? l10n.t("wallet.setup.hideToken") : l10n.t("wallet.setup.showToken"),
+                                isButton: true
+                            )
                         }
                         .padding(14)
                         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))

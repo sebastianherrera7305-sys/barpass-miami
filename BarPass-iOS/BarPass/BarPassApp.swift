@@ -169,4 +169,5 @@ extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
 extension Notification.Name {
     static let deviceTokenReceived = Notification.Name("deviceTokenReceived")
     static let deepLinkReceived    = Notification.Name("deepLinkReceived")
+    static let selectedCityChanged = Notification.Name("selectedCityChanged")
 }

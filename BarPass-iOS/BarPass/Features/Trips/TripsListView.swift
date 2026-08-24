@@ -110,6 +110,7 @@ struct TripsListView: View {
             }
         }
         .padding(.top, 100)
+        .bpLoadingRegion(l10n.t("a11y.loading"))
     }
 
     private func errorView(_ error: String) -> some View {
@@ -261,6 +262,7 @@ struct TripsListView: View {
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("trips.createNew"), hint: l10n.t("trips.createNew.hint"), isButton: true)
+            .helpTarget("trips.create")
         }
     }
 

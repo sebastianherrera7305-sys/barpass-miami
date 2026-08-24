@@ -11,6 +11,7 @@ struct ActiveTicketView: View {
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
 
     @State private var pulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
@@ -39,7 +40,10 @@ struct ActiveTicketView: View {
                     .bpAccessibility(label: l10n.t("reservationConfirm.done"), hint: l10n.t("ticket.done.hint"), isButton: true)
             }
         }
-        .onAppear { pulse = true }
+        // Reduce Motion: `pulse` drives both repeatForever animations here
+        // (header circle + QR glow). Leaving it false keeps the view at its
+        // resting state, so neither animation ever starts.
+        .onAppear { pulse = !reduceMotion }
     }
 
     // MARK: - Header

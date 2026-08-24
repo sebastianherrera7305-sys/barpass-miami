@@ -119,7 +119,7 @@ struct PromptYourNightView: View {
                 Text(label).font(.bpScaled(12, weight: .semibold))
                     .lineLimit(1).minimumScaleFactor(0.8)
             }
-            .foregroundStyle(on ? .black : .white)
+            .foregroundStyle(on ? .black : Color.bpInk)
             .padding(.horizontal, 12).padding(.vertical, 10)
             .frame(maxWidth: .infinity)
             .background(on ? Color.bpAmber : Color.bpInk.opacity(0.06), in: Capsule())
@@ -140,7 +140,7 @@ struct PromptYourNightView: View {
                 Text(c.emoji)
                 Text(label).font(.bpScaled(12, weight: .semibold)).lineLimit(1)
             }
-            .foregroundStyle(on ? .black : .white)
+            .foregroundStyle(on ? .black : Color.bpInk)
             .padding(.horizontal, 12).padding(.vertical, 8)
             .background(on ? Color.bpAmber : Color.bpInk.opacity(0.06), in: Capsule())
             .overlay(Capsule().strokeBorder(on ? .clear : Color.bpInk.opacity(0.1)))
@@ -159,7 +159,7 @@ struct PromptYourNightView: View {
             Text(label)
                 .font(.bpScaled(11, weight: .semibold))
                 .lineLimit(1).minimumScaleFactor(0.85)
-                .foregroundStyle(on ? .black : .white)
+                .foregroundStyle(on ? .black : Color.bpInk)
                 .padding(.horizontal, 10).padding(.vertical, 8)
                 .frame(maxWidth: .infinity)
                 .background(on ? Color.bpAmber : Color.bpInk.opacity(0.06), in: Capsule())

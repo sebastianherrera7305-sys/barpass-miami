@@ -68,7 +68,10 @@ struct HypeWeekCard: View {
 
     private var loadingCard: some View {
         HStack(spacing: 12) {
-            ProgressView().tint(Color.bpAmber)
+            Image("BarPassMascot")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 32, height: 32)
             Text(l10n.t("hype.loading"))
                 .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
         }

@@ -409,6 +409,8 @@ private struct CartItemRow: View {
                 .font(.bpScaled(11, weight: .bold))
                 .foregroundStyle(Color.bpInk.opacity(0.55))
                 .frame(width: 30, height: 30)
+                .frame(minWidth: 44, minHeight: 44)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .bpAccessibility(label: icon == "minus" ? l10n.t("cart.decreaseQty") : l10n.t("cart.increaseQty"), hint: icon == "minus" ? l10n.t("cart.decreaseQty.hint") : l10n.t("cart.increaseQty.hint"), isButton: true)

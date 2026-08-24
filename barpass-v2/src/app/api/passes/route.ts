@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/passes
@@ -60,6 +61,18 @@ export async function POST(request: Request) {
   const { data: userData, error: userError } = await supabase.auth.getUser(token);
   if (userError || !userData?.user) {
     return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
+  }
+
+  // 10 registros de pase por minuto y por usuario — holgado para una noche
+  // real (un pase por compra), pero cierra el martilleo de este endpoint, que
+  // era el único autenticado sin límite. La clave va después de getUser para
+  // que sea el user id verificado y no algo que el llamante pueda falsear.
+  const withinLimit = await checkRateLimit(`passes:${userData.user.id}`, {
+    maxRequests: 10,
+    windowSeconds: 60,
+  });
+  if (!withinLimit) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
   let body: unknown;

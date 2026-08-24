@@ -49,7 +49,9 @@ struct ExploreView: View {
             Layer(id: "all", icon: "square.grid.2x2", label: l10n.t("explore.layer.all")),
             Layer(id: "trending", icon: "flame.fill", label: l10n.t("explore.layer.trending")),
             Layer(id: "happy_hour", icon: "clock.fill", label: l10n.t("explore.layer.happyHour")),
-            Layer(id: "no_cover", icon: "ticket.fill", label: l10n.t("explore.layer.noCover")),
+            // "no_cover" layer removed — it filtered on `coverMen == 0`, but
+            // coverMen is unpopulated for the entire catalog, so the chip
+            // always matched zero venues. Re-add once real cover data exists.
             Layer(id: "rooftop", icon: "sun.max.fill", label: l10n.t("explore.layer.rooftops")),
             Layer(id: "live", icon: "music.mic", label: l10n.t("explore.layer.liveMusic")),
         ]
@@ -61,7 +63,6 @@ struct ExploreView: View {
                 switch selectedLayer {
                 case "trending": return v.isTrending
                 case "happy_hour": return v.hasHappyHour
-                case "no_cover": return (v.coverMen ?? 1) == 0
                 case "rooftop": return v.type == .rooftop
                 case "live": return v.musicGenres.contains(.live)
                 default: return true
@@ -74,6 +75,11 @@ struct ExploreView: View {
                    v.neighborhood.lowercased().contains(q) ||
                    v.type.rawValue.lowercased().contains(q)
         }
+        // DiscoveryScorer, not ExperienceScorer — see that type's doc
+        // comment. Harmless for the map (pins place by lat/lng regardless
+        // of array order); gives the list view real best-quality-first
+        // order instead of raw database insertion order.
+        .sorted { DiscoveryScorer.score($0) > DiscoveryScorer.score($1) }
     }
 
     var body: some View {
@@ -102,6 +108,8 @@ struct ExploreView: View {
                             .foregroundStyle(Color.bpAmber)
                             .frame(width: 32, height: 32)
                             .glass(radius: 16)
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .bpAccessibility(label: showList ? l10n.t("explore.toggleMap") : l10n.t("explore.toggleList"), hint: l10n.t("explore.toggleView.hint"), isButton: true)
@@ -143,6 +151,8 @@ struct ExploreView: View {
                             .foregroundStyle(Color.bpAmber)
                             .frame(width: 32, height: 32)
                             .glass(radius: 16)
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .bpAccessibility(label: l10n.t("explore.centerMap"), hint: l10n.t("explore.centerMap.hint"), isButton: true)
@@ -159,6 +169,7 @@ struct ExploreView: View {
                     .padding(.horizontal, BPSpacing.lg)
                     .padding(.vertical, 6)
                 }
+                .helpTarget("explore.filters")
 
                 Spacer()
 
@@ -172,13 +183,71 @@ struct ExploreView: View {
         }
         .animation(.spring(response: 0.35), value: selectedVenue?.id)
         .animation(.easeInOut(duration: 0.25), value: showList)
-        .onAppear { mapLoadTriggered = true }
+        .onAppear {
+            mapLoadTriggered = true
+            recenterOnCurrentCity()
+        }
+        .onChange(of: venueStore.selectedCity) { _, _ in recenterOnCurrentCity() }
+    }
+
+    /// Re-centers the map on the real, currently-loaded venues for the
+    /// selected city — a bounding box of their actual coordinates, not a
+    /// second hardcoded per-city constant. Falls back to Miami only when
+    /// there's genuinely nothing else to center on (e.g. before the first
+    /// load completes).
+    private func recenterOnCurrentCity() {
+        let lats = venueStore.venues.map(\.latitude)
+        let lngs = venueStore.venues.map(\.longitude)
+        guard let minLat = lats.min(), let maxLat = lats.max(),
+              let minLng = lngs.min(), let maxLng = lngs.max() else { return }
+        let center = CLLocationCoordinate2D(latitude: (minLat + maxLat) / 2, longitude: (minLng + maxLng) / 2)
+        let span = MKCoordinateSpan(
+            latitudeDelta: max((maxLat - minLat) * 1.4, 0.05),
+            longitudeDelta: max((maxLng - minLng) * 1.4, 0.05)
+        )
+        withAnimation(.easeInOut(duration: 0.4)) {
+            cameraPosition = .region(MKCoordinateRegion(center: center, span: span))
+        }
     }
 
     // MARK: - Map
 
+    /// The selected city's "territory" — a Snapchat-campus-style geofence
+    /// ring drawn from the real bounding box of its actual loaded venues
+    /// (not a hand-drawn/hardcoded shape per city), so it's always honest
+    /// about where the data actually is.
+    private var territory: (center: CLLocationCoordinate2D, radius: Double)? {
+        let lats = venueStore.venues.map(\.latitude)
+        let lngs = venueStore.venues.map(\.longitude)
+        guard let minLat = lats.min(), let maxLat = lats.max(),
+              let minLng = lngs.min(), let maxLng = lngs.max() else { return nil }
+        let center = CLLocationCoordinate2D(latitude: (minLat + maxLat) / 2, longitude: (minLng + maxLng) / 2)
+        let latMeters = (maxLat - minLat) * 111_000
+        let lngMeters = (maxLng - minLng) * 111_000 * cos(center.latitude * .pi / 180)
+        let radius = max(max(latMeters, lngMeters) / 2 * 1.15, 3000)
+        return (center, radius)
+    }
+
     private var mapView: some View {
         Map(position: $cameraPosition) {
+            if let territory, let city = venueStore.selectedCity {
+                let identity = CityIdentity.forCity(city)
+                MapCircle(center: territory.center, radius: territory.radius)
+                    .foregroundStyle(identity.theme.palette.0.opacity(0.08))
+                    .stroke(identity.theme.palette.0.opacity(0.9), lineWidth: 2.5)
+
+                Annotation(
+                    "",
+                    coordinate: CLLocationCoordinate2D(
+                        latitude: territory.center.latitude + (territory.radius / 111_000) * 0.92,
+                        longitude: territory.center.longitude
+                    )
+                ) {
+                    territoryLabel(city: city, identity: identity)
+                }
+                .annotationTitles(.hidden)
+            }
+
             ForEach(clusters) { cluster in
                 Annotation(cluster.venues.first?.name ?? "", coordinate: cluster.coordinate) {
                     if cluster.isSingle, let venue = cluster.venues.first {
@@ -224,6 +293,28 @@ struct ExploreView: View {
         .mapControls {
             MapUserLocationButton()
         }
+    }
+
+    /// The pill sitting on the territory ring — mascot badge + real
+    /// school/city name, e.g. "🐊 Gator Nation" for Gainesville, "UGA" for
+    /// Athens — the same identity used everywhere else (city picker,
+    /// Profile), just anchored to the map this time.
+    private func territoryLabel(city: String, identity: CityIdentity) -> some View {
+        HStack(spacing: 6) {
+            CityMascotIcon(city: city, size: 22)
+            Text(identity.nickname.isEmpty ? city : identity.nickname)
+                .font(.bpScaled(12, weight: .heavy))
+                .foregroundStyle(Color.bpInk)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(
+            Capsule()
+                .fill(.ultraThinMaterial)
+                .overlay(Capsule().strokeBorder(identity.theme.palette.0.opacity(0.6), lineWidth: 1.5))
+        )
+        .shadow(color: .black.opacity(0.3), radius: 8, y: 3)
+        .allowsHitTesting(false)
     }
 
     private func clusterBubble(_ cluster: Cluster) -> some View {
@@ -332,7 +423,7 @@ struct ExploreView: View {
                     }
 
                     HStack(spacing: 8) {
-                        Text(venue.priceRange)
+                        Text(venue.priceTier.symbol ?? l10n.t("venue.crowd.na"))
                             .font(.bpScaled(10))
                             .foregroundStyle(Color.bpTextSecondary)
                         if venue.isOpenNow {
@@ -384,7 +475,7 @@ struct ExploreView: View {
                 Image(systemName: layer.icon).font(.bpScaled(10))
                 Text(layer.label).font(.bpScaled(11, weight: .semibold))
             }
-            .foregroundStyle(selected ? .black : .white)
+            .foregroundStyle(selected ? .black : Color.bpInk)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(selected ? Color.bpAmber : Color.bpInk.opacity(0.1))
@@ -438,6 +529,7 @@ struct ExploreView: View {
             Spacer(minLength: 120)
         }
         .safeAreaInset(edge: .top) { Color.clear.frame(height: 180) }
+        .refreshable { await venueStore.forceRefresh() }
     }
 
     private var region: MKCoordinateRegion {
@@ -453,12 +545,14 @@ struct ExploreView: View {
 struct PulsingRing: View {
     @State private var scale: CGFloat = 1.0
     @State private var opacity: Double = 0.4
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Circle()
             .strokeBorder(Color.bpAmber.opacity(opacity), lineWidth: 1.5)
             .scaleEffect(scale)
             .onAppear {
+                guard !reduceMotion else { return }
                 withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
                     scale = 1.35
                     opacity = 0
@@ -493,7 +587,7 @@ struct VenueListRow: View {
                         .font(.bpScaled(12, weight: .semibold))
                         .foregroundStyle(Color.bpTextSecondary)
                     Text("·").foregroundStyle(Color.bpTextTertiary)
-                    Text(venue.priceRange).font(.bpScaled(12)).foregroundStyle(Color.bpTextSecondary)
+                    Text(venue.priceTier.symbol ?? l10n.t("venue.crowd.na")).font(.bpScaled(12)).foregroundStyle(Color.bpTextSecondary)
                 }
             }
 

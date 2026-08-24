@@ -18,6 +18,23 @@ drop policy if exists "wallet balance readable by owner" on public.wallet_balanc
 create policy "wallet balance readable by owner" on public.wallet_balances
   for select using (auth.uid() = user_id);
 
+-- ============================================================
+-- ⚠️  HISTORICAL — V1, SUPERSEDED. DO NOT RUN ON A LIVE DATABASE.
+--
+-- Replaced on 2026-07-20 by V2 in `pass_payment_verification.sql`,
+-- which is the CANONICAL definition and the one production runs.
+-- V2 adds `p_kind`, returns `(balance, transaction_id)` instead of a
+-- bare numeric, and records every movement in `wallet_transactions`
+-- so a pass can be tied to a verified payment.
+--
+-- This V1 body is kept only because THIS FILE also creates the
+-- `wallet_balances` table, its RLS and its policies (above) — deleting
+-- the file would delete the wallet schema itself. Executing this
+-- definition against a database that already has V2 would silently
+-- break `/api/wallet/topup` and `/api/wallet/spend`, which both pass
+-- `p_kind` and read `rpcData[0]`.
+-- ============================================================
+--
 -- Atomic increment/decrement. Raises if it would go negative — callers
 -- (the spend route) catch that and surface "insufficient_funds" rather
 -- than ever letting balance dip below zero.

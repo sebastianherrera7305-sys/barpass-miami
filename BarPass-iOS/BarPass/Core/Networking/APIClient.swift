@@ -9,6 +9,7 @@ enum APIClient {
 
     enum APIClientError: LocalizedError {
         case notAuthenticated
+        case sessionExpired
         case server(String)
         case network(String)
         case invalidResponse
@@ -16,11 +17,29 @@ enum APIClient {
         var errorDescription: String? {
             switch self {
             case .notAuthenticated: return "Debes iniciar sesión para pagar con tarjeta."
+            case .sessionExpired:   return "Tu sesión expiró. Vuelve a iniciar sesión para continuar."
             case .server(let msg):  return msg
             case .network(let msg): return msg
             case .invalidResponse:  return "Respuesta inválida del servidor."
             }
         }
+    }
+
+    /// Guarantees the access token used for an authenticated request is still
+    /// valid (ADR-012). Callers read `session.accessToken` before awaiting, so
+    /// by the time a request is built that token may already have expired — the
+    /// JWT lives ~59 minutes and nothing else in the app refreshes it outside
+    /// the login screen. `refreshIfNeeded()` is a no-op when the token is still
+    /// good, so this adds no latency in the common case.
+    ///
+    /// The `provided` token is kept as a fallback for the (unexpected) case
+    /// where no session can be read back after a successful refresh, so the
+    /// public API signatures stay unchanged.
+    private static func freshToken(_ provided: String) async throws -> String {
+        guard await AuthService.shared.refreshIfNeeded() else {
+            throw APIClientError.sessionExpired
+        }
+        return AuthService.shared.restoreSession()?.accessToken ?? provided
     }
 
     /// Generates a key matching the backend's required format:
@@ -75,11 +94,12 @@ enum APIClient {
         stripePaymentMethodId: String
     ) async throws -> [String: Any] {
         let staffId = "self_checkout"
+        let token = try await freshToken(idToken)
 
         var request = URLRequest(url: baseURL.appendingPathComponent("transactions"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue(generateIdempotencyKey(vendorId: vendorId, staffId: staffId),
                           forHTTPHeaderField: "idempotency-key")
 
@@ -160,10 +180,14 @@ enum APIClient {
         validUntil: Date,
         paymentSource: PassPaymentSource
     ) async {
+        // Best-effort by design (this function can't throw), so a failed
+        // refresh falls back to the caller's token rather than aborting.
+        let token = (try? await freshToken(idToken)) ?? idToken
+
         var request = URLRequest(url: baseURL.appendingPathComponent("passes"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         let body: [String: Any] = [
             "passCode":      passCode,
@@ -207,10 +231,11 @@ enum APIClient {
     /// keep the user signed in and surface the error rather than logging them
     /// out of an account that still exists.
     static func deleteAccount(idToken: String) async throws {
+        let token = try await freshToken(idToken)
         var request = URLRequest(url: baseURL.appendingPathComponent("account/delete"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         let (data, response): (Data, URLResponse)
         do {
@@ -231,9 +256,10 @@ enum APIClient {
     /// created on first call). Feeds ShareManager.shareReferral with a real
     /// code instead of a placeholder. GET /api/referral/code.
     static func fetchReferralCode(idToken: String) async throws -> String {
+        let token = try await freshToken(idToken)
         var request = URLRequest(url: baseURL.appendingPathComponent("referral/code"))
         request.httpMethod = "GET"
-        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         let (data, response): (Data, URLResponse)
         do {
@@ -254,10 +280,11 @@ enum APIClient {
     /// POST /api/referral/attribute. Throws on hard failure; `invalid_code`
     /// and `self_referral` surface as `.server` errors the caller can ignore.
     static func attributeReferral(idToken: String, code: String) async throws {
+        let token = try await freshToken(idToken)
         var request = URLRequest(url: baseURL.appendingPathComponent("referral/attribute"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.httpBody = try JSONSerialization.data(withJSONObject: ["code": code])
 
         let (data, response): (Data, URLResponse)
@@ -277,10 +304,11 @@ enum APIClient {
     private static func postJSON(
         path: String, idToken: String, body: [String: Any]
     ) async throws -> (balance: Double, transactionId: String?) {
+        let token = try await freshToken(idToken)
         var request = URLRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(idToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response): (Data, URLResponse)

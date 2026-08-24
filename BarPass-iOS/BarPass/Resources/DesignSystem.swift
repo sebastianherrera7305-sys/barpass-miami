@@ -1,5 +1,22 @@
 import SwiftUI
 
+/// UI-layer rendering for the `PriceTier` domain value — deliberately kept
+/// out of Models/Venue.swift (ADR-014): the model exposes the real 1-4 tier
+/// as pure data, the view layer decides how "$"–"$$$$" looks. `nil` for
+/// `.unknown` — callers fall back to the shared `venue.crowd.na` l10n key,
+/// same pattern as `crowdDescriptionKey`, never a hardcoded default here.
+extension PriceTier {
+    var symbol: String? {
+        switch self {
+        case .unknown: return nil
+        case .tier1: return "$"
+        case .tier2: return "$$"
+        case .tier3: return "$$$"
+        case .tier4: return "$$$$"
+        }
+    }
+}
+
 extension Font {
     /// Dynamic-Type-aware fixed size: identity at the default content size,
     /// scales with the user's text size setting (UIFontMetrics).
@@ -60,6 +77,10 @@ extension View {
 
 struct ShimmerModifier: ViewModifier {
     @State private var phase: CGFloat = -1
+    /// Reduce Motion: the sweep repeats forever, so it's exactly the kind of
+    /// perpetual motion the setting exists to stop. The static gradient stays
+    /// (it still reads as a placeholder), only the animation is skipped.
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func body(content: Content) -> some View {
         content
@@ -72,6 +93,7 @@ struct ShimmerModifier: ViewModifier {
                 .offset(x: phase * 200)
                 .mask(content)
                 .onAppear {
+                    guard !reduceMotion else { return }
                     withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
                         phase = 1
                     }
@@ -90,6 +112,22 @@ struct ShimmerSkeleton: View {
             .frame(maxWidth: width == nil ? .infinity : nil)
             .frame(width: width, height: height)
             .shimmer()
+    }
+}
+
+extension View {
+    /// Announces a loading region to VoiceOver as a single element.
+    ///
+    /// Skeletons are bare `Shape`s, which are not accessibility elements —
+    /// so every loading screen was silent, indistinguishable from an empty
+    /// or broken view. Labelling each skeleton individually would instead
+    /// announce "loading" once per placeholder (7 times on Tonight alone),
+    /// so the label belongs on the container that groups them.
+    func bpLoadingRegion(_ label: String) -> some View {
+        self
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(label)
+            .accessibilityAddTraits(.updatesFrequently)
     }
 }
 
@@ -118,29 +156,138 @@ enum BPSpacing {
     static func error() { UINotificationFeedbackGenerator().notificationOccurred(.error) }
 }
 
-/// Fondo de la app — antes negro/blanco plano en las 24 pantallas.
-/// Ahora un resplandor "Deep Cosmos" sutil (glow púrpura-ámbar arriba,
-/// cayendo a negro en los bordes) — un solo punto de cambio para todas
-/// las pantallas, sin assets nuevos que pesen.
+/// Fondo de la app — antes negro/blanco plano en las 24 pantallas, después
+/// un glow atmosférico difuminado. Ahora una composición asimétrica de 2-3
+/// formas PLANAS con contorno negro grueso por tema (ver
+/// `BPTheme.backgroundBlobs`) — el mismo lenguaje "sticker" del logo
+/// (relleno plano, línea gruesa, sombra dura) en vez de un degradado suave
+/// que le peleaba visualmente al mascot. Un solo punto de cambio para toda
+/// la app, cero assets de imagen. `@ObservedObject` en vez de leer el
+/// `static var currentPalette` directamente: así se repinta solo apenas
+/// cambia la ciudad/tema, sin depender de que algún ancestro fuerce
+/// `.id(theme)`.
 struct BPBackgroundView: View {
+    @ObservedObject private var themeService = ThemeService.shared
+    @State private var selectedCity: String? = SelectedCityStore.selectedCity
+
     var body: some View {
         Group {
             if AppearanceStore.isDark {
-                RadialGradient(
-                    colors: [
-                        Color(red: 0.14, green: 0.09, blue: 0.15),
-                        Color(red: 0.07, green: 0.05, blue: 0.09),
-                        Color.black,
-                    ],
-                    center: UnitPoint(x: 0.5, y: 0.15),
-                    startRadius: 0,
-                    endRadius: 650
-                )
+                GeometryReader { proxy in
+                    if let artName = CityBackgroundArt.imageName(for: selectedCity) {
+                        // Real illustrated art for cities that have it —
+                        // fills the top of the screen, fades to solid black
+                        // well before the safe content area so venue cards/
+                        // text never fight it for legibility.
+                        ZStack(alignment: .top) {
+                            Color.black
+                            Image(artName)
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: proxy.size.width, height: proxy.size.height * 0.62)
+                                .clipped()
+                                .overlay(alignment: .bottom) {
+                                    LinearGradient(
+                                        colors: [.clear, .black.opacity(0.55), .black],
+                                        startPoint: .init(x: 0.5, y: 0.35),
+                                        endPoint: .bottom
+                                    )
+                                    .frame(height: proxy.size.height * 0.62)
+                                }
+                            GrainTexture(opacity: 0.03)
+                        }
+                    } else {
+                        let blobs = themeService.theme.backgroundBlobs
+                        ZStack {
+                            Color.black
+
+                            ForEach(Array(blobs.enumerated()), id: \.offset) { _, blob in
+                                // The stroke must NOT inherit the fill's low
+                                // opacity — a "black" outline at 45% opacity
+                                // just blends into the dark background and
+                                // reads as soft, not as the mascot's crisp,
+                                // fully-opaque line. Opacity applies to the
+                                // fill only; the stroke stays solid black.
+                                ZStack {
+                                    Circle().fill(blob.color).opacity(blob.opacity)
+                                    Circle().strokeBorder(.black, lineWidth: 6)
+                                }
+                                .frame(width: proxy.size.width * blob.radius, height: proxy.size.width * blob.radius)
+                                .position(x: proxy.size.width * blob.point.x, y: proxy.size.height * blob.point.y)
+                                .blur(radius: blob.blur)
+                            }
+
+                            GrainTexture()
+                        }
+                    }
+                }
             } else {
                 Color.bpBackground
             }
         }
         .ignoresSafeArea()
+        .onReceive(NotificationCenter.default.publisher(for: .selectedCityChanged)) { note in
+            selectedCity = note.object as? String
+        }
+    }
+}
+
+/// Cities with real illustrated background art (generated per-city, not
+/// per-theme — Gainesville and Miami share a theme color but not art,
+/// since the art is a specific illustrated piece, not just a recolor).
+/// Cities without an entry fall back to the flat sticker-blob composition.
+enum CityBackgroundArt {
+    private static let names: [String: String] = [
+        "Miami": "CityArtMiami",
+        "New York": "CityArtNewYork",
+    ]
+
+    static func imageName(for city: String?) -> String? {
+        guard let city else { return nil }
+        return names[city]
+    }
+}
+
+/// A static, deterministic film-grain overlay — a few hundred faint dots,
+/// same pattern every render (seeded, not `Double.random`), so it never
+/// flickers on re-layout. This one texture pass is what keeps the
+/// background glows from reading as a flat, generic gradient blob.
+struct GrainTexture: View {
+    var opacity: Double = 0.05
+
+    var body: some View {
+        Canvas { context, size in
+            var rng = SeededGenerator(seed: 42)
+            let dotCount = Int((size.width * size.height) / 900)
+            for _ in 0..<dotCount {
+                let x = CGFloat.random(in: 0...size.width, using: &rng)
+                let y = CGFloat.random(in: 0...size.height, using: &rng)
+                let a = Double.random(in: 0.03...0.10, using: &rng)
+                context.fill(Path(ellipseIn: CGRect(x: x, y: y, width: 1, height: 1)), with: .color(.white.opacity(a)))
+            }
+        }
+        .opacity(opacity)
+        .allowsHitTesting(false)
+    }
+}
+
+/// Deterministic PRNG (SplitMix64) so grain/other one-shot texture draws are
+/// stable across re-renders instead of using the system RNG, which would
+/// reshuffle every dot on every SwiftUI diff. A plain linear-congruential
+/// generator was tried first and produced a visible grid/moiré artifact —
+/// its low bits are weakly correlated, which `random(in:using:)` exposed
+/// directly. SplitMix64 mixes the state through a proper avalanche step
+/// before returning it, which is what actually reads as organic grain
+/// instead of a repeating dot lattice.
+struct SeededGenerator: RandomNumberGenerator {
+    private var state: UInt64
+    init(seed: UInt64) { self.state = seed }
+    mutating func next() -> UInt64 {
+        state = state &+ 0x9E3779B97F4A7C15
+        var z = state
+        z = (z ^ (z >> 30)) &* 0xBF58476D1CE4E5B9
+        z = (z ^ (z >> 27)) &* 0x94D049BB133111EB
+        return z ^ (z >> 31)
     }
 }
 
@@ -191,22 +338,34 @@ extension Color {
 
 struct BarPassLogo: View {
     var subtitle: String? = nil
+    var showsMascot: Bool = true
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 0) {
-                Text("BAR")
-                    .font(.system(size: 22, weight: .black, design: .rounded))
-                    .foregroundStyle(Color.bpInk)
-                Text("PASS")
-                    .font(.system(size: 22, weight: .black, design: .rounded))
-                    .foregroundStyle(Color.bpAmber)
+        VStack(spacing: 10) {
+            if showsMascot {
+                Image("BarPassMascot")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 46, height: 44)
+                    .padding(9)
+                    .background(Color.white, in: Circle())
             }
-            .tracking(4)
 
-            Rectangle()
-                .fill(Color.bpAmber)
-                .frame(width: 40, height: 2.5)
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    Text("BAR")
+                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .foregroundStyle(Color.bpInk)
+                    Text("PASS")
+                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .foregroundStyle(Color.bpAmber)
+                }
+                .tracking(4)
+
+                Rectangle()
+                    .fill(Color.bpAmber)
+                    .frame(width: 40, height: 2.5)
+            }
 
             if let subtitle {
                 Text(subtitle)

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Lightweight UI themes. One palette = one accent pair; every view keeps
 /// using `Color.bpAmber` / `.bpAmberBright` (computed from the active theme),
@@ -36,6 +37,72 @@ enum BPTheme: String, CaseIterable, Identifiable {
         case .artBasel:   return (Color(red: 0.20, green: 0.85, blue: 0.65), Color(red: 0.50, green: 0.95, blue: 0.80))
         }
     }
+
+    /// A hand-composed, asymmetric layout of flat, thick-outlined "sticker"
+    /// shapes for BPBackgroundView — deliberately different POSITIONS and
+    /// COUNTS per theme, not just a recolor of one centered shape. Flat
+    /// fill + hard black outline (near-zero blur) on purpose: this is what
+    /// actually matches the mascot artwork's own bold-cartoon, thick-line
+    /// style. An earlier soft, heavily-blurred "atmospheric glow" version
+    /// looked premium in isolation but fought the flat mascot logo — two
+    /// different visual languages on the same screen.
+    var backgroundBlobs: [BackgroundBlob] {
+        let (accent, bright) = palette
+        switch self {
+        case .miamiNight:
+            // Sunset: warm shape high and right, a second coral shape low-left.
+            // Positions keep the full circle (position ± radius/2) inside
+            // the screen so the black ring never gets clipped by the edge.
+            return [
+                BackgroundBlob(point: UnitPoint(x: 0.72, y: 0.20), color: bright, radius: 0.38, opacity: 0.45, blur: 2),
+                BackgroundBlob(point: UnitPoint(x: 0.16, y: 0.80), color: Color(red: 0.95, green: 0.45, blue: 0.55), radius: 0.26, opacity: 0.35, blur: 2),
+            ]
+        case .oceanBlue:
+            // Deep sea: large cool shape top-left, a small icy highlight bottom-right.
+            return [
+                BackgroundBlob(point: UnitPoint(x: 0.24, y: 0.18), color: accent, radius: 0.40, opacity: 0.42, blur: 2),
+                BackgroundBlob(point: UnitPoint(x: 0.80, y: 0.75), color: bright, radius: 0.22, opacity: 0.32, blur: 2),
+            ]
+        case .neon:
+            // Vegas strip: three scattered shapes for a busier, electric feel.
+            return [
+                BackgroundBlob(point: UnitPoint(x: 0.24, y: 0.18), color: accent, radius: 0.30, opacity: 0.44, blur: 2),
+                BackgroundBlob(point: UnitPoint(x: 0.80, y: 0.48), color: Color(red: 0.55, green: 0.25, blue: 0.95), radius: 0.28, opacity: 0.40, blur: 2),
+                BackgroundBlob(point: UnitPoint(x: 0.44, y: 0.84), color: bright, radius: 0.18, opacity: 0.34, blur: 2),
+            ]
+        case .ultra:
+            // Dreamy: one shape top-center, one deep violet low-left.
+            return [
+                BackgroundBlob(point: UnitPoint(x: 0.5, y: 0.16), color: bright, radius: 0.40, opacity: 0.40, blur: 2),
+                BackgroundBlob(point: UnitPoint(x: 0.18, y: 0.80), color: accent, radius: 0.24, opacity: 0.34, blur: 2),
+            ]
+        case .f1:
+            // Intense: a tight red shape off-center for energy, a small
+            // ember low-left. Slightly less blur — this one stays punchy.
+            return [
+                BackgroundBlob(point: UnitPoint(x: 0.76, y: 0.20), color: accent, radius: 0.30, opacity: 0.48, blur: 2),
+                BackgroundBlob(point: UnitPoint(x: 0.14, y: 0.78), color: Color(red: 0.95, green: 0.55, blue: 0.15), radius: 0.20, opacity: 0.32, blur: 2),
+            ]
+        case .artBasel:
+            // Fresh: one elongated teal shape left-center, a bright mint
+            // accent top-right.
+            return [
+                BackgroundBlob(point: UnitPoint(x: 0.24, y: 0.42), color: accent, radius: 0.34, opacity: 0.40, blur: 2),
+                BackgroundBlob(point: UnitPoint(x: 0.78, y: 0.18), color: bright, radius: 0.18, opacity: 0.36, blur: 2),
+            ]
+        }
+    }
+}
+
+/// One flat "sticker" shape in a theme's background composition — `point`
+/// is fractional (0...1) screen position, `radius` is fractional screen
+/// width. Near-zero `blur` is intentional (a soft edge, not a glow).
+struct BackgroundBlob {
+    let point: UnitPoint
+    let color: Color
+    let radius: CGFloat
+    let opacity: Double
+    let blur: CGFloat
 }
 
 @MainActor
@@ -53,11 +120,23 @@ final class ThemeService: ObservableObject {
         }
     }
 
+    private var cancellables = Set<AnyCancellable>()
+
     private init() {
+        // A selected city's identity wins over whatever theme was last
+        // manually picked — "pick Gainesville, everything's a Gator" means
+        // the city is authoritative on relaunch too, not just on first pick.
+        let cityTheme = SelectedCityStore.selectedCity.map { CityIdentity.forCity($0).theme }
         let saved = UserDefaults.standard.string(forKey: Self.key)
-        let t = saved.flatMap(BPTheme.init) ?? .miamiNight
+        let t = cityTheme ?? saved.flatMap(BPTheme.init) ?? .miamiNight
         theme = t
         Self.currentPalette = t.palette
+
+        NotificationCenter.default.publisher(for: .selectedCityChanged)
+            .compactMap { $0.object as? String }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] city in self?.theme = CityIdentity.forCity(city).theme }
+            .store(in: &cancellables)
     }
 }
 

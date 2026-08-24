@@ -132,7 +132,7 @@ struct NightPlan: Identifiable, Codable, Hashable {
                 time: c.time,
                 venueName: c.venue.name,
                 venueNeighborhood: c.venue.neighborhood,
-                venuePriceRange: c.venue.priceRange,
+                venuePriceRange: c.venue.priceTier.symbol ?? l10n.t("venue.crowd.na"),
                 note: c.noteKey
             )
         }

@@ -35,6 +35,13 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<!-- Export compliance. The app's only cryptography is exempt: HTTPS via
+	     URLSession, Keychain, and SHA-256 hashing used purely for
+	     authentication (OAuth PKCE code challenge in SpotifySource, and the
+	     Sign in with Apple nonce in NativeAuthView). No proprietary or
+	     non-exempt encryption is implemented or bundled. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>instagram</string>

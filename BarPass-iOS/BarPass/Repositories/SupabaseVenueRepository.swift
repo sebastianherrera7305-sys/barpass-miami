@@ -109,21 +109,39 @@ final actor SupabaseVenueRepository: VenueRepository {
         }
     }
 
+    /// PostgREST caps a single response at the project's default row limit
+    /// (1000 here) regardless of how many rows actually match — a plain GET
+    /// silently truncates the catalog rather than erroring. venues has grown
+    /// past that (1839+ rows across all cities), so this pages through with
+    /// Range until a page comes back short of pageSize.
     private func fetchVenueRows() async throws -> [SupabaseVenueRow] {
-        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/venues?select=\(Self.venueColumns)") else { throw URLError(.badURL) }
-        var request = URLRequest(url: url)
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
+        let pageSize = 1000
+        var allRows: [SupabaseVenueRow] = []
+        var offset = 0
 
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return try decoder.decode([SupabaseVenueRow].self, from: data)
+
+        while true {
+            guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/venues?select=\(Self.venueColumns)") else { throw URLError(.badURL) }
+            var request = URLRequest(url: url)
+            request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
+            request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.setValue("\(offset)-\(offset + pageSize - 1)", forHTTPHeaderField: "Range")
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
+                throw URLError(.badServerResponse)
+            }
+
+            let page = try decoder.decode([SupabaseVenueRow].self, from: data)
+            allRows.append(contentsOf: page)
+            if page.count < pageSize { break }
+            offset += pageSize
+        }
+
+        return allRows
     }
 
     private func fetchEventRows() async throws -> [SupabaseEventRow] {

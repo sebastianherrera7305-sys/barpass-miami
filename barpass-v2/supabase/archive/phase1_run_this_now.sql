@@ -1,4 +1,23 @@
 -- ============================================================
+-- ⚠️  ARCHIVED — HISTORICAL DEPLOY SCRIPT. DO NOT RUN.
+--
+-- One-paste convenience script for the Phase 1 deploy, applied to
+-- production on 2026-07-20 (commit 248b17a). Kept only as a record of
+-- what was executed that day.
+--
+-- It is a CONCATENATION of migrations that already live in this
+-- directory, so it necessarily replays history: it creates the V1
+-- `adjust_wallet_balance` (line ~80), drops it (line ~139), then
+-- creates the V2 that production runs today. Those duplicate
+-- definitions are the reason this file was archived — the canonical
+-- V2 lives in `../pass_payment_verification.sql`.
+--
+-- Re-running this against the live database would drop and recreate a
+-- function production depends on, for no benefit.
+-- ============================================================
+--
+-- Original header follows:
+--
 -- Phase 1 security fixes — run this ENTIRE file once, in the
 -- Supabase SQL editor, in one paste. Order matters: it deploys
 -- orders -> passes -> wallet (none of these exist in production

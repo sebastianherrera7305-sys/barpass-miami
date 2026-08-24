@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { OwnerSection } from "./owner-section";
 
 /**
  * Basic venue dashboard — today's revenue, orders, and pass redemption
@@ -74,6 +75,7 @@ export default function DashboardPage() {
         >
           Continuar
         </button>
+        <OwnerSection />
       </main>
     );
   }
@@ -118,6 +120,8 @@ export default function DashboardPage() {
           </div>
         </>
       )}
+
+      <OwnerSection />
     </main>
   );
 }

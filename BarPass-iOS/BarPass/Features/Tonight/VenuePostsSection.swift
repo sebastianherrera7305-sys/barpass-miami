@@ -40,6 +40,7 @@ struct VenuePostsSection: View {
                     ShimmerSkeleton(height: 70)
                     ShimmerSkeleton(height: 70)
                 }
+                .bpLoadingRegion(l10n.t("a11y.loading"))
             } else if posts.isEmpty {
                 VStack(spacing: 6) {
                     Text("🥂").font(.bpScaled(30))

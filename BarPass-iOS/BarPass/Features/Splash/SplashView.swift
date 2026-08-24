@@ -8,8 +8,6 @@ struct SplashView: View {
     @State private var logoY: CGFloat = 12
     @State private var tagOpacity: Double = 0
 
-    private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
-
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
@@ -17,15 +15,12 @@ struct SplashView: View {
             VStack(spacing: 0) {
                 Spacer()
 
-                Text("BP")
-                    .font(.bpScaled(36, weight: .black, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [amber, Color(red: 0.98, green: 0.86, blue: 0.50)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                Image("BarPassMascot")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 72, height: 68)
+                    .padding(14)
+                    .background(Color.white, in: Circle())
                     .padding(.bottom, 8)
 
                 Text("BARPASS")

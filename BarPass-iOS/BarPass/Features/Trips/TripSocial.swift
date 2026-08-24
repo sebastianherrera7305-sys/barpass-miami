@@ -186,7 +186,7 @@ private struct FlowTags: View {
                 let on = selected.contains(tag)
                 Text(label(for: tag))
                     .font(.bpScaled(12, weight: .semibold))
-                    .foregroundStyle(on ? .black : .white)
+                    .foregroundStyle(on ? .black : Color.bpInk)
                     .padding(.horizontal, 12).padding(.vertical, 8)
                     .background(on ? Color.bpAmber : Color.bpInk.opacity(0.08), in: Capsule())
                     .onTapGesture {

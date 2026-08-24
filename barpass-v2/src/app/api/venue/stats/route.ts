@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { venueSecretMatches } from "@/lib/venue-secret";
 
 /**
  * GET /api/venue/stats?venueId=liv-miami
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
   if (venueError || !venueSecret?.validation_secret) {
     return NextResponse.json({ error: "venue_not_found" }, { status: 404 });
   }
-  if (secret !== venueSecret.validation_secret) {
+  if (!venueSecretMatches(secret, venueSecret.validation_secret)) {
     return NextResponse.json({ error: "not_authorized" }, { status: 401 });
   }
 

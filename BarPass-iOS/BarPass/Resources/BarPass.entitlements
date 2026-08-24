@@ -7,7 +7,7 @@
 		<string>Default</string>
 	</array>
 	<key>aps-environment</key>
-	<string>development</string>
+	<string>production</string>
 	<!-- Wallet pass-type-identifiers entitlement removed for now — pass.io.barpass.wallet
 	     needs to be registered manually at developer.apple.com (Certificates, IDs &
 	     Profiles → Identifiers → Pass Type IDs), a 2FA-gated portal action. Re-add once

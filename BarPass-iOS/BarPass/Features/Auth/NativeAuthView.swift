@@ -82,26 +82,13 @@ struct NativeAuthView: View {
 
     var body: some View {
         ZStack {
-            BPBackgroundView()
-
-            LinearGradient(
-                colors: [Color.bpInk.opacity(0.03), .clear],
-                startPoint: .top,
-                endPoint: .center
-            )
-            .ignoresSafeArea()
+            ComicHalftoneBackground()
 
             mainContent
 
             // Session checking overlay
             if flowState == .idle && contentOpacity < 0.5 {
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .tint(amber)
-                    Text(l10n.t("auth.checkingSession"))
-                        .font(.bpScaled(13))
-                        .foregroundStyle(Color.bpInk.opacity(0.4))
-                }
+                BarPassLoadingView(size: 56, caption: l10n.t("auth.checkingSession"))
                 .transition(.opacity)
             }
 
@@ -132,7 +119,7 @@ struct NativeAuthView: View {
         VStack(spacing: 0) {
             Spacer()
             logoSection
-                .padding(.bottom, 36)
+                .padding(.bottom, 52)
 
             tabPicker
                 .padding(.horizontal, 24)
@@ -222,38 +209,31 @@ struct NativeAuthView: View {
     private var logoSection: some View {
         VStack(spacing: 16) {
             ZStack {
-                Circle()
-                    .strokeBorder(Color.bpInk.opacity(0.06), lineWidth: 1)
-                    .frame(width: 80, height: 80)
+                ComicBurstShape()
+                    .fill(.white)
+                    .overlay(ComicBurstShape().stroke(.black, lineWidth: 3))
+                    .frame(width: 108, height: 108)
 
-                RoundedRectangle(cornerRadius: 18)
-                    .fill(Color.bpInk.opacity(0.04))
-                    .frame(width: 58, height: 58)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 18)
-                            .strokeBorder(Color.bpInk.opacity(0.10), lineWidth: 1)
-                    )
-
-                Text("BP")
-                    .font(.bpScaled(22, weight: .black, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [amber, amberB],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                Image("BarPassMascot")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 62, height: 59)
+                    .padding(13)
+                    .background(Color.white, in: Circle())
+                    .overlay(Circle().strokeBorder(.black, lineWidth: 4))
             }
 
+            // Sits on the amber panel — black text, not the theme-driven
+            // bpInk (which assumes a dark background).
             VStack(spacing: 5) {
                 Text("BarPass")
-                    .font(.bpScaled(28, weight: .black, design: .rounded))
-                    .foregroundStyle(Color.bpInk)
+                    .font(.bpScaled(30, weight: .black, design: .rounded))
+                    .foregroundStyle(.black)
                     .kerning(-0.4)
 
                 Text(l10n.t("auth.tagline"))
-                    .font(.bpScaled(13))
-                    .foregroundStyle(Color.bpInk.opacity(0.35))
+                    .font(.bpScaled(13, weight: .semibold))
+                    .foregroundStyle(.black.opacity(0.55))
             }
         }
         .accessibilityElement(children: .ignore)
@@ -277,15 +257,17 @@ struct NativeAuthView: View {
                 flowState = .idle
             }
         } label: {
+            // Sits on the black field below the amber panel, not on the
+            // panel itself — needs light text, unlike the logo section.
             VStack(spacing: 8) {
                 Text(label)
-                    .font(.system(size: 15, weight: active ? .semibold : .regular))
-                    .foregroundStyle(active ? Color.bpInk : Color.bpInk.opacity(0.35))
+                    .font(.system(size: 15, weight: active ? .bold : .regular))
+                    .foregroundStyle(active ? .white : .white.opacity(0.4))
                     .frame(maxWidth: .infinity)
 
                 Capsule()
-                    .fill(tab == t && !flowState.isLoading ? amber : Color.clear)
-                    .frame(height: 2)
+                    .fill(tab == t && !flowState.isLoading ? Color.bpAmber : Color.clear)
+                    .frame(height: 3)
             }
         }
         .buttonStyle(.plain)
@@ -358,14 +340,8 @@ struct NativeAuthView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.bpInk.opacity(0.05))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .strokeBorder(Color.bpInk.opacity(0.08), lineWidth: 1)
-                )
-        )
+        .background(Color(red: 0.06, green: 0.06, blue: 0.06))
+        .overlay(RoundedRectangle(cornerRadius: 0).strokeBorder(.black, lineWidth: 3))
     }
 
     // MARK: - CTA Button
@@ -393,22 +369,19 @@ struct NativeAuthView: View {
             }
         }()
 
+        // Pink, not amber — the CTA is a distinct accent from the panel
+        // behind it (design canvas "Comic Halftone" direction), so it
+        // reads as its own tappable object rather than blending into it.
+        let ctaPink = Color(red: 0.949, green: 0.447, blue: 0.565)
+
         return Button {
             guard !flowState.isLoading else { return }
             submit()
         } label: {
             ZStack {
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(
-                        LinearGradient(
-                            colors: isDisabled
-                                ? [Color.bpInk.opacity(0.08), Color.bpInk.opacity(0.08)]
-                                : [amber, amberB],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .frame(height: 52)
+                Rectangle()
+                    .fill(isDisabled ? Color.bpInk.opacity(0.08) : ctaPink)
+                    .frame(height: 54)
 
                 HStack(spacing: 8) {
                     if showSpinner {
@@ -417,17 +390,17 @@ struct NativeAuthView: View {
                             .scaleEffect(0.85)
                     }
                     Text(label)
-                        .font(.bpScaled(16, weight: .semibold))
+                        .font(.bpScaled(17, weight: .black))
                         .foregroundStyle(isDisabled ? Color.bpInk.opacity(0.25) : .black)
                 }
             }
         }
         .buttonStyle(.plain)
+        .stickerCard(cornerRadius: 0, borderWidth: 4, shadowOffset: isDisabled ? 0 : 6)
+        .rotationEffect(.degrees(isDisabled ? 0 : -0.6))
         .disabled(isDisabled)
         .animation(.easeInOut(duration: 0.18), value: isDisabled)
         .animation(.easeInOut(duration: 0.18), value: label)
-        .shadow(color: isDisabled || flowState.isLoading ? .clear : amber.opacity(0.25),
-                radius: 12, y: 4)
         .opacity(flowState.isLoading ? 0.9 : 1)
         .bpAccessibility(
             label: tab == .signIn ? l10n.t("auth.enter") : l10n.t("auth.createAccount"),
@@ -465,7 +438,8 @@ struct NativeAuthView: View {
         }
         .signInWithAppleButtonStyle(.white)
         .frame(height: 52)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(Rectangle())
+        .stickerCard(cornerRadius: 0, borderWidth: 3, shadowOffset: 5)
         .disabled(flowState.isLoading)
         .bpAccessibility(label: l10n.t("auth.apple.continue"), hint: l10n.t("auth.apple.hint"), isButton: true)
     }
@@ -880,6 +854,16 @@ private struct ErrorToast: View {
 
 // MARK: - Preview
 
-#Preview {
+// NativeAuthView reads AppState, so the canvas traps without it injected.
+#Preview("Dark") {
     NativeAuthView()
+        .environmentObject(AppState())
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Dynamic Type XXXL") {
+    NativeAuthView()
+        .environmentObject(AppState())
+        .preferredColorScheme(.dark)
+        .environment(\.dynamicTypeSize, .accessibility3)
 }

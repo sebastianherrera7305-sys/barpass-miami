@@ -50,9 +50,12 @@ final class ConsoleReviewSummaryService: ReviewSummaryService {
             let first = editorial.components(separatedBy: "\n").first ?? editorial
             parts.append(first.hasSuffix(".") ? first : first + ".")
         } else {
-            let genres = v.musicGenres.prefix(2).map { $0.rawValue.lowercased() }
-            let music = genres.isEmpty ? "" : " con ambiente \(genres.joined(separator: " y "))"
-            parts.append("\(v.type.rawValue) de \(v.neighborhood)\(music).")
+            // musicGenres is never a real per-venue signal (confirmed via
+            // Supabase audit: empty for 90% of venues, an identical
+            // ["house","hip_hop"] literal stuck on one seed batch for the
+            // rest, unrelated to venue type) — never mentioned here, per
+            // this function's "real data only" contract.
+            parts.append("\(v.type.rawValue) de \(v.neighborhood).")
         }
 
         if !v.vibes.isEmpty {

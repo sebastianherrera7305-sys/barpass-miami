@@ -1,4 +1,5 @@
 import XCTest
+import CoreLocation
 @testable import BarPass_app
 
 /// Permanent regression net for `ExperienceScorer` — the second time a
@@ -16,17 +17,24 @@ final class ExperienceScorerTests: XCTestCase {
         rating: Double = 4.5,
         isTrending: Bool = false,
         musicGenres: [MusicGenre] = [],
-        experienceTags: [ExperienceTag] = []
+        experienceTags: [ExperienceTag] = [],
+        slug: String? = nil,
+        latitude: Double = 0,
+        longitude: Double = 0,
+        isOpenNow: Bool = true,
+        upcomingEvents: [VenueEvent] = [],
+        reviewCount: Int = 100
     ) -> BarPassVenue {
         var v = BarPassVenue(
             id: id, name: "Venue \(id)", neighborhood: "Wynwood", address: "",
-            latitude: 0, longitude: 0, type: type, vibes: [], musicGenres: musicGenres,
-            rating: rating, reviewCount: 100, coverMen: nil, coverWomen: nil,
+            latitude: latitude, longitude: longitude, type: type, vibes: [], musicGenres: musicGenres,
+            rating: rating, reviewCount: reviewCount, coverMen: nil, coverWomen: nil,
             openTime: "22:00", closeTime: "04:00", avgSpend: "$$", dressCode: "",
             parking: "", crowdLevel: 3, bestArrivalTime: "", peakHours: "",
-            popularDrinks: [], upcomingEvents: [], tags: [], emoji: "🍸",
+            popularDrinks: [], upcomingEvents: upcomingEvents, tags: [], emoji: "🍸",
             instagramHandle: nil, isTrending: isTrending, hasHappyHour: false,
-            happyHourUntil: nil, isOpenNow: true, photoUrls: [], editorial: nil
+            happyHourUntil: nil, isOpenNow: isOpenNow, photoUrls: [], editorial: nil,
+            slug: slug
         )
         v.experienceTags = experienceTags
         return v
@@ -134,5 +142,157 @@ final class ExperienceScorerTests: XCTestCase {
 
         XCTAssertEqual(withNonMatchingPassport, withoutPassport,
             "a passport with zero genre overlap must not change the score at all")
+    }
+
+    // MARK: - Test date helper — real upcoming weekday/hour, never hardcoded
+    // against an assumed calendar (a hardcoded "2026-08-14 is a Friday"
+    // string breaks the moment someone edits it without checking).
+
+    /// weekday: 1=Sun ... 6=Fri, 7=Sat, per `Calendar.component(.weekday:)`.
+    private func dateFor(weekday: Int, hour: Int) -> Date {
+        var comps = DateComponents()
+        comps.weekday = weekday
+        comps.hour = hour
+        comps.minute = 0
+        return Calendar.current.nextDate(after: Date(), matching: comps, matchingPolicy: .nextTime)!
+    }
+
+    // MARK: - Weekday/curation boost (Fase 2 — college nightlife curation)
+
+    func test_fridayNight_curatedVenue_outranksSameVenueUncurated() {
+        let curated = venue(id: "curated", type: .club, slug: "club-space")
+        let uncurated = venue(id: "plain", type: .club, slug: "not-in-the-list")
+        let fridayNight = dateFor(weekday: 6, hour: 22)
+
+        let curatedScore = ExperienceScorer.score(venue: curated, context: TripContext(), now: fridayNight)
+        let uncuratedScore = ExperienceScorer.score(venue: uncurated, context: TripContext(), now: fridayNight)
+
+        XCTAssertGreaterThan(curatedScore, uncuratedScore)
+    }
+
+    func test_saturdayNight_curatedVenue_outranksSameVenueUncurated() {
+        let curated = venue(id: "curated", type: .bar, slug: "the-bar")
+        let uncurated = venue(id: "plain", type: .bar, slug: "not-in-the-list")
+        let saturdayNight = dateFor(weekday: 7, hour: 2)
+
+        let curatedScore = ExperienceScorer.score(venue: curated, context: TripContext(), now: saturdayNight)
+        let uncuratedScore = ExperienceScorer.score(venue: uncurated, context: TripContext(), now: saturdayNight)
+
+        XCTAssertGreaterThan(curatedScore, uncuratedScore)
+    }
+
+    func test_tuesdayNight_curatedVenue_getsNoWeekdayBoost() {
+        // The curation boost is gated on Thu/Fri/Sat — a curated venue on a
+        // Tuesday must score identically to the same venue if it weren't
+        // curated at all, proving the gate actually gates.
+        let curated = venue(id: "curated", type: .club, slug: "club-space")
+        let uncurated = venue(id: "plain", type: .club, slug: "not-in-the-list")
+        let tuesdayNight = dateFor(weekday: 3, hour: 22)
+
+        let curatedScore = ExperienceScorer.score(venue: curated, context: TripContext(), now: tuesdayNight)
+        let uncuratedScore = ExperienceScorer.score(venue: uncurated, context: TripContext(), now: tuesdayNight)
+
+        XCTAssertEqual(curatedScore, uncuratedScore, accuracy: 0.0001)
+    }
+
+    // MARK: - Real event tiers
+
+    func test_venueWithEventToday_outranksVenueWithNoEvent() {
+        let now = Date()
+        let withEvent = venue(id: "hasEvent", type: .club, upcomingEvents: [
+            VenueEvent(id: "e1", title: "Real Show", date: now.addingTimeInterval(3600), coverPrice: nil, description: "")
+        ])
+        let noEvent = venue(id: "noEvent", type: .club)
+
+        let withEventScore = ExperienceScorer.score(venue: withEvent, context: TripContext(), now: now)
+        let noEventScore = ExperienceScorer.score(venue: noEvent, context: TripContext(), now: now)
+
+        XCTAssertGreaterThan(withEventScore, noEventScore)
+    }
+
+    func test_eventStartingSoon_outranksSameVenueWithEventStartingLater() {
+        let now = Date()
+        let soon = venue(id: "soon", type: .club, upcomingEvents: [
+            VenueEvent(id: "e1", title: "Starts Soon", date: now.addingTimeInterval(30 * 60), coverPrice: nil, description: "")
+        ])
+        let later = venue(id: "later", type: .club, upcomingEvents: [
+            VenueEvent(id: "e2", title: "Starts Later", date: now.addingTimeInterval(10 * 3600), coverPrice: nil, description: "")
+        ])
+
+        let soonScore = ExperienceScorer.score(venue: soon, context: TripContext(), now: now)
+        let laterScore = ExperienceScorer.score(venue: later, context: TripContext(), now: now)
+
+        XCTAssertGreaterThan(soonScore, laterScore,
+            "an event starting within 3h must outrank one starting outside that window, both real events on real venues")
+    }
+
+    func test_liveEventNow_outranksUpcomingEvent() {
+        let now = Date()
+        let live = venue(id: "live", type: .club, upcomingEvents: [
+            VenueEvent(id: "e1", title: "Live Now", date: now.addingTimeInterval(-1800), coverPrice: nil, description: "")
+        ])
+        let upcoming = venue(id: "upcoming", type: .club, upcomingEvents: [
+            VenueEvent(id: "e2", title: "Starting Soon", date: now.addingTimeInterval(600), coverPrice: nil, description: "")
+        ])
+
+        let liveScore = ExperienceScorer.score(venue: live, context: TripContext(), now: now)
+        let upcomingScore = ExperienceScorer.score(venue: upcoming, context: TripContext(), now: now)
+
+        XCTAssertGreaterThan(liveScore, upcomingScore)
+    }
+
+    // MARK: - Personalization (real FavoritesStore signal, never a guessed profile)
+
+    func test_userWithFavoriteType_boostsMatchingTypeVenue() {
+        let rooftop = venue(id: "roof", type: .rooftop)
+        let bar = venue(id: "bar", type: .bar)
+
+        let withFavorites = ExperienceScorer.score(venue: rooftop, context: TripContext(), favoriteTypes: [.rooftop])
+        let withoutFavorites = ExperienceScorer.score(venue: rooftop, context: TripContext(), favoriteTypes: [])
+        let barWithRooftopFavorite = ExperienceScorer.score(venue: bar, context: TripContext(), favoriteTypes: [.rooftop])
+
+        XCTAssertGreaterThan(withFavorites, withoutFavorites)
+        // A rooftop-favoriting user's boost must be type-specific — it
+        // shouldn't leak onto an unrelated bar.
+        XCTAssertEqual(barWithRooftopFavorite, ExperienceScorer.score(venue: bar, context: TripContext(), favoriteTypes: []), accuracy: 0.0001)
+    }
+
+    func test_userWithNoHistory_getsZeroPersonalizationContribution() {
+        let v = venue(id: "v", type: .bar)
+        let withEmptyFavorites = ExperienceScorer.score(venue: v, context: TripContext(), favoriteTypes: [])
+        let withNoFavoritesParamAtAll = ExperienceScorer.score(venue: v, context: TripContext())
+
+        XCTAssertEqual(withEmptyFavorites, withNoFavoritesParamAtAll, accuracy: 0.0001)
+    }
+
+    // MARK: - Distance (real haversine, never a guessed location)
+
+    func test_nearbyVenue_outranksFarVenue_whenUserLocationKnown() {
+        let userCoord = CLLocationCoordinate2D(latitude: 25.7617, longitude: -80.1918) // Downtown Miami
+        let nearby = venue(id: "near", type: .bar, latitude: 25.7650, longitude: -80.1950) // ~0.5km away
+        let far = venue(id: "far", type: .bar, latitude: 25.9000, longitude: -80.3000) // ~20km away
+
+        let nearScore = ExperienceScorer.score(venue: nearby, context: TripContext(), userCoordinate: userCoord)
+        let farScore = ExperienceScorer.score(venue: far, context: TripContext(), userCoordinate: userCoord)
+
+        XCTAssertGreaterThan(nearScore, farScore)
+    }
+
+    func test_noUserLocation_distanceContributesNothing() {
+        let v = venue(id: "v", type: .bar, latitude: 25.7650, longitude: -80.1950)
+        let withoutLocation = ExperienceScorer.score(venue: v, context: TripContext(), userCoordinate: nil)
+        let baseline = ExperienceScorer.score(venue: v, context: TripContext())
+
+        XCTAssertEqual(withoutLocation, baseline, accuracy: 0.0001)
+    }
+
+    // MARK: - Missing optional data never crashes or produces NaN/Infinity
+
+    func test_venueWithNoOptionalSignalsAtAll_stillProducesFiniteScore() {
+        let bareVenue = venue(id: "bare", type: .bar) // no slug, no events, no tags, 0,0 coordinate
+        let score = ExperienceScorer.score(venue: bareVenue, context: TripContext())
+
+        XCTAssertFalse(score.isNaN)
+        XCTAssertFalse(score.isInfinite)
     }
 }

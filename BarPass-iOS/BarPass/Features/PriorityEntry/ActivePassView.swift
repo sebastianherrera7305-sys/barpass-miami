@@ -8,6 +8,7 @@ struct ActivePassView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var timeString = ""
     @State private var pulse      = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
@@ -151,7 +152,10 @@ struct ActivePassView: View {
                 .padding(.vertical, 18)
             }
         }
-        .onAppear { pulse = true }
+        // Reduce Motion: `pulse` drives both repeatForever animations here
+        // (border width + glow radius). Leaving it false keeps the pass at
+        // its resting state, so neither animation ever starts.
+        .onAppear { pulse = !reduceMotion }
         .accessibilityElement(children: .ignore)
         .bpAccessibility(label: String(format: l10n.t("pass.qr.a11y"), pass.venueName), hint: l10n.t("pass.qr.hint"))
     }
