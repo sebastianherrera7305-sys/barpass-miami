@@ -24,7 +24,7 @@
       { "name": "ViceVersa", "address": "398 NE 5th St, Miami, FL 33132", "why": "Italian aperitivo bar by Valentino Longo. 60-seat intimate space, emerald-tiled bar, Neapolitan pizzas.", "action": "add_new" },
       { "name": "Dante's HiFi", "address": "519 NW 26th St, Miami, FL 33127", "why": "Japanese-style listening bar, 50 people max. Vinyl records, Japanese highballs, wasabi peas.", "action": "add_new" },
       { "name": "Panamericano Bar", "address": "900 South Miami Ave, Miami, FL 33130", "why": "Hidden second floor of Mary Brickell Village. Spirits from the Americas, incense cocktail rituals.", "action": "add_new" },
-      { "name": "The Corner", "address": "1035 N Miami Ave, Miami, FL 33132", "why": "Dark cocktail bar downtown near Club Space and E11EVEN. Jazz nights every Tuesday, open until 4am.", "action": "add_new" },
+      { "name": "The Corner", "address": "1035 N Miami Ave #101, Miami, FL 33136", "why": "Dark cocktail bar downtown near Club Space and E11EVEN. Jazz nights every Tuesday, open until 4am.", "action": "keep_existing" },
       { "name": "Medium Cool Cocktail Lounge", "address": "1690 Collins Ave, Miami Beach, FL 33139", "why": "Velvet-clad basement bar, live DJs every night, table service without forced bottle service.", "action": "keep_existing" },
       { "name": "Swizzle Rum Bar & Drinkery", "address": "1120 Collins Ave, Miami Beach, FL 33139", "why": "Prohibition-style rum bar in South Beach hostel. Museum-like decor, classic and contemporary rum cocktails.", "action": "keep_existing" },
       { "name": "Brother's Keeper", "address": "1710 Alton Road, Miami Beach, FL 33139", "why": "25-foot saltwater aquarium, purple neon lights, dive bar vibes. Playful cocktails, pool table, darts.", "action": "add_new" },
