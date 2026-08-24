@@ -1,0 +1,44 @@
+{
+  "Nashville": {
+    "18_25": [
+      { "name": "Tootsies Orchid Lounge", "address": "422 Broadway, Nashville, TN 37203", "google_rating": 4.2, "why": "Nashville's most famous honky-tonk since 1960. Four stages, three bars, live music 16+ hours a day.", "action": "keep_existing" },
+      { "name": "Robert's Western World", "address": "416 Broadway B, Nashville, TN 37203", "google_rating": 4.5, "why": "Best honky-tonk on Broadway. Famous $6 Recession Special: fried bologna sandwich, chips, Moon Pie, PBR.", "action": "keep_existing" },
+      { "name": "Layla's Honky Tonk", "why": "Broadway's bluegrass bar since 1997. Vintage license plates on the ceiling, female-owned.", "action": "keep_existing" },
+      { "name": "Legends Corner", "why": "Classic dive bar on the corner of 5th and Broadway with great country music.", "action": "keep_existing" },
+      { "name": "Honky Tonk Central", "why": "Massive 94,000 sq ft bar on Lower Broadway with pub food and live country music.", "action": "keep_existing" },
+      { "name": "Jason Aldean's Kitchen + Rooftop Bar", "address": "307 Broadway, Nashville, TN 37201", "why": "Four-level celebrity bar with Southern food, 'My Kinda Party' rooftop.", "action": "keep_existing" },
+      { "name": "Luke's 32 Bridge", "address": "301 Broadway, Nashville, TN 37201", "why": "Luke Bryan's 30,000 sq ft, 6-level entertainment complex. 8 bars, 3 stages.", "action": "keep_existing" },
+      { "name": "Kid Rock's Big Ass Honky Tonk", "address": "221 Broadway, Nashville, TN 37201", "why": "Five floors, four stages, six bars, capacity for 2,000.", "action": "keep_existing" },
+      { "name": "Nashville Underground", "address": "105 Broadway, Nashville, TN 37201", "why": "40,000 sq ft, four floors with the highest rooftop on Broadway. Bowling alley, mechanical bull.", "action": "keep_existing" },
+      { "name": "Rippy's Bar and Grill", "why": "Corner of 5th and Broadway across from Bridgestone Arena, BBQ-focused.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "The Patterson House", "address": "700 8th Ave S, Nashville, TN 37203", "why": "Pioneer of Nashville's craft cocktail movement. Speakeasy-style, reservations recommended.", "action": "keep_existing" },
+      { "name": "The Fox Bar & Cocktail Club", "why": "Intimate cocktail bar in East Nashville with creative drinks.", "action": "keep_existing" },
+      { "name": "Attaboy", "why": "No-menu cocktail bar where bartenders craft drinks based on your preferences.", "action": "keep_existing" },
+      { "name": "L.A. Jackson", "why": "Rooftop bar at the Thompson Hotel in the Gulch with panoramic city views.", "action": "keep_existing" },
+      { "name": "The Twelve Thirty Club", "address": "550 Broadway, Nashville, TN 37203", "why": "Justin Timberlake's three-story venue. Honky-tonk, jazz club, supper club, rooftop.", "action": "keep_existing" },
+      { "name": "Acme Feed & Seed", "address": "101 Broadway, Nashville, TN 37201", "why": "Alan Jackson's five-floor venue with sushi bar and rooftop.", "action": "keep_existing" },
+      { "name": "The Stage on Broadway", "address": "412 Broadway, Nashville, TN 37203", "why": "Classic honky-tonk with one of the best rooftops on Broadway.", "action": "keep_existing" },
+      { "name": "Miranda Lambert's Casa Rosa", "address": "308 Broadway, Nashville, TN 37201", "why": "First female artist-owned bar on Broadway. Hot pink decor, Tex-Mex cantina.", "action": "keep_existing" },
+      { "name": "Red Phone Booth", "address": "136 Rosa L Parks Blvd, Nashville, TN 37203", "why": "Authentic 1920s speakeasy requiring a secret code for entry.", "action": "keep_existing" },
+      { "name": "Hidden Bar at Noelle", "address": "200 4th Ave N, Nashville, TN 37219", "why": "Seasonal speakeasy in the Noelle hotel, open only for Halloween and Christmas.", "action": "keep_existing" },
+      { "name": "Pushing Daisies", "address": "570 Broadway, Nashville, TN 37203", "why": "Underground margarita bar beneath Fifth and Broad. 15+ margarita varieties.", "action": "keep_existing" },
+      { "name": "Jelly Roll's Goodnight Nashville", "address": "209 Broadway, Nashville, TN 37201", "why": "Rugged, tattoo-themed honky-tonk with four stories and the highest rooftop on Broadway.", "action": "keep_existing" },
+      { "name": "The Local Nashville", "why": "Neighborhood bar in The Gulch with live music, craft beer.", "action": "keep_existing" },
+      { "name": "Urban Cowboy Public House", "why": "Western-themed bar with a party atmosphere, dance floor.", "action": "keep_existing" },
+      { "name": "Parlour Bar", "why": "Upscale cocktail bar with a refined atmosphere, craft drinks.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Skull's Rainbow Room", "why": "Historic Printer's Alley jazz club with live music, burlesque shows.", "action": "keep_existing" },
+      { "name": "The Bluebird Cafe", "why": "Legendary songwriter's venue in a strip mall. Intimate 'in the round' performances.", "action": "add_new" },
+      { "name": "Bourbon Street Blues and Boogie Bar", "why": "Printer's Alley institution with live blues, bourbon selection.", "action": "keep_existing" },
+      { "name": "The Nashville Palace", "why": "Historic venue near the Opryland Hotel with live country music, dancing.", "action": "keep_existing" },
+      { "name": "The Stillery", "why": "Restaurant and bar on Broadway with a focus on craft cocktails and elevated pub food.", "action": "add_new" },
+      { "name": "Pinewood Social", "why": "Multi-concept space with coffee, cocktails, bowling, and a pool.", "action": "add_new" },
+      { "name": "City Winery Nashville", "why": "Urban winery and music venue with live performances, wine tastings.", "action": "add_new" },
+      { "name": "Martin's Bar-B-Que SoBro", "why": "BBQ restaurant and bar with a large patio, craft beer.", "action": "keep_existing" },
+      { "name": "Germantown Pub", "address": "708 Monroe St, Nashville, TN 37208", "why": "Neighborhood sports bar in Germantown with quality food, great drink specials.", "action": "keep_existing" }
+    ]
+  }
+}

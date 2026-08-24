@@ -1,0 +1,46 @@
+{
+  "Las Vegas": {
+    "18_25": [
+      { "name": "AREA15", "address": "3215 S Rancho Dr, Las Vegas, NV 89102", "why": "Immersive entertainment complex with bars, art installations, and experiences.", "action": "keep_existing" },
+      { "name": "The Golden Tiki", "address": "3939 Spring Mountain Rd, Las Vegas, NV 89102", "why": "All-tiki-everything bar in Chinatown. Shrunken head dolls, punchy drinks.", "action": "keep_existing" },
+      { "name": "BrewDog Las Vegas", "why": "Craft beer bar and restaurant with a large selection of BrewDog beers.", "action": "keep_existing" },
+      { "name": "Tom's Watch Bar", "why": "Sports bar with massive screens, beer, and a party atmosphere.", "action": "keep_existing" },
+      { "name": "Beer Park", "why": "Rooftop beer garden on the Strip with views, craft beer.", "action": "keep_existing" },
+      { "name": "Ojos Locos Sports Cantina", "why": "Lively sports cantina with Latin flair, multiple screens.", "action": "keep_existing" },
+      { "name": "Mango Tango Nightclub", "why": "Latin nightclub with salsa, bachata, and reggaeton.", "action": "keep_existing" },
+      { "name": "FANDOM BAR", "why": "Geek-themed bar with cosplay events, trivia, themed cocktails.", "action": "keep_existing" },
+      { "name": "The Nerd", "why": "Nerdy-themed bar with arcade games, comic book decor, craft cocktails.", "action": "keep_existing" },
+      { "name": "Oddfellows", "why": "Casual bar with a quirky atmosphere, craft beer, young crowd.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Herbs & Rye", "address": "3713 W Sahara Ave, Las Vegas, NV 89102", "google_rating": 4.5, "why": "Old-school speakeasy with red walls and deep oak furniture. Cocktail list by era.", "action": "add_new" },
+      { "name": "Nocturno", "address": "1131 S 1st St, Las Vegas, NV 89104", "why": "James Beard-semifinalist DJ Flores' cocktail bar in the Arts District.", "action": "add_new" },
+      { "name": "Doberman Drawing Room", "address": "1025 S 1st St, Las Vegas, NV 89101", "why": "Opened April 2025 by Corner Bar Management. Moody, maximalist cocktail bar.", "action": "add_new" },
+      { "name": "Bar Ginza", "address": "1201 S Main St, Las Vegas, NV 89104", "why": "Intimate Japanese whisky bar in the Arts District. Rare and limited-release bottles.", "action": "add_new" },
+      { "name": "Garagiste Wine Room and Merchant", "address": "1240 S Main St, Las Vegas, NV 89104", "why": "Arts District wine bar and bottle shop, 30+ wines by the glass.", "action": "add_new" },
+      { "name": "Easy's Cocktail Lounge", "address": "3730 S Las Vegas Blvd, Las Vegas, NV 89158", "why": "Hidden behind Easy Donuts in Aria's Proper Eats Food Hall.", "action": "add_new" },
+      { "name": "Ski Lodge", "address": "3708 S Las Vegas Blvd, Las Vegas, NV 89109", "why": "Hidden inside Superfrico at The Cosmopolitan. Climate-controlled crackling fire.", "action": "add_new" },
+      { "name": "The Chandelier", "address": "3708 S Las Vegas Blvd, Las Vegas, NV 89109", "why": "Three-floor lounge inside a two-million crystal chandelier at The Cosmopolitan.", "action": "keep_existing" },
+      { "name": "1923 Prohibition Bar", "why": "Speakeasy-style bar with a focus on pre-Prohibition cocktails.", "action": "keep_existing" },
+      { "name": "The Underground Lounge", "why": "Speakeasy-style cocktail bar with a hidden entrance.", "action": "keep_existing" },
+      { "name": "Gatsby's Cocktail Lounge", "why": "Upscale cocktail lounge with a Gatsby-era theme.", "action": "keep_existing" },
+      { "name": "Petite Boheme", "why": "Intimate cocktail bar with a bohemian atmosphere.", "action": "keep_existing" },
+      { "name": "Luxe Lounge", "why": "Hookah and cocktail bar with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "Top of the World", "why": "Rooftop bar with panoramic views of the Strip.", "action": "keep_existing" },
+      { "name": "Allē Lounge on 66", "why": "Upscale lounge on the 66th floor with stunning views.", "action": "keep_existing" },
+      { "name": "Rosina", "why": "Art Deco cocktail bar at the base of Palazzo elevators.", "action": "keep_existing" },
+      { "name": "Vesper Bar", "why": "Mid-century modern bar at The Cosmopolitan.", "action": "keep_existing" },
+      { "name": "Petrossian Bar", "why": "Classic caviar-and-champagne bar at The Bellagio celebrating 25 years.", "action": "keep_existing" },
+      { "name": "Skyfall Panoramic Bar & Lounge", "why": "James Bond-inspired bar on the 64th floor with futuristic design.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Collins", "address": "2777 S Las Vegas Blvd, Las Vegas, NV 89109", "why": "Piano-backed lobby bar at Fontainebleau Las Vegas.", "action": "add_new" },
+      { "name": "Aft Cocktail Deck", "address": "3131 S Las Vegas Blvd, Las Vegas, NV 89109", "why": "Superyacht-inspired cocktail deck on the Lake of Dreams at Wynn.", "action": "add_new" },
+      { "name": "The Peppermill Restaurant and Fireside Lounge", "address": "2985 S Las Vegas Blvd, Las Vegas, NV 89109", "why": "Vegas institution since 1972. Fireside Lounge with sunken seating.", "action": "keep_existing" },
+      { "name": "Velveteen Rabbit", "why": "Arts District cocktail bar with a whimsical atmosphere.", "action": "keep_existing" },
+      { "name": "The Cabinet of Curiosities", "why": "Bar and lounge with a quirky, museum-like atmosphere.", "action": "keep_existing" },
+      { "name": "Buddha Bar Las Vegas", "why": "Upscale Asian-inspired bar and restaurant.", "action": "keep_existing" },
+      { "name": "Vintage Vegas Cocktail Lounge", "why": "Retro-themed cocktail lounge with classic drinks.", "action": "keep_existing" }
+    ]
+  }
+}

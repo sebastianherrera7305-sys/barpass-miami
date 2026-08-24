@@ -1,0 +1,41 @@
+{
+  "Baton Rouge": {
+    "18_25": [
+      { "name": "The Chimes", "why": "Popular college bar and restaurant near LSU with a large beer selection.", "action": "keep_existing" },
+      { "name": "Fred's Bar & Grill", "why": "Casual bar and grill near LSU with cheap drinks, burgers.", "action": "keep_existing" },
+      { "name": "Mike's in Tiger Land", "why": "LSU-area bar with a party atmosphere, cheap drinks.", "action": "keep_existing" },
+      { "name": "Walk-On's Sports Bistreaux - Burbank", "why": "Louisiana-inspired sports bar with extensive menu, craft beers.", "action": "keep_existing" },
+      { "name": "Walk-On's Sports Bistreaux - Towne Center", "why": "Same concept as Burbank location with a different crowd.", "action": "keep_existing" },
+      { "name": "BJ's Restaurant & Brewhouse", "why": "Casual chain restaurant and bar with craft beer, burgers.", "action": "keep_existing" },
+      { "name": "Twin Peaks", "why": "Sports lodge-themed restaurant and bar with scenic views, craft beer.", "action": "keep_existing" },
+      { "name": "Buffalo Wild Wings", "why": "Sports bar chain with multiple screens, wings, and beer.", "action": "keep_existing" },
+      { "name": "Dave & Buster's", "why": "Arcade and sports bar with games, drinks, and casual food.", "action": "keep_existing" },
+      { "name": "The Station Sports Bar and Grill", "why": "Sports bar and grill with multiple screens, casual food.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Hayride Scandal", "address": "5110 Corporate Blvd, Ste B, Baton Rouge, LA 70808", "google_rating": 4.6, "why": "Upscale cocktail bar and whiskey lounge in Corporate Blvd. Purple Fez, Aviation.", "action": "add_new" },
+      { "name": "Tallulah Crafted Food and Wine Bar", "why": "Sophisticated wine bar with curated selection, small plates.", "action": "keep_existing" },
+      { "name": "The Brakes Bar", "why": "Neighborhood bar with craft cocktails, local beer.", "action": "keep_existing" },
+      { "name": "Tipsy Librarian", "why": "Library-themed bar with book-lined walls, craft cocktails.", "action": "keep_existing" },
+      { "name": "Dark 30 Wine & Craft Cocktail Bar", "why": "Wine and cocktail bar with a focus on craft drinks.", "action": "keep_existing" },
+      { "name": "Second Story Bar and Lounge at 214", "why": "Upscale bar and lounge with craft cocktails, wine list.", "action": "keep_existing" },
+      { "name": "The Radio Bar", "why": "Casual bar with a retro radio theme, craft beer.", "action": "keep_existing" },
+      { "name": "Bin 77 Bistro & Sidebar", "why": "Upscale bistro and bar with wine focus, craft cocktails.", "action": "keep_existing" },
+      { "name": "Red Stick Social", "why": "Social club with bowling, live music, craft cocktails.", "action": "keep_existing" },
+      { "name": "The R&B Cocktail Lounge", "why": "Cocktail lounge with a focus on R&B music, craft drinks.", "action": "keep_existing" },
+      { "name": "Avanti Night Club", "why": "Nightclub with a party atmosphere, dance floor, young crowd.", "action": "keep_existing" },
+      { "name": "Truce & Chaos", "why": "Bar and lounge with a unique atmosphere, craft cocktails.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Bengal Tap Room", "address": "421 3rd St, Ste A, Baton Rouge, LA 70801", "google_rating": 3.7, "why": "Casual pub in downtown Baton Rouge with craft beer, burgers, cheese curds.", "action": "add_new" },
+      { "name": "SoLou Baton Rouge", "why": "Upscale restaurant and bar with Southern-inspired cuisine.", "action": "keep_existing" },
+      { "name": "Mansur's on the Boulevard", "why": "Established Baton Rouge restaurant and bar with a refined menu, wine list.", "action": "add_new" },
+      { "name": "Ruth's Chris Steak House", "why": "Upscale steakhouse and bar with premium wines.", "action": "add_new" },
+      { "name": "The Penthouse Club", "why": "Upscale lounge with craft cocktails, wine list.", "action": "keep_existing" },
+      { "name": "Edge Lounge at L'Auberge", "why": "Casino lounge with craft cocktails, gaming.", "action": "keep_existing" },
+      { "name": "The Sportsbook at L'Auberge", "why": "Sports betting bar with multiple screens, craft beer.", "action": "keep_existing" },
+      { "name": "Topgolf Baton Rouge", "why": "Entertainment venue with golf bays, bar, and restaurant.", "action": "keep_existing" },
+      { "name": "Loft18 Baton Rouge", "why": "Upscale entertainment venue with golf simulators, bar, and restaurant.", "action": "keep_existing" }
+    ]
+  }
+}
