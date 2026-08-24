@@ -1,0 +1,42 @@
+{
+  "Boulder": {
+    "18_25": [
+      { "name": "The Sink", "address": "1165 13th St, Boulder, CO 80302", "google_rating": 4.5, "why": "Boulder institution since 1923, steps from CU campus. Famous for pizza, burgers, signature-covered ceiling.", "action": "keep_existing" },
+      { "name": "Mountain Sun Pub & Brewery", "address": "1535 Pearl St, Boulder, CO 80302", "google_rating": 4.5, "why": "Beloved brewpub on Pearl Street with house-made beers, pub food, relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "Southern Sun Pub & Brewery", "address": "627 S Broadway, Boulder, CO 80305", "why": "Sister location to Mountain Sun on South Broadway, same great beers.", "action": "keep_existing" },
+      { "name": "Pearl Street Pub & Cellar", "why": "Underground bar on Pearl Street with cheap drinks, pool tables, dive-y college crowd.", "action": "keep_existing" },
+      { "name": "The Outback Saloon", "why": "Country-themed bar with line dancing, mechanical bull, cheap beer.", "action": "keep_existing" },
+      { "name": "Press Play Bar", "why": "Arcade bar with classic video games, pinball, craft beer.", "action": "keep_existing" },
+      { "name": "Jungle", "address": "2018 10th St, Boulder, CO 80302", "google_rating": 4.5, "why": "Tropical tiki bar off Pearl Street, island-inspired cocktails, rum selection, drag performances.", "action": "keep_existing" },
+      { "name": "Sundown Saloon", "why": "Classic dive bar with cheap drinks, pool tables, no-frills atmosphere.", "action": "keep_existing" },
+      { "name": "The Corner Bar", "why": "College bar near campus with drink specials, sports on TV.", "action": "keep_existing" },
+      { "name": "Bohemian Biergarten", "why": "German-style beer hall with long communal tables, steins of beer, pretzels.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "The Bitter Bar", "address": "835 Walnut St, Boulder, CO 80302", "google_rating": 4.5, "why": "Pioneer of Boulder's craft cocktail scene for 10+ years, low-slung red couches.", "action": "keep_existing" },
+      { "name": "License No. 1", "address": "2115 13th St, Boulder, CO 80302", "why": "Hidden basement bar in the historic Hotel Boulderado, first liquor license after Prohibition.", "action": "keep_existing" },
+      { "name": "Siren Cocktail Bar", "why": "Newly opened rum-centric cocktail bar by Jungle owner Jake Novotny.", "action": "keep_existing" },
+      { "name": "C Bar", "why": "Elegant cocktail lounge with tufted leather seating, marbled floors, late-night DJ sets.", "action": "keep_existing" },
+      { "name": "Corrida", "why": "Spanish-inspired restaurant and bar with gin and tonics, sherry, tapas, Flatirons views.", "action": "keep_existing" },
+      { "name": "Postino Boulder", "address": "1468 Pearl St, Ste 110, Boulder, CO 80302", "why": "Wine bar and restaurant on Pearl Street with $6 glasses and pitchers until 5pm.", "action": "keep_existing" },
+      { "name": "West End Tavern", "address": "926 Pearl St, Boulder, CO 80302", "why": "Boulder pillar for 120+ years. Award-winning BBQ, 20 local brews on draft.", "action": "keep_existing" },
+      { "name": "Avanti Food and Beverage Boulder", "why": "Food hall and rooftop bar with multiple vendors, craft cocktails, panoramic views.", "action": "keep_existing" },
+      { "name": "Rosetta Hall", "why": "Food hall with multiple dining concepts and a central bar.", "action": "keep_existing" },
+      { "name": "Backcountry Pizza & Tap House", "why": "Pizza and craft beer bar with an extensive tap list and hearty pies.", "action": "keep_existing" },
+      { "name": "Tonic Alchemy Lounge", "why": "Cocktail lounge with a focus on botanical and herbal ingredients.", "action": "keep_existing" },
+      { "name": "The Spotted James", "why": "Neighborhood bar with craft cocktails, local beers, relaxed vibe.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "The Hungry Toad", "why": "English-style pub with fish and chips, shepherd's pie, solid beer list.", "action": "keep_existing" },
+      { "name": "Velvet Elk Lounge", "why": "Sophisticated lounge with craft cocktails, small plates, refined atmosphere.", "action": "keep_existing" },
+      { "name": "The Attic Bar & Bistro", "why": "Upscale bar and bistro with a focus on wine, craft cocktails, elevated American cuisine.", "action": "keep_existing" },
+      { "name": "Boulder Social", "why": "Restaurant and bar with a focus on local ingredients, craft cocktails.", "action": "keep_existing" },
+      { "name": "Rayback Collective", "why": "Food truck park and bar with rotating vendors, craft beer, live music.", "action": "keep_existing" },
+      { "name": "Twisted Pine Brewing Co", "why": "Local brewery with a taproom, tours, relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "The Lounge at the Boulder Theater", "why": "Bar inside the historic Boulder Theater with pre-show drinks.", "action": "keep_existing" },
+      { "name": "Mudrock's Tap & Tavern", "why": "Neighborhood tavern with craft beer, pub food, relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "The Yeti", "why": "Bar and restaurant with a focus on comfort food, craft beer, cozy atmosphere.", "action": "keep_existing" },
+      { "name": "T-Zero Lounge", "why": "Upscale lounge with craft cocktails, wine list, sophisticated atmosphere.", "action": "keep_existing" }
+    ]
+  }
+}
