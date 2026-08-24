@@ -1,0 +1,63 @@
+{
+  "Tempe": {
+    "18_25": [
+      { "name": "Casey Moore's Oyster House", "address": "850 S Ash Ave, Tempe, AZ 85281", "google_rating": 4.5, "why": "Historic house-turned-bar since 1986 with one of the best patios in Tempe.", "action": "keep_existing" },
+      { "name": "Yucca Tap Room", "address": "29 W Southern Ave, Tempe, AZ 85282", "google_rating": 4.4, "why": "Legendary live music venue and bar since 1975.", "action": "keep_existing" },
+      { "name": "Mill's Modern Social", "why": "Lively bar and restaurant in the Mill Avenue district.", "action": "keep_existing" },
+      { "name": "Pedal Haus Brewery - Tempe", "why": "Brewery and restaurant with house-made beers, large patio.", "action": "keep_existing" },
+      { "name": "Four Peaks Brewing Company", "why": "Iconic Arizona brewery in a historic creamery building.", "action": "keep_existing" },
+      { "name": "Zipps Sports Grill", "why": "Sports bar with multiple screens, wings, and beer.", "action": "keep_existing" },
+      { "name": "Varsity Tavern", "why": "Sports bar and tavern with a party atmosphere.", "action": "keep_existing" },
+      { "name": "The Tipsy Taps & Grill", "why": "Casual bar and grill with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "414 Pub Pizza & Karaoke", "why": "Pub with pizza, karaoke, and a party atmosphere.", "action": "keep_existing" },
+      { "name": "Monkey Pants Bar & Grill", "why": "Casual bar and grill with a fun atmosphere.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Skysill Rooftop Lounge", "why": "Rooftop lounge with panoramic views of Tempe and ASU.", "action": "keep_existing" },
+      { "name": "Postino Annex", "why": "Wine bar and restaurant with $6 glasses and pitchers until 5pm.", "action": "keep_existing" },
+      { "name": "Thirsty Lion", "why": "Gastropub with craft beer, elevated pub food, multiple screens.", "action": "keep_existing" },
+      { "name": "The Porch", "why": "Restaurant and bar with a focus on Southern-inspired cuisine.", "action": "keep_existing" },
+      { "name": "The Yard At Farmer Arts District", "why": "Outdoor bar and event space with food trucks, craft beer.", "action": "keep_existing" },
+      { "name": "Sunbar Tempe", "why": "Bar and nightclub with a party atmosphere, dance floor.", "action": "keep_existing" },
+      { "name": "Boondocks Patio & Grill Tempe", "why": "Casual bar and grill with a large patio, craft beer.", "action": "keep_existing" },
+      { "name": "Taste of Tops", "why": "Wine bar with curated selection, small plates.", "action": "keep_existing" },
+      { "name": "Fat Tuesday", "why": "New Orleans-style daiquiri bar with frozen drinks.", "action": "keep_existing" },
+      { "name": "Twin Peaks", "why": "Sports lodge-themed restaurant and bar with scenic views.", "action": "keep_existing" },
+      { "name": "Neon Spur", "why": "Bar with a Western theme, craft cocktails.", "action": "keep_existing" },
+      { "name": "Philly's Sports Grill", "why": "Sports grill with multiple screens, casual food.", "action": "keep_existing" },
+      { "name": "The HIGH Lounge", "why": "Upscale lounge with craft cocktails, intimate setting.", "action": "keep_existing" },
+      { "name": "Palo Verde Lounge", "why": "Casual lounge with a relaxed atmosphere, craft beer.", "action": "keep_existing" },
+      { "name": "Time Out Lounge", "why": "Neighborhood lounge with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "Lush Cafe and Lounge", "why": "Cafe and lounge with a focus on craft cocktails.", "action": "keep_existing" },
+      { "name": "SaltFire Brewery Co Taphouse", "why": "Brewery taphouse with house-made beers.", "action": "keep_existing" },
+      { "name": "Final Round", "why": "Bar with a focus on craft beer, casual food.", "action": "keep_existing" },
+      { "name": "Social Hall Restaurant + Event Venue", "why": "Restaurant and event venue with craft cocktails.", "action": "keep_existing" },
+      { "name": "Doc & Eddy's", "why": "Casual bar and grill with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "CASA Tempe", "why": "Restaurant and bar with a focus on Latin-inspired cuisine.", "action": "keep_existing" },
+      { "name": "Mazaj Hookah Lounge", "why": "Hookah lounge with flavored tobacco, craft cocktails.", "action": "keep_existing" },
+      { "name": "Tempe Tavern", "why": "Neighborhood tavern with craft beer, casual food.", "action": "keep_existing" },
+      { "name": "Low Key Piano Bar", "why": "Piano bar with live music, singalongs.", "action": "keep_existing" },
+      { "name": "The Hudson Eatery & Bar", "why": "Restaurant and bar with elevated American cuisine.", "action": "keep_existing" },
+      { "name": "Bonfire Craft Kitchen and Tap House Tempe", "why": "Craft kitchen and tap house with house-made beers.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Brick & Barley - A Neighborhood Bar & Grill", "why": "Neighborhood bar and grill with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "The Dark Side", "why": "Bar with a dark, moody atmosphere, craft cocktails.", "action": "keep_existing" },
+      { "name": "Devil's Hideaway", "why": "Bar with a rustic, Western atmosphere, whiskey selection.", "action": "keep_existing" },
+      { "name": "Nara Hookah", "why": "Hookah bar with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "Rodeo Ranch", "why": "Country-themed bar with line dancing, live music.", "action": "keep_existing" },
+      { "name": "Idle Hands", "why": "Bar with a focus on craft cocktails, intimate setting.", "action": "keep_existing" },
+      { "name": "Castro's Cigar Lounge & Bar", "why": "Upscale cigar lounge with premium spirits.", "action": "keep_existing" },
+      { "name": "Drop Dead Gorgeous", "why": "Bar with a glamorous atmosphere, craft cocktails.", "action": "keep_existing" },
+      { "name": "University Club At ASU", "why": "Private club with a refined atmosphere, wine list.", "action": "keep_existing" },
+      { "name": "Alibi", "why": "Neighborhood bar with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "University Sports Grill", "why": "Sports grill with multiple screens, casual food.", "action": "keep_existing" },
+      { "name": "Woodshed", "why": "Bar with a rustic atmosphere, craft beer.", "action": "keep_existing" },
+      { "name": "Bogeys Sports Bar & Grill", "why": "Sports bar and grill with multiple screens.", "action": "keep_existing" },
+      { "name": "Society", "why": "Bar and lounge with a sophisticated atmosphere.", "action": "keep_existing" },
+      { "name": "Bar Louie - Tempe Marketplace", "why": "Casual bar and restaurant with craft beer, burgers.", "action": "keep_existing" },
+      { "name": "The Chill Room", "why": "Lounge with a relaxed atmosphere, hookah.", "action": "keep_existing" },
+      { "name": "The Way Station Restaurant & Bar", "why": "Restaurant and bar with a focus on American cuisine.", "action": "keep_existing" }
+    ]
+  }
+}
