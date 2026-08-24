@@ -1,0 +1,40 @@
+{
+  "Austin": {
+    "18_25": [
+      { "name": "Garage", "address": "503 Colorado St, Austin, TX 78701", "google_rating": 4.6, "why": "Speakeasy cocktail bar escondido detrás de una puerta de estacionamiento en el centro. Ambiente íntimo, música de fondo y cocktails creativos.", "action": "keep_existing" },
+      { "name": "Tiki Tatsu-Ya", "address": "1300 S Lamar Blvd, Austin, TX 78704", "google_rating": 4.5, "why": "Bar tiki de los creadores de Ramen Tatsu-Ya. Decoración inmersiva polinesia, cocktails en tazones compartidos.", "action": "keep_existing" },
+      { "name": "Cheer Up Charlies", "address": "900 Red River St, Austin, TX 78701", "google_rating": 4.5, "why": "Bar LGBTQ+ friendly en Red River con patio al aire libre, food trucks, música indie/electrónica en vivo.", "action": "keep_existing" },
+      { "name": "Barbarella Austin", "address": "611 Red River St, Austin, TX 78701", "google_rating": 4.2, "why": "Club de baile con tres salas, cada una con música diferente. Clásico de Red River para el crowd universitario.", "action": "keep_existing" },
+      { "name": "Vulcan Gas Company", "address": "418 E 6th St, Austin, TX 78701", "google_rating": 4.2, "why": "Venue de música en vivo y club en 6th Street, múltiples niveles, terraza, mezcla conciertos y noches de DJ.", "action": "keep_existing" },
+      { "name": "Highland Lounge", "address": "404 Colorado St, Austin, TX 78701", "google_rating": 4.2, "why": "Club LGBTQ+ de múltiples niveles, drag shows y terraza. Destino principal para la comunidad joven y aliada.", "action": "keep_existing" },
+      { "name": "The Dizzy Rooster", "address": "306 E 6th St, Austin, TX 78701", "google_rating": 4.0, "why": "Bar de 6th Street con música en vivo, karaoke, ambiente de fiesta desenfadada.", "action": "keep_existing" },
+      { "name": "Lavaca Street Bar", "address": "405 Lavaca St, Austin, TX 78701", "google_rating": 4.0, "why": "Sports bar céntrico, múltiples pantallas, popular entre estudiantes de UT.", "action": "keep_existing" },
+      { "name": "Antone's Nightclub", "address": "305 E 5th St, Austin, TX 78701", "google_rating": 4.0, "why": "Legendario venue de blues y rock en vivo, 'The Home of the Blues' desde 1975.", "action": "keep_existing" },
+      { "name": "Green Light Social", "address": "720 W 6th St, Austin, TX 78701", "google_rating": 4.0, "why": "Rooftop bar en West 6th con vistas del skyline, cocktails de temporada.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "The Roosevelt Room", "address": "307 W 5th St, Austin, TX 78701", "google_rating": 4.7, "why": "Cocktail bar de clase mundial, menú dividido por eras históricas. Bartenders en traje, presentación impecable.", "action": "add_new" },
+      { "name": "Small Victory", "address": "108 E 7th St, Austin, TX 78701", "google_rating": 4.7, "why": "Speakeasy escondido en un estacionamiento del centro, capacidad limitada, cocktails clásicos.", "action": "add_new" },
+      { "name": "Firehouse Lounge", "address": "605 Brazos St, Austin, TX 78701", "google_rating": 4.5, "why": "Speakeasy detrás de una librería giratoria en una antigua estación de bomberos.", "action": "keep_existing" },
+      { "name": "Whisler's", "address": "1816 E 6th St, Austin, TX 78702", "google_rating": 4.5, "why": "Bar de East Austin con patio grande, mezcalería adjunta (Milonga Room), música en vivo.", "action": "keep_existing" },
+      { "name": "Midnight Cowboy", "address": "313 E 6th St, Austin, TX 78701", "google_rating": 4.5, "why": "Speakeasy con reservación previa detrás de un falso negocio de masajes. Solo 25 asientos.", "action": "keep_existing" },
+      { "name": "Elysium", "address": "705 Red River St, Austin, TX 78701", "google_rating": 4.3, "why": "Club alternativo en Red River, música industrial/goth/EBM, shows de performance.", "action": "keep_existing" },
+      { "name": "Upstairs at Caroline", "address": "109 East 7th St, Austin, TX 78701", "google_rating": 4.3, "why": "Rooftop bar sobre el restaurante Caroline, vistas del Capitolio.", "action": "keep_existing" },
+      { "name": "The Library Bar", "address": "407 E 6th St, Austin, TX 78701", "google_rating": 4.1, "why": "Bar temático de biblioteca en 6th Street con estantes de libros reales, billar.", "action": "keep_existing" },
+      { "name": "Here Nor There", "address": "612 Brazos St, Austin, TX 78701", "google_rating": 4.0, "why": "Speakeasy con entrada secreta, menú rotativo, requiere conocimiento previo.", "action": "keep_existing" },
+      { "name": "Geraldine's", "address": "605 Davis St, Austin, TX 78701", "google_rating": 4.0, "why": "Rooftop bar y restaurante en el Hotel Van Zandt, vistas de Lady Bird Lake.", "action": "keep_existing" },
+      { "name": "P6 at the LINE Austin", "address": "111 E Cesar Chavez St, Austin, TX 78701", "google_rating": 4.0, "why": "Rooftop pool bar en el hotel LINE, vistas del lago y el centro.", "action": "keep_existing" },
+      { "name": "Seven Grand", "address": "305 E 4th St, Austin, TX 78701", "google_rating": 4.0, "why": "Bar de whiskey con más de 400 etiquetas, decoración de caza inglesa.", "action": "keep_existing" },
+      { "name": "Workhorse Bar", "address": "1000 E 6th St, Austin, TX 78702", "google_rating": 4.0, "why": "Bar de vecindario en East Austin con patio, cervezas artesanales.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "The White Horse", "address": "500 Comal St, Austin, TX 78702", "google_rating": 4.5, "why": "Honky-tonk legendario en East Austin, música country en vivo, food trucks afuera.", "action": "keep_existing" },
+      { "name": "Donn's Depot", "address": "1600 W 5th St, Austin, TX 78703", "google_rating": 4.0, "why": "Bar en un vagón de tren convertido, música en vivo, ambiente de antaño.", "action": "keep_existing" },
+      { "name": "The Far Out Lounge & Stage", "address": "8504 S Congress Ave, Austin, TX 78745", "google_rating": 4.0, "why": "Venue al aire libre, escenario grande, patio con mesas de picnic.", "action": "keep_existing" },
+      { "name": "Mean Eyed Cat", "address": "1621 W 5th St, Austin, TX 78703", "google_rating": 4.0, "why": "Bar temático de Johnny Cash con decoración de memorabilia, patio grande.", "action": "keep_existing" },
+      { "name": "The Hole in the Wall", "address": "2538 Guadalupe St, Austin, TX 78705", "google_rating": 4.0, "why": "Institución de Austin desde 1974, música en vivo, dive bar auténtico.", "action": "keep_existing" },
+      { "name": "Black Sheep Lodge", "address": "2108 S Lamar Blvd, Austin, TX 78704", "google_rating": 4.0, "why": "Bar de vecindario en South Austin con patio, cervezas artesanales.", "action": "keep_existing" },
+      { "name": "Mister Tramps Sports Pub", "address": "8565 Research Blvd, Austin, TX 78758", "google_rating": 4.0, "why": "Sports pub en North Austin, múltiples pantallas, ambiente familiar.", "action": "keep_existing" }
+    ]
+  }
+}
