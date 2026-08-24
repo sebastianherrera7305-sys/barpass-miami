@@ -16,6 +16,10 @@
 		6653697AF565692E1B2F279B /* VenueCheckinRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */; };
 		00425100532EF59250F240FB /* CheckInButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C778D8EC6D60879605EA40 /* CheckInButton.swift */; };
 		12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */; };
+		A74E2DF0019E057F9578D8AB /* Stadium.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9944A65EAC0560419D02323C /* Stadium.swift */; };
+		0F61EAC735A9E5FBEEAB0A7D /* StadiumRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162643D77BF970FAA2942A37 /* StadiumRepository.swift */; };
+		E59E448890306D0FDEF2CA7B /* StadiumDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */; };
+		90618CE0C09E2971F82286BE /* StadiumsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */; };
 		7BB3D4EC13FA314E51E72F88 /* AgeReportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */; };
 		0058F433096FE68B59B9F1EE /* UniversityIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */; };
 		A44EFDEC59D7784580819FD3 /* ChapterChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 792335E55D9363A086C6C79B /* ChapterChatView.swift */; };
@@ -219,6 +223,10 @@
 		3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueCheckinRepository.swift; path = BarPass/Repositories/VenueCheckinRepository.swift; sourceTree = SOURCE_ROOT; };
 		54C778D8EC6D60879605EA40 /* CheckInButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckInButton.swift; path = BarPass/Features/Tonight/CheckInButton.swift; sourceTree = SOURCE_ROOT; };
 		1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportRepository.swift; path = BarPass/Repositories/AgeReportRepository.swift; sourceTree = SOURCE_ROOT; };
+		9944A65EAC0560419D02323C /* Stadium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Stadium.swift; path = BarPass/Models/Stadium.swift; sourceTree = SOURCE_ROOT; };
+		162643D77BF970FAA2942A37 /* StadiumRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumRepository.swift; path = BarPass/Repositories/StadiumRepository.swift; sourceTree = SOURCE_ROOT; };
+		A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumDetailView.swift; path = BarPass/Features/Stadiums/StadiumDetailView.swift; sourceTree = SOURCE_ROOT; };
+		4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumsListView.swift; path = BarPass/Features/Stadiums/StadiumsListView.swift; sourceTree = SOURCE_ROOT; };
 		9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportSheet.swift; path = BarPass/Features/Tonight/AgeReportSheet.swift; sourceTree = SOURCE_ROOT; };
 		B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityIdentity.swift; path = BarPass/Resources/UniversityIdentity.swift; sourceTree = SOURCE_ROOT; };
 		792335E55D9363A086C6C79B /* ChapterChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatView.swift; path = BarPass/Features/CollegeLife/ChapterChatView.swift; sourceTree = SOURCE_ROOT; };
@@ -526,6 +534,7 @@
 				WLT005000000000000RP01 /* OrderHistoryView.swift */,
 				WLT007000000000000RP01 /* OrderHistoryService.swift */,
 				ED4BB265491D4A7E864C255E /* University.swift */,
+				9944A65EAC0560419D02323C /* Stadium.swift */,
 				EDF98E2E20484C3784F7D613 /* GreekLifeRepository.swift */,
 				61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */,
 				F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */,
@@ -533,6 +542,7 @@
 				3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */,
 				3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */,
 				1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */,
+				162643D77BF970FAA2942A37 /* StadiumRepository.swift */,
 				F863CE708ACF44B3A96D654A /* UniversityListView.swift */,
 				792335E55D9363A086C6C79B /* ChapterChatView.swift */,
 				02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */,
@@ -557,6 +567,8 @@
 				HYWC01000000000000RP01 /* HypeWeekCard.swift */,
 				54C778D8EC6D60879605EA40 /* CheckInButton.swift */,
 				9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */,
+				A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */,
+				4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */,
 				MPAS01000000000000RP01 /* MusicPassport.swift */,
 				HYPE01000000000000RP01 /* HypeEngine.swift */,
 				AMSC01000000000000RP01 /* AppleMusicSource.swift */,
@@ -962,6 +974,10 @@
 				00425100532EF59250F240FB /* CheckInButton.swift in Sources */,
 				12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */,
 				7BB3D4EC13FA314E51E72F88 /* AgeReportSheet.swift in Sources */,
+				A74E2DF0019E057F9578D8AB /* Stadium.swift in Sources */,
+				0F61EAC735A9E5FBEEAB0A7D /* StadiumRepository.swift in Sources */,
+				E59E448890306D0FDEF2CA7B /* StadiumDetailView.swift in Sources */,
+				90618CE0C09E2971F82286BE /* StadiumsListView.swift in Sources */,
 				C577FAF109A04AFC978B06E4 /* UniversityDetailView.swift in Sources */,
 				75652242527C4F55B1D4A669 /* FraternityListView.swift in Sources */,
 				BF6F4AE4A5514E81881AF641 /* ComicHalftoneBackground.swift in Sources */,

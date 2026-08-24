@@ -176,6 +176,12 @@ struct TonightView: View {
                         .padding(.horizontal, BPSpacing.lg)
                     }
 
+                    NavigationLink(destination: StadiumsListView()) {
+                        stadiumsEntryCard
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, BPSpacing.lg)
+
                     vibeTags
 
                     if venueStore.isLoading {
@@ -316,10 +322,10 @@ struct TonightView: View {
                 .foregroundStyle(Color.bpAmber)
                 .frame(width: 34)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Universidades")
+                Text(l10n.t("greek.universityList.title"))
                     .font(.bpHeadline())
                     .foregroundStyle(Color.bpInk)
-                Text("Greek Life verificado, campus por campus")
+                Text(l10n.t("greek.universityList.hint"))
                     .font(.bpCaption())
                     .foregroundStyle(Color.bpTextSecondary)
             }
@@ -331,7 +337,29 @@ struct TonightView: View {
         .padding(BPSpacing.md)
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
-        .bpAccessibility(label: "Universidades", hint: "Ver Greek Life verificado por universidad", isButton: true)
+        .bpAccessibility(label: l10n.t("greek.universityList.title"), hint: l10n.t("greek.universityList.hint"), isButton: true)
+    }
+
+    private var stadiumsEntryCard: some View {
+        HStack(spacing: 14) {
+            Text("🏟️").font(.bpScaled(20)).frame(width: 34)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(l10n.t("stadiums.entry.title"))
+                    .font(.bpHeadline())
+                    .foregroundStyle(Color.bpInk)
+                Text(l10n.t("stadiums.entry.hint"))
+                    .font(.bpCaption())
+                    .foregroundStyle(Color.bpTextSecondary)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.bpScaled(13, weight: .semibold))
+                .foregroundStyle(Color.bpTextTertiary)
+        }
+        .padding(BPSpacing.md)
+        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
+        .bpAccessibility(label: l10n.t("stadiums.entry.title"), hint: l10n.t("stadiums.entry.hint"), isButton: true)
     }
 
     // MARK: - Vibe tags
