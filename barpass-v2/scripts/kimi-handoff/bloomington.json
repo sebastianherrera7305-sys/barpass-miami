@@ -1,0 +1,40 @@
+{
+  "Bloomington": {
+    "18_25": [
+      { "name": "Kilroy's Sports Bar", "why": "Popular college sports bar near IU campus with multiple screens.", "action": "keep_existing" },
+      { "name": "Nick's English Hut", "why": "Historic Bloomington bar and restaurant since 1927. Sink the Biz.", "action": "keep_existing" },
+      { "name": "Upstairs Pub", "why": "Casual pub above a restaurant with cheap drinks, pool tables.", "action": "keep_existing" },
+      { "name": "Alley Bar", "address": "210 W Kirkwood Ave, Bloomington, IN 47404", "why": "Casual bar in an alley with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "Atlas Ballroom", "address": "209 S College Ave, Bloomington, IN 47404", "why": "Bar and music venue with a dance floor, live bands.", "action": "keep_existing" },
+      { "name": "The Bluebird", "why": "Live music venue and bar with national and local acts.", "action": "keep_existing" },
+      { "name": "Sports Bar", "why": "Casual sports bar with multiple screens, beer specials.", "action": "keep_existing" },
+      { "name": "Bear's Place", "why": "Bar and restaurant with a relaxed atmosphere, beer selection.", "action": "keep_existing" },
+      { "name": "The Vid", "why": "Dive bar with cheap drinks, pool tables, no-frills atmosphere.", "action": "keep_existing" },
+      { "name": "Dunnkirk", "why": "Sports bar and grill with multiple screens, casual food.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Serendipity Martini Bar", "google_rating": 4.4, "why": "Upscale martini bar with a refined atmosphere, extensive martini menu.", "action": "keep_existing" },
+      { "name": "Upland Brewing Company", "why": "Local brewery with house-made beers, elevated pub food.", "action": "keep_existing" },
+      { "name": "The Tap", "why": "Craft beer bar with rotating taps, casual atmosphere.", "action": "keep_existing" },
+      { "name": "Cardinal Spirits", "why": "Local distillery and cocktail bar with house-made spirits.", "action": "keep_existing" },
+      { "name": "FARMbloomington", "why": "Farm-to-table restaurant and bar with seasonal cocktails.", "action": "keep_existing" },
+      { "name": "C3 Bar", "why": "Cocktail bar with a focus on craft drinks, intimate setting.", "action": "keep_existing" },
+      { "name": "The Root Cellar", "why": "Bar and lounge with a cozy atmosphere, craft cocktails.", "action": "keep_existing" },
+      { "name": "Blockhouse Bar", "address": "205 S College Ave, Bloomington, IN 47404", "why": "Bar with a focus on craft beer, cocktails, casual atmosphere.", "action": "keep_existing" },
+      { "name": "Bluetip Billiards", "address": "426 S Walnut St, Bloomington, IN 47404", "why": "Billiards bar with pool tables, craft beer.", "action": "keep_existing" },
+      { "name": "Sleeper's Bar", "address": "2601 N Walnut St, Bloomington, IN 47404", "why": "Neighborhood bar with a relaxed atmosphere, beer selection.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Oliver Winery", "why": "Local winery with wine tastings, tours, beautiful outdoor setting.", "action": "add_new" },
+      { "name": "The Trojan Horse", "why": "Historic Bloomington bar and restaurant with Greek-inspired cuisine.", "action": "keep_existing" },
+      { "name": "Lennie's", "why": "Established restaurant and bar with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "Scholar's Inn Bakehouse", "why": "Bakery and cafe with a bar, wine selection.", "action": "keep_existing" },
+      { "name": "Bloomingfoods", "why": "Natural foods market with a cafe and bar.", "action": "keep_existing" },
+      { "name": "Uptown Cafe", "why": "Cafe and bar with a cozy atmosphere, coffee, wine.", "action": "keep_existing" },
+      { "name": "Truffles Restaurant", "why": "Upscale restaurant and bar with a refined atmosphere.", "action": "keep_existing" },
+      { "name": "Janko's Little Zagreb", "why": "Historic steakhouse and bar with a lively atmosphere.", "action": "keep_existing" },
+      { "name": "Malibu Grill", "why": "Casual grill and bar with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "Crazy Horse", "why": "Live music venue and bar with a lively atmosphere.", "action": "keep_existing" }
+    ]
+  }
+}

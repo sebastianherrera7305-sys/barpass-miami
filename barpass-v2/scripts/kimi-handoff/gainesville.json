@@ -1,0 +1,42 @@
+{
+  "Gainesville": {
+    "18_25": [
+      { "name": "The Bull", "why": "Popular college bar near UF campus with a party atmosphere.", "action": "keep_existing" },
+      { "name": "Salty Dog Saloon", "google_rating": 4.0, "why": "Casual bar with a relaxed atmosphere, cheap drinks.", "action": "keep_existing" },
+      { "name": "Balls", "google_rating": 4.1, "why": "Popular college bar with a party atmosphere and a young crowd.", "action": "keep_existing" },
+      { "name": "Munegin's On 13th", "why": "Casual bar near UF campus with drink specials.", "action": "keep_existing" },
+      { "name": "The Swamp Restaurant", "why": "Iconic Gainesville sports bar and restaurant, gameday destination.", "action": "keep_existing" },
+      { "name": "Mother's Pub & Grill North", "why": "Sports bar and grill with multiple screens.", "action": "keep_existing" },
+      { "name": "GATORS DEN SPORTS GRILL", "why": "Sports grill with UF-themed decor, multiple screens.", "action": "keep_existing" },
+      { "name": "MacDinton's GNV", "why": "Irish pub with a party atmosphere, live music.", "action": "keep_existing" },
+      { "name": "Baby J's Bar", "why": "Casual bar with a relaxed atmosphere, cheap drinks.", "action": "keep_existing" },
+      { "name": "White Buffalo", "why": "Bar and restaurant with a lively atmosphere, craft beer.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "The Dime", "why": "Upscale cocktail bar with a refined atmosphere.", "action": "keep_existing" },
+      { "name": "Lillians Music Store", "why": "Unique bar in a converted music store with live performances.", "action": "keep_existing" },
+      { "name": "Kin Cocktail Bar & Lounge", "why": "Sophisticated cocktail lounge with craft drinks.", "action": "keep_existing" },
+      { "name": "Covey Kitchen + Cocktails", "why": "Restaurant and bar with craft cocktails, seasonal menu.", "action": "keep_existing" },
+      { "name": "Boxcar", "why": "Bar and restaurant with a focus on craft beer, wine, elevated pub food.", "action": "keep_existing" },
+      { "name": "The TOP", "why": "Popular restaurant and bar with a lively atmosphere.", "action": "keep_existing" },
+      { "name": "Public & General", "address": "1000 NE 16th Ave, Gainesville, FL 32601", "google_rating": 4.2, "why": "Trendy bar and restaurant with a modern atmosphere.", "action": "keep_existing" },
+      { "name": "Havana's Wine & Cigar Lounge", "why": "Upscale lounge with premium cigars, wine selection.", "action": "keep_existing" },
+      { "name": "Twist Coffee & Cocktails", "why": "Dual-concept space with coffee by day and cocktails by night.", "action": "keep_existing" },
+      { "name": "Arcade Bar", "why": "Bar with arcade games, craft beer, and a playful atmosphere.", "action": "keep_existing" },
+      { "name": "The Atlantic", "why": "Restaurant and bar with a focus on seafood, craft cocktails.", "action": "keep_existing" },
+      { "name": "Crafty Bastards Restaurant", "why": "Restaurant and bar with craft beer, elevated pub food.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "The Wine & Cheese Gallery", "google_rating": 4.5, "why": "Established wine bar with curated selection, cheese boards.", "action": "add_new" },
+      { "name": "Rise & Nye's", "why": "Upscale restaurant and bar with a focus on local ingredients.", "action": "add_new" },
+      { "name": "Mark's Prime Steakhouse", "why": "Upscale steakhouse and bar with premium wines.", "action": "add_new" },
+      { "name": "Emiliano's Cafe", "why": "Cafe and bar with a focus on Latin-inspired cuisine.", "action": "keep_existing" },
+      { "name": "Paramount Grill", "why": "Upscale restaurant and bar with seasonal menu, wine list.", "action": "keep_existing" },
+      { "name": "Dragonfly Sushi & Sake", "why": "Upscale sushi restaurant and bar with sake selection.", "action": "keep_existing" },
+      { "name": "Civilization", "why": "Restaurant and bar with a focus on global cuisine.", "action": "keep_existing" },
+      { "name": "The Great Outdoors", "why": "Restaurant and bar with a focus on outdoor-inspired cuisine.", "action": "keep_existing" },
+      { "name": "Amelia's Fine Dining", "why": "Upscale restaurant and bar with a refined atmosphere.", "action": "keep_existing" },
+      { "name": "Northwest Grille", "why": "Casual restaurant and bar with a relaxed atmosphere.", "action": "keep_existing" }
+    ]
+  }
+}

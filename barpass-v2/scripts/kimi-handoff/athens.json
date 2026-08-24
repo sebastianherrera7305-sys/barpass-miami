@@ -1,0 +1,40 @@
+{
+  "Athens": {
+    "18_25": [
+      { "name": "Creature Comforts Brewing", "address": "271 W Hancock Ave, Athens, GA 30601", "why": "Athens' best craft brewery in a converted tire shop. Tropicália IPA.", "action": "keep_existing" },
+      { "name": "Wonderbar", "address": "240 E Washington St, Athens, GA 30601", "why": "Playful bar with vintage arcade games, board games, Nintendo 64.", "action": "keep_existing" },
+      { "name": "Cutters Pub", "address": "120 E Clayton St, Athens, GA 30601", "google_rating": 4.5, "why": "Popular pub on Clayton Street with a lively atmosphere.", "action": "keep_existing" },
+      { "name": "The Hangover", "address": "175 N Lumpkin St, Athens, GA 30601", "why": "Casual bar and restaurant with craft beers, cocktails, comfort food.", "action": "keep_existing" },
+      { "name": "Toppers International Showbar", "why": "Adult entertainment venue with a party atmosphere.", "action": "keep_existing" },
+      { "name": "Moonshine Bar & Grill", "why": "Bar and grill with a Southern atmosphere, live music.", "action": "keep_existing" },
+      { "name": "Clarke's Standard", "why": "Casual bar with burgers, beer, and a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "Blind Pig Tavern", "why": "Classic Athens dive bar with cheap drinks, pool tables.", "action": "keep_existing" },
+      { "name": "Magnolias Bar of Athens", "why": "College bar with a party atmosphere, dance floor.", "action": "keep_existing" },
+      { "name": "Normal Bar", "address": "1365 Prince Ave, Athens, GA 30606", "google_rating": 4.5, "why": "Retro diner-vibe bar in Normaltown. 16 rotating craft beer taps.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Nighthawks", "address": "175 Tracy St, Athens, GA 30601", "why": "Stylish low-lit cocktail bar with Americana vibes.", "action": "add_new" },
+      { "name": "Tapped Athens Wine Tasting Market", "address": "297 Prince Ave, Athens, GA 30601", "why": "Wine bar in the Bottleworks district with 24 self-serve taps.", "action": "add_new" },
+      { "name": "The Globe", "address": "199 N Lumpkin St, Athens, GA 30601", "why": "Historic English pub since 1989, first in Athens to serve Guinness.", "action": "keep_existing" },
+      { "name": "Walker's Coffee Shop & Pub", "address": "128 College Ave, Athens, GA 30601", "why": "Coffee shop by day, pub by night. Hidden Blue Sky Bar upstairs.", "action": "keep_existing" },
+      { "name": "Hi-Lo Lounge", "address": "1354 Prince Ave, Athens, GA 30606", "why": "Effortlessly cool Normaltown lounge with retro diner vibe.", "action": "keep_existing" },
+      { "name": "Trapese Pub", "why": "Upscale pub with craft cocktails, wine list, elevated pub fare.", "action": "keep_existing" },
+      { "name": "South Kitchen + Bar", "address": "247 E Washington St, Athens, GA 30601", "why": "Special occasion spot with marble columns, mosaic floors.", "action": "keep_existing" },
+      { "name": "Aperitivo", "address": "1664 S Lumpkin St, Athens, GA 30606", "why": "Italian aperitivo bar in Five Points with rattan chairs.", "action": "keep_existing" },
+      { "name": "The Root", "why": "Restaurant and bar with a focus on local ingredients.", "action": "keep_existing" },
+      { "name": "Bar Bruno", "why": "Casual bar with a relaxed atmosphere, craft beer.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "The National", "why": "Upscale restaurant and bar with a refined atmosphere.", "action": "keep_existing" },
+      { "name": "Five & Ten", "why": "Established restaurant with a sophisticated bar.", "action": "keep_existing" },
+      { "name": "Last Resort Grill", "why": "Historic restaurant and bar with Southern-inspired cuisine.", "action": "keep_existing" },
+      { "name": "The Rookery", "why": "Lively bar with outdoor games, craft beer.", "action": "keep_existing" },
+      { "name": "The Old Pal", "why": "Neighborhood bar with a classic atmosphere, whiskey selection.", "action": "keep_existing" },
+      { "name": "Manhattan Cafe", "why": "Cafe and bar with live music, craft beer.", "action": "keep_existing" },
+      { "name": "Hendershot's", "why": "Coffee shop and bar with live music, craft beer.", "action": "keep_existing" },
+      { "name": "The World Famous", "why": "Bar and music venue with a lively atmosphere.", "action": "keep_existing" },
+      { "name": "The Local 706", "why": "Neighborhood bar with craft beer, casual food.", "action": "keep_existing" },
+      { "name": "Boar's Head Lounge", "why": "Historic bar with a classic atmosphere, whiskey selection.", "action": "keep_existing" }
+    ]
+  }
+}

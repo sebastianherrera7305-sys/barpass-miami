@@ -1,0 +1,45 @@
+{
+  "Chapel Hill": {
+    "18_25": [
+      { "name": "He's Not Here", "address": "112 1/2 W Franklin St, Chapel Hill, NC 27516", "why": "Iconic Chapel Hill bar famous for Blue Cups. A UNC tradition since 1972.", "action": "keep_existing" },
+      { "name": "The Cave", "address": "452 1/2 W Franklin St, Chapel Hill, NC 27516", "why": "Chapel Hill's oldest bar, open since 1968. Made to look like a cave.", "action": "keep_existing" },
+      { "name": "Pantana Bob's", "why": "Popular UNC college bar with a party atmosphere.", "action": "keep_existing" },
+      { "name": "Goodfellows", "why": "Lively bar with a party atmosphere, dance floor.", "action": "keep_existing" },
+      { "name": "Might As Well Bar & Grill", "address": "West Franklin Street, Chapel Hill, NC 27516", "why": "Top Chapel Hill sports bar with fresh, quality food.", "action": "keep_existing" },
+      { "name": "Four Corners", "address": "East Franklin Street, Chapel Hill, NC 27514", "why": "Lively sports bar named after Dean Smith's four corners offense.", "action": "keep_existing" },
+      { "name": "Local 506", "why": "Live music venue and bar with indie, rock, alternative acts.", "action": "keep_existing" },
+      { "name": "Zog's Pool", "why": "Bar with pool tables, cheap drinks, relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "The Town Hall Grill", "why": "Casual bar and grill with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "The Blue Horn Lounge", "why": "Bar with live music, craft beer, relaxed atmosphere.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "The Crunkleton", "why": "Upscale cocktail bar with a focus on classic drinks.", "action": "keep_existing" },
+      { "name": "Carolina Brewery", "address": "460 W Franklin St, Chapel Hill, NC 27516", "why": "Local brewery and restaurant with house-made beers.", "action": "keep_existing" },
+      { "name": "Top of the Hill Restaurant & Brewery", "why": "Restaurant and brewery with rooftop views of Chapel Hill.", "action": "keep_existing" },
+      { "name": "Clouds Brewing Storm Cellar", "why": "Brewery and bar with a focus on craft beer.", "action": "keep_existing" },
+      { "name": "TRU", "why": "Restaurant and bar with a focus on local ingredients.", "action": "keep_existing" },
+      { "name": "VIBEZ UNC", "why": "Bar and lounge with a lively atmosphere, craft cocktails.", "action": "keep_existing" },
+      { "name": "The Northside District", "why": "Bar and restaurant with a focus on craft cocktails.", "action": "keep_existing" },
+      { "name": "Franklin Motors", "why": "Bar with a focus on craft beer, casual food.", "action": "keep_existing" },
+      { "name": "Dead Mule Club", "why": "Bar and club with a party atmosphere, dance floor.", "action": "keep_existing" },
+      { "name": "Good Fortune Chapel Hill", "why": "Bar and restaurant with Asian-inspired cuisine.", "action": "keep_existing" },
+      { "name": "One40 Social", "why": "Social bar and lounge with craft cocktails, wine list.", "action": "keep_existing" },
+      { "name": "Little Gem", "why": "Intimate bar with a focus on craft cocktails, small plates.", "action": "keep_existing" },
+      { "name": "The Casual Pint of Chapel Hill", "why": "Craft beer bar with rotating taps, casual atmosphere.", "action": "keep_existing" },
+      { "name": "Trophy Room", "why": "Upscale bar at the Graduate Chapel Hill with a refined atmosphere.", "action": "keep_existing" },
+      { "name": "The Gathering Place", "why": "Restaurant and bar with a focus on Southern cuisine.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "The Baxter Bar & Arcade", "why": "Bar with retro pinball and video games, craft beer.", "action": "add_new" },
+      { "name": "The Kraken", "why": "Bar with rock 'n' roll, billiards, and a lively atmosphere.", "action": "add_new" },
+      { "name": "Tallulah's Mezze Lounge and Bar", "why": "Upscale lounge with Mediterranean-inspired small plates.", "action": "add_new" },
+      { "name": "B-Side Lounge", "why": "Intimate cocktail lounge with a refined atmosphere.", "action": "add_new" },
+      { "name": "The Rookery", "why": "Bar with outdoor games, craft beer, lively atmosphere.", "action": "add_new" },
+      { "name": "Town Hall Burger & Beer Chapel Hill", "why": "Casual restaurant and bar with craft beer, burgers.", "action": "keep_existing" },
+      { "name": "Lapin Bleu", "why": "French-inspired bar and restaurant with a refined atmosphere.", "action": "keep_existing" },
+      { "name": "Sidetrack Bar & Lounge", "why": "Bar and lounge with a relaxed atmosphere, craft beer.", "action": "keep_existing" },
+      { "name": "Echelon Kitchen and Bar", "why": "Restaurant and bar with a focus on elevated American cuisine.", "action": "keep_existing" },
+      { "name": "The Sports Bar Westside", "why": "Sports bar with multiple screens, casual food.", "action": "keep_existing" }
+    ]
+  }
+}

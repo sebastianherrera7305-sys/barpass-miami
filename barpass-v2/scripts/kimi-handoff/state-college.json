@@ -1,0 +1,31 @@
+{
+  "State College": {
+    "18_25": [
+      { "name": "Champs Downtown", "why": "Massive multi-level sports bar and nightclub in downtown State College.", "action": "keep_existing" },
+      { "name": "The Saloon", "address": "101 Heister St, State College, PA 16801", "why": "English-style pub since 1976. Famous Monkey Boy cocktails in pitchers.", "action": "keep_existing" },
+      { "name": "Bar Bleu", "address": "112 S Garner St, State College, PA 16801", "why": "Bilevel sports bar with craft beer, cocktails, Kansas City-style BBQ.", "action": "keep_existing" },
+      { "name": "Cafe 210 West", "why": "Popular student hangout with classic American dishes, famous Cafe Teas.", "action": "keep_existing" },
+      { "name": "The Brewery", "address": "233 E Beaver Ave, State College, PA 16801", "why": "Long-standing dive bar in a basement alley. Cheap drinks, live music.", "action": "keep_existing" },
+      { "name": "Primanti Bros", "why": "Pittsburgh-famous sandwich shop and bar with hefty sandwiches.", "action": "keep_existing" },
+      { "name": "Zeno's", "why": "Underground bar with excellent craft beer selection, live music, wings.", "action": "keep_existing" },
+      { "name": "Brothers Bar & Grill", "address": "134 S Allen St, State College, PA 16801", "why": "Casual bar and grill with multiple games, sports bar in the basement.", "action": "keep_existing" },
+      { "name": "The Darkhorse Tavern", "why": "Relaxed tavern with daily specials, famous wings, discounted Tonto's.", "action": "keep_existing" },
+      { "name": "Jax Bar & Kitchen", "why": "Classy lounge with fabulous margaritas, extensive cocktail and whiskey selection.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Chumley's", "address": "108 W College Ave, State College, PA 16801", "google_rating": 4.5, "why": "Cozy local gay bar with wide liquor selection, drag bingo, live music.", "action": "add_new" },
+      { "name": "The Allen Street Grill", "why": "Upscale dining spot with sunny outdoor porch, full bar, late-night specials.", "action": "add_new" },
+      { "name": "Happy Valley Brewing Company", "why": "Charming microbrewery in a renovated barn. Over a dozen craft beers.", "action": "add_new" },
+      { "name": "The All American Rathskeller", "why": "Historic bar open since 1933. Traditional American food and drinks.", "action": "add_new" },
+      { "name": "Liberty Craft House", "why": "Trendy spot with great craft beer selection on tap, industrial-chic vibe.", "action": "keep_existing" },
+      { "name": "Antifragile Brewing", "why": "Nano brewery with rotating taps, kombucha. Small but comfortable.", "action": "keep_existing" },
+      { "name": "Chrome Liquor Lounge", "address": "222 W Beaver Ave, State College, PA 16801", "why": "Modern club with mood lighting, drink specials, electronic hookah.", "action": "keep_existing" },
+      { "name": "Smoke World & Lounge", "address": "111 W Beaver Ave, State College, PA 16801", "google_rating": 4.5, "why": "Lounge with hookah, cocktails, and a modern atmosphere.", "action": "add_new" }
+    ],
+    "35_50": [
+      { "name": "Otto's Pub & Brewery", "why": "Established brewery and pub with house-made beers, elevated pub food.", "action": "keep_existing" },
+      { "name": "The Tavern Restaurant", "why": "Historic State College restaurant and bar with a refined atmosphere.", "action": "keep_existing" },
+      { "name": "Fiddlehead", "address": "134 W College Ave, State College, PA 16801", "google_rating": 4.0, "why": "Cafe offering salads, grain bowls, and soups. Cocktails by night.", "action": "add_new" }
+    ]
+  }
+}

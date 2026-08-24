@@ -1,0 +1,42 @@
+{
+  "College Station": {
+    "18_25": [
+      { "name": "Dixie Chicken", "why": "Legendary Texas A&M bar since 1974. 'The Chicken' is an Aggie institution.", "action": "keep_existing" },
+      { "name": "The Backyard", "why": "Popular college bar with outdoor seating, cheap drinks.", "action": "keep_existing" },
+      { "name": "Hurricane Harry's", "why": "Country-themed dance hall and bar with live music, line dancing.", "action": "keep_existing" },
+      { "name": "The Corner on Northgate", "address": "401 University Dr, College Station, TX 77840", "why": "Bar and rooftop grill on Northgate with a lively atmosphere.", "action": "keep_existing" },
+      { "name": "The Spot On Northgate", "why": "Casual bar on Northgate with cheap drinks, outdoor seating.", "action": "keep_existing" },
+      { "name": "Duddley's Draw", "why": "Historic A&M bar with a relaxed atmosphere, cheap beer.", "action": "keep_existing" },
+      { "name": "O'Bannon's Taphouse", "why": "Taphouse with extensive craft beer selection, casual atmosphere.", "action": "keep_existing" },
+      { "name": "The Dry Bean Saloon", "why": "Casual saloon-style bar with cheap drinks, pool tables.", "action": "keep_existing" },
+      { "name": "ICON Nightclub and Lounge", "why": "Nightclub and lounge with a party atmosphere, dance floor.", "action": "keep_existing" },
+      { "name": "Reveille Rooftop Bar", "why": "Rooftop bar with views of Northgate, craft cocktails.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "The Republic", "why": "Upscale steakhouse and cocktail bar with a refined atmosphere.", "action": "add_new" },
+      { "name": "12 Rooftop Bar & Lounge", "address": "209 University Dr, College Station, TX 77840", "why": "Rooftop bar and lounge with panoramic views.", "action": "keep_existing" },
+      { "name": "The George", "address": "180 Century Court, College Station, TX 77840", "why": "Upscale bar and restaurant with craft cocktails.", "action": "keep_existing" },
+      { "name": "Gate 12 Bar and Grill", "address": "1770 George Bush Dr W, College Station, TX 77801", "why": "Steakhouse and bar with a focus on premium cuts.", "action": "keep_existing" },
+      { "name": "1791 Whiskey Bar", "why": "Whiskey-focused bar with extensive selection.", "action": "keep_existing" },
+      { "name": "Rough Draught Whiskey Bar", "why": "Whiskey bar with a focus on rare and craft spirits.", "action": "keep_existing" },
+      { "name": "The Tap", "why": "Craft beer bar with rotating taps, casual atmosphere.", "action": "keep_existing" },
+      { "name": "Good Bull Icehouse", "why": "Casual icehouse-style bar with outdoor seating, craft beer.", "action": "keep_existing" },
+      { "name": "Koppe Bridge Bar & Grill", "why": "Bar and grill with a focus on craft beer, burgers.", "action": "keep_existing" },
+      { "name": "Baumhaus", "why": "Unique bar with a treehouse theme, craft cocktails.", "action": "keep_existing" },
+      { "name": "Primrose Path Wine Bar", "why": "Wine bar with curated selection, small plates.", "action": "keep_existing" },
+      { "name": "Downtown Uncorked Winebar", "why": "Wine bar in downtown Bryan with a relaxed atmosphere.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Christopher's World Grille", "why": "Upscale restaurant and bar in a historic home.", "action": "add_new" },
+      { "name": "Caffe Capri", "why": "Italian restaurant and bar with a cozy atmosphere.", "action": "add_new" },
+      { "name": "Napa Flats Wood-Fired Kitchen", "why": "Restaurant and bar with wood-fired cuisine.", "action": "add_new" },
+      { "name": "Porter's Bar & Grill", "why": "Casual bar and grill with a relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "Cheddar's Scratch Kitchen", "why": "Casual restaurant and bar with a focus on scratch-made food.", "action": "keep_existing" },
+      { "name": "Lupe Tortilla", "why": "Tex-Mex restaurant and bar with a lively atmosphere.", "action": "keep_existing" },
+      { "name": "Jose's Mexican Restaurant", "why": "Mexican restaurant and bar with a casual atmosphere.", "action": "keep_existing" },
+      { "name": "Messina Hof Winery & Resort", "why": "Winery and resort with wine tastings, restaurant, and bar.", "action": "add_new" },
+      { "name": "The Village Cafe", "why": "Cafe and bar with a cozy atmosphere, coffee, and light fare.", "action": "keep_existing" },
+      { "name": "Fargo's Pit BBQ", "why": "BBQ restaurant and bar with a casual atmosphere.", "action": "keep_existing" }
+    ]
+  }
+}
