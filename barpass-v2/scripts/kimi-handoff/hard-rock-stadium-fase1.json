@@ -1,0 +1,119 @@
+{
+  "stadium": "Hard Rock Stadium",
+  "address": "347 Don Shula Drive, Miami Gardens, FL 33056",
+  "levels": [
+    {
+      "name": "Field Level",
+      "sections_approx": 0,
+      "entrances": ["Field tunnel access (staff/players only)", "72 Club field walk (ticketed guests)"],
+      "pois": [
+        {"name": "72 Club Lounge", "type": "bar", "section_or_concourse": "Ground Level South side, between 35-yard lines", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Touchdown Club presented by Bud Light", "type": "bar", "section_or_concourse": "East end zone, field level", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Gallagher Club / West Field Club", "type": "bar", "section_or_concourse": "West end zone, field level", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "72 Club Living Room Boxes", "type": "bar", "section_or_concourse": "Sections 145, 147, field adjacent", "source_url": "https://www.rateyourseats.com/hard-rock-stadium/seating/72-club", "confidence": "verified"},
+        {"name": "Field Suites", "type": "bar", "section_or_concourse": "Field level, both end zones", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "South Gate Plaza Team Store", "type": "merch", "section_or_concourse": "Ground Level, South Gate", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "South Triangle Container Store", "type": "merch", "section_or_concourse": "Ground Level", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Southeast Gate New Era Kiosk", "type": "merch", "section_or_concourse": "Ground Level, Southeast Gate", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "72 Club Presented by Broxel Team Store", "type": "merch", "section_or_concourse": "Ground Level, near 72 Club", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Northeast Gate Trailer", "type": "merch", "section_or_concourse": "Ground Level, Northeast Gate", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "North Lexus Club", "type": "merch", "section_or_concourse": "Ground Level, North side", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"}
+      ]
+    },
+    {
+      "name": "100 Level (Lower Bowl)",
+      "sections_approx": 54,
+      "entrances": ["Gate 1A", "Gate 2A", "Gate 3 (East Side)", "Gate 5 (West Side)", "Gate 11 (South Gate, Team Store)", "Gate 12 (West Side Event)", "Northeast Gate", "Southeast Gate", "South Gate"],
+      "pois": [
+        {"name": "The Nine Presented by Amerant", "type": "bar", "section_or_concourse": "100 Level South side, between 30-yard lines", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Lexus North Sideline Club", "type": "bar", "section_or_concourse": "Sections 117-119, 100-North side between 30-yard lines", "source_url": "https://www.hardrockstadium.com/faq-items/lexus-north-sideline-club/", "confidence": "verified"},
+        {"name": "Verizon Northeast Corner Terrace", "type": "bar", "section_or_concourse": "100 Level Northeast corner", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "UHealth Southeast Corner Terrace", "type": "bar", "section_or_concourse": "100 Level Southeast corner", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Autonation Northwest Corner Terrace", "type": "bar", "section_or_concourse": "100 Level Northwest corner", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Heineken Southwest Corner Terrace", "type": "bar", "section_or_concourse": "100 Level Southwest corner", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "305 Sliders", "type": "concession", "section_or_concourse": "Section 111", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Amazonica", "type": "concession", "section_or_concourse": "Section 111", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "CANTALOUPE & Pepsi Food Zone", "type": "concession", "section_or_concourse": "Section 122", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Cheeseburger Baby", "type": "concession", "section_or_concourse": "Section 114", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Tex-Mex by Avocados from Mexico", "type": "concession", "section_or_concourse": "Sections 130, 214", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Japanese (hibachi, bowls, sushi)", "type": "concession", "section_or_concourse": "Sections 148, 350", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "American / Stadium Fare / Pizza", "type": "concession", "section_or_concourse": "Sections 122, 135, 150, 308, 336", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "American (burger, chicken, tenders, hot dogs, fries)", "type": "concession", "section_or_concourse": "Sections 114, 233", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Fried Chicken / Stadium Fare", "type": "concession", "section_or_concourse": "Sections 102, 329", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Pizza", "type": "concession", "section_or_concourse": "Sections 222, 250", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Cafe (coffee, italian, pastries)", "type": "concession", "section_or_concourse": "Section 111", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "American", "type": "concession", "section_or_concourse": "Sections 107, 205, 327, 355", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "American (burger, fries)", "type": "concession", "section_or_concourse": "Section 106", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Fried Chicken (sandwich, tender, waffle, fries)", "type": "concession", "section_or_concourse": "Sections 145, 319", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Dessert (italian ice, fruit, sweet, cold)", "type": "concession", "section_or_concourse": "Section 139", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Middle Eastern", "type": "concession", "section_or_concourse": "Sections 129, 135", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "American / Fried Chicken", "type": "concession", "section_or_concourse": "Section 313", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Fried chicken / Cuban", "type": "concession", "section_or_concourse": "Section 347", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Pizza", "type": "concession", "section_or_concourse": "Sections 142, 345", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "American (hotdogs, popcorn, nachos, pretzels)", "type": "concession", "section_or_concourse": "Sections 101, 114, 129", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Argentinian (steak, sandwich, choripan, empanadas)", "type": "concession", "section_or_concourse": "Section 134", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Upscale / Luxury American", "type": "concession", "section_or_concourse": "Section 117", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "American (snacks, candy, drinks, tenders, burger, popcorn)", "type": "concession", "section_or_concourse": "Sections 117, 122, 142, 150, 317, 319, 345, 347", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Cuban / Cafe (coffee, empanadas, croquetas)", "type": "concession", "section_or_concourse": "Sections 120, 242, 317", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Tex Mex (bowls, mexican, texas)", "type": "concession", "section_or_concourse": "Section 119", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "Southern BBQ", "type": "concession", "section_or_concourse": "Sections 104, 132", "source_url": "https://www.hardrockstadium.com/concessions/", "confidence": "verified"},
+        {"name": "G3 Team Store", "type": "merch", "section_or_concourse": "Section 103", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "New Era Team Store", "type": "merch", "section_or_concourse": "Section 110", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Team Store", "type": "merch", "section_or_concourse": "Section 118", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "47 Brand Kiosk", "type": "merch", "section_or_concourse": "Section 125", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Throwback Team Store", "type": "merch", "section_or_concourse": "Section 132", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Team Store", "type": "merch", "section_or_concourse": "Section 138", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Team Store", "type": "merch", "section_or_concourse": "Section 146", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Guest Experience Headquarters", "type": "guest_services", "section_or_concourse": "Section 115", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Guest Experience Headquarters", "type": "guest_services", "section_or_concourse": "Section 143", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "First Aid", "type": "first_aid", "section_or_concourse": "Section 104", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Sensory Room (by Altec Lansing)", "type": "other", "section_or_concourse": "Section 153", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Elevators (ADA/Suite holders with strollers)", "type": "elevator", "section_or_concourse": "North, South, East, West sides", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Restrooms", "type": "restroom", "section_or_concourse": "UNKNOWN - not specified in official map", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "unverified"}
+      ]
+    },
+    {
+      "name": "200 Level (Club Level / Empower Club)",
+      "sections_approx": 54,
+      "entrances": ["Access via 100 Level concourse + escalators/ramps", "Elevators (ADA/Suite holders)"],
+      "pois": [
+        {"name": "Empower Club and Suite Level", "type": "bar", "section_or_concourse": "200C and 200M levels, full concourse", "source_url": "https://www.hardrockstadium.com/faq-items/club-level-areas/", "confidence": "verified"},
+        {"name": "Corner Club (Northeast)", "type": "bar", "section_or_concourse": "200C/200M Northeast corner", "source_url": "https://www.hardrockstadium.com/faq-items/club-level-areas/", "confidence": "verified"},
+        {"name": "Corner Club (Southeast)", "type": "bar", "section_or_concourse": "200C/200M Southeast corner", "source_url": "https://www.hardrockstadium.com/faq-items/club-level-areas/", "confidence": "verified"},
+        {"name": "Corner Club (Northwest)", "type": "bar", "section_or_concourse": "200C/200M Northwest corner", "source_url": "https://www.hardrockstadium.com/faq-items/club-level-areas/", "confidence": "verified"},
+        {"name": "Corner Club (Southwest)", "type": "bar", "section_or_concourse": "200C/200M Southwest corner", "source_url": "https://www.hardrockstadium.com/faq-items/club-level-areas/", "confidence": "verified"},
+        {"name": "West End Zone Club", "type": "bar", "section_or_concourse": "200C/200M West side, 10,000 sq ft overlooking West end zone", "source_url": "https://www.hardrockstadium.com/faq-items/club-level-areas/", "confidence": "verified"},
+        {"name": "Bodega Lounge", "type": "bar", "section_or_concourse": "200 Level (premium access)", "source_url": "https://www.xeniaevents.com/venue-guide/hard-rock-stadium-miami-gardens/", "confidence": "unverified"},
+        {"name": "Golden Cane Club", "type": "bar", "section_or_concourse": "200 Level (premium access)", "source_url": "https://www.xeniaevents.com/venue-guide/hard-rock-stadium-miami-gardens/", "confidence": "unverified"},
+        {"name": "Guest Experience Headquarters", "type": "guest_services", "section_or_concourse": "Section 215", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Guest Experience Headquarters", "type": "guest_services", "section_or_concourse": "Section 243", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "First Aid", "type": "first_aid", "section_or_concourse": "Section 218", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Elevators (ADA/Suite holders with strollers)", "type": "elevator", "section_or_concourse": "North, South, East, West sides", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Restrooms", "type": "restroom", "section_or_concourse": "UNKNOWN - not specified in official map", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "unverified"}
+      ]
+    },
+    {
+      "name": "300 Level (Upper Deck)",
+      "sections_approx": 56,
+      "entrances": ["Access via 100/200 Level + escalators/ramps/helix", "Elevators (ADA/Suite holders)"],
+      "pois": [
+        {"name": "Guest Experience Headquarters", "type": "guest_services", "section_or_concourse": "Section 315", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Guest Experience Headquarters", "type": "guest_services", "section_or_concourse": "Section 343", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "First Aid", "type": "first_aid", "section_or_concourse": "Section 346", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Elevators (ADA/Suite holders with strollers)", "type": "elevator", "section_or_concourse": "North, South, East, West sides", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"},
+        {"name": "Restrooms", "type": "restroom", "section_or_concourse": "UNKNOWN - not specified in official map", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "unverified"}
+      ]
+    },
+    {
+      "name": "Suite Level",
+      "sections_approx": 0,
+      "entrances": ["Elevators (North, South, East, West)", "Private suite entrances"],
+      "pois": [
+        {"name": "Suite Level Lounges", "type": "bar", "section_or_concourse": "200C and 200M levels, suite concourse", "source_url": "https://www.hardrockstadium.com/faq-items/club-level-areas/", "confidence": "verified"},
+        {"name": "Corner Club Suites", "type": "bar", "section_or_concourse": "Four corners of Suite Level", "source_url": "https://www.hardrockstadium.com/faq-items/club-level-areas/", "confidence": "verified"},
+        {"name": "Elevators (ADA/Suite holders with strollers)", "type": "elevator", "section_or_concourse": "North, South, East, West sides", "source_url": "https://www.hardrockstadium.com/a-z-guide/", "confidence": "verified"}
+      ]
+    }
+  ],
+  "notes": "Restroom locations are not specified in the official Hard Rock Stadium map or A-Z Guide. Family restrooms are mentioned as existing but without section-level detail. Concession data is from the official concessions page which lists food types by section number but not always specific vendor names. Gate numbering varies by event type (Dolphins vs. concerts vs. World Cup). The stadium has a distinctive shade canopy covering most seats. The 200 Level is also referred to as Club Level / Empower Club and Suite Level with 200C (corner) and 200M (mezzanine) sub-levels. Wheelchair accessible seating is documented in 40+ specific sections across all levels."
+}

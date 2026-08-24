@@ -664,6 +664,9 @@ final class L10n: ObservableObject {
             "checkin.error.birthdate": "Necesitamos tu fecha de nacimiento para el check-in.",
             "checkin.error.underage": "Tenés que ser mayor de 18 para el check-in.",
             "checkin.error.generic": "No se pudo hacer el check-in. Probá de nuevo.",
+            "ageReport.title": "¿Qué edad tenía la gente?",
+            "ageReport.subtitle": "Ayudanos a otros a saber qué esperar en %@",
+            "ageReport.skip": "Prefiero no decir",
         ],
         .en: [
             "venue.crowd.empty": "Empty", "venue.crowd.chill": "Chill", "venue.crowd.moderate": "Moderate", "venue.crowd.lively": "Lively", "venue.crowd.packed": "Packed", "venue.crowd.max": "Slammed", "venue.crowd.na": "N/A",
@@ -1284,6 +1287,9 @@ final class L10n: ObservableObject {
             "checkin.error.birthdate": "We need your date of birth for check-in.",
             "checkin.error.underage": "You must be 18+ to check in.",
             "checkin.error.generic": "Couldn't check in. Try again.",
+            "ageReport.title": "What age was the crowd?",
+            "ageReport.subtitle": "Help others know what to expect at %@",
+            "ageReport.skip": "Prefer not to say",
         ],
         .pt: [
             "venue.crowd.empty": "Vazio", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Cheio", "venue.crowd.max": "Lotado", "venue.crowd.na": "N/D",
@@ -1904,6 +1910,9 @@ final class L10n: ObservableObject {
             "checkin.error.birthdate": "Precisamos da sua data de nascimento para o check-in.",
             "checkin.error.underage": "Você precisa ter 18+ anos para o check-in.",
             "checkin.error.generic": "Não foi possível fazer o check-in. Tente de novo.",
+            "ageReport.title": "Que idade tinha a galera?",
+            "ageReport.subtitle": "Ajude outras pessoas a saber o que esperar em %@",
+            "ageReport.skip": "Prefiro não dizer",
         ],
     ]
 }

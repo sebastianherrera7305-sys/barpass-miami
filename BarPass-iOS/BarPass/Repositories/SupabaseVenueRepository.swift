@@ -163,7 +163,11 @@ final actor SupabaseVenueRepository: VenueRepository {
     }
 
     private func fetchAgeBracketRows() async throws -> [SupabaseAgeBracketRow] {
-        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/venue_age_brackets?select=\(Self.ageBracketColumns)") else { throw URLError(.badURL) }
+        // venue_age_effective (venue_age_reports.sql): real user checkout
+        // reports win per-bracket once there are 3+ of them, otherwise
+        // falls back to venue_age_brackets (Kimi research) for that bracket
+        // — never the raw research table alone.
+        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/venue_age_effective?select=\(Self.ageBracketColumns)") else { throw URLError(.badURL) }
         var request = URLRequest(url: url)
         request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")

@@ -163,7 +163,7 @@ struct VenueDetailView: View {
                 .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 20)
 
-            CheckInButton(venueId: venue.id)
+            CheckInButton(venueId: venue.id, venueName: venue.name)
                 .padding(.horizontal, BPSpacing.lg)
 
             if !goodToKnowChips.isEmpty {

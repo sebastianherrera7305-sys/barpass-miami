@@ -37,6 +37,11 @@ final class CheckInStore: ObservableObject {
         isLoading = false
     }
 
+    /// True right after a successful check-out — the view watches this to
+    /// present AgeReportSheet at the one moment we actually know someone
+    /// was at the venue and is now leaving.
+    @Published var justCheckedOut = false
+
     func checkOut() async {
         guard let checkinId = activeCheckin?.checkinId else { return }
         isLoading = true
@@ -45,6 +50,7 @@ final class CheckInStore: ObservableObject {
             try await repository.checkOut(checkinId: checkinId)
             activeCheckin = nil
             BPHaptics.medium()
+            justCheckedOut = true
         } catch {
             errorMessage = L10n.shared.t("checkin.error.generic")
         }
@@ -64,6 +70,7 @@ final class CheckInStore: ObservableObject {
 /// profiles.birthdate, this button never sends a client-supplied age.
 struct CheckInButton: View {
     let venueId: String
+    let venueName: String
     var tripId: String? = nil
 
     @StateObject private var store = CheckInStore()
@@ -114,5 +121,10 @@ struct CheckInButton: View {
             }
         }
         .task { await store.load() }
+        .sheet(isPresented: $store.justCheckedOut) {
+            AgeReportSheet(venueId: venueId, venueName: venueName) {
+                store.justCheckedOut = false
+            }
+        }
     }
 }
