@@ -1,0 +1,42 @@
+{
+  "Oxford": {
+    "18_25": [
+      { "name": "The Library Sports Bar", "address": "120 S 11th St, Oxford, MS 38655", "why": "Ole Miss institution on the Square. Two stories, multiple bars, dance floor.", "action": "keep_existing" },
+      { "name": "Round Table on the Square", "why": "Casual bar and restaurant on the Oxford Square with outdoor seating, burgers.", "action": "keep_existing" },
+      { "name": "Funkys Pizza & Daiquiri Bar", "google_rating": 4.3, "why": "Vibrant casual spot on Jackson Avenue with colorful frozen daiquiris, pizza, lively patio.", "action": "keep_existing" },
+      { "name": "The Coop", "address": "400 North Lamar Blvd, Oxford, MS 38655", "why": "Popular college bar near campus with outdoor seating, cheap drinks.", "action": "keep_existing" },
+      { "name": "Mugshots Grill and Bar", "why": "Burger and beer bar with a college crowd, massive burgers.", "action": "keep_existing" },
+      { "name": "Whiskey Ranch Oxford", "why": "Country-themed bar with whiskey selection, live music.", "action": "keep_existing" },
+      { "name": "Quack's", "why": "Casual bar with a fun atmosphere, drink specials, young crowd.", "action": "keep_existing" },
+      { "name": "Retro Haven", "why": "Bar with retro decor, arcade games, nostalgic atmosphere.", "action": "keep_existing" },
+      { "name": "Buffalo Wild Wings", "why": "Sports bar chain with multiple screens, wings, beer.", "action": "keep_existing" },
+      { "name": "Chili's Grill & Bar", "why": "Casual chain restaurant and bar with margaritas, burgers.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Bar Muse", "address": "1107 Van Buren Ave, Oxford, MS 38655", "google_rating": 4.5, "why": "Tiny cocktail bar tucked inside the Lyric theater. French pet-nat, expertly crafted cocktails.", "action": "add_new" },
+      { "name": "Snackbar", "address": "721 North Lamar Blvd, Oxford, MS 38655", "why": "Upscale restaurant with one of Oxford's best bar programs, $8 happy hour classics.", "action": "add_new" },
+      { "name": "City Grocery Bar", "address": "152 Courthouse Square, Oxford, MS 38655", "why": "Upstairs bar at John Currence's flagship restaurant overlooking the Square.", "action": "keep_existing" },
+      { "name": "Saint Leo", "why": "Upscale Italian restaurant and bar with pizzas, seasonal small plates.", "action": "keep_existing" },
+      { "name": "Boure Restaurant", "why": "Upscale restaurant on the Square with a focus on Creole and Southern cuisine.", "action": "keep_existing" },
+      { "name": "Proud Larry's", "why": "Restaurant and live music venue with a bar, patio, eclectic menu.", "action": "keep_existing" },
+      { "name": "The Blind Pig Pub", "why": "Pub-style bar with craft beer, burgers, relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "Aplós Oxford", "why": "Sophisticated bar and restaurant with Mediterranean-inspired cuisine.", "action": "keep_existing" },
+      { "name": "Circle and Square Brewery", "google_rating": 4.4, "why": "Craft brewery with rotating beer selection, Griddle Dog.", "action": "keep_existing" },
+      { "name": "Back Nine Oxford", "why": "Sports bar and restaurant with golf-themed decor, multiple screens.", "action": "keep_existing" },
+      { "name": "The Sipp on South Lamar", "why": "Casual bar and restaurant with Southern-inspired menu, craft cocktails.", "action": "keep_existing" },
+      { "name": "Miscellanea Spirit House", "why": "Cocktail bar with a focus on craft spirits and creative drinks.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Harrison's", "why": "Established restaurant and bar, refined atmosphere, steakhouse menu.", "action": "keep_existing" },
+      { "name": "City Grocery | Creole • Southern", "address": "152 Courthouse Square, Oxford, MS 38655", "why": "John Currence's flagship restaurant, brick walls, white tablecloths, shrimp and grits.", "action": "keep_existing" },
+      { "name": "The Balcony at Oxford Grillehouse", "why": "Upscale steakhouse with a balcony bar overlooking the Square.", "action": "keep_existing" },
+      { "name": "The Old Henry", "why": "Historic bar with a classic atmosphere, whiskey selection, mature crowd.", "action": "keep_existing" },
+      { "name": "Rafters Music and Food", "why": "Live music venue and restaurant with a bar, patio, casual atmosphere.", "action": "keep_existing" },
+      { "name": "Kingswood Restaurant and Bar", "why": "Established restaurant and bar, refined menu, craft cocktails.", "action": "keep_existing" },
+      { "name": "Moe's Original BBQ", "why": "BBQ restaurant and bar with a casual atmosphere, live music.", "action": "keep_existing" },
+      { "name": "SoLa", "why": "Restaurant and bar with Southern-inspired cuisine, craft cocktails.", "action": "keep_existing" },
+      { "name": "Walk-On's Sports Bistreaux", "why": "Louisiana-inspired sports bar with extensive menu, craft beers.", "action": "keep_existing" },
+      { "name": "Estelle's", "why": "Restaurant and bar with a focus on local ingredients, craft cocktails.", "action": "keep_existing" }
+    ]
+  }
+}

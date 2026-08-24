@@ -183,6 +183,22 @@ async function main() {
         continue;
       }
 
+      // Google can resolve a name we don't recognize (e.g. Kimi's "City
+      // Grocery Bar") to the SAME canonical business as an entry already in
+      // our DB under a completely different name ("City Grocery | Creole
+      // Southern") — the pre-geocode findExisting() check above can't catch
+      // this since it only compares against what Kimi supplied. Re-check
+      // against what Google actually calls it before inserting.
+      const postGeocodeMatch = findExisting(place.displayName?.text ?? entry.name, cityVenues);
+      if (postGeocodeMatch) {
+        await supabase.from("venue_age_brackets").upsert(
+          { venue_id: postGeocodeMatch.id, bracket, why: entry.why, source: "kimi_research" },
+          { onConflict: "venue_id,bracket" }
+        );
+        tagged++;
+        continue;
+      }
+
       const hours = hoursFrom(place);
       const slug = entry.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
