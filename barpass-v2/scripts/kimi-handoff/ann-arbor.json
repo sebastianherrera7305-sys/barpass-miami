@@ -1,0 +1,42 @@
+{
+  "Ann Arbor": {
+    "18_25": [
+      { "name": "Conor O'Neill's Irish Pub", "address": "3685 Jackson Rd, Ann Arbor, MI 48103", "google_rating": 4.5, "why": "Traditional Irish pub with authentic decor, live Irish music, lively atmosphere.", "action": "add_new" },
+      { "name": "Good Time Charley's", "why": "Iconic UMich college bar with fishbowl cocktails, outdoor patio, game-day crowds.", "action": "keep_existing" },
+      { "name": "The Blue Leprechaun", "why": "Classic college bar near campus with cheap drinks, dance floor, young crowd.", "action": "keep_existing" },
+      { "name": "Scorekeepers Sports Grill & Pub", "why": "Sports bar and dance club hybrid on State Street. Dirty Shirley pitchers.", "action": "keep_existing" },
+      { "name": "Brown Jug Restaurant", "why": "Historic college bar near campus with cheap beer, pizza, no-frills atmosphere.", "action": "keep_existing" },
+      { "name": "Necto", "why": "Nightclub in downtown Ann Arbor with themed nights, drag shows, dance floors.", "action": "keep_existing" },
+      { "name": "The Garage Bar", "why": "Casual bar with pool tables, arcade games, cheap drinks.", "action": "keep_existing" },
+      { "name": "Kilroy's on Kirkwood", "why": "College sports bar with multiple TVs, beer specials, party atmosphere.", "action": "keep_existing" },
+      { "name": "Mash Bar", "why": "Cocktail bar mixing college students pregaming and 20-somethings on dates.", "action": "keep_existing" },
+      { "name": "Bill's Beer Garden", "why": "Outdoor beer garden with rotating Michigan-based drafts, communal tables.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "The Last Word", "address": "301 W Huron St, Ann Arbor, MI 48104", "google_rating": 4.5, "why": "Speakeasy cocktail bar with laid-back vibe, attentive staff, incredible drinks.", "action": "keep_existing" },
+      { "name": "Nightcap", "why": "Swanky cocktail speakeasy, bar rail stretching the length of the room. Blueberry Gimlet.", "action": "keep_existing" },
+      { "name": "The Ravens Club", "address": "207 S Main St, Ann Arbor, MI 48104", "google_rating": 4.5, "why": "Upscale cocktail bar on Main Street, craft cocktails, whiskey selection.", "action": "keep_existing" },
+      { "name": "The Blind Pig", "why": "Legendary music venue and bar with live shows, pool tables, 8-Ball basement billiards.", "action": "keep_existing" },
+      { "name": "Ashley's Restaurant & Pub", "address": "338 S State St, Ann Arbor, MI 48104", "why": "State Street institution, one of the largest beer selections in the Midwest, 100+ taps.", "action": "keep_existing" },
+      { "name": "The Rabbit Hole", "why": "Versatile bar in a renovated grain mill with brick-lined walls, omakase dealer's choice.", "action": "keep_existing" },
+      { "name": "Babs' Underground Lounge", "why": "Underground bar with pool tables upstairs, intimate booths downstairs.", "action": "keep_existing" },
+      { "name": "Arbor Brewing Company Session Room", "why": "Brewpub with house-made beers, pub food, relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "The Grotto - Watering Hole", "why": "Bungalow-like patio bar on the corner of Ashley and Liberty, Michigan IPAs.", "action": "keep_existing" },
+      { "name": "Blue LLama Jazz Club and Restaurant", "why": "Upscale jazz club with live performances, craft cocktails, sophisticated atmosphere.", "action": "keep_existing" },
+      { "name": "Aperitivo", "why": "Italian-inspired bar with spritzes, negronis, small plates. Rattan chairs, twinkle lights.", "action": "keep_existing" },
+      { "name": "1824 Cocktails & Coffee", "why": "Dual-concept space with coffee by day and cocktails by night.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Old Town Tavern", "why": "Historic neighborhood bar and local hole-in-the-wall. Unpretentious, cash-friendly.", "action": "keep_existing" },
+      { "name": "Fraser's Pub", "address": "2045 Packard, Ann Arbor, MI 48104", "why": "Neighborhood 'Cheers' like bar just outside downtown. Quality pub food, friendly staff.", "action": "keep_existing" },
+      { "name": "The Dixboro Project", "why": "Farm-to-table restaurant and bar in a historic setting, seasonal cocktails.", "action": "keep_existing" },
+      { "name": "Palio Ann Arbor", "why": "Upscale Italian restaurant with a sophisticated bar, wine list, craft cocktails.", "action": "keep_existing" },
+      { "name": "Grizzly Peak Brewing Company", "why": "Local brewpub with house-made beers, elevated pub food, family-friendly.", "action": "keep_existing" },
+      { "name": "Jolly Pumpkin Cafe & Brewery", "why": "Brewery and restaurant with sour beers, rustic decor, relaxed atmosphere.", "action": "keep_existing" },
+      { "name": "The Hidden King - Neighborhood Bar", "why": "Half-coffee shop, half-cocktail bar filled with townies. Canned beers, tattered chess boards.", "action": "keep_existing" },
+      { "name": "Allen Rumsey Cocktail Lounge", "why": "Sophisticated cocktail lounge with a focus on classic drinks and a quiet atmosphere.", "action": "keep_existing" },
+      { "name": "North Star Lounge", "why": "Neighborhood bar with a relaxed atmosphere, craft beer selection, local crowd.", "action": "keep_existing" },
+      { "name": "HOMES Brewery - Brewpub", "why": "Brewery with fruit-forward beers, wood-fired pizza, family-friendly atmosphere.", "action": "keep_existing" }
+    ]
+  }
+}

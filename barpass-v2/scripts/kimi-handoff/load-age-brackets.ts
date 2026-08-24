@@ -75,23 +75,48 @@ function hoursFrom(place: any): { open: string; close: string } {
 function normalize(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu, "") // strip emoji/punctuation, keep letters/digits/spaces
+    .replace(/&/g, " and ") // "Grill & Pub" vs "Grill and Pub" missed a real
+    // match in Ann Arbor (Scorekeepers) — substring containment fails on a
+    // mid-string word difference like this, so normalize the spelling first.
+    .replace(/[^\p{L}\p{N}\s]/gu, "") // strip emoji/remaining punctuation
     .replace(/\s+/g, " ")
     .trim();
 }
 
+// Token-level Jaccard similarity — catches word-order/pluralization/minor
+// spelling differences ("Drinks" vs "Drink", "Co." vs "Company") that
+// substring containment misses in either direction.
+function similarity(a: string, b: string): number {
+  const wa = new Set(a.split(" ").filter((w) => w.length > 1));
+  const wb = new Set(b.split(" ").filter((w) => w.length > 1));
+  if (wa.size === 0 || wb.size === 0) return 0;
+  let shared = 0;
+  for (const w of wa) if (wb.has(w)) shared++;
+  return shared / Math.max(wa.size, wb.size);
+}
+
 function findExisting(entryName: string, cityVenues: { id: string; name: string }[]) {
   const target = normalize(entryName);
-  // Exact normalized match first, then "one name contains the other" as a
-  // fallback for suffixed variants (e.g. "grails miami" vs
-  // "grails miami restaurant sports bar").
-  return (
-    cityVenues.find((v) => normalize(v.name) === target) ??
-    cityVenues.find((v) => {
-      const vn = normalize(v.name);
-      return vn.includes(target) || target.includes(vn);
-    })
-  );
+  const exact = cityVenues.find((v) => normalize(v.name) === target);
+  if (exact) return exact;
+  const contains = cityVenues.find((v) => {
+    const vn = normalize(v.name);
+    return vn.includes(target) || target.includes(vn);
+  });
+  if (contains) return contains;
+  // Last resort: most-similar name by shared words, only if it clears a
+  // high bar — this is deliberately conservative (0.6) so it doesn't start
+  // matching genuinely different venues that happen to share one word.
+  let best: { id: string; name: string } | undefined;
+  let bestScore = 0;
+  for (const v of cityVenues) {
+    const score = similarity(target, normalize(v.name));
+    if (score > bestScore) {
+      bestScore = score;
+      best = v;
+    }
+  }
+  return bestScore >= 0.6 ? best : undefined;
 }
 
 async function main() {
