@@ -1,0 +1,42 @@
+{
+  "New Orleans": {
+    "18_25": [
+      { "name": "Pat O'Brien's", "address": "718 St Peter St, New Orleans, LA 70116", "why": "Legendary French Quarter bar famous for inventing the Hurricane cocktail. Dueling pianos, courtyard with flaming fountain.", "action": "keep_existing" },
+      { "name": "The World Famous Cats Meow | Karaoke New Orleans", "why": "Iconic karaoke bar on Bourbon Street with a stage, balcony, and rowdy crowd. Open since 1989.", "action": "keep_existing" },
+      { "name": "Razzoo Bar & Patio", "why": "Bourbon Street staple with live music, dance floor, outdoor patio, cover bands.", "action": "keep_existing" },
+      { "name": "Coyote Ugly Saloon", "why": "Wild bar on Decatur Street where bartenders dance on the bar and pour shots into patrons' mouths.", "action": "keep_existing" },
+      { "name": "Beach On Bourbon", "why": "Tropical-themed bar on Bourbon Street with sand, beach chairs, frozen drinks.", "action": "keep_existing" },
+      { "name": "Oz New Orleans", "why": "Premier LGBTQ+ dance club in the French Quarter with drag shows, go-go dancers, multiple dance floors.", "action": "keep_existing" },
+      { "name": "SNEAKY PETE'S", "why": "Dive bar on St. Charles Avenue with cheap drinks, pool tables, popular with Tulane and Loyola students.", "action": "keep_existing" },
+      { "name": "Finn McCool's Irish Pub", "why": "Authentic Irish pub in Mid-City with soccer on TV, live music, beer garden, trivia nights.", "action": "keep_existing" },
+      { "name": "Erin Rose", "why": "Tiny Irish pub in the French Quarter, famous for frozen Irish coffee and Bloody Marys.", "action": "keep_existing" },
+      { "name": "Kermit's Treme Mother in Law Lounge", "why": "Colorful Bywater bar owned by trumpeter Kermit Ruffins. Murals, live jazz, backyard cookouts.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Cure", "address": "4905 Freret St, New Orleans, LA 70115", "google_rating": 4.4, "why": "Pioneer of NOLA's craft cocktail movement since 2009. James Beard Award 2018 Outstanding Bar Program.", "action": "add_new" },
+      { "name": "Bar Tonique", "why": "Cozy Rampart Street cocktail joint balancing dive bar and cocktail den. Daily $6 happy hour classics.", "action": "keep_existing" },
+      { "name": "French 75 Bar", "why": "Elegant bar inside Arnaud's Restaurant, polished mahogany, white-tuxedoed staff.", "action": "keep_existing" },
+      { "name": "Jewel of the South", "why": "Beautifully appointed venue at the edge of the French Quarter, plant-filled courtyard.", "action": "keep_existing" },
+      { "name": "Barrel Proof", "why": "Whiskey bar in the Lower Garden District with an extensive bourbon and rye selection.", "action": "keep_existing" },
+      { "name": "Beachbum Berry's Latitude 29", "why": "World-class tiki bar by rum authority Jeff Berry in the Bienville Hotel.", "action": "keep_existing" },
+      { "name": "The Spotted Cat Music Club", "why": "Intimate jazz club on Frenchmen Street with live music nightly, no cover.", "action": "keep_existing" },
+      { "name": "Bacchanal Wine", "why": "Wine shop, bar, and live music venue in Bywater with a gritty backyard.", "action": "keep_existing" },
+      { "name": "The AllWays Lounge & Cabaret", "why": "DIY cabaret and burlesque venue on St. Claude with glitter, disco balls, neon.", "action": "keep_existing" },
+      { "name": "Twelve Mile Limit", "why": "Unassuming Mid-City bar with a different happy hour special every day.", "action": "keep_existing" },
+      { "name": "Cane & Table", "why": "Colonial-style cocktail bar and restaurant in the French Quarter with a big back courtyard.", "action": "add_new" },
+      { "name": "Napoleon House", "why": "Two-century-old French Quarter landmark. Famous for Pimm's Cup and absinthe-dabbed Sazerac.", "action": "add_new" }
+    ],
+    "35_50": [
+      { "name": "The Sazerac Bar", "why": "Iconic bar in The Roosevelt Hotel. Home of the Sazerac and Ramos Gin Fizz.", "action": "keep_existing" },
+      { "name": "The Carousel Bar & Lounge", "address": "214 Royal St, New Orleans, LA 70130", "why": "Famous rotating carousel bar inside the Hotel Monteleone.", "action": "keep_existing" },
+      { "name": "Lafitte's Blacksmith Shop", "why": "One of the oldest bars in America, built in the 1720s. Candlelit interior, frozen daiquiris.", "action": "keep_existing" },
+      { "name": "Vaughan's Lounge", "why": "Bywater neighborhood dive since 1959. One of the few places to catch live jazz without tourist crowds.", "action": "keep_existing" },
+      { "name": "The Columns Hotel", "why": "Boutique hotel bar on St. Charles Avenue, patio overlooking the streetcar.", "action": "keep_existing" },
+      { "name": "Prohibition", "why": "Speakeasy-style bar with a focus on pre-Prohibition cocktails. Hidden entrance.", "action": "keep_existing" },
+      { "name": "The Dungeon", "why": "Gothic-themed bar in the French Quarter with heavy metal music, cash-only.", "action": "keep_existing" },
+      { "name": "Bouligny Tavern", "why": "Local favorite in Uptown with dim lighting, a long bar, excellent cocktails. Attached to Lilette.", "action": "add_new" },
+      { "name": "Avegno", "why": "Parisian brasserie-style bar attached to Gautreau's restaurant. Wood floors, brass accents.", "action": "add_new" },
+      { "name": "Pluck Wine Bar", "why": "Warehouse District wine bar with outstanding wine selection and knowledgeable staff.", "action": "add_new" }
+    ]
+  }
+}

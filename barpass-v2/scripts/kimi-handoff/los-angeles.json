@@ -1,0 +1,45 @@
+{
+  "Los Angeles": {
+    "18_25": [
+      { "name": "The Continental Club", "why": "Legendary rockabilly and roots music venue in Silver Lake. Live bands nightly, dance floor, retro atmosphere.", "action": "keep_existing" },
+      { "name": "The Silverlake Lounge", "why": "Intimate dive bar and live music venue in Silver Lake. Cheap drinks, no cover most nights.", "action": "keep_existing" },
+      { "name": "Good Times at Davey Wayne's", "why": "70s-themed house party bar in Hollywood, enter through a refrigerator door. Fun, unpretentious.", "action": "keep_existing" },
+      { "name": "Bigfoot Lodge", "why": "Woodsy cabin-themed bar in Atwater Village with taxidermy, camp vibes, s'mores, board games.", "action": "keep_existing" },
+      { "name": "The Escondite", "why": "Hidden bar in Downtown LA's Skid Row with live music, burgers, dive-y atmosphere.", "action": "keep_existing" },
+      { "name": "The Room Hollywood", "why": "Small, dark cocktail bar on Hollywood Boulevard with a speakeasy feel. No sign on the door.", "action": "keep_existing" },
+      { "name": "Crocker Club", "why": "Underground cocktail lounge in Downtown LA with a bank vault entrance. Craft cocktails, live jazz.", "action": "keep_existing" },
+      { "name": "The Redwood Bar & Grill", "why": "Pirate-themed dive bar in Downtown LA with nautical decor, live music, strong rum drinks.", "action": "keep_existing" },
+      { "name": "Rhythm Room L.A.", "why": "Live music venue and bar in Downtown LA with salsa, Latin jazz, dance nights.", "action": "keep_existing" },
+      { "name": "DTLA Sports Bar & Grill", "why": "Casual sports bar in Downtown LA with multiple screens, beer specials.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "The Roger Room", "address": "370 La Cienega Blvd, Los Angeles, CA 90048", "google_rating": 4.5, "why": "First-rate West Hollywood cocktail bar hidden behind a neon 'PSYCHIC' sign. Dark, intimate, perfect for dates.", "action": "keep_existing" },
+      { "name": "Death & Co Los Angeles", "address": "810 E 3rd St, Los Angeles, CA 90013", "google_rating": 4.5, "why": "Underground Arts District outpost of the famous NYC cocktail bar. Rare spirits, James Beard Award-winning program.", "action": "add_new" },
+      { "name": "Thunderbolt", "address": "1263 W Temple St, Los Angeles, CA 90026", "google_rating": 4.5, "why": "Award-winning cocktail bar in Historic Filipinotown, tech-forward zero-waste mixology. North America's 50 Best Bars.", "action": "add_new" },
+      { "name": "The Wolves", "address": "519 S Spring St, Los Angeles, CA 90013", "google_rating": 4.5, "why": "Ornate cocktail bar in Downtown's Historic Core with Belle Époque decor, stained-glass ceiling from a Paris train station.", "action": "add_new" },
+      { "name": "Everson Royce Bar", "address": "1936 E 7th St, Los Angeles, CA 90021", "google_rating": 4.5, "why": "Relaxed indoor-outdoor cocktail bar in the Arts District. Famous cheeseburger, raucous patio.", "action": "add_new" },
+      { "name": "Big Bar", "address": "1927 Hillhurst Ave, Los Angeles, CA 90027", "google_rating": 4.5, "why": "Converted Craftsman bungalow in Los Feliz, rotating themed menus, heated brick patio.", "action": "add_new" },
+      { "name": "Accomplice", "address": "3811 Grand View Blvd, Los Angeles, CA 90066", "google_rating": 4.5, "why": "L-shaped bar inside Mar Vista's Little Fatty. $10 happy hour drinks, bartender favorite.", "action": "add_new" },
+      { "name": "Melrose Umbrella Co.", "address": "7465 Melrose Ave, Los Angeles, CA 90046", "google_rating": 4.5, "why": "Prohibition-themed cocktail bar on Melrose since 2013. Famous scorpion bowl, heated patio.", "action": "add_new" },
+      { "name": "Capri Club", "address": "4604 Eagle Rock Blvd, Los Angeles, CA 90041", "google_rating": 4.5, "why": "Ultra-trendy aperitivo bar in Eagle Rock, extensive amaro selection, frozen Negroni.", "action": "add_new" },
+      { "name": "The Let's Go Disco & Cocktail Club", "address": "710 E 4th Pl, Los Angeles, CA 90013", "google_rating": 4.0, "why": "70s-inspired Arts District lounge, disco balls, DJs spinning Italo disco.", "action": "add_new" },
+      { "name": "La Cita Bar", "why": "Latin-themed bar in Downtown LA with salsa nights, live bands, vibrant dance floor.", "action": "keep_existing" },
+      { "name": "Seven Grand", "why": "Whiskey bar with 400+ labels, pool tables, masculine hunting-lodge aesthetic.", "action": "keep_existing" },
+      { "name": "The Normandie Club", "why": "Koreatown cocktail bar by Pouring With Heart. Coconut-washed bourbon Old Fashioned.", "action": "keep_existing" },
+      { "name": "Broken Shaker at Freehand Los Angeles", "why": "Rooftop pool bar at the Freehand hotel, tropical cocktails, palm trees.", "action": "keep_existing" },
+      { "name": "Kiss Kiss Bang Bang", "why": "Hidden speakeasy-style bar, craft cocktails, intimate seating, dim lighting.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Dante Beverly Hills", "address": "225 N Canon Dr, Beverly Hills, CA 90210", "google_rating": 4.5, "why": "Ritzy rooftop outpost of the award-winning NYC cocktail bar, sweeping views of the hills.", "action": "add_new" },
+      { "name": "Tonga Hut", "address": "12808 Victory Blvd, North Hollywood, CA 91606", "google_rating": 4.5, "why": "LA's oldest tiki bar since the 1950s. 78-cocktail Grog Log challenge, potent mai tais.", "action": "add_new" },
+      { "name": "71Above", "why": "Sky-high restaurant and bar on the 71st floor of the US Bank Tower. Panoramic views of LA.", "action": "keep_existing" },
+      { "name": "Perch", "why": "French-inspired rooftop bar in Downtown LA with outdoor fireplaces, live jazz, skyline views.", "action": "keep_existing" },
+      { "name": "The Reserve", "why": "Upscale cocktail lounge in Downtown LA, rare spirits, classic cocktails, quiet atmosphere.", "action": "keep_existing" },
+      { "name": "Spire 73", "why": "Rooftop bar on the 73rd floor of the InterContinental Downtown LA. Highest open-air bar in the Western Hemisphere.", "action": "keep_existing" },
+      { "name": "La Descarga", "why": "Cuban rum bar in Hollywood with live salsa, cigar room, 1950s Havana decor.", "action": "keep_existing" },
+      { "name": "The Mermaid", "why": "Coastal-inspired cocktail bar in Little Tokyo, fresh oysters, tiki cocktails.", "action": "keep_existing" },
+      { "name": "Caña Rum Bar", "why": "Rum-focused cocktail bar in Downtown LA with 300+ rums, Latin-inspired menu.", "action": "keep_existing" },
+      { "name": "Videre Rooftop Restaurant & Bar", "why": "Rooftop bar at the Four Seasons Hotel in Westlake Village. Panoramic views.", "action": "keep_existing" }
+    ]
+  }
+}
