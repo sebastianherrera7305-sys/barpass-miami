@@ -1,0 +1,42 @@
+{
+  "Columbus": {
+    "18_25": [
+      { "name": "The Go Go", "why": "Popular nightclub in Columbus with a party atmosphere, dance floor.", "action": "keep_existing" },
+      { "name": "Axis Nightclub", "why": "Largest LGBTQ+ nightclub in Columbus with cabaret, drag shows.", "action": "keep_existing" },
+      { "name": "Bodega", "why": "Hip gastropub in the Short North with 150+ beers on tap.", "action": "keep_existing" },
+      { "name": "Seventh Son Brewing Co.", "why": "Brewery in the Short North specializing in ales and IPAs.", "action": "keep_existing" },
+      { "name": "Gaswerks", "why": "Garage-themed watering hole in the Short North with multiple bars.", "action": "keep_existing" },
+      { "name": "Good Night John Boy", "why": "Retro-themed dance club with 70s and 80s music, disco balls.", "action": "keep_existing" },
+      { "name": "Skully's Music-Diner", "why": "Music venue and bar with live bands, DJ nights, dance floor.", "action": "keep_existing" },
+      { "name": "The Forum", "why": "Nightclub and event venue with themed parties, DJ nights.", "action": "keep_existing" },
+      { "name": "Half Baked", "why": "Casual bar with a relaxed atmosphere, cheap drinks, young crowd.", "action": "keep_existing" },
+      { "name": "Uno", "why": "Lively bar and nightclub with a party atmosphere, dance floor.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Law Bird", "address": "740 S High St, Columbus, OH 43206", "google_rating": 4.8, "why": "James Beard Award semifinalist 2025. Creative craft cocktails, curated natural wines.", "action": "add_new" },
+      { "name": "Stories on High", "address": "404 N High St, Columbus, OH 43215", "google_rating": 4.6, "why": "Columbus' tallest rooftop bar, 28 stories over High Street, 360-degree views.", "action": "add_new" },
+      { "name": "Brass Eye", "address": "77 Belle St, Columbus, OH 43215", "google_rating": 4.6, "why": "Rooftop bar atop The Junto Hotel in Downtown Columbus.", "action": "add_new" },
+      { "name": "Lincoln Social Rooftop", "address": "711 N High St, 9th Floor, Columbus, OH 43215", "google_rating": 4.0, "why": "Urban rooftop lounge in the Short North on the 9th floor.", "action": "keep_existing" },
+      { "name": "Galla Park Social", "why": "Chic cocktail bar in the Short North with an amazing vibe and inventive drinks.", "action": "add_new" },
+      { "name": "Sacred Palm", "why": "Upscale cocktail bar with a sophisticated atmosphere, craft drinks.", "action": "keep_existing" },
+      { "name": "Denmark on High", "why": "Chic cocktail bar in the Short North offering handcrafted cocktails.", "action": "keep_existing" },
+      { "name": "Parlay Sporting Club + Kitchen", "why": "Polished sports bar and restaurant in the Short North.", "action": "keep_existing" },
+      { "name": "Astra Rooftop", "why": "Elevated dining and rooftop bar in the Short North.", "action": "keep_existing" },
+      { "name": "The O on Lane", "google_rating": 4.4, "why": "Popular campus bar near Ohio State with a lively atmosphere.", "action": "keep_existing" },
+      { "name": "Local Bar", "why": "Neighborhood bar in Columbus with a relaxed atmosphere, craft beer.", "action": "keep_existing" },
+      { "name": "Antiques on High", "why": "Unique bar with an antique shop vibe, craft cocktails.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "VASO Rooftop Lounge", "why": "Rooftop cocktail bar in Dublin with mixology-forward cocktails.", "action": "add_new" },
+      { "name": "Subourbon Southern Kitchen and Spirits", "why": "Southern-inspired cocktail bar in Worthington with rare bourbon selection.", "action": "add_new" },
+      { "name": "I Like It Like That Bar", "why": "Columbus establishment offering specialty cocktails, espresso, small plates.", "action": "add_new" },
+      { "name": "Let Me Roll It", "why": "Vintage-inspired cocktail bar in Weinland Park launching summer 2026.", "action": "add_new" },
+      { "name": "The Rossi Kitchen & Bar", "why": "Hip twist on a classic supper club in the Short North.", "action": "keep_existing" },
+      { "name": "Worthington Tavern", "why": "Historic tavern in Old Worthington with impressive cocktail menu.", "action": "add_new" },
+      { "name": "DUECENTO", "why": "Upscale bar and restaurant with a refined atmosphere, craft cocktails.", "action": "keep_existing" },
+      { "name": "The Bluestone", "why": "Live music venue and bar in a historic church building.", "action": "keep_existing" },
+      { "name": "Noir Lounge", "why": "Sophisticated lounge with craft cocktails, wine list, refined atmosphere.", "action": "keep_existing" },
+      { "name": "The Library Bar", "why": "Upscale bar with a library theme, extensive whiskey selection.", "action": "keep_existing" }
+    ]
+  }
+}
