@@ -1,0 +1,41 @@
+{
+  "Chicago": {
+    "18_25": [
+      { "name": "Delilah's", "address": "2771 N Lincoln Ave, Chicago, IL 60614", "google_rating": 4.5, "why": "Rock 'n' roll booze emporium with 1,000+ whiskeys, nightly DJ sets, VHS screenings.", "action": "keep_existing" },
+      { "name": "The California Clipper", "address": "1002 N California Ave, Chicago, IL 60622", "google_rating": 4.5, "why": "Circa-1937 bar with retro-cool space, red leather booths, weekly live music.", "action": "keep_existing" },
+      { "name": "Dorothy Downstairs", "address": "2500 W Chicago Ave, Chicago, IL 60622", "google_rating": 4.5, "why": "70s-inspired LGBTQ+ cocktail lounge with vintage furniture, drag showcases.", "action": "keep_existing" },
+      { "name": "Sportsman's Club", "address": "948 N Western Ave, Chicago, IL 60622", "google_rating": 4.5, "why": "Pretense-free drinks den with vintage hunting-lodge vibe, $7 Low Life.", "action": "keep_existing" },
+      { "name": "Richard's Bar", "address": "491 N Milwaukee Ave, Chicago, IL 60654", "google_rating": 4.5, "why": "True-blue Chicago tavern with tin ceilings, budget beers, Rat-Pack jukebox.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "Kumiko", "address": "630 W Lake St, Chicago, IL 60661", "google_rating": 4.5, "why": "Japanese dining bar with cocktail omakase, rice vodka, saké vermouth.", "action": "keep_existing" },
+      { "name": "Meadowlark", "address": "2812 W Palmer St, Chicago, IL 60647", "google_rating": 4.5, "why": "Dimly lit cocktail haven in Logan Square with inventive drinks.", "action": "keep_existing" },
+      { "name": "The Green Mill", "address": "4802 N Broadway St, Chicago, IL 60640", "google_rating": 4.5, "why": "Iconic Uptown jazz lounge since 1907. Al Capone's old haunt.", "action": "keep_existing" },
+      { "name": "Best Intentions", "address": "3281 W Armitage Ave, Chicago, IL 60647", "google_rating": 4.5, "why": "Self-proclaimed 'fancy cocktail bar' in Logan Square.", "action": "keep_existing" },
+      { "name": "La Licor Panamericana", "address": "2521 N California Ave, Chicago, IL 60647", "google_rating": 4.5, "why": "Logan Square bar showcasing Latin American spirits.", "action": "keep_existing" },
+      { "name": "Scofflaw", "address": "3201 W Armitage Ave, Chicago, IL 60647", "google_rating": 4.5, "why": "Gin-focused bar with Victorian salon and neighborhood joint rooms.", "action": "keep_existing" },
+      { "name": "Billy Sunday", "address": "3143 W Logan Blvd, Chicago, IL 60647", "google_rating": 4.5, "why": "Logan Square pub with high-end but approachable cocktails.", "action": "keep_existing" },
+      { "name": "Nine Bar", "address": "216 W Cermak Rd, Chicago, IL 60616", "google_rating": 4.5, "why": "Asian-ish cocktail bar hidden in Chinatown's Moon Palace Express.", "action": "keep_existing" },
+      { "name": "Moneygun", "address": "660 W Lake St, Chicago, IL 60661", "google_rating": 4.5, "why": "West Loop bar specializing in 30 classic cocktails for $15.", "action": "keep_existing" },
+      { "name": "Cindy's", "address": "12 S Michigan Ave, Chicago, IL 60603", "google_rating": 4.5, "why": "Stylish rooftop atop Chicago Athletic Association Hotel.", "action": "keep_existing" },
+      { "name": "Three Dots and a Dash", "address": "435 N Clark St, Chicago, IL 60654", "google_rating": 4.5, "why": "Underground tiki bar in River North. Smoking Sippopotamus punch bowl.", "action": "keep_existing" },
+      { "name": "The Aviary", "address": "955 W Fulton Market, Chicago, IL 60607", "google_rating": 4.5, "why": "Modern cocktail lounge by The Alinea Group. James Beard Award-winning.", "action": "keep_existing" },
+      { "name": "The Office", "address": "955 W Fulton Market, Chicago, IL 60607", "google_rating": 4.5, "why": "21-seat speakeasy below The Aviary. Prepaid experiences.", "action": "keep_existing" },
+      { "name": "After", "address": "1338 W Fulton St, Chicago, IL 60607", "google_rating": 4.5, "why": "High-craft, low-key lounge by Michelin-starred chef Curtis Duffy.", "action": "keep_existing" },
+      { "name": "Bar Bambi", "address": "1703 W Chicago Ave, Chicago, IL 60622", "google_rating": 4.5, "why": "Whimsical West Town bar by Katie Renshaw. Colorful dream-like decor.", "action": "add_new" },
+      { "name": "Gus' Sip & Dip", "address": "51 W Hubbard St, Chicago, IL 60654", "google_rating": 4.5, "why": "Classic tavern concept with 30 cocktails at $12 each.", "action": "keep_existing" },
+      { "name": "Nobody's Darling", "address": "1744 W Balmoral Ave, Chicago, IL 60640", "google_rating": 4.5, "why": "Laid-back LGBTQIA+ lounge, second Black-owned LGBTQ+ bar in Chicago.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "Old Town Ale House", "address": "219 W North Ave, Chicago, IL 60610", "google_rating": 4.5, "why": "Neighborhood landmark since 1958 near Second City.", "action": "keep_existing" },
+      { "name": "Bisous", "address": "938 W Fulton Market, Chicago, IL 60607", "google_rating": 4.5, "why": "60s Parisian-inspired bar with plush velvet booths, globe lighting.", "action": "keep_existing" },
+      { "name": "Maria's Packaged Goods & Community Bar", "address": "960 W 31st St, Chicago, IL 60608", "google_rating": 4.5, "why": "Hybrid liquor store and tavern in Bridgeport.", "action": "keep_existing" },
+      { "name": "Hopleaf", "address": "5148 N Clark St, Chicago, IL 60640", "google_rating": 4.5, "why": "Andersonville staple with 60+ drafts and encyclopedic bottle list.", "action": "keep_existing" },
+      { "name": "Lazy Bird", "address": "200 N Green St, Chicago, IL 60607", "google_rating": 4.5, "why": "Stylish rathskeller beneath The Hoxton.", "action": "keep_existing" },
+      { "name": "Buttercup", "address": "75 E 16th St, Chicago, IL 60616", "google_rating": 4.5, "why": "Cozy South Loop cafe and bar specializing in amaro.", "action": "keep_existing" },
+      { "name": "Belmont Tavern", "address": "3405 W Belmont Ave, Chicago, IL 60618", "google_rating": 4.5, "why": "Reborn Avondale neighborhood bar in a former Polish watering hole.", "action": "keep_existing" },
+      { "name": "Kitty's Cosmopolitan Club", "address": "51 W Hubbard St Ste 200, Chicago, IL 60654", "google_rating": 4.5, "why": "Sultry intimate cocktail lounge below Crying Tiger.", "action": "keep_existing" },
+      { "name": "Cantina Rosa", "address": "5230 S Harper Ave, Chicago, IL 60615", "google_rating": 4.5, "why": "Tropical escape in Hyde Park celebrating Mexican spirits.", "action": "keep_existing" }
+    ]
+  }
+}

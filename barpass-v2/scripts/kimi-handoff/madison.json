@@ -1,0 +1,42 @@
+{
+  "Madison": {
+    "18_25": [
+      { "name": "Whiskey Jack's Saloon", "why": "Popular college bar near UW-Madison campus with a party atmosphere.", "action": "keep_existing" },
+      { "name": "The Kollege Klub", "why": "Iconic UW-Madison college bar with a party atmosphere.", "action": "keep_existing" },
+      { "name": "Jordan's Big Ten Pub", "address": "1330 Regent St A, Madison, WI 53715", "google_rating": 4.6, "why": "Official Green Bay Packers bar near campus.", "action": "keep_existing" },
+      { "name": "Nitty Gritty Madison", "address": "223 N Frances St, Madison, WI 53703", "google_rating": 4.2, "why": "Official Milwaukee Bucks bar and birthday destination.", "action": "keep_existing" },
+      { "name": "Lucky's 1313 Brew Pub", "address": "1313 Regent St, Madison, WI 53715", "google_rating": 4.4, "why": "Official Packers bar with craft beer and pub food.", "action": "keep_existing" },
+      { "name": "The Red Zone", "address": "1212 Regent St, Madison, WI 53715", "google_rating": 4.3, "why": "Official USA soccer bar and popular college hangout.", "action": "keep_existing" },
+      { "name": "Club LaMark", "address": "1525 N Stoughton Rd, Madison, WI 53704", "google_rating": 4.4, "why": "Official Packers bar with a party atmosphere.", "action": "keep_existing" },
+      { "name": "SconnieBar", "why": "Wisconsin-themed bar with local beers, cheese curds.", "action": "keep_existing" },
+      { "name": "Tipsy Cow", "address": "102 King St, Madison, WI 53703", "google_rating": 4.5, "why": "Official Packers bar with burgers and craft beer.", "action": "keep_existing" },
+      { "name": "State Street Brats", "why": "Classic State Street bar with brats, beer, party atmosphere.", "action": "keep_existing" }
+    ],
+    "25_35": [
+      { "name": "The Old Fashioned", "why": "Wisconsin-themed restaurant and bar with the state's largest old fashioned selection.", "action": "keep_existing" },
+      { "name": "Paul's Club", "address": "204 State St, Madison, WI 53703", "google_rating": 4.2, "why": "Official Milwaukee Bucks bar on State Street.", "action": "keep_existing" },
+      { "name": "The Coopers Tavern", "address": "20 W Mifflin St, Madison, WI 53703", "google_rating": 4.5, "why": "British-inspired pub with craft beer, Scotch eggs.", "action": "keep_existing" },
+      { "name": "Merchant Madison", "why": "Upscale craft cocktail bar with a focus on local ingredients.", "action": "keep_existing" },
+      { "name": "The Robin Room", "why": "Intimate cocktail bar with a focus on classic drinks.", "action": "keep_existing" },
+      { "name": "Cielo", "why": "Upscale rooftop bar with craft cocktails and panoramic views.", "action": "keep_existing" },
+      { "name": "Camp Trippalindee", "why": "Rooftop bar with a camp theme, craft cocktails.", "action": "keep_existing" },
+      { "name": "Moon Bar", "address": "328 W Gorham St, Madison, WI 53703", "google_rating": 4.5, "why": "Local favorite in downtown Madison with welcoming atmosphere.", "action": "keep_existing" },
+      { "name": "Jay's Bar", "address": "406 N Frances St, Madison, WI 53703", "google_rating": 4.0, "why": "Must-try bar in downtown Madison.", "action": "add_new" },
+      { "name": "The Cardinal Bar", "why": "Historic bar with a dance floor, live music, diverse crowd.", "action": "keep_existing" },
+      { "name": "The Bar", "why": "Casual bar with a relaxed atmosphere, beer selection.", "action": "keep_existing" },
+      { "name": "Garver Lounge", "why": "Sophisticated lounge with craft cocktails and a refined atmosphere.", "action": "keep_existing" }
+    ],
+    "35_50": [
+      { "name": "The Great Dane Pub & Brewing Company", "address": "123 E Doty St, Madison, WI 53703", "google_rating": 4.3, "why": "Historic brewpub with house-made beers, elevated pub food.", "action": "keep_existing" },
+      { "name": "Dexter's Pub", "address": "301 North St, Madison, WI 53704", "google_rating": 4.5, "why": "Official Packers bar with a neighborhood pub vibe.", "action": "keep_existing" },
+      { "name": "Echo Tap & Grill", "address": "554 W Main St, Madison, WI 53703", "google_rating": 4.4, "why": "Official Packers bar with a casual atmosphere and solid food.", "action": "keep_existing" },
+      { "name": "Baldwin Street Grille", "address": "1304 E Washington Ave, Madison, WI 53703", "google_rating": 4.4, "why": "Official Liverpool FC supporters bar. British pub atmosphere.", "action": "add_new" },
+      { "name": "The Rigby Pub", "why": "British-inspired pub with a focus on craft beer, Scotch eggs.", "action": "keep_existing" },
+      { "name": "Vintage Spirits & Grill", "why": "Upscale bar and grill with craft cocktails, wine list.", "action": "keep_existing" },
+      { "name": "Northside Lounge", "why": "Neighborhood bar with a relaxed atmosphere, cheap drinks.", "action": "keep_existing" },
+      { "name": "Wilson's Bar & Grill", "why": "Casual neighborhood bar with a friendly atmosphere.", "action": "keep_existing" },
+      { "name": "Genna's Lounge", "why": "Historic bar with a classic atmosphere, cocktail selection.", "action": "keep_existing" },
+      { "name": "Settle Down Tavern", "why": "Relaxed tavern with craft beer, casual food.", "action": "keep_existing" }
+    ]
+  }
+}
