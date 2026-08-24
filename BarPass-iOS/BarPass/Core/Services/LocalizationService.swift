@@ -660,6 +660,10 @@ final class L10n: ObservableObject {
             "greek.status.active": "Activo", "greek.status.suspended": "Suspendido", "greek.status.inactive": "Inactivo",
             "greek.status.historical": "Histórico", "greek.status.unknown": "Sin confirmar",
             "greek.profile.title": "Universidad", "greek.profile.noneHint": "Sin afiliación — tocá para elegir",
+            "checkin.here": "Estoy acá", "checkin.leave": "Salir",
+            "checkin.error.birthdate": "Necesitamos tu fecha de nacimiento para el check-in.",
+            "checkin.error.underage": "Tenés que ser mayor de 18 para el check-in.",
+            "checkin.error.generic": "No se pudo hacer el check-in. Probá de nuevo.",
         ],
         .en: [
             "venue.crowd.empty": "Empty", "venue.crowd.chill": "Chill", "venue.crowd.moderate": "Moderate", "venue.crowd.lively": "Lively", "venue.crowd.packed": "Packed", "venue.crowd.max": "Slammed", "venue.crowd.na": "N/A",
@@ -1276,6 +1280,10 @@ final class L10n: ObservableObject {
             "greek.status.active": "Active", "greek.status.suspended": "Suspended", "greek.status.inactive": "Inactive",
             "greek.status.historical": "Historical", "greek.status.unknown": "Unconfirmed",
             "greek.profile.title": "University", "greek.profile.noneHint": "No affiliation — tap to choose",
+            "checkin.here": "I'm here", "checkin.leave": "Leave",
+            "checkin.error.birthdate": "We need your date of birth for check-in.",
+            "checkin.error.underage": "You must be 18+ to check in.",
+            "checkin.error.generic": "Couldn't check in. Try again.",
         ],
         .pt: [
             "venue.crowd.empty": "Vazio", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Cheio", "venue.crowd.max": "Lotado", "venue.crowd.na": "N/D",
@@ -1892,6 +1900,10 @@ final class L10n: ObservableObject {
             "greek.status.active": "Ativo", "greek.status.suspended": "Suspenso", "greek.status.inactive": "Inativo",
             "greek.status.historical": "Histórico", "greek.status.unknown": "Não confirmado",
             "greek.profile.title": "Universidade", "greek.profile.noneHint": "Sem afiliação — toque para escolher",
+            "checkin.here": "Estou aqui", "checkin.leave": "Sair",
+            "checkin.error.birthdate": "Precisamos da sua data de nascimento para o check-in.",
+            "checkin.error.underage": "Você precisa ter 18+ anos para o check-in.",
+            "checkin.error.generic": "Não foi possível fazer o check-in. Tente de novo.",
         ],
     ]
 }

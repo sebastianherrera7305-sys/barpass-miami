@@ -163,6 +163,9 @@ struct VenueDetailView: View {
                 .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 20)
 
+            CheckInButton(venueId: venue.id)
+                .padding(.horizontal, BPSpacing.lg)
+
             if !goodToKnowChips.isEmpty {
                 goodToKnowSection
                     .padding(.horizontal, BPSpacing.lg)

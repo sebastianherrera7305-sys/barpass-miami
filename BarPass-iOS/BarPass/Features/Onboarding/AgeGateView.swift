@@ -61,6 +61,14 @@ struct AgeGateView: View {
                 BPHaptics.medium()
                 if AgeGateService.verify(dateOfBirth: dateOfBirth) {
                     BPHaptics.success()
+                    // Best-effort: The Grid's check_in_venue() needs a real
+                    // server-side birthdate (see the_grid.sql), but that's a
+                    // separate feature from this 21+ App Store gate. Never
+                    // block onVerified() on this — a signed-out/offline
+                    // session shouldn't trap the user on this screen. If it
+                    // fails silently, the Grid check-in RPC will surface
+                    // "birthdate required" then, not here.
+                    Task { try? await RepositoryDependencies.birthdate.setBirthdate(dateOfBirth) }
                     onVerified()
                 } else {
                     BPHaptics.error()
@@ -117,6 +125,16 @@ struct AgeGateView: View {
     }
 }
 
-#Preview {
+// AgeGateView reads AppState, so the canvas traps without it injected.
+#Preview("Dark") {
     AgeGateView(onVerified: {})
+        .environmentObject(AppState())
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Dynamic Type XXXL") {
+    AgeGateView(onVerified: {})
+        .environmentObject(AppState())
+        .preferredColorScheme(.dark)
+        .environment(\.dynamicTypeSize, .accessibility3)
 }
