@@ -63,6 +63,18 @@ struct VenueDetailView: View {
                     .offset(y: -stretch)
             }
             .frame(height: 300)
+            // TestFlight feedback: "the app has a middle space inside of
+            // the cards of the venues where it has a background and it
+            // gets everything messed up" — if `minY`/`stretch` above is
+            // even briefly out of sync with the real scroll offset (a
+            // known GeometryReader-in-ScrollView timing gap right after a
+            // push/sheet transition), the offset can walk the photo's
+            // bottom edge past this 300pt slot before layout settles. The
+            // inner .clipped() only bounds the image to its OWN (taller,
+            // 300+stretch) frame, not to this outer one — this second
+            // .clipped() is the hard stop that guarantees nothing ever
+            // bleeds into contentSection below, regardless of that timing.
+            .clipped()
 
             LinearGradient(
                 colors: [.clear, .black],
