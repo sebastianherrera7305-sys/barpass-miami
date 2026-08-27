@@ -370,7 +370,7 @@ struct TableReservationView: View {
             paymentError = nil
             let svc = ApplePayService()
             svc.requestPayment(amount: Decimal(selectedPackage.deposit),
-                               label: "Mesa VIP · \(venueName)") { stripePaymentMethodId in
+                               label: "\(l10n.t("table.applePay.label")) · \(venueName)") { stripePaymentMethodId in
                 let json = try await APIClient.createApplePayTransaction(
                     idToken:    session.accessToken,
                     vendorId:   venueId,

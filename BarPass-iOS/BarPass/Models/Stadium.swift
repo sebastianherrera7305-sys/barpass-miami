@@ -10,6 +10,18 @@ struct Stadium: Identifiable, Codable, Hashable {
     let lat: Double?
     let lng: Double?
     let sourceURL: String
+    /// Real Ticketmaster static seatmap image for this venue (from a
+    /// current event's `seatmap.staticUrl` — the seating geometry is the
+    /// same venue-wide, so one event's image stands in for "the stadium's
+    /// map"). Nil until synced.
+    let seatmapURL: String?
+    /// Real photo + description, sourced the same way venues are (Google
+    /// Places) — never fabricated. Nil until backfilled; the detail view
+    /// falls back to the psychedelic background art when absent instead
+    /// of rendering nothing (TestFlight feedback: "doesn't show a picture
+    /// or description of the stadium").
+    let imageURL: String?
+    let description: String?
 }
 
 enum StadiumPOIType: String, Codable, CaseIterable {
@@ -55,6 +67,15 @@ struct StadiumPOI: Identifiable, Codable, Hashable {
     let sectionOrConcourse: String?
     let sourceURL: String
     let confidence: String
+
+    /// There's no per-POI description in the data yet (stadium_pois has no
+    /// such column) — falling back to type + level keeps every card
+    /// showing *something* instead of just a bare name, which read as
+    /// "broken" to testers (TestFlight feedback: "Bars/cards without
+    /// info"). Real per-POI descriptions can replace this once sourced.
+    var subtitle: String {
+        sectionOrConcourse ?? "\(type.label) · \(levelName)"
+    }
 }
 
 /// Real events from Ticketmaster Discovery API (sync-stadium-events.ts) —

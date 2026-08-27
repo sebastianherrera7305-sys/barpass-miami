@@ -18,3 +18,12 @@ credentials*
 seed-venues.js
 !barpass-map.html
 .vercel/
+
+# App Store Connect API private keys — never commit these
+*.p8
+AuthKey_*.p8
+
+# Xcode build output (regenerated, can be gigabytes)
+BarPass-iOS/build/
+BarPass-iOS/build-device/
+BarPass-iOS/build-device-check/

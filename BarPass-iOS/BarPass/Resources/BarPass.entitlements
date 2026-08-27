@@ -16,5 +16,12 @@
 	<array>
 		<string>merchant.com.barpass.app</string>
 	</array>
+	<!-- Shared with BarPassWidget (Widget Extension target) — lets
+	     GoHomeStore write the saved home coordinates somewhere the widget
+	     process can read without hitting Supabase/Keychain itself. -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.sebastian.barpass</string>
+	</array>
 </dict>
 </plist>

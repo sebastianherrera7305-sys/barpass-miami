@@ -22,7 +22,25 @@ struct AgeReportSheet: View {
 
     var body: some View {
         VStack(spacing: BPSpacing.lg) {
-            Capsule().fill(Color.bpBorder).frame(width: 36, height: 4).padding(.top, 8)
+            HStack {
+                Spacer()
+                // Explicit, always-visible way out — the drag indicator
+                // alone wasn't enough (TestFlight feedback: "doesn't let
+                // me leave this bottom sheet"), and "Skip" below reads as
+                // low-priority text, not an exit.
+                Button {
+                    onDismiss()
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.bpScaled(20))
+                        .foregroundStyle(Color.bpTextSecondary)
+                }
+                .buttonStyle(.plain)
+                .padding(.trailing, BPSpacing.lg)
+                .bpAccessibility(label: l10n.t("ageReport.skip"), isButton: true)
+            }
+            .padding(.top, 8)
 
             Text(l10n.t("ageReport.title"))
                 .font(.bpTitle2())
@@ -68,6 +86,7 @@ struct AgeReportSheet: View {
         .padding(.bottom, BPSpacing.lg)
         .background(Color.bpSurface)
         .presentationDetents([.height(280)])
+        .presentationDragIndicator(.visible)
     }
 
     private func submit(_ bracket: String) {

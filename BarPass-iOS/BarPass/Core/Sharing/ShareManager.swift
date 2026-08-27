@@ -80,6 +80,12 @@ enum ShareManager {
         return Content(text: text, url: nil, cardImage: nil)
     }
 
+    static func shareNightPlan(_ plan: NightPlan) -> Content {
+        let stopsList = plan.stops.map { "\($0.time) — \($0.venueName)" }.joined(separator: "\n")
+        let text = String(format: L10n.shared.t("plan.shareText"), plan.title, stopsList)
+        return Content(text: text, url: nil, cardImage: nil)
+    }
+
     /// Infrastructure only — no referral tracking/points/UI yet (that's a
     /// separate, not-yet-designed product decision). Produces a shareable
     /// card + link today so the plumbing exists ahead of that design.

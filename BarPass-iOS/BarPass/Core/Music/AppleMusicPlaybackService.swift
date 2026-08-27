@@ -12,10 +12,36 @@ enum AppleMusicPlaybackService {
     private static let minimumQueueLength = 15
 
     private static let cacheIDsKey = "bp_music_intro_song_ids"
-    private static let cacheDateKey = "bp_music_intro_cache_date"
-    // El álbum no cambia — una semana de cache evita pegarle al catálogo
-    // de Apple Music en cada apertura de la app para el mismo resultado.
+    private static let cacheWeekKey = "bp_music_intro_cache_week"
+    // Cache TTL matches the rotation period — a week of cache avoids
+    // hitting the Apple Music catalog on every app open for the same
+    // already-resolved result, but the week-stamped key (see
+    // currentChartWeekID) is what actually forces a refetch at the cutover,
+    // not this TTL alone.
     private static let cacheTTL: TimeInterval = 60 * 60 * 24 * 7
+
+    /// Explicit product requirement: the algorithmic "most played" chart
+    /// surfaced tracks the user didn't recognize. This is real, named
+    /// house/dance artists — the four requested directly (Prospa, Hugel,
+    /// Cloonee, John Summit) plus other widely-recognized names in the
+    /// same lane, so the queue is built from real catalog search per
+    /// artist rather than a black-box chart.
+    private static let recognizedArtists: [String] = [
+        "Prospa", "Hugel", "Cloonee", "John Summit",
+        "Fisher", "Dom Dolla", "Chris Lake", "David Guetta",
+    ]
+
+    /// A stable identifier for "this chart week" that flips at Sunday
+    /// 00:00 in a fixed calendar, not the device's locale-dependent
+    /// first-weekday — Calendar.current.component(.weekOfYear) would
+    /// otherwise roll over on Monday for most non-US locales.
+    private static var currentChartWeekID: String {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC") ?? .current
+        cal.firstWeekday = 1 // Sunday
+        let comps = cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
+        return "\(comps.yearForWeekOfYear ?? 0)-W\(comps.weekOfYear ?? 0)"
+    }
 
     static func playTopSongs() async {
         guard AutoplayPreference.isEnabled else {
@@ -36,8 +62,21 @@ enum AppleMusicPlaybackService {
         configureAudioSession()
 
         do {
-            var songs = try await freeYourMindFromLoveSongs()
-            log("Free Your Mind desde 'Love Songs': \(songs.count) canciones")
+            // The chart fetch is caught on its own — an invalid genre ID or
+            // a transient Apple Music catalog error here used to abort the
+            // whole function (both the chart AND the fallback below live
+            // under one `try`), leaving nothing playing at all. Now a
+            // chart failure just falls straight through to the same
+            // catalog-search fallback that already exists for "not enough
+            // songs", instead of skipping it.
+            var songs: [Song]
+            do {
+                songs = try await weeklyHouseChart()
+                log("chart house de la semana: \(songs.count) canciones")
+            } catch {
+                log("chart house falló (\(error)) — cae al fallback de catálogo")
+                songs = []
+            }
 
             if songs.count < minimumQueueLength {
                 let fill = try await catalogFillSongs(excluding: songs)
@@ -57,8 +96,9 @@ enum AppleMusicPlaybackService {
             }
 
             player.queue = ApplicationMusicPlayer.Queue(for: songs)
-            // Shuffle apagado a propósito: el álbum tiene que sonar en su
-            // orden real, no mezclado.
+            // A chart is already a ranked list (#1 most played first) —
+            // play it in that order, same reasoning the old fixed-album
+            // version had, just no longer tied to one specific album.
             player.state.shuffleMode = .off
             try await player.play()
             log("play() OK — \(songs.count) canciones en cola")
@@ -67,52 +107,47 @@ enum AppleMusicPlaybackService {
         }
     }
 
-    /// Busca el álbum "Free Your Mind" de Prospa en el catálogo de Apple
-    /// Music y arma la cola en orden real de álbum, arrancando en el track
-    /// "Love Songs" (no es un mood genérico — es el nombre del track).
-    /// Cachea los IDs resueltos: sin esto, cada apertura de la app hacía una
-    /// búsqueda nueva al catálogo para un resultado que siempre es el mismo.
-    private static func freeYourMindFromLoveSongs() async throws -> [Song] {
+    /// Builds the queue from real, named house/dance artists (see
+    /// `recognizedArtists`) — a couple of real songs per artist via direct
+    /// catalog search, not an algorithmic chart. Refetches whenever
+    /// `currentChartWeekID` rolls over (Sunday 00:00 UTC), so the queue
+    /// still rotates week to week without depending on Apple's chart
+    /// picking anything the user actually recognizes.
+    private static func weeklyHouseChart() async throws -> [Song] {
         if let cached = try await cachedIntroSongs() {
-            log("intro desde cache: \(cached.count) canciones")
+            log("cola de artistas desde cache: \(cached.count) canciones")
             return cached
         }
 
-        var albumRequest = MusicCatalogSearchRequest(term: "Prospa Free Your Mind", types: [Album.self])
-        albumRequest.limit = 1
-        let albumResponse = try await albumRequest.response()
-        guard let album = albumResponse.albums.first else {
-            log("álbum 'Free Your Mind' de Prospa no encontrado en el catálogo")
-            return []
-        }
-
-        let detailedAlbum = try await album.with(.tracks)
-        guard let tracks = detailedAlbum.tracks else { return [] }
-
-        let allSongs = tracks.compactMap { track -> Song? in
-            if case .song(let song) = track { return song }
-            return nil
-        }
-        let songs: [Song]
-        if let startIndex = allSongs.firstIndex(where: { $0.title.localizedCaseInsensitiveContains("Love Songs") }) {
-            songs = Array(allSongs[startIndex...])
-        } else {
-            log("track 'Love Songs' no encontrado en el álbum — arranca desde el track 1")
-            songs = allSongs
+        var songs: [Song] = []
+        var seenIDs = Set<MusicItemID>()
+        for artist in recognizedArtists {
+            var request = MusicCatalogSearchRequest(term: artist, types: [Song.self])
+            request.limit = 3
+            guard let response = try? await request.response() else { continue }
+            for song in response.songs where !seenIDs.contains(song.id) {
+                seenIDs.insert(song.id)
+                songs.append(song)
+            }
         }
 
         if !songs.isEmpty {
-            cacheSongIDs(songs.map(\.id.rawValue))
+            cacheSongIDs(songs.map { $0.id.rawValue })
+        } else {
+            log("ningún artista reconocido devolvió resultados — cae al fallback de género")
         }
         return songs
     }
 
     /// Resuelve el cache de IDs a Song reales, preservando el orden guardado
     /// (la respuesta de MusicCatalogResourceRequest no garantiza orden).
+    /// Válido solo mientras siga siendo la misma semana de chart — el
+    /// cambio de semana invalida el cache aunque el TTL de 7 días todavía
+    /// no haya vencido en el reloj real (evita quedar un día atrás del
+    /// corte del domingo).
     private static func cachedIntroSongs() async throws -> [Song]? {
         let defaults = UserDefaults.standard
-        guard let cachedDate = defaults.object(forKey: cacheDateKey) as? Date,
-              Date().timeIntervalSince(cachedDate) < cacheTTL,
+        guard defaults.string(forKey: cacheWeekKey) == currentChartWeekID,
               let ids = defaults.stringArray(forKey: cacheIDsKey), !ids.isEmpty else {
             return nil
         }
@@ -126,7 +161,7 @@ enum AppleMusicPlaybackService {
 
     private static func cacheSongIDs(_ ids: [String]) {
         UserDefaults.standard.set(ids, forKey: cacheIDsKey)
-        UserDefaults.standard.set(Date(), forKey: cacheDateKey)
+        UserDefaults.standard.set(currentChartWeekID, forKey: cacheWeekKey)
     }
 
     /// Sin esto la sesión queda en `.soloAmbient` (default de iOS cuando
@@ -205,7 +240,7 @@ enum AppleMusicPlaybackService {
     /// usuario (o EDM si todavía no hay Music Passport) — sin esto, cuentas
     /// con poco historial de canciones individuales sonaban solo 1-2 temas.
     private static func catalogFillSongs(excluding existing: [Song]) async throws -> [Song] {
-        let genre = MusicProfileStore.shared.passport?.topGenres.first?.genre ?? "EDM"
+        let genre = MusicProfileStore.shared.passport?.topGenres.first?.genre ?? "House"
         var request = MusicCatalogSearchRequest(term: genre, types: [Song.self])
         request.limit = 25
         let response = try await request.response()

@@ -185,13 +185,13 @@ struct ActiveTicketView: View {
 
     private var detailRows: some View {
         VStack(spacing: 0) {
-            row(icon: "mappin.circle.fill", label: "Venue",    value: ticket.venueName)
+            row(icon: "mappin.circle.fill", label: l10n.t("ticket.venue"), value: ticket.venueName)
             Divider().background(Color.bpInk.opacity(0.07)).padding(.horizontal, 16)
-            row(icon: "calendar",           label: "Fecha",    value: ticket.formattedDate)
+            row(icon: "calendar",           label: l10n.t("ticket.date"), value: ticket.formattedDate)
             Divider().background(Color.bpInk.opacity(0.07)).padding(.horizontal, 16)
-            row(icon: "creditcard.fill",    label: "Pago",     value: ticket.payMethod)
+            row(icon: "creditcard.fill",    label: l10n.t("ticket.payment"), value: ticket.payMethod)
             Divider().background(Color.bpInk.opacity(0.07)).padding(.horizontal, 16)
-            row(icon: "dollarsign.circle.fill", label: "Total",
+            row(icon: "dollarsign.circle.fill", label: l10n.t("ticket.total"),
                 value: String(format: "$%.2f", ticket.amount))
         }
         .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))

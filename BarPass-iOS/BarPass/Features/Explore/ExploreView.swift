@@ -12,6 +12,8 @@ struct ExploreView: View {
     @State private var mapLoadTriggered = false
     @State private var cameraPosition: MapCameraPosition = .region(ExploreView.defaultRegion)
     @State private var visibleSpan: CLLocationDegrees = 0.08
+    @State private var stadiums: [Stadium] = []
+    @State private var selectedStadium: Stadium? = nil
 
     static let defaultRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 25.78, longitude: -80.19),
@@ -178,14 +180,21 @@ struct ExploreView: View {
                         .padding(.horizontal, 16)
                         .padding(.bottom, 86)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
+                } else if !showList, let stadium = selectedStadium {
+                    stadiumCallout(stadium)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 86)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
         }
         .animation(.spring(response: 0.35), value: selectedVenue?.id)
+        .animation(.spring(response: 0.35), value: selectedStadium?.id)
         .animation(.easeInOut(duration: 0.25), value: showList)
         .onAppear {
             mapLoadTriggered = true
             recenterOnCurrentCity()
+            Task { stadiums = (try? await RepositoryDependencies.stadium.allStadiums()) ?? [] }
         }
         .onChange(of: venueStore.selectedCity) { _, _ in recenterOnCurrentCity() }
     }
@@ -255,6 +264,7 @@ struct ExploreView: View {
                             .onTapGesture {
                                 BPHaptics.light()
                                 withAnimation(.spring(response: 0.3)) {
+                                    selectedStadium = nil
                                     selectedVenue = selectedVenue?.id == venue.id ? nil : venue
                                 }
                             }
@@ -284,6 +294,22 @@ struct ExploreView: View {
                         }
                 }
                 .annotationTitles(.hidden)
+            }
+
+            ForEach(stadiums) { stadium in
+                if let lat = stadium.lat, let lng = stadium.lng {
+                    Annotation(stadium.name, coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lng)) {
+                        stadiumMarker(stadium)
+                            .onTapGesture {
+                                BPHaptics.light()
+                                withAnimation(.spring(response: 0.3)) {
+                                    selectedVenue = nil
+                                    selectedStadium = selectedStadium?.id == stadium.id ? nil : stadium
+                                }
+                            }
+                    }
+                    .annotationTitles(.hidden)
+                }
             }
         }
         .onMapCameraChange(frequency: .onEnd) { ctx in
@@ -381,6 +407,60 @@ struct ExploreView: View {
                 .font(.bpScaled(size * 0.44, weight: .semibold))
                 .foregroundStyle(Color.bpInk)
         }
+    }
+
+    /// Stadiums get their own marker style — bigger, distinct icon — since
+    /// they're not `BarPassVenue` rows and shouldn't blend into the regular
+    /// venue pins.
+    private func stadiumMarker(_ stadium: Stadium) -> some View {
+        let isSelected = selectedStadium?.id == stadium.id
+        let size: CGFloat = isSelected ? 46 : 36
+        return ZStack {
+            Circle().fill(Color.bpAmber)
+            Image(systemName: "sportscourt.fill")
+                .font(.bpScaled(size * 0.42, weight: .semibold))
+                .foregroundStyle(.black)
+        }
+        .frame(width: size, height: size)
+        .overlay(Circle().strokeBorder(Color.bpInk.opacity(0.8), lineWidth: isSelected ? 2.5 : 1.5))
+        .shadow(color: isSelected ? Color.bpAmber.opacity(0.4) : .black.opacity(0.35), radius: isSelected ? 8 : 3, y: 1)
+        .bpAccessibility(label: stadium.name, isButton: true)
+    }
+
+    private func stadiumCallout(_ stadium: Stadium) -> some View {
+        NavigationLink(destination: StadiumDetailView(stadium: stadium)) {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle().fill(Color.bpAmber)
+                    Image(systemName: "sportscourt.fill")
+                        .font(.bpScaled(16, weight: .semibold))
+                        .foregroundStyle(.black)
+                }
+                .frame(width: 34, height: 34)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(stadium.name)
+                        .font(.bpScaled(15, weight: .bold))
+                        .foregroundStyle(Color.bpInk)
+                    Text(stadium.address)
+                        .font(.bpScaled(11))
+                        .foregroundStyle(Color.bpTextSecondary)
+                        .lineLimit(1)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.bpScaled(10, weight: .semibold))
+                    .foregroundStyle(Color.bpTextTertiary)
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: BPRadius.lg)
+                    .fill(Color.bpCardBackground.opacity(0.97))
+                    .shadow(color: .black.opacity(0.4), radius: 16, y: 4)
+            )
+            .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpAmber.opacity(0.2), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .bpAccessibility(label: stadium.name, isButton: true)
     }
 
     private static func markerIcon(_ type: VenueType) -> String {

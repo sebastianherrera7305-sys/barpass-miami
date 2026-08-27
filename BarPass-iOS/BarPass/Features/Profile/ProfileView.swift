@@ -16,6 +16,7 @@ struct ProfileView: View {
     @State private var affiliatedUniversity: University?
     @State private var affiliatedChapter: GreekChapter?
     @State private var showAffiliationPicker = false
+    @State private var showHomeAddress = false
 
     private var affiliationSubtitle: String {
         guard let uni = affiliatedUniversity else { return l10n.t("greek.profile.noneHint") }
@@ -170,6 +171,35 @@ struct ProfileView: View {
                     .buttonStyle(.plain)
                     .bpAccessibility(label: l10n.t("profile.passes.title"), hint: l10n.t("profile.passes.hint"), isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
+
+                    // Dirección de casa (botón "Ir a casa")
+                    Button {
+                        BPHaptics.light()
+                        showHomeAddress = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text("🏠").font(.bpScaled(22))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(l10n.t("profile.homeAddress.title"))
+                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
+                                Text(l10n.t("profile.homeAddress.subtitle"))
+                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.bpScaled(13, weight: .semibold))
+                                .foregroundStyle(Color.bpAmber)
+                        }
+                        .padding(16)
+                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
+                    }
+                    .buttonStyle(.plain)
+                    .bpAccessibility(label: l10n.t("profile.homeAddress.title"), hint: l10n.t("profile.homeAddress.hint"), isButton: true)
+                    .padding(.horizontal, BPSpacing.lg)
+                    .sheet(isPresented: $showHomeAddress) {
+                        HomeAddressSettingsView()
+                    }
 
                     // Juegos y misiones
                     Button {

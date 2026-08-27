@@ -9,7 +9,7 @@ protocol StadiumRepository: Sendable {
 final actor SupabaseStadiumRepository: StadiumRepository {
     private static let supabaseURL = SupabaseConfig.url.absoluteString
     private static let anonKey = SupabaseConfig.anonKey
-    private static let stadiumColumns = "id,name,address,lat,lng,source_url"
+    private static let stadiumColumns = "id,name,address,lat,lng,source_url,seatmap_url,image_url,description"
     private static let poiColumns = "id,stadium_id,level_name,level_order,name,poi_type,section_or_concourse,source_url,confidence"
     private static let eventColumns = "id,stadium_id,name,starts_at,ticket_url,image_url"
 
@@ -37,7 +37,7 @@ final actor SupabaseStadiumRepository: StadiumRepository {
             URLQueryItem(name: "select", value: Self.stadiumColumns),
             URLQueryItem(name: "order", value: "name.asc"),
         ])
-        return rows.map { Stadium(id: $0.id, name: $0.name, address: $0.address, lat: $0.lat, lng: $0.lng, sourceURL: $0.sourceUrl) }
+        return rows.map { Stadium(id: $0.id, name: $0.name, address: $0.address, lat: $0.lat, lng: $0.lng, sourceURL: $0.sourceUrl, seatmapURL: $0.seatmapUrl, imageURL: $0.imageUrl, description: $0.description) }
     }
 
     func pois(stadiumId: String) async throws -> [StadiumPOI] {
@@ -68,7 +68,8 @@ final actor SupabaseStadiumRepository: StadiumRepository {
 }
 
 private struct StadiumRow: Decodable {
-    let id: String, name: String, address: String, lat: Double?, lng: Double?, sourceUrl: String
+    let id: String, name: String, address: String, lat: Double?, lng: Double?, sourceUrl: String, seatmapUrl: String?
+    let imageUrl: String?, description: String?
 }
 
 private struct POIRow: Decodable {

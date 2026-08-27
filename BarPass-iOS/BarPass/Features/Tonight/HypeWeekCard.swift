@@ -119,6 +119,16 @@ struct HypeWeekCard: View {
                 Text(String(format: p.newDiscoveries.count == 1 ? l10n.t("hype.newDiscoveries.singular") : l10n.t("hype.newDiscoveries.plural"), p.newDiscoveries.count))
                     .font(.bpScaled(10, weight: .semibold)).foregroundStyle(Color.bpGreen)
             }
+
+            // Honest source + timeframe attribution — Spotify's API only
+            // offers a rolling ~4-week "top artists" window (no real
+            // per-day recency), while Apple Music's is genuinely recent
+            // plays. Showing both the source and its real timeframe avoids
+            // implying "this week" when the underlying data isn't that.
+            if !p.sources.isEmpty {
+                Text(p.sources.map { $0 == .spotify ? l10n.t("hype.sourceLabel.spotify") : l10n.t("hype.sourceLabel.appleMusic") }.joined(separator: " · "))
+                    .font(.bpScaled(9)).foregroundStyle(Color.bpTextTertiary)
+            }
         }
         .padding(14)
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))

@@ -1,12 +1,29 @@
 import SwiftUI
+import CoreLocation
 
 @MainActor
 final class CheckInStore: ObservableObject {
+    /// Shared across the app — RootView's "go home" button needs to know
+    /// whether the user is checked in anywhere, regardless of which venue's
+    /// CheckInButton last touched this state. Previously each
+    /// VenueDetailView owned its own private instance, so navigating
+    /// between two venues' detail screens showed stale/inconsistent state
+    /// until each independently reloaded.
+    static let shared = CheckInStore()
+
     @Published private(set) var activeCheckin: ActiveCheckin?
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
 
     private let repository: any VenueCheckinRepository
+    private let locationService = LocationService()
+
+    /// A real GPS check at the moment of tap — not "Always" background
+    /// location, so it doesn't carry the App Store review scrutiny a
+    /// geofencing feature would. Explicit product requirement: without
+    /// this, anyone could check in from anywhere, which defeats the whole
+    /// point of the Grid (real presence, not self-reported).
+    static let maxCheckInDistanceMeters: Double = 50
 
     init(repository: any VenueCheckinRepository = RepositoryDependencies.venueCheckin) {
         self.repository = repository
@@ -20,9 +37,26 @@ final class CheckInStore: ObservableObject {
         activeCheckin?.venueId == venueId
     }
 
-    func checkIn(venueId: String, tripId: String?) async {
+    func checkIn(venueId: String, tripId: String?, venueLat: Double, venueLng: Double) async {
         isLoading = true
         errorMessage = nil
+
+        guard let userLocation = await locationService.requestOnce() else {
+            errorMessage = L10n.shared.t("checkin.error.locationRequired")
+            BPHaptics.error()
+            isLoading = false
+            return
+        }
+        let venueLocation = CLLocation(latitude: venueLat, longitude: venueLng)
+        let distance = CLLocation(latitude: userLocation.latitude, longitude: userLocation.longitude)
+            .distance(from: venueLocation)
+        guard distance <= Self.maxCheckInDistanceMeters else {
+            errorMessage = L10n.shared.t("checkin.error.tooFar")
+            BPHaptics.error()
+            isLoading = false
+            return
+        }
+
         do {
             _ = try await repository.checkIn(venueId: venueId, tripId: tripId)
             await load()
@@ -71,9 +105,11 @@ final class CheckInStore: ObservableObject {
 struct CheckInButton: View {
     let venueId: String
     let venueName: String
+    let venueLat: Double
+    let venueLng: Double
     var tripId: String? = nil
 
-    @StateObject private var store = CheckInStore()
+    @ObservedObject private var store = CheckInStore.shared
     @ObservedObject private var l10n = L10n.shared
 
     private var checkedIn: Bool { store.isCheckedIn(at: venueId) }
@@ -84,7 +120,7 @@ struct CheckInButton: View {
                 BPHaptics.light()
                 Task {
                     if checkedIn { await store.checkOut() }
-                    else { await store.checkIn(venueId: venueId, tripId: tripId) }
+                    else { await store.checkIn(venueId: venueId, tripId: tripId, venueLat: venueLat, venueLng: venueLng) }
                 }
             } label: {
                 HStack(spacing: 8) {

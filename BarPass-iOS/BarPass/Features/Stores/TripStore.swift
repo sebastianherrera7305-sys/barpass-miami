@@ -54,6 +54,7 @@ final class TripStore: ObservableObject {
 
     func loadTrips() async {
         isLoading = true
+        loadError = nil
         let repo = repository
         do {
             trips = try await repo.getTrips()
@@ -71,6 +72,7 @@ final class TripStore: ObservableObject {
         do {
             try await repo.saveTrip(t)
             trips.insert(t, at: 0)
+            loadError = nil
         } catch {
             loadError = error.localizedDescription
         }

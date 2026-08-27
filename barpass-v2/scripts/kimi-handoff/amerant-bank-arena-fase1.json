@@ -1,0 +1,101 @@
+{
+  "stadium": "Amerant Bank Arena",
+  "address": "1 Panther Parkway, Sunrise, FL 33323",
+  "capacity": {
+    "hockey": 19250,
+    "concerts": 23000,
+    "basketball": 20737
+  },
+  "levels": [
+    {
+      "name": "Plaza Level (100 Level)",
+      "sections_approx": 34,
+      "sections_list": "101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134",
+      "entrances": ["Gate 1 (North)", "Gate 2 (East)", "Gate 3 (South)", "Gate 4 (West)", "VIP Entrance", "Suite Entrance"],
+      "pois": [
+        {"name": "Funky Buddha Brewery Tap Room", "type": "bar", "section_or_concourse": "Main entrance, inside front doors", "source_url": "https://www.amerantbankarena.com/plan-your-visit/dine-with-us", "confidence": "verified"},
+        {"name": "VooDoo Ranger Craft Beer & Bar", "type": "bar", "section_or_concourse": "Section 114-115 area", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Jameson Crossbar", "type": "bar", "section_or_concourse": "Section 119", "source_url": "https://www.amerantbankarena.com/plan-your-visit/dine-with-us", "confidence": "verified"},
+        {"name": "Patrón Patio", "type": "bar", "section_or_concourse": "Plaza Level, outdoor space", "source_url": "https://www.amerantbankarena.com/plan-your-visit/dine-with-us", "confidence": "verified"},
+        {"name": "Yuengling Flight Deck & Bar", "type": "bar", "section_or_concourse": "Plaza Level, near Patrón Patio", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Coors Light Cold Zone", "type": "bar", "section_or_concourse": "Above Pantherland", "source_url": "https://www.nhl.com/panthers/arena/concessions", "confidence": "verified"},
+        {"name": "New Patrón Bar", "type": "bar", "section_or_concourse": "Section 114 (new 2025-26)", "source_url": "https://www.nhl.com/panthers/news/florida-panthers-announce-new-enhanced-food-and-beverage-at-amerant-bank-arena-for-2025-26-season", "confidence": "verified"},
+        {"name": "New Southside Bar", "type": "bar", "section_or_concourse": "Section 108 (new 2025-26)", "source_url": "https://www.nhl.com/panthers/news/florida-panthers-announce-new-enhanced-food-and-beverage-at-amerant-bank-arena-for-2025-26-season", "confidence": "verified"},
+        {"name": "Surfside Sundeck", "type": "bar", "section_or_concourse": "Plaza Level, beach-inspired outdoor space", "source_url": "https://www.amerantbankarena.com/plan-your-visit/dine-with-us", "confidence": "verified"},
+        {"name": "Cats Cantina", "type": "bar", "section_or_concourse": "Plaza Level", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Coca-Cola Food Court #1", "type": "concession", "section_or_concourse": "Plaza Level", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Coca-Cola Food Court #2", "type": "concession", "section_or_concourse": "Plaza Level", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Coca-Cola Food Court #3", "type": "concession", "section_or_concourse": "Plaza Level", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Castaway Coffee", "type": "concession", "section_or_concourse": "Section 128", "source_url": "https://www.nhl.com/panthers/arena/concessions", "confidence": "verified"},
+        {"name": "Lime Fresh", "type": "concession", "section_or_concourse": "Section 127", "source_url": "https://www.nhl.com/panthers/arena/concessions", "confidence": "verified"},
+        {"name": "Mister Softee Cart", "type": "concession", "section_or_concourse": "Section 112, 124", "source_url": "https://www.nhl.com/panthers/arena/concessions", "confidence": "verified"},
+        {"name": "Pasta Cart", "type": "concession", "section_or_concourse": "Section 113", "source_url": "https://www.nhl.com/panthers/arena/concessions", "confidence": "verified"},
+        {"name": "Stoner's Pizza", "type": "concession", "section_or_concourse": "Stand 115", "source_url": "https://www.nhl.com/panthers/arena/concessions", "confidence": "verified"},
+        {"name": "Kosher Korner", "type": "concession", "section_or_concourse": "Outside Section 114", "source_url": "https://www.nhl.com/panthers/arena/concessions", "confidence": "verified"},
+        {"name": "Grab N Go", "type": "concession", "section_or_concourse": "Sections 100, 126", "source_url": "https://www.nhl.com/panthers/arena/concessions", "confidence": "verified"},
+        {"name": "Pantherland Retail", "type": "merch", "section_or_concourse": "Plaza Level", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Guest Services", "type": "guest_services", "section_or_concourse": "Plaza Level", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "First Aid", "type": "first_aid", "section_or_concourse": "Plaza Level", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "ATMs", "type": "other", "section_or_concourse": "Plaza Level", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "Elevators (ADA)", "type": "elevator", "section_or_concourse": "All sides", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "Family Restrooms", "type": "restroom", "section_or_concourse": "Plaza Level", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"}
+      ]
+    },
+    {
+      "name": "Mezzanine Level (200 Level / Club Level)",
+      "sections_approx": 35,
+      "sections_list": "CL 01-CL 35 (Club Level suites), 200-level general",
+      "entrances": ["Access via Plaza Level + escalators/elevators", "Club Level private entrance"],
+      "pois": [
+        {"name": "Champions Club (formerly Club Stoli)", "type": "bar", "section_or_concourse": "Club Level, rotating smash burgers", "source_url": "https://www.nhl.com/panthers/news/florida-panthers-announce-new-enhanced-food-and-beverage-at-amerant-bank-arena-for-2025-26-season", "confidence": "verified"},
+        {"name": "Club Lexus", "type": "bar", "section_or_concourse": "Club Level, premium seating area", "source_url": "https://www.seatgeek.com/venues/amerant-bank-arena/seating-chart", "confidence": "verified"},
+        {"name": "Corner Club (Northeast)", "type": "bar", "section_or_concourse": "Club Level Northeast corner", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "Corner Club (Southeast)", "type": "bar", "section_or_concourse": "Club Level Southeast corner", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "Corner Club (Northwest)", "type": "bar", "section_or_concourse": "Club Level Northwest corner", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "Corner Club (Southwest)", "type": "bar", "section_or_concourse": "Club Level Southwest corner", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "Food Court #1", "type": "concession", "section_or_concourse": "Mezzanine Level", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Food Court #2", "type": "concession", "section_or_concourse": "Mezzanine Level", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Food Court #3", "type": "concession", "section_or_concourse": "Mezzanine Level", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Point of Purchase Kiosk #1", "type": "concession", "section_or_concourse": "Mezzanine Level", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Point of Purchase Kiosk #2", "type": "concession", "section_or_concourse": "Mezzanine Level", "source_url": "https://en.wikipedia.org/wiki/Amerant_Bank_Arena", "confidence": "verified"},
+        {"name": "Guest Services", "type": "guest_services", "section_or_concourse": "Mezzanine Level", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "Elevators (ADA)", "type": "elevator", "section_or_concourse": "All sides", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"}
+      ]
+    },
+    {
+      "name": "Upper Level (300 Level)",
+      "sections_approx": 34,
+      "sections_list": "301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334",
+      "entrances": ["Access via Plaza/Mezzanine Level + escalators/elevators", "Upper Level north escalator", "Upper Level south escalator"],
+      "pois": [
+        {"name": "Corona Sandbar", "type": "bar", "section_or_concourse": "Section 319 food court", "source_url": "https://www.nhl.com/panthers/news/florida-panthers-announce-new-enhanced-food-and-beverage-at-amerant-bank-arena-for-2025-26-season", "confidence": "verified"},
+        {"name": "Coors Banquet Bar", "type": "bar", "section_or_concourse": "Upper Level, north escalator entrance", "source_url": "https://www.nhl.com/panthers/news/florida-panthers-announce-new-enhanced-food-and-beverage-at-amerant-bank-arena-for-2025-26-season", "confidence": "verified"},
+        {"name": "Yuengling Bar", "type": "bar", "section_or_concourse": "Section 323", "source_url": "https://www.amerantbankarena.com/news/detail/florida-panthers-announce-new-food-and-beverage-locations-at-amerant-bank-arena", "confidence": "verified"},
+        {"name": "Conniption Gin Bar", "type": "bar", "section_or_concourse": "Section 306", "source_url": "https://www.amerantbankarena.com/news/detail/florida-panthers-announce-new-food-and-beverage-locations-at-amerant-bank-arena", "confidence": "verified"},
+        {"name": "Southside Bar", "type": "bar", "section_or_concourse": "Section 305", "source_url": "https://www.amerantbankarena.com/news/detail/florida-panthers-announce-new-food-and-beverage-locations-at-amerant-bank-arena", "confidence": "verified"},
+        {"name": "Surfside Bar", "type": "bar", "section_or_concourse": "Section 326", "source_url": "https://www.amerantbankarena.com/news/detail/florida-panthers-announce-new-food-and-beverage-locations-at-amerant-bank-arena", "confidence": "verified"},
+        {"name": "New Belgium Bar", "type": "bar", "section_or_concourse": "Section 305 food court", "source_url": "https://www.nhl.com/panthers/news/florida-panthers-announce-new-enhanced-food-and-beverage-at-amerant-bank-arena-for-2025-26-season", "confidence": "verified"},
+        {"name": "Yuengling Flight Bar", "type": "bar", "section_or_concourse": "Section 313 (new 2025-26)", "source_url": "https://www.nhl.com/panthers/news/florida-panthers-announce-new-enhanced-food-and-beverage-at-amerant-bank-arena-for-2025-26-season", "confidence": "verified"},
+        {"name": "Playa Bowls", "type": "concession", "section_or_concourse": "Section 318", "source_url": "https://www.amerantbankarena.com/news/detail/florida-panthers-announce-new-food-and-beverage-locations-at-amerant-bank-arena", "confidence": "verified"},
+        {"name": "Stoner's Pizza", "type": "concession", "section_or_concourse": "Section 318", "source_url": "https://www.amerantbankarena.com/news/detail/florida-panthers-announce-new-food-and-beverage-locations-at-amerant-bank-arena", "confidence": "verified"},
+        {"name": "Castaway Coffee", "type": "concession", "section_or_concourse": "Section 309", "source_url": "https://www.amerantbankarena.com/news/detail/florida-panthers-announce-new-food-and-beverage-locations-at-amerant-bank-arena", "confidence": "verified"},
+        {"name": "Mister Softee", "type": "concession", "section_or_concourse": "Upper Level (added October)", "source_url": "https://www.nhl.com/panthers/news/florida-panthers-announce-new-enhanced-food-and-beverage-at-amerant-bank-arena-for-2025-26-season", "confidence": "verified"},
+        {"name": "Pantherland Retail", "type": "merch", "section_or_concourse": "Upper Level, outside Section 121", "source_url": "https://www.nhl.com/panthers/arena/concessions", "confidence": "verified"},
+        {"name": "Guest Services", "type": "guest_services", "section_or_concourse": "Upper Level", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "Elevators (ADA)", "type": "elevator", "section_or_concourse": "All sides", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"}
+      ]
+    },
+    {
+      "name": "Suite Level",
+      "sections_approx": 70,
+      "sections_list": "Suites 1-70, Club Level suites CL 01-CL 35",
+      "entrances": ["Private suite entrances", "Elevators (all sides)"],
+      "pois": [
+        {"name": "Suite Level Lounges", "type": "bar", "section_or_concourse": "Suite Level concourse", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "In-Suite Catering", "type": "concession", "section_or_concourse": "All suites", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"},
+        {"name": "Elevators (ADA)", "type": "elevator", "section_or_concourse": "All sides", "source_url": "https://www.amerantbankarena.com/arena-info/a-z-guide", "confidence": "verified"}
+      ]
+    }
+  ],
+  "notes": "All concession stands operate on a cashless basis. The arena has 3 food courts on each of the two general seating levels (Plaza and Upper). Club Level has 3 food courts + 2 kiosks. New food and beverage locations were added for the 2025-26 season including several new bars on the Upper Level. The arena is fully equipped with accessible seating, elevators, ramps, and accessible parking. Family restrooms are available on all levels. The arena was formerly known as FLA Live Arena, BB&T Center, BankAtlantic Center, Office Depot Center, and National Car Rental Center."
+}

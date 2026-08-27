@@ -7,62 +7,60 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4DA58C700ED24E96B99C812B /* University.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4BB265491D4A7E864C255E /* University.swift */; };
-		A8A6CC267A4D4BA7B9F79410 /* GreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF98E2E20484C3784F7D613 /* GreekLifeRepository.swift */; };
-		523167EE1BE844FD9D19B062 /* SupabaseGreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */; };
-		7AC8FF76E544F30232283F9E /* ProfileAffiliationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */; };
-		E453AE48EC805F573934230C /* ChapterChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */; };
-		39E22AF8EE155DF7FC352FBA /* BirthdateRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */; };
-		6653697AF565692E1B2F279B /* VenueCheckinRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */; };
 		00425100532EF59250F240FB /* CheckInButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C778D8EC6D60879605EA40 /* CheckInButton.swift */; };
-		12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */; };
-		A74E2DF0019E057F9578D8AB /* Stadium.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9944A65EAC0560419D02323C /* Stadium.swift */; };
-		0F61EAC735A9E5FBEEAB0A7D /* StadiumRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162643D77BF970FAA2942A37 /* StadiumRepository.swift */; };
-		E59E448890306D0FDEF2CA7B /* StadiumDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */; };
-		90618CE0C09E2971F82286BE /* StadiumsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */; };
-		7BB3D4EC13FA314E51E72F88 /* AgeReportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */; };
+		650C9C3329EE0838B574E7CA /* BarPassWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0C24D42852CE5379B6D0C7 /* BarPassWidgetBundle.swift */; };
+		CB1F9606B527DA7A5AEA29A6 /* GoHomeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457BF8CA0B0C5084EECB9173 /* GoHomeWidget.swift */; };
+		271A1755648951074C082C7E /* BarPassWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2ACCCBF0A93A18BFF314E986 /* BarPassWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3B7C8E2A419DF605B8A61C90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6A2E4C1F8B9D7016C3E5F420 /* Assets.xcassets */; };
+		CE1FC5AD84F9D0E40E7E0898 /* HomeAddressRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F33027CA0AAAD146EE78DA8 /* HomeAddressRepository.swift */; };
+		FB27B50A40070142DA45268A /* GoHomeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBB1D2978A1CEFD5727A510 /* GoHomeButton.swift */; };
+		FD87EDAD40F4189CC21E49A7 /* HomeAddressSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8BF3CAAE71351BE1BD33DA /* HomeAddressSettingsView.swift */; };
 		0058F433096FE68B59B9F1EE /* UniversityIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */; };
-		A44EFDEC59D7784580819FD3 /* ChapterChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 792335E55D9363A086C6C79B /* ChapterChatView.swift */; };
-		C4DE0A26B74D4F5DBEE8F764 /* UniversityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F863CE708ACF44B3A96D654A /* UniversityListView.swift */; };
-		C577FAF109A04AFC978B06E4 /* UniversityDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */; };
-		75652242527C4F55B1D4A669 /* FraternityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1A059688C549A88BABFEBB /* FraternityListView.swift */; };
-		BF6F4AE4A5514E81881AF641 /* ComicHalftoneBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EAE48B333A4F13A08FC333 /* ComicHalftoneBackground.swift */; };
-		6D4D7F366C7647BABC1EB1EE /* TicketReceivedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF2C8BAFE3D48CC85B36E9B /* TicketReceivedView.swift */; };
-		D8865A1397474618901E5092 /* BarPassLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C91D8ECDD43B6AE34CEA4 /* BarPassLoadingView.swift */; };
-		1E6D56BE3ACE427DB3D6D36B /* CityMascotIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */; };
-		C79F0EA45A09405485E0FC4D /* CityIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656968298CED42FFBA49231A /* CityIdentity.swift */; };
-		BBD8BC9C0B40435594795411 /* SelectedCityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F35C2CF95EBF470399C6196E /* SelectedCityStore.swift */; };
-		7A79EB5E27ED4C56B9B794AF /* CityPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C5D564990D482ABF8A0AE5 /* CityPickerView.swift */; };
-		64BC73EEB97843B5A2ADC6DC /* LiquidGlassButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163C5D5B580F4F5CB17391D4 /* LiquidGlassButtonStyle.swift */; };
-		B253F7CB898A4C4581EBAF8A /* DotMatrixRevealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700D2E03703E4BDD9F730194 /* DotMatrixRevealView.swift */; };
 		01609A069EE22D5E5CDAF602 /* EventTicket.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5086AAE9CBD601116597BE /* EventTicket.swift */; };
 		045900B0B0374875CD4DF42D /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856638E27CF7A56A57535A80 /* KeychainServiceTests.swift */; };
+		0F61EAC735A9E5FBEEAB0A7D /* StadiumRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162643D77BF970FAA2942A37 /* StadiumRepository.swift */; };
+		12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */; };
 		1381C66FFDBA49BF7D938D04 /* HelpRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */; };
+		1E6D56BE3ACE427DB3D6D36B /* CityMascotIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */; };
 		1FA39B5B4E8C1190DC8683E2 /* HelpGuideStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75CA2DEEAE28B897B4F7BBE4 /* HelpGuideStoreTests.swift */; };
 		247910BD9F5933841A403D3A /* ExperienceScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B25282D5543608685CFCACF /* ExperienceScorerTests.swift */; };
 		25E4AAF65D8C63C40C3FD6BA /* PriceTierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C3DFC6C83DA2445542EDA60 /* PriceTierTests.swift */; };
 		2780C01B2FC36D2F946AA949 /* CollegeNightlifeCuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8573B32468D00824A6FB632 /* CollegeNightlifeCuration.swift */; };
 		2A0BC0EA1346366A63326961 /* CartItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8568370BB34F88D6D61CD5B2 /* CartItem.swift */; };
-		2FD00D94265BF1B464B7C912 /* DeepLinkRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F14D299B6CF077F28A63D3 /* DeepLinkRouterTests.swift */; };
+		2FD00D94265BF1B464B7C912 /* BarPassTests/DeepLinkRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F14D299B6CF077F28A63D3 /* BarPassTests/DeepLinkRouterTests.swift */; };
 		30D51A75A5B95FDE56B0FBB0 /* CartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECEA1F54438283EF27ED535E /* CartView.swift */; };
 		345EF762F181F05CFC873285 /* DeleteAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */; };
 		35C0EF5692CBE8A6227C1745 /* ShareManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 721FC3825B9184C905EB3EF0 /* ShareManager.swift */; };
+		39E22AF8EE155DF7FC352FBA /* BirthdateRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */; };
 		3B997A737FD4B9BDABFA9D2B /* ModelCodableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF31AC3E1809B2072DE6CA9C /* ModelCodableTests.swift */; };
 		40CD7131F382690E2735FB1C /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB6374016627134BFCC83D6 /* ShareCardView.swift */; };
 		498B1F017E9F0F4CE0F713B3 /* DiscoveryScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEB9D058BA5451D3579444B /* DiscoveryScorer.swift */; };
 		4AD4CD88E1366A6ACA462B08 /* CardPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */; };
+		4DA58C700ED24E96B99C812B /* University.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4BB265491D4A7E864C255E /* University.swift */; };
 		4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */; };
 		5088325E9E6E36AB9FB16A81 /* UserLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC72D4050837ED089C03C05 /* UserLocationProvider.swift */; };
-		58B304D6CCCBB61826E1F150 /* AuthTokenRefreshTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE939BD56D206ED35B073C2 /* AuthTokenRefreshTests.swift */; };
+		523167EE1BE844FD9D19B062 /* SupabaseGreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */; };
+		58B304D6CCCBB61826E1F150 /* BarPassTests/AuthTokenRefreshTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE939BD56D206ED35B073C2 /* BarPassTests/AuthTokenRefreshTests.swift */; };
+		64BC73EEB97843B5A2ADC6DC /* LiquidGlassButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163C5D5B580F4F5CB17391D4 /* LiquidGlassButtonStyle.swift */; };
+		6653697AF565692E1B2F279B /* VenueCheckinRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */; };
 		67538855A4392738D84D703B /* ReferralService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE1AEB039250C8DA5E41CE1 /* ReferralService.swift */; };
+		6D4D7F366C7647BABC1EB1EE /* TicketReceivedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF2C8BAFE3D48CC85B36E9B /* TicketReceivedView.swift */; };
 		6DB2BBFD9C2F38D3220A684A /* HypeEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3963062AE9823148A85E40 /* HypeEngineTests.swift */; };
+		75652242527C4F55B1D4A669 /* FraternityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1A059688C549A88BABFEBB /* FraternityListView.swift */; };
+		7A79EB5E27ED4C56B9B794AF /* CityPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C5D564990D482ABF8A0AE5 /* CityPickerView.swift */; };
+		7AC8FF76E544F30232283F9E /* ProfileAffiliationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */; };
 		7B6B03398BDEC6245300D80C /* SkipLinePass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */; };
+		7BB3D4EC13FA314E51E72F88 /* AgeReportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */; };
 		7D22239A32057DDDC1688082 /* ReservationConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA727DF04AFC4355197DDF95 /* ReservationConfirmView.swift */; };
 		7E5EB2897A93841F178719A9 /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4534C465198E6FF9A92B4C7D /* DeepLinkRouter.swift */; };
 		80A5280DA8DF78405C1E0A01 /* TableReservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA759652D778C1B0CD58E463 /* TableReservation.swift */; };
 		8A1DDE6046186E41A8635D09 /* ActivePassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0C516E6C74A66937CBB9B8F /* ActivePassView.swift */; };
-		98E6980599177FA54192F939 /* ShareManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66E768A00F7416F3E940CCD /* ShareManagerTests.swift */; };
+		90618CE0C09E2971F82286BE /* StadiumsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */; };
+		98E6980599177FA54192F939 /* BarPassTests/ShareManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66E768A00F7416F3E940CCD /* BarPassTests/ShareManagerTests.swift */; };
 		A2CF02FBB442045B9D9084FF /* HelpGuideStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD594030C69C33F1DB823472 /* HelpGuideStore.swift */; };
+		A44EFDEC59D7784580819FD3 /* ChapterChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 792335E55D9363A086C6C79B /* ChapterChatView.swift */; };
+		A74E2DF0019E057F9578D8AB /* Stadium.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9944A65EAC0560419D02323C /* Stadium.swift */; };
+		A8A6CC267A4D4BA7B9F79410 /* GreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF98E2E20484C3784F7D613 /* GreekLifeRepository.swift */; };
 		A957F031255C8A30AB61608E /* EventTicketsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 138CCFF5EDE420FFDFA78DC8 /* EventTicketsView.swift */; };
 		A98A51CDBD980DB16CF2CDC6 /* VenueFreshnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD5A631300729CFF9A2CCDB /* VenueFreshnessTests.swift */; };
 		AA0000010000000000000001 /* BarPassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000001 /* BarPassApp.swift */; };
@@ -81,16 +79,26 @@
 		AMSC02000000000000RP01 /* AppleMusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AMSC01000000000000RP01 /* AppleMusicSource.swift */; };
 		AN0000010000000000000001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AN0000020000000000000001 /* AnalyticsService.swift */; };
 		AUTP02000000000000RP01 /* AutoplayPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTP01000000000000RP01 /* AutoplayPreference.swift */; };
+		B253F7CB898A4C4581EBAF8A /* DotMatrixRevealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700D2E03703E4BDD9F730194 /* DotMatrixRevealView.swift */; };
+		B9A71D8F490D7C4F6A542FE3 /* AffiliationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D676FAF3C8541AE12E83DCCC /* AffiliationPickerView.swift */; };
 		BB000001000000000000000E /* barpass-logo.svg in Resources */ = {isa = PBXBuildFile; fileRef = BB000002000000000000000E /* barpass-logo.svg */; };
 		BBAAF54C30060C2A00E490E9 /* Stripe in Frameworks */ = {isa = PBXBuildFile; productRef = SPM00000000000000000002 /* Stripe */; };
+		BBD8BC9C0B40435594795411 /* SelectedCityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F35C2CF95EBF470399C6196E /* SelectedCityStore.swift */; };
+		BF6F4AE4A5514E81881AF641 /* ComicHalftoneBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EAE48B333A4F13A08FC333 /* ComicHalftoneBackground.swift */; };
+		C4DE0A26B74D4F5DBEE8F764 /* UniversityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F863CE708ACF44B3A96D654A /* UniversityListView.swift */; };
+		C577FAF109A04AFC978B06E4 /* UniversityDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */; };
+		C79F0EA45A09405485E0FC4D /* CityIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 656968298CED42FFBA49231A /* CityIdentity.swift */; };
 		CC000001000000000000LG01 /* venue_logos.json in Resources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000LG01 /* venue_logos.json */; };
 		CC000001000000000000LG02 /* VenueLogos.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000LG02 /* VenueLogos.swift */; };
 		CC000001000000000000ME01 /* venue_media.json in Resources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000ME01 /* venue_media.json */; };
 		CEF97FC6EA40560FF2D7D0EF /* SkipLinePassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C54DE23E3FEFE20783A41C3 /* SkipLinePassView.swift */; };
 		D8328AFA30179FA9AA6E5296 /* HelpRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858A2988E7A0989998ED59 /* HelpRegistryTests.swift */; };
+		D8865A1397474618901E5092 /* BarPassLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C91D8ECDD43B6AE34CEA4 /* BarPassLoadingView.swift */; };
 		DDC733155D1594F75D48A1D0 /* TableReservationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F2D00744D57ECA5B25B120 /* TableReservationView.swift */; };
 		E2136AAC149E09CCCF75EE87 /* TimeContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90DDC921B24BF09D3E8A04F2 /* TimeContext.swift */; };
 		E44CDF7872A2DD52484EE256 /* CartStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA3D664AAE5148E8E014E77 /* CartStore.swift */; };
+		E453AE48EC805F573934230C /* ChapterChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */; };
+		E59E448890306D0FDEF2CA7B /* StadiumDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */; };
 		E7A190DFF6312B338701215F /* HelpOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF3AE92540CD87A9A6850339 /* HelpOverlayView.swift */; };
 		EBF12578C120CFBF1FA60335 /* PriorityEntryHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2373126D43DE228E7095F6A2 /* PriorityEntryHubView.swift */; };
 		EDTV04000000000000RP01 /* EditTripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDTV03000000000000RP01 /* EditTripView.swift */; };
@@ -121,7 +129,6 @@
 		FF000002000000000000AB03 /* WalletPassService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AB03 /* WalletPassService.swift */; };
 		FF000002000000000000AB04 /* AppleWalletButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AB04 /* AppleWalletButton.swift */; };
 		GAMF02000000000000RP01 /* GamificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GAMF01000000000000RP01 /* GamificationView.swift */; };
-		B9A71D8F490D7C4F6A542FE3 /* AffiliationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D676FAF3C8541AE12E83DCCC /* AffiliationPickerView.swift */; };
 		HYPE02000000000000RP01 /* HypeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = HYPE01000000000000RP01 /* HypeEngine.swift */; };
 		HYWC02000000000000RP01 /* HypeWeekCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = HYWC01000000000000RP01 /* HypeWeekCard.swift */; };
 		IMGC02000000000000RP01 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = IMGC01000000000000RP01 /* ImageCache.swift */; };
@@ -165,6 +172,20 @@
 		XPEN02000000000000RP01 /* PointsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = XPEN01000000000000RP01 /* PointsEngine.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		093B05FC1A03FE35C6CBFA7C /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				271A1755648951074C082C7E /* BarPassWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXContainerItemProxy section */
 		0BB1E0328DD66CE1A8E99EC3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -173,25 +194,57 @@
 			remoteGlobalIDString = AA0000050000000000000000;
 			remoteInfo = "BarPass app";
 		};
+		8FD1741A799C87DF58B053CD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000070000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 83D07AE731AA8581AFB15429;
+			remoteInfo = BarPassWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityDetailView.swift; path = BarPass/Features/CollegeLife/UniversityDetailView.swift; sourceTree = SOURCE_ROOT; };
 		0A200C69C860B34D942241B9 /* BarPassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BarPassTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		0FE939BD56D206ED35B073C2 /* AuthTokenRefreshTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/AuthTokenRefreshTests.swift; sourceTree = "<group>"; };
+		0FE939BD56D206ED35B073C2 /* BarPassTests/AuthTokenRefreshTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/AuthTokenRefreshTests.swift; sourceTree = "<group>"; };
 		138CCFF5EDE420FFDFA78DC8 /* EventTicketsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTicketsView.swift; sourceTree = "<group>"; };
 		153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipLinePass.swift; sourceTree = "<group>"; };
+		162643D77BF970FAA2942A37 /* StadiumRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumRepository.swift; path = BarPass/Repositories/StadiumRepository.swift; sourceTree = SOURCE_ROOT; };
+		163C5D5B580F4F5CB17391D4 /* LiquidGlassButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiquidGlassButtonStyle.swift; path = BarPass/Resources/LiquidGlassButtonStyle.swift; sourceTree = SOURCE_ROOT; };
+		1D1A059688C549A88BABFEBB /* FraternityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FraternityListView.swift; path = BarPass/Features/CollegeLife/FraternityListView.swift; sourceTree = SOURCE_ROOT; };
+		1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportRepository.swift; path = BarPass/Repositories/AgeReportRepository.swift; sourceTree = SOURCE_ROOT; };
 		2373126D43DE228E7095F6A2 /* PriorityEntryHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriorityEntryHubView.swift; sourceTree = "<group>"; };
+		28C5D564990D482ABF8A0AE5 /* CityPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityPickerView.swift; path = BarPass/Features/Onboarding/CityPickerView.swift; sourceTree = SOURCE_ROOT; };
 		3AA3D664AAE5148E8E014E77 /* CartStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartStore.swift; sourceTree = "<group>"; };
+		3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueCheckinRepository.swift; path = BarPass/Repositories/VenueCheckinRepository.swift; sourceTree = SOURCE_ROOT; };
+		3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BirthdateRepository.swift; path = BarPass/Repositories/BirthdateRepository.swift; sourceTree = SOURCE_ROOT; };
+		43EAE48B333A4F13A08FC333 /* ComicHalftoneBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ComicHalftoneBackground.swift; path = BarPass/Resources/ComicHalftoneBackground.swift; sourceTree = SOURCE_ROOT; };
 		4534C465198E6FF9A92B4C7D /* DeepLinkRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		4C3963062AE9823148A85E40 /* HypeEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HypeEngineTests.swift; path = BarPassTests/HypeEngineTests.swift; sourceTree = "<group>"; };
+		4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumsListView.swift; path = BarPass/Features/Stadiums/StadiumsListView.swift; sourceTree = SOURCE_ROOT; };
+		54C778D8EC6D60879605EA40 /* CheckInButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckInButton.swift; path = BarPass/Features/Tonight/CheckInButton.swift; sourceTree = SOURCE_ROOT; };
+		9F0C24D42852CE5379B6D0C7 /* BarPassWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BarPassWidgetBundle.swift; path = BarPassWidget/BarPassWidgetBundle.swift; sourceTree = SOURCE_ROOT; };
+		457BF8CA0B0C5084EECB9173 /* GoHomeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GoHomeWidget.swift; path = BarPassWidget/GoHomeWidget.swift; sourceTree = SOURCE_ROOT; };
+		829CF36B09B1ECDF96A87195 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = BarPassWidget/Info.plist; sourceTree = SOURCE_ROOT; };
+		D0A7686268D5679874C25E39 /* BarPassWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = BarPassWidget.entitlements; path = BarPassWidget/BarPassWidget.entitlements; sourceTree = SOURCE_ROOT; };
+		6A2E4C1F8B9D7016C3E5F420 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = BarPassWidget/Assets.xcassets; sourceTree = SOURCE_ROOT; };
+		2ACCCBF0A93A18BFF314E986 /* BarPassWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BarPassWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		0F33027CA0AAAD146EE78DA8 /* HomeAddressRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HomeAddressRepository.swift; path = BarPass/Repositories/HomeAddressRepository.swift; sourceTree = SOURCE_ROOT; };
+		1DBB1D2978A1CEFD5727A510 /* GoHomeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GoHomeButton.swift; path = BarPass/Features/GoHome/GoHomeButton.swift; sourceTree = SOURCE_ROOT; };
+		DC8BF3CAAE71351BE1BD33DA /* HomeAddressSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HomeAddressSettingsView.swift; path = BarPass/Features/GoHome/HomeAddressSettingsView.swift; sourceTree = SOURCE_ROOT; };
 		5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPaymentView.swift; sourceTree = "<group>"; };
+		5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatRepository.swift; path = BarPass/Repositories/ChapterChatRepository.swift; sourceTree = SOURCE_ROOT; };
+		61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseGreekLifeRepository.swift; path = BarPass/Repositories/SupabaseGreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
+		656968298CED42FFBA49231A /* CityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityIdentity.swift; path = BarPass/Resources/CityIdentity.swift; sourceTree = SOURCE_ROOT; };
 		6EB6374016627134BFCC83D6 /* ShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
+		700D2E03703E4BDD9F730194 /* DotMatrixRevealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DotMatrixRevealView.swift; path = BarPass/Resources/DotMatrixRevealView.swift; sourceTree = SOURCE_ROOT; };
 		721FC3825B9184C905EB3EF0 /* ShareManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareManager.swift; sourceTree = "<group>"; };
 		75CA2DEEAE28B897B4F7BBE4 /* HelpGuideStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpGuideStoreTests.swift; path = BarPassTests/HelpGuideStoreTests.swift; sourceTree = SOURCE_ROOT; };
+		792335E55D9363A086C6C79B /* ChapterChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatView.swift; path = BarPass/Features/CollegeLife/ChapterChatView.swift; sourceTree = SOURCE_ROOT; };
 		7B25282D5543608685CFCACF /* ExperienceScorerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExperienceScorerTests.swift; path = BarPassTests/ExperienceScorerTests.swift; sourceTree = "<group>"; };
 		7DEB9D058BA5451D3579444B /* DiscoveryScorer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DiscoveryScorer.swift; path = BarPass/Core/Intelligence/DiscoveryScorer.swift; sourceTree = SOURCE_ROOT; };
 		7DF352B37244C7C0F8C8D874 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		83F14D299B6CF077F28A63D3 /* DeepLinkRouterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/DeepLinkRouterTests.swift; sourceTree = "<group>"; };
+		83F14D299B6CF077F28A63D3 /* BarPassTests/DeepLinkRouterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/DeepLinkRouterTests.swift; sourceTree = "<group>"; };
 		856638E27CF7A56A57535A80 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KeychainServiceTests.swift; path = BarPassTests/KeychainServiceTests.swift; sourceTree = "<group>"; };
 		8568370BB34F88D6D61CD5B2 /* CartItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartItem.swift; sourceTree = "<group>"; };
 		8C3DFC6C83DA2445542EDA60 /* PriceTierTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PriceTierTests.swift; path = BarPassTests/PriceTierTests.swift; sourceTree = SOURCE_ROOT; };
@@ -199,7 +252,10 @@
 		90DDC921B24BF09D3E8A04F2 /* TimeContext.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TimeContext.swift; path = BarPass/Core/Intelligence/TimeContext.swift; sourceTree = SOURCE_ROOT; };
 		93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAccountView.swift; sourceTree = "<group>"; };
 		97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpRegistry.swift; path = BarPass/Core/Help/HelpRegistry.swift; sourceTree = SOURCE_ROOT; };
+		9944A65EAC0560419D02323C /* Stadium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Stadium.swift; path = BarPass/Models/Stadium.swift; sourceTree = SOURCE_ROOT; };
+		9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportSheet.swift; path = BarPass/Features/Tonight/AgeReportSheet.swift; sourceTree = SOURCE_ROOT; };
 		9EC72D4050837ED089C03C05 /* UserLocationProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UserLocationProvider.swift; path = BarPass/Core/Services/UserLocationProvider.swift; sourceTree = SOURCE_ROOT; };
+		A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumDetailView.swift; path = BarPass/Features/Stadiums/StadiumDetailView.swift; sourceTree = SOURCE_ROOT; };
 		AA0000020000000000000001 /* BarPassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarPassApp.swift; sourceTree = "<group>"; };
 		AA0000020000000000000002 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		AA0000020000000000000003 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -214,34 +270,6 @@
 		AA00000200000000000000A1 /* BarPass app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BarPass app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD594030C69C33F1DB823472 /* HelpGuideStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpGuideStore.swift; path = BarPass/Core/Help/HelpGuideStore.swift; sourceTree = SOURCE_ROOT; };
 		AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveTicketView.swift; sourceTree = "<group>"; };
-		ED4BB265491D4A7E864C255E /* University.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = University.swift; path = BarPass/Models/University.swift; sourceTree = SOURCE_ROOT; };
-		EDF98E2E20484C3784F7D613 /* GreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GreekLifeRepository.swift; path = BarPass/Repositories/GreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
-		61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseGreekLifeRepository.swift; path = BarPass/Repositories/SupabaseGreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
-		F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileAffiliationRepository.swift; path = BarPass/Repositories/ProfileAffiliationRepository.swift; sourceTree = SOURCE_ROOT; };
-		5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatRepository.swift; path = BarPass/Repositories/ChapterChatRepository.swift; sourceTree = SOURCE_ROOT; };
-		3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BirthdateRepository.swift; path = BarPass/Repositories/BirthdateRepository.swift; sourceTree = SOURCE_ROOT; };
-		3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueCheckinRepository.swift; path = BarPass/Repositories/VenueCheckinRepository.swift; sourceTree = SOURCE_ROOT; };
-		54C778D8EC6D60879605EA40 /* CheckInButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckInButton.swift; path = BarPass/Features/Tonight/CheckInButton.swift; sourceTree = SOURCE_ROOT; };
-		1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportRepository.swift; path = BarPass/Repositories/AgeReportRepository.swift; sourceTree = SOURCE_ROOT; };
-		9944A65EAC0560419D02323C /* Stadium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Stadium.swift; path = BarPass/Models/Stadium.swift; sourceTree = SOURCE_ROOT; };
-		162643D77BF970FAA2942A37 /* StadiumRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumRepository.swift; path = BarPass/Repositories/StadiumRepository.swift; sourceTree = SOURCE_ROOT; };
-		A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumDetailView.swift; path = BarPass/Features/Stadiums/StadiumDetailView.swift; sourceTree = SOURCE_ROOT; };
-		4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumsListView.swift; path = BarPass/Features/Stadiums/StadiumsListView.swift; sourceTree = SOURCE_ROOT; };
-		9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportSheet.swift; path = BarPass/Features/Tonight/AgeReportSheet.swift; sourceTree = SOURCE_ROOT; };
-		B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityIdentity.swift; path = BarPass/Resources/UniversityIdentity.swift; sourceTree = SOURCE_ROOT; };
-		792335E55D9363A086C6C79B /* ChapterChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatView.swift; path = BarPass/Features/CollegeLife/ChapterChatView.swift; sourceTree = SOURCE_ROOT; };
-		F863CE708ACF44B3A96D654A /* UniversityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityListView.swift; path = BarPass/Features/CollegeLife/UniversityListView.swift; sourceTree = SOURCE_ROOT; };
-		02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityDetailView.swift; path = BarPass/Features/CollegeLife/UniversityDetailView.swift; sourceTree = SOURCE_ROOT; };
-		1D1A059688C549A88BABFEBB /* FraternityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FraternityListView.swift; path = BarPass/Features/CollegeLife/FraternityListView.swift; sourceTree = SOURCE_ROOT; };
-		43EAE48B333A4F13A08FC333 /* ComicHalftoneBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ComicHalftoneBackground.swift; path = BarPass/Resources/ComicHalftoneBackground.swift; sourceTree = SOURCE_ROOT; };
-		DEF2C8BAFE3D48CC85B36E9B /* TicketReceivedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TicketReceivedView.swift; path = BarPass/Features/PriorityEntry/TicketReceivedView.swift; sourceTree = SOURCE_ROOT; };
-		CE8C91D8ECDD43B6AE34CEA4 /* BarPassLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BarPassLoadingView.swift; path = BarPass/Resources/BarPassLoadingView.swift; sourceTree = SOURCE_ROOT; };
-		DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityMascotIcon.swift; path = BarPass/Resources/CityMascotIcon.swift; sourceTree = SOURCE_ROOT; };
-		656968298CED42FFBA49231A /* CityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityIdentity.swift; path = BarPass/Resources/CityIdentity.swift; sourceTree = SOURCE_ROOT; };
-		F35C2CF95EBF470399C6196E /* SelectedCityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SelectedCityStore.swift; path = BarPass/Core/Services/SelectedCityStore.swift; sourceTree = SOURCE_ROOT; };
-		28C5D564990D482ABF8A0AE5 /* CityPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityPickerView.swift; path = BarPass/Features/Onboarding/CityPickerView.swift; sourceTree = SOURCE_ROOT; };
-		163C5D5B580F4F5CB17391D4 /* LiquidGlassButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiquidGlassButtonStyle.swift; path = BarPass/Resources/LiquidGlassButtonStyle.swift; sourceTree = SOURCE_ROOT; };
-		700D2E03703E4BDD9F730194 /* DotMatrixRevealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DotMatrixRevealView.swift; path = BarPass/Resources/DotMatrixRevealView.swift; sourceTree = SOURCE_ROOT; };
 		AGGT01000000000000RP01 /* AgeGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateService.swift; path = BarPass/Core/Services/AgeGateService.swift; sourceTree = SOURCE_ROOT; };
 		AGGT03000000000000RP01 /* AgeGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateView.swift; path = BarPass/Features/Onboarding/AgeGateView.swift; sourceTree = SOURCE_ROOT; };
 		AMPS01000000000000RP01 /* AppleMusicPlaybackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleMusicPlaybackService.swift; path = BarPass/Core/Music/AppleMusicPlaybackService.swift; sourceTree = SOURCE_ROOT; };
@@ -249,6 +277,7 @@
 		AN0000020000000000000001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalyticsService.swift; path = BarPass/Core/Services/AnalyticsService.swift; sourceTree = SOURCE_ROOT; };
 		AUTP01000000000000RP01 /* AutoplayPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AutoplayPreference.swift; path = BarPass/Core/Music/AutoplayPreference.swift; sourceTree = SOURCE_ROOT; };
 		B255F26D4A13547562CDF99B /* HelpTargetAnchor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpTargetAnchor.swift; path = BarPass/Core/Help/HelpTargetAnchor.swift; sourceTree = SOURCE_ROOT; };
+		B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityIdentity.swift; path = BarPass/Resources/UniversityIdentity.swift; sourceTree = SOURCE_ROOT; };
 		BB000002000000000000000E /* barpass-logo.svg */ = {isa = PBXFileReference; lastKnownFileType = image.svg; path = "barpass-logo.svg"; sourceTree = "<group>"; };
 		BF31AC3E1809B2072DE6CA9C /* ModelCodableTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ModelCodableTests.swift; path = BarPassTests/ModelCodableTests.swift; sourceTree = "<group>"; };
 		BF3AE92540CD87A9A6850339 /* HelpOverlayView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpOverlayView.swift; path = BarPass/Core/Help/HelpOverlayView.swift; sourceTree = SOURCE_ROOT; };
@@ -257,18 +286,27 @@
 		CC000002000000000000LG01 /* venue_logos.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = venue_logos.json; sourceTree = "<group>"; };
 		CC000002000000000000LG02 /* VenueLogos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueLogos.swift; sourceTree = "<group>"; };
 		CC000002000000000000ME01 /* venue_media.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = venue_media.json; sourceTree = "<group>"; };
+		CE8C91D8ECDD43B6AE34CEA4 /* BarPassLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BarPassLoadingView.swift; path = BarPass/Resources/BarPassLoadingView.swift; sourceTree = SOURCE_ROOT; };
 		D0C516E6C74A66937CBB9B8F /* ActivePassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePassView.swift; sourceTree = "<group>"; };
+		D676FAF3C8541AE12E83DCCC /* AffiliationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AffiliationPickerView.swift; path = BarPass/Features/Profile/AffiliationPickerView.swift; sourceTree = SOURCE_ROOT; };
 		D7858A2988E7A0989998ED59 /* HelpRegistryTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpRegistryTests.swift; path = BarPassTests/HelpRegistryTests.swift; sourceTree = SOURCE_ROOT; };
 		D8573B32468D00824A6FB632 /* CollegeNightlifeCuration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CollegeNightlifeCuration.swift; path = BarPass/Core/Intelligence/CollegeNightlifeCuration.swift; sourceTree = SOURCE_ROOT; };
-		E66E768A00F7416F3E940CCD /* ShareManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/ShareManagerTests.swift; sourceTree = "<group>"; };
+		DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityMascotIcon.swift; path = BarPass/Resources/CityMascotIcon.swift; sourceTree = SOURCE_ROOT; };
+		DEF2C8BAFE3D48CC85B36E9B /* TicketReceivedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TicketReceivedView.swift; path = BarPass/Features/PriorityEntry/TicketReceivedView.swift; sourceTree = SOURCE_ROOT; };
+		E66E768A00F7416F3E940CCD /* BarPassTests/ShareManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/ShareManagerTests.swift; sourceTree = "<group>"; };
 		EA727DF04AFC4355197DDF95 /* ReservationConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservationConfirmView.swift; sourceTree = "<group>"; };
 		ECEA1F54438283EF27ED535E /* CartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartView.swift; sourceTree = "<group>"; };
+		ED4BB265491D4A7E864C255E /* University.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = University.swift; path = BarPass/Models/University.swift; sourceTree = SOURCE_ROOT; };
 		EDD5A631300729CFF9A2CCDB /* VenueFreshnessTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VenueFreshnessTests.swift; path = BarPassTests/VenueFreshnessTests.swift; sourceTree = SOURCE_ROOT; };
+		EDF98E2E20484C3784F7D613 /* GreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GreekLifeRepository.swift; path = BarPass/Repositories/GreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
 		EDTV03000000000000RP01 /* EditTripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EditTripView.swift; path = BarPass/Features/Trips/EditTripView.swift; sourceTree = SOURCE_ROOT; };
 		EE000001000000000000001A /* NativeAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthView.swift; sourceTree = "<group>"; };
 		EF000001000000000000RP01 /* EventFlyerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventFlyerCard.swift; path = BarPass/Features/Tonight/EventFlyerCard.swift; sourceTree = SOURCE_ROOT; };
 		EXEN03000000000000RP01 /* ExperienceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceEngine.swift; path = BarPass/Models/ExperienceEngine.swift; sourceTree = SOURCE_ROOT; };
 		EXSC03000000000000RP01 /* ExperienceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceScorer.swift; path = BarPass/Core/Intelligence/ExperienceScorer.swift; sourceTree = SOURCE_ROOT; };
+		F35C2CF95EBF470399C6196E /* SelectedCityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SelectedCityStore.swift; path = BarPass/Core/Services/SelectedCityStore.swift; sourceTree = SOURCE_ROOT; };
+		F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileAffiliationRepository.swift; path = BarPass/Repositories/ProfileAffiliationRepository.swift; sourceTree = SOURCE_ROOT; };
+		F863CE708ACF44B3A96D654A /* UniversityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityListView.swift; path = BarPass/Features/CollegeLife/UniversityListView.swift; sourceTree = SOURCE_ROOT; };
 		FAVS01000000000000RP01 /* FavoritesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FavoritesStore.swift; path = BarPass/Core/Services/FavoritesStore.swift; sourceTree = SOURCE_ROOT; };
 		FB5086AAE9CBD601116597BE /* EventTicket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTicket.swift; sourceTree = "<group>"; };
 		FDE1AEB039250C8DA5E41CE1 /* ReferralService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReferralService.swift; sourceTree = "<group>"; };
@@ -292,7 +330,6 @@
 		FF000001000000000000AB03 /* WalletPassService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletPassService.swift; sourceTree = "<group>"; };
 		FF000001000000000000AB04 /* AppleWalletButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleWalletButton.swift; path = BarPass/Features/WalletPass/AppleWalletButton.swift; sourceTree = SOURCE_ROOT; };
 		GAMF01000000000000RP01 /* GamificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GamificationView.swift; path = BarPass/Features/Profile/GamificationView.swift; sourceTree = SOURCE_ROOT; };
-		D676FAF3C8541AE12E83DCCC /* AffiliationPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AffiliationPickerView.swift; path = BarPass/Features/Profile/AffiliationPickerView.swift; sourceTree = SOURCE_ROOT; };
 		HYPE01000000000000RP01 /* HypeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HypeEngine.swift; path = BarPass/Core/Music/HypeEngine.swift; sourceTree = SOURCE_ROOT; };
 		HYWC01000000000000RP01 /* HypeWeekCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HypeWeekCard.swift; path = BarPass/Features/Tonight/HypeWeekCard.swift; sourceTree = SOURCE_ROOT; };
 		IMGC01000000000000RP01 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImageCache.swift; path = BarPass/Core/Services/ImageCache.swift; sourceTree = SOURCE_ROOT; };
@@ -353,6 +390,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FD32F8074432B7582EE3ABFB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -362,7 +406,6 @@
 				6EB6374016627134BFCC83D6 /* ShareCardView.swift */,
 				721FC3825B9184C905EB3EF0 /* ShareManager.swift */,
 			);
-			name = Sharing;
 			path = Sharing;
 			sourceTree = "<group>";
 		};
@@ -381,9 +424,9 @@
 				4C3963062AE9823148A85E40 /* HypeEngineTests.swift */,
 				856638E27CF7A56A57535A80 /* KeychainServiceTests.swift */,
 				BF31AC3E1809B2072DE6CA9C /* ModelCodableTests.swift */,
-				83F14D299B6CF077F28A63D3 /* DeepLinkRouterTests.swift */,
-				E66E768A00F7416F3E940CCD /* ShareManagerTests.swift */,
-				0FE939BD56D206ED35B073C2 /* AuthTokenRefreshTests.swift */,
+				83F14D299B6CF077F28A63D3 /* BarPassTests/DeepLinkRouterTests.swift */,
+				E66E768A00F7416F3E940CCD /* BarPassTests/ShareManagerTests.swift */,
+				0FE939BD56D206ED35B073C2 /* BarPassTests/AuthTokenRefreshTests.swift */,
 				EDD5A631300729CFF9A2CCDB /* VenueFreshnessTests.swift */,
 				8C3DFC6C83DA2445542EDA60 /* PriceTierTests.swift */,
 				D7858A2988E7A0989998ED59 /* HelpRegistryTests.swift */,
@@ -396,6 +439,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000040000000000000001 /* BarPass */,
+				730FED0B66C9D602E7D40BE0 /* BarPassWidget */,
 				AA000004000000000000000F /* Products */,
 				BBAAF54D30060C2A00E490E9 /* Recovered References */,
 				ED72C18BBBB1841C199CA23B /* Frameworks */,
@@ -512,10 +556,23 @@
 			path = Web;
 			sourceTree = "<group>";
 		};
+		730FED0B66C9D602E7D40BE0 /* BarPassWidget */ = {
+			isa = PBXGroup;
+			children = (
+				9F0C24D42852CE5379B6D0C7 /* BarPassWidgetBundle.swift */,
+				457BF8CA0B0C5084EECB9173 /* GoHomeWidget.swift */,
+				829CF36B09B1ECDF96A87195 /* Info.plist */,
+				D0A7686268D5679874C25E39 /* BarPassWidget.entitlements */,
+				6A2E4C1F8B9D7016C3E5F420 /* Assets.xcassets */,
+			);
+			path = BarPassWidget;
+			sourceTree = "<group>";
+		};
 		AA000004000000000000000F /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				AA00000200000000000000A1 /* BarPass app.app */,
+				2ACCCBF0A93A18BFF314E986 /* BarPassWidgetExtension.appex */,
 				0A200C69C860B34D942241B9 /* BarPassTests.xctest */,
 			);
 			name = Products;
@@ -566,6 +623,9 @@
 				VEVW03000000000000RP01 /* VerifyEmailView.swift */,
 				HYWC01000000000000RP01 /* HypeWeekCard.swift */,
 				54C778D8EC6D60879605EA40 /* CheckInButton.swift */,
+				0F33027CA0AAAD146EE78DA8 /* HomeAddressRepository.swift */,
+				1DBB1D2978A1CEFD5727A510 /* GoHomeButton.swift */,
+				DC8BF3CAAE71351BE1BD33DA /* HomeAddressSettingsView.swift */,
 				9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */,
 				A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */,
 				4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */,
@@ -757,10 +817,12 @@
 				AA0000030000000000000001 /* Sources */,
 				AA0000030000000000000002 /* Resources */,
 				AA0000030000000000000003 /* Frameworks */,
+				093B05FC1A03FE35C6CBFA7C /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				0EF84A3EBC2E4A55D255F785 /* PBXTargetDependency */,
 			);
 			name = "BarPass app";
 			packageProductDependencies = (
@@ -769,6 +831,23 @@
 			productName = BarPass;
 			productReference = AA00000200000000000000A1 /* BarPass app.app */;
 			productType = "com.apple.product-type.application";
+		};
+		83D07AE731AA8581AFB15429 /* BarPassWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 103E8DFFFE3C6476C441C369 /* Build configuration list for PBXNativeTarget "BarPassWidgetExtension" */;
+			buildPhases = (
+				ACBFBB7514423ACD750251D3 /* Sources */,
+				E01E88B25C63202FE1571AFE /* Resources */,
+				FD32F8074432B7582EE3ABFB /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BarPassWidgetExtension;
+			productName = BarPassWidgetExtension;
+			productReference = 2ACCCBF0A93A18BFF314E986 /* BarPassWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -781,6 +860,9 @@
 				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					AA0000050000000000000000 = {
+						CreatedOnToolsVersion = 17.0;
+					};
+					83D07AE731AA8581AFB15429 = {
 						CreatedOnToolsVersion = 17.0;
 					};
 				};
@@ -803,6 +885,7 @@
 			targets = (
 				AA0000050000000000000000 /* BarPass app */,
 				77AF89583365670A933DCB1B /* BarPassTests */,
+				83D07AE731AA8581AFB15429 /* BarPassWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -827,9 +910,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E01E88B25C63202FE1571AFE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3B7C8E2A419DF605B8A61C90 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		ACBFBB7514423ACD750251D3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				650C9C3329EE0838B574E7CA /* BarPassWidgetBundle.swift in Sources */,
+				CB1F9606B527DA7A5AEA29A6 /* GoHomeWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		084F7E042D4C251D3E747EBC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -838,9 +938,9 @@
 				6DB2BBFD9C2F38D3220A684A /* HypeEngineTests.swift in Sources */,
 				045900B0B0374875CD4DF42D /* KeychainServiceTests.swift in Sources */,
 				3B997A737FD4B9BDABFA9D2B /* ModelCodableTests.swift in Sources */,
-				2FD00D94265BF1B464B7C912 /* DeepLinkRouterTests.swift in Sources */,
-				98E6980599177FA54192F939 /* ShareManagerTests.swift in Sources */,
-				58B304D6CCCBB61826E1F150 /* AuthTokenRefreshTests.swift in Sources */,
+				2FD00D94265BF1B464B7C912 /* BarPassTests/DeepLinkRouterTests.swift in Sources */,
+				98E6980599177FA54192F939 /* BarPassTests/ShareManagerTests.swift in Sources */,
+				58B304D6CCCBB61826E1F150 /* BarPassTests/AuthTokenRefreshTests.swift in Sources */,
 				A98A51CDBD980DB16CF2CDC6 /* VenueFreshnessTests.swift in Sources */,
 				25E4AAF65D8C63C40C3FD6BA /* PriceTierTests.swift in Sources */,
 				D8328AFA30179FA9AA6E5296 /* HelpRegistryTests.swift in Sources */,
@@ -972,6 +1072,9 @@
 				39E22AF8EE155DF7FC352FBA /* BirthdateRepository.swift in Sources */,
 				6653697AF565692E1B2F279B /* VenueCheckinRepository.swift in Sources */,
 				00425100532EF59250F240FB /* CheckInButton.swift in Sources */,
+				CE1FC5AD84F9D0E40E7E0898 /* HomeAddressRepository.swift in Sources */,
+				FB27B50A40070142DA45268A /* GoHomeButton.swift in Sources */,
+				FD87EDAD40F4189CC21E49A7 /* HomeAddressSettingsView.swift in Sources */,
 				12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */,
 				7BB3D4EC13FA314E51E72F88 /* AgeReportSheet.swift in Sources */,
 				A74E2DF0019E057F9578D8AB /* Stadium.swift in Sources */,
@@ -1001,6 +1104,12 @@
 			name = "BarPass app";
 			target = AA0000050000000000000000 /* BarPass app */;
 			targetProxy = 0BB1E0328DD66CE1A8E99EC3 /* PBXContainerItemProxy */;
+		};
+		0EF84A3EBC2E4A55D255F785 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = BarPassWidgetExtension;
+			target = 83D07AE731AA8581AFB15429 /* BarPassWidgetExtension */;
+			targetProxy = 8FD1741A799C87DF58B053CD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1150,12 +1259,61 @@
 			};
 			name = Release;
 		};
+		3DACE1A31DEC2B3E0B83DEB0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BarPassWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "BarPass";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sebastian.barpass.BarPassWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		0D70C12D500A0F2892E92877 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BarPassWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "BarPass";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sebastian.barpass.BarPassWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		DE01BF1ED83486860E46CEF2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
+				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sebastian.barpass.tests;
@@ -1192,6 +1350,15 @@
 			buildConfigurations = (
 				AA0000080000000000000003 /* Debug */,
 				AA0000080000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		103E8DFFFE3C6476C441C369 /* Build configuration list for PBXNativeTarget "BarPassWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DACE1A31DEC2B3E0B83DEB0 /* Debug */,
+				0D70C12D500A0F2892E92877 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

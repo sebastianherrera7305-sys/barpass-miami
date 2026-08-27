@@ -46,10 +46,10 @@ struct CardPaymentView: View {
                                 .foregroundStyle(Color.bpInk.opacity(0.45))
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                            cardInputField(placeholder: "1234 5678 9012 3456", text: $cardNumber, field: .number)
+                            cardInputField(placeholder: l10n.t("card.numberPlaceholder"), text: $cardNumber, field: .number)
                             HStack(spacing: 12) {
-                                cardInputField(placeholder: "MM/AA", text: $expiry, field: .expiry)
-                                cardInputField(placeholder: "CVV", text: $cvv, field: .cvv)
+                                cardInputField(placeholder: l10n.t("card.expiryPlaceholder"), text: $expiry, field: .expiry)
+                                cardInputField(placeholder: l10n.t("card.cvvPlaceholder"), text: $cvv, field: .cvv)
                             }
                         }
                         .padding(.horizontal, 20)
@@ -209,7 +209,10 @@ struct CardPaymentView: View {
             .overlay(RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(activeFocus == field ? gold.opacity(0.5) : Color.bpInk.opacity(0.08), lineWidth: 1))
             .onChange(of: text.wrappedValue) { _, _ in validateCard() }
-            .bpAccessibility(label: field == .number ? "Número de tarjeta" : (field == .expiry ? "Fecha de expiración" : "Código de seguridad CVV"), hint: field == .number ? "Ingresa el número de tu tarjeta" : (field == .expiry ? "Ingresa la fecha de vencimiento en formato MM/AA" : "Ingresa el código de seguridad de 3 dígitos"))
+            .bpAccessibility(
+                label: field == .number ? l10n.t("card.number.a11y") : (field == .expiry ? l10n.t("card.expiry.a11y") : l10n.t("card.cvv.a11y")),
+                hint: field == .number ? l10n.t("card.number.hint") : (field == .expiry ? l10n.t("card.expiry.hint") : l10n.t("card.cvv.hint"))
+            )
     }
 
     private var isValid: Bool {
@@ -236,7 +239,7 @@ struct CardPaymentView: View {
 
         guard let session = AuthService.shared.restoreSession() else {
             loading = false
-            errorMsg = "Inicia sesión para pagar con tarjeta."
+            errorMsg = l10n.t("cardPayment.error.signInRequired")
             return
         }
 
@@ -273,11 +276,22 @@ struct CardPaymentView: View {
                 let orderId = (json["transaction"] as? [String: Any])?["id"] as? String
                 await MainActor.run {
                     self.loading = false
+                    // A nil orderId here means the card was actually charged
+                    // (createPaymentMethod + the transaction call both
+                    // succeeded) but the server response didn't include an
+                    // id to attach a pass/reservation to. Previously this
+                    // silently dismissed the sheet via onSuccess anyway —
+                    // the caller's onOrderId never fired, so no pass ever
+                    // got created, and the user had no idea anything was
+                    // wrong. Surface it instead of pretending it worked.
+                    guard let orderId else {
+                        self.errorMsg = self.l10n.t("cardPayment.error.noOrderId")
+                        BPAnalytics.track(.paymentFailed(method: "card", error: "missing order id"))
+                        return
+                    }
                     BPAnalytics.track(.paymentSuccess(method: "card", amount: self.total))
                     PointsEngine.shared.award(.completeTrip)
-                    if let orderId {
-                        self.onOrderId?(orderId)
-                    }
+                    self.onOrderId?(orderId)
                     self.onSuccess("💳 •••• \(last4)")
                     self.dismiss()
                 }

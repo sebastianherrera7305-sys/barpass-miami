@@ -4,6 +4,7 @@ struct RootView: View {
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var cart:     CartStore
+    @ObservedObject private var checkInStore = CheckInStore.shared
 
     var body: some View {
         ZStack {
@@ -74,56 +75,63 @@ struct RootView: View {
         .animation(.easeOut(duration: 0.1), value: appState.showSplash)
         .animation(.spring(response: 0.2, dampingFraction: 0.85), value: appState.isOffline)
         .animation(.easeOut(duration: 0.1), value: appState.showNativeAuth)
-        // Native floating action bar
-        // El botón "⚡ Priority Entry" global vivía acá, visible en las 5
-        // tabs para siempre (showActionBar nunca vuelve a false) y sin
-        // venueId asociado — abría PriorityEntryHubView con el venue que
-        // quedó seteado de la última vez que se vio un detalle, o vacío si
-        // nunca se vio ninguno. Priority Entry (skip line/mesa/tickets) es
-        // inherentemente por venue — el CTA correcto y ya scopeado vive en
-        // VenueDetailView, que sí setea priorityVenueId antes de abrir el
-        // sheet. Sacado de acá; ver también la guarda en PriorityEntryHubView.
-        .overlay(alignment: .bottom) {
-            HStack(spacing: 12) {
-                // 🛒 Cart
-                Button {
-                    appState.showCart = true
-                } label: {
-                    ZStack(alignment: .topTrailing) {
-                        Image(systemName: "cart.fill")
-                            .font(.bpScaled(18, weight: .semibold))
-                            .foregroundStyle(Color.bpInk)
-                            .frame(width: 44, height: 44)
-                            .background(Color.bpInk.opacity(0.15), in: Circle())
-                            .overlay(Circle().strokeBorder(Color.bpInk.opacity(0.2)))
+        // Floating cart button — only exists when there's actually something
+        // to show (cart.itemCount > 0). Previously this was an always-on
+        // overlay gated by showActionBar, which the code's own comment
+        // admitted never returns to false — so it rendered on every screen
+        // in the app, including flows with nothing to do with a cart (e.g.
+        // Greek Life sign-up). Small and corner-anchored per explicit
+        // request, not the old center pill.
+        .overlay(alignment: .bottomTrailing) {
+            VStack(spacing: 12) {
+                // "Go home" — only while checked in somewhere (per explicit
+                // product decision: not useful outside a real night out).
+                if checkInStore.activeCheckin != nil {
+                    GoHomeButton()
+                }
+                if appState.showActionBar && cart.itemCount > 0 {
+                    Button {
+                        appState.showCart = true
+                    } label: {
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: "cart.fill")
+                                .font(.bpScaled(14, weight: .semibold))
+                                .foregroundStyle(Color.bpInk)
+                                .frame(width: 34, height: 34)
+                                .background(Color.bpCardBackground.opacity(0.97), in: Circle())
+                                .overlay(Circle().strokeBorder(Color.bpInk.opacity(0.15), lineWidth: 1))
+                                .shadow(color: .black.opacity(0.5), radius: 10, y: 3)
 
-                        if cart.itemCount > 0 {
                             Text("\(cart.itemCount)")
-                                .font(.bpScaled(10, weight: .bold))
+                                .font(.bpScaled(9, weight: .bold))
                                 .foregroundStyle(.black)
-                                .frame(minWidth: 18, minHeight: 18)
-                                .background(Color(red:0.85,green:0.63,blue:0.09), in: Circle())
-                                .offset(x: 4, y: -4)
+                                .frame(minWidth: 15, minHeight: 15)
+                                .background(Color(red: 0.85, green: 0.63, blue: 0.09), in: Circle())
+                                .offset(x: 3, y: -3)
                         }
                     }
+                    .buttonStyle(.plain)
+                    .transition(.scale.combined(with: .opacity))
+                    .bpAccessibility(label: l10n.t("root.cart"), hint: l10n.t("root.cart.hint"), isButton: true)
                 }
-                .buttonStyle(.plain)
-                .bpAccessibility(label: l10n.t("root.cart"), hint: l10n.t("root.cart.hint"), isButton: true)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 8)
-            .background(
-                Capsule()
-                    // Same Light Mode bug as the tab bar: hardcoded dark fill
-                    // under a bpInk cart icon. bpCardBackground is the identical
-                    // colour in Dark Mode and adapts in Light.
-                    .fill(Color.bpCardBackground.opacity(0.97))
-                    .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.15), lineWidth: 1))
-                    .shadow(color: .black.opacity(0.6), radius: 16, y: 4)
-            )
+            .padding(.trailing, 16)
             .padding(.bottom, 100)
-            .opacity(appState.showActionBar ? 1 : 0)
-            .animation(.easeOut(duration: 0.15), value: appState.showActionBar)
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: cart.itemCount)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: checkInStore.activeCheckin?.checkinId)
+        .task { await checkInStore.load() }
+        // Retries AgeGateView's fire-and-forget birthdate write — every
+        // profile in the DB showed a null birthdate despite the local gate
+        // having been passed, because that write has no retry today. Cheap
+        // to check (UserDefaults) and only hits the network when the
+        // previous attempt actually never landed.
+        .task {
+            guard AgeGateService.isVerified, !AgeGateService.isSyncedToServer,
+                  let dob = AgeGateService.storedDateOfBirth else { return }
+            if (try? await RepositoryDependencies.birthdate.setBirthdate(dob)) != nil {
+                AgeGateService.isSyncedToServer = true
+            }
         }
         // Native cart sheet
         .sheet(isPresented: $appState.showCart) {

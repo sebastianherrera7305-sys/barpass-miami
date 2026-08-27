@@ -163,7 +163,7 @@ struct VenueDetailView: View {
                 .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 20)
 
-            CheckInButton(venueId: venue.id, venueName: venue.name)
+            CheckInButton(venueId: venue.id, venueName: venue.name, venueLat: venue.latitude, venueLng: venue.longitude)
                 .padding(.horizontal, BPSpacing.lg)
 
             if !goodToKnowChips.isEmpty {
@@ -530,7 +530,7 @@ struct VenueDetailView: View {
             }
 
             HStack(spacing: 10) {
-                linkButton(icon: "map.fill", label: "Maps") { openMaps() }
+                linkButton(icon: "map.fill", label: l10n.t("venueDetail.mapsLink")) { openMaps() }
                 linkButton(icon: "car.fill", label: "Uber") { openUber() }
                 if let ig = venue.instagramHandle {
                     linkButton(icon: "camera.fill", label: "@\(ig)") { openInstagram(handle: ig) }

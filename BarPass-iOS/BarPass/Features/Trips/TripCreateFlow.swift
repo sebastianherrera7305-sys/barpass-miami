@@ -20,6 +20,8 @@ struct TripCreateFlow: View {
     /// camera photo decoded at full resolution for a 140pt preview box was
     /// exactly the kind of memory spike that got the app killed by jetsam.
     @State private var coverImage: UIImage?
+    @State private var isCreating = false
+    @State private var createError: String?
 
     private let amber  = Color.bpAmber
 
@@ -279,17 +281,32 @@ struct TripCreateFlow: View {
             .padding(16)
             .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
 
+            if let createError {
+                Text(createError)
+                    .font(.bpCaption())
+                    .foregroundStyle(Color.bpDanger)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, BPSpacing.lg)
+            }
+
             Button {
                 createTrip()
             } label: {
-                Text(l10n.t("tripCreate.createButton"))
-                    .font(.bpHeadline())
-                    .foregroundStyle(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(amber, in: Capsule())
+                Group {
+                    if isCreating {
+                        ProgressView().tint(.black)
+                    } else {
+                        Text(l10n.t("tripCreate.createButton"))
+                            .font(.bpHeadline())
+                    }
+                }
+                .foregroundStyle(.black)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(amber, in: Capsule())
             }
             .buttonStyle(.plain)
+            .disabled(isCreating)
             .bpAccessibility(label: l10n.t("tripCreate.createButton"), hint: l10n.t("tripCreate.createButton.hint"), isButton: true)
             .padding(.horizontal, BPSpacing.lg)
 
@@ -341,8 +358,21 @@ struct TripCreateFlow: View {
             stops: stops
         )
         trip.coverImage = saveCoverImageIfNeeded(tripId: trip.id)
-        Task { await tripStore.create(trip) }
-        onDismiss()
+        isCreating = true
+        createError = nil
+        Task {
+            await tripStore.create(trip)
+            isCreating = false
+            // create() sets tripStore.loadError on failure instead of
+            // throwing — this used to fire-and-forget and dismiss the
+            // sheet immediately, so a failed save silently looked
+            // successful (the trip just never existed).
+            if let error = tripStore.loadError {
+                createError = error
+            } else {
+                onDismiss()
+            }
+        }
     }
 
     /// Saves the already-downsampled (~1200px) cover photo to disk and

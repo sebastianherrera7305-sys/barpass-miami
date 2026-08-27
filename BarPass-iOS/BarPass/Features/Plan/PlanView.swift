@@ -18,6 +18,32 @@ struct PlanView: View {
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
     private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
 
+    /// The on-screen plan lived only in @State, so iOS killing the app in
+    /// the background (common under memory pressure) silently lost it —
+    /// the user came back to a blank Plan tab even though nothing was
+    /// wrong. Mirrored to disk so it survives a real termination, not just
+    /// a suspend.
+    private static let currentPlanKey = "bp_plan_current"
+    private static let lastPromptKey = "bp_plan_lastPrompt"
+
+    private func persistCurrentPlan() {
+        if let plan, let data = try? JSONEncoder().encode(plan) {
+            UserDefaults.standard.set(data, forKey: Self.currentPlanKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: Self.currentPlanKey)
+        }
+        UserDefaults.standard.set(lastPrompt, forKey: Self.lastPromptKey)
+    }
+
+    private func restoreCurrentPlan() {
+        guard plan == nil else { return }
+        lastPrompt = UserDefaults.standard.string(forKey: Self.lastPromptKey) ?? ""
+        if let data = UserDefaults.standard.data(forKey: Self.currentPlanKey),
+           let restored = try? JSONDecoder().decode(NightPlan.self, from: data) {
+            plan = restored
+        }
+    }
+
     private var suggestions: [String] {
         [
             l10n.t("plan.suggestion.budget"),
@@ -56,7 +82,15 @@ struct PlanView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 60)
 
-                    // Input area
+                    // Input area — hidden once a plan exists. Previously
+                    // this stayed on screen unconditionally: generatePlan()
+                    // resets `prompt` to "" on success, so right after
+                    // building a plan the placeholder text and the
+                    // low-opacity disabled button both reappeared sitting
+                    // directly above the results — correct per-field state,
+                    // but read as a broken "ghost" render. An explicit
+                    // "Ask again" pill replaces it instead.
+                    if plan == nil {
                     VStack(spacing: 12) {
                         ZStack(alignment: .topLeading) {
                             if prompt.isEmpty {
@@ -133,9 +167,28 @@ struct PlanView: View {
                             .padding(.horizontal, 20)
                         }
                     }
+                    }
 
                     // Plan result
                     if let plan {
+                        Button {
+                            self.plan = nil
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "arrow.counterclockwise")
+                                Text(l10n.t("plan.askAgain"))
+                            }
+                            .font(.bpScaled(13, weight: .semibold))
+                            .foregroundStyle(Color.bpInk.opacity(0.7))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 9)
+                            .background(Color.bpInk.opacity(0.06), in: Capsule())
+                            .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.09)))
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 20)
+                        .bpAccessibility(label: l10n.t("plan.askAgain"), isButton: true)
+
                         NightPlanView(plan: plan, onSave: savePlan)
                             .padding(.horizontal, 20)
                     }
@@ -176,6 +229,7 @@ struct PlanView: View {
         }
         .onAppear { BPAnalytics.track(.viewPlan) }
         .task {
+            restoreCurrentPlan()
             await loadSavedPlans()
             userLocation = await locationService.requestOnce()
         }
@@ -186,6 +240,7 @@ struct PlanView: View {
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active, plan != nil, !lastPrompt.isEmpty else { return }
             plan = NightPlan.sample(for: lastPrompt, venues: venueStore.venues, userLocation: userLocation)
+            persistCurrentPlan()
         }
 }
 
@@ -198,6 +253,7 @@ struct PlanView: View {
             await MainActor.run {
                 plan = NightPlan.sample(for: currentPrompt, venues: venueStore.venues, userLocation: userLocation)
                 lastPrompt = currentPrompt
+                persistCurrentPlan()
                 BPAnalytics.track(.createPlan(method: "prompt"))
                 isLoading = false
                 prompt = ""
@@ -333,7 +389,9 @@ struct NightPlanView: View {
                 .buttonStyle(.plain)
                 .bpAccessibility(label: l10n.t("plan.save"), hint: l10n.t("plan.save.hint"), isButton: true)
 
-                Button { } label: {
+                Button {
+                    ShareManager.present(ShareManager.shareNightPlan(plan))
+                } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "square.and.arrow.up")
                         Text(l10n.t("plan.share"))

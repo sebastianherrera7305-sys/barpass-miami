@@ -16,26 +16,30 @@ struct TonightView: View {
         let keywords: [String]
     }
 
-    private let moods: [Mood] = [
-        .init(label: "🔥 Trending",   keywords: ["trending"]),
-        .init(label: "🎉 Party",      keywords: ["club", "edm", "house", "techno", "packed", "reggaeton"]),
-        .init(label: "🍸 Cocktails",  keywords: ["cocktail", "lounge", "bar", "mixology"]),
-        .init(label: "🥂 Date Night", keywords: ["date", "romantic", "rooftop", "lounge", "upscale", "views", "restaurant"]),
-        .init(label: "🍽️ Dinner",     keywords: ["restaurant", "dinner", "food"]),
-        .init(label: "🎵 Live Music", keywords: ["live", "jazz", "salsa", "latin", "band"]),
-        .init(label: "🌇 Rooftop",    keywords: ["rooftop", "sunset", "views", "terrace"]),
-        .init(label: "🏈 Sports",     keywords: ["sports", "sport", "game", "screens"]),
-        // "age:" keywords are a marker read by matches() below, not text
-        // searched against venue fields — these check the real, research-
-        // verified venue.ageBrackets instead of a keyword heuristic, same
-        // distinction as the Trending case.
-        .init(label: "🎓 18-25",      keywords: ["age:18_25"]),
-        .init(label: "💼 25-35",      keywords: ["age:25_35"]),
-        .init(label: "🥂 35-50",      keywords: ["age:35_50"]),
-    ]
+    private var moods: [Mood] {
+        [
+            .init(label: "🔥 " + l10n.t("mood.trending"),   keywords: ["trending"]),
+            .init(label: "🎉 " + l10n.t("mood.party"),      keywords: ["club", "edm", "house", "techno", "packed", "reggaeton"]),
+            .init(label: "🍸 " + l10n.t("mood.cocktails"),  keywords: ["cocktail", "lounge", "bar", "mixology"]),
+            .init(label: "🥂 " + l10n.t("mood.dateNight"),  keywords: ["date", "romantic", "rooftop", "lounge", "upscale", "views", "restaurant"]),
+            .init(label: "🍽️ " + l10n.t("mood.dinner"),     keywords: ["restaurant", "dinner", "food"]),
+            .init(label: "🎵 " + l10n.t("mood.liveMusic"),  keywords: ["live", "jazz", "salsa", "latin", "band"]),
+            .init(label: "🌇 " + l10n.t("mood.rooftop"),    keywords: ["rooftop", "sunset", "views", "terrace"]),
+            .init(label: "🏈 " + l10n.t("mood.sports"),     keywords: ["sports", "sport", "game", "screens"]),
+            // "age:" keywords are a marker read by matches() below, not text
+            // searched against venue fields — these check the real, research-
+            // verified venue.ageBrackets instead of a keyword heuristic, same
+            // distinction as the Trending case.
+            .init(label: "🎓 18-25", keywords: ["age:18_25"]),
+            .init(label: "💼 25-35", keywords: ["age:25_35"]),
+            .init(label: "🥂 35-50", keywords: ["age:35_50"]),
+        ]
+    }
 
     private func matches(_ venue: BarPassVenue, _ mood: Mood) -> Bool {
-        if mood.label.contains("Trending") { return venue.isTrending }
+        // Matched by keyword identity, not the (now-localized) label text —
+        // "trending" is the marker, same pattern as the "age:" markers below.
+        if mood.keywords == ["trending"] { return venue.isTrending }
         if let marker = mood.keywords.first, marker.hasPrefix("age:") {
             return venue.ageBrackets.contains(String(marker.dropFirst(4)))
         }
@@ -129,9 +133,14 @@ struct TonightView: View {
         let trending: [BarPassVenue]
         let happyHour: [BarPassVenue]
         let openNow: [BarPassVenue]
-        let brickell: [BarPassVenue]
-        let southBeach: [BarPassVenue]
-        let wynwood: [BarPassVenue]
+        /// Top 3 neighborhoods by venue count in the current city — real
+        /// data-derived grouping, not 3 Miami names hardcoded everywhere.
+        /// Each neighborhood's venues are sorted by review_count (the
+        /// closest real proxy for "most famous / most people want to go")
+        /// with rating as a tiebreaker, so the front of each section is
+        /// the neighborhood's actual most-popular spot, not DB insertion
+        /// order.
+        let neighborhoods: [(name: String, venues: [BarPassVenue])]
     }
 
     private var dedupedFeed: DedupedFeed {
@@ -145,13 +154,22 @@ struct TonightView: View {
             return fresh
         }
 
+        let byNeighborhood = Dictionary(grouping: venueStore.venues, by: \.neighborhood)
+        let topNeighborhoods = byNeighborhood
+            .sorted { $0.value.count > $1.value.count }
+            .prefix(3)
+            .map { name, venues -> (name: String, venues: [BarPassVenue]) in
+                let ranked = venues.sorted {
+                    $0.reviewCount != $1.reviewCount ? $0.reviewCount > $1.reviewCount : $0.rating > $1.rating
+                }
+                return (name, take(ranked))
+            }
+
         return DedupedFeed(
-            trending:   take(venueStore.trending),
-            happyHour:  take(venueStore.happyHour),
-            openNow:    take(venueStore.openNow),
-            brickell:   take(venueStore.venues.filter { $0.neighborhood == "Brickell" }),
-            southBeach: take(venueStore.venues.filter { $0.neighborhood == "South Beach" }),
-            wynwood:    take(venueStore.venues.filter { $0.neighborhood == "Wynwood" })
+            trending:      take(venueStore.trending),
+            happyHour:     take(venueStore.happyHour),
+            openNow:       take(venueStore.openNow),
+            neighborhoods: topNeighborhoods
         )
     }
 
@@ -235,14 +253,10 @@ struct TonightView: View {
                             section(title: l10n.t("home.openNow"), venues: feed.openNow, style: .card)
                         }
 
-                        if !feed.brickell.isEmpty {
-                            section(title: "📍 Brickell", venues: feed.brickell, style: .card)
-                        }
-                        if !feed.southBeach.isEmpty {
-                            section(title: "📍 South Beach", venues: feed.southBeach, style: .card)
-                        }
-                        if !feed.wynwood.isEmpty {
-                            section(title: "📍 Wynwood", venues: feed.wynwood, style: .card)
+                        ForEach(feed.neighborhoods, id: \.name) { entry in
+                            if !entry.venues.isEmpty {
+                                section(title: "📍 \(entry.name)", venues: entry.venues, style: .card)
+                            }
                         }
                     }
 
@@ -342,7 +356,10 @@ struct TonightView: View {
 
     private var stadiumsEntryCard: some View {
         HStack(spacing: 14) {
-            Text("🏟️").font(.bpScaled(20)).frame(width: 34)
+            Image(systemName: "sportscourt.fill")
+                .font(.bpScaled(20))
+                .foregroundStyle(Color.bpAmber)
+                .frame(width: 34)
             VStack(alignment: .leading, spacing: 2) {
                 Text(l10n.t("stadiums.entry.title"))
                     .font(.bpHeadline())
@@ -534,7 +551,7 @@ struct HeroVenueCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
                     if venue.isTrending {
-                        Text("TRENDING")
+                        Text(l10n.t("tonight.trending.badge"))
                             .font(.bpTiny())
                             .tracking(2)
                             .foregroundStyle(Color.bpAmber)
@@ -659,10 +676,16 @@ struct SmallVenueCard: View {
                 }
             }
 
+            // TestFlight feedback: "cards are not well design they have ui
+            // problems" — single-line truncation was chopping longer venue
+            // names ("REPUBLICA FOOD & LIQUOR…") mid-word. Two lines with a
+            // fixed height keeps the row aligned either way.
             Text(venue.name)
                 .font(.bpScaled(13, weight: .bold))
                 .foregroundStyle(Color.bpInk)
-                .lineLimit(1)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .frame(height: 34, alignment: .top)
 
             Text(venue.neighborhood)
                 .font(.bpSmall())

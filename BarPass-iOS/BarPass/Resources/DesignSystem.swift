@@ -187,9 +187,15 @@ struct BPBackgroundView: View {
                                 .frame(width: proxy.size.width, height: proxy.size.height * 0.62)
                                 .clipped()
                                 .overlay(alignment: .bottom) {
+                                    // Fade starts earlier (was 0.35) so the
+                                    // profile header and the first row of
+                                    // Tonight cards — both of which sit
+                                    // fairly high on screen — land against
+                                    // mostly-faded art instead of the
+                                    // brightest part of the illustration.
                                     LinearGradient(
                                         colors: [.clear, .black.opacity(0.55), .black],
-                                        startPoint: .init(x: 0.5, y: 0.35),
+                                        startPoint: .init(x: 0.5, y: 0.12),
                                         endPoint: .bottom
                                     )
                                     .frame(height: proxy.size.height * 0.62)

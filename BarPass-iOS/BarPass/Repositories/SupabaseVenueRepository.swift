@@ -378,27 +378,10 @@ final actor SupabaseVenueRepository: VenueRepository {
         }
     }
 
-    // Stored in Supabase as a JSON-encoded STRING (not a jsonb array), with
-    // numeric prices — so we decode the raw string and parse it ourselves.
-    private static func mapPopularDrinks(_ json: String?) -> [PopularDrink] {
-        guard let json,
-              let data = json.data(using: .utf8),
-              let arr = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
-        else { return [] }
-
-        return arr.enumerated().compactMap { i, dict in
-            guard let name = dict["name"] as? String else { return nil }
-            let price: Double
-            if let p = dict["price"] as? Double { price = p }
-            else if let p = dict["price"] as? Int { price = Double(p) }
-            else if let s = dict["price"] as? String { price = Double(s) ?? 0 }
-            else { price = 0 }
-            return PopularDrink(
-                id: "supabase-\(i)",
-                name: name,
-                price: price,
-                emoji: dict["emoji"] as? String ?? "🍸"
-            )
+    private static func mapPopularDrinks(_ field: SupabasePopularDrinksField?) -> [PopularDrink] {
+        guard let field else { return [] }
+        return field.items.enumerated().map { i, item in
+            PopularDrink(id: "supabase-\(i)", name: item.name, price: item.price ?? 0, emoji: item.emoji ?? "🍸")
         }
     }
 
@@ -451,7 +434,7 @@ struct SupabaseVenueRow: Codable {
     let crowdLevel: String?
     let bestArrivalTime: String?
     let peakHours: String?
-    let popularDrinks: String?
+    let popularDrinks: SupabasePopularDrinksField?
     let emoji: String?
     let imageUrl: String?
     let instagramHandle: String?
@@ -469,6 +452,55 @@ struct SupabaseVenueRow: Codable {
     let city: String?
     let country: String?
     let timezone: String?
+}
+
+struct SupabasePopularDrinkItem: Codable {
+    let name: String
+    let price: Double?
+    let emoji: String?
+
+    enum CodingKeys: String, CodingKey { case name, price, emoji }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        emoji = try container.decodeIfPresent(String.self, forKey: .emoji)
+        if let d = try? container.decode(Double.self, forKey: .price) {
+            price = d
+        } else if let s = try? container.decode(String.self, forKey: .price) {
+            price = Double(s)
+        } else {
+            price = nil
+        }
+    }
+}
+
+/// popular_drinks is a jsonb column, but rows written by different loaders
+/// over time disagree on shape: some store the literal array, others store
+/// a JSON-encoded STRING containing that array (double-encoded). A plain
+/// `String?` or `[Item]?` decode throws on whichever shape it doesn't
+/// expect — this accepts both so one malformed row can't break the whole
+/// venues fetch and silently fall back to fake preview data.
+struct SupabasePopularDrinksField: Codable {
+    let items: [SupabasePopularDrinkItem]
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let arr = try? container.decode([SupabasePopularDrinkItem].self) {
+            items = arr
+        } else if let str = try? container.decode(String.self),
+                  let data = str.data(using: .utf8),
+                  let arr = try? JSONDecoder().decode([SupabasePopularDrinkItem].self, from: data) {
+            items = arr
+        } else {
+            items = []
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(items)
+    }
 }
 
 struct SupabaseEventRow: Codable {

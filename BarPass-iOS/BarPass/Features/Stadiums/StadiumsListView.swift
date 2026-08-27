@@ -42,7 +42,9 @@ struct StadiumsListView: View {
                     LinearGradient(colors: [Color.bpAmber, Color.bpAmberBright],
                                    startPoint: .topLeading, endPoint: .bottomTrailing)
                 )
-                Text("🏟️").font(.bpScaled(20))
+                Image(systemName: "sportscourt.fill")
+                    .font(.bpScaled(18, weight: .semibold))
+                    .foregroundStyle(.black)
             }
             .frame(width: 44, height: 44)
 
@@ -67,7 +69,9 @@ struct StadiumsListView: View {
 
     private var emptyState: some View {
         VStack(spacing: 10) {
-            Text("🏟️").font(.bpScaled(34))
+            Image(systemName: "sportscourt.fill")
+                .font(.bpScaled(34))
+                .foregroundStyle(Color.bpAmber)
             Text(l10n.t("stadiums.empty"))
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)

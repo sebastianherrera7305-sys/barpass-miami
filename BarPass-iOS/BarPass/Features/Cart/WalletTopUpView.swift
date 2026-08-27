@@ -33,11 +33,11 @@ struct WalletTopUpView: View {
                         amountPicker.padding(.top, 8)
 
                         VStack(spacing: 12) {
-                            field("Nombre en la tarjeta", text: $name, kind: .name, keyboard: .default)
-                            field("1234 5678 9012 3456", text: $cardNumber, kind: .number, keyboard: .numberPad)
+                            field(l10n.t("card.holderName"), text: $name, kind: .name, keyboard: .default)
+                            field(l10n.t("card.numberPlaceholder"), text: $cardNumber, kind: .number, keyboard: .numberPad)
                             HStack(spacing: 12) {
-                                field("MM/AA", text: $expiry, kind: .expiry, keyboard: .numberPad)
-                                field("CVV", text: $cvv, kind: .cvv, keyboard: .numberPad)
+                                field(l10n.t("card.expiryPlaceholder"), text: $expiry, kind: .expiry, keyboard: .numberPad)
+                                field(l10n.t("card.cvvPlaceholder"), text: $cvv, kind: .cvv, keyboard: .numberPad)
                             }
                         }
                         .padding(.horizontal, 20)
@@ -52,7 +52,7 @@ struct WalletTopUpView: View {
                         Button(action: topUp) {
                             Group {
                                 if loading { ProgressView().tint(.black) }
-                                else { Text(String(format: "Cargar $%.2f", amount)).font(.bpScaled(17, weight: .heavy)) }
+                                else { Text(String(format: l10n.t("wallet.topUp.button"), amount)).font(.bpScaled(17, weight: .heavy)) }
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 18)
@@ -121,7 +121,7 @@ struct WalletTopUpView: View {
 
     private func topUp() {
         guard isValid, let session = AuthService.shared.restoreSession() else {
-            errorMsg = "Inicia sesión para cargar saldo."
+            errorMsg = l10n.t("wallet.topUp.signInRequired")
             return
         }
         focus = nil
@@ -132,12 +132,16 @@ struct WalletTopUpView: View {
             do {
                 let parts = expiry.split(separator: "/")
                 let month = parts.first.flatMap { UInt($0) } ?? 0
-                let year = parts.count > 1 ? UInt(parts[1]) ?? 0 : 0
+                let rawYear = parts.count > 1 ? UInt(parts[1]) ?? 0 : 0
+                // Same fix as CardPaymentView: a 4-digit year typed here
+                // (e.g. "12/2028") would otherwise become 2000+2028=4028,
+                // which Stripe rejects with a confusing error.
+                let year = rawYear >= 100 ? rawYear : 2000 + rawYear
 
                 let cardParams = STPPaymentMethodCardParams()
                 cardParams.number = cardNumber
                 cardParams.expMonth = NSNumber(value: month)
-                cardParams.expYear = NSNumber(value: 2000 + year)
+                cardParams.expYear = NSNumber(value: year)
                 cardParams.cvc = cvv
 
                 let billingDetails = STPPaymentMethodBillingDetails()

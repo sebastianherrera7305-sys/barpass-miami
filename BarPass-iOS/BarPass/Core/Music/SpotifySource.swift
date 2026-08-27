@@ -1,6 +1,7 @@
 import Foundation
 import AuthenticationServices
 import CryptoKit
+import UIKit
 
 /// Configuración de Spotify. Crear app gratis en developer.spotify.com,
 /// agregar redirect URI `barpass://spotify-callback` y pegar el Client ID.
@@ -189,9 +190,19 @@ final class SpotifySource: NSObject, MusicSource, @unchecked Sendable {
 }
 
 /// Ancla de presentación para ASWebAuthenticationSession.
+///
+/// `ASPresentationAnchor()` construía una UIWindow nueva, en blanco, sin
+/// scene asociada — no la ventana real de la app. La sesión necesita una
+/// ventana conectada de verdad para presentarse; con una ventana fantasma,
+/// el login de Spotify abre pero el flujo se rompe después (exactamente el
+/// bug reportado: "se abrió el login pero falló después").
 private final class PresentationAnchor: NSObject, ASWebAuthenticationPresentationContextProviding {
     static let shared = PresentationAnchor()
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        ASPresentationAnchor()
+        let keyWindow = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+        return keyWindow ?? ASPresentationAnchor()
     }
 }

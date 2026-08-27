@@ -68,7 +68,15 @@ struct AgeGateView: View {
                     // session shouldn't trap the user on this screen. If it
                     // fails silently, the Grid check-in RPC will surface
                     // "birthdate required" then, not here.
-                    Task { try? await RepositoryDependencies.birthdate.setBirthdate(dateOfBirth) }
+                    Task {
+                        do {
+                            try await RepositoryDependencies.birthdate.setBirthdate(dateOfBirth)
+                            AgeGateService.isSyncedToServer = true
+                        } catch {
+                            // Left false on purpose — RootView retries this
+                            // on every launch until it actually succeeds.
+                        }
+                    }
                     onVerified()
                 } else {
                     BPHaptics.error()
