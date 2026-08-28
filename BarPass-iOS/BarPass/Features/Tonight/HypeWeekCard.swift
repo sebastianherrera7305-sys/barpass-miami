@@ -40,10 +40,13 @@ struct HypeWeekCard: View {
                 Spacer()
             }
 
-            HStack(spacing: 10) {
-                providerButton(" Apple Music", kind: .appleMusic)
-                providerButton("Spotify", kind: .spotify)
-            }
+            // Spotify pulled from the main connect row — its app is stuck in
+            // Development Mode (25-tester cap, self-service quota extension
+            // no longer offered for an app this size per Spotify's May 2025
+            // policy change), so it can't be offered to real users the way
+            // Apple Music can. `notEntitledCard` below still falls back to
+            // it if MusicKit itself ever fails — that path stays.
+            providerButton(" Apple Music", kind: .appleMusic)
         }
         .padding(14)
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
