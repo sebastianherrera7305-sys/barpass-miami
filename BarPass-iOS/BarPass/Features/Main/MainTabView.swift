@@ -188,6 +188,10 @@ struct MainTabView: View {
             appState.consumeRoute()
         case .pass, .profile:
             appState.consumeRoute()
+        case .tonightPrompt:
+            selectedTab = 0
+            appState.focusPromptRequested = true
+            appState.consumeRoute()
         }
     }
 

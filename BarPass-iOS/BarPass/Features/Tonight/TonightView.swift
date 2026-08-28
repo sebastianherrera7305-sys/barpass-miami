@@ -195,7 +195,7 @@ struct TonightView: View {
                     // this screen already uses — nothing below this line
                     // moved, changed, or lost its own state.
                     if usePromptYourNightHome {
-                        PromptYourNightHomeSection(venues: venueStore.venues, zoomNS: zoomNS)
+                        PromptYourNightHomeSection(venues: venueStore.venues, zoomNS: zoomNS, focusRequested: $appState.focusPromptRequested)
                             .padding(.horizontal, BPSpacing.lg)
                     }
 

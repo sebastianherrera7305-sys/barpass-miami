@@ -37,6 +37,11 @@ struct GoHomeEntry: TimelineEntry {
         // pattern already used in VenueDetailView.openUber().
         return URL(string: "uber://?action=setPickup&pickup=my_location&dropoff[latitude]=\(coordinate.lat)&dropoff[longitude]=\(coordinate.lng)&dropoff[nickname]=Home")
     }
+
+    /// Opens the app straight into Tonight with Prompt Your Night's text
+    /// field focused — DeepLinkRouter parses the bare `prompt` host with no
+    /// id required (see DeepLinkRouter.swift).
+    var promptURL: URL { URL(string: "barpass://prompt")! }
 }
 
 struct GoHomeProvider: TimelineProvider {
@@ -65,16 +70,24 @@ struct GoHomeWidgetView: View {
 
     var body: some View {
         Group {
-            if entry.hasHomeAddress {
+            if family == .systemSmall {
+                // Two independent tap zones (Prompt Your Night / Go Home),
+                // each its own Link — a single .widgetURL() can't do that,
+                // it's one destination for the whole widget. The Lock
+                // Screen families below stay single-target: there's no room
+                // for two zones at that size, and .widgetURL is what they
+                // support anyway.
+                promptAndHomeContent
+            } else if entry.hasHomeAddress {
                 content
             } else {
                 Text("Configurá tu dirección de casa en BarPass")
                     .font(.caption2)
                     .multilineTextAlignment(.center)
                     .padding(8)
+                    .widgetURL(nil)
             }
         }
-        .widgetURL(entry.uberURL)
         // Required since iOS 17 — a manual .background() on the root view
         // (the old pattern below) makes WidgetKit refuse to render the
         // widget at all, showing "Please adopt containerBackground API"
@@ -107,11 +120,62 @@ struct GoHomeWidgetView: View {
         }
     }
 
+    /// systemSmall layout: the mascot tile opens Prompt Your Night, the "P"
+    /// tile opens the Uber home flow when an address is configured (falls
+    /// back to just opening the app to set one). Same flat-fill / thick-
+    /// outline / hard-shadow "sticker" language as the app's real logo,
+    /// sized from the design exploration (BarPass Widget Concepts canvas).
+    private var promptAndHomeContent: some View {
+        HStack(spacing: 10) {
+            Link(destination: entry.promptURL) {
+                ZStack {
+                    Color.white
+                    Image("BarPassMascot")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(10)
+                    Text("PROMPT")
+                        .font(.system(size: 8, weight: .heavy, design: .rounded))
+                        .tracking(0.5)
+                        .foregroundStyle(.black)
+                        .padding(.bottom, 6)
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 22))
+                .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(.black, lineWidth: 3))
+            }
+            .buttonStyle(.plain)
+
+            Link(destination: entry.hasHomeAddress ? (entry.uberURL ?? entry.promptURL) : entry.promptURL) {
+                ZStack {
+                    LinearGradient(
+                        colors: [Color(red: 0.92, green: 0.72, blue: 0.28), Color(red: 0.98, green: 0.86, blue: 0.50)],
+                        startPoint: .top, endPoint: .bottomTrailing
+                    )
+                    Image(systemName: "house.fill")
+                        .font(.system(size: 46, weight: .black))
+                        .foregroundStyle(.black)
+                        .offset(y: -4)
+                    Text(entry.hasHomeAddress ? "GO HOME" : "SET HOME")
+                        .font(.system(size: 8, weight: .heavy, design: .rounded))
+                        .tracking(0.5)
+                        .foregroundStyle(.black.opacity(0.65))
+                        .padding(.bottom, 6)
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 22))
+                .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(.black, lineWidth: 3))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     @ViewBuilder
     private var content: some View {
         switch family {
         case .accessoryCircular:
             mascotBadge(size: 48, badgeSize: 20)
+                .widgetURL(entry.uberURL)
         case .accessoryRectangular:
             HStack(spacing: 8) {
                 mascotBadge(size: 34, badgeSize: 15)
@@ -120,33 +184,9 @@ struct GoHomeWidgetView: View {
                     Text("Un toque, Uber directo").font(.caption2)
                 }
             }
+            .widgetURL(entry.uberURL)
         default:
-            // The same psychedelic sunburst art used behind Tonight/Plan/
-            // Profile in the main app (CityArtMiami) — makes the widget
-            // instantly recognizable as BarPass on a home screen full of
-            // generic gray/white widgets, not just a mascot on a flat tile.
-            ZStack {
-                Image("CityArtMiami")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .overlay(
-                        LinearGradient(
-                            colors: [.clear, .black.opacity(0.35), .black.opacity(0.85)],
-                            startPoint: .top, endPoint: .bottom
-                        )
-                    )
-
-                VStack(spacing: 6) {
-                    Spacer()
-                    mascotBadge(size: 56, badgeSize: 24)
-                    Text("IR A CASA")
-                        .font(.system(size: 13, weight: .black, design: .rounded))
-                        .tracking(1.5)
-                        .foregroundStyle(.white)
-                        .shadow(color: .black.opacity(0.6), radius: 3)
-                    Spacer().frame(height: 6)
-                }
-            }
+            EmptyView()
         }
     }
 }
@@ -158,8 +198,8 @@ struct GoHomeWidget: Widget {
         StaticConfiguration(kind: kind, provider: GoHomeProvider()) { entry in
             GoHomeWidgetView(entry: entry)
         }
-        .configurationDisplayName("Ir a casa")
-        .description("Un toque para pedir un Uber a tu casa.")
+        .configurationDisplayName("BarPass")
+        .description("Armá tu noche, o pedí un Uber a casa — un toque.")
         .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular])
     }
 }

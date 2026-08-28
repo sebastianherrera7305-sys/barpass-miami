@@ -11,6 +11,11 @@ enum DeepLinkRoute: Equatable {
     case pass(id: String)       // future
     case invite(code: String)   // future
     case profile(id: String)    // future
+    /// Opens Tonight with the Prompt Your Night text field already focused —
+    /// the Home Screen widget's "prompt" button target. No id: unlike the
+    /// others, this route doesn't identify a resource, it identifies an
+    /// intent, so it's parsed before the value-required cases below.
+    case tonightPrompt
 }
 
 /// Turns an incoming URL into a `DeepLinkRoute`. Pure and side-effect free so
@@ -33,6 +38,8 @@ enum DeepLinkRouter {
             // barpass://trip/abc123  →  host "trip", pathComponents ["/", "abc123"]
             guard let host = url.host, !host.isEmpty else { return nil }
             type = host.lowercased()
+            // barpass://prompt — no id to carry, so no path segment required.
+            if type == "prompt" { return .tonightPrompt }
             rawValue = url.pathComponents.first(where: { $0 != "/" }) ?? ""
         case "https", "http":
             // https://barpass.app/trip/abc123  →  ["/", "trip", "abc123"]

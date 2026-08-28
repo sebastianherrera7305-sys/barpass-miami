@@ -15,6 +15,11 @@ import SwiftUI
 struct PromptYourNightHomeSection: View {
     let venues: [BarPassVenue]
     let zoomNS: Namespace.ID
+    /// Flips true when the Home Screen widget's "prompt" button opens the
+    /// app via `barpass://prompt` (DeepLinkRouter → AppState → TonightView).
+    /// Focusing here, not higher up, keeps the keyboard-focus concern local
+    /// to the field that actually owns it.
+    @Binding var focusRequested: Bool
 
     @ObservedObject private var l10n = L10n.shared
     @State private var prompt = ""
@@ -142,6 +147,11 @@ struct PromptYourNightHomeSection: View {
         .padding(16)
         .background(Color.black.opacity(0.22), in: RoundedRectangle(cornerRadius: BPRadius.xl))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.08)))
+        .onChange(of: focusRequested) { _, requested in
+            guard requested else { return }
+            promptFocused = true
+            focusRequested = false
+        }
     }
 
     private func budgetChip(_ b: Budget) -> some View {
