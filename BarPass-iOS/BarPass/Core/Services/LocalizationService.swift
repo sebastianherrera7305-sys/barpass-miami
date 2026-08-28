@@ -149,6 +149,7 @@ final class L10n: ObservableObject {
             "prompt.placeholder": "Tengo $50 y quiero algo lleno de gente...", "prompt.cta": "Encontrar mi noche",
             "prompt.results": "Para vos", "prompt.vibe.party": "Fiesta", "prompt.vibe.music": "Música",
             "prompt.vibe.chill": "Tranquilo", "prompt.vibe.date": "Cita", "prompt.vibe.upscale": "Exclusivo",
+            "prompt.genreLabel": "¿Qué música buscás?",
             "night.yours": "Tu noche", "night.save": "Guardar como Trip",
 
             "home.mood.empty": "Nada abierto con ese mood ahora.",
@@ -818,6 +819,7 @@ final class L10n: ObservableObject {
             "prompt.placeholder": "I have $50 and want somewhere packed...", "prompt.cta": "Find my night",
             "prompt.results": "For you", "prompt.vibe.party": "Party", "prompt.vibe.music": "Music",
             "prompt.vibe.chill": "Chill", "prompt.vibe.date": "Date", "prompt.vibe.upscale": "Upscale",
+            "prompt.genreLabel": "What music are you looking for?",
             "night.yours": "Your night", "night.save": "Save as Trip",
 
             "home.mood.empty": "Nothing open for that mood right now.",
@@ -1487,6 +1489,7 @@ final class L10n: ObservableObject {
             "prompt.placeholder": "Tenho $50 e quero um lugar cheio...", "prompt.cta": "Encontrar minha noite",
             "prompt.results": "Para você", "prompt.vibe.party": "Festa", "prompt.vibe.music": "Música",
             "prompt.vibe.chill": "Tranquilo", "prompt.vibe.date": "Encontro", "prompt.vibe.upscale": "Exclusivo",
+            "prompt.genreLabel": "Que música você procura?",
             "night.yours": "Sua noite", "night.save": "Salvar como Trip",
 
             "home.mood.empty": "Nada aberto para esse mood agora.",

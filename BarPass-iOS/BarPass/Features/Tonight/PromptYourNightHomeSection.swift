@@ -20,8 +20,15 @@ struct PromptYourNightHomeSection: View {
     @State private var prompt = ""
     @State private var selectedBudget: Budget? = nil
     @State private var selectedVibe: ExperienceIntent? = nil
+    @State private var selectedGenre: MusicGenre? = nil
     @State private var results: [BarPassVenue]? = nil
     @FocusState private var promptFocused: Bool
+
+    /// The genres real venues in this catalog actually carry (sourced from
+    /// Google Places / manual research, same as everywhere else `musicGenres`
+    /// is used) — not a curated subset, so a chip never promises a sound the
+    /// data can't back up.
+    private static let genres = MusicGenre.allCases
 
     /// Buckets over the venue catalog's real `priceTier` (1-4, sourced from
     /// Google Places price level via `enrich-venues.ts` — never invented).
@@ -117,6 +124,17 @@ struct PromptYourNightHomeSection: View {
                 }
             }
 
+            VStack(alignment: .leading, spacing: 6) {
+                Text(l10n.t("prompt.genreLabel"))
+                    .font(.bpScaled(11, weight: .semibold))
+                    .foregroundStyle(Color.bpTextSecondary)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(Self.genres, id: \.self) { g in genreChip(g) }
+                    }
+                }
+            }
+
             if let results {
                 resultsView(results)
             }
@@ -161,6 +179,23 @@ struct PromptYourNightHomeSection: View {
         }
         .buttonStyle(.plain)
         .bpAccessibility(label: label, isButton: true)
+    }
+
+    private func genreChip(_ g: MusicGenre) -> some View {
+        let on = selectedGenre == g
+        return Button {
+            BPHaptics.light()
+            selectedGenre = on ? nil : g
+        } label: {
+            Text(g.rawValue)
+                .font(.bpScaled(13, weight: .semibold))
+                .foregroundStyle(on ? .black : Color.bpInk)
+                .padding(.horizontal, 14).padding(.vertical, 8)
+                .background(on ? Color.bpAmber : Color.bpInk.opacity(0.08), in: Capsule())
+                .overlay(Capsule().strokeBorder(on ? .clear : Color.bpInk.opacity(0.12)))
+        }
+        .buttonStyle(.plain)
+        .bpAccessibility(label: g.rawValue, isButton: true)
     }
 
     private func resultsView(_ results: [BarPassVenue]) -> some View {
@@ -228,6 +263,18 @@ struct PromptYourNightHomeSection: View {
 
         if let maxTier = selectedBudget?.maxTier {
             ranked = ranked.filter { $0.priceTier == .unknown || $0.priceTier.rawValue <= maxTier.rawValue }
+        }
+
+        // Genre is a real signal on the venue (`musicGenres`, sourced the
+        // same way as everywhere else it's used) — a soft preference, not a
+        // hard filter: venues that actually carry the picked genre float to
+        // the top (their ExperienceScorer order preserved among themselves),
+        // but a great match with no genre tag still shows rather than
+        // vanishing, same reasoning as the budget bucket above.
+        if let selectedGenre {
+            let matching = ranked.filter { $0.musicGenres.contains(selectedGenre) }
+            let rest = ranked.filter { !$0.musicGenres.contains(selectedGenre) }
+            ranked = matching + rest
         }
 
         withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
