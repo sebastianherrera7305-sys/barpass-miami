@@ -335,43 +335,16 @@ struct ProfileView: View {
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
                     .padding(.horizontal, BPSpacing.lg)
 
-                    // Appearance selector
-                    VStack(alignment: .leading, spacing: 14) {
-                        Text(l10n.t("profile.appearance"))
-                            .font(.bpScaled(16, weight: .bold))
-                            .foregroundStyle(Color.bpInk)
-
-                        HStack(spacing: 10) {
-                            ForEach(BPAppearance.allCases) { mode in
-                                let on = appearanceStore.appearance == mode
-                                Button {
-                                    BPHaptics.medium()
-                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                                        appearanceStore.appearance = mode
-                                    }
-                                } label: {
-                                    VStack(spacing: 4) {
-                                        Text(mode.emoji).font(.bpScaled(22))
-                                        Text(mode.label)
-                                            .font(.system(size: 11, weight: on ? .bold : .regular))
-                                            .foregroundStyle(on ? Color.bpAmber : Color.bpTextSecondary)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .background(on ? Color.bpAmber.opacity(0.12) : Color.bpInk.opacity(0.04),
-                                                in: RoundedRectangle(cornerRadius: BPRadius.md))
-                                    .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
-                                        .strokeBorder(on ? Color.bpAmber.opacity(0.4) : Color.bpInk.opacity(0.07)))
-                                }
-                                .buttonStyle(.plain)
-                                .bpAccessibility(label: mode.label, hint: l10n.t("profile.appearance.hint"), isButton: true)
-                            }
-                        }
-                    }
-                    .padding(18)
-                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
-                    .padding(.horizontal, BPSpacing.lg)
+                    // Appearance selector removed 2026-08-28 — TestFlight feedback:
+                    // a tester picked "Claro" and the whole app broke ("pierde
+                    // todos los Features del Background"). Light mode was never
+                    // actually designed: BPBackgroundView's non-dark branch is a
+                    // flat Color.bpBackground fill with none of the psychedelic
+                    // city art, and every screen this session touched assumes
+                    // the dark palette. Rather than finish designing a real light
+                    // mode, the honest fix is to stop offering a mode that isn't
+                    // built — AppearanceStore now always resolves to dark (see
+                    // ThemeService.swift), so this control has nothing to do.
 
                     // Autoplay — apagado real, no solo el X de la barra flotante.
                     HStack {

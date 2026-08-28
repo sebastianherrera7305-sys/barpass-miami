@@ -14,12 +14,21 @@ import SwiftUI
 /// exactly as before, whether or not a search is active here.
 struct PromptYourNightHomeSection: View {
     let venues: [BarPassVenue]
-    let zoomNS: Namespace.ID
     /// Flips true when the Home Screen widget's "prompt" button opens the
     /// app via `barpass://prompt` (DeepLinkRouter → AppState → TonightView).
     /// Focusing here, not higher up, keeps the keyboard-focus concern local
     /// to the field that actually owns it.
     @Binding var focusRequested: Bool
+
+    /// Deliberately NOT the `zoomNS` TonightView's own Trending/Recommended
+    /// sections use. TestFlight feedback: a result card lost its name and
+    /// photo — root cause was this section sharing that namespace, so a
+    /// venue appearing here AND in Trending/Recommended at the same time
+    /// (very common, both draw from the same catalog) registered the same
+    /// `matchedTransitionSource` id twice concurrently, which is undefined
+    /// behavior and broke one of the two card's rendering. A dedicated
+    /// namespace can never collide with the rest of the screen.
+    @Namespace private var zoomNS
 
     @ObservedObject private var l10n = L10n.shared
     @State private var prompt = ""
@@ -271,8 +280,15 @@ struct PromptYourNightHomeSection: View {
             .sorted { $0.1 > $1.1 }
             .map(\.0)
 
+        // TestFlight feedback: asking for something cheap surfaced an
+        // Airport Lounge — `.unknown` (no Google Places price data) was
+        // bypassing the filter unconditionally, so an unpriced upscale
+        // venue could slip through even the $25 bucket. `.open` ($150+)
+        // already has no real ceiling (`maxTier` is nil, this block never
+        // runs), so the bypass was only ever wrong for the three buckets
+        // that DO mean something — dropped instead of guessed at.
         if let maxTier = selectedBudget?.maxTier {
-            ranked = ranked.filter { $0.priceTier == .unknown || $0.priceTier.rawValue <= maxTier.rawValue }
+            ranked = ranked.filter { $0.priceTier != .unknown && $0.priceTier.rawValue <= maxTier.rawValue }
         }
 
         // Genre is a real signal on the venue (`musicGenres`, sourced the

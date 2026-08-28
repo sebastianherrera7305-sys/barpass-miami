@@ -158,17 +158,17 @@ final class AppearanceStore: ObservableObject {
     /// Read by the Color tokens from any context (plain value).
     nonisolated(unsafe) static var isDark: Bool = true
 
-    @Published var appearance: BPAppearance {
-        didSet {
-            UserDefaults.standard.set(appearance.rawValue, forKey: Self.key)
-            Self.isDark = appearance == .dark
-        }
-    }
+    // Light mode was never actually designed (TestFlight feedback: picking
+    // it broke the app — BPBackgroundView's non-dark branch is a flat fill
+    // with none of the city art every screen assumes is behind it), and the
+    // picker that offered it is gone from ProfileView. `appearance` stays
+    // `@Published .dark` unconditionally now, ignoring whatever a device
+    // may have persisted under the old key — including a tester's device
+    // already stuck on "Claro" from before this fix, which this corrects
+    // without them touching anything.
+    @Published var appearance: BPAppearance = .dark
 
     private init() {
-        let saved = UserDefaults.standard.string(forKey: Self.key)
-        let a = saved.flatMap(BPAppearance.init) ?? .dark
-        appearance = a
-        Self.isDark = a == .dark
+        Self.isDark = true
     }
 }
