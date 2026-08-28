@@ -30,15 +30,15 @@ enum StadiumPOIType: String, Codable, CaseIterable {
 
     var label: String {
         switch self {
-        case .bar: return "Bares"
-        case .concession: return "Comida"
-        case .merch: return "Tienda"
-        case .restroom: return "Baños"
-        case .firstAid: return "Primeros auxilios"
-        case .guestServices: return "Servicios"
-        case .elevator: return "Ascensores"
-        case .entrance: return "Entradas"
-        case .other: return "Otros"
+        case .bar: return L10n.shared.t("stadium.poi.bar")
+        case .concession: return L10n.shared.t("stadium.poi.concession")
+        case .merch: return L10n.shared.t("stadium.poi.merch")
+        case .restroom: return L10n.shared.t("stadium.poi.restroom")
+        case .firstAid: return L10n.shared.t("stadium.poi.firstAid")
+        case .guestServices: return L10n.shared.t("stadium.poi.guestServices")
+        case .elevator: return L10n.shared.t("stadium.poi.elevator")
+        case .entrance: return L10n.shared.t("stadium.poi.entrance")
+        case .other: return L10n.shared.t("stadium.poi.other")
         }
     }
 

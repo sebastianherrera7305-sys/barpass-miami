@@ -25,5 +25,6 @@ AuthKey_*.p8
 
 # Xcode build output (regenerated, can be gigabytes)
 BarPass-iOS/build/
+BarPass-iOS/build-sim/
 BarPass-iOS/build-device/
 BarPass-iOS/build-device-check/

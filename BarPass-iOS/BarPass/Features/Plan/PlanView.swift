@@ -64,84 +64,107 @@ struct PlanView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
 
-                    // Header
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("REMY")
-                            .font(.bpScaled(11, weight: .heavy))
-                            .tracking(3)
-                            .foregroundStyle(amber)
+                    // Header + input area sit on top of the city art before
+                    // BPBackgroundView's fade reaches full black (that fade
+                    // is tuned for Tonight's header, which sits lower, below
+                    // the mascot logo). Both the input box and the button
+                    // are near-transparent by design — meant to read against
+                    // solid black — so on top of the busy illustration they
+                    // don't just lose contrast, they nearly disappear. A
+                    // single scrim behind this whole block (not per-element
+                    // patches) fixes all of it at once and matches how the
+                    // rest of the screen already looks once the real fade
+                    // kicks in below.
+                    VStack(alignment: .leading, spacing: 24) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("REMY")
+                                .font(.bpScaled(11, weight: .heavy))
+                                .tracking(3)
+                                .foregroundStyle(amber)
 
-                        Text(l10n.t("plan.headerTitle"))
-                            .font(.bpScaled(26, weight: .bold))
-                            .foregroundStyle(Color.bpInk)
-
-                        Text(l10n.t("plan.headerSubtitle"))
-                            .font(.bpScaled(14))
-                            .foregroundStyle(Color.bpInk.opacity(0.4))
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 60)
-
-                    // Input area — hidden once a plan exists. Previously
-                    // this stayed on screen unconditionally: generatePlan()
-                    // resets `prompt` to "" on success, so right after
-                    // building a plan the placeholder text and the
-                    // low-opacity disabled button both reappeared sitting
-                    // directly above the results — correct per-field state,
-                    // but read as a broken "ghost" render. An explicit
-                    // "Ask again" pill replaces it instead.
-                    if plan == nil {
-                    VStack(spacing: 12) {
-                        ZStack(alignment: .topLeading) {
-                            if prompt.isEmpty {
-                                Text(l10n.t("plan.promptPlaceholder"))
-                                    .font(.bpScaled(14))
-                                    .foregroundStyle(Color.bpInk.opacity(0.25))
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 14)
-                                    .allowsHitTesting(false)
-                            }
-                            TextEditor(text: $prompt)
+                            Text(l10n.t("plan.headerTitle"))
+                                .font(.bpScaled(26, weight: .bold))
                                 .foregroundStyle(Color.bpInk)
-                                .tint(amber)
-                                .scrollContentBackground(.hidden)
-                                .background(.clear)
+
+                            Text(l10n.t("plan.headerSubtitle"))
                                 .font(.bpScaled(14))
-                                .padding(10)
-                                .frame(minHeight: 100)
-                                .bpAccessibility(label: l10n.t("night.prompt.label"), hint: l10n.t("night.prompt.hint"))
+                                .foregroundStyle(Color.bpInk.opacity(0.75))
                         }
-                        .background(Color.bpInk.opacity(0.05), in: RoundedRectangle(cornerRadius: 16))
-                        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.bpInk.opacity(0.09)))
+                        .padding(.horizontal, 20)
+                        .padding(.top, 60)
 
-                        Button {
-                            generatePlan()
-                        } label: {
-                            HStack(spacing: 8) {
-                                if isLoading {
-                                    ProgressView().tint(.black).scaleEffect(0.85)
-                                } else {
-                                    Image(systemName: "sparkles")
-                                    Text(l10n.t("plan.buildButton"))
-                                        .font(.bpScaled(16, weight: .bold))
+                        // Input area — hidden once a plan exists. Previously
+                        // this stayed on screen unconditionally: generatePlan()
+                        // resets `prompt` to "" on success, so right after
+                        // building a plan the placeholder text and the
+                        // low-opacity disabled button both reappeared sitting
+                        // directly above the results — correct per-field state,
+                        // but read as a broken "ghost" render. An explicit
+                        // "Ask again" pill replaces it instead.
+                        if plan == nil {
+                        VStack(spacing: 12) {
+                            ZStack(alignment: .topLeading) {
+                                if prompt.isEmpty {
+                                    Text(l10n.t("plan.promptPlaceholder"))
+                                        .font(.bpScaled(14))
+                                        .foregroundStyle(Color.bpInk.opacity(0.4))
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 14)
+                                        .allowsHitTesting(false)
                                 }
+                                TextEditor(text: $prompt)
+                                    .foregroundStyle(Color.bpInk)
+                                    .tint(amber)
+                                    .scrollContentBackground(.hidden)
+                                    .background(.clear)
+                                    .font(.bpScaled(14))
+                                    .padding(10)
+                                    .frame(minHeight: 100)
+                                    .bpAccessibility(label: l10n.t("night.prompt.label"), hint: l10n.t("night.prompt.hint"))
                             }
-                            .foregroundStyle(.black)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(
-                                LinearGradient(colors: [amber, amberB], startPoint: .leading, endPoint: .trailing),
-                                in: RoundedRectangle(cornerRadius: 14)
-                            )
-                        }
-                        .buttonStyle(.plain)
-                        .bpAccessibility(label: l10n.t("plan.buildButton"), hint: l10n.t("plan.buildButton.hint"), isButton: true)
-                        .disabled(prompt.trimmingCharacters(in: .whitespaces).isEmpty || isLoading)
-                        .opacity(prompt.trimmingCharacters(in: .whitespaces).isEmpty ? 0.4 : 1)
-                    }
-                    .padding(.horizontal, 20)
+                            .background(Color.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 16))
+                            .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.bpInk.opacity(0.15)))
 
-                    // Quick suggestions
+                            Button {
+                                generatePlan()
+                            } label: {
+                                HStack(spacing: 8) {
+                                    if isLoading {
+                                        ProgressView().tint(.black).scaleEffect(0.85)
+                                    } else {
+                                        Image(systemName: "sparkles")
+                                        Text(l10n.t("plan.buildButton"))
+                                            .font(.bpScaled(16, weight: .bold))
+                                    }
+                                }
+                                .foregroundStyle(.black)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(
+                                    LinearGradient(colors: [amber, amberB], startPoint: .leading, endPoint: .trailing),
+                                    in: RoundedRectangle(cornerRadius: 14)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .bpAccessibility(label: l10n.t("plan.buildButton"), hint: l10n.t("plan.buildButton.hint"), isButton: true)
+                            .disabled(prompt.trimmingCharacters(in: .whitespaces).isEmpty || isLoading)
+                            .opacity(prompt.trimmingCharacters(in: .whitespaces).isEmpty ? 0.55 : 1)
+                        }
+                        .padding(.horizontal, 20)
+                        }
+                    }
+                    .background(
+                        LinearGradient(
+                            colors: [.black.opacity(0.7), .black.opacity(0.55), .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .padding(.bottom, -30)
+                    )
+
+                    // Quick suggestions — hidden once a plan exists, same as
+                    // the input area above.
+                    if plan == nil {
                     VStack(alignment: .leading, spacing: 12) {
                         Text(l10n.t("plan.quickIdeas"))
                             .font(.bpScaled(13, weight: .semibold))

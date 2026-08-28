@@ -16,11 +16,11 @@ enum APIClient {
 
         var errorDescription: String? {
             switch self {
-            case .notAuthenticated: return "Debes iniciar sesión para pagar con tarjeta."
-            case .sessionExpired:   return "Tu sesión expiró. Vuelve a iniciar sesión para continuar."
+            case .notAuthenticated: return L10n.shared.t("api.error.notAuthenticated")
+            case .sessionExpired:   return L10n.shared.t("api.error.sessionExpired")
             case .server(let msg):  return msg
             case .network(let msg): return msg
-            case .invalidResponse:  return "Respuesta inválida del servidor."
+            case .invalidResponse:  return L10n.shared.t("api.error.invalidResponse")
             }
         }
     }

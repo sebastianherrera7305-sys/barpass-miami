@@ -620,27 +620,6 @@ struct ExploreView: View {
     }
 }
 
-// MARK: - Pulsing ring animation
-
-struct PulsingRing: View {
-    @State private var scale: CGFloat = 1.0
-    @State private var opacity: Double = 0.4
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    var body: some View {
-        Circle()
-            .strokeBorder(Color.bpAmber.opacity(opacity), lineWidth: 1.5)
-            .scaleEffect(scale)
-            .onAppear {
-                guard !reduceMotion else { return }
-                withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-                    scale = 1.35
-                    opacity = 0
-                }
-            }
-    }
-}
-
 // MARK: - List Row
 
 struct VenueListRow: View {

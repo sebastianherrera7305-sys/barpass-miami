@@ -44,11 +44,11 @@ enum ExperienceScorer {
         favoriteTypes: Set<VenueType> = []
     ) -> Double {
         let intents = context?.resolvedIntents ?? []
-        let intentKeys = intents.flatMap { $0.keywords }
+        let intentKeys = intents.flatMap { $0.profile.keywords }
         let companyKeys = context?.company?.keywords ?? []
-        let preferredTypes = Set(intents.flatMap { $0.preferredTypes })
-        let relevantTagIds = Set(intents.flatMap { $0.relevantTagIds })
-        let conflictingTagIds = Set(intents.flatMap { $0.conflictingTagIds })
+        let preferredTypes = Set(intents.flatMap { $0.profile.preferredTypes })
+        let relevantTagIds = Set(intents.flatMap { $0.profile.positiveTagIds })
+        let conflictingTagIds = Set(intents.flatMap { $0.profile.negativeTagIds })
 
         let surprise = isSurprise(selected: selected, prompt: prompt, context: context)
 
@@ -161,7 +161,7 @@ enum ExperienceScorer {
         userCoordinate: CLLocationCoordinate2D? = nil
     ) -> String? {
         let intents = context?.resolvedIntents ?? []
-        let relevantTagIds = Set(intents.flatMap { $0.relevantTagIds })
+        let relevantTagIds = Set(intents.flatMap { $0.profile.positiveTagIds })
         func matchedExperienceTags(_ v: BarPassVenue) -> [ExperienceTag] {
             guard !relevantTagIds.isEmpty else { return [] }
             return v.experienceTags.filter { relevantTagIds.contains($0.id) }

@@ -143,15 +143,6 @@ enum ExperienceIntent: String, Codable, CaseIterable, Identifiable {
             )
         }
     }
-
-    // MARK: Thin forwarders (migration scaffolding)
-    //
-    // Kept so NightPlanner didn't need to change in the same commit as this
-    // consolidation. Delete once all call sites read `.profile` directly.
-    var keywords: [String] { profile.keywords }
-    var preferredTypes: [VenueType] { profile.preferredTypes }
-    var relevantTagIds: [String] { profile.positiveTagIds }
-    var conflictingTagIds: [String] { profile.negativeTagIds }
 }
 
 /// One intent's full compatibility signal set — see `ExperienceIntent.profile`.

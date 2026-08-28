@@ -15,7 +15,7 @@ Miami nightlife access app. Skip the Line passes, VIP tables, event tickets, dri
 **Google Places API Key:** `AIzaSy<REDACTED>` (local only, not on Vercel)
 **Vercel Project:** `<VERCEL_PROJECT_ID>` (org `<VERCEL_ORG_ID>`) — **LIVE at `https://barpass-v2.vercel.app`** (deployed 2026-07-14). Env vars set on Vercel: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, VENUE_VALIDATION_SECRET. Still missing on Vercel: STRIPE_SECRET_KEY, OPENAI_API_KEY (add when available). iOS `APIClient.baseURL` points here now (old `barpass-miami.vercel.app` Express/Firestore backend was never deployed and is dead).
 **Stripe SPM:** `stripe-ios@23.32.0` resolved in pbxproj, `CardPaymentView` does real client-side tokenization + calls `/api/transactions` (real Stripe PaymentIntent server-side) — needs `STRIPE_SECRET_KEY` set on Vercel to actually charge.
-**Apple Developer Program:** ACTIVE (paid, 2026-07-14). Team ID `<APPLE_TEAM_ID>`. Entitlements (`BarPass.entitlements`) now wired into the build via `CODE_SIGN_ENTITLEMENTS`. Sign In with Apple code complete (`NativeAuthView` + `AuthService.signInWithApple`). **Remaining manual step:** enable Sign In with Apple / MusicKit / Apple Pay capabilities in Xcode → Signing & Capabilities (one-time, 2FA-gated, can't be done via CLI).
+**Apple Developer Program:** ACTIVE (paid, 2026-07-14). Team ID `<APPLE_TEAM_ID>`. Entitlements (`BarPass.entitlements`) now wired into the build via `CODE_SIGN_ENTITLEMENTS`. Sign In with Apple code complete (`NativeAuthView` + `AuthService.signInWithApple`). **Capabilities confirmed live in Xcode → Signing & Capabilities (2026-08-27):** Sign In with Apple, Apple Pay (merchant ID `merchant.com.barpass.app` registered and checked), App Groups, Face ID, Location (When In Use), Media Library, Photo Library (+ Add Only), Push Notifications — all already enabled, nothing pending here. MusicKit itself isn't an Xcode capability; it's the Media ID `media.barpass` under Certificates, Identifiers & Profiles → Identifiers → Media IDs (also already created).
 
 ---
 
@@ -29,11 +29,11 @@ Splash → Onboarding Video → Native Auth → MainTabView (5 tabs)
 | Layer | Directory | Description |
 |-------|-----------|-------------|
 | **Domain Models** | `Models/` | `BarPassVenue`, `VenueType`, `Trip`, `NightPlan`, `CartItem`, `EventTicket`, `SkipLinePass`, `TableReservation` |
-| **Repositories** | `Repositories/` | `VenueRepository`, `TripRepository`, `PlanRepository` (protocols). `SupabaseVenueRepository` (actor), `LocalVenueRepository`, `LocalTripRepository`, `LocalPlanRepository`, `SupabasePlanRepository` (placeholder — `RepositoryDependencies` uses `LocalPlanRepository`), `SupabaseTripRepository` (**live, wired as the real dependency** — real shared backend against `trips_schema.sql`, not a placeholder) |
+| **Repositories** | `Repositories/` | `VenueRepository`, `TripRepository`, `PlanRepository` (protocols). `SupabaseVenueRepository` (actor), `LocalVenueRepository`, `LocalPlanRepository`, `SupabasePlanRepository` (placeholder — `RepositoryDependencies` uses `LocalPlanRepository`), `SupabaseTripRepository` (**live, wired as the real dependency** — real shared backend against `trips_schema.sql`, not a placeholder). `LocalTripRepository` deleted 2026-08-27 (dead code, orphaned since the Supabase migration) |
 | **DI** | `Repositories/RepositoryDependencies.swift` | `nonisolated(unsafe) static var venue/trip/plan` — swap implementations one line |
 | **Stores** | `Models/VenueStore.swift`, `Models/TripStore.swift` | `@MainActor`, `@Published`, repository injected via init |
 | **UI** | `Features/` | `MainTabView` (5 tabs), `TonightView`, `ExploreView`, `TripsListView`, `PlanView`, `ProfileView`, `CartView`, `CardPaymentView`, PriorityEntry hub, Trip detail/creation flow |
-| **Services** | `Core/Services/` | `AuthService`, `HapticService`, `LocationService`, `NotificationService`, `BiometricService`, `ApplePayService`, `WalletPassService`, `ImageCache` |
+| **Services** | `Core/Services/` | `AuthService`, `HapticService`, `LocationService`, `NotificationService`, `ApplePayService`, `ImageCache` |
 | **Design System** | `Resources/DesignSystem.swift` | Colors, radii, spacing, haptics, shimmer, glass, `BarPassLogo`, font helpers, entrance animation |
 | **Cache** | `Core/Services/ImageCache.swift` | `NSCache` hot/standard tiers, `CachedImage` view with ImageIO downsampling |
 | **Auth** | `Core/Services/AuthService.swift` | Native Supabase Auth via URLSession (no WebView, no SDK). `restoreSession()` sync from UserDefaults. `signIn`, `signUp`, `sendPasswordReset`, `signOut` |
@@ -96,7 +96,6 @@ barpass/
     │   ├── LocalVenueRepository.swift     ← Actor, fallback with .preview
     │   ├── SupabaseVenueRepository.swift  ← Actor, real Supabase fetch + row mapping
     │   ├── TripRepository.swift           ← Protocol (CRUD)
-    │   ├── LocalTripRepository.swift      ← Actor, disk-backed JSON
     │   ├── SupabaseTripRepository.swift   ← Live, real Supabase (trips_schema.sql) — used by RepositoryDependencies
     │   ├── PlanRepository.swift           ← Protocol + LocalPlanRepository (actor)
     │   ├── SupabasePlanRepository.swift   ← Placeholder (throws)
@@ -107,9 +106,7 @@ barpass/
     │   ├── HapticService.swift           ← Not used (BPHaptics in DesignSystem)
     │   ├── LocationService.swift          ← Location permissions + fetch
     │   ├── NotificationService.swift      ← Push notification registration
-    │   ├── BiometricService.swift         ← Face ID / Touch ID
-    │   ├── ApplePayService.swift          ← Apple Pay stub
-    │   └── WalletPassService.swift        ← Wallet PassKit stub
+    │   └── ApplePayService.swift          ← Apple Pay stub
     ├── Core/Networking/APIClient.swift    ← URLSession-based API client
     ├── Core/Cache/CacheManager.swift      ← Cache management
     ├── Core/Config/StripeConfig.swift     ← Stripe publishable key
@@ -134,8 +131,7 @@ barpass/
     │   ├── PriorityEntry/                 ← Hub, SkipLine, Table, Tickets, QR confirm
     │   ├── Profile/ProfileView.swift      ← Points, level, stats, how-to-earn
     │   ├── Splash/SplashView.swift        ← 0.3s spring → 0.6s auto-dismiss
-    │   ├── Onboarding/OnboardingVideoView.swift ← Video splash (placeholder)
-    │   └── WalletPass/AppleWalletButton.swift ← Add to Apple Wallet button
+    │   └── Onboarding/OnboardingVideoView.swift ← Video splash (placeholder)
     ├── AppState.swift                     ← ObservableObject (Auth app state, sheets, connectivity)
     ├── BarPassApp.swift                   ← @main, AppDelegate (push, deep links, BG tasks)
     └── BarPass app.xcodeproj              ← Xcode project (Swift 6, iOS 17+)
@@ -251,13 +247,11 @@ Sign Out
 
 ### ❌ PENDING / KNOWN ISSUES (actualizado 2026-07-14)
 
-- **Apple capabilities** — Sign In with Apple / MusicKit / Apple Pay tienen código completo pero necesitan habilitarse en Xcode → Signing & Capabilities (2FA-gated, manual, un solo click por capability). Team ID `<APPLE_TEAM_ID>` ya paga y listo.
 - **Stripe live** — `STRIPE_SECRET_KEY` no está seteada ni local ni en Vercel. `/api/transactions`, `/api/wallet/topup` devuelven 503 `payments_not_configured` hasta que se agregue.
 - **OpenAI key** — missing. AI Concierge (`/api/concierge`) won't work.
 - **Onboarding videos** — 6 Higgsfield clips not yet generated. View is placeholder.
 - **MapLibre** — works locally but not deployed.
-- **Supabase night_plans table** — `SupabasePlanRepository` is a placeholder; `RepositoryDependencies` uses `LocalPlanRepository`, plans persist on disk only. Trips are NOT disk-only anymore — `SupabaseTripRepository` is live against `trips_schema.sql` (verified against the real DB 2026-08-22); `LocalTripRepository`'s old disk-based trips are orphaned since this migration.
-- **Apple Pay merchant ID** — código apunta a `<MERCHANT_ID>` (ya no es placeholder), pero el merchant ID en sí todavía no está registrado en el portal.
+- **Supabase night_plans table** — `SupabasePlanRepository` is a placeholder; `RepositoryDependencies` uses `LocalPlanRepository`, plans persist on disk only. Trips are NOT disk-only anymore — `SupabaseTripRepository` is live against `trips_schema.sql` (verified against the real DB 2026-08-22); the old disk-based `LocalTripRepository` was deleted 2026-08-27 (confirmed zero references — dead code from the migration).
 - **PrivacyInfo.xcprivacy** — declares collected data but may need App Store review confirmation.
 
 ---
@@ -270,8 +264,8 @@ Sign Out
 - [x] **Privacy Policy + Terms of Service** — `/legal/privacy`, `/legal/terms`, linkeados desde el login
 - [x] **Verificación de edad 21+** — `AgeGateView`, bloqueante, post-login
 - [ ] **Stripe live** — falta pegar `STRIPE_SECRET_KEY` real (local + Vercel)
-- [ ] **Apple Pay** — merchant ID registrado en el portal + capability habilitada en Xcode
-- [ ] **Apple Sign In** — código listo, falta habilitar capability en Xcode (3 clicks)
+- [x] **Apple Pay** — merchant ID `merchant.com.barpass.app` registrado + capability habilitada en Xcode (confirmado 2026-08-27)
+- [x] **Apple Sign In** — capability habilitada en Xcode (confirmado 2026-08-27)
 
 ### 🟡 Importante (App Store)
 - [x] Apple Developer account activa ($99/año) — **ACTIVA desde 2026-07-14**
@@ -302,4 +296,4 @@ Sign Out
 
 ---
 
-*Última actualización: 2026-07-10*
+*Última actualización: 2026-08-27*
