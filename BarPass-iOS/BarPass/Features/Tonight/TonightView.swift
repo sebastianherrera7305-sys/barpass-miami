@@ -7,6 +7,10 @@ struct TonightView: View {
     @EnvironmentObject private var venueStore: VenueStore
     @EnvironmentObject private var appState:   AppState
     @State private var selectedTag: String? = nil
+    /// Rollback switch for the "Prompt Your Night" home section — flip to
+    /// false to instantly restore the old passive "Where to tonight?" Home
+    /// without reverting any code.
+    private let usePromptYourNightHome = true
 
     /// Mood Mode — browse by experience, not venue type. Each mood maps to
     /// keywords matched against type/vibes/tags/music (same approach as
@@ -183,6 +187,18 @@ struct TonightView: View {
                         .padding(.horizontal, BPSpacing.lg)
                         .padding(.top, 60)
 
+                    // "Prompt Your Night" — the new front door, replacing the
+                    // passive "Where to tonight?" line's role (that Text is
+                    // dropped from `header` below since this takes over
+                    // immediately underneath it). Isolated component, real
+                    // venue data, same ExperienceScorer everything else on
+                    // this screen already uses — nothing below this line
+                    // moved, changed, or lost its own state.
+                    if usePromptYourNightHome {
+                        PromptYourNightHomeSection(venues: venueStore.venues, zoomNS: zoomNS)
+                            .padding(.horizontal, BPSpacing.lg)
+                    }
+
                     HypeWeekCard()
                         .padding(.horizontal, BPSpacing.lg)
 
@@ -320,9 +336,14 @@ struct TonightView: View {
                 .font(.bpTitle1())
                 .foregroundStyle(Color.bpInk)
 
-            Text(l10n.t("home.where"))
-                .font(.bpBody())
-                .foregroundStyle(Color.bpTextSecondary)
+            // Dropped in favor of PromptYourNightHomeSection directly below,
+            // which now owns "what do you want tonight?" — kept behind the
+            // same flag so disabling the section restores this line too.
+            if !usePromptYourNightHome {
+                Text(l10n.t("home.where"))
+                    .font(.bpBody())
+                    .foregroundStyle(Color.bpTextSecondary)
+            }
         }
         .bpAccessibility(label: greeting, hint: l10n.t("tonight.greeting.hint"))
     }
@@ -417,14 +438,18 @@ struct TonightView: View {
 
     // MARK: - Events tonight (flyer rail)
 
-    /// Live-now/ending-soon events plus upcoming ones within the next 36
-    /// hours, paired with their venue. Events that have actually finished
+    /// Live-now/ending-soon events plus upcoming ones within the next 7
+    /// days, paired with their venue. Events that have actually finished
     /// (per `VenueTimeStatus`) are never shown — previously this used a
     /// flat "-6h to +36h around start" window, which kept an event visible
-    /// for 6 hours after it started even once it was long over.
+    /// for 6 hours after it started even once it was long over. The 36h
+    /// upcoming horizon was widened to 7 days because real event data is
+    /// sparse (only a handful of venues have any events loaded, spaced
+    /// days apart) — a 36h window sat empty on most days even when real
+    /// upcoming events existed just outside it.
     private var tonightEvents: [(event: VenueEvent, venue: BarPassVenue)] {
         let now = Date()
-        let horizon = now.addingTimeInterval(36 * 3600)
+        let horizon = now.addingTimeInterval(7 * 24 * 3600)
         return venueStore.venues
             .flatMap { v in v.upcomingEvents.map { (event: $0, venue: v) } }
             .filter { pair in

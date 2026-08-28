@@ -28,7 +28,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 @MainActor
 final class L10n: ObservableObject {
     static let shared = L10n()
-    private static let key = "bp_language"
+    nonisolated private static let key = "bp_language"
 
     @Published var language: AppLanguage {
         didSet { UserDefaults.standard.set(language.rawValue, forKey: Self.key) }
@@ -45,7 +45,7 @@ final class L10n: ObservableObject {
         language = saved.flatMap(AppLanguage.init) ?? Self.systemDefault()
     }
 
-    private static func systemDefault() -> AppLanguage {
+    nonisolated private static func systemDefault() -> AppLanguage {
         for preferred in Locale.preferredLanguages {
             let code = Locale(identifier: preferred).language.languageCode?.identifier
             if let code, let match = AppLanguage(rawValue: code) { return match }
@@ -58,7 +58,18 @@ final class L10n: ObservableObject {
         Self.tables[language]?[key] ?? Self.tables[.es]?[key] ?? key
     }
 
-    private static let tables: [AppLanguage: [String: String]] = [
+    /// Same lookup, callable from non-isolated contexts (LocalizedError
+    /// conformances thrown from actors/background code — `Error` types must
+    /// stay reachable from any isolation, so they can't hop to `@MainActor`
+    /// just to read `.language`). Reads the persisted language straight from
+    /// UserDefaults instead of the `@Published` property; `didSet` above
+    /// keeps the two in sync, so this is never stale.
+    nonisolated static func tSync(_ key: String) -> String {
+        let lang = UserDefaults.standard.string(forKey: Self.key).flatMap(AppLanguage.init) ?? systemDefault()
+        return tables[lang]?[key] ?? tables[.es]?[key] ?? key
+    }
+
+    nonisolated private static let tables: [AppLanguage: [String: String]] = [
         .es: [
             "venue.crowd.empty": "Vacío", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Lleno", "venue.crowd.max": "A tope", "venue.crowd.na": "N/D",
             "a11y.loading": "Cargando contenido",
@@ -134,6 +145,10 @@ final class L10n: ObservableObject {
             "night.question": "¿Qué noche buscas?",
             "night.hint": "Elige un vibe o descríbelo. Yo armo la noche.",
             "night.build": "Arma mi noche", "night.rebuild": "Arma otra noche",
+            "prompt.kicker": "PROMPT YOUR NIGHT", "prompt.question": "¿Cuál es el plan de esta noche?",
+            "prompt.placeholder": "Tengo $50 y quiero algo lleno de gente...", "prompt.cta": "Encontrar mi noche",
+            "prompt.results": "Para vos", "prompt.vibe.party": "Fiesta", "prompt.vibe.music": "Música",
+            "prompt.vibe.chill": "Tranquilo", "prompt.vibe.date": "Cita", "prompt.vibe.upscale": "Exclusivo",
             "night.yours": "Tu noche", "night.save": "Guardar como Trip",
 
             "home.mood.empty": "Nada abierto con ese mood ahora.",
@@ -799,6 +814,10 @@ final class L10n: ObservableObject {
             "night.question": "What kind of night?",
             "night.hint": "Pick a vibe or describe it. I'll build the night.",
             "night.build": "Build my night", "night.rebuild": "Build another one",
+            "prompt.kicker": "PROMPT YOUR NIGHT", "prompt.question": "What's the plan tonight?",
+            "prompt.placeholder": "I have $50 and want somewhere packed...", "prompt.cta": "Find my night",
+            "prompt.results": "For you", "prompt.vibe.party": "Party", "prompt.vibe.music": "Music",
+            "prompt.vibe.chill": "Chill", "prompt.vibe.date": "Date", "prompt.vibe.upscale": "Upscale",
             "night.yours": "Your night", "night.save": "Save as Trip",
 
             "home.mood.empty": "Nothing open for that mood right now.",
@@ -1464,6 +1483,10 @@ final class L10n: ObservableObject {
             "night.question": "Que noite você quer?",
             "night.hint": "Escolha um vibe ou descreva. Eu monto a noite.",
             "night.build": "Montar minha noite", "night.rebuild": "Montar outra",
+            "prompt.kicker": "PROMPT YOUR NIGHT", "prompt.question": "Qual é o plano de hoje à noite?",
+            "prompt.placeholder": "Tenho $50 e quero um lugar cheio...", "prompt.cta": "Encontrar minha noite",
+            "prompt.results": "Para você", "prompt.vibe.party": "Festa", "prompt.vibe.music": "Música",
+            "prompt.vibe.chill": "Tranquilo", "prompt.vibe.date": "Encontro", "prompt.vibe.upscale": "Exclusivo",
             "night.yours": "Sua noite", "night.save": "Salvar como Trip",
 
             "home.mood.empty": "Nada aberto para esse mood agora.",

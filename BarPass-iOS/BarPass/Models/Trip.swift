@@ -9,9 +9,9 @@ enum TripVisibility: String, Codable, CaseIterable {
 
     var label: String {
         switch self {
-        case .privateTrip: return L10n.shared.t("trip.visibility.private")
-        case .semiOpen:    return L10n.shared.t("trip.visibility.semiOpen")
-        case .publicTrip:  return L10n.shared.t("trip.visibility.public")
+        case .privateTrip: return L10n.tSync("trip.visibility.private")
+        case .semiOpen:    return L10n.tSync("trip.visibility.semiOpen")
+        case .publicTrip:  return L10n.tSync("trip.visibility.public")
         }
     }
 }

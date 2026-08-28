@@ -22,7 +22,7 @@ actor SupabaseTripRepository: TripRepository {
         // raw string as the error subtitle underneath the (correctly
         // localized) "Something went wrong" title — routed through L10n
         // like every other user-facing string now.
-        var errorDescription: String? { L10n.shared.t("trips.error.noSession") }
+        var errorDescription: String? { L10n.tSync("trips.error.noSession") }
     }
 
     private static let encoder: JSONEncoder = {
@@ -96,7 +96,7 @@ actor SupabaseTripRepository: TripRepository {
     }
 
     struct InviteNotFoundError: LocalizedError {
-        var errorDescription: String? { L10n.shared.t("trips.error.inviteNotFound") }
+        var errorDescription: String? { L10n.tSync("trips.error.inviteNotFound") }
     }
 
     /// Calls the `redeem_trip_invite` RPC (SECURITY DEFINER) instead of a

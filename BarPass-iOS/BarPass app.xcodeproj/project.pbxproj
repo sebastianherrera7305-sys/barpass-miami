@@ -69,7 +69,6 @@
 		AA0000010000000000000004 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000004 /* SplashView.swift */; };
 		AA0000010000000000000009 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000009 /* LocationService.swift */; };
 		AA000001000000000000000A /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000A /* NotificationService.swift */; };
-		AA000001000000000000000B /* BiometricService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000B /* BiometricService.swift */; };
 		AA000001000000000000000C /* ApplePayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000C /* ApplePayService.swift */; };
 		AA000001000000000000000D /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000D /* CacheManager.swift */; };
 		AA000001000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000F /* Assets.xcassets */; };
@@ -79,7 +78,6 @@
 		AMSC02000000000000RP01 /* AppleMusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AMSC01000000000000RP01 /* AppleMusicSource.swift */; };
 		AN0000010000000000000001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AN0000020000000000000001 /* AnalyticsService.swift */; };
 		AUTP02000000000000RP01 /* AutoplayPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTP01000000000000RP01 /* AutoplayPreference.swift */; };
-		B253F7CB898A4C4581EBAF8A /* DotMatrixRevealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700D2E03703E4BDD9F730194 /* DotMatrixRevealView.swift */; };
 		B9A71D8F490D7C4F6A542FE3 /* AffiliationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D676FAF3C8541AE12E83DCCC /* AffiliationPickerView.swift */; };
 		BB000001000000000000000E /* barpass-logo.svg in Resources */ = {isa = PBXBuildFile; fileRef = BB000002000000000000000E /* barpass-logo.svg */; };
 		BBAAF54C30060C2A00E490E9 /* Stripe in Frameworks */ = {isa = PBXBuildFile; productRef = SPM00000000000000000002 /* Stripe */; };
@@ -105,6 +103,7 @@
 		EE000002000000000000001A /* NativeAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000001000000000000001A /* NativeAuthView.swift */; };
 		EE01BC57203A630FF06E9694 /* HelpTargetAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B255F26D4A13547562CDF99B /* HelpTargetAnchor.swift */; };
 		EF000002000000000000RP01 /* EventFlyerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF000001000000000000RP01 /* EventFlyerCard.swift */; };
+		PYH002000000000000RP99 /* PromptYourNightHomeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = PYH001000000000000RP99 /* PromptYourNightHomeSection.swift */; };
 		EXEN04000000000000RP01 /* ExperienceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXEN03000000000000RP01 /* ExperienceEngine.swift */; };
 		EXSC04000000000000RP01 /* ExperienceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXSC03000000000000RP01 /* ExperienceScorer.swift */; };
 		F1BA46464607754B4A2D0728 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF352B37244C7C0F8C8D874 /* Foundation.framework */; };
@@ -126,8 +125,6 @@
 		FF000002000000000000AA20 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA20 /* AuthService.swift */; };
 		FF000002000000000000AB01 /* StripeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AB01 /* StripeConfig.swift */; };
 		FF000002000000000000AB02 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AB02 /* APIClient.swift */; };
-		FF000002000000000000AB03 /* WalletPassService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AB03 /* WalletPassService.swift */; };
-		FF000002000000000000AB04 /* AppleWalletButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AB04 /* AppleWalletButton.swift */; };
 		GAMF02000000000000RP01 /* GamificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GAMF01000000000000RP01 /* GamificationView.swift */; };
 		HYPE02000000000000RP01 /* HypeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = HYPE01000000000000RP01 /* HypeEngine.swift */; };
 		HYWC02000000000000RP01 /* HypeWeekCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = HYWC01000000000000RP01 /* HypeWeekCard.swift */; };
@@ -158,7 +155,6 @@
 		TR000002000000000000AA03 /* TripCreateFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = TR000001000000000000AA03 /* TripCreateFlow.swift */; };
 		TR000002000000000000AA04 /* TripDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = TR000001000000000000AA04 /* TripDetailView.swift */; };
 		TR000002000000000000AA05 /* TripSocial.swift in Sources */ = {isa = PBXBuildFile; fileRef = TR000001000000000000AA05 /* TripSocial.swift */; };
-		TR000002000000000000RP01 /* LocalTripRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = TR000001000000000000RP01 /* LocalTripRepository.swift */; };
 		TRIV02000000000000RP01 /* TriviaEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = TRIV01000000000000RP01 /* TriviaEngine.swift */; };
 		TS0000020000000000000001 /* TripStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS0000010000000000000001 /* TripStore.swift */; };
 		VEVW04000000000000RP01 /* VerifyEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VEVW03000000000000RP01 /* VerifyEmailView.swift */; };
@@ -237,7 +233,6 @@
 		61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseGreekLifeRepository.swift; path = BarPass/Repositories/SupabaseGreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
 		656968298CED42FFBA49231A /* CityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityIdentity.swift; path = BarPass/Resources/CityIdentity.swift; sourceTree = SOURCE_ROOT; };
 		6EB6374016627134BFCC83D6 /* ShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
-		700D2E03703E4BDD9F730194 /* DotMatrixRevealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DotMatrixRevealView.swift; path = BarPass/Resources/DotMatrixRevealView.swift; sourceTree = SOURCE_ROOT; };
 		721FC3825B9184C905EB3EF0 /* ShareManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareManager.swift; sourceTree = "<group>"; };
 		75CA2DEEAE28B897B4F7BBE4 /* HelpGuideStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpGuideStoreTests.swift; path = BarPassTests/HelpGuideStoreTests.swift; sourceTree = SOURCE_ROOT; };
 		792335E55D9363A086C6C79B /* ChapterChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatView.swift; path = BarPass/Features/CollegeLife/ChapterChatView.swift; sourceTree = SOURCE_ROOT; };
@@ -262,7 +257,6 @@
 		AA0000020000000000000004 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		AA0000020000000000000009 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		AA000002000000000000000A /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-		AA000002000000000000000B /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricService.swift; sourceTree = "<group>"; };
 		AA000002000000000000000C /* ApplePayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayService.swift; sourceTree = "<group>"; };
 		AA000002000000000000000D /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
 		AA000002000000000000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -302,6 +296,7 @@
 		EDTV03000000000000RP01 /* EditTripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EditTripView.swift; path = BarPass/Features/Trips/EditTripView.swift; sourceTree = SOURCE_ROOT; };
 		EE000001000000000000001A /* NativeAuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthView.swift; sourceTree = "<group>"; };
 		EF000001000000000000RP01 /* EventFlyerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventFlyerCard.swift; path = BarPass/Features/Tonight/EventFlyerCard.swift; sourceTree = SOURCE_ROOT; };
+		PYH001000000000000RP99 /* PromptYourNightHomeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PromptYourNightHomeSection.swift; path = BarPass/Features/Tonight/PromptYourNightHomeSection.swift; sourceTree = SOURCE_ROOT; };
 		EXEN03000000000000RP01 /* ExperienceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceEngine.swift; path = BarPass/Models/ExperienceEngine.swift; sourceTree = SOURCE_ROOT; };
 		EXSC03000000000000RP01 /* ExperienceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceScorer.swift; path = BarPass/Core/Intelligence/ExperienceScorer.swift; sourceTree = SOURCE_ROOT; };
 		F35C2CF95EBF470399C6196E /* SelectedCityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SelectedCityStore.swift; path = BarPass/Core/Services/SelectedCityStore.swift; sourceTree = SOURCE_ROOT; };
@@ -327,8 +322,6 @@
 		FF000001000000000000AA20 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		FF000001000000000000AB01 /* StripeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StripeConfig.swift; path = BarPass/Core/Config/StripeConfig.swift; sourceTree = SOURCE_ROOT; };
 		FF000001000000000000AB02 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = APIClient.swift; path = BarPass/Core/Networking/APIClient.swift; sourceTree = SOURCE_ROOT; };
-		FF000001000000000000AB03 /* WalletPassService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletPassService.swift; sourceTree = "<group>"; };
-		FF000001000000000000AB04 /* AppleWalletButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleWalletButton.swift; path = BarPass/Features/WalletPass/AppleWalletButton.swift; sourceTree = SOURCE_ROOT; };
 		GAMF01000000000000RP01 /* GamificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GamificationView.swift; path = BarPass/Features/Profile/GamificationView.swift; sourceTree = SOURCE_ROOT; };
 		HYPE01000000000000RP01 /* HypeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HypeEngine.swift; path = BarPass/Core/Music/HypeEngine.swift; sourceTree = SOURCE_ROOT; };
 		HYWC01000000000000RP01 /* HypeWeekCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HypeWeekCard.swift; path = BarPass/Features/Tonight/HypeWeekCard.swift; sourceTree = SOURCE_ROOT; };
@@ -359,7 +352,6 @@
 		TR000001000000000000AA03 /* TripCreateFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripCreateFlow.swift; path = BarPass/Features/Trips/TripCreateFlow.swift; sourceTree = SOURCE_ROOT; };
 		TR000001000000000000AA04 /* TripDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripDetailView.swift; path = BarPass/Features/Trips/TripDetailView.swift; sourceTree = SOURCE_ROOT; };
 		TR000001000000000000AA05 /* TripSocial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripSocial.swift; path = BarPass/Features/Trips/TripSocial.swift; sourceTree = SOURCE_ROOT; };
-		TR000001000000000000RP01 /* LocalTripRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocalTripRepository.swift; path = BarPass/Repositories/LocalTripRepository.swift; sourceTree = SOURCE_ROOT; };
 		TRIV01000000000000RP01 /* TriviaEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TriviaEngine.swift; path = BarPass/Core/Services/TriviaEngine.swift; sourceTree = SOURCE_ROOT; };
 		TS0000010000000000000001 /* TripStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripStore.swift; path = BarPass/Features/Stores/TripStore.swift; sourceTree = SOURCE_ROOT; };
 		VEVW03000000000000RP01 /* VerifyEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerifyEmailView.swift; path = BarPass/Features/Auth/VerifyEmailView.swift; sourceTree = SOURCE_ROOT; };
@@ -485,11 +477,9 @@
 			children = (
 				AA0000020000000000000009 /* LocationService.swift */,
 				AA000002000000000000000A /* NotificationService.swift */,
-				AA000002000000000000000B /* BiometricService.swift */,
 				AA000002000000000000000C /* ApplePayService.swift */,
 				FF000001000000000000AB01 /* StripeConfig.swift */,
 				FF000001000000000000AB02 /* APIClient.swift */,
-				FF000001000000000000AB03 /* WalletPassService.swift */,
 				FF000001000000000000AA20 /* AuthService.swift */,
 				AN0000020000000000000001 /* AnalyticsService.swift */,
 				4534C465198E6FF9A92B4C7D /* DeepLinkRouter.swift */,
@@ -520,7 +510,6 @@
 				FF000003000000000000AA04 /* Plan */,
 				FF000003000000000000AA05 /* Profile */,
 				FF000003000000000000AA06 /* Onboarding */,
-				FF000001000000000000AB04 /* AppleWalletButton.swift */,
 				TS0000040000000000000001 /* Stores */,
 			);
 			path = Features;
@@ -582,6 +571,7 @@
 			isa = PBXGroup;
 			children = (
 				EF000001000000000000RP01 /* EventFlyerCard.swift */,
+				PYH001000000000000RP99 /* PromptYourNightHomeSection.swift */,
 				IMGC01000000000000RP01 /* ImageCache.swift */,
 				L10N01000000000000RP01 /* LocalizationService.swift */,
 				THEM01000000000000RP01 /* ThemeService.swift */,
@@ -613,7 +603,6 @@
 				F35C2CF95EBF470399C6196E /* SelectedCityStore.swift */,
 				28C5D564990D482ABF8A0AE5 /* CityPickerView.swift */,
 				163C5D5B580F4F5CB17391D4 /* LiquidGlassButtonStyle.swift */,
-				700D2E03703E4BDD9F730194 /* DotMatrixRevealView.swift */,
 				AGGT01000000000000RP01 /* AgeGateService.swift */,
 				AGGT03000000000000RP01 /* AgeGateView.swift */,
 				EDTV03000000000000RP01 /* EditTripView.swift */,
@@ -657,7 +646,6 @@
 				TR000001000000000000AA05 /* TripSocial.swift */,
 				PY000001000000000000RP01 /* PromptYourNightView.swift */,
 				NP000001000000000000RP01 /* NightPlanner.swift */,
-				TR000001000000000000RP01 /* LocalTripRepository.swift */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -959,6 +947,7 @@
 				FF000002000000000000AA01 /* MainTabView.swift in Sources */,
 				FF000002000000000000AA02 /* TonightView.swift in Sources */,
 				EF000002000000000000RP01 /* EventFlyerCard.swift in Sources */,
+				PYH002000000000000RP99 /* PromptYourNightHomeSection.swift in Sources */,
 				FF000002000000000000AA03 /* VenueDetailView.swift in Sources */,
 				FF000002000000000000AA04 /* ExploreView.swift in Sources */,
 				FF000002000000000000AA05 /* PlanView.swift in Sources */,
@@ -968,8 +957,6 @@
 				FF000002000000000000AA09 /* VenueStore.swift in Sources */,
 				FF000002000000000000AB01 /* StripeConfig.swift in Sources */,
 				FF000002000000000000AB02 /* APIClient.swift in Sources */,
-				FF000002000000000000AB03 /* WalletPassService.swift in Sources */,
-				FF000002000000000000AB04 /* AppleWalletButton.swift in Sources */,
 				AA0000010000000000000001 /* BarPassApp.swift in Sources */,
 				AA0000010000000000000002 /* AppState.swift in Sources */,
 				CC000001000000000000LG02 /* VenueLogos.swift in Sources */,
@@ -1025,7 +1012,6 @@
 				RVSM02000000000000RP01 /* ReviewSummaryService.swift in Sources */,
 				AA0000010000000000000009 /* LocationService.swift in Sources */,
 				AA000001000000000000000A /* NotificationService.swift in Sources */,
-				AA000001000000000000000B /* BiometricService.swift in Sources */,
 				AA000001000000000000000C /* ApplePayService.swift in Sources */,
 				AA000001000000000000000D /* CacheManager.swift in Sources */,
 				FF000002000000000000AA20 /* AuthService.swift in Sources */,
@@ -1043,7 +1029,6 @@
 				FF000002000000000000AA13 /* RepositoryDependencies.swift in Sources */,
 				FF000002000000000000AA14 /* SupabaseVenueRepository.swift in Sources */,
 				RE0000020000000000000001 /* TripRepository.swift in Sources */,
-				TR000002000000000000RP01 /* LocalTripRepository.swift in Sources */,
 				RE0000020000000000000002 /* SupabaseTripRepository.swift in Sources */,
 				RE0000020000000000000003 /* PlanRepository.swift in Sources */,
 				RE0000020000000000000004 /* SupabasePlanRepository.swift in Sources */,
@@ -1092,7 +1077,6 @@
 				BBD8BC9C0B40435594795411 /* SelectedCityStore.swift in Sources */,
 				7A79EB5E27ED4C56B9B794AF /* CityPickerView.swift in Sources */,
 				64BC73EEB97843B5A2ADC6DC /* LiquidGlassButtonStyle.swift in Sources */,
-				B253F7CB898A4C4581EBAF8A /* DotMatrixRevealView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1222,7 +1206,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1244,7 +1228,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1265,7 +1249,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1289,7 +1273,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;

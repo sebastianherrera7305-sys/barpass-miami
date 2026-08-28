@@ -269,8 +269,8 @@ enum AuthError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .badCredentials(let msg): return msg
-        case .network: return L10n.shared.t("auth.error.network")
-        case .notAuthenticated: return L10n.shared.t("auth.error.notAuthenticated")
+        case .network: return L10n.tSync("auth.error.network")
+        case .notAuthenticated: return L10n.tSync("auth.error.notAuthenticated")
         }
     }
 }

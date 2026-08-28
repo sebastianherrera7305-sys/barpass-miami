@@ -27,14 +27,14 @@ enum XPAction: String, Codable, CaseIterable {
 
     var label: String {
         switch self {
-        case .checkIn:      return L10n.shared.t("points.action.checkIn")
-        case .leaveReview:  return L10n.shared.t("points.action.leaveReview")
-        case .shareVenue:   return L10n.shared.t("points.action.shareVenue")
-        case .createTrip:   return L10n.shared.t("points.action.createTrip")
-        case .completeTrip: return L10n.shared.t("points.action.completeTrip")
-        case .inviteFriend: return L10n.shared.t("points.action.inviteFriend")
-        case .triviaWin:    return L10n.shared.t("points.action.triviaWin")
-        case .missionComplete: return L10n.shared.t("points.action.missionComplete")
+        case .checkIn:      return L10n.tSync("points.action.checkIn")
+        case .leaveReview:  return L10n.tSync("points.action.leaveReview")
+        case .shareVenue:   return L10n.tSync("points.action.shareVenue")
+        case .createTrip:   return L10n.tSync("points.action.createTrip")
+        case .completeTrip: return L10n.tSync("points.action.completeTrip")
+        case .inviteFriend: return L10n.tSync("points.action.inviteFriend")
+        case .triviaWin:    return L10n.tSync("points.action.triviaWin")
+        case .missionComplete: return L10n.tSync("points.action.missionComplete")
         }
     }
 }

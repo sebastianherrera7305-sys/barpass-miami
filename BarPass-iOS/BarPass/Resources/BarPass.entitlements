@@ -10,8 +10,18 @@
 	<string>production</string>
 	<!-- Wallet pass-type-identifiers entitlement removed for now — pass.io.barpass.wallet
 	     needs to be registered manually at developer.apple.com (Certificates, IDs &
-	     Profiles → Identifiers → Pass Type IDs), a 2FA-gated portal action. Re-add once
-	     that's done; WalletPassService is a stub until then anyway. -->
+	     Profiles → Identifiers → Pass Type IDs), a 2FA-gated portal action. The old
+	     WalletPassService stub built for it was deleted 2026-08-27 (dead code, never
+	     wired to any screen); re-add both once the pass type ID is registered. -->
+	<!-- MusicKit (AppleMusicSource in Core/Music/) is NOT an entitlements.plist
+	     key at all, unlike Sign In with Apple / Apple Pay / App Groups above —
+	     `com.apple.developer.musickit` isn't a real key (Xcode's archive step
+	     rejects it: "not found and could not be included in profile"). Client
+	     MusicKit authorization is purely OS-level via MusicAuthorization.request();
+	     the App ID itself just needs "MusicKit" checked under developer.apple.com
+	     → Identifiers → App IDs → com.sebastian.barpass, which is separate from
+	     the `media.barpass` Media ID (that one's for server-side Apple Music API
+	     developer tokens, not needed for on-device MusicRecentlyPlayedRequest). -->
 	<key>com.apple.developer.in-app-payments</key>
 	<array>
 		<string>merchant.com.barpass.app</string>
