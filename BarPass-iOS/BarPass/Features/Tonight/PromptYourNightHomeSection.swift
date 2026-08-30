@@ -108,6 +108,11 @@ struct PromptYourNightHomeSection: View {
                 .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
                     .strokeBorder(promptFocused ? Color.bpAmber.opacity(0.5) : Color.bpInk.opacity(0.12)))
                 .bpAccessibility(label: l10n.t("night.prompt.label"), hint: l10n.t("night.prompt.hint"))
+                // TestFlight: "puse que quería ir a Space y no da respuesta" —
+                // only the button called search(); the keyboard's Return key
+                // (the instinctive way to submit a search field) did nothing.
+                .submitLabel(.search)
+                .onSubmit(search)
 
             Button(action: search) {
                 HStack(spacing: 8) {
