@@ -329,7 +329,14 @@ struct TonightView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
-            BarPassLogo(subtitle: "MIAMI")
+            // Was hardcoded "MIAMI" regardless of which city's venues were
+            // actually showing — the app now serves 23 cities (per Supabase),
+            // so a New York or Chicago session showed a wrong, misleading
+            // label. Real bug surfaced alongside the city-filter fallback
+            // fix in VenueStore: a New York feed under a "MIAMI" header
+            // looked like venues from the wrong city had leaked in, when
+            // the feed itself was actually correctly filtered.
+            BarPassLogo(subtitle: venueStore.selectedCity?.uppercased() ?? l10n.t("home.allCities"))
                 .padding(.bottom, 4)
 
             Text(greeting)

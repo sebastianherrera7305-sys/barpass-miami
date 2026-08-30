@@ -64,16 +64,37 @@ final class VenueStore: ObservableObject {
         }
     }
 
-    /// nil (or a city with zero matches, e.g. before the first load
-    /// finishes) shows everything rather than an empty screen.
+    /// nil (before a city is ever chosen, or before the first load finishes)
+    /// shows everything — there's genuinely no filter to apply yet.
+    ///
+    /// A NON-nil city that matches zero venues is a different situation, and
+    /// used to be treated the same way ("show everything") — that silently
+    /// dumped all ~1846 venues across all 23 cities into what the user
+    /// expected to be one city's feed. Root cause: a `bp_selected_city`
+    /// value that no longer exact-matches any venue's `city` column (stale
+    /// value from before the multi-city expansion, a spelling change
+    /// server-side, etc.) stays non-nil forever, so `proceedPastAgeGate()`'s
+    /// `selectedCity == nil` check never re-triggers the city picker either
+    /// — every screen quietly showed the entire catalog mixed together,
+    /// looking like "random" broken/inconsistent cards city to city. Now:
+    /// clear the stale preference so the picker is forced to reappear (via
+    /// AppState's existing nil-check) instead of ever silently mixing
+    /// cities, and show nothing in the meantime rather than a wrong catalog.
     private func applyCityFilter(_ city: String?) {
-        selectedCity = city
         guard let city, !city.isEmpty else {
+            selectedCity = city
             venues = allVenues
             return
         }
         let matches = allVenues.filter { $0.city == city }
-        venues = matches.isEmpty ? allVenues : matches
+        if matches.isEmpty && !allVenues.isEmpty {
+            SelectedCityStore.reset()
+            selectedCity = nil
+            venues = []
+            return
+        }
+        selectedCity = city
+        venues = matches
     }
 
     var trending: [BarPassVenue]    { venues.filter { $0.isTrending } }
