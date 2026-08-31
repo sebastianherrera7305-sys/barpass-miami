@@ -298,6 +298,22 @@ struct PromptYourNightHomeSection: View {
             .sorted { $0.1 > $1.1 }
             .map(\.0)
 
+        // "Los que son restaurante son restaurantes, los que son bar son
+        // bares y los que son discoteca son discoteca" — a vibe's
+        // `preferredTypes` (real, already-tuned per intent: Party→Club
+        // only, Date→Rooftop/Lounge/Restaurant, etc.) was only ever a soft
+        // scoring nudge, so a restaurant with a lucky keyword/popularity
+        // score could still win a "Party" search. Picking a vibe now hard-
+        // filters to venues of that vibe's real preferred types — no vibe
+        // selected still means no type restriction (a bare free-text
+        // search shouldn't get one invented).
+        if let selectedVibe {
+            let allowedTypes = selectedVibe.profile.preferredTypes
+            if !allowedTypes.isEmpty {
+                ranked = ranked.filter { allowedTypes.contains($0.type) }
+            }
+        }
+
         // TestFlight feedback: asking for something cheap surfaced an
         // Airport Lounge — `.unknown` (no Google Places price data) was
         // bypassing the filter unconditionally, so an unpriced upscale
