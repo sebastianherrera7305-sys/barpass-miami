@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { requireUser } from "@/lib/supabase/require-user";
 
 /**
  * POST /api/referral/attribute
@@ -17,25 +17,11 @@ const attributeSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  if (!token) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
-  }
+  const auth = await requireUser(request);
+  if (!auth.ok) return auth.response;
+  const { supabase, user } = auth;
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceRoleKey) {
-    return NextResponse.json({ error: "backend_not_configured" }, { status: 503 });
-  }
-
-  const supabase = createServiceClient(supabaseUrl, serviceRoleKey);
-  const { data: userData, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !userData?.user) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
-  }
-
-  const withinLimit = await checkRateLimit(`referral-attribute:${userData.user.id}`, {
+  const withinLimit = await checkRateLimit(`referral-attribute:${user.id}`, {
     maxRequests: 10,
     windowSeconds: 60,
   });
@@ -55,7 +41,7 @@ export async function POST(request: Request) {
   }
 
   const { data: state, error: rpcError } = await supabase.rpc("attribute_referral", {
-    p_referred_id: userData.user.id,
+    p_referred_id: user.id,
     p_code: parsed.data.code,
   });
   if (rpcError) {

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { requireUser } from "@/lib/supabase/require-user";
 
 /**
  * POST /api/wallet/topup
@@ -17,29 +17,17 @@ export const topUpRequestSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  if (!token) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
-  }
+  const auth = await requireUser(request);
+  if (!auth.ok) return auth.response;
+  const { supabase, user } = auth;
+
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: "payments_not_configured" }, { status: 503 });
-  }
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceRoleKey) {
-    return NextResponse.json({ error: "backend_not_configured" }, { status: 503 });
-  }
-
-  const supabase = createServiceClient(supabaseUrl, serviceRoleKey);
-  const { data: userData, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !userData?.user) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
   }
 
   // 10 top-ups/minuto por usuario — deja pasar reintentos legítimos de
   // tarjeta rechazada, frena card-testing/carding.
-  const withinLimit = await checkRateLimit(`wallet-topup:${userData.user.id}`, {
+  const withinLimit = await checkRateLimit(`wallet-topup:${user.id}`, {
     maxRequests: 10,
     windowSeconds: 60,
   });
@@ -70,7 +58,7 @@ export async function POST(request: Request) {
       payment_method: stripePaymentMethodId,
       confirm: true,
       automatic_payment_methods: { enabled: true, allow_redirects: "never" },
-      metadata: { purpose: "wallet_topup", customer_id: userData.user.id },
+      metadata: { purpose: "wallet_topup", customer_id: user.id },
     });
     if (intent.status !== "succeeded") {
       return NextResponse.json(
@@ -87,7 +75,7 @@ export async function POST(request: Request) {
   }
 
   const { data: rpcData, error: rpcError } = await supabase.rpc("adjust_wallet_balance", {
-    p_user_id: userData.user.id,
+    p_user_id: user.id,
     p_amount: amount,
     p_kind: "topup",
   });

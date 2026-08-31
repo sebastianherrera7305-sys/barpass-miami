@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { requireUser } from "@/lib/supabase/require-user";
 
 /**
  * POST /api/wallet/spend
@@ -16,26 +16,13 @@ export const spendRequestSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  if (!token) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
-  }
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceRoleKey) {
-    return NextResponse.json({ error: "backend_not_configured" }, { status: 503 });
-  }
-
-  const supabase = createServiceClient(supabaseUrl, serviceRoleKey);
-  const { data: userData, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !userData?.user) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
-  }
+  const auth = await requireUser(request);
+  if (!auth.ok) return auth.response;
+  const { supabase, user } = auth;
 
   // 20 gastos/minuto por usuario — cubre uso normal (carrito + priority
   // entry en la misma sesión), frena un loop de gasto automatizado.
-  const withinLimit = await checkRateLimit(`wallet-spend:${userData.user.id}`, {
+  const withinLimit = await checkRateLimit(`wallet-spend:${user.id}`, {
     maxRequests: 20,
     windowSeconds: 60,
   });
@@ -55,7 +42,7 @@ export async function POST(request: Request) {
   }
 
   const { data: rpcData, error: rpcError } = await supabase.rpc("adjust_wallet_balance", {
-    p_user_id: userData.user.id,
+    p_user_id: user.id,
     p_amount: -parsed.data.amount,
     p_kind: "spend",
   });

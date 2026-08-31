@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { requireUser } from "@/lib/supabase/require-user";
 
 /**
  * POST /api/transactions
@@ -39,31 +39,17 @@ export const transactionRequestSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  if (!token) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
-  }
+  const auth = await requireUser(request);
+  if (!auth.ok) return auth.response;
+  const { supabase, user } = auth;
 
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: "payments_not_configured" }, { status: 503 });
   }
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceRoleKey) {
-    return NextResponse.json({ error: "backend_not_configured" }, { status: 503 });
-  }
-
-  const supabase = createServiceClient(supabaseUrl, serviceRoleKey);
-
-  const { data: userData, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !userData?.user) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
-  }
 
   // 10 compras/minuto por usuario — cubre una noche normal de pedidos,
   // frena card-testing/carding contra este endpoint.
-  const withinLimit = await checkRateLimit(`transactions:${userData.user.id}`, {
+  const withinLimit = await checkRateLimit(`transactions:${user.id}`, {
     maxRequests: 10,
     windowSeconds: 60,
   });
@@ -117,7 +103,7 @@ export async function POST(request: Request) {
       metadata: {
         vendor_id: vendorId,
         staff_id: staffId,
-        customer_id: userData.user.id,
+        customer_id: user.id,
         idempotency_key: idempotencyKey ?? "",
       },
     });
@@ -149,7 +135,7 @@ export async function POST(request: Request) {
       id,
       idempotency_key: idempotencyKey,
       vendor_id: vendorId,
-      customer_id: userData.user.id,
+      customer_id: user.id,
       items,
       subtotal,
       tax,

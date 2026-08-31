@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { requireUser } from "@/lib/supabase/require-user";
 
 /**
  * POST /api/passes
@@ -44,30 +44,15 @@ const passRequestSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  if (!token) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
-  }
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceRoleKey) {
-    return NextResponse.json({ error: "backend_not_configured" }, { status: 503 });
-  }
-
-  const supabase = createServiceClient(supabaseUrl, serviceRoleKey);
-
-  const { data: userData, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !userData?.user) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
-  }
+  const auth = await requireUser(request);
+  if (!auth.ok) return auth.response;
+  const { supabase, user } = auth;
 
   // 10 registros de pase por minuto y por usuario — holgado para una noche
   // real (un pase por compra), pero cierra el martilleo de este endpoint, que
   // era el único autenticado sin límite. La clave va después de getUser para
   // que sea el user id verificado y no algo que el llamante pueda falsear.
-  const withinLimit = await checkRateLimit(`passes:${userData.user.id}`, {
+  const withinLimit = await checkRateLimit(`passes:${user.id}`, {
     maxRequests: 10,
     windowSeconds: 60,
   });
@@ -118,7 +103,7 @@ export async function POST(request: Request) {
     if (orderError || !order) {
       return NextResponse.json({ error: "order_not_found" }, { status: 404 });
     }
-    if (order.customer_id !== userData.user.id) {
+    if (order.customer_id !== user.id) {
       return NextResponse.json({ error: "order_not_yours" }, { status: 403 });
     }
     if (order.vendor_id !== venueId) {
@@ -135,7 +120,7 @@ export async function POST(request: Request) {
     if (txnError || !txn) {
       return NextResponse.json({ error: "wallet_transaction_not_found" }, { status: 404 });
     }
-    if (txn.user_id !== userData.user.id) {
+    if (txn.user_id !== user.id) {
       return NextResponse.json({ error: "wallet_transaction_not_yours" }, { status: 403 });
     }
     if (txn.kind !== "spend") {
@@ -152,7 +137,7 @@ export async function POST(request: Request) {
       kind,
       venue_id: venueId,
       venue_name: venueName,
-      customer_id: userData.user.id,
+      customer_id: user.id,
       quantity,
       amount: verifiedAmount,
       valid_until: validUntil,
