@@ -302,14 +302,47 @@ struct PromptYourNightHomeSection: View {
         // the top (their ExperienceScorer order preserved among themselves),
         // but a great match with no genre tag still shows rather than
         // vanishing, same reasoning as the budget bucket above.
-        if let selectedGenre {
-            let matching = ranked.filter { $0.musicGenres.contains(selectedGenre) }
-            let rest = ranked.filter { !$0.musicGenres.contains(selectedGenre) }
+        // TestFlight: "pedía por una noche de House electrónica... y la
+        // aplicación no se la dio" — they typed the genre into the free-text
+        // field instead of tapping a genre chip. ExperienceScorer's haystack
+        // match treats "house" in the prompt as one keyword among many
+        // (rating, trending, tag boosts...), so a highly-rated venue that
+        // doesn't play house at all could easily outrank a real house venue.
+        // The chip's hard float-to-top only ran for `selectedGenre`; a genre
+        // named in plain text deserves the exact same treatment.
+        if let effectiveGenre = selectedGenre ?? Self.detectGenre(in: prompt) {
+            let matching = ranked.filter { $0.musicGenres.contains(effectiveGenre) }
+            let rest = ranked.filter { !$0.musicGenres.contains(effectiveGenre) }
             ranked = matching + rest
         }
 
         withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
             results = Array(ranked.prefix(10))
         }
+    }
+
+    /// Matches a `MusicGenre` by its own raw value (already how the chips
+    /// read) plus the handful of Spanish/alternate spellings someone would
+    /// actually type — not a translation layer, just the real words for the
+    /// same real genres already in the venue data.
+    private static func detectGenre(in prompt: String) -> MusicGenre? {
+        let text = prompt.lowercased()
+        let synonyms: [MusicGenre: [String]] = [
+            .edm: ["edm", "electronica", "electrónica", "electronic"],
+            .house: ["house", "techno"],
+            .latin: ["latin", "latino", "latina"],
+            .hipHop: ["hip hop", "hip-hop", "hiphop", "rap"],
+            .reggaeton: ["reggaeton", "reggaetón"],
+            .pop: ["pop"],
+            .live: ["live music", "música en vivo", "musica en vivo", "banda en vivo"],
+            .jazz: ["jazz"],
+            .techHouse: ["tech house"],
+            .rnb: ["r&b", "rnb", "r & b"],
+        ]
+        for genre in MusicGenre.allCases {
+            let words = [genre.rawValue.lowercased()] + (synonyms[genre] ?? [])
+            if words.contains(where: { text.contains($0) }) { return genre }
+        }
+        return nil
     }
 }
