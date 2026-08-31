@@ -9,8 +9,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Format a dollar amount for display ("$20", "$1,250"). */
-export function formatUSD(amount: number): string {
+/**
+ * Format a dollar amount for display ("$20", "$1,250"). Some venue rows
+ * are missing pricing data (e.g. avg_spend not yet backfilled) despite the
+ * column being typed as non-null — falls back to "—" instead of crashing
+ * Intl.NumberFormat on undefined during static generation.
+ */
+export function formatUSD(amount: number | null | undefined): string {
+  if (amount == null) return "—";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -18,9 +24,16 @@ export function formatUSD(amount: number): string {
   }).format(amount);
 }
 
-/** "10:30 PM" from a 24h "22:30" string. Handles "24:00" as Midnight. */
-export function formatTime(time24: string): string {
+/**
+ * "10:30 PM" from a 24h "22:30" string. Handles "24:00" as Midnight.
+ * Venue hours aren't always real times — rows enriched from Google carry
+ * placeholders like "Ver Google Maps" — so anything unparseable is passed
+ * through as-is rather than crashing on a missing minutes component.
+ */
+export function formatTime(time24: string | null | undefined): string {
+  if (!time24) return "—";
   const [h, m] = time24.split(":").map(Number);
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return time24;
   if (h === 24 && m === 0) return "Midnight";
   const suffix = h >= 12 ? "PM" : "AM";
   const hour = h % 12 || 12;
