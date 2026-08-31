@@ -14,7 +14,9 @@ Miami nightlife access app. Skip the Line passes, VIP tables, event tickets, dri
 **Firebase (legacy):** `barpass-app` · apiKey `AIzaSy<REDACTED>`
 **Google Places API Key:** `AIzaSy<REDACTED>` (local only, not on Vercel)
 **Vercel Project:** `<VERCEL_PROJECT_ID>` (org `<VERCEL_ORG_ID>`) — **LIVE at `https://barpass-v2.vercel.app`** (deployed 2026-07-14). Env vars set on Vercel: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, VENUE_VALIDATION_SECRET. Still missing on Vercel: STRIPE_SECRET_KEY, OPENAI_API_KEY (add when available). iOS `APIClient.baseURL` points here now (old `barpass-miami.vercel.app` Express/Firestore backend was never deployed and is dead).
-**Stripe SPM:** `stripe-ios@23.32.0` resolved in pbxproj, `CardPaymentView` does real client-side tokenization + calls `/api/transactions` (real Stripe PaymentIntent server-side) — needs `STRIPE_SECRET_KEY` set on Vercel to actually charge.
+**Stripe SPM:** `stripe-ios@23.32.0` resolved in pbxproj, `CardPaymentView` does real client-side tokenization + calls `/api/transactions` (real Stripe PaymentIntent server-side).
+**Stripe account:** `acct_1TmM3pHzVF9FsUCt` (US). **Test mode is wired and verified end-to-end** (2026-08-31): `STRIPE_SECRET_KEY` (`sk_test_…`) is in `barpass-v2/.env.local`, and a real test PaymentIntent of $25 came back `succeeded`. `StripeConfig.publishableKey` was pointing at a *different* account (`acct_…TmM4d`) and was corrected — a mismatch silently breaks charges (client tokenizes on one account, server charges on another), so **always verify the `pk_`/`sk_` account prefixes match**. `charges_enabled`/`payouts_enabled` are `false` because the account isn't activated yet — blocked on the company incorporation papers, not on code. Test mode needs no business verification, so all development/TestFlight work can proceed now; going live is a key swap in three places (`.env.local`, Vercel, `StripeConfig.swift`), no code changes.
+**Payments — why Stripe and not Apple:** Apple Pay is only a wallet, not a processor; it still needs Stripe behind it to settle. And Apple's own guideline 3.1.3(e) *forbids* IAP for goods/services consumed outside the app (skip-the-line passes, tables, tickets, drinks all qualify), so IAP isn't an alternative — it's a rejection. Don't revisit this.
 **Apple Developer Program:** ACTIVE (paid, 2026-07-14). Team ID `<APPLE_TEAM_ID>`. Entitlements (`BarPass.entitlements`) now wired into the build via `CODE_SIGN_ENTITLEMENTS`. Sign In with Apple code complete (`NativeAuthView` + `AuthService.signInWithApple`). **Capabilities confirmed live in Xcode → Signing & Capabilities (2026-08-27):** Sign In with Apple, Apple Pay (merchant ID `merchant.com.barpass.app` registered and checked), App Groups, Face ID, Location (When In Use), Media Library, Photo Library (+ Add Only), Push Notifications — all already enabled, nothing pending here. MusicKit itself isn't an Xcode capability; it's the Media ID `media.barpass` under Certificates, Identifiers & Profiles → Identifiers → Media IDs (also already created).
 
 ---
@@ -46,10 +48,14 @@ barpass-v2/
 ├── src/app/          — Pages (Discover, Concierge, Map, Venues/[slug], Profile, API routes, Admin CRUD)
 ├── src/features/     — Feature modules (venues, discover, ai, map, intelligence)
 ├── src/components/   — Shared UI (nav-bar, Badge, Button, Card)
-├── src/lib/supabase/ — client.ts, server.ts, config.ts
+├── src/lib/supabase/ — client.ts, server.ts, config.ts, service.ts, require-user.ts
 ├── supabase/schema.sql
 └── scripts/enrich-venues.ts  — Google Places enrichment
 ```
+
+### Shared helpers (dedupe refactors, 2026-08-31)
+- **iOS — `Repositories/SupabaseRESTClient.swift`**: the one place that knows the Supabase REST base URL, anon key, auth headers, and the snake_case/iso8601 coders. All 12 repositories build requests through `SupabaseRESTClient.request(...)` + `.send(...)` instead of repeating the boilerplate. Two deliberate exceptions keep their own coders/raw calls: `SupabasePlanRepository` (its `plan` jsonb blob must not be re-cased) and the repos that need the raw failure body for custom error mapping (`BirthdateRepository`, `VenueCheckinRepository`).
+- **Web — `src/lib/supabase/require-user.ts`**: `requireUser(request)` wraps Bearer-token parse → env check → service-role client → `auth.getUser()`, returning `{ok, supabase, user}` or a ready `NextResponse`. Used by the 7 privileged routes (passes, referral/code, referral/attribute, transactions, wallet/topup, wallet/spend, account/delete). **Not** for the cookie-session routes (events, promos and their `[id]` variants) — those get their user from RLS via `@/lib/supabase/server`.
 
 ### Navigation
 - `RootView` manages splash, onboarding, auth, and main app
@@ -247,7 +253,9 @@ Sign Out
 
 ### ❌ PENDING / KNOWN ISSUES (actualizado 2026-07-14)
 
-- **Stripe live** — `STRIPE_SECRET_KEY` no está seteada ni local ni en Vercel. `/api/transactions`, `/api/wallet/topup` devuelven 503 `payments_not_configured` hasta que se agregue.
+- **Stripe en Vercel** — `STRIPE_SECRET_KEY` ya está en `.env.local` (test, verificada), pero **falta agregarla en Vercel** (Settings → Environment Variables, los 3 environments, + redeploy). Hasta entonces `/api/transactions` y `/api/wallet/topup` siguen devolviendo 503 `payments_not_configured` en producción.
+- **Stripe live** — bloqueado por los papeles de constitución de la empresa (la cuenta no está activada, `charges_enabled: false`). No es trabajo de código.
+- **Build de TestFlight desactualizada** — la build subida apunta a la cuenta de Stripe vieja; hay que recompilar para que tome la `pk_test_` corregida.
 - **OpenAI key** — missing. AI Concierge (`/api/concierge`) won't work.
 - **Onboarding videos** — 6 Higgsfield clips not yet generated. View is placeholder.
 - **MapLibre** — works locally but not deployed.
@@ -263,7 +271,9 @@ Sign Out
 - [x] **Wallet top-up** — `/api/wallet/topup` + `/api/wallet/spend`, balance atómico en Supabase
 - [x] **Privacy Policy + Terms of Service** — `/legal/privacy`, `/legal/terms`, linkeados desde el login
 - [x] **Verificación de edad 21+** — `AgeGateView`, bloqueante, post-login
-- [ ] **Stripe live** — falta pegar `STRIPE_SECRET_KEY` real (local + Vercel)
+- [x] **Stripe test** — `STRIPE_SECRET_KEY` seteada local, cobro de prueba verificado ($25 `succeeded`)
+- [ ] **Stripe en Vercel** — falta agregar `STRIPE_SECRET_KEY` + redeploy
+- [ ] **Stripe live** — bloqueado por papeles de la empresa (no es código)
 - [x] **Apple Pay** — merchant ID `merchant.com.barpass.app` registrado + capability habilitada en Xcode (confirmado 2026-08-27)
 - [x] **Apple Sign In** — capability habilitada en Xcode (confirmado 2026-08-27)
 
@@ -296,4 +306,4 @@ Sign Out
 
 ---
 
-*Última actualización: 2026-08-27*
+*Última actualización: 2026-08-31*
