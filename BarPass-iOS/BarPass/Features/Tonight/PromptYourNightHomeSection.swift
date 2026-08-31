@@ -316,9 +316,15 @@ struct PromptYourNightHomeSection: View {
             ranked = matching + rest
         }
 
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
-            results = Array(ranked.prefix(10))
-        }
+        // TestFlight: cards showing the photo but missing name/rating —
+        // each HeroVenueCard already runs its own `.bpEntrance` animation
+        // on appear. Wrapping this state change in ANOTHER animation meant
+        // every new search result was animating on two competing clocks at
+        // once (the outer spring driving layout, the card's own internal
+        // entrance driving its offset/opacity) — SwiftUI could catch a
+        // partially-settled frame from that conflict, and a screenshot or
+        // fast glance landed on it. bpEntrance alone is enough motion.
+        results = Array(ranked.prefix(10))
     }
 
     /// Matches a `MusicGenre` by its own raw value (already how the chips
