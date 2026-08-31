@@ -8,7 +8,10 @@ enum RepositoryDependencies {
     // have been run in the Supabase SQL editor. Needs a signed-in session;
     // guest mode can't read/write trips (RLS scopes everything to auth.uid()).
     nonisolated(unsafe) static var trip: TripRepository = SupabaseTripRepository()
-    nonisolated(unsafe) static var plan: PlanRepository = LocalPlanRepository()
+    // Real shared backend — public.night_plans exists and is live in
+    // Supabase (schema.sql), same auth-gated pattern as trips. Guest mode
+    // can't read/write plans (RLS scopes everything to auth.uid()).
+    nonisolated(unsafe) static var plan: PlanRepository = SupabasePlanRepository()
     nonisolated(unsafe) static var post: PostRepository = SupabasePostRepository()
     nonisolated(unsafe) static var greekLife: GreekLifeRepository = SupabaseGreekLifeRepository()
     nonisolated(unsafe) static var profileAffiliation: ProfileAffiliationRepository = SupabaseProfileAffiliationRepository()

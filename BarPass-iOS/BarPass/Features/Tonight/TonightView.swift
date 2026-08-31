@@ -147,6 +147,58 @@ struct TonightView: View {
         let neighborhoods: [(name: String, venues: [BarPassVenue])]
     }
 
+    /// `matchedTransitionSource`/`.navigationTransition(.zoom)` require a
+    /// unique id within their namespace at any given time a source is on
+    /// screen. TestFlight bug fixed 2026-08-28 (b3b67f4) for
+    /// `PromptYourNightHomeSection`: a venue appearing in two places
+    /// registered the same id twice in a shared namespace at once, which is
+    /// undefined behavior and broke one of the two cards' rendering (missing
+    /// name/photo — a HeroVenueCard falling back to just its bare gradient,
+    /// or an EventFlyerCard stuck on its amber "no photo" placeholder,
+    /// depending on which card lost the race).
+    ///
+    /// That fix only covered Prompt's own results vs. the rest of the
+    /// screen — Home's own sections still share ONE `zoomNS` and have the
+    /// identical exposure: `favoriteVenues`, `musicMatchedVenues`,
+    /// `recommendedForYou`, and `tonightEvents` are four independent queries
+    /// over the same catalog with no exclusion between each other (unlike
+    /// `dedupedFeed`'s own lists, which already are mutually exclusive by
+    /// construction). A venue that's simultaneously a favorite AND trending
+    /// AND has an event tonight — not a rare combination for a popular
+    /// venue — hit this every time.
+    ///
+    /// Rather than give every section its own private namespace (loses the
+    /// shared hero-zoom animation for no reason on the common case), any
+    /// venue id that shows up more than once across this render's visible
+    /// sections just skips the zoom modifiers entirely: a plain push
+    /// instead of a broken card.
+    private var duplicatedVenueIDs: Set<String> {
+        let allShown = favoriteVenues + musicMatchedVenues + recommendedForYou + tonightEvents.map(\.venue)
+        var counts: [String: Int] = [:]
+        for v in allShown { counts[v.id, default: 0] += 1 }
+        return Set(counts.filter { $0.value > 1 }.keys)
+    }
+
+    /// Zoom-transition destination, skipped for `duplicatedVenueIDs` (see above).
+    @ViewBuilder
+    private func zoomedDestination(for venue: BarPassVenue) -> some View {
+        if duplicatedVenueIDs.contains(venue.id) {
+            VenueDetailView(venue: venue)
+        } else {
+            VenueDetailView(venue: venue).bpZoomDestination(id: venue.id, in: zoomNS)
+        }
+    }
+
+    /// Zoom-transition source, skipped for `duplicatedVenueIDs` (see above).
+    @ViewBuilder
+    private func zoomedSource(for venue: BarPassVenue, @ViewBuilder content: () -> some View) -> some View {
+        if duplicatedVenueIDs.contains(venue.id) {
+            content()
+        } else {
+            content().bpZoomSource(id: venue.id, in: zoomNS)
+        }
+    }
+
     private var dedupedFeed: DedupedFeed {
         var shown = Set(favoriteVenues.map(\.id))
         shown.formUnion(musicMatchedVenues.map(\.id))
@@ -479,9 +531,10 @@ struct TonightView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 14) {
                     ForEach(tonightEvents, id: \.event.id) { pair in
-                        NavigationLink(destination: VenueDetailView(venue: pair.venue).bpZoomDestination(id: pair.venue.id, in: zoomNS)) {
-                            EventFlyerCard(event: pair.event, venue: pair.venue)
-                                .bpZoomSource(id: pair.venue.id, in: zoomNS)
+                        NavigationLink(destination: zoomedDestination(for: pair.venue)) {
+                            zoomedSource(for: pair.venue) {
+                                EventFlyerCard(event: pair.event, venue: pair.venue)
+                            }
                         }
                         .buttonStyle(.plain)
                         .bpAccessibility(label: String(format: l10n.t("tonight.eventAt"), pair.event.title, pair.venue.name), hint: l10n.t("tonight.event.hint"), isButton: true)
@@ -505,14 +558,15 @@ struct TonightView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: BPSpacing.md) {
                     ForEach(venues) { venue in
-                        NavigationLink(destination: VenueDetailView(venue: venue).bpZoomDestination(id: venue.id, in: zoomNS)) {
-                            Group {
-                                switch style {
-                                case .hero: HeroVenueCard(venue: venue)
-                                case .card: SmallVenueCard(venue: venue)
+                        NavigationLink(destination: zoomedDestination(for: venue)) {
+                            zoomedSource(for: venue) {
+                                Group {
+                                    switch style {
+                                    case .hero: HeroVenueCard(venue: venue)
+                                    case .card: SmallVenueCard(venue: venue)
+                                    }
                                 }
                             }
-                            .bpZoomSource(id: venue.id, in: zoomNS)
                         }
                         .buttonStyle(.plain)
                     }

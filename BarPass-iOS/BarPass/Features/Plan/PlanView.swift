@@ -13,6 +13,11 @@ struct PlanView: View {
     @State private var lastPrompt = ""
     @State private var userLocation: CLLocationCoordinate2D?
     @State private var locationService = LocationService()
+    /// Surfaces `savePlan` failures — mainly `SupabasePlanRepository`'s
+    /// no-session error for guests. Before this the save silently no-opted
+    /// (`try?`), so a guest tapping "Save" saw nothing happen with zero
+    /// explanation why.
+    @State private var saveErrorMessage: String?
 
     private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
@@ -265,6 +270,20 @@ struct PlanView: View {
             plan = NightPlan.sample(for: lastPrompt, venues: venueStore.venues, userLocation: userLocation)
             persistCurrentPlan()
         }
+        .overlay(alignment: .top) {
+            if let saveErrorMessage {
+                Text(saveErrorMessage)
+                    .font(.bpScaled(13, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16).padding(.vertical, 10)
+                    .background(Color.bpDanger.opacity(0.9), in: Capsule())
+                    .padding(.top, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .bpAccessibility(label: saveErrorMessage)
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: saveErrorMessage)
 }
 
     private func generatePlan() {
@@ -299,7 +318,16 @@ struct PlanView: View {
     private func savePlan(_ plan: NightPlan) {
         let repo = planRepo
         Task {
-            try? await repo.savePlan(plan)
+            do {
+                try await repo.savePlan(plan)
+            } catch {
+                await MainActor.run {
+                    saveErrorMessage = error.localizedDescription
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        if saveErrorMessage == error.localizedDescription { saveErrorMessage = nil }
+                    }
+                }
+            }
             await loadSavedPlans()
         }
     }
