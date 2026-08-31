@@ -25,7 +25,7 @@ import { VenueReviews } from "@/features/venues/components/venue-reviews";
 import { VenueAmenities } from "@/features/venues/components/venue-amenities";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { formatUSD, formatTime } from "@/lib/utils";
+import { formatUSD, formatTime, formatHoursRange } from "@/lib/utils";
 
 export async function generateStaticParams() {
   const venues = await getVenues();
@@ -128,7 +128,7 @@ export default async function VenuePage({
           <dl className="space-y-2 text-sm">
             <FactRow
               label="Hours"
-              value={`${formatTime(venue.openTime)} – ${formatTime(venue.closeTime)}`}
+              value={formatHoursRange(venue.openTime, venue.closeTime)}
             />
             <FactRow label="Best arrival" value={venue.bestArrivalTime} />
             <FactRow label="Peak" value={venue.peakHours} />

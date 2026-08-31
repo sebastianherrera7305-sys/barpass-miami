@@ -39,3 +39,21 @@ export function formatTime(time24: string | null | undefined): string {
   const hour = h % 12 || 12;
   return `${hour}:${m.toString().padStart(2, "0")} ${suffix}`;
 }
+
+/**
+ * "10:00 PM – 5:00 AM" from an open/close pair.
+ *
+ * ~17% of venues (171/1000 as of 2026-08-31) never got their hours parsed
+ * during Google enrichment: open_time and close_time both hold the same
+ * raw string, either a placeholder ("Ver Google Maps") or a whole rendered
+ * range ("Friday: 4:00 PM – 5:00 AM"). Joining those two identical values
+ * with a dash would print the range twice, so an equal pair is shown once.
+ */
+export function formatHoursRange(
+  openTime: string | null | undefined,
+  closeTime: string | null | undefined,
+): string {
+  const open = formatTime(openTime);
+  const close = formatTime(closeTime);
+  return open === close ? open : `${open} – ${close}`;
+}
