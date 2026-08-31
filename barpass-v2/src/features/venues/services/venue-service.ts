@@ -152,25 +152,56 @@ async function fetchVenues(): Promise<Venue[]> {
   return inFlight;
 }
 
+/** PostgREST's hard per-response row cap. */
+const REST_PAGE_SIZE = 1000;
+/** Safety stop so a server that always returns a full page can't spin forever. */
+const REST_MAX_PAGES = 20;
+
 /**
- * Plain-fetch REST read (same pattern as the iOS app). We deliberately avoid
- * both supabase clients here: the cookie-bound one throws inside
- * generateStaticParams, and supabase-js hits a Node stream bug under Next 16
- * dev that turned 200ms queries into 15s+. Venues/events are public data —
- * an apikey header is all that's needed.
+ * Plain-fetch REST read (same pattern as the iOS app), following PostgREST's
+ * pagination instead of silently stopping at the first page.
+ *
+ * We deliberately avoid both supabase clients here: the cookie-bound one
+ * throws inside generateStaticParams, and supabase-js hits a Node stream bug
+ * under Next 16 dev that turned 200ms queries into 15s+. Venues/events are
+ * public data — an apikey header is all that's needed.
+ *
+ * Paging matters because the 1000-row cap is not an error: the request
+ * succeeds and returns a truncated array. `venues` (1846 rows) was quietly
+ * reduced to the alphabetical first 1000, and everything after that simply
+ * did not exist for the web app — no detail page (`getVenueBySlug` 404'd),
+ * no map pin, no search hit. `SupabaseVenueRepository` on iOS already pages
+ * this way; the web never got the same treatment.
+ *
+ * No cache directive on the fetch: "no-store" here forbids static
+ * prerendering and silently downgraded /venues/[slug] to the local fallback
+ * at build time. Freshness at runtime is handled by the module-level TTL
+ * cache above.
  */
-async function restGet<T>(path: string): Promise<T> {
+async function restGetAll<T>(path: string): Promise<T[]> {
   const { getSupabaseEnv } = await import("@/lib/supabase/config");
   const env = getSupabaseEnv()!;
-  const res = await fetch(`${env.url}/rest/v1/${path}`, {
-    headers: { apikey: env.anonKey, Authorization: `Bearer ${env.anonKey}` },
-    signal: AbortSignal.timeout(10_000),
-    // No cache directive: "no-store" here forbids static prerendering and
-    // silently downgraded /venues/[slug] to the local fallback at build time.
-    // Freshness at runtime is handled by the module-level TTL cache above.
-  });
-  if (!res.ok) throw new Error(`Supabase REST ${res.status} on ${path}`);
-  return res.json() as Promise<T>;
+  const all: T[] = [];
+
+  for (let page = 0; page < REST_MAX_PAGES; page++) {
+    const from = page * REST_PAGE_SIZE;
+    const res = await fetch(`${env.url}/rest/v1/${path}`, {
+      headers: {
+        apikey: env.anonKey,
+        Authorization: `Bearer ${env.anonKey}`,
+        "Range-Unit": "items",
+        Range: `${from}-${from + REST_PAGE_SIZE - 1}`,
+      },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) throw new Error(`Supabase REST ${res.status} on ${path}`);
+
+    const rows = (await res.json()) as T[];
+    all.push(...rows);
+    if (rows.length < REST_PAGE_SIZE) break;
+  }
+
+  return all;
 }
 
 async function fetchVenuesUncached(): Promise<Venue[]> {
@@ -179,12 +210,12 @@ async function fetchVenuesUncached(): Promise<Venue[]> {
     return VENUES;
   }
   try {
-    const data = await restGet<DbVenue[]>("venues?select=*&order=name");
+    const data = await restGetAll<DbVenue>("venues?select=*&order=name");
     const venues = data.map(mapDbVenue);
     _isServingLiveData = true;
 
     try {
-      const eventData = await restGet<DbEvent[]>("events?select=*&order=starts_at");
+      const eventData = await restGetAll<DbEvent>("events?select=*&order=starts_at");
       const byVenue = new Map<string, VenueEvent[]>();
       for (const e of eventData) {
         const list = byVenue.get(e.venue_id) ?? [];
