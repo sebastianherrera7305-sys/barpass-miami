@@ -11,9 +11,6 @@ final actor SupabaseVenueRepository: VenueRepository {
     /// the app stayed open or how many times it came back from background.
     private static let freshnessWindow: TimeInterval = 10 * 60
 
-    private static let supabaseURL = SupabaseConfig.url.absoluteString
-    private static let anonKey = SupabaseConfig.anonKey
-
     /// Exact columns the decoder uses — `select=*` shipped dead columns on
     /// every app launch (egress is the free-tier bottleneck).
     private static let venueColumns = "id,slug,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,price_tier,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom,city,country,timezone"
@@ -119,23 +116,17 @@ final actor SupabaseVenueRepository: VenueRepository {
         var allRows: [SupabaseVenueRow] = []
         var offset = 0
 
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-
+        // Public-read table (RLS: "to anon, authenticated using (true)") —
+        // anon key doubles as bearer, same pattern as every other
+        // public-catalog repository.
         while true {
-            guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/venues?select=\(Self.venueColumns)") else { throw URLError(.badURL) }
-            var request = URLRequest(url: url)
-            request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-            request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-            request.setValue("application/json", forHTTPHeaderField: "Accept")
-            request.setValue("\(offset)-\(offset + pageSize - 1)", forHTTPHeaderField: "Range")
-
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-                throw URLError(.badServerResponse)
-            }
-
-            let page = try decoder.decode([SupabaseVenueRow].self, from: data)
+            let request = try SupabaseRESTClient.request(
+                "GET", path: "venues", queryItems: [URLQueryItem(name: "select", value: Self.venueColumns)],
+                accessToken: SupabaseRESTClient.anonKey,
+                extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"]
+            )
+            let data = try await SupabaseRESTClient.send(request)
+            let page = try SupabaseRESTClient.decoder.decode([SupabaseVenueRow].self, from: data)
             allRows.append(contentsOf: page)
             if page.count < pageSize { break }
             offset += pageSize
@@ -145,39 +136,11 @@ final actor SupabaseVenueRepository: VenueRepository {
     }
 
     private func fetchEventRows() async throws -> [SupabaseEventRow] {
-        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/events?select=\(Self.eventColumns)") else { throw URLError(.badURL) }
-        var request = URLRequest(url: url)
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode([SupabaseEventRow].self, from: data)
+        try await publicGet("events", columns: Self.eventColumns)
     }
 
     private func fetchExperienceTagRows() async throws -> [SupabaseExperienceTagRow] {
-        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/venue_experience_tags?select=\(Self.tagColumns)") else { throw URLError(.badURL) }
-        var request = URLRequest(url: url)
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode([SupabaseExperienceTagRow].self, from: data)
+        try await publicGet("venue_experience_tags", columns: Self.tagColumns)
     }
 
     private func fetchAgeBracketRows() async throws -> [SupabaseAgeBracketRow] {
@@ -185,20 +148,16 @@ final actor SupabaseVenueRepository: VenueRepository {
         // reports win per-bracket once there are 3+ of them, otherwise
         // falls back to venue_age_brackets (Kimi research) for that bracket
         // — never the raw research table alone.
-        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/venue_age_effective?select=\(Self.ageBracketColumns)") else { throw URLError(.badURL) }
-        var request = URLRequest(url: url)
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        try await publicGet("venue_age_effective", columns: Self.ageBracketColumns)
+    }
 
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        return try decoder.decode([SupabaseAgeBracketRow].self, from: data)
+    private func publicGet<T: Decodable>(_ path: String, columns: String) async throws -> [T] {
+        let request = try SupabaseRESTClient.request(
+            "GET", path: path, queryItems: [URLQueryItem(name: "select", value: columns)],
+            accessToken: SupabaseRESTClient.anonKey
+        )
+        let data = try await SupabaseRESTClient.send(request)
+        return try SupabaseRESTClient.decoder.decode([T].self, from: data)
     }
 
     // MARK: - VenueRepository

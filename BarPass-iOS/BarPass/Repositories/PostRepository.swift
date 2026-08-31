@@ -62,20 +62,7 @@ actor LocalPostRepository: PostRepository {
 /// out or before the `venue_posts` table exists stay local with
 /// `pendingSync = true`.
 actor SupabasePostRepository: PostRepository {
-    private static let supabaseURL = SupabaseConfig.url.absoluteString
-    private static let anonKey = SupabaseConfig.anonKey
-
     private let local = LocalPostRepository()
-
-    /// Construye URLs de PostgREST con percent-encoding real — la
-    /// interpolación directa de venueId/postId en un string podía crashear
-    /// (force-unwrap) si algún ID alguna vez traía caracteres que
-    /// necesitaran encoding.
-    private static func restURL(path: String, queryItems: [URLQueryItem]) -> URL? {
-        var components = URLComponents(string: "\(supabaseURL)/rest/v1/\(path)")
-        components?.queryItems = queryItems
-        return components?.url
-    }
 
     private struct Row: Codable {
         let id: UUID
@@ -119,16 +106,13 @@ actor SupabasePostRepository: PostRepository {
         if let r = p.drinksRating { body["drinks_rating"] = r }
         if let r = p.musicRating { body["music_rating"] = r }
 
-        var request = URLRequest(url: URL(string: "\(Self.supabaseURL)/rest/v1/venue_posts")!)
-        request.httpMethod = "POST"
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("return=minimal", forHTTPHeaderField: "Prefer")
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-
-        let (_, response) = try await URLSession.shared.data(for: request)
-        if let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode {
+        let request = try SupabaseRESTClient.request(
+            "POST", path: "venue_posts",
+            body: try JSONSerialization.data(withJSONObject: body),
+            accessToken: session.accessToken,
+            extraHeaders: ["Prefer": "return=minimal"]
+        )
+        if (try? await SupabaseRESTClient.send(request)) != nil {
             p.pendingSync = false
             try await local.create(p)   // mark synced
         }
@@ -137,35 +121,29 @@ actor SupabasePostRepository: PostRepository {
     func delete(_ post: VenuePost) async throws {
         try? await local.delete(post)
         guard let session = AuthService.shared.restoreSession() else { return }
-        guard let url = Self.restURL(path: "venue_posts", queryItems: [
-            URLQueryItem(name: "id", value: "eq.\(post.id.lowercased())"),
-        ]) else { return }
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
-        _ = try? await URLSession.shared.data(for: request)
+        let request = try SupabaseRESTClient.request(
+            "DELETE", path: "venue_posts",
+            queryItems: [URLQueryItem(name: "id", value: "eq.\(post.id.lowercased())")],
+            accessToken: session.accessToken
+        )
+        try? await SupabaseRESTClient.send(request)
     }
 
     private func fetchRemote(venueId: String) async throws -> [VenuePost] {
-        guard let url = Self.restURL(path: "venue_posts", queryItems: [
-            URLQueryItem(name: "venue_id", value: "eq.\(venueId.lowercased())"),
-            URLQueryItem(name: "order", value: "created_at.desc"),
-            URLQueryItem(name: "limit", value: "50"),
-        ]) else { throw URLError(.badURL) }
-        var request = URLRequest(url: url)
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-        request.timeoutInterval = 8
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode([Row].self, from: data).map {
+        // Anon key doubles as bearer here — venue_posts reads are public
+        // (RLS: "to anon, authenticated using (true)"), same as StadiumRepository.
+        let request = try SupabaseRESTClient.request(
+            "GET", path: "venue_posts",
+            queryItems: [
+                URLQueryItem(name: "venue_id", value: "eq.\(venueId.lowercased())"),
+                URLQueryItem(name: "order", value: "created_at.desc"),
+                URLQueryItem(name: "limit", value: "50"),
+            ],
+            accessToken: SupabaseRESTClient.anonKey,
+            timeout: 8
+        )
+        let data = try await SupabaseRESTClient.send(request)
+        return try SupabaseRESTClient.decoder.decode([Row].self, from: data).map {
             VenuePost(id: $0.id.uuidString.lowercased(),
                       venueId: $0.venueId.uuidString.lowercased(),
                       userId: $0.userId?.uuidString.lowercased(),

@@ -28,30 +28,14 @@ protocol VenueCheckinRepository: Sendable {
 }
 
 final actor SupabaseVenueCheckinRepository: VenueCheckinRepository {
-    private static let supabaseURL = SupabaseConfig.url.absoluteString
-    private static let anonKey = SupabaseConfig.anonKey
-
-    private func freshSession() async throws -> AuthSession {
-        guard await AuthService.shared.refreshIfNeeded(),
-              let session = AuthService.shared.restoreSession() else {
-            throw URLError(.userAuthenticationRequired)
-        }
-        return session
-    }
-
     private func rpcRequest(path: String, body: [String: String], accessToken: String) throws -> URLRequest {
-        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/rpc/\(path)") else { throw URLError(.badURL) }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONEncoder().encode(body)
-        return request
+        try SupabaseRESTClient.request(
+            "POST", path: "rpc/\(path)", body: try SupabaseRESTClient.encoder.encode(body), accessToken: accessToken
+        )
     }
 
     func checkIn(venueId: String, tripId: String?) async throws -> String {
-        let session = try await freshSession()
+        let session = try await SupabaseRESTClient.freshSession()
         var body = ["p_venue_id": venueId]
         if let tripId { body["p_trip_id"] = tripId }
         let request = try rpcRequest(path: "check_in_venue", body: body, accessToken: session.accessToken)
@@ -66,25 +50,16 @@ final actor SupabaseVenueCheckinRepository: VenueCheckinRepository {
     }
 
     func checkOut(checkinId: String) async throws {
-        let session = try await freshSession()
+        let session = try await SupabaseRESTClient.freshSession()
         let request = try rpcRequest(path: "check_out_venue", body: ["p_checkin_id": checkinId], accessToken: session.accessToken)
-        let (_, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw VenueCheckinError.network
-        }
+        guard (try? await SupabaseRESTClient.send(request)) != nil else { throw VenueCheckinError.network }
     }
 
     func getActiveCheckin() async throws -> ActiveCheckin? {
-        let session = try await freshSession()
+        let session = try await SupabaseRESTClient.freshSession()
         let request = try rpcRequest(path: "get_active_checkin", body: [:], accessToken: session.accessToken)
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw VenueCheckinError.network
-        }
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        decoder.dateDecodingStrategy = .iso8601
-        let rows = try decoder.decode([ActiveCheckin].self, from: data)
+        guard let data = try? await SupabaseRESTClient.send(request) else { throw VenueCheckinError.network }
+        let rows = try SupabaseRESTClient.decoder.decode([ActiveCheckin].self, from: data)
         return rows.first
     }
 

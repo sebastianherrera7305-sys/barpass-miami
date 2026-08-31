@@ -7,29 +7,19 @@ protocol StadiumRepository: Sendable {
 }
 
 final actor SupabaseStadiumRepository: StadiumRepository {
-    private static let supabaseURL = SupabaseConfig.url.absoluteString
-    private static let anonKey = SupabaseConfig.anonKey
     private static let stadiumColumns = "id,name,address,lat,lng,source_url,seatmap_url,image_url,description"
     private static let poiColumns = "id,stadium_id,level_name,level_order,name,poi_type,section_or_concourse,source_url,confidence"
     private static let eventColumns = "id,stadium_id,name,starts_at,ticket_url,image_url"
 
     private func get<T: Decodable>(_ path: String, queryItems: [URLQueryItem]) async throws -> T {
-        var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/\(path)")
-        components?.queryItems = queryItems
-        guard let url = components?.url else { throw URLError(.badURL) }
-        var request = URLRequest(url: url)
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(T.self, from: data)
+        // Anon key doubles as the bearer token here — these tables are
+        // public-read (RLS: "to anon, authenticated using (true)"), so
+        // there's no real session to fetch, just the same key twice.
+        let request = try SupabaseRESTClient.request(
+            "GET", path: path, queryItems: queryItems, accessToken: SupabaseRESTClient.anonKey
+        )
+        let data = try await SupabaseRESTClient.send(request)
+        return try SupabaseRESTClient.decoder.decode(T.self, from: data)
     }
 
     func allStadiums() async throws -> [Stadium] {

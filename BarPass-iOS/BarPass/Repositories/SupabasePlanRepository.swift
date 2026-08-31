@@ -12,9 +12,6 @@ import Foundation
 /// `auth.uid()`, so guest mode (no session) can't read/write plans at all,
 /// same restriction `SupabaseTripRepository` has for trips.
 actor SupabasePlanRepository: PlanRepository {
-    private static let supabaseURL = SupabaseConfig.url.absoluteString
-    private static let anonKey = SupabaseConfig.anonKey
-
     struct NoSessionError: LocalizedError {
         var errorDescription: String? { L10n.tSync("plan.error.noSession") }
     }
@@ -31,6 +28,11 @@ actor SupabasePlanRepository: PlanRepository {
         }
     }
 
+    // Row is NOT snake_case-mapped (user_id has an explicit CodingKey; id/
+    // title/plan need no conversion) — SupabaseRESTClient's shared coders
+    // would be harmless on Row's own keys but wrong for whatever casing
+    // NightPlan's own Codable conformance uses inside the jsonb blob, so
+    // this keeps its own plain (iso8601-only) coders.
     private static let encoder: JSONEncoder = {
         let e = JSONEncoder()
         e.dateEncodingStrategy = .iso8601
@@ -49,25 +51,14 @@ actor SupabasePlanRepository: PlanRepository {
     }
 
     private func request(_ method: String, path: String, body: Data? = nil) throws -> URLRequest {
-        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/\(path)") else { throw URLError(.badURL) }
-        var req = URLRequest(url: url)
-        req.httpMethod = method
-        req.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        req.setValue("Bearer \(try session().accessToken)", forHTTPHeaderField: "Authorization")
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.setValue("application/json", forHTTPHeaderField: "Accept")
-        if let body { req.httpBody = body }
-        return req
+        try SupabaseRESTClient.request(method, path: path, body: body, accessToken: try session().accessToken)
     }
 
     // MARK: - PlanRepository
 
     func getPlans() async throws -> [NightPlan] {
         let req = try request("GET", path: "night_plans?select=id,user_id,title,plan&order=created_at.desc")
-        let (data, response) = try await URLSession.shared.data(for: req)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
+        let data = try await SupabaseRESTClient.send(req)
         let rows = try Self.decoder.decode([Row].self, from: data)
         return rows.map(\.plan)
     }
@@ -79,8 +70,10 @@ actor SupabasePlanRepository: PlanRepository {
         let userId = try session().user.id
         let row = Row(id: plan.id, userId: userId, title: plan.title, plan: plan)
         let body = try Self.encoder.encode(row)
-        var req = try request("POST", path: "night_plans", body: body)
-        req.setValue("return=minimal,resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
+        let req = try SupabaseRESTClient.request(
+            "POST", path: "night_plans", body: body, accessToken: try session().accessToken,
+            extraHeaders: ["Prefer": "return=minimal,resolution=merge-duplicates"]
+        )
         let (data, response) = try await URLSession.shared.data(for: req)
         guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
             throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: String(data: data, encoding: .utf8) ?? "save failed"])
@@ -89,9 +82,6 @@ actor SupabasePlanRepository: PlanRepository {
 
     func deletePlan(_ plan: NightPlan) async throws {
         let req = try request("DELETE", path: "night_plans?id=eq.\(plan.id)")
-        let (_, response) = try await URLSession.shared.data(for: req)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
+        try await SupabaseRESTClient.send(req)
     }
 }

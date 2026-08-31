@@ -1,9 +1,6 @@
 import Foundation
 
 final actor SupabaseGreekLifeRepository: GreekLifeRepository {
-    private static let supabaseURL = SupabaseConfig.url.absoluteString
-    private static let anonKey = SupabaseConfig.anonKey
-
     private static let universityColumns = "id,name,short_name,city,metro_city,state,country,official_url,greek_life_url,lat,lng,party_life_notes"
     private static let chapterColumns = "id,university_id,fraternity_name,chapter_designation,council,status,official_source_url,chapter_url,address,lat,lng,address_verified,needs_review,review_reason"
 
@@ -11,31 +8,25 @@ final actor SupabaseGreekLifeRepository: GreekLifeRepository {
     private var chaptersByUniversity: [String: [GreekChapter]] = [:]
     private var allUniversitiesCache: [University]?
 
+    /// Public-read tables (RLS: "to anon, authenticated using (true)") —
+    /// the anon key doubles as the bearer token, same as StadiumRepository.
+    private func get<T: Decodable>(_ path: String, queryItems: [URLQueryItem]) async throws -> T {
+        let request = try SupabaseRESTClient.request(
+            "GET", path: path, queryItems: queryItems, accessToken: SupabaseRESTClient.anonKey
+        )
+        let data = try await SupabaseRESTClient.send(request)
+        return try SupabaseRESTClient.decoder.decode(T.self, from: data)
+    }
+
     func universities(forCity city: String) async throws -> [University] {
         if let cached = universitiesByCity[city] { return cached }
-        guard var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/universities") else { throw URLError(.badURL) }
         // Matches either the university's real city or its metro_city (e.g.
         // Coral Gables schools surface under "Miami") — never a fuzzy/ilike
         // match, both sides are exact real values.
-        components.queryItems = [
+        let rows: [SupabaseUniversityRow] = try await get("universities", queryItems: [
             URLQueryItem(name: "select", value: Self.universityColumns),
             URLQueryItem(name: "or", value: "(city.eq.\(city),metro_city.eq.\(city))"),
-        ]
-        guard let url = components.url else { throw URLError(.badURL) }
-
-        var request = URLRequest(url: url)
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let rows = try decoder.decode([SupabaseUniversityRow].self, from: data)
+        ])
         let result = rows.map(Self.mapUniversity)
         universitiesByCity[city] = result
         return result
@@ -43,27 +34,11 @@ final actor SupabaseGreekLifeRepository: GreekLifeRepository {
 
     func chapters(forUniversity universityId: String) async throws -> [GreekChapter] {
         if let cached = chaptersByUniversity[universityId] { return cached }
-        guard var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/greek_chapters") else { throw URLError(.badURL) }
-        components.queryItems = [
+        let rows: [SupabaseChapterRow] = try await get("greek_chapters", queryItems: [
             URLQueryItem(name: "select", value: Self.chapterColumns),
             URLQueryItem(name: "university_id", value: "eq.\(universityId)"),
             URLQueryItem(name: "order", value: "council.asc,fraternity_name.asc"),
-        ]
-        guard let url = components.url else { throw URLError(.badURL) }
-
-        var request = URLRequest(url: url)
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let rows = try decoder.decode([SupabaseChapterRow].self, from: data)
+        ])
         let result = rows.map(Self.mapChapter)
         chaptersByUniversity[universityId] = result
         return result
@@ -71,26 +46,10 @@ final actor SupabaseGreekLifeRepository: GreekLifeRepository {
 
     func allUniversities() async throws -> [University] {
         if let cached = allUniversitiesCache { return cached }
-        guard var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/universities") else { throw URLError(.badURL) }
-        components.queryItems = [
+        let rows: [SupabaseUniversityRow] = try await get("universities", queryItems: [
             URLQueryItem(name: "select", value: Self.universityColumns),
             URLQueryItem(name: "order", value: "name.asc"),
-        ]
-        guard let url = components.url else { throw URLError(.badURL) }
-
-        var request = URLRequest(url: url)
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let rows = try decoder.decode([SupabaseUniversityRow].self, from: data)
+        ])
         let result = rows.map(Self.mapUniversity)
         allUniversitiesCache = result
         return result
@@ -104,26 +63,10 @@ final actor SupabaseGreekLifeRepository: GreekLifeRepository {
         for (_, chapters) in chaptersByUniversity {
             if let match = chapters.first(where: { $0.id == id }) { return match }
         }
-        guard var components = URLComponents(string: "\(Self.supabaseURL)/rest/v1/greek_chapters") else { throw URLError(.badURL) }
-        components.queryItems = [
+        let rows: [SupabaseChapterRow] = try await get("greek_chapters", queryItems: [
             URLQueryItem(name: "select", value: Self.chapterColumns),
             URLQueryItem(name: "id", value: "eq.\(id)"),
-        ]
-        guard let url = components.url else { throw URLError(.badURL) }
-
-        var request = URLRequest(url: url)
-        request.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(Self.anonKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
-
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let rows = try decoder.decode([SupabaseChapterRow].self, from: data)
+        ])
         return rows.first.map(Self.mapChapter)
     }
 

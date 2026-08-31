@@ -12,9 +12,6 @@ import Foundation
 /// Requires a real signed-in session — RLS scopes every row to
 /// `auth.uid()`, so guest mode (no session) can't read/write trips at all.
 actor SupabaseTripRepository: TripRepository {
-    private static let supabaseURL = SupabaseConfig.url.absoluteString
-    private static let anonKey = SupabaseConfig.anonKey
-
     private static let columns = "id,creator_id,title,destination_city,start_date,end_date,cover_image,visibility,status,member_ids,co_organizer_ids,pending_requests,invite_code,stops"
 
     struct NoSessionError: LocalizedError {
@@ -25,19 +22,9 @@ actor SupabaseTripRepository: TripRepository {
         var errorDescription: String? { L10n.tSync("trips.error.noSession") }
     }
 
-    private static let encoder: JSONEncoder = {
-        let e = JSONEncoder()
-        e.keyEncodingStrategy = .convertToSnakeCase
-        e.dateEncodingStrategy = .iso8601
-        return e
-    }()
-
-    private static let decoder: JSONDecoder = {
-        let d = JSONDecoder()
-        d.keyDecodingStrategy = .convertFromSnakeCase
-        d.dateDecodingStrategy = .iso8601
-        return d
-    }()
+    /// Trip's field names line up exactly with the table's snake_case
+    /// columns via convertTo/FromSnakeCase, so it uses SupabaseRESTClient's
+    /// shared coders directly — no local override needed.
 
     private func session() throws -> AuthSession {
         guard let s = AuthService.shared.restoreSession() else { throw NoSessionError() }
@@ -45,32 +32,23 @@ actor SupabaseTripRepository: TripRepository {
     }
 
     private func request(_ method: String, path: String, body: Data? = nil) throws -> URLRequest {
-        guard let url = URL(string: "\(Self.supabaseURL)/rest/v1/\(path)") else { throw URLError(.badURL) }
-        var req = URLRequest(url: url)
-        req.httpMethod = method
-        req.setValue(Self.anonKey, forHTTPHeaderField: "apikey")
-        req.setValue("Bearer \(try session().accessToken)", forHTTPHeaderField: "Authorization")
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.setValue("application/json", forHTTPHeaderField: "Accept")
-        if let body { req.httpBody = body }
-        return req
+        try SupabaseRESTClient.request(method, path: path, body: body, accessToken: try session().accessToken)
     }
 
     // MARK: - TripRepository
 
     func getTrips() async throws -> [Trip] {
         let req = try request("GET", path: "trips?select=\(Self.columns)&order=start_date.asc")
-        let (data, response) = try await URLSession.shared.data(for: req)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
-        return try Self.decoder.decode([Trip].self, from: data)
+        let data = try await SupabaseRESTClient.send(req)
+        return try SupabaseRESTClient.decoder.decode([Trip].self, from: data)
     }
 
     func saveTrip(_ trip: Trip) async throws {
-        let body = try Self.encoder.encode(trip)
-        var req = try request("POST", path: "trips", body: body)
-        req.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+        let body = try SupabaseRESTClient.encoder.encode(trip)
+        let req = try SupabaseRESTClient.request(
+            "POST", path: "trips", body: body, accessToken: try session().accessToken,
+            extraHeaders: ["Prefer": "return=minimal"]
+        )
         let (data, response) = try await URLSession.shared.data(for: req)
         guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
             throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: String(data: data, encoding: .utf8) ?? "save failed"])
@@ -78,9 +56,12 @@ actor SupabaseTripRepository: TripRepository {
     }
 
     func updateTrip(_ trip: Trip) async throws {
-        let body = try Self.encoder.encode(trip)
-        var req = try request("PATCH", path: "trips?id=eq.\(trip.id)", body: body)
-        req.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+        let body = try SupabaseRESTClient.encoder.encode(trip)
+        let req = try SupabaseRESTClient.request(
+            "PATCH", path: "trips", queryItems: [URLQueryItem(name: "id", value: "eq.\(trip.id)")],
+            body: body, accessToken: try session().accessToken,
+            extraHeaders: ["Prefer": "return=minimal"]
+        )
         let (data, response) = try await URLSession.shared.data(for: req)
         guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
             throw URLError(.badServerResponse, userInfo: [NSLocalizedDescriptionKey: String(data: data, encoding: .utf8) ?? "update failed"])
@@ -89,10 +70,7 @@ actor SupabaseTripRepository: TripRepository {
 
     func deleteTrip(_ trip: Trip) async throws {
         let req = try request("DELETE", path: "trips?id=eq.\(trip.id)")
-        let (_, response) = try await URLSession.shared.data(for: req)
-        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
-        }
+        try await SupabaseRESTClient.send(req)
     }
 
     struct InviteNotFoundError: LocalizedError {
@@ -116,6 +94,6 @@ actor SupabaseTripRepository: TripRepository {
             }
             throw URLError(.badServerResponse)
         }
-        return try Self.decoder.decode(Trip.self, from: data)
+        return try SupabaseRESTClient.decoder.decode(Trip.self, from: data)
     }
 }

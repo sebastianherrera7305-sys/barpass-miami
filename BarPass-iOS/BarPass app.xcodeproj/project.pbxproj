@@ -12,6 +12,7 @@
 		01609A069EE22D5E5CDAF602 /* EventTicket.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5086AAE9CBD601116597BE /* EventTicket.swift */; };
 		045900B0B0374875CD4DF42D /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856638E27CF7A56A57535A80 /* KeychainServiceTests.swift */; };
 		0F61EAC735A9E5FBEEAB0A7D /* StadiumRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162643D77BF970FAA2942A37 /* StadiumRepository.swift */; };
+		0EF6C5915AA240B49202C271 /* SupabaseRESTClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A173F3C3D34475BC7C8C4D /* SupabaseRESTClient.swift */; };
 		12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */; };
 		1381C66FFDBA49BF7D938D04 /* HelpRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */; };
 		1E6D56BE3ACE427DB3D6D36B /* CityMascotIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */; };
@@ -207,6 +208,7 @@
 		138CCFF5EDE420FFDFA78DC8 /* EventTicketsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTicketsView.swift; sourceTree = "<group>"; };
 		153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipLinePass.swift; sourceTree = "<group>"; };
 		162643D77BF970FAA2942A37 /* StadiumRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumRepository.swift; path = BarPass/Repositories/StadiumRepository.swift; sourceTree = SOURCE_ROOT; };
+		28A173F3C3D34475BC7C8C4D /* SupabaseRESTClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseRESTClient.swift; path = BarPass/Repositories/SupabaseRESTClient.swift; sourceTree = SOURCE_ROOT; };
 		163C5D5B580F4F5CB17391D4 /* LiquidGlassButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiquidGlassButtonStyle.swift; path = BarPass/Resources/LiquidGlassButtonStyle.swift; sourceTree = SOURCE_ROOT; };
 		1D1A059688C549A88BABFEBB /* FraternityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FraternityListView.swift; path = BarPass/Features/CollegeLife/FraternityListView.swift; sourceTree = SOURCE_ROOT; };
 		1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportRepository.swift; path = BarPass/Repositories/AgeReportRepository.swift; sourceTree = SOURCE_ROOT; };
@@ -590,6 +592,7 @@
 				3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */,
 				1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */,
 				162643D77BF970FAA2942A37 /* StadiumRepository.swift */,
+				28A173F3C3D34475BC7C8C4D /* SupabaseRESTClient.swift */,
 				F863CE708ACF44B3A96D654A /* UniversityListView.swift */,
 				792335E55D9363A086C6C79B /* ChapterChatView.swift */,
 				02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */,
@@ -1055,6 +1058,7 @@
 				7BB3D4EC13FA314E51E72F88 /* AgeReportSheet.swift in Sources */,
 				A74E2DF0019E057F9578D8AB /* Stadium.swift in Sources */,
 				0F61EAC735A9E5FBEEAB0A7D /* StadiumRepository.swift in Sources */,
+				0EF6C5915AA240B49202C271 /* SupabaseRESTClient.swift in Sources */,
 				E59E448890306D0FDEF2CA7B /* StadiumDetailView.swift in Sources */,
 				90618CE0C09E2971F82286BE /* StadiumsListView.swift in Sources */,
 				C577FAF109A04AFC978B06E4 /* UniversityDetailView.swift in Sources */,
