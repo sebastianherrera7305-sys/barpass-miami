@@ -272,15 +272,28 @@ struct PromptYourNightHomeSection: View {
         let now = Date()
         let coordinate = UserLocationProvider.shared.coordinate
 
+        // TestFlight: "por qué recomiendas lugares que tú no irías" — a
+        // real, low-profile venue that happens to contain a searched
+        // keyword (e.g. a small café whose Google category loosely matches)
+        // could outrank an actually-famous spot, because ExperienceScorer's
+        // keyword-match bonus (+1.0 per hit) dwarfs its own popularity term
+        // (`reviewCount`, capped at +0.5 — a shared formula other screens
+        // also rely on, so not touched globally). "Known" has no honest
+        // signal in the data except real review volume, so Prompt Your
+        // Night — the one screen explicitly promising "places you'd
+        // actually go" — weighs it far more here: same real reviewCount
+        // field everywhere else, just a bigger say in this ranking.
         var ranked = venues
-            .map { venue in
-                (venue, ExperienceScorer.score(
+            .map { venue -> (BarPassVenue, Double) in
+                let base = ExperienceScorer.score(
                     venue: venue,
                     passport: MusicProfileStore.shared.passport,
                     context: context,
                     now: now,
                     userCoordinate: coordinate
-                ))
+                )
+                let fameBoost = min(Double(venue.reviewCount) / 500.0, 6.0)
+                return (venue, base + fameBoost)
             }
             .sorted { $0.1 > $1.1 }
             .map(\.0)
