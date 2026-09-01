@@ -11,7 +11,13 @@ struct RootView: View {
             // Native main experience. Built only AFTER auth: at opacity 0 it
             // still rendered 181 venue cards behind the login, saturating the
             // main thread and making the login feel frozen.
-            if !appState.showSplash && !appState.showNativeAuth {
+            //
+            // El quiz de gustos cuenta igual que el login. Un usuario con
+            // sesión guardada entra directo, así que sin este flag el quiz
+            // salía FLOTANDO sobre la app ya corriendo — con las 181 cards
+            // renderizando detrás y `playTopSongs()` arrancando la música
+            // bajo una pantalla que todavía pide atención.
+            if !appState.showSplash && !appState.showNativeAuth && !appState.showTasteQuiz {
                 NavigationStack {
                     MainTabView()
                 }

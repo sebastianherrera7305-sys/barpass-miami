@@ -76,6 +76,13 @@ final class AppState: ObservableObject {
         withAnimation(.easeOut(duration: 0.15)) { showSplash = false }
     }
 
+    /// Se llama cuando el usuario termina o saltea el quiz de gustos. No
+    /// necesita empujar el paso siguiente: `showNativeAuth` ya viene en true,
+    /// y RootView lo muestra en cuanto este flag baja.
+    func completeTasteQuiz() {
+        withAnimation(.easeOut(duration: 0.15)) { showTasteQuiz = false }
+    }
+
     /// Called after successful auth (sign in, sign up, or session restore).
     /// Dismisses auth UI, marks app as ready, and reveals the action bar —
     /// unless the account's email isn't verified yet, in which case it blocks
@@ -89,13 +96,6 @@ final class AppState: ObservableObject {
     /// anyone. A network failure during that check fails open (lets the
     /// already-authenticated user in) rather than locking out a real user
     /// over a connectivity blip; the gate re-evaluates on the next launch.
-    /// Se llama cuando el usuario termina o saltea el quiz de gustos. No
-    /// necesita empujar el paso siguiente: `showNativeAuth` ya viene en true,
-    /// y RootView lo muestra en cuanto este flag baja.
-    func completeTasteQuiz() {
-        withAnimation(.easeOut(duration: 0.15)) { showTasteQuiz = false }
-    }
-
     func completeAuth() {
         withAnimation(.easeOut(duration: 0.1)) { showNativeAuth = false }
         appReady = true
