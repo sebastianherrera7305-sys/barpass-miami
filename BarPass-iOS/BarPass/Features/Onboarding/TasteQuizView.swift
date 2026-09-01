@@ -141,6 +141,17 @@ struct TasteQuizView: View {
 
     private var header: some View {
         VStack(spacing: 14) {
+            // Solo la mascota, sin el wordmark: la pantalla ya tiene título,
+            // subtítulo y 12 chips, y el logo completo la apretaba. Mismo
+            // tratamiento que BarPassLogo para que se lea igual que el resto.
+            Image("BarPassMascot")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 34, height: 32)
+                .padding(7)
+                .background(Color.white, in: Circle())
+                .accessibilityHidden(true)
+
             // Indicador de progreso: arranca con el primer tramo ya pintado
             // para que el quiz se vea empezado y no en cero.
             HStack(spacing: 6) {
@@ -290,15 +301,20 @@ struct TasteQuizView: View {
     private func chipBody(emoji: String?, label: String, on: Bool) -> some View {
         HStack(spacing: 6) {
             if let emoji { Text(emoji) }
+            // Dos líneas y no una: varias etiquetas de InclusivePreference se
+            // cortaban en español ("Accesible en silla de ruedas") y en
+            // portugués, donde son bastante más largas que en inglés. El
+            // minHeight mantiene parejas las cápsulas de una y dos líneas.
             Text(label)
                 .font(.bpScaled(12, weight: .semibold))
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                .multilineTextAlignment(.leading)
         }
         .foregroundStyle(on ? .black : Color.bpInk)
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, minHeight: 44)
         .background(on ? Color.bpAmber : Color.bpInk.opacity(0.06), in: Capsule())
         .overlay(Capsule().strokeBorder(on ? .clear : Color.bpInk.opacity(0.1)))
     }
