@@ -40,8 +40,11 @@ export type MusicGenre =
   | "country"
   | "americana"
   | "rock"
+  | "goth"
   | "reggae"
-  | "afrobeats";
+  | "dancehall"
+  | "afrobeats"
+  | "tejano";
 
 export type Neighborhood =
   | "South Beach"

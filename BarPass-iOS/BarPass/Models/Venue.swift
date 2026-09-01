@@ -12,19 +12,6 @@ enum VenueType: String, Codable, CaseIterable {
     case brewery    = "Brewery"
 }
 
-/// Note that `live` is a performance FORMAT, not a genre — it means "played
-/// by people on a stage". It is kept because it is the only honest answer
-/// for a venue whose programming is verified live but whose style no source
-/// names, and it composes with a real genre (a honky-tonk is `[country,
-/// live]`).
-///
-/// The first six cases below were a Miami-only vocabulary. Per-venue research
-/// across the other 22 cities (2026-09-01) found it could not express most of
-/// what those cities actually programme: 8 of 9 researched Nashville venues
-/// are country, New Orleans is piano/brass/blues, Austin is honky-tonk and
-/// western swing, Chicago has blues and dueling pianos. All of them collapsed
-/// into the single `live` tag, making a Broadway honky-tonk indistinguishable
-/// from a jazz listening room — so genre search could not work outside Miami.
 /// One age bracket a venue fits, and where that claim comes from.
 struct VenueAgeBracket: Codable, Hashable, Sendable {
     enum Source: String, Codable, Sendable {
@@ -54,7 +41,7 @@ struct VenueAgeBracket: Codable, Hashable, Sendable {
 /// naming a style is a real and frequent case — `[.live]` alone is the honest
 /// answer there.
 ///
-/// The list grew from 10 to 14 to 22 as manual research kept hitting music the
+/// The list grew from 10 to 14 to 22 to 25 as manual research kept hitting music the
 /// vocabulary could not express. Each addition below was made only after a
 /// documented venue was being tagged WRONG or LOSSILY without it — never
 /// speculatively:
@@ -73,10 +60,24 @@ struct VenueAgeBracket: Codable, Hashable, Sendable {
 ///              for — RedBar's "OYE CHICA", Caña's "Salsa Flow Tuesdays".
 ///   bachata    Same, and it is not interchangeable with salsa on the floor.
 ///
-/// Still unrepresented and known to exist in the catalogue: soca, vallenato,
-/// merengue, cumbia, zydeco, brass band. Those currently fold into `latin` or
-/// `live`. Add them the same way — when a venue is being mislabelled without
-/// them, not before.
+///   goth       Three venues program it as their whole identity — Elysium in
+///              Austin (25 years), Chicago's Late Bar, and Bar Sinister at
+///              Boardner's in LA. Calling them `rock` described almost nothing
+///              about what happens there. Covers industrial, darkwave, EBM and
+///              new wave.
+///   dancehall  Was folding into `reggae`, which is the wrong room: Madame X
+///              and Deluxx Fluxx in New York and Kultur in LA all bill
+///              dancehall (and bashment) as a distinct night.
+///   tejano     OK Corral books conjunto and tejano — tributes to Valerio
+///              Longoria and Steve Jordan — and Mala Vida is regional
+///              mexicano. Both collapsed into `latin`, which filed a tejano
+///              dance hall and a reggaeton club under one label.
+///
+/// Still unrepresented and seen at least once: soca, freestyle, amapiano,
+/// traditional Irish, vallenato, merengue, cumbia, zydeco, brass band. Those
+/// fold into a parent term for now. Add them the same way — when a venue is
+/// being mislabelled without them, not before. One sighting is a note; three
+/// is a term.
 enum MusicGenre: String, Codable, CaseIterable {
     case edm        = "EDM"
     case house      = "House"
@@ -98,8 +99,11 @@ enum MusicGenre: String, Codable, CaseIterable {
     case country    = "Country"
     case americana  = "Americana"
     case rock       = "Rock"
+    case goth       = "Goth"
     case reggae     = "Reggae"
+    case dancehall  = "Dancehall"
     case afrobeats  = "Afrobeats"
+    case tejano     = "Tejano"
 }
 
 // MARK: - Domain Models
