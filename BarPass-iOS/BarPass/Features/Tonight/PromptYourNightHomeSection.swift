@@ -307,10 +307,27 @@ struct PromptYourNightHomeSection: View {
         // filters to venues of that vibe's real preferred types — no vibe
         // selected still means no type restriction (a bare free-text
         // search shouldn't get one invented).
+        // Resolved before the vibe filter runs, because an explicitly named
+        // genre has to survive it — see the exemption below.
+        let effectiveGenre = selectedGenre ?? Self.detectGenre(in: prompt)
+
         if let selectedVibe {
             let allowedTypes = selectedVibe.profile.preferredTypes
             if !allowedTypes.isEmpty {
-                ranked = ranked.filter { allowedTypes.contains($0.type) }
+                // TestFlight: asking for House with the "Music" chip returned
+                // Brickell cocktail bars. That chip is `.liveMusic`, whose
+                // preferredTypes are [.lounge, .bar] — it means live bands
+                // (jazz, salsa), so it filtered out every one of the 54 clubs
+                // carrying house, 38% of the house venues in the catalogue and
+                // the only type the genre actually lives in. A named genre is a
+                // far more specific request than a broad vibe chip, so a venue
+                // that really carries the asked-for genre is never dropped for
+                // being the "wrong" type; the vibe still shapes the ranking
+                // through ExperienceScorer above.
+                ranked = ranked.filter { venue in
+                    if let effectiveGenre, venue.musicGenres.contains(effectiveGenre) { return true }
+                    return allowedTypes.contains(venue.type)
+                }
             }
         }
 
@@ -339,7 +356,7 @@ struct PromptYourNightHomeSection: View {
         // doesn't play house at all could easily outrank a real house venue.
         // The chip's hard float-to-top only ran for `selectedGenre`; a genre
         // named in plain text deserves the exact same treatment.
-        if let effectiveGenre = selectedGenre ?? Self.detectGenre(in: prompt) {
+        if let effectiveGenre {
             let matching = ranked.filter { $0.musicGenres.contains(effectiveGenre) }
             let rest = ranked.filter { !$0.musicGenres.contains(effectiveGenre) }
             ranked = matching + rest
