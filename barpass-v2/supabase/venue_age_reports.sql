@@ -43,7 +43,13 @@ create index if not exists venue_age_reports_venue_idx on public.venue_age_repor
 -- that bracket is used. Matched per-bracket, not per-venue overall — a
 -- venue can have "18_25" confirmed by real reports while "25_35" still
 -- shows the research tag.
-create or replace view public.venue_age_effective as
+-- security_invoker: sin esto la vista corre con los permisos de quien la creó
+-- (postgres), saltándose el RLS del que consulta. El linter de Supabase lo
+-- marca como error. Aquí ambas tablas base tienen select público, así que el
+-- resultado es idéntico — pero la vista deja de ser un agujero por el que un
+-- futuro cambio de RLS no tendría efecto.
+create or replace view public.venue_age_effective
+with (security_invoker = true) as
 with real_brackets as (
   select venue_id, bracket, count(*) as report_count
   from venue_age_reports
