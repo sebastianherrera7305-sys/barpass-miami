@@ -53,6 +53,47 @@ barpass-v2/
 └── scripts/enrich-venues.ts  — Google Places enrichment
 ```
 
+### Venue data — what is real and what is not (2026-09-01 audit)
+The catalogue is 1846 rows; **1814 are served**, 32 are excluded. Two columns
+answer two different questions and BOTH must be filtered on every read:
+`business_status` (Google: does this still exist) and `excluded_reason`
+(does this belong in a nightlife app — airport lounges, a cruise-ship lounge,
+a cinema, smoke shops, promoters/concierges that resell entry to other
+clubs, a pub-crawl tour operator, a yacht charter, a directory record for a
+business that does not exist, closed/demolished venues, one exact duplicate).
+Filter as `or=(business_status.is.null,business_status.neq.CLOSED_PERMANENTLY)`
+— a bare `not.eq` is NULL, not true, for the 171 venues Google never reached
+and silently drops them.
+
+**`music_genres` was fabricated.** Until 2026-09-01 all 175 rows carrying it
+were Miami and every one held the identical `['hip_hop','house']` — including
+sports bars and a brewery. The likely origin is a promoter listing whose ad
+copy reads "HIP HOP, HOUSE, EDM, LATIN" describing *other people's* clubs.
+All 182 Miami venues have since been researched one at a time against primary
+sources; 0 fabricated tags remain. Of 62 in the final pass, only 2 genuinely
+warranted `hip_hop, house`.
+
+**Rules that came out of it, and are worth keeping:**
+- Never write a genre/field that no source states. An empty value is a fact
+  (McSorley's NYC and Hopleaf Chicago have no music *by design*); a guessed
+  one is a lie that survives for months because nothing marks it as guessed.
+- **Update by id, never by name.** Names repeat across (and within) cities —
+  updating `name=eq.…` wrongly excluded three legitimate Miller's Ale House
+  rows and the real Bloomington Kilroy's before it was caught.
+- Absence must never render as a value: `avg_spend = 0` was showing as a
+  confident "$0" on 1665 venues (iOS already returned "N/A"; the web did not).
+- `neighborhood` was wrong on more than half the researched venues (Coconut
+  Grove alone held eight venues that were not in it). 41 are fixed from
+  verified addresses. Geometry *detects* these but cannot *correct* them —
+  the catalogue has no label to move them to.
+
+**Genre vocabulary** is 14 cases; `country`, `rock`, `blues`, `afrobeats` were
+added because the original ten were Miami-only and everything else collapsed
+into `live` (8 of 9 researched Nashville venues are country). `live` is a
+performance FORMAT, not a genre, and composes: a honky-tonk is `[country, live]`.
+Still missing and seen repeatedly: reggae/calypso, soca, vallenato, merengue,
+bachata.
+
 ### Shared helpers (dedupe refactors, 2026-08-31)
 - **iOS — `Repositories/SupabaseRESTClient.swift`**: the one place that knows the Supabase REST base URL, anon key, auth headers, and the snake_case/iso8601 coders. All 12 repositories build requests through `SupabaseRESTClient.request(...)` + `.send(...)` instead of repeating the boilerplate. Two deliberate exceptions keep their own coders/raw calls: `SupabasePlanRepository` (its `plan` jsonb blob must not be re-cased) and the repos that need the raw failure body for custom error mapping (`BirthdateRepository`, `VenueCheckinRepository`).
 - **Web — `src/lib/supabase/require-user.ts`**: `requireUser(request)` wraps Bearer-token parse → env check → service-role client → `auth.getUser()`, returning `{ok, supabase, user}` or a ready `NextResponse`. Used by the 7 privileged routes (passes, referral/code, referral/attribute, transactions, wallet/topup, wallet/spend, account/delete). **Not** for the cookie-session routes (events, promos and their `[id]` variants) — those get their user from RLS via `@/lib/supabase/server`.
@@ -306,4 +347,4 @@ Sign Out
 
 ---
 
-*Última actualización: 2026-08-31*
+*Última actualización: 2026-09-01*
