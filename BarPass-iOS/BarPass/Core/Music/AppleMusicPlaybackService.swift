@@ -52,6 +52,14 @@ enum AppleMusicPlaybackService {
             log("MusicAuthorization no autorizado (status: \(MusicAuthorization.currentStatus)) — no arranca")
             return
         }
+        // Autorizado no implica suscrito. Sin suscripción, ApplicationMusicPlayer
+        // no puede reproducir catálogo: se gastaban búsquedas en el catálogo
+        // para armar una cola que nunca iba a sonar. Si la consulta falla la
+        // dejamos pasar — no bloqueamos a un suscriptor real por eso.
+        if let canPlay = try? await MusicSubscription.current.canPlayCatalogContent, !canPlay {
+            log("sin suscripción a Apple Music — no arranca el autoplay")
+            return
+        }
 
         let player = ApplicationMusicPlayer.shared
         guard player.state.playbackStatus != .playing else {

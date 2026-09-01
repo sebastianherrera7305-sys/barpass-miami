@@ -21,6 +21,7 @@ enum MusicConnectionState: Equatable {
     case connected
     case denied          // permiso rechazado → link a Ajustes
     case notEntitled     // MusicKit sin habilitar en el dev portal
+    case noSubscription  // autorizado, pero la cuenta no tiene el servicio contratado
     case noData          // autorizado pero sin escucha reciente
     case error(String)
 }
@@ -126,9 +127,10 @@ final class MusicProfileStore: ObservableObject {
         } catch let e as MusicSourceError {
             let hasPassport = passport != nil
             switch e {
-            case .notAuthorized: state = hasPassport ? .connected : .denied
-            case .notEntitled:   state = hasPassport ? .connected : .notEntitled
-            case .noData:        state = hasPassport ? .connected : .noData
+            case .notAuthorized:  state = hasPassport ? .connected : .denied
+            case .notEntitled:    state = hasPassport ? .connected : .notEntitled
+            case .noSubscription: state = hasPassport ? .connected : .noSubscription
+            case .noData:         state = hasPassport ? .connected : .noData
             case .network(let m): state = hasPassport ? .connected : .error(m)
             }
         } catch {

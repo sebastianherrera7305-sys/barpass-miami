@@ -30,6 +30,15 @@ enum MusicAuthStatus {
 enum MusicSourceError: Error {
     case notAuthorized
     case notEntitled
+    /// El usuario dio permiso pero no tiene suscripción activa al servicio.
+    ///
+    /// No es un error: es el estado normal de mucha gente. Autorizar y poder
+    /// leer la música son cosas distintas — `MusicAuthorization.request()` se
+    /// la concede a cualquiera, con suscripción o sin ella, y recién la
+    /// petición de canciones falla. Sin este caso propio eso caía en
+    /// `.network`, que le decía al usuario "intenta de nuevo" para algo que
+    /// reintentar no arregla nunca.
+    case noSubscription
     case noData
     case network(String)
 }

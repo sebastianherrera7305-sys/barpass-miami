@@ -15,6 +15,7 @@ struct HypeWeekCard: View {
             case .connected:         if let p = music.passport { hypeCard(p) }
             case .denied:            infoCard(icon: "gear", text: l10n.t("hype.denied"))
             case .notEntitled:       notEntitledCard
+            case .noSubscription:    noSubscriptionCard
             case .noData:            infoCard(icon: "music.note", text: l10n.t("hype.noData"))
             case .error:             infoCard(icon: "wifi.slash", text: l10n.t("hype.error"))
             }
@@ -183,6 +184,39 @@ struct HypeWeekCard: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             providerButton(l10n.t("hype.connectSpotify"), kind: .spotify)
+        }
+        .padding(12)
+        .background(Color.bpCardBackground.opacity(0.7), in: RoundedRectangle(cornerRadius: BPRadius.md))
+    }
+
+    /// Sin suscripción a Apple Music.
+    ///
+    /// Un tester llegó acá y vio "no pudimos conectar con tu música, intenta
+    /// de nuevo" — un mensaje de reintentar para algo que reintentar no
+    /// arregla. No es un fallo de la app ni del usuario: autorizar y estar
+    /// suscrito son cosas distintas, y mucha gente da el permiso sin tener
+    /// Apple Music. Lo honesto es decirlo y dar la única acción que sí
+    /// cambia el resultado.
+    ///
+    /// Deliberadamente NO ofrece Spotify como salida: su app sigue en
+    /// Development Mode con tope de 25 testers, así que mandar ahí a un
+    /// usuario real es cambiarle un callejón sin salida por otro.
+    private var noSubscriptionCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "music.note.list").font(.bpScaled(15)).foregroundStyle(Color.bpAmber)
+                Text(l10n.t("hype.noSubscription"))
+                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if let url = URL(string: "https://music.apple.com/subscribe") {
+                Link(destination: url) {
+                    Text(l10n.t("hype.getAppleMusic"))
+                        .font(.bpScaled(12, weight: .bold))
+                        .foregroundStyle(Color.bpAmber)
+                }
+                .bpAccessibility(label: l10n.t("hype.getAppleMusic"), isButton: true)
+            }
         }
         .padding(12)
         .background(Color.bpCardBackground.opacity(0.7), in: RoundedRectangle(cornerRadius: BPRadius.md))
