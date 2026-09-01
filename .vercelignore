@@ -1,0 +1,7 @@
+# Vercel builds the web app from the barpass-v2/ root directory, so nothing
+# else in this repo needs to be uploaded. Without this, a deploy tried to
+# push 9.8GB (node_modules, .next, Xcode DerivedData/archives) and failed.
+/*
+!/barpass-v2
+barpass-v2/node_modules
+barpass-v2/.next
