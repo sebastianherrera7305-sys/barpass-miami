@@ -7,6 +7,7 @@ import SwiftUI
 /// design tokens exclusively — no new colors, radii, or animation curves.
 struct HelpOverlayView: View {
     @ObservedObject private var store = HelpGuideStore.shared
+    @ObservedObject private var l10n = L10n.shared
     let anchors: [String: Anchor<CGRect>]
 
     @State private var selectedTipID: String?
@@ -62,7 +63,7 @@ struct HelpOverlayView: View {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { selectedTipID = tip.id }
                 HelpGuideStore.shared.markAsSeen(tip)
             }
-            .bpAccessibility(label: tip.title, hint: tip.description, isButton: true)
+            .bpAccessibility(label: l10n.t(tip.titleKey), hint: l10n.t(tip.descriptionKey), isButton: true)
     }
 
     // MARK: - Tooltip card
@@ -84,10 +85,10 @@ struct HelpOverlayView: View {
         let cardY = placeBelow ? rect.maxY + 14 : rect.minY - 14
 
         return VStack(alignment: .leading, spacing: 6) {
-            Text(tip.title)
+            Text(l10n.t(tip.titleKey))
                 .font(.bpHeadline())
                 .foregroundStyle(Color.bpAmber)
-            Text(tip.description)
+            Text(l10n.t(tip.descriptionKey))
                 .font(.bpBody())
                 .foregroundStyle(Color.bpInk.opacity(0.9))
                 .fixedSize(horizontal: false, vertical: true)
@@ -108,6 +109,8 @@ struct HelpOverlayView: View {
 struct HelpButton: View {
     let route: HelpRoute
 
+    @ObservedObject private var l10n = L10n.shared
+
     var body: some View {
         Button {
             BPHaptics.light()
@@ -125,6 +128,6 @@ struct HelpButton: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .bpAccessibility(label: "Ayuda", hint: "Explora qué hace cada elemento de esta pantalla", isButton: true)
+        .bpAccessibility(label: l10n.t("help.button.a11y"), hint: l10n.t("help.button.hint"), isButton: true)
     }
 }

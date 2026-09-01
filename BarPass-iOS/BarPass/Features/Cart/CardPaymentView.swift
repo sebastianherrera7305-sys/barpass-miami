@@ -129,7 +129,7 @@ struct CardPaymentView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(l10n.t("card.holderLabel")).font(.bpScaled(8, weight: .bold)).foregroundStyle(.white.opacity(0.35))
-                    Text(draft.entry.name.isEmpty ? l10n.t("draft.entry.nameUpperPlaceholder") : draft.entry.name.uppercased())
+                    Text(draft.entry.name.isEmpty ? l10n.t("card.nameUpperPlaceholder") : draft.entry.name.uppercased())
                         .font(.bpScaled(12, weight: .semibold)).foregroundStyle(.white.opacity(0.75))
                 }
             }

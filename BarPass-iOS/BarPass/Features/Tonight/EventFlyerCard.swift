@@ -124,6 +124,10 @@ struct EventFlyerCard: View {
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.10)))
         .shadow(color: .black.opacity(0.45), radius: 12, y: 6)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "\(event.title) en \(venue.name)", hint: "Ver detalle del evento", isButton: true)
+        .bpAccessibility(
+            label: String(format: l10n.t("event.card.a11y"), event.title, venue.name),
+            hint: l10n.t("event.card.hint"),
+            isButton: true
+        )
     }
 }

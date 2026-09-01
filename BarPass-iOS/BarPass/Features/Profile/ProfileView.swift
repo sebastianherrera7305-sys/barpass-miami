@@ -573,7 +573,7 @@ struct ProfileView: View {
         .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpInk.opacity(0.07)))
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: "\(value) \(label)", hint: "Estadística: \(label)")
+        .bpAccessibility(label: "\(value) \(label)", hint: String(format: l10n.t("profile.stat.hint"), label))
     }
 
     private func earnRow(icon: String, action: String, points: String) -> some View {
