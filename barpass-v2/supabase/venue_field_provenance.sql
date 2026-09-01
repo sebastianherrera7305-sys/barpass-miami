@@ -26,6 +26,18 @@
 --                (a Google photo URL is not a judgement call).
 --   at           ISO date the value was written.
 --
+-- RESEARCHED BUT EMPTY
+-- A field can carry provenance while holding no value:
+--   "music_genres": {"source": "manual_research", "at": "2026-09-01",
+--                    "result": "none_published"}
+-- means a human checked this venue and found that it publishes no music
+-- programming. That is a finding, not a gap — most sports bars, cocktail
+-- lounges and hotel rooftops genuinely have nothing to state. Recording it
+-- keeps those venues out of the research queue; writing provenance only on
+-- success sent every one of them back around, and two were paid for twice
+-- before anyone noticed. `result` is what keeps this from claiming a value:
+-- the entry describes the research, not a genre.
+--
 -- An absent key means the origin is unknown — the default for anything
 -- written before this column existed. That is honest: it does not claim the
 -- value is fabricated, only that nobody recorded where it came from.
