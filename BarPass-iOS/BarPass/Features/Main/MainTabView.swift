@@ -86,15 +86,23 @@ struct MainTabView: View {
                 }
             )
 
+            // Bottom-trailing, above the tab bar — NOT top-trailing.
+            // This is a global overlay drawn on top of whichever screen is
+            // showing, and every screen owns its own top-right corner: on
+            // Trips it landed exactly on the create-trip button and hid it
+            // (TestFlight, build 16: "el botón de ayuda… está justamente
+            // encima del botón de crear un trip"). Nothing owns the area just
+            // above the tab bar, so one move fixes the collision on every
+            // screen instead of nudging them one at a time.
             if let route = currentHelpRoute, !helpStore.isActive {
                 VStack {
+                    Spacer()
                     HStack {
                         Spacer()
                         HelpButton(route: route)
-                            .padding(.top, 56)
                             .padding(.trailing, BPSpacing.lg)
+                            .padding(.bottom, bottomChromeHeight + BPSpacing.md)
                     }
-                    Spacer()
                 }
             }
 
