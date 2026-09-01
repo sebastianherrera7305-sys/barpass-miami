@@ -210,7 +210,20 @@ async function fetchVenuesUncached(): Promise<Venue[]> {
     return VENUES;
   }
   try {
-    const data = await restGetAll<DbVenue>("venues?select=*&order=name");
+    // excluded_reason: "should this be in a nightlife app at all" (airport
+    // lounges, a cinema, smoke shops, venues 40km+ outside Miami — see
+    // supabase/venue_exclusions.sql). business_status: "does it still
+    // exist". Both columns existed and neither was filtered, so the
+    // catalogue served places nobody could go out to.
+    const data = await restGetAll<DbVenue>(
+      // The or(...) is deliberate: `business_status <> 'CLOSED_PERMANENTLY'`
+      // is NULL — not true — for the 171 venues Google enrichment never
+      // reached, so a bare not.eq silently dropped them. Missing data must
+      // never read as "closed".
+      "venues?select=*&excluded_reason=is.null" +
+        "&or=(business_status.is.null,business_status.neq.CLOSED_PERMANENTLY)" +
+        "&order=name",
+    );
     const venues = data.map(mapDbVenue);
     _isServingLiveData = true;
 

@@ -121,7 +121,26 @@ final actor SupabaseVenueRepository: VenueRepository {
         // public-catalog repository.
         while true {
             let request = try SupabaseRESTClient.request(
-                "GET", path: "venues", queryItems: [URLQueryItem(name: "select", value: Self.venueColumns)],
+                "GET", path: "venues",
+                queryItems: [
+                    URLQueryItem(name: "select", value: Self.venueColumns),
+                    // Two different questions, two different columns:
+                    // business_status answers "does this place still exist"
+                    // (Google Places), excluded_reason answers "should it be
+                    // in a nightlife app at all" (see
+                    // barpass-v2/supabase/venue_exclusions.sql — airport VIP
+                    // lounges, a cinema, smoke shops, venues 40km+ outside
+                    // Miami). Both were present in the catalogue and neither
+                    // was ever filtered, which is why results included places
+                    // nobody could actually go out to.
+                    URLQueryItem(name: "excluded_reason", value: "is.null"),
+                    // NOT a plain `not.eq`: in SQL, `business_status <>
+                    // 'CLOSED_PERMANENTLY'` evaluates to NULL — not true — when
+                    // the column is NULL, so a bare not.eq silently dropped the
+                    // 171 venues Google enrichment never reached. Missing data
+                    // must never read as "closed".
+                    URLQueryItem(name: "or", value: "(business_status.is.null,business_status.neq.CLOSED_PERMANENTLY)"),
+                ],
                 accessToken: SupabaseRESTClient.anonKey,
                 extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"]
             )
