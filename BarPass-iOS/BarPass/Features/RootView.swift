@@ -34,7 +34,13 @@ struct RootView: View {
                     .zIndex(4)
             }
 
-            if appState.showNativeAuth && !appState.showOnboarding {
+            if appState.showTasteQuiz && !appState.showOnboarding && !appState.showSplash {
+                TasteQuizView { appState.completeTasteQuiz() }
+                    .transition(.opacity)
+                    .zIndex(4)
+            }
+
+            if appState.showNativeAuth && !appState.showOnboarding && !appState.showTasteQuiz {
                 NativeAuthView()
                     .environmentObject(appState)
                     .transition(.asymmetric(
