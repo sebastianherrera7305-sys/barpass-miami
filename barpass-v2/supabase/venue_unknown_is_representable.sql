@@ -36,7 +36,11 @@ update public.venues set dress_code        = null where dress_code = '';
 update public.venues set parking           = null where parking = '';
 update public.venues set best_arrival_time = null where best_arrival_time = '';
 update public.venues set peak_hours        = null where peak_hours = '';
-update public.venues set popular_drinks    = null where popular_drinks in ('[]', '');
+-- popular_drinks is a `json` column, and json has no `=` operator in
+-- Postgres — comparing it to '' also fails as invalid JSON syntax. Cast to
+-- text. (Getting this wrong aborts the whole script: the Supabase SQL editor
+-- runs it in one transaction, so the ALTERs above roll back with it.)
+update public.venues set popular_drinks    = null where popular_drinks::text = '[]';
 update public.venues set vibes             = null where cardinality(vibes) = 0;
 
 -- crowd_level is 'steady' for all 1846 rows — there is no live busyness
