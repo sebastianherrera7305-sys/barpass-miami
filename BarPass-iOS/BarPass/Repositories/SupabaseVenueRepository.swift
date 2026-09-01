@@ -16,7 +16,7 @@ final actor SupabaseVenueRepository: VenueRepository {
     private static let venueColumns = "id,slug,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,price_tier,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom,city,country,timezone"
     private static let eventColumns = "id,venue_id,title,description,starts_at,ends_at,cover_price"
     private static let tagColumns = "venue_id,tag_id,category,confidence,source,computed_at"
-    private static let ageBracketColumns = "venue_id,bracket"
+    private static let ageBracketColumns = "venue_id,bracket,source,report_count"
 
     /// Cache en disco de la última lista real obtenida — antes el fallback
     /// sin red era 1 sola venue hardcodeada de preview (LocalVenueRepository),
@@ -101,7 +101,17 @@ final actor SupabaseVenueRepository: VenueRepository {
             let venueTags: [ExperienceTag] = (tagsByVenue[row.id.uuidString.lowercased()] ?? []).map { tag in
                 ExperienceTag(id: tag.tagId, category: tag.category, confidence: tag.confidence, source: tag.source, updatedAt: tag.computedAt)
             }
-            let venueAgeBrackets = (ageBracketsByVenue[row.id.uuidString.lowercased()] ?? []).map(\.bracket)
+            let venueAgeBrackets = (ageBracketsByVenue[row.id.uuidString.lowercased()] ?? []).map {
+                // The view's `source` distinguishes an informed research
+                // estimate from 3+ real check-out reports. Carrying it through
+                // is the point: the app must not present the two as the same
+                // kind of claim.
+                VenueAgeBracket(
+                    id: $0.bracket,
+                    source: $0.source == "user_reports" ? .userReports : .research,
+                    reportCount: $0.reportCount
+                )
+            }
             return Self.mapRowToVenue(row, events: venueEvents, experienceTags: venueTags, ageBrackets: venueAgeBrackets)
         }
     }
@@ -222,7 +232,7 @@ final actor SupabaseVenueRepository: VenueRepository {
 
     // MARK: - Mapping
 
-    private static func mapRowToVenue(_ row: SupabaseVenueRow, events: [VenueEvent], experienceTags: [ExperienceTag] = [], ageBrackets: [String] = []) -> BarPassVenue {
+    private static func mapRowToVenue(_ row: SupabaseVenueRow, events: [VenueEvent], experienceTags: [ExperienceTag] = [], ageBrackets: [VenueAgeBracket] = []) -> BarPassVenue {
         BarPassVenue(
             id: row.id.uuidString.lowercased(),
             name: row.name,
@@ -510,4 +520,8 @@ struct SupabaseExperienceTagRow: Codable {
 struct SupabaseAgeBracketRow: Codable {
     let venueId: UUID
     let bracket: String
+    /// "kimi_research" or "user_reports" — see venue_age_effective.
+    let source: String
+    /// Only non-nil when `source` is "user_reports".
+    let reportCount: Int?
 }

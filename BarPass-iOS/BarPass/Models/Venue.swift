@@ -25,6 +25,26 @@ enum VenueType: String, Codable, CaseIterable {
 /// western swing, Chicago has blues and dueling pianos. All of them collapsed
 /// into the single `live` tag, making a Broadway honky-tonk indistinguishable
 /// from a jazz listening room — so genre search could not work outside Miami.
+/// One age bracket a venue fits, and where that claim comes from.
+struct VenueAgeBracket: Codable, Hashable, Sendable {
+    enum Source: String, Codable, Sendable {
+        /// Desk research. An informed estimate, not an observation.
+        case research
+        /// 3+ real check-out reports for this bracket — see
+        /// barpass-v2/supabase/venue_age_reports.sql.
+        case userReports
+    }
+
+    /// "18_25", "25_35", "35_50".
+    let id: String
+    let source: Source
+    /// Only set for `.userReports`.
+    let reportCount: Int?
+
+    /// "18–25" — an en dash, not a hyphen, and never the raw "18_25".
+    var label: String { id.replacingOccurrences(of: "_", with: "–") }
+}
+
 enum MusicGenre: String, Codable, CaseIterable {
     case edm        = "EDM"
     case house      = "House"
@@ -158,10 +178,15 @@ struct BarPassVenue: Identifiable, Codable {
     /// server-side from real amenity/category data, never invented client-
     /// side. Empty until `derive-experience-tags.ts` has run for a venue.
     var experienceTags:   [ExperienceTag] = []
-    /// Which age brackets ("18_25", "25_35", "35_50") this venue was
-    /// research-verified to fit, from `venue_age_brackets`. Empty — never a
-    /// guessed default — for venues research hasn't tagged yet.
-    var ageBrackets:       [String] = []
+    /// Which age brackets this venue fits, from the `venue_age_effective`
+    /// view. Empty — never a guessed default — for venues nothing has tagged
+    /// yet. Carries `source` because the two are not the same claim: research
+    /// is an informed estimate, real check-out reports are what actually
+    /// happened, and the app should not present them identically.
+    var ageBrackets:       [VenueAgeBracket] = []
+
+    /// Just the ids, for filtering. Keeps existing call sites simple.
+    var ageBracketIds: [String] { ageBrackets.map(\.id) }
     /// Multi-city readiness (Venue Intelligence Roadmap Phase 2). Optional
     /// for decode-safety against any venue cached before these existed —
     /// nil, not "Miami", when a source genuinely doesn't say. The live

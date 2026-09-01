@@ -197,6 +197,7 @@ struct VenueDetailView: View {
             divider
 
             musicSection
+            ageSection
                 .padding(.horizontal, BPSpacing.lg)
 
             if !venue.popularDrinks.isEmpty {
@@ -372,6 +373,50 @@ struct VenueDetailView: View {
 
                 if !venue.dressCode.isEmpty {
                     infoRow("tshirt.fill", l10n.t("venueDetail.dressCode"), venue.dressCode)
+                }
+            }
+        }
+    }
+
+    /// Who actually goes. Two different claims, shown differently on purpose:
+    /// desk research is an informed estimate, while 3+ real check-out reports
+    /// are an observation. `venue_age_effective` already resolves which wins
+    /// per bracket (see barpass-v2/supabase/venue_age_reports.sql); this only
+    /// has to avoid presenting them as the same thing.
+    ///
+    /// Renders nothing when nothing has tagged the venue — an untagged venue
+    /// is a fact, not a gap to fill with a guess.
+    @ViewBuilder
+    private var ageSection: some View {
+        if !venue.ageBrackets.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                sectionTitle(l10n.t("venueDetail.ageTitle"))
+
+                ForEach(venue.ageBrackets.sorted { $0.id < $1.id }, id: \.self) { bracket in
+                    HStack(spacing: 10) {
+                        Text(bracket.label)
+                            .font(.bpScaled(15, weight: .bold))
+                            .foregroundStyle(Color.bpAmber)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.bpAmber.opacity(0.12), in: Capsule())
+                            .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.25)))
+
+                        if bracket.source == .userReports, let count = bracket.reportCount {
+                            Label(
+                                String(format: l10n.t("venueDetail.ageReports"), count.formatted()),
+                                systemImage: "person.2.fill"
+                            )
+                            .font(.bpSmall())
+                            .foregroundStyle(Color.bpInk.opacity(0.75))
+                        } else {
+                            Text(l10n.t("venueDetail.ageResearch"))
+                                .font(.bpSmall())
+                                .foregroundStyle(Color.bpTextSecondary)
+                        }
+
+                        Spacer()
+                    }
                 }
             }
         }

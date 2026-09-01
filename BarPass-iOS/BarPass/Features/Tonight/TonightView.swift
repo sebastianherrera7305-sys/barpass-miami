@@ -45,7 +45,7 @@ struct TonightView: View {
         // "trending" is the marker, same pattern as the "age:" markers below.
         if mood.keywords == ["trending"] { return venue.isTrending }
         if let marker = mood.keywords.first, marker.hasPrefix("age:") {
-            return venue.ageBrackets.contains(String(marker.dropFirst(4)))
+            return venue.ageBracketIds.contains(String(marker.dropFirst(4)))
         }
         let haystack = ([venue.type.rawValue, venue.name] + venue.vibes + venue.tags
             + venue.musicGenres.map { $0.rawValue }).joined(separator: " ").lowercased()
