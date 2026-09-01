@@ -44,6 +44,8 @@ export type MusicGenre =
   | "reggae"
   | "dancehall"
   | "afrobeats"
+  | "amapiano"
+  | "soca"
   | "tejano";
 
 export type Neighborhood =

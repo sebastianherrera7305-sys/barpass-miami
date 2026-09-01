@@ -330,7 +330,9 @@ final actor SupabaseVenueRepository: VenueRepository {
         case "goth", "industrial", "darkwave", "ebm", "new_wave", "post_punk": return .goth
         case "reggae", "ska": return .reggae
         case "dancehall", "bashment": return .dancehall
-        case "afrobeats", "afrobeat", "afro_house", "amapiano": return .afrobeats
+        case "afrobeats", "afrobeat", "afro_house": return .afrobeats
+        case "amapiano": return .amapiano
+        case "soca", "calypso": return .soca
         case "tejano", "conjunto", "regional_mexicano", "banda", "corridos", "norteno": return .tejano
         // Latin styles with no case of their own resolve UP to `latin` rather
         // than being dropped. Losing "cumbia" entirely is worse than showing

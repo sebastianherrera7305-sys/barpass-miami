@@ -41,7 +41,7 @@ struct VenueAgeBracket: Codable, Hashable, Sendable {
 /// naming a style is a real and frequent case — `[.live]` alone is the honest
 /// answer there.
 ///
-/// The list grew from 10 to 14 to 22 to 25 as manual research kept hitting music the
+/// The list grew from 10 to 14 to 22 to 27 as manual research kept hitting music the
 /// vocabulary could not express. Each addition below was made only after a
 /// documented venue was being tagged WRONG or LOSSILY without it — never
 /// speculatively:
@@ -73,11 +73,16 @@ struct VenueAgeBracket: Codable, Hashable, Sendable {
 ///              mexicano. Both collapsed into `latin`, which filed a tejano
 ///              dance hall and a reggaeton club under one label.
 ///
-/// Still unrepresented and seen at least once: soca, freestyle, amapiano,
-/// traditional Irish, vallenato, merengue, cumbia, zydeco, brass band. Those
-/// fold into a parent term for now. Add them the same way — when a venue is
-/// being mislabelled without them, not before. One sighting is a note; three
-/// is a term.
+///   soca       Named in three venues' own event titles — Madame X's Lloyd
+///              the DJ nights, and Le Nocturne and Masada's "Afrobeats,
+///              Hiphop, Dancehall, Soca" residencies.
+///   amapiano   Same three-sighting bar: Kultur, Masada and Amor Miami all
+///              bill it alongside afrobeats rather than as a synonym for it.
+///
+/// Still unrepresented and seen at least once: freestyle, traditional Irish,
+/// vallenato, merengue, cumbia, zydeco, brass band. Those fold into a parent
+/// term for now. Add them the same way — when a venue is being mislabelled
+/// without them, not before. One sighting is a note; three is a term.
 enum MusicGenre: String, Codable, CaseIterable {
     case edm        = "EDM"
     case house      = "House"
@@ -103,6 +108,8 @@ enum MusicGenre: String, Codable, CaseIterable {
     case reggae     = "Reggae"
     case dancehall  = "Dancehall"
     case afrobeats  = "Afrobeats"
+    case amapiano   = "Amapiano"
+    case soca       = "Soca"
     case tejano     = "Tejano"
 }
 
