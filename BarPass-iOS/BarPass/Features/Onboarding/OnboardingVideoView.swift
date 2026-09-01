@@ -13,13 +13,17 @@ struct OnboardingVideoView: View {
     @State private var isFinished = false
     @State private var cancellables = Set<AnyCancellable>()
 
+    // Las captions se guardan como CLAVE, no como texto ya resuelto: `scenes`
+    // es un `let` que se evalúa una sola vez, así que un `l10n.t(...)` aquí
+    // congelaría el idioma del primer render y el cambio en caliente dejaría
+    // de funcionar solo en esta pantalla. Se resuelven en el `body`.
     private let scenes: [SceneInfo] = [
-        SceneInfo(file: "scene1", caption: nil),
-        SceneInfo(file: "scene2", caption: "Desde el juego hasta la fiesta"),
-        SceneInfo(file: "scene3", caption: "Festivales. Cultura. Energía."),
-        SceneInfo(file: "scene4", caption: nil),
-        SceneInfo(file: "scene5", caption: "Los mejores clubs. Tu acceso."),
-        SceneInfo(file: "scene6", caption: "Un toque. Adentro."),
+        SceneInfo(file: "scene1", captionKey: nil),
+        SceneInfo(file: "scene2", captionKey: "onboarding.caption.2"),
+        SceneInfo(file: "scene3", captionKey: "onboarding.caption.3"),
+        SceneInfo(file: "scene4", captionKey: nil),
+        SceneInfo(file: "scene5", captionKey: "onboarding.caption.5"),
+        SceneInfo(file: "scene6", captionKey: "onboarding.caption.6"),
     ]
 
     var body: some View {
@@ -43,8 +47,8 @@ struct OnboardingVideoView: View {
             VStack {
                 Spacer()
 
-                if let caption = scenes[safe: currentScene]?.caption {
-                    Text(caption)
+                if let captionKey = scenes[safe: currentScene]?.captionKey {
+                    Text(l10n.t(captionKey))
                         .font(.bpScaled(22, weight: .bold))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
@@ -170,9 +174,10 @@ struct OnboardingVideoView: View {
 }
 
 private struct SceneInfo {
-    let file:     String
-    let caption:  String?
-    var duration: Double = 5.0
+    let file:       String
+    /// Clave de l10n, no el texto ya traducido — ver nota en `scenes`.
+    let captionKey: String?
+    var duration:   Double = 5.0
 }
 
 private extension Array {
