@@ -172,7 +172,20 @@ struct MainTabView: View {
             }
         }
         .fullScreenCover(item: $deepLinkedVenue) { venue in
+            // La Ayuda necesita su propia capa DENTRO del cover. Las
+            // preferences de SwiftUI no salen de una presentación modal, así
+            // que el `.overlayPreferenceValue` de arriba nunca ve los anchors
+            // de esta pantalla: el usuario tocaba "?", `isActive` pasaba a
+            // true y el overlay intentaba dibujarse en el árbol de atrás,
+            // invisible e intocable. Y como el botón flotante se oculta
+            // mientras `isActive` es true, no quedaba forma de apagarlo — la
+            // app se sentía trabada. Reportado desde TestFlight.
             NavigationStack { VenueDetailView(venue: venue) }
+                .overlayPreferenceValue(HelpAnchorPreferenceKey.self) { anchors in
+                    if helpStore.isActive {
+                        HelpOverlayView(anchors: anchors)
+                    }
+                }
         }
     }
 

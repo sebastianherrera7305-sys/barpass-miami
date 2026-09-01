@@ -197,6 +197,7 @@ struct VenueDetailView: View {
             divider
 
             musicSection
+                .padding(.horizontal, BPSpacing.lg)
             ageSection
                 .padding(.horizontal, BPSpacing.lg)
 
@@ -356,6 +357,11 @@ struct VenueDetailView: View {
                 sectionTitle(l10n.t("venueDetail.musicAmbience"))
 
                 if !venue.musicGenres.isEmpty {
+                    // El ScrollView llega a los bordes a propósito y el padding
+                    // va DENTRO, en el HStack: así las cápsulas arrancan
+                    // alineadas con el resto de la pantalla pero pueden
+                    // desplazarse hasta el borde en vez de cortarse contra un
+                    // recorte. Padear el ScrollView entero haría lo segundo.
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             ForEach(venue.musicGenres, id: \.self) { genre in
@@ -368,7 +374,9 @@ struct VenueDetailView: View {
                                     .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.25)))
                             }
                         }
+                        .padding(.horizontal, BPSpacing.lg)
                     }
+                    .padding(.horizontal, -BPSpacing.lg)
                 }
 
                 if !venue.dressCode.isEmpty {

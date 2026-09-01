@@ -52,6 +52,12 @@ final class HelpGuideStore: ObservableObject {
     }
 
     func open(route: HelpRoute) {
+        // Cambiar de ruta con la Ayuda abierta la apaga primero. Es la red de
+        // seguridad para el mismo fallo: si el overlay queda activo en un
+        // contexto que no puede dibujarlo, `isActive` se quedaba en true sin
+        // manera de bajarlo, porque el botón que lo apaga se esconde mientras
+        // está activo. Navegar a cualquier parte ahora lo recupera.
+        if isActive, route != currentRoute { isActive = false }
         currentRoute = route
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { isActive = true }
     }
