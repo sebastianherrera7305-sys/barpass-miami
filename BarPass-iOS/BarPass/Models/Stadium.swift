@@ -22,6 +22,18 @@ struct Stadium: Identifiable, Codable, Hashable {
     /// or description of the stadium").
     let imageURL: String?
     let description: String?
+
+    /// City derived from `address`, which has no column of its own in
+    /// `stadiums`. US addresses here are consistently
+    /// "street, City, ST ZIP", so the component before the state/ZIP is the
+    /// city. Returns nil rather than a guess if the shape doesn't match —
+    /// the list groups those under "Other" instead of inventing a city.
+    var city: String? {
+        let parts = address.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        guard parts.count >= 3 else { return nil }
+        let candidate = parts[parts.count - 2]
+        return candidate.isEmpty ? nil : candidate
+    }
 }
 
 enum StadiumPOIType: String, Codable, CaseIterable {
