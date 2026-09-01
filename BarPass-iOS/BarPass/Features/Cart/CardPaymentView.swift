@@ -31,7 +31,16 @@ struct CardPaymentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                // The city art behind BPBackgroundView fades to black low on
+                // screen, which suits browsing views — but this form's fields
+                // sit high, right against the brightest part of the
+                // illustration, and the labels became unreadable over it
+                // (TestFlight feedback, 2026-09-01). A payment form should
+                // read as calm and secure, so the art stays only as a faint
+                // texture behind an almost-solid surface.
                 BPBackgroundView()
+                    .overlay(Color.bpSurface.opacity(0.93))
+                    .ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 20) {
@@ -208,11 +217,42 @@ struct CardPaymentView: View {
             .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(activeFocus == field ? gold.opacity(0.5) : Color.bpInk.opacity(0.08), lineWidth: 1))
-            .onChange(of: text.wrappedValue) { _, _ in validateCard() }
+            .onChange(of: text.wrappedValue) { _, newValue in
+                // The keyboard is a numberPad, which has no "/" key — without
+                // this the expiry field could never be filled in a form the
+                // parser accepts (it splits on "/"), so no card payment could
+                // ever succeed. Formatting is applied as the user types.
+                let formatted = Self.formatted(newValue, for: field)
+                if formatted != newValue { text.wrappedValue = formatted }
+                validateCard()
+            }
             .bpAccessibility(
                 label: field == .number ? l10n.t("card.number.a11y") : (field == .expiry ? l10n.t("card.expiry.a11y") : l10n.t("card.cvv.a11y")),
                 hint: field == .number ? l10n.t("card.number.hint") : (field == .expiry ? l10n.t("card.expiry.hint") : l10n.t("card.cvv.hint"))
             )
+    }
+
+    /// Groups the card number in 4s and turns a bare "1234" expiry into
+    /// "12/34". Digits-only input, capped at the real field lengths.
+    private static func formatted(_ raw: String, for field: CardField) -> String {
+        let digits = raw.filter(\.isNumber)
+        switch field {
+        case .name:
+            return raw
+        case .number:
+            let capped = String(digits.prefix(16))
+            return stride(from: 0, to: capped.count, by: 4).map { offset in
+                let start = capped.index(capped.startIndex, offsetBy: offset)
+                let end = capped.index(start, offsetBy: min(4, capped.count - offset))
+                return String(capped[start..<end])
+            }.joined(separator: " ")
+        case .expiry:
+            let capped = String(digits.prefix(4))
+            guard capped.count > 2 else { return capped }
+            return "\(capped.prefix(2))/\(capped.dropFirst(2))"
+        case .cvv:
+            return String(digits.prefix(4))
+        }
     }
 
     private var isValid: Bool {
@@ -221,7 +261,11 @@ struct CardPaymentView: View {
 
     private func validateCard() {
         let digits = cardNumber.filter(\.isNumber)
-        let expiryOk = expiry.count >= 4
+        // Was `expiry.count >= 4`, which accepted "1234" — a value the parser
+        // below then read as month 1234. Require a real month and a 2-digit year.
+        let expiryDigits = expiry.filter(\.isNumber)
+        let month = UInt(expiryDigits.prefix(2)) ?? 0
+        let expiryOk = expiryDigits.count == 4 && (1...12).contains(month)
         let cvvOk = cvv.count >= 3
         isCardValid = digits.count == 16 && expiryOk && cvvOk
     }
@@ -255,7 +299,7 @@ struct CardPaymentView: View {
                 let year = rawYear >= 100 ? rawYear : 2000 + rawYear
 
                 let cardParams = STPPaymentMethodCardParams()
-                cardParams.number = cardNumber
+                cardParams.number = cardNumber.filter(\.isNumber)
                 cardParams.expMonth = NSNumber(value: month)
                 cardParams.expYear = NSNumber(value: year)
                 cardParams.cvc = cvv

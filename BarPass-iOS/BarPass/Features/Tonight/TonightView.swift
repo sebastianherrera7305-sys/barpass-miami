@@ -592,6 +592,10 @@ struct HeroVenueCard: View {
     @ObservedObject private var l10n = L10n.shared
     let venue: BarPassVenue
 
+    // The photo below must be pinned to exactly these — see the comment there.
+    private static let cardWidth: CGFloat = 280
+    private static let cardHeight: CGFloat = 180
+
     /// Same call `recommendedForYou` scores with, so the badge shown here
     /// always matches the real reason this card ranked where it did — never
     /// independent, possibly-inconsistent copy.
@@ -618,11 +622,21 @@ struct HeroVenueCard: View {
                 .padding(16)
 
             if let first = venue.photoUrls.first, let url = URL(string: first) {
+                // `.fill` with no frame grows to the photo's own aspect
+                // ratio, and a ZStack sizes itself to its largest child — so
+                // a wide or tall photo inflated this stack and pushed the
+                // name/rating block outside the visible card before the outer
+                // .frame could clamp it. That is why cards looked broken for
+                // some venues and fine for others: it tracked each photo's
+                // shape, not the data. Pinning the image to the card's own
+                // size keeps the text block inside it for every photo.
                 CachedImage(url: url, targetSize: CGSize(width: 400, height: 300), priority: .hot) { image in
                     image.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     Color.clear
                 }
+                .frame(width: Self.cardWidth, height: Self.cardHeight)
+                .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: BPRadius.xl))
             }
 
@@ -695,7 +709,8 @@ struct HeroVenueCard: View {
             }
             .padding(16)
         }
-        .frame(width: 280, height: 180)
+        .frame(width: Self.cardWidth, height: Self.cardHeight)
+        .clipped()
         .overlay(alignment: .topLeading) {
             // Own opaque-ish background, independent of the photo gradient
             // below — top-leading sits above where that gradient darkens,
