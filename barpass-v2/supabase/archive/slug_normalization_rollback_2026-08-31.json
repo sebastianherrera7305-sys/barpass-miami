@@ -1,0 +1,500 @@
+[
+ {
+  "id": "da82e881-8d13-4f31-a1ce-64927eed576c",
+  "name": "Accomplice Bar",
+  "old": "accomplice-los angeles",
+  "new": "accomplice-los-angeles"
+ },
+ {
+  "id": "10c73e7f-8ad5-41b9-8967-eb0ce416be6a",
+  "name": "Aft Cocktail Deck",
+  "old": "aft-cocktail-deck-las vegas",
+  "new": "aft-cocktail-deck-las-vegas"
+ },
+ {
+  "id": "aeb29fd0-cd24-465f-9694-c695022ce48f",
+  "name": "All American Rathskeller",
+  "old": "the-all-american-rathskeller-state college",
+  "new": "the-all-american-rathskeller-state-college"
+ },
+ {
+  "id": "45a62c5c-2d6f-445e-9a04-a10a65d09c88",
+  "name": "Avegno Lounge",
+  "old": "avegno-new orleans",
+  "new": "avegno-new-orleans"
+ },
+ {
+  "id": "646ac926-7ff3-414e-8333-813415f294e6",
+  "name": "B-Side Lounge",
+  "old": "b-side-lounge-chapel hill",
+  "new": "b-side-lounge-chapel-hill"
+ },
+ {
+  "id": "44ac08a6-41ff-4c94-a3e5-6e836ee5e0a3",
+  "name": "Bacchanal Fine Wine & Spirits",
+  "old": "bacchanal-wine-new orleans",
+  "new": "bacchanal-wine-new-orleans"
+ },
+ {
+  "id": "fa5437a0-d7eb-45a2-99b5-580d710d0bb9",
+  "name": "Bar Bleu",
+  "old": "bar-bleu-state college",
+  "new": "bar-bleu-state-college"
+ },
+ {
+  "id": "09d8b6c2-90e1-4aa7-911e-73efdc002128",
+  "name": "Bar Bonobo",
+  "old": "bar-none-new york",
+  "new": "bar-none-new-york"
+ },
+ {
+  "id": "a9ca4ceb-2d5b-418e-bea2-342370c69ce2",
+  "name": "Bar Ginza",
+  "old": "bar-ginza-las vegas",
+  "new": "bar-ginza-las-vegas"
+ },
+ {
+  "id": "1cb3ae8c-a739-4c39-843a-f5145a990eed",
+  "name": "Bar Room at the Beekman",
+  "old": "the-bar-room-at-the-beekman-new york",
+  "new": "the-bar-room-at-the-beekman-new-york"
+ },
+ {
+  "id": "b0b3f585-ef27-4553-bbed-6ec4fc8e8cf7",
+  "name": "Bar Snack",
+  "old": "bar-snack-new york",
+  "new": "bar-snack-new-york"
+ },
+ {
+  "id": "9fe5fe9f-d541-42e2-81e3-06f6bcbd3701",
+  "name": "Barrel Proof",
+  "old": "barrel-proof-new orleans",
+  "new": "barrel-proof-new-orleans"
+ },
+ {
+  "id": "0808f02b-7eac-4775-a9f7-35c27bee320f",
+  "name": "Beachbum Berry's Latitude 29",
+  "old": "beachbum-berry-s-latitude-29-new orleans",
+  "new": "beachbum-berry-s-latitude-29-new-orleans"
+ },
+ {
+  "id": "70fe3ef3-d8cc-4d3d-a8dd-ac45aba0bf98",
+  "name": "Bemelmans Bar",
+  "old": "bemelmans-bar-new york",
+  "new": "bemelmans-bar-new-york"
+ },
+ {
+  "id": "57092ba1-d4b5-4910-aa4c-3e718b8bbaee",
+  "name": "Bengal Tap Room",
+  "old": "bengal-tap-room-baton rouge",
+  "new": "bengal-tap-room-baton-rouge"
+ },
+ {
+  "id": "da7ffcb4-de67-4202-ac7b-0a282cf0d79d",
+  "name": "Bouligny Tavern",
+  "old": "bouligny-tavern-new orleans",
+  "new": "bouligny-tavern-new-orleans"
+ },
+ {
+  "id": "6f158826-c328-42b7-a1d4-fa2c05155267",
+  "name": "Buffalo Wild Wings",
+  "old": "buffalo-wild-wings-baton rouge",
+  "new": "buffalo-wild-wings-baton-rouge"
+ },
+ {
+  "id": "0273b5c0-84d5-4a33-8077-7dbcd89488a1",
+  "name": "Caff\u00e9 Capri",
+  "old": "caffe-capri-college station",
+  "new": "caffe-capri-college-station"
+ },
+ {
+  "id": "bc708137-d96c-4062-a2ae-b154f696a9cc",
+  "name": "Cane and Table",
+  "old": "cane-table-new orleans",
+  "new": "cane-table-new-orleans"
+ },
+ {
+  "id": "0164da55-bf5f-4885-8d8c-4ca5ec376059",
+  "name": "Capri Club",
+  "old": "capri-club-los angeles",
+  "new": "capri-club-los-angeles"
+ },
+ {
+  "id": "c7802c23-fdad-4838-88b4-c73fbd169c32",
+  "name": "Cheddar's Scratch Kitchen",
+  "old": "cheddar-s-scratch-kitchen-college station",
+  "new": "cheddar-s-scratch-kitchen-college-station"
+ },
+ {
+  "id": "936bd8f8-efc7-47bd-b681-0595c6ac06c1",
+  "name": "Christopher's World Grille",
+  "old": "christopher-s-world-grille-college station",
+  "new": "christopher-s-world-grille-college-station"
+ },
+ {
+  "id": "55178565-8135-43cc-a599-e82f9ccef01e",
+  "name": "Clover Club",
+  "old": "clover-club-new york",
+  "new": "clover-club-new-york"
+ },
+ {
+  "id": "a56e702c-bfb1-4da2-9216-ab18513729e6",
+  "name": "Collins",
+  "old": "collins-las vegas",
+  "new": "collins-las-vegas"
+ },
+ {
+  "id": "9a5559d8-e4b2-4288-b122-b29a4f469a84",
+  "name": "Columns",
+  "old": "the-columns-hotel-new orleans",
+  "new": "the-columns-hotel-new-orleans"
+ },
+ {
+  "id": "9505e3b4-6896-49e4-81d6-2200d5c5adff",
+  "name": "Conor O'Neill's Irish Pub",
+  "old": "conor-o-neill-s-irish-pub-ann arbor",
+  "new": "conor-o-neill-s-irish-pub-ann-arbor"
+ },
+ {
+  "id": "1e9c89d6-0411-47d5-9a8c-3083cb8c302b",
+  "name": "Cure",
+  "old": "cure-new orleans",
+  "new": "cure-new-orleans"
+ },
+ {
+  "id": "727181be-e1a0-41f4-856f-09db64541608",
+  "name": "Dante Beverly Hills",
+  "old": "dante-beverly-hills-los angeles",
+  "new": "dante-beverly-hills-los-angeles"
+ },
+ {
+  "id": "26631191-6fe5-432d-8d09-dc15e74fad87",
+  "name": "Dante West Village",
+  "old": "dante-new york",
+  "new": "dante-new-york"
+ },
+ {
+  "id": "e5883557-ffeb-4428-9896-4e33b3254278",
+  "name": "Doberman Drawing Room",
+  "old": "doberman-drawing-room-las vegas",
+  "new": "doberman-drawing-room-las-vegas"
+ },
+ {
+  "id": "ff0d017f-61f1-45b1-977c-cfc9195e8b81",
+  "name": "Double Chicken Please",
+  "old": "double-chicken-please-new york",
+  "new": "double-chicken-please-new-york"
+ },
+ {
+  "id": "7266b5c7-7b03-49f2-9878-0216f7c12113",
+  "name": "Echelon Kitchen and Bar",
+  "old": "echelon-kitchen-and-bar-chapel hill",
+  "new": "echelon-kitchen-and-bar-chapel-hill"
+ },
+ {
+  "id": "ba3a8866-4ee3-4454-babf-4b765a6bd2c1",
+  "name": "Erin Rose",
+  "old": "erin-rose-new orleans",
+  "new": "erin-rose-new-orleans"
+ },
+ {
+  "id": "de5641b8-8ce8-48e4-8170-18b42d7ec4c4",
+  "name": "Fargo's Pit BBQ",
+  "old": "fargo-s-pit-bbq-college station",
+  "new": "fargo-s-pit-bbq-college-station"
+ },
+ {
+  "id": "5cb8607a-e6a1-432d-920c-25bb73711d5c",
+  "name": "Fiddlehead",
+  "old": "fiddlehead-state college",
+  "new": "fiddlehead-state-college"
+ },
+ {
+  "id": "e28f0a8e-6a6f-4e88-8721-bd5506071eae",
+  "name": "Garagiste Wine Room I Merchant",
+  "old": "garagiste-wine-room-and-merchant-las vegas",
+  "new": "garagiste-wine-room-and-merchant-las-vegas"
+ },
+ {
+  "id": "dc6e4e37-a245-4376-b2bb-a8a5ea9e4bc7",
+  "name": "Grand Army",
+  "old": "grand-army-new york",
+  "new": "grand-army-new-york"
+ },
+ {
+  "id": "3980cf9e-111c-4348-9c7e-a7896b0ab6ca",
+  "name": "Hard Rock Cafe",
+  "old": "hard-rock-cafe-new-orleans-new orleans",
+  "new": "hard-rock-cafe-new-orleans-new-orleans"
+ },
+ {
+  "id": "76c80618-0ecf-4086-ab54-1e727ad36410",
+  "name": "Hard Rock Cafe",
+  "old": "hard-rock-cafe-hollywood-los angeles",
+  "new": "hard-rock-cafe-hollywood-los-angeles"
+ },
+ {
+  "id": "ba222931-b215-4613-a084-c29ea0bc5bb6",
+  "name": "Hard Rock Cafe",
+  "old": "hard-rock-cafe-las-vegas-strip-las vegas",
+  "new": "hard-rock-cafe-las-vegas-strip-las-vegas"
+ },
+ {
+  "id": "7e7740c0-347d-4712-b974-136006849ee2",
+  "name": "Hard Rock Hotel New York",
+  "old": "hard-rock-hotel-new-york-new york",
+  "new": "hard-rock-hotel-new-york-new-york"
+ },
+ {
+  "id": "306e2e1c-e86d-4b62-a701-932e1792deaf",
+  "name": "Jax Bar & Kitchen",
+  "old": "jax-bar-kitchen-state college",
+  "new": "jax-bar-kitchen-state-college"
+ },
+ {
+  "id": "5d3d9183-5d54-40d2-b616-66ac53bbf12a",
+  "name": "Jewel of the South",
+  "old": "jewel-of-the-south-new orleans",
+  "new": "jewel-of-the-south-new-orleans"
+ },
+ {
+  "id": "0e430a45-c13d-475f-85c7-86da2318f26b",
+  "name": "Jimmy's Corner",
+  "old": "jimmy-s-corner-new york",
+  "new": "jimmy-s-corner-new-york"
+ },
+ {
+  "id": "15fa964f-7177-4391-9731-83ca3b7c65f9",
+  "name": "Jose's Restaurant",
+  "old": "jose-s-mexican-restaurant-college station",
+  "new": "jose-s-mexican-restaurant-college-station"
+ },
+ {
+  "id": "11350aaa-7ef9-423d-9f1b-d2c0806d682e",
+  "name": "Katana Kitten",
+  "old": "katana-kitten-new york",
+  "new": "katana-kitten-new-york"
+ },
+ {
+  "id": "38763caf-282f-4c92-8846-654559aec579",
+  "name": "Keens Steakhouse",
+  "old": "keens-steakhouse-new york",
+  "new": "keens-steakhouse-new-york"
+ },
+ {
+  "id": "3b087faf-bcda-4f31-b4a9-63555023ca88",
+  "name": "Kermit's Trem\u00e9 Mother-in-Law Lounge",
+  "old": "kermit-s-treme-mother-in-law-lounge-new orleans",
+  "new": "kermit-s-treme-mother-in-law-lounge-new-orleans"
+ },
+ {
+  "id": "d4687b91-67d4-4a40-abde-b171435aeaa0",
+  "name": "Kilroy's on Kirkwood",
+  "old": "kilroy-s-on-kirkwood-ann arbor",
+  "new": "kilroy-s-on-kirkwood-ann-arbor"
+ },
+ {
+  "id": "c3ff4882-2be1-4d25-9be8-a34f56e3f4d1",
+  "name": "Lafitte's Blacksmith Shop Bar",
+  "old": "lafitte-s-blacksmith-shop-new orleans",
+  "new": "lafitte-s-blacksmith-shop-new-orleans"
+ },
+ {
+  "id": "0f99d866-c6f0-4ca6-9691-a2a8397c1cc8",
+  "name": "Lupe Tortilla Mexican Restaurant",
+  "old": "lupe-tortilla-college station",
+  "new": "lupe-tortilla-college-station"
+ },
+ {
+  "id": "cb5a9a5a-a541-47c0-ac99-2f604235e1e5",
+  "name": "Maison Premiere",
+  "old": "maison-premiere-new york",
+  "new": "maison-premiere-new-york"
+ },
+ {
+  "id": "772df57b-32c1-49cb-a4b1-343d1b5867d7",
+  "name": "Mansurs on the Boulevard",
+  "old": "mansur-s-on-the-boulevard-baton rouge",
+  "new": "mansur-s-on-the-boulevard-baton-rouge"
+ },
+ {
+  "id": "b73f68da-67a0-4999-9667-3297f6a49176",
+  "name": "Melrose Umbrella Co.",
+  "old": "melrose-umbrella-co-los angeles",
+  "new": "melrose-umbrella-co-los-angeles"
+ },
+ {
+  "id": "361b647f-6bff-40cc-94af-59d9677a21e1",
+  "name": "Messina Hof Estate Winery",
+  "old": "messina-hof-winery-resort-college station",
+  "new": "messina-hof-winery-resort-college-station"
+ },
+ {
+  "id": "4c2ec2e5-d0ac-4a34-aeb4-35208817bc44",
+  "name": "Napa Flats Wood-Fired Kitchen",
+  "old": "napa-flats-wood-fired-kitchen-college station",
+  "new": "napa-flats-wood-fired-kitchen-college-station"
+ },
+ {
+  "id": "b8f81a00-37ea-472f-b6f3-7c2c9ec90966",
+  "name": "Napoleon House",
+  "old": "napoleon-house-new orleans",
+  "new": "napoleon-house-new-orleans"
+ },
+ {
+  "id": "1b09c65c-cbfb-476e-960f-354dbb0cf8db",
+  "name": "NOTHING REALLY MATTERS",
+  "old": "nothing-really-matters-new york",
+  "new": "nothing-really-matters-new-york"
+ },
+ {
+  "id": "8cf6bd2c-4e96-4ddd-9995-74d5d8b574a6",
+  "name": "Petrossian Bar",
+  "old": "petrossian-bar-las vegas",
+  "new": "petrossian-bar-las-vegas"
+ },
+ {
+  "id": "ad491d1e-651e-4a7b-8cc7-21f4318d8a3d",
+  "name": "Pluck Wine Bar & Restaurant",
+  "old": "pluck-wine-bar-new orleans",
+  "new": "pluck-wine-bar-new-orleans"
+ },
+ {
+  "id": "0949b3f6-4a2f-43f2-80ed-71e4558b6ce9",
+  "name": "Ruth's Chris Steak House",
+  "old": "ruth-s-chris-steak-house-baton rouge",
+  "new": "ruth-s-chris-steak-house-baton-rouge"
+ },
+ {
+  "id": "0464f58d-9311-4199-802a-04cdb15786c9",
+  "name": "Saint Tuesday",
+  "old": "saint-tuesday-new york",
+  "new": "saint-tuesday-new-york"
+ },
+ {
+  "id": "f1ec248b-9c17-48b0-bda0-707d18c25a8e",
+  "name": "schmuck.",
+  "old": "schmuck-new york",
+  "new": "schmuck-new-york"
+ },
+ {
+  "id": "4f9fc892-f123-46b6-b61c-b9f9f8dc07d4",
+  "name": "Ski Lodge",
+  "old": "ski-lodge-las vegas",
+  "new": "ski-lodge-las-vegas"
+ },
+ {
+  "id": "de166542-b29f-4ff9-933f-90cf649bf6f2",
+  "name": "Sunken Harbor Club",
+  "old": "sunken-harbor-club-new york",
+  "new": "sunken-harbor-club-new-york"
+ },
+ {
+  "id": "cad4058a-1ad4-415c-8dca-a28df03696be",
+  "name": "The Baxter Arcade",
+  "old": "the-baxter-bar-arcade-chapel hill",
+  "new": "the-baxter-bar-arcade-chapel-hill"
+ },
+ {
+  "id": "ace25a6c-78b6-48fd-b523-4dcf84d180cb",
+  "name": "The Campbell",
+  "old": "the-campbell-new york",
+  "new": "the-campbell-new-york"
+ },
+ {
+  "id": "ab42771f-cefc-4f53-a0fa-3b4e80aede4c",
+  "name": "The Chandelier",
+  "old": "the-chandelier-las vegas",
+  "new": "the-chandelier-las-vegas"
+ },
+ {
+  "id": "44213188-e6bf-40a6-9dbb-e24c3b0f19a6",
+  "name": "The George, Valencia Hotel Collection",
+  "old": "the-george-college station",
+  "new": "the-george-college-station"
+ },
+ {
+  "id": "0991b0d4-0010-446c-bb61-172835e36876",
+  "name": "The Golden Tiki",
+  "old": "the-golden-tiki-las vegas",
+  "new": "the-golden-tiki-las-vegas"
+ },
+ {
+  "id": "a9d856e0-b743-48f6-a9ed-5fef4aa17124",
+  "name": "The Kraken",
+  "old": "the-kraken-chapel hill",
+  "new": "the-kraken-chapel-hill"
+ },
+ {
+  "id": "e9f9bf7b-e0ec-47a6-a0fb-54bb6e4a2208",
+  "name": "The Let's Go!",
+  "old": "the-let-s-go-disco-cocktail-club-los angeles",
+  "new": "the-let-s-go-disco-cocktail-club-los-angeles"
+ },
+ {
+  "id": "61c9e5b3-b8cf-4366-8da1-7e9e40378c7e",
+  "name": "The Long Island Bar",
+  "old": "the-long-island-bar-new york",
+  "new": "the-long-island-bar-new-york"
+ },
+ {
+  "id": "47552ba4-41a2-4db7-90d7-6be5b55c450e",
+  "name": "The Republic Steakhouse",
+  "old": "the-republic-college station",
+  "new": "the-republic-college-station"
+ },
+ {
+  "id": "0bbacb79-0c72-47ac-8181-c53ec3ae7f3b",
+  "name": "The Rookery",
+  "old": "the-rookery-chapel hill",
+  "new": "the-rookery-chapel-hill"
+ },
+ {
+  "id": "4cc11eec-99c7-4224-a2a3-357294edc4ef",
+  "name": "The Sazerac Bar",
+  "old": "the-sazerac-bar-new orleans",
+  "new": "the-sazerac-bar-new-orleans"
+ },
+ {
+  "id": "7d686eff-4b94-444f-a86f-efc4df90a7d6",
+  "name": "The Village Coffee by Altara",
+  "old": "the-village-cafe-college station",
+  "new": "the-village-cafe-college-station"
+ },
+ {
+  "id": "fcd053c9-b6bb-49cf-95e7-e60dc2ea2d1c",
+  "name": "The Wolves",
+  "old": "the-wolves-los angeles",
+  "new": "the-wolves-los-angeles"
+ },
+ {
+  "id": "aa45d56c-87bf-4b73-8b49-bb7fdd1d158f",
+  "name": "Tin Building by Jean-Georges",
+  "old": "tin-roof-new york",
+  "new": "tin-roof-new-york"
+ },
+ {
+  "id": "dcf83da1-3bc0-48d6-a942-aa9293adf93d",
+  "name": "Tonga Hut",
+  "old": "tonga-hut-los angeles",
+  "new": "tonga-hut-los-angeles"
+ },
+ {
+  "id": "2c6da9a0-db58-445b-8d2d-2adecec07a7b",
+  "name": "Twelve Mile Limit",
+  "old": "twelve-mile-limit-new orleans",
+  "new": "twelve-mile-limit-new-orleans"
+ },
+ {
+  "id": "1d57a213-4a1f-4816-8bb6-d3b0ac6a8be7",
+  "name": "Vaughan's Lounge",
+  "old": "vaughan-s-lounge-new orleans",
+  "new": "vaughan-s-lounge-new-orleans"
+ },
+ {
+  "id": "7fe8ad92-0cfa-43af-9b17-b20bf0207ce6",
+  "name": "Vesper Bar",
+  "old": "vesper-bar-las vegas",
+  "new": "vesper-bar-las-vegas"
+ }
+]
