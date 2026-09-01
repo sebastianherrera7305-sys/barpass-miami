@@ -17,6 +17,18 @@ onboarding se salta solo.
 Este documento es el brief para generar esos 6 clips. No propone cambios de
 código: la estructura de escenas, los tiempos y las captions ya existen.
 
+### Dónde cae el video en el flujo
+
+```
+Splash → Onboarding (video) → Quiz de gustos → Auth → AgeGate → CityPicker → app
+```
+
+El quiz de gustos (`TasteQuizView`) va **inmediatamente después** del video y
+antes del login. Los dos se leen como una sola secuencia: el video vende la
+sensación, el quiz la vuelve personal. Si los videos no están en el bundle, el
+onboarding se saltea solo y el usuario cae directo en el quiz — el flujo no se
+rompe, solo pierde su parte emocional.
+
 ### Restricciones que definen el brief
 
 Tres hechos del sistema que condicionan todo lo que estos videos pueden hacer:

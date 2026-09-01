@@ -13,6 +13,10 @@ struct OrderConfirmation: Equatable {
 final class AppState: ObservableObject {
     @Published var showSplash             = true
     @Published var showOnboarding         = false
+    /// Quiz de gustos, entre el video de onboarding y el login. Va antes del
+    /// auth a propósito (ver TasteQuizView), así que se resuelve contra
+    /// UserDefaults y no contra el usuario, que todavía no existe.
+    @Published var showTasteQuiz          = !TasteProfileService.isCompleted
     @Published var showActionBar          = false
     @Published var showNativeAuth         = true
     @Published var showAgeGate            = false
@@ -85,6 +89,13 @@ final class AppState: ObservableObject {
     /// anyone. A network failure during that check fails open (lets the
     /// already-authenticated user in) rather than locking out a real user
     /// over a connectivity blip; the gate re-evaluates on the next launch.
+    /// Se llama cuando el usuario termina o saltea el quiz de gustos. No
+    /// necesita empujar el paso siguiente: `showNativeAuth` ya viene en true,
+    /// y RootView lo muestra en cuanto este flag baja.
+    func completeTasteQuiz() {
+        withAnimation(.easeOut(duration: 0.15)) { showTasteQuiz = false }
+    }
+
     func completeAuth() {
         withAnimation(.easeOut(duration: 0.1)) { showNativeAuth = false }
         appReady = true
