@@ -15,7 +15,7 @@ struct CardPaymentView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var l10n = L10n.shared
 
-    @State private var card        = CardEntry()
+    @ObservedObject private var draft = CardDraft.shared
     @State private var loading     = false
     @State private var errorMsg    = ""
     @FocusState private var activeFocus: CardEntry.Field?
@@ -48,7 +48,7 @@ struct CardPaymentView: View {
                                 .foregroundStyle(Color.bpInk.opacity(0.45))
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                            CardEntryFields(entry: $card, focus: $activeFocus)
+                            CardEntryFields(entry: $draft.entry, focus: $activeFocus)
                         }
                         .padding(.horizontal, 20)
 
@@ -122,14 +122,14 @@ struct CardPaymentView: View {
 
                 Spacer()
 
-                Text(card.isValid ? "•••• •••• •••• ••••" : l10n.t("card.enterDetails"))
-                    .font(.system(size: card.isValid ? 18 : 13, weight: .medium, design: card.isValid ? .monospaced : .default))
+                Text(draft.entry.isValid ? "•••• •••• •••• ••••" : l10n.t("card.enterDetails"))
+                    .font(.system(size: draft.entry.isValid ? 18 : 13, weight: .medium, design: draft.entry.isValid ? .monospaced : .default))
                     .foregroundStyle(.white.opacity(0.9))
                     .padding(.bottom, 8)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(l10n.t("card.holderLabel")).font(.bpScaled(8, weight: .bold)).foregroundStyle(.white.opacity(0.35))
-                    Text(card.name.isEmpty ? l10n.t("card.nameUpperPlaceholder") : card.name.uppercased())
+                    Text(draft.entry.name.isEmpty ? l10n.t("draft.entry.nameUpperPlaceholder") : draft.entry.name.uppercased())
                         .font(.bpScaled(12, weight: .semibold)).foregroundStyle(.white.opacity(0.75))
                 }
             }
@@ -178,7 +178,7 @@ struct CardPaymentView: View {
 
 
 
-    private var isValid: Bool { card.isValid }
+    private var isValid: Bool { draft.entry.isValid }
 
 
     // MARK: - Payment flow (Stripe SPM not yet installed — stub until added)
@@ -190,7 +190,7 @@ struct CardPaymentView: View {
         loading  = true
         errorMsg = ""
 
-        let last4 = String(card.digits.suffix(4))
+        let last4 = String(draft.entry.digits.suffix(4))
 
         guard let session = AuthService.shared.restoreSession() else {
             loading = false
@@ -200,7 +200,7 @@ struct CardPaymentView: View {
 
         Task {
             do {
-                guard let paymentParams = card.stripeParams() else {
+                guard let paymentParams = draft.entry.stripeParams() else {
                     await MainActor.run { loading = false; errorMsg = l10n.t("cardPayment.error.invalidCard") }
                     return
                 }
@@ -232,6 +232,7 @@ struct CardPaymentView: View {
                     BPAnalytics.track(.paymentSuccess(method: "card", amount: self.total))
                     PointsEngine.shared.award(.completeTrip)
                     self.onOrderId?(orderId)
+                    CardDraft.shared.clear()   // paid: nothing left to preserve
                     self.onSuccess("💳 •••• \(last4)")
                     self.dismiss()
                 }

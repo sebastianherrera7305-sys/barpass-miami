@@ -148,6 +148,10 @@ final class AuthService: @unchecked Sendable {
         lock.lock(); defer { lock.unlock() }
         KeychainService.delete(forKey: Self.sessionKey)
         defaults.removeObject(forKey: Self.sessionKey) // limpia cualquier resto legacy también
+        // A half-typed card is held in memory so backing out of the payment
+        // sheet doesn't lose it (see CardDraft). It must not survive into the
+        // next person's session on a shared device.
+        Task { @MainActor in CardDraft.shared.clear() }
     }
 
     /// Permanently deletes the signed-in user's account server-side (Apple

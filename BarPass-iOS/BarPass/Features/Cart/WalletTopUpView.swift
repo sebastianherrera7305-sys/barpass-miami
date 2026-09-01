@@ -12,7 +12,7 @@ struct WalletTopUpView: View {
     @EnvironmentObject private var appState: AppState
 
     @State private var amount: Double = 25
-    @State private var card = CardEntry()
+    @ObservedObject private var draft = CardDraft.shared
     @State private var loading = false
     @State private var errorMsg = ""
     @FocusState private var focus: CardEntry.Field?
@@ -27,7 +27,7 @@ struct WalletTopUpView: View {
                     VStack(spacing: 22) {
                         amountPicker.padding(.top, 8)
 
-                        CardEntryFields(entry: $card, focus: $focus)
+                        CardEntryFields(entry: $draft.entry, focus: $focus)
                             .padding(.horizontal, 20)
 
                         if !errorMsg.isEmpty {
@@ -92,7 +92,7 @@ struct WalletTopUpView: View {
     }
 
 
-    private var isValid: Bool { card.isValid }
+    private var isValid: Bool { draft.entry.isValid }
 
     private func topUp() {
         guard isValid, let session = AuthService.shared.restoreSession() else {
@@ -105,7 +105,7 @@ struct WalletTopUpView: View {
 
         Task {
             do {
-                guard let params = card.stripeParams() else {
+                guard let params = draft.entry.stripeParams() else {
                     await MainActor.run { loading = false; errorMsg = l10n.t("cardPayment.error.invalidCard") }
                     return
                 }
@@ -118,6 +118,7 @@ struct WalletTopUpView: View {
                     loading = false
                     appState.walletBalance = newBalance
                     BPHaptics.success()
+                    CardDraft.shared.clear()   // paid: nothing left to preserve
                     onSuccess(newBalance)
                     dismiss()
                 }

@@ -100,6 +100,33 @@ struct CardEntry: Equatable {
     }
 }
 
+/// Keeps a half-typed card alive while the app is running.
+///
+/// TestFlight feedback: "tampoco guarda la tarjeta… cada cosa que yo vaya
+/// poniendo debería estar siendo guardada para que el cliente no pierda
+/// tiempo en el caso de que tengas que ir para atrás". Both payment screens
+/// are sheets, so backing out to check a balance or a price threw away
+/// everything already typed.
+///
+/// IN MEMORY ONLY. This is never written to disk, UserDefaults or the
+/// keychain, and that is deliberate: storing a card number on the device is a
+/// PCI problem and an App Review risk. Real "save my card for next time" is
+/// Stripe's job — a Customer plus a SetupIntent, which keeps the number on
+/// Stripe and leaves the app holding only a payment-method id. That is a
+/// separate feature; this is only about not losing what the user is typing
+/// right now.
+///
+/// Cleared on a successful payment and on sign-out.
+@MainActor
+final class CardDraft: ObservableObject {
+    static let shared = CardDraft()
+    private init() {}
+
+    @Published var entry = CardEntry()
+
+    func clear() { entry = CardEntry() }
+}
+
 /// The four card fields, rendered identically wherever a card is taken.
 ///
 /// Deliberately only the fields — the surrounding screen (amount picker, cart
