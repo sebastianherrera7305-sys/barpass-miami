@@ -588,6 +588,34 @@ struct TonightView: View {
 
 // MARK: - Hero Card
 
+/// What a venue card shows when there is genuinely no photo.
+///
+/// 10 of the 1814 served venues have none: Google Places has no image for
+/// them at all, and inventing one would be the same class of mistake as the
+/// fabricated genres. So the empty state has to look deliberate instead of
+/// broken — TestFlight feedback called these "cards rotas… ninguna foto
+/// mostraba", and the old treatment (the venue emoji at 15% opacity, tucked
+/// in a corner of a dark gradient) did read as a failed image load.
+struct VenuePhotoFallback: View {
+    let emoji: String
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color(white: 0.16), Color.bpSurface],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            )
+            Circle()
+                .fill(Color.bpAmber.opacity(0.10))
+                .blur(radius: 34)
+                .frame(width: 150, height: 150)
+            Text(emoji)
+                .font(.system(size: 46))
+                .opacity(0.85)
+        }
+    }
+}
+
 struct HeroVenueCard: View {
     @ObservedObject private var l10n = L10n.shared
     let venue: BarPassVenue
@@ -615,11 +643,11 @@ struct HeroVenueCard: View {
                 .fill(LinearGradient(colors: [Color(white: 0.12), Color.bpSurface], startPoint: .topLeading, endPoint: .bottomTrailing))
                 .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
 
-            Text(venue.emoji)
-                .font(.bpScaled(72))
-                .opacity(0.15)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .padding(16)
+            if venue.photoUrls.isEmpty {
+                VenuePhotoFallback(emoji: venue.emoji)
+                    .frame(width: Self.cardWidth, height: Self.cardHeight)
+                    .clipShape(RoundedRectangle(cornerRadius: BPRadius.xl))
+            }
 
             if let first = venue.photoUrls.first, let url = URL(string: first) {
                 // `.fill` with no frame grows to the photo's own aspect
@@ -758,11 +786,10 @@ struct SmallVenueCard: View {
                     .frame(maxWidth: .infinity)
                     .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
                 } else {
-                    Text(venue.emoji)
-                        .font(.bpScaled(44))
-                        .opacity(0.2)
-                        .padding(10)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    VenuePhotoFallback(emoji: venue.emoji)
+                        .frame(height: 100)
+                        .frame(maxWidth: .infinity)
+                        .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
                 }
 
                 if venue.hasHappyHour, let until = venue.happyHourUntil {

@@ -41,6 +41,12 @@ if (!SUPABASE_URL || !SERVICE_KEY) throw new Error("Missing Supabase env vars");
 if (!PLACES_KEY) throw new Error("Missing GOOGLE_PLACES_API_KEY");
 
 const DRY_RUN = process.argv.includes("--dry-run");
+/**
+ * --gaps re-visits rows that already have a photo but are still missing hours
+ * or price. The first pass only selected `image_url is null`, so 324 of the
+ * 331 rows with no price_tier were never looked at.
+ */
+const GAPS = process.argv.includes("--gaps");
 const LIMIT = (() => {
   const i = process.argv.indexOf("--limit");
   return i >= 0 ? Number(process.argv[i + 1]) : Infinity;
@@ -165,12 +171,19 @@ function pad(n: number): string {
 }
 
 async function main() {
-  const rows = (await REST.select(
+  const all = (await REST.select(
     "select=id,name,city,address,google_place_id,image_url,open_time,price_tier" +
-      "&excluded_reason=is.null&image_url=is.null&order=name",
+      "&excluded_reason=is.null&order=name",
   )) as Venue[];
+
+  const needsSomething = (v: Venue) =>
+    !v.image_url || !hoursAreParseable(v.open_time) || v.price_tier == null;
+  const rows = all.filter(GAPS ? needsSomething : (v) => !v.image_url);
   const venues = rows.slice(0, LIMIT);
-  console.log(`${venues.length} venues without a photo${DRY_RUN ? " (dry run)" : ""}\n`);
+  console.log(
+    `${venues.length} venues ${GAPS ? "missing a photo, hours or price" : "without a photo"}` +
+      `${DRY_RUN ? " (dry run)" : ""}\n`,
+  );
 
   let gotPhoto = 0, gotHours = 0, gotPrice = 0, noPlace = 0, noPhoto = 0;
 
@@ -185,11 +198,19 @@ async function main() {
     }
 
     const details = await getDetails(placeId);
-    const photoName = details?.photos?.[0]?.name;
-    const photoUrl = photoName ? await sizedPhotoUrl(photoName) : null;
+
+    // Only spend a photo call when the row actually needs one, and walk the
+    // whole array: Google occasionally returns a first entry that 404s.
+    let photoUrl: string | null = null;
+    if (!v.image_url) {
+      for (const photo of details?.photos ?? []) {
+        photoUrl = await sizedPhotoUrl(photo.name);
+        if (photoUrl) break;
+      }
+    }
 
     const update: Record<string, unknown> = { google_place_id: placeId, google_synced_at: new Date().toISOString() };
-    if (photoUrl) { update.image_url = photoUrl; gotPhoto++; } else { noPhoto++; }
+    if (photoUrl) { update.image_url = photoUrl; gotPhoto++; } else if (!v.image_url) { noPhoto++; }
 
     // Only fill hours when the row has none usable — never overwrite good data.
     const period = details?.regularOpeningHours?.periods?.[0];
