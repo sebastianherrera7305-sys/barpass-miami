@@ -45,20 +45,60 @@ struct VenueAgeBracket: Codable, Hashable, Sendable {
     var label: String { id.replacingOccurrences(of: "_", with: "–") }
 }
 
+/// The controlled vocabulary for what a venue actually plays.
+///
+/// `live` is a performance FORMAT, not a genre, and composes with one: a
+/// honky-tonk booking country bands is `[.country, .live]`. It stays in this
+/// list because it is the single most common thing a venue publishes about
+/// itself, and because a venue that only advertises "live music" without ever
+/// naming a style is a real and frequent case — `[.live]` alone is the honest
+/// answer there.
+///
+/// The list grew from 10 to 14 to 22 as manual research kept hitting music the
+/// vocabulary could not express. Each addition below was made only after a
+/// documented venue was being tagged WRONG or LOSSILY without it — never
+/// speculatively:
+///   techno     Bauhaus Vegas states "house, techno, and tech-house"; folding
+///              techno into house erased the distinction its own site draws.
+///   disco      Ciao Ciao Disco, Jolene Sound Room, Arbella's "House, Soul,
+///              Disco, Afro" — three venues where disco is the billing.
+///   soul/funk  The pair appears together constantly ("funk and soul music
+///              blasts through the speakers"). Folding soul into rnb made a
+///              1970s vinyl bar look like a contemporary R&B room.
+///   americana  MRB and Acme book roots/singer-songwriter acts. Folding it
+///              into country was the closest wrong answer, not a right one.
+///   reggae     Turned up three separate times (Bembe, Bar Room, Cuban
+///              Creations) before it was added.
+///   salsa      Dedicated salsa nights are a distinct thing a user searches
+///              for — RedBar's "OYE CHICA", Caña's "Salsa Flow Tuesdays".
+///   bachata    Same, and it is not interchangeable with salsa on the floor.
+///
+/// Still unrepresented and known to exist in the catalogue: soca, vallenato,
+/// merengue, cumbia, zydeco, brass band. Those currently fold into `latin` or
+/// `live`. Add them the same way — when a venue is being mislabelled without
+/// them, not before.
 enum MusicGenre: String, Codable, CaseIterable {
     case edm        = "EDM"
     case house      = "House"
+    case techHouse  = "Tech House"
+    case techno     = "Techno"
+    case disco      = "Disco"
     case latin      = "Latin"
-    case hipHop     = "Hip-Hop"
+    case salsa      = "Salsa"
+    case bachata    = "Bachata"
     case reggaeton  = "Reggaeton"
+    case hipHop     = "Hip-Hop"
+    case rnb        = "R&B"
+    case soul       = "Soul"
+    case funk       = "Funk"
     case pop        = "Pop"
     case live       = "Live Music"
     case jazz       = "Jazz"
-    case techHouse  = "Tech House"
-    case rnb        = "R&B"
-    case country    = "Country"
-    case rock       = "Rock"
     case blues      = "Blues"
+    case country    = "Country"
+    case americana  = "Americana"
+    case rock       = "Rock"
+    case reggae     = "Reggae"
     case afrobeats  = "Afrobeats"
 }
 

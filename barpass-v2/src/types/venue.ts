@@ -13,17 +13,35 @@ export type VenueType =
   | "restaurant"
   | "brewery";
 
+/// Must stay in sync with `MusicGenre` in
+/// BarPass-iOS/BarPass/Models/Venue.swift, which carries the rationale for
+/// each term. This list had drifted: it still lacked country, rock, blues,
+/// afrobeats and tech_house months after iOS gained them, so the web silently
+/// widened its own type every time the database held a value it did not know.
+/// `live` is a performance format and composes with a genre.
 export type MusicGenre =
   | "edm"
   | "house"
+  | "tech_house"
   | "techno"
+  | "disco"
   | "latin"
+  | "salsa"
+  | "bachata"
   | "reggaeton"
   | "hip_hop"
   | "rnb"
+  | "soul"
+  | "funk"
   | "pop"
   | "live"
-  | "jazz";
+  | "jazz"
+  | "blues"
+  | "country"
+  | "americana"
+  | "rock"
+  | "reggae"
+  | "afrobeats";
 
 export type Neighborhood =
   | "South Beach"

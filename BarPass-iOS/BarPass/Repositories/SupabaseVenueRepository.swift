@@ -308,22 +308,31 @@ final actor SupabaseVenueRepository: VenueRepository {
     private static func mapGenre(_ raw: String) -> MusicGenre? {
         switch raw.lowercased() {
         case "edm": return .edm
-        case "house", "techno": return .house
+        case "house": return .house
+        case "tech_house", "techhouse": return .techHouse
+        case "techno": return .techno
+        case "disco", "nu_disco", "nudisco": return .disco
         case "latin": return .latin
-        case "hip_hop", "hiphop", "hip-hop": return .hipHop
+        case "salsa": return .salsa
+        case "bachata": return .bachata
         case "reggaeton": return .reggaeton
+        case "hip_hop", "hiphop", "hip-hop": return .hipHop
+        case "rnb", "r&b": return .rnb
+        case "soul", "motown": return .soul
+        case "funk": return .funk
         case "pop": return .pop
         case "live": return .live
         case "jazz": return .jazz
-        case "tech_house", "techhouse": return .techHouse
-        case "rnb", "r&b", "soul": return .rnb
-        // Synonyms map to the nearest real case rather than being dropped:
-        // research turned up honky_tonk/bluegrass/americana (country),
-        // punk/metal/alternative/indie (rock) and afrobeat (afrobeats).
-        case "country", "honky_tonk", "bluegrass", "americana": return .country
-        case "rock", "punk", "metal", "alternative", "indie": return .rock
         case "blues": return .blues
-        case "afrobeats", "afrobeat", "afro_house": return .afrobeats
+        case "country", "honky_tonk", "bluegrass": return .country
+        case "americana", "roots", "folk", "singer_songwriter": return .americana
+        case "rock", "punk", "metal", "alternative", "indie": return .rock
+        case "reggae", "dancehall", "ska": return .reggae
+        case "afrobeats", "afrobeat", "afro_house", "amapiano": return .afrobeats
+        // Latin styles with no case of their own resolve UP to `latin` rather
+        // than being dropped. Losing "cumbia" entirely is worse than showing
+        // it as Latin; showing it as Salsa would be a different lie.
+        case "merengue", "vallenato", "cumbia", "dembow": return .latin
         default: return MusicGenre(rawValue: raw)
         }
     }
