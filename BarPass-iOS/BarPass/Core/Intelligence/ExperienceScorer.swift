@@ -173,26 +173,38 @@ enum ExperienceScorer {
         case .upcoming(let mins) where mins <= 180:
             if let e = eventTonight(v, now: now) { return "🎟️ \(e.title) pronto" }
         case .upcoming:
-            if let e = eventTonight(v, now: now) { return "🎟️ \(e.title) esta noche" }
+            if let e = eventTonight(v, now: now) { return String(format: L10n.tSync("reason.eventTonight"), e.title) }
         case .finished, .none:
             break
         }
         if CollegeNightlifeCuration.isCurated(v) && CollegeNightlifeCuration.isGoingOutNight(now) {
-            return "🎓 Popular para salir"
+            return L10n.tSync("reason.collegePopular")
         }
         if let userCoordinate {
             let km = haversineKm(userCoordinate, CLLocationCoordinate2D(latitude: v.latitude, longitude: v.longitude))
-            if km < 2.0 { return "📍 Cerca de ti" }
+            if km < 2.0 { return L10n.tSync("reason.nearYou") }
         }
         if let passport, HypeEngine.musicMatch(passport: passport, venue: v) >= 0.6 {
-            return "🎵 Match con tu música"
+            return L10n.tSync("reason.musicMatch")
         }
         if let tag = matchedExperienceTags(v).first(where: { $0.confidence == .high }) {
             return "✨ " + NightPlanner.reasonLabel(for: tag.id)
         }
-        if v.hasHappyHour, let until = v.happyHourUntil { return "🍹 Happy hour hasta \(until)" }
-        if v.isTrending { return "🔥 Trending ahora" }
-        if v.reviewCount > 5000 { return "⭐ Favorito de Miami (\(v.reviewCount) reviews)" }
+        if v.hasHappyHour, let until = v.happyHourUntil { return String(format: L10n.tSync("reason.happyHour"), until) }
+        if v.isTrending { return L10n.tSync("reason.trending") }
+        // Was "Favorito de Miami" for every venue in all 23 cities — a Chicago
+        // bar carried a Miami badge (TestFlight, build 16). The city has to come
+        // from the venue itself. These strings were also hardcoded Spanish,
+        // bypassing L10n entirely, so an English user saw "Trending ahora".
+        if v.reviewCount > 5000 {
+            // `city` is optional and 0 rows are missing it today, but the badge
+            // must never render "Favorito de " with a blank — fall back to a
+            // city-less phrasing rather than an empty one.
+            if let city = v.city, !city.isEmpty {
+                return String(format: L10n.tSync("reason.cityFavorite"), city, v.reviewCount.formatted())
+            }
+            return String(format: L10n.tSync("reason.localFavorite"), v.reviewCount.formatted())
+        }
         return nil
     }
 
