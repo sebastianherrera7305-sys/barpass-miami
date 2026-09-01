@@ -53,6 +53,20 @@ barpass-v2/
 └── scripts/enrich-venues.ts  — Google Places enrichment
 ```
 
+### TestFlight uploads — two traps that cost time on 2026-09-01
+- **`/v1/apps/{id}/builds` returns NO guaranteed order.** Querying it with a
+  small `limit` returns an arbitrary subset, so a freshly uploaded build can
+  look missing when it is already `VALID`. Always fetch `limit=50` and sort by
+  version client-side. Believing the short query led to two pointless
+  re-uploads.
+- **Xcode auto-increments the build number on upload when it is already
+  taken.** Those two re-uploads therefore landed as builds 18 and 19, and the
+  pbxproj said 18 while TestFlight's newest was 19 — the next archive would
+  have collided again. After any upload, check what Apple actually holds and
+  align `CURRENT_PROJECT_VERSION`.
+- A `Progress 43%: Upload succeeded` line is not a truncated upload; it is
+  just the percentage at that instant.
+
 ### Venue data — what is real and what is not (2026-09-01 audit)
 The catalogue is 1846 rows; **1814 are served**, 32 are excluded. Two columns
 answer two different questions and BOTH must be filtered on every read:
