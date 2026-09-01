@@ -197,7 +197,7 @@ export function VenueMap({ venues }: { venues: Venue[] }) {
                             <Star className="h-3 w-3 fill-current" />
                             {venue.rating}
                           </span>
-                          <span>{formatUSD(venue.avgSpend)} avg</span>
+                          <span>{venue.avgSpend ? `${formatUSD(venue.avgSpend)} avg` : "—"}</span>
                           {venue.coverMen === null && <span>No cover</span>}
                           {venue.isTrending && <span>🔥 Trending</span>}
                           {venue.happyHourUntil && (

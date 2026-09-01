@@ -60,7 +60,7 @@ export function MapCanvas({
                   {selected.emoji} {selected.name}
                 </p>
                 <p className="mt-0.5 text-xs text-text-secondary">
-                  {selected.neighborhood} · {formatUSD(selected.avgSpend)} avg ·{" "}
+                  {selected.neighborhood} · {selected.avgSpend ? `${formatUSD(selected.avgSpend)} avg` : "—"} ·{" "}
                   {formatTime(selected.openTime)}–{formatTime(selected.closeTime)}
                 </p>
                 <p className="mt-0.5 truncate text-xs text-text-tertiary">

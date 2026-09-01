@@ -75,7 +75,13 @@ export interface Venue {
   coverMen: number | null;
   coverWomen: number | null;
   priceTier: PriceTier;
-  avgSpend: number;
+  /**
+   * null when unknown. 1665 of 1832 served venues have no real figure (only
+   * the 167 fabricated Miami seed rows ever had one), and 0 was rendering as
+   * a confident "$0" on every one of them. iOS already showed "N/A" here;
+   * the web was the odd one out.
+   */
+  avgSpend: number | null;
 
   openTime: string; // "22:00"
   closeTime: string; // "05:00"

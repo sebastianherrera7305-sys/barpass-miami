@@ -39,7 +39,7 @@ export function buildConciergeSystemPrompt(
       (v) =>
         `- ${v.name} (slug:${v.slug}) | ${v.type} | ${v.neighborhood} | ` +
         `${v.coverMen === null ? "no cover" : `cover ~$${v.coverMen}`} | ` +
-        `avg spend $${v.avgSpend} | ${"$".repeat(v.priceTier)} | ` +
+        `avg spend ${v.avgSpend ? `$${v.avgSpend}` : "unknown"} | ${"$".repeat(v.priceTier)} | ` +
         `music: ${v.musicGenres.join("/")} | vibes: ${v.vibes.join(", ")} | ` +
         `hours ${v.openTime}–${v.closeTime}` +
         (v.happyHourUntil ? ` | happy hour until ${v.happyHourUntil}` : "") +

@@ -94,7 +94,7 @@ function mapDbVenue(v: DbVenue): Venue {
     coverMen: v.cover_men,
     coverWomen: v.cover_women,
     priceTier: v.price_tier as Venue["priceTier"],
-    avgSpend: v.avg_spend,
+    avgSpend: v.avg_spend || null,   // 0 in this dataset means "no data", not "free"
     openTime: v.open_time,
     closeTime: v.close_time,
     happyHourUntil: v.happy_hour_until,
