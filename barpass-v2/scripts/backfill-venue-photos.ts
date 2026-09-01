@@ -47,6 +47,14 @@ const DRY_RUN = process.argv.includes("--dry-run");
  * 331 rows with no price_tier were never looked at.
  */
 const GAPS = process.argv.includes("--gaps");
+/**
+ * --resize re-generates photos already stored in the old unsized form.
+ * `…/photos/{ref}` ignores every sizing parameter and always redirects to the
+ * full original — 1.3MB per card. The photoName is embedded in that URL, so
+ * these can be re-issued through the skipHttpRedirect form without another
+ * place lookup: one photo call each, no search, no details.
+ */
+const RESIZE = process.argv.includes("--resize");
 const LIMIT = (() => {
   const i = process.argv.indexOf("--limit");
   return i >= 0 ? Number(process.argv[i + 1]) : Infinity;
@@ -66,10 +74,26 @@ const REST = {
     Authorization: `Bearer ${SERVICE_KEY}`,
     "Content-Type": "application/json",
   },
+  /**
+   * Paged. PostgREST caps a response at 1000 rows and does NOT report it as an
+   * error — a plain select returns a truncated array. This script silently
+   * only ever saw the alphabetical first 1000 venues, so a resize pass
+   * reported "nothing left to do" while 750 rows past that point still held
+   * the unsized URL. Same trap the web app hit; see venue-service.ts.
+   */
   async select(query: string): Promise<unknown[]> {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/venues?${query}`, { headers: this.headers });
-    if (!res.ok) throw new Error(`select ${res.status}: ${await res.text()}`);
-    return res.json();
+    const all: unknown[] = [];
+    for (let page = 0; page < 20; page++) {
+      const from = page * 1000;
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/venues?${query}`, {
+        headers: { ...this.headers, "Range-Unit": "items", Range: `${from}-${from + 999}` },
+      });
+      if (!res.ok) throw new Error(`select ${res.status}: ${await res.text()}`);
+      const rows = (await res.json()) as unknown[];
+      all.push(...rows);
+      if (rows.length < 1000) break;
+    }
+    return all;
   },
   async update(id: string, patch: Record<string, unknown>): Promise<string | null> {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/venues?id=eq.${id}`, {
@@ -88,6 +112,7 @@ interface Venue {
   address: string | null;
   google_place_id: string | null;
   image_url: string | null;
+  field_sources: Record<string, unknown> | null;
   open_time: string | null;
   price_tier: number | null;
 }
@@ -172,16 +197,19 @@ function pad(n: number): string {
 
 async function main() {
   const all = (await REST.select(
-    "select=id,name,city,address,google_place_id,image_url,open_time,price_tier" +
+    "select=id,name,city,address,google_place_id,image_url,open_time,price_tier,field_sources" +
       "&excluded_reason=is.null&order=name",
   )) as Venue[];
 
   const needsSomething = (v: Venue) =>
     !v.image_url || !hoursAreParseable(v.open_time) || v.price_tier == null;
-  const rows = all.filter(GAPS ? needsSomething : (v) => !v.image_url);
+  const isUnsized = (v: Venue) =>
+    !!v.image_url && v.image_url.includes("places.googleapis.com");
+  const rows = all.filter(RESIZE ? isUnsized : GAPS ? needsSomething : (v) => !v.image_url);
   const venues = rows.slice(0, LIMIT);
   console.log(
-    `${venues.length} venues ${GAPS ? "missing a photo, hours or price" : "without a photo"}` +
+    `${venues.length} venues ` +
+      (RESIZE ? "with an unsized photo" : GAPS ? "missing a photo, hours or price" : "without a photo") +
       `${DRY_RUN ? " (dry run)" : ""}\n`,
   );
 
@@ -189,6 +217,32 @@ async function main() {
 
   for (const [i, v] of venues.entries()) {
     const label = `[${i + 1}/${venues.length}] ${v.name.slice(0, 38)} — ${v.city}`;
+
+    // Resize path: everything needed is already in the stored URL. Re-issuing
+    // the same photo reference through the sized form costs one call and
+    // touches nothing but image_url.
+    if (RESIZE) {
+      // The photo reference embedded in the stored URL cannot be reused: those
+      // were issued by an older Places era ("AWCwy…") and the /media endpoint
+      // rejects them with a misleading "API key not valid", while a freshly
+      // fetched reference ("AVoNoX…") for the same place works. So a details
+      // call is unavoidable here — two calls per venue, not one.
+      const pid = v.google_place_id;
+      const details = pid ? await getDetails(pid) : null;
+      const photoName = details?.photos?.[0]?.name;
+      const sized = photoName ? await sizedPhotoUrl(photoName) : null;
+      if (!sized) { console.log(`${label}\n   could not resize`); noPhoto++; continue; }
+      gotPhoto++;
+      console.log(`${label}\n   resized`);
+      if (!DRY_RUN) {
+        const err = await REST.update(v.id, {
+          image_url: sized,
+          field_sources: { ...(v.field_sources ?? {}), image_url: { source: "google_places", at: "2026-09-01" } },
+        });
+        if (err) console.warn(`   update failed: ${err}`);
+      }
+      continue;
+    }
 
     const placeId = v.google_place_id ?? (await findPlaceId(v));
     if (!placeId) {
