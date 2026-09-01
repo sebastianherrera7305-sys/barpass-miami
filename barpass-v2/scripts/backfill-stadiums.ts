@@ -158,3 +158,8 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
+
+// Marks this file a module. Without it TypeScript treats a script with no
+// imports as a global script, and these two both declare SUPABASE_URL at top
+// level — "Cannot redeclare block-scoped variable", which fails next build.
+export {};
