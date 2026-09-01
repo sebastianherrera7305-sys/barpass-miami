@@ -111,21 +111,37 @@ struct StadiumsListView: View {
 
     private func stadiumCard(_ stadium: Stadium) -> some View {
         HStack(spacing: 14) {
+            // The real stadium photo, not a generic glyph. Every one of the 22
+            // has an image_url, but the card showed the same amber
+            // sportscourt icon for all of them — which is what "las fotos se
+            // ven horribles" was about: there were no photos here at all.
+            // Pinned to the thumbnail's own size, because `.fill` with no
+            // frame grows to the photo's aspect ratio and pushes the row's
+            // text out of line (the same bug HeroVenueCard had).
             ZStack {
-                Circle().fill(
+                if let urlString = stadium.imageURL, let url = URL(string: urlString) {
+                    CachedImage(url: url, targetSize: CGSize(width: 132, height: 132), priority: .standard) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Color.bpSurfaceRaised
+                    }
+                } else {
                     LinearGradient(colors: [Color.bpAmber, Color.bpAmberBright],
                                    startPoint: .topLeading, endPoint: .bottomTrailing)
-                )
-                Image(systemName: "sportscourt.fill")
-                    .font(.bpScaled(18, weight: .semibold))
-                    .foregroundStyle(.black)
+                    Image(systemName: "sportscourt.fill")
+                        .font(.bpScaled(18, weight: .semibold))
+                        .foregroundStyle(.black)
+                }
             }
-            .frame(width: 44, height: 44)
+            .frame(width: 56, height: 56)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.bpBorder))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(stadium.name)
                     .font(.bpHeadline())
                     .foregroundStyle(Color.bpInk)
+                    .lineLimit(2)
                 Text(stadium.address)
                     .font(.bpCaption())
                     .foregroundStyle(Color.bpTextSecondary)
