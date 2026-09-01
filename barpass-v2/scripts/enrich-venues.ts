@@ -1,4 +1,8 @@
 /**
+// REQUIRES supabase/venue_field_provenance.sql to have been run: this script
+// selects `field_sources` so it can avoid overwriting a photo that was written
+// deliberately. Without the column the select fails with 42703.
+
  * Enriquece los venues de Supabase con datos reales de Google Places
  * (API New — Text Search + Place Details). Regla dura: si Google no
  * devuelve un campo, se deja tal cual está (nunca se inventa un valor).
@@ -144,7 +148,13 @@ async function enrichVenue(venue: VenueRow): Promise<void> {
   if (typeof details.userRatingCount === "number") update.review_count = details.userRatingCount;
   if (details.businessStatus) update.business_status = details.businessStatus;
   const photoUrl = firstPhotoUrl(details);
-  if (photoUrl) update.image_url = photoUrl;
+  // Do not clobber a photo whose provenance says it was written deliberately.
+  // The 2026-09-01 backfill stored pre-sized, key-free URLs (~40-160KB); this
+  // script still builds the old 1.3MB form, so an unguarded re-run would
+  // silently undo that work on 1804 venues. See
+  // supabase/venue_field_provenance.sql.
+  const photoIsTraced = Boolean((venue as { field_sources?: Record<string, unknown> })?.field_sources?.image_url);
+  if (photoUrl && !photoIsTraced) update.image_url = photoUrl;
 
   // Amenities: only written when Google's response actually included the
   // key. NULL stays NULL ("unknown") rather than ever being set to false.
@@ -174,7 +184,7 @@ async function enrichVenue(venue: VenueRow): Promise<void> {
 async function main() {
   let query = supabase
     .from("venues")
-    .select("id,slug,name,address,phone,website,google_place_id,rating,review_count");
+    .select("id,slug,name,address,phone,website,google_place_id,rating,review_count,field_sources");
   if (onlySlugs) query = query.in("slug", onlySlugs);
 
   const { data: venues, error } = await query;
