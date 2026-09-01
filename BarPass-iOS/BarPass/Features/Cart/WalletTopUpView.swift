@@ -12,15 +12,10 @@ struct WalletTopUpView: View {
     @EnvironmentObject private var appState: AppState
 
     @State private var amount: Double = 25
-    @State private var cardNumber = ""
-    @State private var expiry = ""
-    @State private var cvv = ""
-    @State private var name = ""
+    @State private var card = CardEntry()
     @State private var loading = false
     @State private var errorMsg = ""
-    @FocusState private var focus: Field?
-
-    private enum Field { case name, number, expiry, cvv }
+    @FocusState private var focus: CardEntry.Field?
     private let presets: [Double] = [10, 25, 50, 100]
     private let gold = Color(red: 0.85, green: 0.63, blue: 0.09)
 
@@ -32,15 +27,8 @@ struct WalletTopUpView: View {
                     VStack(spacing: 22) {
                         amountPicker.padding(.top, 8)
 
-                        VStack(spacing: 12) {
-                            field(l10n.t("card.holderName"), text: $name, kind: .name, keyboard: .default)
-                            field(l10n.t("card.numberPlaceholder"), text: $cardNumber, kind: .number, keyboard: .numberPad)
-                            HStack(spacing: 12) {
-                                field(l10n.t("card.expiryPlaceholder"), text: $expiry, kind: .expiry, keyboard: .numberPad)
-                                field(l10n.t("card.cvvPlaceholder"), text: $cvv, kind: .cvv, keyboard: .numberPad)
-                            }
-                        }
-                        .padding(.horizontal, 20)
+                        CardEntryFields(entry: $card, focus: $focus)
+                            .padding(.horizontal, 20)
 
                         if !errorMsg.isEmpty {
                             Text(errorMsg)
@@ -103,21 +91,8 @@ struct WalletTopUpView: View {
         }
     }
 
-    private func field(_ placeholder: String, text: Binding<String>, kind: Field, keyboard: UIKeyboardType) -> some View {
-        TextField(placeholder, text: text)
-            .keyboardType(keyboard)
-            .focused($focus, equals: kind)
-            .font(.system(size: 16, design: kind == .name ? .default : .monospaced))
-            .foregroundStyle(Color.bpInk)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 14)
-            .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(focus == kind ? gold.opacity(0.5) : Color.bpInk.opacity(0.08)))
-    }
 
-    private var isValid: Bool {
-        cardNumber.filter(\.isNumber).count == 16 && expiry.count >= 4 && cvv.count >= 3 && !name.trimmingCharacters(in: .whitespaces).isEmpty
-    }
+    private var isValid: Bool { card.isValid }
 
     private func topUp() {
         guard isValid, let session = AuthService.shared.restoreSession() else {
@@ -130,24 +105,10 @@ struct WalletTopUpView: View {
 
         Task {
             do {
-                let parts = expiry.split(separator: "/")
-                let month = parts.first.flatMap { UInt($0) } ?? 0
-                let rawYear = parts.count > 1 ? UInt(parts[1]) ?? 0 : 0
-                // Same fix as CardPaymentView: a 4-digit year typed here
-                // (e.g. "12/2028") would otherwise become 2000+2028=4028,
-                // which Stripe rejects with a confusing error.
-                let year = rawYear >= 100 ? rawYear : 2000 + rawYear
-
-                let cardParams = STPPaymentMethodCardParams()
-                cardParams.number = cardNumber
-                cardParams.expMonth = NSNumber(value: month)
-                cardParams.expYear = NSNumber(value: year)
-                cardParams.cvc = cvv
-
-                let billingDetails = STPPaymentMethodBillingDetails()
-                billingDetails.name = name
-
-                let params = STPPaymentMethodParams(card: cardParams, billingDetails: billingDetails, metadata: nil)
+                guard let params = card.stripeParams() else {
+                    await MainActor.run { loading = false; errorMsg = l10n.t("cardPayment.error.invalidCard") }
+                    return
+                }
                 let paymentMethod = try await STPAPIClient.shared.createPaymentMethod(with: params, additionalPaymentUserAgentValues: [])
 
                 let newBalance = try await APIClient.topUpWallet(

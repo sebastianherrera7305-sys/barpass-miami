@@ -32,6 +32,7 @@
 		40CD7131F382690E2735FB1C /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB6374016627134BFCC83D6 /* ShareCardView.swift */; };
 		498B1F017E9F0F4CE0F713B3 /* DiscoveryScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEB9D058BA5451D3579444B /* DiscoveryScorer.swift */; };
 		4AD4CD88E1366A6ACA462B08 /* CardPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */; };
+		DC0F9B36910A4B57AAAEEAAC /* CardEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B1C5F03E13449629D93859E /* CardEntry.swift */; };
 		4DA58C700ED24E96B99C812B /* University.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4BB265491D4A7E864C255E /* University.swift */; };
 		4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */; };
 		5088325E9E6E36AB9FB16A81 /* UserLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC72D4050837ED089C03C05 /* UserLocationProvider.swift */; };
@@ -226,6 +227,7 @@
 		4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumsListView.swift; path = BarPass/Features/Stadiums/StadiumsListView.swift; sourceTree = SOURCE_ROOT; };
 		54C778D8EC6D60879605EA40 /* CheckInButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckInButton.swift; path = BarPass/Features/Tonight/CheckInButton.swift; sourceTree = SOURCE_ROOT; };
 		5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPaymentView.swift; sourceTree = "<group>"; };
+		1B1C5F03E13449629D93859E /* CardEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEntry.swift; sourceTree = "<group>"; };
 		5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatRepository.swift; path = BarPass/Repositories/ChapterChatRepository.swift; sourceTree = SOURCE_ROOT; };
 		61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseGreekLifeRepository.swift; path = BarPass/Repositories/SupabaseGreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
 		656968298CED42FFBA49231A /* CityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityIdentity.swift; path = BarPass/Resources/CityIdentity.swift; sourceTree = SOURCE_ROOT; };
@@ -673,6 +675,7 @@
 				3AA3D664AAE5148E8E014E77 /* CartStore.swift */,
 				ECEA1F54438283EF27ED535E /* CartView.swift */,
 				5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */,
+				1B1C5F03E13449629D93859E /* CardEntry.swift */,
 			);
 			path = Cart;
 			sourceTree = "<group>";
@@ -965,6 +968,7 @@
 				E44CDF7872A2DD52484EE256 /* CartStore.swift in Sources */,
 				30D51A75A5B95FDE56B0FBB0 /* CartView.swift in Sources */,
 				4AD4CD88E1366A6ACA462B08 /* CardPaymentView.swift in Sources */,
+				DC0F9B36910A4B57AAAEEAAC /* CardEntry.swift in Sources */,
 				AA0000010000000000000003 /* RootView.swift in Sources */,
 				AA0000010000000000000004 /* SplashView.swift in Sources */,
 				IMGC02000000000000RP01 /* ImageCache.swift in Sources */,

@@ -15,16 +15,11 @@ struct CardPaymentView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var l10n = L10n.shared
 
-    @State private var cardNumber  = ""
-    @State private var expiry      = ""
-    @State private var cvv         = ""
-    @State private var isCardValid = false
-    @State private var name        = ""
+    @State private var card        = CardEntry()
     @State private var loading     = false
     @State private var errorMsg    = ""
-    @FocusState private var activeFocus: CardField?
+    @FocusState private var activeFocus: CardEntry.Field?
 
-    private enum CardField { case name, number, expiry, cvv }
 
     private let gold = Color(red: 0.85, green: 0.63, blue: 0.09)
 
@@ -48,18 +43,12 @@ struct CardPaymentView: View {
                             .padding(.top, 8)
 
                         VStack(spacing: 12) {
-                            nameField
-
                             Text(l10n.t("card.numberHint"))
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(Color.bpInk.opacity(0.45))
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                            cardInputField(placeholder: l10n.t("card.numberPlaceholder"), text: $cardNumber, field: .number)
-                            HStack(spacing: 12) {
-                                cardInputField(placeholder: l10n.t("card.expiryPlaceholder"), text: $expiry, field: .expiry)
-                                cardInputField(placeholder: l10n.t("card.cvvPlaceholder"), text: $cvv, field: .cvv)
-                            }
+                            CardEntryFields(entry: $card, focus: $activeFocus)
                         }
                         .padding(.horizontal, 20)
 
@@ -133,14 +122,14 @@ struct CardPaymentView: View {
 
                 Spacer()
 
-                Text(isCardValid ? "•••• •••• •••• ••••" : l10n.t("card.enterDetails"))
-                    .font(.system(size: isCardValid ? 18 : 13, weight: .medium, design: isCardValid ? .monospaced : .default))
+                Text(card.isValid ? "•••• •••• •••• ••••" : l10n.t("card.enterDetails"))
+                    .font(.system(size: card.isValid ? 18 : 13, weight: .medium, design: card.isValid ? .monospaced : .default))
                     .foregroundStyle(.white.opacity(0.9))
                     .padding(.bottom, 8)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(l10n.t("card.holderLabel")).font(.bpScaled(8, weight: .bold)).foregroundStyle(.white.opacity(0.35))
-                    Text(name.isEmpty ? l10n.t("card.nameUpperPlaceholder") : name.uppercased())
+                    Text(card.name.isEmpty ? l10n.t("card.nameUpperPlaceholder") : card.name.uppercased())
                         .font(.bpScaled(12, weight: .semibold)).foregroundStyle(.white.opacity(0.75))
                 }
             }
@@ -154,25 +143,6 @@ struct CardPaymentView: View {
 
     // MARK: - Name field
 
-    private var nameField: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(l10n.t("card.holderName"))
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.bpInk.opacity(0.45))
-            TextField(l10n.t("card.namePlaceholder"), text: $name)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.words)
-                .focused($activeFocus, equals: .name)
-                .font(.bpScaled(16))
-                .foregroundStyle(Color.bpInk)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 14)
-                .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
-                .overlay(RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(activeFocus == .name ? gold.opacity(0.5) : Color.bpInk.opacity(0.08), lineWidth: 1))
-                .bpAccessibility(label: l10n.t("card.holderName"), hint: l10n.t("card.holderName.hint"))
-        }
-    }
 
     // MARK: - Error banner
 
@@ -206,69 +176,10 @@ struct CardPaymentView: View {
 
     // MARK: - Card input helper
 
-    private func cardInputField(placeholder: String, text: Binding<String>, field: CardField) -> some View {
-        TextField(placeholder, text: text)
-            .keyboardType(.numberPad)
-            .focused($activeFocus, equals: field)
-            .font(.system(size: 16, design: .monospaced))
-            .foregroundStyle(Color.bpInk)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 14)
-            .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(activeFocus == field ? gold.opacity(0.5) : Color.bpInk.opacity(0.08), lineWidth: 1))
-            .onChange(of: text.wrappedValue) { _, newValue in
-                // The keyboard is a numberPad, which has no "/" key — without
-                // this the expiry field could never be filled in a form the
-                // parser accepts (it splits on "/"), so no card payment could
-                // ever succeed. Formatting is applied as the user types.
-                let formatted = Self.formatted(newValue, for: field)
-                if formatted != newValue { text.wrappedValue = formatted }
-                validateCard()
-            }
-            .bpAccessibility(
-                label: field == .number ? l10n.t("card.number.a11y") : (field == .expiry ? l10n.t("card.expiry.a11y") : l10n.t("card.cvv.a11y")),
-                hint: field == .number ? l10n.t("card.number.hint") : (field == .expiry ? l10n.t("card.expiry.hint") : l10n.t("card.cvv.hint"))
-            )
-    }
 
-    /// Groups the card number in 4s and turns a bare "1234" expiry into
-    /// "12/34". Digits-only input, capped at the real field lengths.
-    private static func formatted(_ raw: String, for field: CardField) -> String {
-        let digits = raw.filter(\.isNumber)
-        switch field {
-        case .name:
-            return raw
-        case .number:
-            let capped = String(digits.prefix(16))
-            return stride(from: 0, to: capped.count, by: 4).map { offset in
-                let start = capped.index(capped.startIndex, offsetBy: offset)
-                let end = capped.index(start, offsetBy: min(4, capped.count - offset))
-                return String(capped[start..<end])
-            }.joined(separator: " ")
-        case .expiry:
-            let capped = String(digits.prefix(4))
-            guard capped.count > 2 else { return capped }
-            return "\(capped.prefix(2))/\(capped.dropFirst(2))"
-        case .cvv:
-            return String(digits.prefix(4))
-        }
-    }
 
-    private var isValid: Bool {
-        isCardValid && !name.trimmingCharacters(in: .whitespaces).isEmpty
-    }
+    private var isValid: Bool { card.isValid }
 
-    private func validateCard() {
-        let digits = cardNumber.filter(\.isNumber)
-        // Was `expiry.count >= 4`, which accepted "1234" — a value the parser
-        // below then read as month 1234. Require a real month and a 2-digit year.
-        let expiryDigits = expiry.filter(\.isNumber)
-        let month = UInt(expiryDigits.prefix(2)) ?? 0
-        let expiryOk = expiryDigits.count == 4 && (1...12).contains(month)
-        let cvvOk = cvv.count >= 3
-        isCardValid = digits.count == 16 && expiryOk && cvvOk
-    }
 
     // MARK: - Payment flow (Stripe SPM not yet installed — stub until added)
 
@@ -279,7 +190,7 @@ struct CardPaymentView: View {
         loading  = true
         errorMsg = ""
 
-        let last4 = String(cardNumber.filter(\.isNumber).suffix(4))
+        let last4 = String(card.digits.suffix(4))
 
         guard let session = AuthService.shared.restoreSession() else {
             loading = false
@@ -289,25 +200,10 @@ struct CardPaymentView: View {
 
         Task {
             do {
-                let parts = expiry.split(separator: "/")
-                let month = parts.first.flatMap { UInt($0) } ?? 0
-                let rawYear = parts.count > 1 ? UInt(parts[1]) ?? 0 : 0
-                // The field's placeholder is "MM/AA" but nothing enforces a
-                // 2-digit year — a user typing "12/2028" would otherwise get
-                // 2000 + 2028 = 4028 sent to Stripe. Only add the century when
-                // it looks like a 2-digit year was actually entered.
-                let year = rawYear >= 100 ? rawYear : 2000 + rawYear
-
-                let cardParams = STPPaymentMethodCardParams()
-                cardParams.number = cardNumber.filter(\.isNumber)
-                cardParams.expMonth = NSNumber(value: month)
-                cardParams.expYear = NSNumber(value: year)
-                cardParams.cvc = cvv
-
-                let billingDetails = STPPaymentMethodBillingDetails()
-                billingDetails.name = name
-
-                let paymentParams = STPPaymentMethodParams(card: cardParams, billingDetails: billingDetails, metadata: nil)
+                guard let paymentParams = card.stripeParams() else {
+                    await MainActor.run { loading = false; errorMsg = l10n.t("cardPayment.error.invalidCard") }
+                    return
+                }
                 let paymentMethod = try await STPAPIClient.shared.createPaymentMethod(with: paymentParams, additionalPaymentUserAgentValues: [])
 
                 let json = try await APIClient.createCardTransaction(
