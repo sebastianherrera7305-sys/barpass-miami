@@ -210,11 +210,11 @@ struct MainTabView: View {
             HStack(spacing: 10) {
                 Image(systemName: "questionmark.circle.fill")
                     .foregroundStyle(Color.bpAmber)
-                Text("Let us show you around.")
+                Text(l10n.t("help.intro.text"))
                     .font(.bpScaled(13, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
                 Spacer()
-                Button("Ver") {
+                Button(l10n.t("help.intro.cta")) {
                     BPHaptics.light()
                     helpStore.markIntroShown()
                     withAnimation { showHelpIntro = false }

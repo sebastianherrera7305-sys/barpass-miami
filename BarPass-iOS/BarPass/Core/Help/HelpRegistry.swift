@@ -17,15 +17,19 @@ enum HelpRoute: String, CaseIterable {
 struct HelpTip: Identifiable {
     let id: String            // matches the elementID passed to .helpTarget(id:)
     let route: HelpRoute
-    let title: String
-    let description: String   // 1–2 sentences, enforced by convention not code
+    /// Claves de l10n, NO el texto ya traducido. `HelpRegistry.tips` es un
+    /// `static let` que se evalúa una sola vez, así que resolver acá
+    /// congelaría el idioma del primer acceso y el cambio en caliente dejaría
+    /// de funcionar en la ayuda. Se resuelven en HelpOverlayView.
+    let titleKey: String
+    let descriptionKey: String   // 1–2 oraciones, por convención no por código
     let version: Int
 
-    init(id: String, route: HelpRoute, title: String, description: String, version: Int = 1) {
+    init(id: String, route: HelpRoute, titleKey: String, descriptionKey: String, version: Int = 1) {
         self.id = id
         self.route = route
-        self.title = title
-        self.description = description
+        self.titleKey = titleKey
+        self.descriptionKey = descriptionKey
         self.version = version
     }
 }
@@ -39,38 +43,38 @@ enum HelpRegistry {
         HelpTip(
             id: "tonight.recommendedForYou",
             route: .tonight,
-            title: "Recomendado para ti",
-            description: "Combina lo que está pasando esta noche con lugares que podrían interesarte, según tus gustos reales."
+            titleKey: "help.tonight.recommendedForYou.title",
+            descriptionKey: "help.tonight.recommendedForYou.desc"
         ),
         HelpTip(
             id: "explore.filters",
             route: .explore,
-            title: "Filtros",
-            description: "Descubre lugares por categoría — trending, happy hour, rooftops, música en vivo."
+            titleKey: "help.explore.filters.title",
+            descriptionKey: "help.explore.filters.desc"
         ),
         HelpTip(
             id: "tonight.events",
             route: .tonight,
-            title: "Esta noche",
-            description: "Eventos reales que pasan hoy en venues de Miami — toca uno para ver el detalle."
+            titleKey: "help.tonight.events.title",
+            descriptionKey: "help.tonight.events.desc"
         ),
         HelpTip(
             id: "venueDetail.save",
             route: .venueDetail,
-            title: "Guardar lugar",
-            description: "Guarda este venue como favorito para encontrarlo rápido después, en Tonight y en tu perfil."
+            titleKey: "help.venueDetail.save.title",
+            descriptionKey: "help.venueDetail.save.desc"
         ),
         HelpTip(
             id: "venueDetail.skipLine",
             route: .venueDetail,
-            title: "Skip the Line",
-            description: "Compra tu acceso prioritario para este venue y entra sin esperar en la puerta."
+            titleKey: "help.venueDetail.skipLine.title",
+            descriptionKey: "help.venueDetail.skipLine.desc"
         ),
         HelpTip(
             id: "trips.create",
             route: .trips,
-            title: "Crear un trip",
-            description: "Arma un recorrido de la noche con varios venues para vos y tu grupo."
+            titleKey: "help.trips.create.title",
+            descriptionKey: "help.trips.create.desc"
         ),
     ]
 
