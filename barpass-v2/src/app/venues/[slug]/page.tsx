@@ -140,10 +140,16 @@ export default async function VenuePage({
                   : `${formatUSD(venue.coverMen)} M / ${formatUSD(venue.coverWomen ?? venue.coverMen)} W`
               }
             />
-            <FactRow label="Avg spend" value={formatUSD(venue.avgSpend)} />
+            <FactRow label="Avg spend" value={venue.avgSpend ? formatUSD(venue.avgSpend) : null} />
           </dl>
         </Card>
 
+        {/* Rendered only when something real remains: crowd_level was removed
+            (constant "steady" for every row, no live source — iOS had already
+            dropped it), and dress_code/parking were cleared on the 175 seeded
+            rows that shared one fabricated value. Without this guard the card
+            would show a header over nothing. */}
+        {(venue.musicGenres.length > 0 || venue.dressCode || venue.parking) && (
         <Card className="space-y-3 p-5">
           <h3 className="flex items-center gap-2 text-sm font-bold">
             <Music className="h-4 w-4 text-amber-brand" /> The scene
@@ -155,11 +161,11 @@ export default async function VenuePage({
                 .map((g) => g.replace("_", " ").toUpperCase())
                 .join(" · ")}
             />
-            <FactRow label="Crowd" value={venue.crowdLevel} capitalize />
             <FactRow label="Dress code" value={venue.dressCode} icon={Shirt} />
             <FactRow label="Parking" value={venue.parking} icon={Car} />
           </dl>
         </Card>
+        )}
       </div>
 
       {venue.popularDrinks.length > 0 && (

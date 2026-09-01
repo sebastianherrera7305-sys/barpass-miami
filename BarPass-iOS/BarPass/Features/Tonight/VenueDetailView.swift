@@ -318,8 +318,17 @@ struct VenueDetailView: View {
             sectionTitle(l10n.t("venueDetail.whenToGo"))
 
             infoRow("calendar", l10n.t("venueDetail.hours"), "\(venue.openTime) – \(venue.closeTime)")
-            infoRow("clock.arrow.2.circlepath", l10n.t("venueDetail.bestTime"), venue.bestArrivalTime)
-            infoRow("waveform.path.ecg", l10n.t("venueDetail.peakHours"), venue.peakHours)
+            // Guarded: best_arrival_time and peak_hours were NOT NULL columns
+            // holding one identical fabricated value across 175 seeded rows
+            // ("11:00 PM" / "12 AM – 3 AM" for every venue type). Those were
+            // cleared on 2026-09-01, so most venues now have nothing here and
+            // an unguarded row would render blank.
+            if !venue.bestArrivalTime.isEmpty {
+                infoRow("clock.arrow.2.circlepath", l10n.t("venueDetail.bestTime"), venue.bestArrivalTime)
+            }
+            if !venue.peakHours.isEmpty {
+                infoRow("waveform.path.ecg", l10n.t("venueDetail.peakHours"), venue.peakHours)
+            }
             infoRow("dollarsign.circle.fill", l10n.t("venueDetail.avgSpend"), venue.avgSpend + l10n.t("venueDetail.perPersonSuffix"))
             // The "Crowd" bar used to render here, driven by crowd_level —
             // confirmed 100% "steady" for all 1,817 venues (no real live-
@@ -332,18 +341,38 @@ struct VenueDetailView: View {
 
     // MARK: - Music
 
-    // `music_genres` is never a real per-venue signal today — it's either
-    // empty (90% of venues) or the identical ["house","hip_hop"] literal
-    // stuck on one 2026-07-07 Miami seed batch regardless of venue type
-    // (confirmed via direct Supabase audit). Showing it as a fact about the
-    // venue would be fabricating data, so this section no longer renders
-    // genre chips at all — only real per-venue dress code, when present.
+    // Genre chips render again as of 2026-09-01. They were pulled when
+    // `music_genres` held the identical fabricated ["house","hip_hop"] on one
+    // 2026-07-07 seed batch — showing that would have been inventing facts.
+    // Every Miami venue has since been researched one at a time against
+    // primary sources and 0 fabricated tags remain, so what is here now is
+    // real and worth showing. A venue with no verified genre still shows
+    // nothing: empty stays a fact, never a gap to fill.
     @ViewBuilder
     private var musicSection: some View {
-        if !venue.dressCode.isEmpty {
+        if !venue.musicGenres.isEmpty || !venue.dressCode.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 sectionTitle(l10n.t("venueDetail.musicAmbience"))
-                infoRow("tshirt.fill", l10n.t("venueDetail.dressCode"), venue.dressCode)
+
+                if !venue.musicGenres.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(venue.musicGenres, id: \.self) { genre in
+                                Text(genre.rawValue)
+                                    .font(.bpCaption())
+                                    .foregroundStyle(Color.bpAmber)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(Color.bpAmber.opacity(0.12), in: Capsule())
+                                    .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.25)))
+                            }
+                        }
+                    }
+                }
+
+                if !venue.dressCode.isEmpty {
+                    infoRow("tshirt.fill", l10n.t("venueDetail.dressCode"), venue.dressCode)
+                }
             }
         }
     }
