@@ -306,7 +306,14 @@ final actor SupabaseVenueRepository: VenueRepository {
         case "live": return .live
         case "jazz": return .jazz
         case "tech_house", "techhouse": return .techHouse
-        case "rnb", "r&b": return .rnb
+        case "rnb", "r&b", "soul": return .rnb
+        // Synonyms map to the nearest real case rather than being dropped:
+        // research turned up honky_tonk/bluegrass/americana (country),
+        // punk/metal/alternative/indie (rock) and afrobeat (afrobeats).
+        case "country", "honky_tonk", "bluegrass", "americana": return .country
+        case "rock", "punk", "metal", "alternative", "indie": return .rock
+        case "blues": return .blues
+        case "afrobeats", "afrobeat", "afro_house": return .afrobeats
         default: return MusicGenre(rawValue: raw)
         }
     }

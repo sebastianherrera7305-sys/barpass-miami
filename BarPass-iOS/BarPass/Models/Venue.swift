@@ -12,6 +12,19 @@ enum VenueType: String, Codable, CaseIterable {
     case brewery    = "Brewery"
 }
 
+/// Note that `live` is a performance FORMAT, not a genre — it means "played
+/// by people on a stage". It is kept because it is the only honest answer
+/// for a venue whose programming is verified live but whose style no source
+/// names, and it composes with a real genre (a honky-tonk is `[country,
+/// live]`).
+///
+/// The first six cases below were a Miami-only vocabulary. Per-venue research
+/// across the other 22 cities (2026-09-01) found it could not express most of
+/// what those cities actually programme: 8 of 9 researched Nashville venues
+/// are country, New Orleans is piano/brass/blues, Austin is honky-tonk and
+/// western swing, Chicago has blues and dueling pianos. All of them collapsed
+/// into the single `live` tag, making a Broadway honky-tonk indistinguishable
+/// from a jazz listening room — so genre search could not work outside Miami.
 enum MusicGenre: String, Codable, CaseIterable {
     case edm        = "EDM"
     case house      = "House"
@@ -23,6 +36,10 @@ enum MusicGenre: String, Codable, CaseIterable {
     case jazz       = "Jazz"
     case techHouse  = "Tech House"
     case rnb        = "R&B"
+    case country    = "Country"
+    case rock       = "Rock"
+    case blues      = "Blues"
+    case afrobeats  = "Afrobeats"
 }
 
 // MARK: - Domain Models
