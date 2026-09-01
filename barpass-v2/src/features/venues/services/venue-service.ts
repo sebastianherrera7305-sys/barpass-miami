@@ -42,8 +42,13 @@ interface DbVenue {
   open_time: string;
   close_time: string;
   happy_hour_until: string | null;
-  music_genres: Venue["musicGenres"];
-  vibes: string[];
+  // Nullable in the database: the NOT NULL constraints on the descriptive
+  // columns were dropped on 2026-09-01 precisely so "unknown" could be
+  // expressed, and `vibes` went to NULL on all 1846 rows when the fabricated
+  // seed values were cleared. Anything reading these as arrays must get an
+  // array — see mapDbVenue.
+  music_genres: Venue["musicGenres"] | null;
+  vibes: string[] | null;
   dress_code: string;
   parking: string;
   crowd_level: Venue["crowdLevel"];
@@ -98,8 +103,12 @@ function mapDbVenue(v: DbVenue): Venue {
     openTime: v.open_time,
     closeTime: v.close_time,
     happyHourUntil: v.happy_hour_until,
-    musicGenres: v.music_genres,
-    vibes: v.vibes,
+    // Normalised at the boundary, not at every call site: collections.ts and
+    // concierge-prompt.ts both call .includes()/.join() on these, and a NULL
+    // took down the whole homepage prerender ("Cannot read properties of null
+    // (reading 'includes')") the moment the seeded values were cleared.
+    musicGenres: v.music_genres ?? [],
+    vibes: v.vibes ?? [],
     dressCode: v.dress_code,
     parking: v.parking,
     crowdLevel: v.crowd_level,
