@@ -17,3 +17,10 @@ CREATE TABLE IF NOT EXISTS testflight_feedback (
 );
 
 CREATE INDEX IF NOT EXISTS testflight_feedback_submitted_at_idx ON testflight_feedback (submitted_at DESC);
+
+-- No RLS policies were ever added here, unlike every other table in this
+-- schema set — with RLS off, the shipped anon key could `select *` this
+-- table over PostgREST and get every tester's plaintext email. Same
+-- deny-by-default pattern as rate_limits: only scripts/check-testflight-
+-- feedback.ts (service role) needs to touch this table.
+ALTER TABLE public.testflight_feedback ENABLE ROW LEVEL SECURITY;

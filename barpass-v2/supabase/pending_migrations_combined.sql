@@ -47,13 +47,15 @@ end;
 $$;
 
 -- 2) Secreto por venue
-alter table public.venues add column if not exists validation_secret text;
-
-update public.venues
-set validation_secret = encode(gen_random_bytes(18), 'base64')
-where validation_secret is null;
-
-alter table public.venues alter column validation_secret set not null;
+-- ⚠️ HISTORICAL — SUPERSEDED. DO NOT RUN ON A LIVE DATABASE.
+-- This put validation_secret directly on `venues`, which has a public
+-- `using (true)` SELECT policy (schema.sql) — RLS is row-level, not
+-- column-level, so this let anyone with the shipped anon key read every
+-- venue's door-staff secret via `select validation_secret from venues`.
+-- Superseded by venue_secrets_lockdown.sql, which moves the secret to its
+-- own zero-policy `venue_secrets` table instead. See that file for the
+-- real migration; the block that used to be here has been removed so a
+-- run-everything-in-this-file mistake can't reintroduce the leak.
 
 -- 3) Achicar fotos de venues (4800px -> 1200px)
 update public.venues
