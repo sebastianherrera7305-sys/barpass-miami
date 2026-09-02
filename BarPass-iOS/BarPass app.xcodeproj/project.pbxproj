@@ -77,6 +77,7 @@
 		AMSC02000000000000RP01 /* AppleMusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AMSC01000000000000RP01 /* AppleMusicSource.swift */; };
 		AN0000010000000000000001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AN0000020000000000000001 /* AnalyticsService.swift */; };
 		PUS0001000000000000RP01 /* PlanUsageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PUS0002000000000000RP01 /* PlanUsageService.swift */; };
+		PPS0001000000000000RP01 /* PlanPreferencesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PPS0002000000000000RP01 /* PlanPreferencesService.swift */; };
 		PES0001000000000000RP01 /* PlanEntitlementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PES0002000000000000RP01 /* PlanEntitlementService.swift */; };
 		AUTP02000000000000RP01 /* AutoplayPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTP01000000000000RP01 /* AutoplayPreference.swift */; };
 		B9A71D8F490D7C4F6A542FE3 /* AffiliationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D676FAF3C8541AE12E83DCCC /* AffiliationPickerView.swift */; };
@@ -280,6 +281,7 @@
 		AMSC01000000000000RP01 /* AppleMusicSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleMusicSource.swift; path = BarPass/Core/Music/AppleMusicSource.swift; sourceTree = SOURCE_ROOT; };
 		AN0000020000000000000001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalyticsService.swift; path = BarPass/Core/Services/AnalyticsService.swift; sourceTree = SOURCE_ROOT; };
 		PUS0002000000000000RP01 /* PlanUsageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlanUsageService.swift; path = BarPass/Core/Services/PlanUsageService.swift; sourceTree = SOURCE_ROOT; };
+		PPS0002000000000000RP01 /* PlanPreferencesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlanPreferencesService.swift; path = BarPass/Core/Services/PlanPreferencesService.swift; sourceTree = SOURCE_ROOT; };
 		PES0002000000000000RP01 /* PlanEntitlementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlanEntitlementService.swift; path = BarPass/Core/Services/PlanEntitlementService.swift; sourceTree = SOURCE_ROOT; };
 		AUTP01000000000000RP01 /* AutoplayPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AutoplayPreference.swift; path = BarPass/Core/Music/AutoplayPreference.swift; sourceTree = SOURCE_ROOT; };
 		B255F26D4A13547562CDF99B /* HelpTargetAnchor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpTargetAnchor.swift; path = BarPass/Core/Help/HelpTargetAnchor.swift; sourceTree = SOURCE_ROOT; };
@@ -513,6 +515,7 @@
 				FF000001000000000000AA20 /* AuthService.swift */,
 				AN0000020000000000000001 /* AnalyticsService.swift */,
 				PUS0002000000000000RP01 /* PlanUsageService.swift */,
+				PPS0002000000000000RP01 /* PlanPreferencesService.swift */,
 				PES0002000000000000RP01 /* PlanEntitlementService.swift */,
 				4534C465198E6FF9A92B4C7D /* DeepLinkRouter.swift */,
 				FDE1AEB039250C8DA5E41CE1 /* ReferralService.swift */,
@@ -1035,6 +1038,7 @@
 				FF000002000000000000AA20 /* AuthService.swift in Sources */,
 				AN0000010000000000000001 /* AnalyticsService.swift in Sources */,
 				PUS0001000000000000RP01 /* PlanUsageService.swift in Sources */,
+				PPS0001000000000000RP01 /* PlanPreferencesService.swift in Sources */,
 				PES0001000000000000RP01 /* PlanEntitlementService.swift in Sources */,
 				TR000002000000000000AA01 /* Trip.swift in Sources */,
 				TR000002000000000000AA02 /* TripsListView.swift in Sources */,

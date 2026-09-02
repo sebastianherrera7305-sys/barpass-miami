@@ -53,6 +53,15 @@ enum PlanEngine {
     ///   the turn came with structured signal (a context chip or a
     ///   refinement quick action) — those are unambiguous regardless of
     ///   their text, so classification would only risk a wrong call.
+    /// - Parameter isPremium: the real Fase 4 differentiator
+    ///   (05_PREMIUM_AI_SPEC.md) — Premium gets the full 3–6 stop itinerary
+    ///   from both engines (`stopCountBlock` server-side, `maxStops` in
+    ///   `NightPlan.local`); Free stays a short 2–3 stop suggestion
+    ///   (04_FREE_PLAN_SPEC.md: no "unlimited multi-step reasoning"). Also
+    ///   the only tier that reads/writes `rememberedVibe`.
+    /// - Parameter rememberedVibe: lightweight cross-conversation memory
+    ///   (`PlanPreferencesService`, Premium-only) — a short phrase describing
+    ///   what this user has liked before, passed straight to the AI prompt.
     static func respond(
         enginePrompt: String,
         conversation: PlanConversation,
@@ -61,7 +70,9 @@ enum PlanEngine {
         userLocation: CLLocationCoordinate2D?,
         priceRange: ClosedRange<Int>? = nil,
         budgetHint: Double? = nil,
-        classifyIntent: Bool = true
+        classifyIntent: Bool = true,
+        isPremium: Bool = false,
+        rememberedVibe: String? = nil
     ) async -> PlanMessage {
         if classifyIntent {
             switch PlanIntentResolver.resolve(enginePrompt) {
@@ -85,16 +96,23 @@ enum PlanEngine {
         // kept.
         let excludeSlugs = Array(Set(conversation.messages.flatMap { $0.plan?.stops.map(\.venueSlug) ?? [] }))
 
+        let maxStops = isPremium ? 6 : 3
         let generated: NightPlan
         let source: PlanMessage.PlanSource
         do {
-            generated = try await APIClient.fetchConciergePlan(prompt: enginePrompt, budget: budgetHint, excludeSlugs: excludeSlugs)
+            generated = try await APIClient.fetchConciergePlan(
+                prompt: enginePrompt, budget: budgetHint, excludeSlugs: excludeSlugs,
+                isPremium: isPremium, rememberedVibe: rememberedVibe
+            )
             source = .ai
         } catch {
             // AI unavailable (no server key, rate limited, offline, bad
             // response) — fall back silently. Never surface this raw to
             // the user (02_UX_ARCHITECTURE.md).
-            generated = await NightPlan.local(prompt: enginePrompt, context: context, venues: venues, userLocation: userLocation, priceRange: priceRange)
+            generated = await NightPlan.local(
+                prompt: enginePrompt, context: context, venues: venues, userLocation: userLocation,
+                priceRange: priceRange, maxStops: maxStops
+            )
             source = .local
         }
 

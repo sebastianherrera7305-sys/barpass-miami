@@ -71,13 +71,20 @@ struct NightPlan: Identifiable, Codable, Hashable {
     ///   filter's bypass fix. `nil` means no price constraint. Falls back
     ///   to the unfiltered catalog if the constraint would leave zero
     ///   candidates, rather than showing an empty plan over a budget chip.
+    /// - Parameter maxStops: same Free/Premium split as the AI concierge's
+    ///   `stopCountBlock` (barpass-v2/.../concierge-prompt.ts) — Free stays
+    ///   short (04_FREE_PLAN_SPEC.md: no "unlimited multi-step reasoning"),
+    ///   Premium gets the full itinerary (05_PREMIUM_AI_SPEC.md "Complete-
+    ///   night itinerary planning"). Defaults to the pre-tier value (4) for
+    ///   any other caller.
     @MainActor
     static func local(
         prompt: String,
         context: TripContext = TripContext(),
         venues: [BarPassVenue],
         userLocation: CLLocationCoordinate2D? = nil,
-        priceRange: ClosedRange<Int>? = nil
+        priceRange: ClosedRange<Int>? = nil,
+        maxStops: Int = 4
     ) -> NightPlan {
         let now = Date()
         let l10n = L10n.shared
@@ -184,11 +191,11 @@ struct NightPlan: Identifiable, Codable, Hashable {
             ranked = fallbackSource
                 .map { ($0, popularity($0)) }
                 .sorted { $0.1 > $1.1 }
-                .prefix(4)
+                .prefix(maxStops)
                 .map { Candidate(venue: $0.0, tier: 4, rankScore: $0.1, time: l10n.t("plan.badge.tomorrow"), noteKey: "plan.note.tomorrow") }
         }
 
-        let picks = Array(ranked.prefix(4))
+        let picks = Array(ranked.prefix(maxStops))
         let stops = picks.map { c in
             PlanStop(
                 time: c.time,

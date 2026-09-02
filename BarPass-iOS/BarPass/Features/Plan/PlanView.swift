@@ -80,6 +80,11 @@ struct PlanView: View {
     @State private var inclusivePrefs: Set<String> = []
     @State private var showInclusivePrefs = false
     @State private var selectedBudget: PlanBudgetOption? = nil
+    /// Fase 4 real — Premium-only cross-conversation memory
+    /// (`PlanPreferencesService`). Set once a fresh conversation's context
+    /// picker has been pre-filled from it, so the AI prompt can reference
+    /// "what this user usually likes" even after the chips reset post-send.
+    @State private var rememberedVibeSummary: String?
 
     /// Picked once when the screen appears, not on every render — so it
     /// doesn't reshuffle mid-type. TestFlight feedback was that the header
@@ -170,6 +175,7 @@ struct PlanView: View {
             restoreCurrentConversation()
             await loadPastConversations()
             userLocation = await locationService.requestOnce()
+            await applyRememberedPreferencesIfNeeded()
         }
         // Re-evaluate the live plan's real-time badges when the app comes
         // back to the foreground — local engine only, and ONLY when the
@@ -185,7 +191,15 @@ struct PlanView: View {
                   conversation.currentPlanIsLocalFallback,
                   let lastUserText = conversation.messages.last(where: { $0.role == .user })?.text
             else { return }
-            let refreshed = NightPlan.local(prompt: lastUserText, context: conversation.lastContext, venues: venueStore.venues, userLocation: userLocation)
+            // Preserve the stop count the plan already has (Free/Premium
+            // tier already decided that when it was first generated) —
+            // don't let a badge-only refresh silently reset it to the
+            // default 4.
+            let existingStopCount = conversation.currentPlan?.stops.count ?? 4
+            let refreshed = NightPlan.local(
+                prompt: lastUserText, context: conversation.lastContext, venues: venueStore.venues,
+                userLocation: userLocation, maxStops: max(existingStopCount, 1)
+            )
             if let idx = conversation.messages.lastIndex(where: { $0.plan != nil }) {
                 conversation.messages[idx].plan = refreshed
             }
@@ -344,6 +358,20 @@ struct PlanView: View {
 
     private var contextPicker: some View {
         VStack(alignment: .leading, spacing: 14) {
+            // Fase 4 real — only shows when PlanPreferencesService actually
+            // pre-filled a chip below from a past Premium conversation, so
+            // the pre-selection never reads as unexplained/confusing.
+            if rememberedVibeSummary != nil, !selectedIntents.isEmpty || company != nil {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                        .font(.bpScaled(11, weight: .semibold))
+                        .foregroundStyle(amber)
+                    Text(l10n.t("plan.premium.remembered"))
+                        .font(.bpScaled(12, weight: .semibold))
+                        .foregroundStyle(Color.bpInk.opacity(0.6))
+                }
+            }
+
             VStack(alignment: .leading, spacing: 6) {
                 Text(l10n.t("plan.budget.question"))
                     .font(.bpScaled(12, weight: .semibold)).foregroundStyle(Color.bpTextSecondary)
@@ -675,10 +703,16 @@ struct PlanView: View {
                 enginePrompt: prompt, conversation: snapshot, context: context,
                 venues: venues, userLocation: location,
                 priceRange: resolvedPriceRange, budgetHint: resolvedBudgetHint,
-                classifyIntent: !hasStructuredSignal
+                classifyIntent: !hasStructuredSignal,
+                isPremium: isPremium, rememberedVibe: rememberedVibeSummary
             )
             if !isPremium, reply.plan != nil {
                 await PlanUsageService.shared.recordUsage(isSignedIn: isSignedIn)
+            }
+            // Fase 4 real — only Premium's preferences get remembered for
+            // next time (Free always starts blank, by design).
+            if isPremium, reply.plan != nil {
+                await PlanPreferencesService.shared.save(context)
             }
             await MainActor.run {
                 // The user switched to a different/new conversation (New
@@ -720,6 +754,7 @@ struct PlanView: View {
                 persistCurrentConversation()
             }
             await loadPastConversations()
+            await applyRememberedPreferencesIfNeeded()
         }
     }
 
@@ -782,6 +817,25 @@ struct PlanView: View {
 
     private func loadPastConversations() async {
         pastConversations = (try? await conversationRepo.getConversations()) ?? []
+    }
+
+    /// Fase 4 real — pre-fills the context picker with what a Premium user
+    /// picked last time, ONLY when the conversation is genuinely fresh (no
+    /// user turn yet) so this never overwrites chips mid-conversation. Free
+    /// never calls `PlanPreferencesService` at all — every new conversation
+    /// starts blank for Free, by design (05_PREMIUM_AI_SPEC.md's memory
+    /// section is scoped to Premium).
+    private func applyRememberedPreferencesIfNeeded() async {
+        guard conversation.messages.allSatisfy({ $0.role != .user }) else { return }
+        guard await PlanEntitlementService.shared.isPremium() else { return }
+        guard let remembered = await PlanPreferencesService.shared.load() else { return }
+        let summary = await PlanPreferencesService.shared.summarize(remembered)
+        await MainActor.run {
+            selectedIntents = remembered.intents
+            company = remembered.company
+            inclusivePrefs = remembered.inclusivePrefs
+            rememberedVibeSummary = summary.isEmpty ? nil : summary
+        }
     }
 
     // MARK: - Plan actions (Save / Save as Trip)

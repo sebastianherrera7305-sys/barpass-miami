@@ -13,13 +13,33 @@ export interface ConciergeContext {
   excludeSlugs?: string[];
   /** Para inyectar hora/día reales — inyectable en tests, default `new Date()`. */
   now?: Date;
+  /** Presupuesto total del grupo/persona en USD — restricción dura, no sugerencia. */
+  budget?: number;
+  /** Tamaño del grupo — afecta qué venues son viables y el spend estimado. */
+  groupSize?: number;
+  /** Zona preferida, si el usuario la mencionó. */
+  neighborhood?: string;
+  /**
+   * Free vs Premium (Fase 4 real, 2026-09-02 — 05_PREMIUM_AI_SPEC.md):
+   * Premium pide un itinerario completo de noche (más paradas, más
+   * profundidad); Free se mantiene corto y directo — 04_FREE_PLAN_SPEC.md
+   * explícitamente NO quiere "unlimited multi-step reasoning" en Free.
+   * Sin valor = comportamiento default (equivalente a "free").
+   */
+  tier?: "free" | "premium";
+  /**
+   * Memoria liviana entre conversaciones — solo Premium (PlanPreferencesService,
+   * lado iOS). Una frase corta con lo que este usuario suele pedir, para que
+   * Remy lo tenga en cuenta sin que el usuario tenga que repetirlo cada vez.
+   */
+  rememberedVibe?: string;
 }
 
 export function buildConciergeSystemPrompt(
   venues: Venue[],
   context: ConciergeContext = {},
 ): string {
-  const { excludeSlugs = [], now = new Date() } = context;
+  const { excludeSlugs = [], now = new Date(), budget, groupSize, neighborhood, tier = "free", rememberedVibe } = context;
 
   const timeContext = now.toLocaleString("en-US", {
     timeZone: "America/New_York",
@@ -33,6 +53,29 @@ export function buildConciergeSystemPrompt(
     excludeSlugs.length > 0
       ? `\n\nALREADY RECOMMENDED THIS SESSION — do not pick these again, choose different venues even if they scored well: ${excludeSlugs.join(", ")}`
       : "";
+
+  const budgetBlock =
+    budget !== undefined
+      ? `\n\nBUDGET: $${budget} total. This is a HARD ceiling, not a suggestion — sum cover + drinks + typical spend across every stop and keep totalEstimate at or under it, even if that means fewer or cheaper stops.`
+      : "";
+
+  const groupSizeBlock =
+    groupSize !== undefined
+      ? `\n\nGROUP SIZE: planning for ${groupSize} ${groupSize === 1 ? "person" : "people"}. Favor venues that actually work for a group this size (reservable, enough room), and scale estimatedSpend to the whole group, not one person.`
+      : "";
+
+  const neighborhoodBlock = neighborhood
+    ? `\n\nPREFERRED AREA: stay in or near ${neighborhood} unless nothing in the catalog there fits the request.`
+    : "";
+
+  const rememberedBlock = rememberedVibe
+    ? `\n\nWHAT THIS USER USUALLY LIKES (from past plans): ${rememberedVibe}. Lean into it unless tonight's request clearly wants something different — this is a Premium user, so showing you remember them matters.`
+    : "";
+
+  const stopCountBlock =
+    tier === "premium"
+      ? `\n\nSTOP COUNT (Premium — build the FULL night): sequence 3 to 6 stops, warm-up → peak → afterparty when the timing and budget support it. Go deeper than a quick suggestion — this user pays for a complete, well-reasoned itinerary.`
+      : `\n\nSTOP COUNT (Free — keep it focused): 2 to 3 stops MAXIMUM, even if more would technically fit the budget. A short, solid plan, not a marathon.`;
 
   const digest = venues
     .map(
@@ -56,7 +99,6 @@ HOW YOU THINK
 - You are specific. Name the drink to order, the exact time to arrive, the door to use, the mistake tourists make. Vague = failure.
 - You read between the lines. "First date" means you avoid deafening clubs and pick somewhere they can actually talk. "Surprise us" means you get playful. "$80" means you respect it to the dollar and still make it feel generous.
 - You sequence a night like a story: warm-up → peak → (optional) after. Account for real travel time between neighborhoods.
-- 2–4 stops is the sweet spot. One perfect stop beats three mediocre ones.
 - If two venues are comparably good fits, rotate — don't default to the same "safe" pick every time. Variety is part of good taste.
 
 HARD RULES
@@ -64,7 +106,7 @@ HARD RULES
 - Respect budget strictly. Sum cover + drinks + typical spend and keep totalEstimate at or under any stated budget.
 - Every fact in a "note" (price, hours, drink, detail) must come from the CATALOG entry for that venue — never state a specific detail you're not sure is real.
 - Language: if the user writes in English, respond in natural American English. If they write in Spanish, respond in neutral Latin American Spanish (the kind used across Latin America and Miami) — never Rioplatense/Argentine Spanish (no "vos", "che", "boludo", or River Plate slang), regardless of what dialect the user themselves writes in.
-- Every "note" must contain at least one concrete, insider-specific detail — a drink, a timing trick, a seat, a heads-up. No filler like "great vibes" or "you'll love it".${excludeBlock}
+- Every "note" must contain at least one concrete, insider-specific detail — a drink, a timing trick, a seat, a heads-up. No filler like "great vibes" or "you'll love it".${excludeBlock}${budgetBlock}${groupSizeBlock}${neighborhoodBlock}${rememberedBlock}${stopCountBlock}
 
 VOICE EXAMPLES (match this energy, don't copy verbatim)
 - "Get there by 6 — the sunset seats on the west rail go first and that's the whole point."

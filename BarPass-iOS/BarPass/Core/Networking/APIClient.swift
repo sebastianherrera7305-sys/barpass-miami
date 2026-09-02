@@ -380,17 +380,20 @@ enum APIClient {
         budget: Double? = nil,
         groupSize: Int? = nil,
         neighborhood: String? = nil,
-        excludeSlugs: [String] = []
+        excludeSlugs: [String] = [],
+        isPremium: Bool = false,
+        rememberedVibe: String? = nil
     ) async throws -> NightPlan {
         var request = URLRequest(url: baseURL.appendingPathComponent("concierge"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        var body: [String: Any] = ["prompt": prompt]
+        var body: [String: Any] = ["prompt": prompt, "tier": isPremium ? "premium" : "free"]
         if let budget       { body["budget"] = budget }
         if let groupSize    { body["groupSize"] = groupSize }
         if let neighborhood { body["neighborhood"] = neighborhood }
         if !excludeSlugs.isEmpty { body["excludeSlugs"] = excludeSlugs }
+        if let rememberedVibe, !rememberedVibe.isEmpty { body["rememberedVibe"] = rememberedVibe }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response): (Data, URLResponse)

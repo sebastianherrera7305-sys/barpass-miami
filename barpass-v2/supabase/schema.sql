@@ -323,6 +323,29 @@ insert into public.app_config (key, value)
 values ('plan_free_daily_limit', '10')
 on conflict (key) do nothing;
 
+-- PLAN PREFERENCES (Fase 4 real, 2026-09-02) ────────────────────
+-- Lightweight cross-conversation memory — 05_PREMIUM_AI_SPEC.md's "start
+-- lightweight... do not build a complicated memory system in V1". One row
+-- per user, `context` is a whole TripContext blob (intents/company/
+-- inclusivePrefs/prompt) from the last plan-generating turn. Premium-only
+-- by product decision (PlanView only reads/writes this for entitled users):
+-- Free always starts a new conversation blank, Premium's context picker
+-- pre-fills with what you picked last time — the actual, felt difference
+-- between the two tiers, not just a higher usage cap.
+create table if not exists public.plan_preferences (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  context jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.plan_preferences enable row level security;
+
+create policy "manage own plan preferences"
+  on public.plan_preferences for all
+  to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
 -- Useful indexes ──────────────────────────────────────────────
 create index if not exists venues_neighborhood_idx on public.venues (neighborhood);
 create index if not exists venues_trending_idx on public.venues (is_trending) where is_trending;
