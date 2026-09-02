@@ -28,3 +28,11 @@ BarPass-iOS/build/
 BarPass-iOS/build-sim/
 BarPass-iOS/build-device/
 BarPass-iOS/build-device-check/
+BarPass-iOS/build-archive/
+
+# Estado de la interfaz de Xcode: qué archivos tenías abiertos, dónde estaba el
+# scroll. Cambia con solo abrir el proyecto y no le sirve a nadie más, así que
+# ensuciaba `git status` en cada sesión. Ya estaba rastreado, de ahí el
+# `git rm --cached` que acompaña a esta línea.
+*.xcuserstate
+xcuserdata/
