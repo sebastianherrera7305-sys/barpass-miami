@@ -1,6 +1,44 @@
 import SwiftUI
 import CoreLocation
 
+/// Budget chips for the context picker and (via `priceRange`/`budgetHint`)
+/// the AI concierge's `budget` param — restores the deleted
+/// `PromptYourNightHomeSection.Budget` (2026-09-02 bug fix: dropped during
+/// consolidation, taking the whole budget filter with it) with the same
+/// $25/$50/$100/$150+ semantics and the same ".unknown tier always
+/// excluded, $150+ has no ceiling" behavior.
+enum PlanBudgetOption: CaseIterable, Identifiable {
+    case low, mid, high, open
+    var id: Self { self }
+
+    var priceRange: ClosedRange<Int>? {
+        switch self {
+        case .low:  return 1...1
+        case .mid:  return 1...2
+        case .high: return 1...3
+        case .open: return nil
+        }
+    }
+
+    var budgetHint: Double {
+        switch self {
+        case .low:  return 25
+        case .mid:  return 50
+        case .high: return 100
+        case .open: return 175
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .low:  return "$25"
+        case .mid:  return "$50"
+        case .high: return "$100"
+        case .open: return "$150+"
+        }
+    }
+}
+
 /// Plan — multi-turn chat surface (Phase 1, 2026-09-02; see CLAUDE.md →
 /// "Plan Chat Architecture"). Built on top of the Fase 0 consolidation:
 /// same generation engines (`APIClient.fetchConciergePlan` → `NightPlan
@@ -13,21 +51,27 @@ import CoreLocation
 struct PlanView: View {
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
+    @EnvironmentObject private var appState: AppState
     @Environment(\.scenePhase) private var scenePhase
     @State private var conversation = PlanConversation()
     @State private var pastConversations: [PlanConversation] = []
     @State private var inputText = ""
     @State private var isLoading = false
-    @State private var lastContext = TripContext()
     @State private var userLocation: CLLocationCoordinate2D?
     @State private var locationService = LocationService()
     @State private var showHistory = false
     @State private var showUpgradeSheet = false
+    @FocusState private var composerFocused: Bool
     /// Surfaces `savePlan`/`saveAsTrip` failures — mainly the no-session
     /// error for guests. Never used for the per-turn conversation
     /// auto-sync, which fails silently for guests (routine, not an error
     /// the user needs to see on every message).
     @State private var saveErrorMessage: String?
+    /// Phase 3 (04_FREE_PLAN_SPEC.md) — a SUBTLE near-limit notice, only
+    /// set once the Free daily quota is close to exhausted (06_UI_COMPONENTS
+    /// .md: "Never make the Free experience feel like a countdown timer" —
+    /// so this stays nil, not shown at all, the rest of the time).
+    @State private var usageNotice: String?
 
     // Context merged in from the old Trips "Prompt Your Night" flow —
     // shown only before the first plan of a conversation exists.
@@ -35,6 +79,7 @@ struct PlanView: View {
     @State private var company: CompanyType? = nil
     @State private var inclusivePrefs: Set<String> = []
     @State private var showInclusivePrefs = false
+    @State private var selectedBudget: PlanBudgetOption? = nil
 
     /// Picked once when the screen appears, not on every render — so it
     /// doesn't reshuffle mid-type. TestFlight feedback was that the header
@@ -43,6 +88,15 @@ struct PlanView: View {
     /// drives the welcome message's text (`PlanEngine.welcomeMessage`), so
     /// the header and the first chat bubble read as one greeting.
     @State private var greetingIndex = Int.random(in: 0..<6)
+
+    /// Serializes conversation saves to Supabase (2026-09-02 bug fix): each
+    /// call used to fire its own unawaited Task, so if an earlier (smaller)
+    /// save's network request happened to complete AFTER a later one, it
+    /// would silently win the upsert and drop the newer message. Now at
+    /// most one save is in flight; anything requested while one is running
+    /// gets coalesced into a single follow-up with the latest snapshot.
+    @State private var isSyncingConversation = false
+    @State private var pendingConversationSync: PlanConversation?
 
     private let planRepo = RepositoryDependencies.plan
     private let conversationRepo = RepositoryDependencies.conversation
@@ -54,7 +108,7 @@ struct PlanView: View {
 
     private var canGenerate: Bool {
         !inputText.trimmingCharacters(in: .whitespaces).isEmpty
-            || !selectedIntents.isEmpty || company != nil || !inclusivePrefs.isEmpty
+            || !selectedIntents.isEmpty || company != nil || !inclusivePrefs.isEmpty || selectedBudget != nil
     }
 
     /// What actually gets sent as the engine prompt when the composer's
@@ -72,6 +126,7 @@ struct PlanView: View {
         for id in inclusivePrefs {
             if let pref = InclusivePreference(rawValue: id) { parts.append(l10n.t(pref.labelKey)) }
         }
+        if let selectedBudget { parts.append(selectedBudget.label) }
         return parts.isEmpty ? l10n.t("night.defaultTitle") : parts.joined(separator: ", ")
     }
 
@@ -117,19 +172,35 @@ struct PlanView: View {
             userLocation = await locationService.requestOnce()
         }
         // Re-evaluate the live plan's real-time badges when the app comes
-        // back to the foreground — local engine only (badge freshness, not
-        // a new AI turn); never fires on a timer.
+        // back to the foreground — local engine only, and ONLY when the
+        // live plan itself came from the local engine (2026-09-02 bug fix:
+        // this used to run unconditionally, so returning from background
+        // could silently replace an AI-concierge-generated plan — different
+        // venues, different reasoning — with an unrelated locally-scored
+        // one). Never fires on a timer, and never re-hits the network: this
+        // is a display-only refresh, not a new turn, so it only updates the
+        // local UserDefaults cache (`cacheConversationLocally`), not Supabase.
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active,
-                  conversation.currentPlan != nil,
+                  conversation.currentPlanIsLocalFallback,
                   let lastUserText = conversation.messages.last(where: { $0.role == .user })?.text
             else { return }
-            let refreshed = NightPlan.local(prompt: lastUserText, context: lastContext, venues: venueStore.venues, userLocation: userLocation)
-            conversation.currentPlan = refreshed
+            let refreshed = NightPlan.local(prompt: lastUserText, context: conversation.lastContext, venues: venueStore.venues, userLocation: userLocation)
             if let idx = conversation.messages.lastIndex(where: { $0.plan != nil }) {
                 conversation.messages[idx].plan = refreshed
             }
-            persistCurrentConversation()
+            cacheConversationLocally()
+        }
+        // Home Screen widget's "prompt" deep link (barpass://prompt) — see
+        // DeepLinkRouter.planPrompt / MainTabView.handleDeepLink. Restores
+        // the auto-focus behavior the deleted PromptYourNightHomeSection had
+        // (2026-09-02 bug fix: dropped during consolidation along with that
+        // file, leaving the widget shortcut open the tab but not the
+        // keyboard).
+        .onChange(of: appState.focusPlanComposerRequested) { _, requested in
+            guard requested else { return }
+            composerFocused = true
+            appState.focusPlanComposerRequested = false
         }
         .overlay(alignment: .top) {
             if let saveErrorMessage {
@@ -269,10 +340,20 @@ struct PlanView: View {
         .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
     }
 
-    // MARK: - Context picker (vibe / company / inclusive prefs)
+    // MARK: - Context picker (budget / vibe / company / inclusive prefs)
 
     private var contextPicker: some View {
         VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(l10n.t("plan.budget.question"))
+                    .font(.bpScaled(12, weight: .semibold)).foregroundStyle(Color.bpTextSecondary)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(PlanBudgetOption.allCases) { b in budgetChip(b) }
+                    }
+                }
+            }
+
             LazyVGrid(columns: chipCols, spacing: 10) {
                 ForEach(ExperienceIntent.allCases) { intent in intentChip(intent) }
             }
@@ -312,6 +393,23 @@ struct PlanView: View {
             }
         }
         .padding(.horizontal, 20)
+    }
+
+    private func budgetChip(_ b: PlanBudgetOption) -> some View {
+        let on = selectedBudget == b
+        return Button {
+            BPHaptics.light()
+            selectedBudget = on ? nil : b
+        } label: {
+            Text(b.label)
+                .font(.bpScaled(13, weight: .semibold))
+                .foregroundStyle(on ? .black : Color.bpInk)
+                .padding(.horizontal, 14).padding(.vertical, 8)
+                .background(on ? amber : Color.bpInk.opacity(0.06), in: Capsule())
+                .overlay(Capsule().strokeBorder(on ? .clear : Color.bpInk.opacity(0.1)))
+        }
+        .buttonStyle(.plain)
+        .bpAccessibility(label: b.label, isButton: true)
     }
 
     private func intentChip(_ intent: ExperienceIntent) -> some View {
@@ -379,12 +477,29 @@ struct PlanView: View {
     // MARK: - Composer
 
     private var composer: some View {
+        VStack(spacing: 6) {
+            if let usageNotice {
+                Text(usageNotice)
+                    .font(.bpScaled(11, weight: .semibold))
+                    .foregroundStyle(Color.bpInk.opacity(0.4))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+            }
+            composerInputRow
+        }
+        .padding(.top, 4)
+        .padding(.bottom, 8)
+        .background(.ultraThinMaterial)
+    }
+
+    private var composerInputRow: some View {
         HStack(alignment: .bottom, spacing: 10) {
             TextField(l10n.t("plan.chat.inputPlaceholder"), text: $inputText, axis: .vertical)
                 .lineLimit(1...4)
                 .font(.bpScaled(14))
                 .foregroundStyle(Color.bpInk)
                 .tint(amber)
+                .focused($composerFocused)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
                 .background(Color.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 20))
@@ -415,8 +530,6 @@ struct PlanView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .padding(.bottom, 8)
-        .background(.ultraThinMaterial)
     }
 
     // MARK: - History sheet
@@ -434,9 +547,8 @@ struct PlanView: View {
                         VStack(spacing: 10) {
                             ForEach(pastConversations) { conv in
                                 Button {
-                                    conversation = conv
+                                    switchToConversation(conv)
                                     showHistory = false
-                                    persistCurrentConversation()
                                 } label: {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(conv.displayTitle)
@@ -483,40 +595,110 @@ struct PlanView: View {
 
     private func handleQuickAction(_ label: String, sourceHasPlan: Bool) {
         guard !isLoading else { return }
+        // Phase 3/4: the limit-reached message's own quick actions aren't
+        // plan requests — "Upgrade" opens the real paywall sheet, "Maybe
+        // later" is a no-op (the user can just keep reading or type
+        // something else; there's nothing to dismiss in a chat transcript).
+        if label == l10n.t("plan.usage.upgradeCta") {
+            showUpgradeSheet = true
+            return
+        }
+        if label == l10n.t("plan.upgrade.maybeLater") {
+            return
+        }
         if sourceHasPlan, let action = PlanEngine.refinementActions.first(where: { l10n.t($0.labelKey) == label }) {
             let anchor = conversation.currentPlan?.title ?? ""
-            sendMessage(displayText: label, enginePrompt: "\(anchor) — \(action.hint)")
+            sendMessage(displayText: label, enginePrompt: "\(anchor) — \(action.hint)", priceRange: action.priceRange, budgetHint: action.budgetHint)
         } else {
             sendMessage(displayText: label, enginePrompt: label)
         }
     }
 
-    private func sendMessage(displayText: String, enginePrompt: String? = nil) {
+    private func sendMessage(displayText: String, enginePrompt: String? = nil, priceRange: ClosedRange<Int>? = nil, budgetHint: Double? = nil) {
         let trimmed = displayText.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty, !isLoading else { return }
         let prompt = enginePrompt ?? trimmed
         let context = TripContext(intents: selectedIntents, company: company, prompt: prompt, inclusivePrefs: inclusivePrefs)
+        let resolvedPriceRange = priceRange ?? selectedBudget?.priceRange
+        let resolvedBudgetHint = budgetHint ?? selectedBudget?.budgetHint
+        // A quick action (enginePrompt already set) or any context chip is
+        // an unambiguous plan request regardless of its text — only run the
+        // greeting/capability intent check on plain free-typed turns
+        // (Phase 2 intent resolver, see PlanEngine.respond's doc comment).
+        let hasStructuredSignal = enginePrompt != nil
+            || !selectedIntents.isEmpty || company != nil || !inclusivePrefs.isEmpty || selectedBudget != nil
         let venues = venueStore.venues
         let location = userLocation
         let snapshot = conversation
+        let isSignedIn = AuthService.shared.restoreSession() != nil
+        // Captured before the async gap so the completion can tell whether
+        // the user is still looking at this conversation when the reply
+        // lands (2026-09-02 bug fix — see the MainActor.run guard below).
+        let sentConversationId = conversation.id
 
         conversation.messages.append(PlanMessage(role: .user, text: trimmed))
+        conversation.lastContext = context
         inputText = ""
         isLoading = true
-        lastContext = context
 
         Task {
-            let reply = await PlanEngine.respond(enginePrompt: prompt, conversation: snapshot, context: context, venues: venues, userLocation: location)
+            // Phase 3/4 usage gate — Premium is unlimited; Free checks the
+            // backend-configured daily quota (PlanUsageService) BEFORE
+            // spending a generation on it. Never abruptly stops the
+            // conversation (02_UX_ARCHITECTURE.md): still replies, just
+            // with the limit message instead of a plan.
+            let isPremium = await PlanEntitlementService.shared.isPremium()
+            if !isPremium {
+                let state = await PlanUsageService.shared.currentState(isSignedIn: isSignedIn)
+                if case .limitReached = state {
+                    await MainActor.run {
+                        guard conversation.id == sentConversationId else { return }
+                        conversation.messages.append(PlanMessage(
+                            role: .assistant,
+                            text: l10n.t("plan.usage.limitReachedMessage"),
+                            quickActions: [l10n.t("plan.usage.upgradeCta"), l10n.t("plan.upgrade.maybeLater")]
+                        ))
+                        isLoading = false
+                        persistCurrentConversation()
+                        BPAnalytics.track(.planLimitReached)
+                    }
+                    return
+                }
+                if case .nearLimit(let remaining, _) = state {
+                    await MainActor.run { usageNotice = String(format: l10n.t("plan.usage.nearLimit"), remaining) }
+                } else {
+                    await MainActor.run { usageNotice = nil }
+                }
+            }
+
+            let reply = await PlanEngine.respond(
+                enginePrompt: prompt, conversation: snapshot, context: context,
+                venues: venues, userLocation: location,
+                priceRange: resolvedPriceRange, budgetHint: resolvedBudgetHint,
+                classifyIntent: !hasStructuredSignal
+            )
+            if !isPremium, reply.plan != nil {
+                await PlanUsageService.shared.recordUsage(isSignedIn: isSignedIn)
+            }
             await MainActor.run {
+                // The user switched to a different/new conversation (New
+                // chat, or a History pick) while this was in flight — drop
+                // the reply instead of appending it to whatever's on screen
+                // now (2026-09-02 bug fix: this used to mutate `conversation`
+                // unconditionally, leaking a stale reply into an unrelated
+                // chat and clearing its loading spinner).
+                guard conversation.id == sentConversationId else { return }
                 conversation.messages.append(reply)
-                if let plan = reply.plan { conversation.currentPlan = plan }
                 isLoading = false
                 selectedIntents = []
                 company = nil
                 inclusivePrefs = []
                 showInclusivePrefs = false
+                selectedBudget = nil
                 persistCurrentConversation()
-                BPAnalytics.track(.createPlan(method: "chat"))
+                if let source = reply.planSource {
+                    BPAnalytics.track(.createPlan(method: source == .ai ? "chat_ai" : "chat_local"))
+                }
             }
         }
     }
@@ -525,6 +707,10 @@ struct PlanView: View {
 
     private func startNewConversation() {
         let toArchive = conversation
+        // Whatever was in flight for the abandoned conversation will be
+        // dropped by sendMessage's id guard when it lands — don't leave the
+        // spinner stuck on the fresh conversation we're about to show.
+        isLoading = false
         Task {
             if toArchive.messages.contains(where: { $0.role == .user }) {
                 try? await conversationRepo.saveConversation(toArchive)
@@ -537,6 +723,12 @@ struct PlanView: View {
         }
     }
 
+    private func switchToConversation(_ conv: PlanConversation) {
+        isLoading = false
+        conversation = conv
+        cacheConversationLocally()
+    }
+
     private func restoreCurrentConversation() {
         if let data = UserDefaults.standard.data(forKey: Self.currentConversationKey),
            let restored = try? JSONDecoder().decode(PlanConversation.self, from: data),
@@ -547,21 +739,48 @@ struct PlanView: View {
         }
     }
 
-    private func persistCurrentConversation() {
+    /// UserDefaults-only — no network. Used by the scenePhase badge refresh,
+    /// which changes display text only, not the conversation's real content
+    /// (2026-09-02: avoids re-uploading the whole conversation to Supabase
+    /// on every foreground transition for a change nobody but this device
+    /// needs to see).
+    private func cacheConversationLocally() {
         if let data = try? JSONEncoder().encode(conversation) {
             UserDefaults.standard.set(data, forKey: Self.currentConversationKey)
         }
-        let toSync = conversation
+    }
+
+    private func persistCurrentConversation() {
+        cacheConversationLocally()
+        syncConversationToSupabase(conversation)
+    }
+
+    /// At most one save in flight; a save requested while one is already
+    /// running is coalesced into a single follow-up with the latest
+    /// snapshot once the current one finishes, instead of firing a second,
+    /// unordered network request (2026-09-02 bug fix — see `isSyncingConversation`).
+    private func syncConversationToSupabase(_ snapshot: PlanConversation) {
+        guard !isSyncingConversation else {
+            pendingConversationSync = snapshot
+            return
+        }
+        isSyncingConversation = true
         Task {
-            // Silent for guests (NoSessionError) — this is a passive
-            // background sync, not a user-initiated save; only explicit
-            // actions (Save, Save as Trip) surface an error banner.
-            try? await conversationRepo.saveConversation(toSync)
+            // Silent for guests too now that the repository is the same
+            // regardless — CompositeConversationRepository already routes
+            // guests to local-only storage without throwing.
+            try? await conversationRepo.saveConversation(snapshot)
+            await MainActor.run {
+                isSyncingConversation = false
+                if let next = pendingConversationSync {
+                    pendingConversationSync = nil
+                    syncConversationToSupabase(next)
+                }
+            }
         }
     }
 
     private func loadPastConversations() async {
-        guard AuthService.shared.restoreSession() != nil else { return }
         pastConversations = (try? await conversationRepo.getConversations()) ?? []
     }
 

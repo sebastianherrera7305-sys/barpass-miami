@@ -60,6 +60,7 @@ struct MainTabView: View {
                 case 3:
                     PlanView()
                         .environmentObject(venueStore)
+                        .environmentObject(appState)
                 default:
                     ProfileView()
                         .environmentObject(appState)
@@ -219,6 +220,7 @@ struct MainTabView: View {
             appState.consumeRoute()
         case .planPrompt:
             selectedTab = 3
+            appState.focusPlanComposerRequested = true
             appState.consumeRoute()
         }
     }

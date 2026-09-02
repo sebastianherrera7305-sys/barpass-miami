@@ -76,6 +76,8 @@
 		AMPS02000000000000RP01 /* AppleMusicPlaybackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AMPS01000000000000RP01 /* AppleMusicPlaybackService.swift */; };
 		AMSC02000000000000RP01 /* AppleMusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AMSC01000000000000RP01 /* AppleMusicSource.swift */; };
 		AN0000010000000000000001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AN0000020000000000000001 /* AnalyticsService.swift */; };
+		PUS0001000000000000RP01 /* PlanUsageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PUS0002000000000000RP01 /* PlanUsageService.swift */; };
+		PES0001000000000000RP01 /* PlanEntitlementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PES0002000000000000RP01 /* PlanEntitlementService.swift */; };
 		AUTP02000000000000RP01 /* AutoplayPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTP01000000000000RP01 /* AutoplayPreference.swift */; };
 		B9A71D8F490D7C4F6A542FE3 /* AffiliationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D676FAF3C8541AE12E83DCCC /* AffiliationPickerView.swift */; };
 		BB000001000000000000000E /* barpass-logo.svg in Resources */ = {isa = PBXBuildFile; fileRef = BB000002000000000000000E /* barpass-logo.svg */; };
@@ -107,6 +109,7 @@
 		EXEN04000000000000RP01 /* ExperienceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXEN03000000000000RP01 /* ExperienceEngine.swift */; };
 		EXSC04000000000000RP01 /* ExperienceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXSC03000000000000RP01 /* ExperienceScorer.swift */; };
 		PEEN04000000000000RP01 /* PlanEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEEN03000000000000RP01 /* PlanEngine.swift */; };
+		PIRE04000000000000RP01 /* PlanIntentResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = PIRE03000000000000RP01 /* PlanIntentResolver.swift */; };
 		F1BA46464607754B4A2D0728 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF352B37244C7C0F8C8D874 /* Foundation.framework */; };
 		FAVS02000000000000RP01 /* FavoritesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAVS01000000000000RP01 /* FavoritesStore.swift */; };
 		FB27B50A40070142DA45268A /* GoHomeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBB1D2978A1CEFD5727A510 /* GoHomeButton.swift */; };
@@ -276,6 +279,8 @@
 		AMPS01000000000000RP01 /* AppleMusicPlaybackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleMusicPlaybackService.swift; path = BarPass/Core/Music/AppleMusicPlaybackService.swift; sourceTree = SOURCE_ROOT; };
 		AMSC01000000000000RP01 /* AppleMusicSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleMusicSource.swift; path = BarPass/Core/Music/AppleMusicSource.swift; sourceTree = SOURCE_ROOT; };
 		AN0000020000000000000001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalyticsService.swift; path = BarPass/Core/Services/AnalyticsService.swift; sourceTree = SOURCE_ROOT; };
+		PUS0002000000000000RP01 /* PlanUsageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlanUsageService.swift; path = BarPass/Core/Services/PlanUsageService.swift; sourceTree = SOURCE_ROOT; };
+		PES0002000000000000RP01 /* PlanEntitlementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlanEntitlementService.swift; path = BarPass/Core/Services/PlanEntitlementService.swift; sourceTree = SOURCE_ROOT; };
 		AUTP01000000000000RP01 /* AutoplayPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AutoplayPreference.swift; path = BarPass/Core/Music/AutoplayPreference.swift; sourceTree = SOURCE_ROOT; };
 		B255F26D4A13547562CDF99B /* HelpTargetAnchor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpTargetAnchor.swift; path = BarPass/Core/Help/HelpTargetAnchor.swift; sourceTree = SOURCE_ROOT; };
 		B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityIdentity.swift; path = BarPass/Resources/UniversityIdentity.swift; sourceTree = SOURCE_ROOT; };
@@ -308,6 +313,7 @@
 		EXEN03000000000000RP01 /* ExperienceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceEngine.swift; path = BarPass/Models/ExperienceEngine.swift; sourceTree = SOURCE_ROOT; };
 		EXSC03000000000000RP01 /* ExperienceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceScorer.swift; path = BarPass/Core/Intelligence/ExperienceScorer.swift; sourceTree = SOURCE_ROOT; };
 		PEEN03000000000000RP01 /* PlanEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlanEngine.swift; path = BarPass/Core/Intelligence/PlanEngine.swift; sourceTree = SOURCE_ROOT; };
+		PIRE03000000000000RP01 /* PlanIntentResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlanIntentResolver.swift; path = BarPass/Core/Intelligence/PlanIntentResolver.swift; sourceTree = SOURCE_ROOT; };
 		F35C2CF95EBF470399C6196E /* SelectedCityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SelectedCityStore.swift; path = BarPass/Core/Services/SelectedCityStore.swift; sourceTree = SOURCE_ROOT; };
 		F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileAffiliationRepository.swift; path = BarPass/Repositories/ProfileAffiliationRepository.swift; sourceTree = SOURCE_ROOT; };
 		F863CE708ACF44B3A96D654A /* UniversityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityListView.swift; path = BarPass/Features/CollegeLife/UniversityListView.swift; sourceTree = SOURCE_ROOT; };
@@ -506,6 +512,8 @@
 				FF000001000000000000AB02 /* APIClient.swift */,
 				FF000001000000000000AA20 /* AuthService.swift */,
 				AN0000020000000000000001 /* AnalyticsService.swift */,
+				PUS0002000000000000RP01 /* PlanUsageService.swift */,
+				PES0002000000000000RP01 /* PlanEntitlementService.swift */,
 				4534C465198E6FF9A92B4C7D /* DeepLinkRouter.swift */,
 				FDE1AEB039250C8DA5E41CE1 /* ReferralService.swift */,
 			);
@@ -623,6 +631,7 @@
 				VTS003000000000000RP01 /* VenueTimeStatus.swift */,
 				EXSC03000000000000RP01 /* ExperienceScorer.swift */,
 				PEEN03000000000000RP01 /* PlanEngine.swift */,
+				PIRE03000000000000RP01 /* PlanIntentResolver.swift */,
 				VEVW03000000000000RP01 /* VerifyEmailView.swift */,
 				HYWC01000000000000RP01 /* HypeWeekCard.swift */,
 				54C778D8EC6D60879605EA40 /* CheckInButton.swift */,
@@ -1025,6 +1034,8 @@
 				AA000001000000000000000D /* CacheManager.swift in Sources */,
 				FF000002000000000000AA20 /* AuthService.swift in Sources */,
 				AN0000010000000000000001 /* AnalyticsService.swift in Sources */,
+				PUS0001000000000000RP01 /* PlanUsageService.swift in Sources */,
+				PES0001000000000000RP01 /* PlanEntitlementService.swift in Sources */,
 				TR000002000000000000AA01 /* Trip.swift in Sources */,
 				TR000002000000000000AA02 /* TripsListView.swift in Sources */,
 				TR000002000000000000AA03 /* TripCreateFlow.swift in Sources */,
@@ -1045,6 +1056,7 @@
 				RE0000020000000000000005 /* ConversationRepository.swift in Sources */,
 				RE0000020000000000000006 /* SupabaseConversationRepository.swift in Sources */,
 				PEEN04000000000000RP01 /* PlanEngine.swift in Sources */,
+				PIRE04000000000000RP01 /* PlanIntentResolver.swift in Sources */,
 				FF000002000000000000AA30 /* PlanUpgradeSheet.swift in Sources */,
 				TS0000020000000000000001 /* TripStore.swift in Sources */,
 				345EF762F181F05CFC873285 /* DeleteAccountView.swift in Sources */,

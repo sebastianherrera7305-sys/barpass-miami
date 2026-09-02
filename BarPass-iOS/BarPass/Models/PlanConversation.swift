@@ -17,10 +17,21 @@ struct PlanMessage: Identifiable, Codable, Hashable {
         case assistant
     }
 
+    /// Which engine produced `plan` — `nil` when there's no plan on this
+    /// message. Gates the scenePhase "refresh real-time badges" pass in
+    /// `PlanView` (2026-09-02 bug fix): that pass must only ever re-run the
+    /// *local* engine, never silently replace an AI-concierge plan with a
+    /// different, locally-scored one.
+    enum PlanSource: String, Codable {
+        case ai
+        case local
+    }
+
     var id: String = UUID().uuidString
     var role: Role
     var text: String
     var plan: NightPlan? = nil
+    var planSource: PlanSource? = nil
     var quickActions: [String] = []
     var createdAt: Date = .now
 }
@@ -29,12 +40,32 @@ struct PlanConversation: Identifiable, Codable, Hashable {
     var id: String = UUID().uuidString
     var title: String = ""
     var messages: [PlanMessage] = []
-    /// The plan currently being iterated on — refinement quick actions act
-    /// on this. Distinct from any older plan earlier in `messages`: only
-    /// the latest one is "live".
-    var currentPlan: NightPlan? = nil
+    /// The vibe/company/inclusive-pref/free-text context that produced the
+    /// most recent plan — persisted with the conversation (instead of
+    /// living in `PlanView`'s own `@State`, 2026-09-02 bug fix) so it
+    /// survives switching conversations from History, app restart, and the
+    /// Supabase round-trip instead of silently going stale or leaking from
+    /// a previously-viewed conversation.
+    var lastContext: TripContext = TripContext()
     var createdAt: Date = .now
     var updatedAt: Date = .now
+
+    /// The plan currently "live" in this conversation — derived from the
+    /// most recent message that carries one. Deliberately NOT a stored
+    /// property (2026-09-02 bug fix): it used to be, and had to be written
+    /// by hand in two places on every update (`PlanView.sendMessage` and
+    /// the scenePhase refresh), which could — and did — drift out of sync
+    /// with what the transcript actually shows. Deriving it makes that
+    /// class of bug structurally impossible.
+    var currentPlan: NightPlan? {
+        messages.last(where: { $0.plan != nil })?.plan
+    }
+
+    /// True only when the live plan came from the local fallback engine —
+    /// see `PlanMessage.PlanSource`.
+    var currentPlanIsLocalFallback: Bool {
+        messages.last(where: { $0.plan != nil })?.planSource == .local
+    }
 
     /// A short label for conversation-history lists — the first thing the
     /// user actually said, falling back to the plan's own title once one

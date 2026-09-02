@@ -403,8 +403,50 @@ Contrato de respuesta único (`message, cards≈plan.stops, quickActions, plan`)
 ### Persistencia (`Repositories/ConversationRepository.swift`, `SupabaseConversationRepository.swift`)
 Mismo patrón que `PlanRepository`/`SupabasePlanRepository`: `LocalConversationRepository` (disco, fallback de invitados) + `SupabaseConversationRepository` (real, requiere sesión, RLS por `auth.uid()`). `RepositoryDependencies.conversation` ya apunta al Supabase real. Cada turno se auto-guarda local siempre, y a Supabase en silencio si hay sesión (sin banner de error para invitados — eso solo se muestra en acciones explícitas como "Save"/"Save as Trip").
 
-### ⚠️ Pendiente manual — igual que `night_plans`/`trips` en su momento
-La tabla `plan_conversations` está en `barpass-v2/supabase/schema.sql` pero **no se ejecutó contra el proyecto real de Supabase** — el MCP de Supabase conectado en esta sesión apunta a otro proyecto ("ByPark"), no al de BarPass, así que no había forma de aplicarla en vivo. Hay que correr ese bloque de `schema.sql` en el SQL editor de Supabase antes de que la persistencia de conversaciones funcione para usuarios reales (mientras tanto, `SupabaseConversationRepository` simplemente falla y el guardado local sigue funcionando).
+### ✅ Migración aplicada (2026-09-02, actualizado)
+`plan_conversations` (y luego `plan_usage`/`app_config`, ver Fase 3 abajo) ya están **aplicadas en el Supabase real** (`hrhdezziddfrktvtgzbg`, "sebastianherrera7305-sys's Project") — el MCP de Supabase se reconectó apuntando al proyecto correcto y se corrió `apply_migration` directo. `get_advisors` no marcó ninguna alerta nueva por estas tablas.
+
+### Bug fixes de la revisión de código (2026-09-02)
+Un review de 8 ángulos (`/code-review high`) sobre el PR encontró 10 bugs/falencias reales, los 10 corregidos el mismo día (detalle completo en el historial de `ReportFindings` de la sesión, resumen aquí):
+1. **Fuga entre conversaciones** — una respuesta en curso podía aparecer en otra conversación si el usuario cambiaba de chat antes de que llegara. Fix: se captura el id de la conversación al enviar y se descarta la respuesta si ya no coincide.
+2. **El refresco al volver del background pisaba planes de IA con planes locales** — `PlanMessage.planSource` (`.ai`/`.local`) ahora gatea ese refresco para que solo corra sobre planes locales.
+3. **Filtro de presupuesto perdido por completo** — restaurado como chips ($25/$50/$100/$150+, `PlanBudgetOption`) + parámetro `budget` real hacia el concierge.
+4. **3 correcciones de ranking perdidas** (fama de venues conocidas, filtro duro por tipo de vibe, género musical detectado en texto libre) — restauradas en `NightPlan.local`.
+5. **`updated_at` nunca se escribía** en `plan_conversations` — el Historial ordenaba mal.
+6. **`getPlans()`/`getConversations()` rompían toda la lista** por una sola fila con schema viejo — ahora decodifican fila por fila.
+7. **Los quick actions "Más económico"/"Más exclusivo" no cambiaban nada** — ahora tienen `priceRange`/`budgetHint` reales.
+8. **Guardados a Supabase sin orden** (race condition) — ahora serializados, con coalescing del último snapshot pendiente.
+9. **El deep link del widget ya no enfocaba el composer** — restaurado vía `AppState.focusPlanComposerRequested`.
+10. **Reupload completo de la conversación en cada turno** (O(n²)) — el refresco de badges por `scenePhase` ahora solo cachea local (sin red); solo un save real de Supabase por turno, serializado.
+
+De paso (no eran de los 10, pero se encontraron en la misma revisión): `RepositoryDependencies.plan`/`.conversation` decían en el comentario que los invitados caían a un repositorio local, pero apuntaban siempre a Supabase — invitados no tenían persistencia real. Se agregaron `CompositePlanRepository`/`CompositeConversationRepository` (Supabase si hay sesión, disco si no) para que el comentario sea cierto.
+
+---
+
+## Plan — Fases 2, 3 y 4 (2026-09-02)
+
+Implementadas completas el mismo día que los bug fixes de arriba, sobre `08_DEVELOPER_TASKS.md`.
+
+### Fase 2 — Free Experience
+- **Intent resolver** (`Core/Intelligence/PlanIntentResolver.swift`) — clasifica un mensaje de texto libre en `.greeting` / `.capability` / `.planRequest` antes de generar. Deliberadamente angosto: solo intercepta saludos/preguntas de capacidad CLARAS ("hola", "qué puedes hacer") con una respuesta enlatada; cualquier otra cosa, aunque sea vaga, sigue intentando un plan — 02_UX_ARCHITECTURE.md advierte explícitamente contra convertir Free en un cuestionario. Se salta por completo cuando el turno viene con una señal estructurada (chip de contexto o quick action de refinamiento), ya que esas son pedidos de plan inequívocos sin importar su texto.
+- **Bloques de respuesta modulares** — `plan.block.greeting`/`plan.block.capability` (l10n, 3 idiomas), assemblados en `PlanEngine.respond` según el intent. Comparten la misma lista de sugerencias que el mensaje de bienvenida (`quickSuggestions()`), así que un "hola" no deja al usuario en un callejón sin salida.
+- Los bloques "missing location/budget/group size" del doc (04_FREE_PLAN_SPEC.md) se dejaron fuera a propósito: los chips del context picker (vibe/compañía/presupuesto/prefs) ya resuelven ese hueco en el primer turno sin necesitar una pregunta bloqueante — agregarla habría ido contra la advertencia explícita del doc de no convertir Free en un cuestionario.
+
+### Fase 3 — Usage
+- **Cuota configurable desde el backend** — tabla nueva `public.app_config` (key/value, legible por cualquiera incluso invitados), seed `plan_free_daily_limit = 10`. Cambiar ese valor en Supabase cambia el límite sin build nuevo — exactamente lo que pedía 04_FREE_PLAN_SPEC.md ("Do not hardcode the number into the UI").
+- **Tracking de uso server-side** — tabla `public.plan_usage` (una fila por usuario, RLS por `auth.uid()`) + RPCs atómicas `increment_plan_usage()`/`get_plan_usage()` (upsert con reset automático cuando cambia la fecha UTC, sin cron job). Invitados: contador local en UserDefaults, mismo reset diario (no hay identidad server-side confiable para un invitado).
+- **`Core/Services/PlanUsageService.swift`** — actor que expone `currentState(isSignedIn:)` → `.available`/`.nearLimit`/`.limitReached` y `recordUsage(isSignedIn:)`.
+- **Gate en `PlanView.sendMessage`** — antes de generar (y antes de gastar una llamada real al motor), si `.limitReached` y no-Premium, responde con el mensaje enlatado de límite + quick actions "Upgrade to Premium"/"Maybe later", sin llamar a `PlanEngine.respond`. Nunca corta la conversación de un tirón (02_UX_ARCHITECTURE.md). `.nearLimit` muestra un aviso sutil bajo el composer (`usageNotice`) — nunca "cuenta regresiva" permanente (06_UI_COMPONENTS.md).
+- **Analytics nuevos**: `.planLimitReached`, `.planUpgradeViewed` (`AnalyticsService.swift`).
+
+### Fase 4 — Premium (real, pero inerte sin configuración externa)
+- **`Core/Services/PlanEntitlementService.swift`** — StoreKit 2 real (`Product`, `Transaction`, `Transaction.updates`/`.currentEntitlements`), único lugar de la app que conoce el entitlement. **Hoy siempre reporta no-premium**: no existe ningún producto de suscripción configurado en App Store Connect para `com.sebastian.barpass` — eso es un paso de configuración externo (App Store Connect), no algo resoluble desde código. `productID` es un placeholder (`com.barpass.plan.premium.monthly`); en cuanto exista un producto real con ese identificador (o se actualice el constante para que coincida), esto arranca a funcionar solo, sin tocar más código.
+- **`PlanUpgradeSheet`** ya intenta `fetchProduct()` real — si algún día hay producto, muestra un botón "Suscribirme — $X/mes" real con `StoreKit.Product.purchase()`; mientras no haya producto, sigue mostrando "Coming soon" (nunca insinúa un cobro que no puede pasar).
+- El gate de uso de Fase 3 ya consulta `PlanEntitlementService.shared.isPremium()` — Premium (cuando exista) es automáticamente ilimitado, sin tocar `PlanUsageService`.
+- **Lo que sigue sin poder resolverse desde acá**: crear el producto de suscripción real en App Store Connect (precio, texto localizado, revisión de Apple) — es trabajo de Sebastián/quien tenga acceso a App Store Connect, no de código.
+
+### Fase 5 — Polish
+Mayormente ya cubierta por el trabajo de Fases 1-4: loading states (typing indicator, spinners), error states (fallback silencioso de IA, banners de error), accesibilidad (`bpAccessibility` consistente en cada control nuevo), animaciones (scroll-to-bottom, transiciones existentes reutilizadas), y el fix de eficiencia del bug #10 de arriba. Sin gaps grandes identificados aparte de los ya cubiertos.
 
 ### Copy del encabezado — reconciliado con origin/main (2026-09-02)
 Se intentó cambiar `plan.headerTitle` a "Crea tu noche" a pedido explícito ("concierge" sonaba raro en español), pero **origin/main ya tenía un cambio de Sebastián/Opus 5 en el mismo lugar** ("Give Remy's greeting some variety instead of the same line every time") que reemplazó el título/subtítulo fijo por **6 variantes rotativas por idioma** (`plan.headerTitle.0`–`.5`, `plan.headerSubtitle.0`–`.5`), elegidas una vez por sesión con `@State private var greetingIndex = Int.random(in: 0..<6)`. Se decidió **adaptar el chat a su rotación en vez de pisarla**: `plan.headerTitle`/`plan.headerSubtitle` (sin sufijo) quedaron con su texto original — ya no se usan en ningún lado, es el `.0` legacy — y `PlanView`'s header + `PlanEngine.welcomeMessage(greetingIndex:)` (primera burbuja del chat) ahora comparten el mismo `greetingIndex`, así que el título del header y el primer mensaje de Remy siempre son la misma variante, no dos saludos distintos.

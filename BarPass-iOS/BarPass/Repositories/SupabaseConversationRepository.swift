@@ -21,10 +21,18 @@ actor SupabaseConversationRepository: ConversationRepository {
         let userId: String
         let title: String
         let conversation: PlanConversation
+        /// Written explicitly on every save (2026-09-02 bug fix) — without
+        /// it, `resolution=merge-duplicates` never touches the table's own
+        /// `updated_at` column (only `conversation.updatedAt` inside the
+        /// jsonb blob changed), so it froze at first-insert time and
+        /// `getConversations`'s `order=updated_at.desc` silently sorted by
+        /// a stale timestamp.
+        let updatedAt: Date
 
         enum CodingKeys: String, CodingKey {
             case id, title, conversation
             case userId = "user_id"
+            case updatedAt = "updated_at"
         }
     }
 
@@ -51,24 +59,30 @@ actor SupabaseConversationRepository: ConversationRepository {
 
     // MARK: - ConversationRepository
 
+    /// Decodes row by row (same 2026-09-02 fix as `SupabasePlanRepository
+    /// .getPlans`) — one conversation with an unexpected shape shouldn't
+    /// take down the whole History list.
     func getConversations() async throws -> [PlanConversation] {
         let req = try request("GET", path: "plan_conversations?select=id,user_id,title,conversation&order=updated_at.desc")
         let data = try await SupabaseRESTClient.send(req)
-        let rows = try Self.decoder.decode([Row].self, from: data)
-        return rows.map(\.conversation)
+        guard let objects = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return [] }
+        return objects.compactMap { obj in
+            guard let objData = try? JSONSerialization.data(withJSONObject: obj) else { return nil }
+            return try? Self.decoder.decode(Row.self, from: objData).conversation
+        }
     }
 
     /// Upsert by id — same overwrite-or-insert semantics as
     /// `SupabasePlanRepository.savePlan`, called again after every turn so
     /// the whole conversation (including the new message) stays current.
     func saveConversation(_ conversation: PlanConversation) async throws {
-        let userId = try session().user.id
+        let s = try session()
         var conversation = conversation
         conversation.updatedAt = .now
-        let row = Row(id: conversation.id, userId: userId, title: conversation.displayTitle, conversation: conversation)
+        let row = Row(id: conversation.id, userId: s.user.id, title: conversation.displayTitle, conversation: conversation, updatedAt: conversation.updatedAt)
         let body = try Self.encoder.encode(row)
         let req = try SupabaseRESTClient.request(
-            "POST", path: "plan_conversations", body: body, accessToken: try session().accessToken,
+            "POST", path: "plan_conversations", body: body, accessToken: s.accessToken,
             extraHeaders: ["Prefer": "return=minimal,resolution=merge-duplicates"]
         )
         let (data, response) = try await URLSession.shared.data(for: req)
