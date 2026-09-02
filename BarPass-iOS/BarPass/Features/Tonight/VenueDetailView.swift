@@ -8,9 +8,8 @@ struct VenueDetailView: View {
     @EnvironmentObject private var appState: AppState
     @ObservedObject private var favorites = FavoritesStore.shared
     @ObservedObject private var points = PointsEngine.shared
-    @State private var checkinMessage: String?
-    @State private var checkingIn = false
     @State private var showReviewComposer = false
+    @State private var reviewMessage: String?
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -37,7 +36,7 @@ struct VenueDetailView: View {
                     try? await RepositoryDependencies.post.create(post)
                     await MainActor.run {
                         NotificationCenter.default.post(name: .bpPostsChanged, object: venue.id)
-                        checkinMessage = l10n.t("venueDetail.reviewPublished")
+                        withAnimation { reviewMessage = l10n.t("venueDetail.reviewPublished") }
                     }
                 }
             }
@@ -532,46 +531,37 @@ struct VenueDetailView: View {
         }
     }
 
-    // MARK: - XP actions (check-in por proximidad + review)
+    // MARK: - Review action
+    //
+    // Used to sit next to a second "check in" button that duplicated
+    // CheckInButton (near the top of this screen) with its own local-only
+    // XP system — never wired to Supabase, a looser 250m radius than the
+    // real one's 50m, and no shared state with it. TestFlight feedback
+    // ("el de abajo está durando demasiado tiempo") was almost certainly
+    // this dead button, not the real one. Removed; review stays, now full
+    // width instead of sharing the row.
 
     private var xpActions: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 10) {
-                Button(action: attemptCheckIn) {
-                    HStack(spacing: 6) {
-                        if checkingIn { ProgressView().tint(.black).scaleEffect(0.7) }
-                        else { Image(systemName: points.hasCheckedInToday(venueId: venue.id) ? "checkmark.seal.fill" : "mappin.and.ellipse").font(.bpScaled(13)) }
-                        Text(points.hasCheckedInToday(venueId: venue.id) ? l10n.t("venueDetail.checkinDone") : l10n.t("venueDetail.checkin"))
-                            .font(.bpScaled(13, weight: .bold))
-                    }
-                    .foregroundStyle(points.hasCheckedInToday(venueId: venue.id) ? Color.bpGreen : .black)
-                    .frame(maxWidth: .infinity).padding(.vertical, 12)
-                    .background(points.hasCheckedInToday(venueId: venue.id) ? Color.bpGreen.opacity(0.12) : Color.bpAmber, in: Capsule())
+            Button {
+                BPHaptics.light()
+                showReviewComposer = true
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: points.hasReviewed(venueId: venue.id) ? "star.fill" : "square.and.pencil").font(.bpScaled(13))
+                    Text(points.hasReviewed(venueId: venue.id) ? l10n.t("venueDetail.reviewDone") : l10n.t("venueDetail.leaveReview"))
+                        .font(.bpScaled(13, weight: .bold))
                 }
-                .buttonStyle(.plain)
-                .disabled(checkingIn || points.hasCheckedInToday(venueId: venue.id))
-                .bpAccessibility(label: l10n.t("venueDetail.checkin.label"), hint: l10n.t("venueDetail.checkin.hint"), isButton: true)
-
-                Button {
-                    BPHaptics.light()
-                    showReviewComposer = true
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: points.hasReviewed(venueId: venue.id) ? "star.fill" : "square.and.pencil").font(.bpScaled(13))
-                        Text(points.hasReviewed(venueId: venue.id) ? l10n.t("venueDetail.reviewDone") : l10n.t("venueDetail.leaveReview"))
-                            .font(.bpScaled(13, weight: .bold))
-                    }
-                    .foregroundStyle(points.hasReviewed(venueId: venue.id) ? Color.bpGreen : Color.bpAmber)
-                    .frame(maxWidth: .infinity).padding(.vertical, 12)
-                    .background(Color.bpAmber.opacity(points.hasReviewed(venueId: venue.id) ? 0.06 : 0.12), in: Capsule())
-                    .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.35)))
-                }
-                .buttonStyle(.plain)
-                .disabled(points.hasReviewed(venueId: venue.id))
-                .bpAccessibility(label: l10n.t("venueDetail.leaveReview.label"), hint: l10n.t("venueDetail.leaveReview.hint"), isButton: true)
+                .foregroundStyle(points.hasReviewed(venueId: venue.id) ? Color.bpGreen : Color.bpAmber)
+                .frame(maxWidth: .infinity).padding(.vertical, 12)
+                .background(Color.bpAmber.opacity(points.hasReviewed(venueId: venue.id) ? 0.06 : 0.12), in: Capsule())
+                .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.35)))
             }
+            .buttonStyle(.plain)
+            .disabled(points.hasReviewed(venueId: venue.id))
+            .bpAccessibility(label: l10n.t("venueDetail.leaveReview.label"), hint: l10n.t("venueDetail.leaveReview.hint"), isButton: true)
 
-            if let msg = checkinMessage {
+            if let msg = reviewMessage {
                 Text(msg)
                     .font(.bpScaled(12, weight: .semibold))
                     .foregroundStyle(Color.bpAmber)
@@ -579,32 +569,6 @@ struct VenueDetailView: View {
             }
         }
         .padding(.top, 6)
-    }
-
-    private func attemptCheckIn() {
-        checkingIn = true
-        checkinMessage = nil
-        Task {
-            let service = LocationService()
-            let coord = await service.requestOnce()
-            await MainActor.run {
-                checkingIn = false
-                guard let coord else {
-                    checkinMessage = l10n.t("venueDetail.enableLocation")
-                    return
-                }
-                let here = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
-                let there = CLLocation(latitude: venue.latitude, longitude: venue.longitude)
-                let meters = here.distance(from: there)
-                if meters <= 250 {
-                    if points.checkIn(venueId: venue.id) != nil {
-                        withAnimation { checkinMessage = String(format: l10n.t("venueDetail.checkinSuccess"), venue.name) }
-                    }
-                } else {
-                    withAnimation { checkinMessage = String(format: l10n.t("venueDetail.tooFar"), Int(meters)) }
-                }
-            }
-        }
     }
 
     // MARK: - AI Insight

@@ -14,9 +14,14 @@ final class CheckInStore: ObservableObject {
     @Published private(set) var activeCheckin: ActiveCheckin?
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
+    /// Set only when location is permanently denied — CheckInButton reads
+    /// this to show a "Abrir Ajustes" affordance instead of implying a
+    /// retry would help, which it won't (see LocationService's
+    /// isPermissionPermanentlyDenied).
+    @Published private(set) var needsSettings = false
 
     private let repository: any VenueCheckinRepository
-    private let locationService = LocationService()
+    let locationService = LocationService()
 
     /// A real GPS check at the moment of tap — not "Always" background
     /// location, so it doesn't carry the App Store review scrutiny a
@@ -24,6 +29,13 @@ final class CheckInStore: ObservableObject {
     /// this, anyone could check in from anywhere, which defeats the whole
     /// point of the Grid (real presence, not self-reported).
     static let maxCheckInDistanceMeters: Double = 50
+
+    /// How much of the GPS's own reported uncertainty we forgive before
+    /// comparing to maxCheckInDistanceMeters. Capped — an accuracy reading
+    /// of 500m (can happen right after cold-starting the radio) must not
+    /// let someone check in from across town, so this stays well inside
+    /// what's plausible for someone genuinely standing at the venue.
+    static let maxAccuracyForgivenessMeters: Double = 100
 
     init(repository: any VenueCheckinRepository = RepositoryDependencies.venueCheckin) {
         self.repository = repository
@@ -40,9 +52,13 @@ final class CheckInStore: ObservableObject {
     func checkIn(venueId: String, tripId: String?, venueLat: Double, venueLng: Double) async {
         isLoading = true
         errorMessage = nil
+        needsSettings = false
 
         guard let userLocation = await locationService.requestOnce() else {
-            errorMessage = L10n.shared.t("checkin.error.locationRequired")
+            needsSettings = locationService.isPermissionPermanentlyDenied
+            errorMessage = needsSettings
+                ? L10n.shared.t("checkin.error.locationDenied")
+                : L10n.shared.t("checkin.error.locationRequired")
             BPHaptics.error()
             isLoading = false
             return
@@ -50,8 +66,16 @@ final class CheckInStore: ObservableObject {
         let venueLocation = CLLocation(latitude: venueLat, longitude: venueLng)
         let distance = CLLocation(latitude: userLocation.latitude, longitude: userLocation.longitude)
             .distance(from: venueLocation)
-        guard distance <= Self.maxCheckInDistanceMeters else {
-            errorMessage = L10n.shared.t("checkin.error.tooFar")
+        // Forgive up to the GPS's own reported uncertainty (capped) before
+        // judging distance — see maxAccuracyForgivenessMeters. Without this,
+        // "estoy literalmente al lado del club" failed because an indoor/
+        // urban-canyon fix can be 60-150m off even when resolved, and a raw
+        // distance check has no way to tell that apart from actually being
+        // 150m away.
+        let accuracyForgiveness = min(locationService.lastHorizontalAccuracy ?? 0, Self.maxAccuracyForgivenessMeters)
+        let effectiveDistance = max(0, distance - accuracyForgiveness)
+        guard effectiveDistance <= Self.maxCheckInDistanceMeters else {
+            errorMessage = String(format: L10n.shared.t("checkin.error.tooFar"), Int(effectiveDistance))
             BPHaptics.error()
             isLoading = false
             return
@@ -154,6 +178,20 @@ struct CheckInButton: View {
                     .font(.bpScaled(11))
                     .foregroundStyle(Color.bpDanger)
                     .multilineTextAlignment(.center)
+
+                if store.needsSettings {
+                    Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Text(l10n.t("checkin.openSettings"))
+                            .font(.bpScaled(11, weight: .semibold))
+                            .foregroundStyle(Color.bpAmber)
+                            .underline()
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
         .task { await store.load() }
