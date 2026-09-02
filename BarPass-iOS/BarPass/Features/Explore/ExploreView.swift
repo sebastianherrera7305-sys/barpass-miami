@@ -628,10 +628,27 @@ struct VenueListRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            Text(venue.emoji)
-                .font(.bpScaled(28))
-                .frame(width: 52, height: 52)
-                .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: BPRadius.md))
+            // Was `Text(venue.emoji)` unconditionally — every row in this
+            // list showed the same generic glyph for its type ("Bar" = the
+            // same wineglass everywhere), never the venue's real photo, even
+            // though 99% of the catalogue has one now. TestFlight feedback:
+            // "cada parte de la interfaz no tiene ni siquiera una foto o
+            // algún indicador de qué es". Same real-photo-with-fallback
+            // pattern TonightView already uses.
+            Group {
+                if let first = venue.photoUrls.first, let url = URL(string: first) {
+                    CachedImage(url: url, targetSize: CGSize(width: 104, height: 104), priority: .standard) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Color.bpInk.opacity(0.06)
+                    }
+                } else {
+                    Color.bpInk.opacity(0.06)
+                        .overlay(Text(venue.emoji).font(.bpScaled(28)))
+                }
+            }
+            .frame(width: 52, height: 52)
+            .clipShape(RoundedRectangle(cornerRadius: BPRadius.md))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(venue.name)
