@@ -31,14 +31,12 @@ struct MainTabView: View {
     /// so there's no visible jump on first frame.
     @State private var bottomChromeHeight: CGFloat = 72
 
-    /// nil for tabs with no registered Help content yet (Plan) — the button
-    /// simply doesn't render rather than opening an overlay with nothing to
-    /// explain.
     private var currentHelpRoute: HelpRoute? {
         switch selectedTab {
         case 0: return .tonight
         case 1: return .explore
         case 2: return .trips
+        case 3: return .plan
         case 4: return .profile
         default: return nil
         }

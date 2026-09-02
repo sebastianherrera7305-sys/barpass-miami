@@ -115,6 +115,7 @@ struct ExploreView: View {
                     }
                     .buttonStyle(.plain)
                     .bpAccessibility(label: showList ? l10n.t("explore.toggleMap") : l10n.t("explore.toggleList"), hint: l10n.t("explore.toggleView.hint"), isButton: true)
+                    .helpTarget("explore.toggleView")
                 }
                 .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 60)

@@ -161,6 +161,7 @@ struct PlanView: View {
                             .opacity(prompt.trimmingCharacters(in: .whitespaces).isEmpty ? 0.55 : 1)
                         }
                         .padding(.horizontal, 20)
+                        .helpTarget("plan.prompt")
                         }
                     }
                     .background(
@@ -199,6 +200,7 @@ struct PlanView: View {
                             }
                             .padding(.horizontal, 20)
                         }
+                        .helpTarget("plan.quickIdeas")
                     }
                     }
 

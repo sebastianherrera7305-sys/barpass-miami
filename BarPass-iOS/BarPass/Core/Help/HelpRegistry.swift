@@ -8,6 +8,7 @@ enum HelpRoute: String, CaseIterable {
     case explore
     case venueDetail
     case trips
+    case plan
     case profile
 }
 
@@ -93,6 +94,60 @@ enum HelpRegistry {
             route: .profile,
             titleKey: "help.profile.wallet.title",
             descriptionKey: "help.profile.wallet.desc"
+        ),
+
+        // Broader pass, 2026-09-02: "toca el botón de ayuda pero no ayuda ni
+        // guía al usuario" — two tips per screen wasn't enough to actually
+        // teach someone how to use the app. Every screen's real, non-obvious
+        // controls get a tip now, not just the one or two that happened to
+        // ship first.
+        HelpTip(
+            id: "tonight.vibeTags",
+            route: .tonight,
+            titleKey: "help.tonight.vibeTags.title",
+            descriptionKey: "help.tonight.vibeTags.desc"
+        ),
+        HelpTip(
+            id: "tonight.universities",
+            route: .tonight,
+            titleKey: "help.tonight.universities.title",
+            descriptionKey: "help.tonight.universities.desc"
+        ),
+        HelpTip(
+            id: "explore.toggleView",
+            route: .explore,
+            titleKey: "help.explore.toggleView.title",
+            descriptionKey: "help.explore.toggleView.desc"
+        ),
+        HelpTip(
+            id: "venueDetail.checkIn",
+            route: .venueDetail,
+            titleKey: "help.venueDetail.checkIn.title",
+            descriptionKey: "help.venueDetail.checkIn.desc"
+        ),
+        HelpTip(
+            id: "venueDetail.directions",
+            route: .venueDetail,
+            titleKey: "help.venueDetail.directions.title",
+            descriptionKey: "help.venueDetail.directions.desc"
+        ),
+        HelpTip(
+            id: "trips.joinByCode",
+            route: .trips,
+            titleKey: "help.trips.joinByCode.title",
+            descriptionKey: "help.trips.joinByCode.desc"
+        ),
+        HelpTip(
+            id: "plan.prompt",
+            route: .plan,
+            titleKey: "help.plan.prompt.title",
+            descriptionKey: "help.plan.prompt.desc"
+        ),
+        HelpTip(
+            id: "plan.quickIdeas",
+            route: .plan,
+            titleKey: "help.plan.quickIdeas.title",
+            descriptionKey: "help.plan.quickIdeas.desc"
         ),
     ]
 

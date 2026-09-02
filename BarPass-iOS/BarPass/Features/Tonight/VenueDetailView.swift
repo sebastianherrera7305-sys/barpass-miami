@@ -176,6 +176,7 @@ struct VenueDetailView: View {
 
             CheckInButton(venueId: venue.id, venueName: venue.name, venueLat: venue.latitude, venueLng: venue.longitude)
                 .padding(.horizontal, BPSpacing.lg)
+                .helpTarget("venueDetail.checkIn")
 
             if !goodToKnowChips.isEmpty {
                 goodToKnowSection
@@ -658,6 +659,7 @@ struct VenueDetailView: View {
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("venueDetail.directions"), hint: l10n.t("venueDetail.directions.hint"), isButton: true)
+            .helpTarget("venueDetail.directions")
         }
         .padding(.horizontal, BPSpacing.lg)
         .padding(.vertical, 10)

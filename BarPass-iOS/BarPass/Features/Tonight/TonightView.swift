@@ -432,6 +432,7 @@ struct TonightView: View {
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
         .bpAccessibility(label: l10n.t("greek.universityList.title"), hint: l10n.t("greek.universityList.hint"), isButton: true)
+        .helpTarget("tonight.universities")
     }
 
     private var stadiumsEntryCard: some View {
@@ -493,6 +494,7 @@ struct TonightView: View {
             }
             .padding(.horizontal, BPSpacing.lg)
         }
+        .helpTarget("tonight.vibeTags")
     }
 
     // MARK: - Events tonight (flyer rail)

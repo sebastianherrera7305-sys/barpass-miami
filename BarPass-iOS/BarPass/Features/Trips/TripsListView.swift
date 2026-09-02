@@ -188,6 +188,7 @@ struct TripsListView: View {
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("trips.joinByCode.cta"), hint: l10n.t("trips.joinByCode.cta.hint"), isButton: true)
+            .helpTarget("trips.joinByCode")
 
             Spacer()
             Spacer()
@@ -249,6 +250,7 @@ struct TripsListView: View {
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("trips.joinByCode.cta"), hint: l10n.t("trips.joinByCode.cta.hint"), isButton: true)
+            .helpTarget("trips.joinByCode")
 
             Button {
                 BPHaptics.light()
