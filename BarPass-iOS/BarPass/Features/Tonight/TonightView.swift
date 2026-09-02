@@ -458,6 +458,7 @@ struct TonightView: View {
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
         .bpAccessibility(label: l10n.t("stadiums.entry.title"), hint: l10n.t("stadiums.entry.hint"), isButton: true)
+        .helpTarget("tonight.stadiums")
     }
 
     // MARK: - Vibe tags

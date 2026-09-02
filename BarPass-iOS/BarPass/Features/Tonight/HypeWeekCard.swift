@@ -20,6 +20,7 @@ struct HypeWeekCard: View {
             case .error:             infoCard(icon: "wifi.slash", text: l10n.t("hype.error"))
             }
         }
+        .helpTarget("tonight.hype")
     }
 
     // MARK: - Bienvenida (primera vez)

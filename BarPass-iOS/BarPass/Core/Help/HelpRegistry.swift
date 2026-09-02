@@ -149,6 +149,96 @@ enum HelpRegistry {
             titleKey: "help.plan.quickIdeas.title",
             descriptionKey: "help.plan.quickIdeas.desc"
         ),
+
+        // Full sweep, same date: the two passes above still left real
+        // controls unexplained on every screen. This is every remaining
+        // interactive element worth a first-timer's attention — nothing
+        // decorative, nothing that already says exactly what it does in
+        // its own label (flag/swatch pickers, sign in/out).
+        HelpTip(
+            id: "tonight.promptSearch",
+            route: .tonight,
+            titleKey: "help.tonight.promptSearch.title",
+            descriptionKey: "help.tonight.promptSearch.desc"
+        ),
+        HelpTip(
+            id: "tonight.hype",
+            route: .tonight,
+            titleKey: "help.tonight.hype.title",
+            descriptionKey: "help.tonight.hype.desc"
+        ),
+        HelpTip(
+            id: "tonight.stadiums",
+            route: .tonight,
+            titleKey: "help.tonight.stadiums.title",
+            descriptionKey: "help.tonight.stadiums.desc"
+        ),
+        HelpTip(
+            id: "explore.centerMap",
+            route: .explore,
+            titleKey: "help.explore.centerMap.title",
+            descriptionKey: "help.explore.centerMap.desc"
+        ),
+        HelpTip(
+            id: "venueDetail.review",
+            route: .venueDetail,
+            titleKey: "help.venueDetail.review.title",
+            descriptionKey: "help.venueDetail.review.desc"
+        ),
+        HelpTip(
+            id: "venueDetail.links",
+            route: .venueDetail,
+            titleKey: "help.venueDetail.links.title",
+            descriptionKey: "help.venueDetail.links.desc"
+        ),
+        HelpTip(
+            id: "trips.card",
+            route: .trips,
+            titleKey: "help.trips.card.title",
+            descriptionKey: "help.trips.card.desc"
+        ),
+        HelpTip(
+            id: "plan.saveShare",
+            route: .plan,
+            titleKey: "help.plan.saveShare.title",
+            descriptionKey: "help.plan.saveShare.desc"
+        ),
+        HelpTip(
+            id: "profile.passes",
+            route: .profile,
+            titleKey: "help.profile.passes.title",
+            descriptionKey: "help.profile.passes.desc"
+        ),
+        HelpTip(
+            id: "profile.homeAddress",
+            route: .profile,
+            titleKey: "help.profile.homeAddress.title",
+            descriptionKey: "help.profile.homeAddress.desc"
+        ),
+        HelpTip(
+            id: "profile.games",
+            route: .profile,
+            titleKey: "help.profile.games.title",
+            descriptionKey: "help.profile.games.desc"
+        ),
+        HelpTip(
+            id: "profile.autoplay",
+            route: .profile,
+            titleKey: "help.profile.autoplay.title",
+            descriptionKey: "help.profile.autoplay.desc"
+        ),
+        HelpTip(
+            id: "profile.city",
+            route: .profile,
+            titleKey: "help.profile.city.title",
+            descriptionKey: "help.profile.city.desc"
+        ),
+        HelpTip(
+            id: "profile.affiliation",
+            route: .profile,
+            titleKey: "help.profile.affiliation.title",
+            descriptionKey: "help.profile.affiliation.desc"
+        ),
     ]
 
     static func tips(for route: HelpRoute) -> [HelpTip] {

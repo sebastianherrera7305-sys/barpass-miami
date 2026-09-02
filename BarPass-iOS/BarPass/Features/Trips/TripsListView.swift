@@ -203,9 +203,15 @@ struct TripsListView: View {
                     .padding(.horizontal, BPSpacing.lg)
                     .padding(.top, 60)
 
-                ForEach(tripStore.myTrips) { trip in
-                    tripCard(trip)
-                        .padding(.horizontal, BPSpacing.lg)
+                ForEach(Array(tripStore.myTrips.enumerated()), id: \.element.id) { index, trip in
+                    if index == 0 {
+                        tripCard(trip)
+                            .padding(.horizontal, BPSpacing.lg)
+                            .helpTarget("trips.card")
+                    } else {
+                        tripCard(trip)
+                            .padding(.horizontal, BPSpacing.lg)
+                    }
                 }
 
                 if !tripStore.discoverableTrips.isEmpty {

@@ -561,6 +561,7 @@ struct VenueDetailView: View {
             .buttonStyle(.plain)
             .disabled(points.hasReviewed(venueId: venue.id))
             .bpAccessibility(label: l10n.t("venueDetail.leaveReview.label"), hint: l10n.t("venueDetail.leaveReview.hint"), isButton: true)
+            .helpTarget("venueDetail.review")
 
             if let msg = reviewMessage {
                 Text(msg)
@@ -601,6 +602,7 @@ struct VenueDetailView: View {
                     linkButton(icon: "safari.fill", label: l10n.t("venueDetail.website")) { openWebsite() }
                 }
             }
+            .helpTarget("venueDetail.links")
         }
     }
 

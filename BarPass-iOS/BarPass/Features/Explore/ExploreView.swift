@@ -159,6 +159,7 @@ struct ExploreView: View {
                     }
                     .buttonStyle(.plain)
                     .bpAccessibility(label: l10n.t("explore.centerMap"), hint: l10n.t("explore.centerMap.hint"), isButton: true)
+                    .helpTarget("explore.centerMap")
                 }
                 .padding(.horizontal, BPSpacing.lg)
                 .padding(.top, 8)

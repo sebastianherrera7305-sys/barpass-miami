@@ -161,6 +161,7 @@ struct PromptYourNightHomeSection: View {
         .padding(16)
         .background(Color.black.opacity(0.22), in: RoundedRectangle(cornerRadius: BPRadius.xl))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.08)))
+        .helpTarget("tonight.promptSearch")
         .onChange(of: focusRequested) { _, requested in
             guard requested else { return }
             promptFocused = true

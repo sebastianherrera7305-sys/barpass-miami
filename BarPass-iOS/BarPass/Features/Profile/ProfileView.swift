@@ -173,6 +173,7 @@ struct ProfileView: View {
                     .buttonStyle(.plain)
                     .bpAccessibility(label: l10n.t("profile.passes.title"), hint: l10n.t("profile.passes.hint"), isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
+                    .helpTarget("profile.passes")
 
                     // Dirección de casa (botón "Ir a casa")
                     Button {
@@ -199,6 +200,7 @@ struct ProfileView: View {
                     .buttonStyle(.plain)
                     .bpAccessibility(label: l10n.t("profile.homeAddress.title"), hint: l10n.t("profile.homeAddress.hint"), isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
+                    .helpTarget("profile.homeAddress")
                     .sheet(isPresented: $showHomeAddress) {
                         HomeAddressSettingsView()
                     }
@@ -228,6 +230,7 @@ struct ProfileView: View {
                     .buttonStyle(.plain)
                     .bpAccessibility(label: l10n.t("profile.games.title"), hint: l10n.t("profile.games.hint"), isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
+                    .helpTarget("profile.games")
 
                     // Stats
                     HStack(spacing: 12) {
@@ -372,6 +375,7 @@ struct ProfileView: View {
                     .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
                     .padding(.horizontal, BPSpacing.lg)
                     .bpAccessibility(label: l10n.t("profile.autoplay.title"), hint: autoplay.enabled ? l10n.t("profile.autoplay.on") : l10n.t("profile.autoplay.off"), isButton: true)
+                    .helpTarget("profile.autoplay")
 
                     // City
                     Button {
@@ -401,6 +405,7 @@ struct ProfileView: View {
                     .buttonStyle(.plain)
                     .padding(.horizontal, BPSpacing.lg)
                     .bpAccessibility(label: currentCity.map { "\(l10n.t("cityGate.title")): \($0)" } ?? l10n.t("cityGate.title"), hint: l10n.t("cityGate.change.hint"), isButton: true)
+                    .helpTarget("profile.city")
                     .onReceive(NotificationCenter.default.publisher(for: .selectedCityChanged)) { note in
                         currentCity = note.object as? String
                     }
@@ -436,6 +441,7 @@ struct ProfileView: View {
                     .buttonStyle(.plain)
                     .padding(.horizontal, BPSpacing.lg)
                     .bpAccessibility(label: l10n.t("greek.profile.title"), hint: affiliationSubtitle, isButton: true)
+                    .helpTarget("profile.affiliation")
 
                     // Account
                     VStack(alignment: .leading, spacing: 12) {

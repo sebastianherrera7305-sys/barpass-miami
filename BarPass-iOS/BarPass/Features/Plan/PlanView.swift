@@ -464,6 +464,7 @@ struct NightPlanView: View {
                 .buttonStyle(.plain)
                 .bpAccessibility(label: l10n.t("plan.share"), hint: l10n.t("plan.share.hint"), isButton: true)
             }
+            .helpTarget("plan.saveShare")
         }
         .padding(18)
         .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: 20))
