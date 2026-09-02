@@ -120,6 +120,7 @@ struct ProfileView: View {
                     .accessibilityElement(children: .ignore)
                     .bpAccessibility(label: String(format: l10n.t("profile.points.a11y"), points), hint: l10n.t("profile.points.hint"))
                     .padding(.horizontal, BPSpacing.lg)
+                    .helpTarget("profile.pointsCard")
 
                     // BarPass Wallet
                     Button {
@@ -146,6 +147,7 @@ struct ProfileView: View {
                     .buttonStyle(.plain)
                     .bpAccessibility(label: l10n.t("table.wallet.name"), hint: l10n.t("profile.wallet.hint"), isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
+                    .helpTarget("profile.wallet")
 
                     // Mis pases (historial)
                     NavigationLink {

@@ -76,6 +76,24 @@ enum HelpRegistry {
             titleKey: "help.trips.create.title",
             descriptionKey: "help.trips.create.desc"
         ),
+        // Profile tenía el botón de Ayuda apuntando a .profile sin un solo
+        // tip registrado — la ruta existía en HelpRoute y MainTabView la
+        // devolvía, pero HelpOverlayView filtra por ruta y no dibuja nada
+        // si la lista sale vacía. El resultado: tocar "?" en Profile
+        // oscurecía la pantalla y no había nada que tocar, indistinguible
+        // de un botón roto. Estos dos son los primeros elementos reales.
+        HelpTip(
+            id: "profile.pointsCard",
+            route: .profile,
+            titleKey: "help.profile.pointsCard.title",
+            descriptionKey: "help.profile.pointsCard.desc"
+        ),
+        HelpTip(
+            id: "profile.wallet",
+            route: .profile,
+            titleKey: "help.profile.wallet.title",
+            descriptionKey: "help.profile.wallet.desc"
+        ),
     ]
 
     static func tips(for route: HelpRoute) -> [HelpTip] {
