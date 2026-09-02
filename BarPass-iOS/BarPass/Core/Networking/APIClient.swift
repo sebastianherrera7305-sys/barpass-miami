@@ -42,6 +42,28 @@ enum APIClient {
         return AuthService.shared.restoreSession()?.accessToken ?? provided
     }
 
+    /// Turns a server error response into a message safe to show a user.
+    /// Deliberately ignores `json["message"]` — several routes (e.g.
+    /// POST /transactions on a DB insert failure) echo the raw
+    /// Postgres/PostgREST error string there, which can contain table,
+    /// column, or constraint names. `json["error"]` is always one of this
+    /// app's own short, stable codes, so it's the only field safe to use;
+    /// even that is only shown as a last resort after checking for one we
+    /// recognize and can phrase properly.
+    private static func friendlyServerMessage(_ json: [String: Any], status: Int, fallbackKey: String) -> String {
+        if let code = json["error"] as? String {
+            switch code {
+            case "card_declined":        return L10n.tSync("api.error.cardDeclined")
+            case "insufficient_funds":   return L10n.tSync("api.error.insufficientFunds")
+            case "rate_limited":         return L10n.tSync("api.error.rateLimited")
+            case "invalid_payload":      return L10n.tSync("api.error.invalidPayload")
+            case "payments_not_configured": return L10n.tSync("api.error.paymentsNotConfigured")
+            default: break
+            }
+        }
+        return L10n.tSync(fallbackKey)
+    }
+
     /// Generates a key matching the backend's required format:
     /// `bp_{vendorId}_{staffId}_{timestamp}_{RANDOM}` — see api/middleware/idempotency.js
     static func generateIdempotencyKey(vendorId: String, staffId: String) -> String {
@@ -136,9 +158,7 @@ enum APIClient {
         let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
 
         guard (200..<300).contains(http.statusCode) else {
-            let message = (json["message"] as? String) ?? (json["error"] as? String)
-                ?? "No se pudo procesar el pago (\(http.statusCode))."
-            throw APIClientError.server(message)
+            throw APIClientError.server(friendlyServerMessage(json, status: http.statusCode, fallbackKey: "api.error.paymentFailed"))
         }
 
         return json
@@ -246,9 +266,7 @@ enum APIClient {
         guard let http = response as? HTTPURLResponse else { throw APIClientError.invalidResponse }
         guard (200..<300).contains(http.statusCode) else {
             let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
-            let message = (json["message"] as? String) ?? (json["error"] as? String)
-                ?? "No se pudo eliminar la cuenta (\(http.statusCode))."
-            throw APIClientError.server(message)
+            throw APIClientError.server(friendlyServerMessage(json, status: http.statusCode, fallbackKey: "api.error.deleteAccountFailed"))
         }
     }
 
@@ -322,9 +340,7 @@ enum APIClient {
         let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
 
         guard (200..<300).contains(http.statusCode) else {
-            let message = (json["message"] as? String) ?? (json["error"] as? String)
-                ?? "No se pudo procesar la operación (\(http.statusCode))."
-            throw APIClientError.server(message)
+            throw APIClientError.server(friendlyServerMessage(json, status: http.statusCode, fallbackKey: "api.error.operationFailed"))
         }
         guard let balance = json["balance"] as? Double else { throw APIClientError.invalidResponse }
         return (balance, json["transactionId"] as? String)

@@ -7,8 +7,15 @@ final class CartStore: ObservableObject {
     @Published var venueName: String     = ""
     @Published var venueId:   String     = ""
 
+    // Must mirror barpass-v2/src/app/api/transactions/route.ts's own formula
+    // exactly (TAX_RATE = 0.07, same rounding) — that route recomputes the
+    // charge from `items` server-side and ignores whatever total the client
+    // shows, so a different formula here doesn't change what gets charged,
+    // it just makes the app lie about it before the fact (TestFlight/audit:
+    // cart showed subtotal + $0.99 while Stripe charged subtotal + 7% tax).
+    private static let taxRate = 0.07
     var subtotal:   Double { items.reduce(0) { $0 + $1.price * Double($1.qty) } }
-    var serviceFee: Double { items.isEmpty ? 0 : 0.99 }
+    var serviceFee: Double { ((subtotal * Self.taxRate) * 100).rounded() / 100 }
     var total:      Double { ((subtotal + serviceFee) * 100).rounded() / 100 }
     var itemCount:  Int    { items.reduce(0) { $0 + $1.qty } }
     var isEmpty:    Bool   { items.isEmpty }

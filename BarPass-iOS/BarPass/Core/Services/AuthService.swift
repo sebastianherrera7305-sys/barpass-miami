@@ -49,6 +49,16 @@ final class AuthService: @unchecked Sendable {
 
     private let defaults = UserDefaults.standard
     private let lock = NSLock()
+    /// Single-flight guard for refreshIfNeeded(). Supabase refresh tokens are
+    /// rotating and single-use — without this, launch-time callers (a dozen+
+    /// repositories each calling SupabaseRESTClient.freshSession()) each fire
+    /// their own POST /token?grant_type=refresh_token with the SAME token at
+    /// once; only the first succeeds and the rest get invalid_grant, throwing
+    /// spurious "not authenticated" errors (or worse, tripping GoTrue's
+    /// reuse-detection and revoking the whole session) even though nothing
+    /// was actually wrong. Concurrent callers now await the one in-flight
+    /// request instead of each starting their own.
+    private var refreshTask: Task<Bool, Never>?
 
     // MARK: Public API
 
@@ -78,16 +88,41 @@ final class AuthService: @unchecked Sendable {
     @discardableResult
     func refreshIfNeeded() async -> Bool {
         guard let session = restoreSession(), session.isExpired else { return true }
-        do {
-            let refreshed = try await tokenRequest(
-                grant: "refresh_token",
-                body: ["refresh_token": session.refreshToken]
-            )
-            store(refreshed)
-            return true
-        } catch {
-            return false
+
+        let (task, owner) = claimRefreshTask(for: session)
+        let result = await task.value
+        if owner { clearRefreshTask() }
+        return result
+    }
+
+    /// Synchronous — safe to call `lock`/`unlock` directly (Swift 6 forbids
+    /// that from an `async` function body). Only the caller that actually
+    /// created the task (`owner == true`) should clear it afterward, so a
+    /// slow straggler that merely joined an existing task can never wipe out
+    /// a newer refresh some other caller has since started.
+    private func claimRefreshTask(for session: AuthSession) -> (task: Task<Bool, Never>, owner: Bool) {
+        lock.lock(); defer { lock.unlock() }
+        if let existing = refreshTask { return (existing, false) }
+        let task = Task<Bool, Never> { [weak self] in
+            guard let self else { return false }
+            do {
+                let refreshed = try await self.tokenRequest(
+                    grant: "refresh_token",
+                    body: ["refresh_token": session.refreshToken]
+                )
+                self.store(refreshed)
+                return true
+            } catch {
+                return false
+            }
         }
+        refreshTask = task
+        return (task, true)
+    }
+
+    private func clearRefreshTask() {
+        lock.lock(); defer { lock.unlock() }
+        refreshTask = nil
     }
 
     @discardableResult
@@ -145,6 +180,24 @@ final class AuthService: @unchecked Sendable {
     }
 
     func signOut() {
+        // Best-effort server-side revocation before clearing the local copy —
+        // deleting the Keychain entry alone does NOT invalidate the refresh
+        // token at Supabase; it stays valid until natural expiry. Without
+        // this call, a token exfiltrated before sign-out (device backup,
+        // jailbreak, a leak elsewhere) keeps working after the user "signs
+        // out" on the legitimate device. Fire-and-forget: sign-out must
+        // still succeed locally even if this request fails or times out.
+        if let session = restoreSession() {
+            let token = session.accessToken
+            Task {
+                var request = URLRequest(url: URL(string: "\(Self.baseURL)/logout")!)
+                request.httpMethod = "POST"
+                applyHeaders(&request)
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+                _ = try? await Self.customSession.data(for: request)
+            }
+        }
+
         lock.lock(); defer { lock.unlock() }
         KeychainService.delete(forKey: Self.sessionKey)
         defaults.removeObject(forKey: Self.sessionKey) // limpia cualquier resto legacy también

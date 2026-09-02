@@ -80,10 +80,27 @@ final class TripStore: ObservableObject {
 
     func addStop(_ stop: Stop, to tripId: String) {
         guard let i = trips.firstIndex(where: { $0.id == tripId }) else { return }
+        let original = trips[i]
         trips[i].stops.append(stop)
         let repo = repository
         let trip = trips[i]
-        Task { try? await repo.updateTrip(trip) }
+        // Optimistic update, rolled back on failure — this used to fire
+        // `try? await repo.updateTrip(trip)` and swallow the error, so a
+        // rejected/offline PATCH left the UI showing a stop that was never
+        // actually saved, silently reverting on the next loadTrips() with
+        // no explanation.
+        Task {
+            do {
+                try await repo.updateTrip(trip)
+            } catch {
+                await MainActor.run {
+                    if let idx = self.trips.firstIndex(where: { $0.id == tripId }) {
+                        self.trips[idx] = original
+                    }
+                    self.loadError = error.localizedDescription
+                }
+            }
+        }
     }
 
     func delete(_ trip: Trip) async {
@@ -98,10 +115,27 @@ final class TripStore: ObservableObject {
 
     private func mutate(_ tripId: String, _ block: (inout Trip) -> Void) {
         guard let i = trips.firstIndex(where: { $0.id == tripId }) else { return }
-        var t = trips[i]; block(&t); trips[i] = t
+        let original = trips[i]
+        var t = original; block(&t); trips[i] = t
         let repo = repository
         let trip = t
-        Task { try? await repo.updateTrip(trip) }
+        // Same optimistic-update-with-rollback as addStop() above — this
+        // backs every mutate()-based method below (join/leave a stop,
+        // promote a member, transfer ownership, complete a trip, edit basic
+        // info) so a rejected/offline PATCH is visibly undone instead of
+        // silently reverting on the next fetch.
+        Task {
+            do {
+                try await repo.updateTrip(trip)
+            } catch {
+                await MainActor.run {
+                    if let idx = self.trips.firstIndex(where: { $0.id == tripId }) {
+                        self.trips[idx] = original
+                    }
+                    self.loadError = error.localizedDescription
+                }
+            }
+        }
     }
 
     func joinStop(_ stopId: String, in tripId: String, user: String = currentUserId) {

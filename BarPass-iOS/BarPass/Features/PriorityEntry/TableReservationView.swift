@@ -375,7 +375,7 @@ struct TableReservationView: View {
                     idToken:    session.accessToken,
                     vendorId:   venueId,
                     customerId: session.user.id,
-                    items:      [],
+                    items:      [CartItem(name: "\(l10n.t("table.summary.table")): \(selectedPackage.name)", price: selectedPackage.deposit, emoji: "🍾", qty: 1, venueId: venueId, venueName: venueName)],
                     stripePaymentMethodId: stripePaymentMethodId
                 )
                 guard let orderId = (json["transaction"] as? [String: Any])?["id"] as? String else {
@@ -434,7 +434,7 @@ struct TableReservationView: View {
 
     private var cardBtn: some View {
         NavigationLink {
-            CardPaymentView(total: selectedPackage.deposit, vendorId: venueId, items: [], onSuccess: { method in
+            CardPaymentView(total: selectedPackage.deposit, vendorId: venueId, items: [CartItem(name: "\(l10n.t("table.summary.table")): \(selectedPackage.name)", price: selectedPackage.deposit, emoji: "🍾", qty: 1, venueId: venueId, venueName: venueName)], onSuccess: { method in
                 guard let orderId = pendingCardOrderId else { return }
                 completeReservation(method: method, paymentSource: .order(orderId: orderId))
             }, onOrderId: { orderId in

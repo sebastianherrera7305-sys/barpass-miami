@@ -185,7 +185,7 @@ struct CardPaymentView: View {
 
     private func pay() {
         BPAnalytics.track(.startPayment(method: "card", amount: total))
-        guard isValid else { return }
+        guard !loading, isValid else { return }
         activeFocus = nil
         loading  = true
         errorMsg = ""

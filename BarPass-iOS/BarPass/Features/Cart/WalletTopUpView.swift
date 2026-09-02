@@ -95,7 +95,7 @@ struct WalletTopUpView: View {
     private var isValid: Bool { draft.entry.isValid }
 
     private func topUp() {
-        guard isValid, let session = AuthService.shared.restoreSession() else {
+        guard !loading, isValid, let session = AuthService.shared.restoreSession() else {
             errorMsg = l10n.t("wallet.topUp.signInRequired")
             return
         }

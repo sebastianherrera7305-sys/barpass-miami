@@ -166,13 +166,33 @@ final class AppState: ObservableObject {
         withAnimation(.easeOut(duration: 0.15).delay(0.1)) { showActionBar = true }
     }
 
+    /// Clears per-user state left over from the previous session so it can't
+    /// be read (even briefly) once a different account signs in. Call this
+    /// alongside AuthService.shared.signOut().
+    func resetUserState() {
+        walletBalance = 0
+        priorityVenueId = ""
+        priorityVenueName = ""
+        showActionBar = false
+        showAgeGate = false
+        showCityPicker = false
+        showEmailVerification = false
+        lastOrderConfirmation = nil
+        showPriorityEntry = false
+        showCart = false
+    }
+
     /// Pulls the real balance from Supabase — walletBalance always starts at
     /// 0 locally, so this is the only thing that should ever raise it,
     /// besides a successful top-up's direct response.
     func refreshWalletBalance() {
         guard let session = AuthService.shared.restoreSession() else { return }
         Task {
-            let balance = await WalletService.fetchBalance(session: session)
+            // A failed fetch (nil) leaves walletBalance exactly as it was —
+            // overwriting it with 0 made a real balance disappear from the
+            // UI on any transient network blip, indistinguishable from
+            // having actually spent it all.
+            guard let balance = await WalletService.fetchBalance(session: session) else { return }
             await MainActor.run { self.walletBalance = balance }
         }
     }

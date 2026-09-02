@@ -461,6 +461,7 @@ struct ProfileView: View {
                             Button {
                                 BPHaptics.medium()
                                 AuthService.shared.signOut()
+                                appState.resetUserState()
                                 appState.showNativeAuth = true
                             } label: {
                                 Text(l10n.t("profile.account.signOut"))

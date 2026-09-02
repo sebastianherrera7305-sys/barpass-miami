@@ -165,11 +165,36 @@ struct NativeAuthView: View {
     // MARK: - On Appear
 
     private func onAppear() {
-        // Check session FIRST, synchronously — if found, skip auth entirely
-        if AuthService.shared.restoreSession() != nil {
-            appState.completeAuth()
-            // Silently refresh token in background if needed
-            Task { try? await Task.sleep(nanoseconds: 2_000_000_000); _ = await AuthService.shared.refreshIfNeeded() }
+        // Check session FIRST, synchronously.
+        if let session = AuthService.shared.restoreSession() {
+            if !session.isExpired {
+                appState.completeAuth()
+                return
+            }
+            // Expired: a decoded session object is not proof the refresh
+            // token still works server-side (revoked, or lost the race in
+            // AuthService's single-flight refresh against another launch-
+            // time caller). Confirm the refresh actually succeeds before
+            // letting the user into the app — previously this branch called
+            // completeAuth() immediately and fired the refresh fire-and-
+            // forget in the background, discarding its result, so a failed
+            // refresh left the user "signed in" against a dead session with
+            // no path back to this screen except a manual sign-out.
+            flowState = .loadingUser
+            Task {
+                let refreshed = await AuthService.shared.refreshIfNeeded()
+                await MainActor.run {
+                    if refreshed {
+                        appState.completeAuth()
+                    } else {
+                        flowState = .idle
+                        withAnimation(.spring(response: 0.2, dampingFraction: 0.85)) {
+                            contentOpacity = 1
+                            contentY       = 0
+                        }
+                    }
+                }
+            }
             return
         }
         flowState = .idle

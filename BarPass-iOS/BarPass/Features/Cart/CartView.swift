@@ -195,6 +195,14 @@ struct CartView: View {
 
     private var walletButton: some View {
         Button { payWithWallet() } label: {
+            walletButtonLabel
+        }
+        .buttonStyle(.plain)
+        .disabled(isProcessing)
+        .bpAccessibility(label: l10n.t("cart.payWithWallet"), hint: l10n.t("cart.payWithWallet.hint"), isButton: true)
+    }
+
+    private var walletButtonLabel: some View {
             HStack(spacing: 12) {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(amber.opacity(0.12))
@@ -228,9 +236,6 @@ struct CartView: View {
                     .overlay(RoundedRectangle(cornerRadius: 14)
                         .strokeBorder(amber.opacity(0.18)))
             )
-        }
-        .buttonStyle(.plain)
-        .bpAccessibility(label: l10n.t("cart.payWithWallet"), hint: l10n.t("cart.payWithWallet.hint"), isButton: true)
     }
 
     // MARK: - Top up prompt
@@ -303,7 +308,7 @@ struct CartView: View {
     }
 
     private func payWithWallet() {
-        guard appState.walletBalance >= cart.total, let session = AuthService.shared.restoreSession() else { return }
+        guard !isProcessing, appState.walletBalance >= cart.total, let session = AuthService.shared.restoreSession() else { return }
         isProcessing = true
         paymentError = nil
         Task {

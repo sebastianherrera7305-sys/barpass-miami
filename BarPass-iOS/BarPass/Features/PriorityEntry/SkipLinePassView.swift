@@ -306,7 +306,7 @@ struct SkipLinePassView: View {
                     idToken:    session.accessToken,
                     vendorId:   venueId,
                     customerId: session.user.id,
-                    items:      [],
+                    items:      [CartItem(name: "\(l10n.t("priorityEntry.skipLine")) — \(l10n.t(selected.labelKey))", price: selected.price, emoji: selected.emoji, qty: 1, venueId: venueId, venueName: venueName)],
                     stripePaymentMethodId: stripePaymentMethodId
                 )
                 guard let orderId = (json["transaction"] as? [String: Any])?["id"] as? String else {
@@ -374,7 +374,7 @@ struct SkipLinePassView: View {
 
     private var cardBtn: some View {
         NavigationLink {
-            CardPaymentView(total: selected.price, vendorId: venueId, items: [], onSuccess: { method in
+            CardPaymentView(total: selected.price, vendorId: venueId, items: [CartItem(name: "\(l10n.t("priorityEntry.skipLine")) — \(l10n.t(selected.labelKey))", price: selected.price, emoji: selected.emoji, qty: 1, venueId: venueId, venueName: venueName)], onSuccess: { method in
                 guard let orderId = pendingCardOrderId else { return }
                 completePass(method: method, paymentSource: .order(orderId: orderId))
             }, onOrderId: { orderId in
