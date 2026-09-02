@@ -183,6 +183,15 @@ create policy "manage own favorites"
 --   with check (auth.uid() = user_id);
 
 -- SAVED PLANS (AI Concierge output) ───────────────────────────
+-- `plan` is a whole `NightPlan` blob, shape unified 2026-09-01 (see
+-- CLAUDE.md → "Plan Consolidation Roadmap") between the iOS app and the AI
+-- concierge (this table's only two writers): { title, summary,
+-- stops: [{ time, venueSlug, venueName, note, estimatedSpend }],
+-- totalEstimate, insiderTip } — matches
+-- src/features/ai/services/plan-schema.ts exactly. Being jsonb, this never
+-- needed an ALTER TABLE for the shape change; it just started writing the
+-- new fields. `id`/`user_id`/`title` are their own columns purely for RLS
+-- and future listing/search, not a field-by-field mirror of the model.
 create table if not exists public.night_plans (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -198,6 +207,33 @@ create policy "manage own plans"
   to authenticated
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- PLAN CHAT CONVERSATIONS (Phase 1, 2026-09-02) ────────────────
+-- Same jsonb-blob-per-row pattern as night_plans: `conversation` holds a
+-- whole PlanConversation — id, title, every message (role/text/plan/
+-- quickActions), currentPlan, timestamps — as one blob. `id`/`user_id`/
+-- `title` are their own columns purely for RLS and listing past
+-- conversations; the app never queries into individual messages
+-- server-side, so no normalized messages table.
+create table if not exists public.plan_conversations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null default '',
+  conversation jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.plan_conversations enable row level security;
+
+create policy "manage own plan conversations"
+  on public.plan_conversations for all
+  to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create index if not exists plan_conversations_user_updated_idx
+  on public.plan_conversations (user_id, updated_at desc);
 
 -- Useful indexes ──────────────────────────────────────────────
 create index if not exists venues_neighborhood_idx on public.venues (neighborhood);

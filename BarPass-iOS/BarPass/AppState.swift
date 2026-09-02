@@ -36,10 +36,6 @@ final class AppState: ObservableObject {
     /// TripsListView, etc.) as a child of a NavigationLink; those views own
     /// their own map/search state and aren't designed to be nested.
     @Published var requestedTab:           Int?
-    /// Set when `.tonightPrompt` is consumed (widget "prompt" button) —
-    /// TonightView passes this down to PromptYourNightHomeSection, which
-    /// focuses its text field on `true` and flips it back to `false`.
-    @Published var focusPromptRequested    = false
     @Published var walletBalance:          Double = 0
     @Published var lastOrderConfirmation:  OrderConfirmation?
     @Published var showPriorityEntry       = false

@@ -13,7 +13,7 @@ Miami nightlife access app. Skip the Line passes, VIP tables, event tickets, dri
 **Web (GitHub Pages):** `https://sebastianherrera7305-sys.github.io/barpass-miami/barpass-miami.html`
 **Firebase (legacy):** `barpass-app` · apiKey `AIzaSy<REDACTED>`
 **Google Places API Key:** `AIzaSy<REDACTED>` (local only, not on Vercel)
-**Vercel Project:** `<VERCEL_PROJECT_ID>` (org `<VERCEL_ORG_ID>`) — **LIVE at `https://barpass-v2.vercel.app`** (deployed 2026-07-14). Env vars set on Vercel: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, VENUE_VALIDATION_SECRET. Still missing on Vercel: STRIPE_SECRET_KEY, OPENAI_API_KEY (add when available). iOS `APIClient.baseURL` points here now (old `barpass-miami.vercel.app` Express/Firestore backend was never deployed and is dead).
+**Vercel Project:** `<VERCEL_PROJECT_ID>` (org `<VERCEL_ORG_ID>`) — **LIVE at `https://barpass-v2.vercel.app`** (deployed 2026-07-14). Env vars set on Vercel: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, VENUE_VALIDATION_SECRET. Still missing on Vercel: STRIPE_SECRET_KEY, NVIDIA_API_KEY (add when available — `/api/concierge` uses NVIDIA NIM/Llama 3.3, not OpenAI; not set locally either, so the endpoint 503s `ai_not_configured` everywhere today). iOS `APIClient.baseURL` points here now (old `barpass-miami.vercel.app` Express/Firestore backend was never deployed and is dead).
 **Stripe SPM:** `stripe-ios@23.32.0` resolved in pbxproj, `CardPaymentView` does real client-side tokenization + calls `/api/transactions` (real Stripe PaymentIntent server-side).
 **Stripe account:** `acct_1TmM3pHzVF9FsUCt` (US). **Test mode is wired and verified end-to-end** (2026-08-31): `STRIPE_SECRET_KEY` (`sk_test_…`) is in `barpass-v2/.env.local`, and a real test PaymentIntent of $25 came back `succeeded`. `StripeConfig.publishableKey` was pointing at a *different* account (`acct_…TmM4d`) and was corrected — a mismatch silently breaks charges (client tokenizes on one account, server charges on another), so **always verify the `pk_`/`sk_` account prefixes match**. `charges_enabled`/`payouts_enabled` are `false` because the account isn't activated yet — blocked on the company incorporation papers, not on code. Test mode needs no business verification, so all development/TestFlight work can proceed now; going live is a key swap in three places (`.env.local`, Vercel, `StripeConfig.swift`), no code changes.
 **Payments — why Stripe and not Apple:** Apple Pay is only a wallet, not a processor; it still needs Stripe behind it to settle. And Apple's own guideline 3.1.3(e) *forbids* IAP for goods/services consumed outside the app (skip-the-line passes, tables, tickets, drinks all qualify), so IAP isn't an alternative — it's a rejection. Don't revisit this.
@@ -31,7 +31,7 @@ Splash → Onboarding Video → Native Auth → MainTabView (5 tabs)
 | Layer | Directory | Description |
 |-------|-----------|-------------|
 | **Domain Models** | `Models/` | `BarPassVenue`, `VenueType`, `Trip`, `NightPlan`, `CartItem`, `EventTicket`, `SkipLinePass`, `TableReservation` |
-| **Repositories** | `Repositories/` | `VenueRepository`, `TripRepository`, `PlanRepository` (protocols). `SupabaseVenueRepository` (actor), `LocalVenueRepository`, `LocalPlanRepository`, `SupabasePlanRepository` (placeholder — `RepositoryDependencies` uses `LocalPlanRepository`), `SupabaseTripRepository` (**live, wired as the real dependency** — real shared backend against `trips_schema.sql`, not a placeholder). `LocalTripRepository` deleted 2026-08-27 (dead code, orphaned since the Supabase migration) |
+| **Repositories** | `Repositories/` | `VenueRepository`, `TripRepository`, `PlanRepository` (protocols). `SupabaseVenueRepository` (actor), `LocalVenueRepository`, `LocalPlanRepository` (disk fallback, not the default), `SupabasePlanRepository` (**live, wired as the real dependency** — `RepositoryDependencies.plan`, real shared backend against `public.night_plans`, jsonb blob, RLS scoped to `auth.uid()`), `SupabaseTripRepository` (**live, wired as the real dependency** — real shared backend against `trips_schema.sql`, not a placeholder). `LocalTripRepository` deleted 2026-08-27 (dead code, orphaned since the Supabase migration) |
 | **DI** | `Repositories/RepositoryDependencies.swift` | `nonisolated(unsafe) static var venue/trip/plan` — swap implementations one line |
 | **Stores** | `Models/VenueStore.swift`, `Models/TripStore.swift` | `@MainActor`, `@Published`, repository injected via init |
 | **UI** | `Features/` | `MainTabView` (5 tabs), `TonightView`, `ExploreView`, `TripsListView`, `PlanView`, `ProfileView`, `CartView`, `CardPaymentView`, PriorityEntry hub, Trip detail/creation flow |
@@ -311,11 +311,101 @@ Sign Out
 - **Stripe en Vercel** — `STRIPE_SECRET_KEY` ya está en `.env.local` (test, verificada), pero **falta agregarla en Vercel** (Settings → Environment Variables, los 3 environments, + redeploy). Hasta entonces `/api/transactions` y `/api/wallet/topup` siguen devolviendo 503 `payments_not_configured` en producción.
 - **Stripe live** — bloqueado por los papeles de constitución de la empresa (la cuenta no está activada, `charges_enabled: false`). No es trabajo de código.
 - **Build de TestFlight desactualizada** — la build subida apunta a la cuenta de Stripe vieja; hay que recompilar para que tome la `pk_test_` corregida.
-- **OpenAI key** — missing. AI Concierge (`/api/concierge`) won't work.
+- **NVIDIA key** — missing (local and Vercel). AI Concierge (`/api/concierge`, NVIDIA NIM/Llama 3.3) always 503s `ai_not_configured` until set. See **Plan Consolidation Roadmap** below — this key is a hard prerequisite for Phase C3.
 - **Onboarding videos** — 6 Higgsfield clips not yet generated. View is placeholder.
 - **MapLibre** — works locally but not deployed.
-- **Supabase night_plans table** — `SupabasePlanRepository` is a placeholder; `RepositoryDependencies` uses `LocalPlanRepository`, plans persist on disk only. Trips are NOT disk-only anymore — `SupabaseTripRepository` is live against `trips_schema.sql` (verified against the real DB 2026-08-22); the old disk-based `LocalTripRepository` was deleted 2026-08-27 (confirmed zero references — dead code from the migration).
+- **Supabase night_plans table** — `SupabasePlanRepository` is live and wired (`RepositoryDependencies.plan`), not a placeholder — corrected 2026-09-01, see Key Files table above. Trips are NOT disk-only either — `SupabaseTripRepository` is live against `trips_schema.sql` (verified against the real DB 2026-08-22); the old disk-based `LocalTripRepository` was deleted 2026-08-27 (confirmed zero references — dead code from the migration).
 - **PrivacyInfo.xcprivacy** — declares collected data but may need App Store review confirmation.
+
+---
+
+## Plan Consolidation Roadmap (2026-09-01)
+
+### El problema
+Tres superficies distintas resuelven hoy el mismo job ("dame un plan para esta noche a partir de un prompt/vibe"), sin comunicarse entre sí, más un backend de IA ya desplegado que ninguna de las tres usa:
+
+| Dónde | Qué hace | Motor |
+|---|---|---|
+| `Features/Plan/PlanView.swift` (tab 3) | 1 prompt → 1 `NightPlan` | Local (`NightPlan.sample`, `Core/Intelligence/ExperienceScorer.swift`/`DiscoveryScorer.swift`) |
+| `Features/Trips/PromptYourNightView.swift` + `NightPlanner.swift` (dentro de `TripsListView`) | chips de vibe + company type + prefs inclusivas + prompt → ruta de `PlannedStop` | Local, motor y modelo de datos distintos al de Plan |
+| `Features/Tonight/PromptYourNightHomeSection.swift` (dentro de `TonightView`, también disparado por el deep link `.tonightPrompt` / widget) | entrada promocional al mismo concepto | — |
+| `barpass-v2/src/app/api/concierge/route.ts` (desplegado en Vercel) | prompt → `NightPlan` generado por LLM real, con rate limit (10/min/IP), retry, validación Zod | **NVIDIA NIM, Llama 3.3 70B** — nunca llamado desde iOS |
+
+Además hay dos shapes de `NightPlan` incompatibles en el mismo producto: el local de iOS (`PlanStop{time, venueName, venueNeighborhood, venuePriceRange, note}`, `totalEst`/`aiInsight` como strings) y el del concierge/web (`PlanStop{time, venueSlug, venueName, note, estimatedSpend}`, `totalEstimate` numérico, `insiderTip`).
+
+### Decisiones tomadas
+1. **Alcance de este round:** unificar UI + datos **y** cablear el concierge real (no solo reorganizar pantallas).
+2. **Schema canónico:** el del concierge/web (`venueSlug`, `estimatedSpend` numérico, `insiderTip`, `summary`) — ya referencia venues reales por slug (`BarPassVenue.slug` ya existe) y es el que produce IA de verdad. El modelo Swift local (`Models/NightPlan.swift`) se adapta a este shape, no al revés.
+3. **`Features/Plan` es la superficie única.** `PromptYourNightView.swift` y `NightPlanner.swift` (Trips) se eliminan; su funcionalidad (vibe chips, company type, prefs inclusivas) se fusiona dentro de `PlanView`. `PromptYourNightHomeSection.swift` (Tonight) se elimina también.
+4. **Trips conserva "Guardar como Trip"** como acción posterior sobre un `NightPlan` ya generado (reutiliza `TripRepository`/`TripCreateFlow`), no como su propio flujo de generación.
+5. **Sin migración de datos** — pre-lanzamiento, no hay usuarios reales con `night_plans`/trips generados por el flujo viejo que preservar. La columna `plan` en `public.night_plans` es `jsonb`, así que no requiere `ALTER TABLE`; simplemente empieza a guardar el nuevo shape.
+
+### Schema canónico (Swift + Supabase)
+```swift
+struct PlanStop: Identifiable, Codable, Hashable {
+    var id: String = UUID().uuidString
+    let time: String
+    let venueSlug: String
+    let venueName: String
+    let note: String
+    let estimatedSpend: Double
+}
+
+struct NightPlan: Identifiable, Codable, Hashable {
+    var id: String = UUID().uuidString
+    var title: String
+    var summary: String
+    var stops: [PlanStop] = []
+    var totalEstimate: Double
+    var insiderTip: String
+    var createdAt: Date = .now
+}
+```
+`public.night_plans.plan` (jsonb) simplemente empieza a almacenar este shape — sin migración SQL. `barpass-v2/src/types/plan.ts` y `plan-schema.ts` ya son la fuente de verdad; no cambian.
+
+### Checklist de implementación (pendiente — no ejecutado aún)
+- [x] **C1 — Schema** (2026-09-01): `Models/NightPlan.swift` reescrito al shape canónico (`venueSlug`, `estimatedSpend`, `totalEstimate`, `insiderTip`, `summary`). `SupabasePlanRepository`/`LocalPlanRepository` sin cambios de código — siguen siendo Codable pass-through, el shape nuevo simplemente empieza a viajar dentro. `ShareManager.shareNightPlan` sin cambios (solo usa `time`/`venueName`, que no cambiaron de nombre).
+- [x] **C2 — Merge de UI** (2026-09-01): vibe chips (`ExperienceIntent`), `CompanyType` y prefs inclusivas portados de `PromptYourNightView.swift` a `PlanView.swift` (nueva `contextPicker`). Generar con solo chips (sin texto) sigue funcionando como en el flujo viejo — `effectivePrompt()` sintetiza un prompt desde los chips cuando el campo de texto está vacío.
+- [x] **C3 — Conectar IA real** (2026-09-01): `APIClient.fetchConciergePlan(prompt:budget:groupSize:neighborhood:excludeSlugs:)` nuevo, `POST /api/concierge`. `generatePlan()` en `PlanView` intenta el concierge primero; cualquier falla (`notConfigured`/`rateLimited`/`invalidRequest`/`unavailable`/red) cae silenciosamente a `NightPlan.local` (el motor `ExperienceScorer`, ya no `NightPlan.sample`). **Sigue bloqueado en producción hasta setear `NVIDIA_API_KEY`** (ver Known Issues arriba) — mientras tanto usa siempre el fallback local, que ahora sí incorpora vibe/company/inclusive context vía `ExperienceScorer`.
+- [x] **C4 — Retiro de duplicados** (2026-09-01): `PromptYourNightView.swift` y `PromptYourNightHomeSection.swift` borrados (código y referencias en `project.pbxproj`). `NightPlanner.swift` **no** se borró completo — `phase(of:)` lo usa `Stop.sequence` (Trip.swift) y `vibes` lo usa `ExperienceScorer`; solo se borró `NightPlanner.plan()`/`PlannedStop`, que ya nadie llama. `TripsListView`'s "AI" choice ahora navega a Plan (`appState.requestedTab = 3`) en vez de abrir su propio sheet; `createTrip()` (dead code, único caller era ese sheet) también se borró. `TonightView` perdió el flag `usePromptYourNightHome` y volvió a su texto pasivo (`home.where`) sin condicional.
+- [x] **C5 — "Guardar como Trip"** (2026-09-01): botón nuevo en `NightPlanView` (`PlanView.swift`) — `saveAsTrip()` matchea `PlanStop.venueSlug` contra `venueStore.venues`, arma `Stop.sequence(...)` y guarda vía `RepositoryDependencies.trip.saveTrip(...)`, con el mismo award de puntos/analytics que tenía `TripsListView.createTrip`.
+- [x] **C6 — Navegación** (2026-09-01): `DeepLinkRoute.tonightPrompt` renombrado a `.planPrompt` (mismo `barpass://prompt`); `MainTabView.handleDeepLink` ahora hace `selectedTab = 3` en vez de tocar `appState.focusPromptRequested` (propiedad borrada de `AppState.swift`, ya no tenía consumidor).
+- [x] **C7 — Supabase** (2026-09-01): sin `ALTER TABLE` (jsonb, confirmado). Comentario junto a `night_plans` en `barpass-v2/supabase/schema.sql` actualizado con el shape canónico.
+
+**Verificado:** `xcodebuild -scheme BarPass -destination 'generic/platform=iOS Simulator'` → `** BUILD SUCCEEDED **`, cero errores (2026-09-01).
+
+### Explícitamente fuera de este round
+La arquitectura de chat conversacional Free/Premium de `BARPASS_PLAN_CHAT_DEVELOPER_DOCS/` (intent resolver, `ConversationContext`, usage ledger por usuario, StoreKit/entitlement, feature flags) **no se toca aquí** — ninguno de esos sistemas existe hoy en el repo (verificado, cero coincidencias de StoreKit/feature-flags). Este consolidation round es el prerequisito de infraestructura; la Fase 1 del chat (`08_DEVELOPER_TASKS.md`) empieza después, sobre una única superficie y un único schema ya limpios.
+
+---
+
+## Plan Chat Architecture (Fase 1, 2026-09-02)
+
+Construido sobre la superficie ya consolidada arriba. `Features/Plan/PlanView.swift` pasó de "un prompt → un resultado" a una conversación multi-turno real, siguiendo 02_UX_ARCHITECTURE.md/03_CHAT_ENGINE.md de `BARPASS_PLAN_CHAT_DEVELOPER_DOCS/`.
+
+### Decisiones tomadas
+1. **Chat multi-turno real** — lista de mensajes + composer persistente, no un formulario. Los quick actions ("Más exclusivo"/"Más económico"/"Más cerca"/"Más social") refinan el plan actual en la misma conversación en vez de generar uno nuevo desde cero.
+2. **Persistencia en Supabase desde ya** — tabla nueva `public.plan_conversations`, mismo patrón jsonb-blob-por-fila que `night_plans`.
+3. **Premium con stub visual** — hay una pantalla de upgrade (`PlanUpgradeSheet.swift`), pero **sin StoreKit ni cobro real** — el CTA dice "Muy pronto" a propósito. No hay ningún gate de verdad: todo el mundo usa el mismo motor Free hoy.
+
+### Modelo (`Models/PlanConversation.swift`)
+```swift
+struct PlanMessage { role: .user | .assistant, text, plan: NightPlan?, quickActions: [String] }
+struct PlanConversation { title, messages: [PlanMessage], currentPlan: NightPlan?, createdAt, updatedAt }
+```
+Contrato de respuesta único (`message, cards≈plan.stops, quickActions, plan`) — la UI nunca distingue si `plan` vino del concierge o del fallback local, tal como pide 03_CHAT_ENGINE.md.
+
+### Motor (`Core/Intelligence/PlanEngine.swift`)
+`PlanEngine.respond(enginePrompt:conversation:context:venues:userLocation:)` intenta `APIClient.fetchConciergePlan` (pasando `excludeSlugs` de las venues ya usadas en la conversación, para no repetir) y cae a `NightPlan.local` en cualquier falla — mismo fallback silencioso que ya existía. `PlanEngine.refinementActions` define los 4 quick actions post-plan; `PlanEngine.welcomeMessage()` arma el primer mensaje con las sugerencias de siempre (`plan.suggestion.*`) como quick actions.
+
+### Persistencia (`Repositories/ConversationRepository.swift`, `SupabaseConversationRepository.swift`)
+Mismo patrón que `PlanRepository`/`SupabasePlanRepository`: `LocalConversationRepository` (disco, fallback de invitados) + `SupabaseConversationRepository` (real, requiere sesión, RLS por `auth.uid()`). `RepositoryDependencies.conversation` ya apunta al Supabase real. Cada turno se auto-guarda local siempre, y a Supabase en silencio si hay sesión (sin banner de error para invitados — eso solo se muestra en acciones explícitas como "Save"/"Save as Trip").
+
+### ⚠️ Pendiente manual — igual que `night_plans`/`trips` en su momento
+La tabla `plan_conversations` está en `barpass-v2/supabase/schema.sql` pero **no se ejecutó contra el proyecto real de Supabase** — el MCP de Supabase conectado en esta sesión apunta a otro proyecto ("ByPark"), no al de BarPass, así que no había forma de aplicarla en vivo. Hay que correr ese bloque de `schema.sql` en el SQL editor de Supabase antes de que la persistencia de conversaciones funcione para usuarios reales (mientras tanto, `SupabaseConversationRepository` simplemente falla y el guardado local sigue funcionando).
+
+### Copy del encabezado — reconciliado con origin/main (2026-09-02)
+Se intentó cambiar `plan.headerTitle` a "Crea tu noche" a pedido explícito ("concierge" sonaba raro en español), pero **origin/main ya tenía un cambio de Sebastián/Opus 5 en el mismo lugar** ("Give Remy's greeting some variety instead of the same line every time") que reemplazó el título/subtítulo fijo por **6 variantes rotativas por idioma** (`plan.headerTitle.0`–`.5`, `plan.headerSubtitle.0`–`.5`), elegidas una vez por sesión con `@State private var greetingIndex = Int.random(in: 0..<6)`. Se decidió **adaptar el chat a su rotación en vez de pisarla**: `plan.headerTitle`/`plan.headerSubtitle` (sin sufijo) quedaron con su texto original — ya no se usan en ningún lado, es el `.0` legacy — y `PlanView`'s header + `PlanEngine.welcomeMessage(greetingIndex:)` (primera burbuja del chat) ahora comparten el mismo `greetingIndex`, así que el título del header y el primer mensaje de Remy siempre son la misma variante, no dos saludos distintos.
 
 ---
 

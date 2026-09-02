@@ -329,4 +329,100 @@ enum APIClient {
         guard let balance = json["balance"] as? Double else { throw APIClientError.invalidResponse }
         return (balance, json["transactionId"] as? String)
     }
+
+    // MARK: - AI Concierge (Plan)
+
+    enum ConciergeError: LocalizedError {
+        case notConfigured
+        case rateLimited
+        case invalidRequest
+        case unavailable
+        case network(String)
+
+        var errorDescription: String? {
+            switch self {
+            case .notConfigured:  return "concierge_not_configured"
+            case .rateLimited:    return "concierge_rate_limited"
+            case .invalidRequest: return "concierge_invalid_request"
+            case .unavailable:    return "concierge_unavailable"
+            case .network(let m): return m
+            }
+        }
+    }
+
+    /// Wire shape for POST /api/concierge, matching
+    /// `barpass-v2/src/features/ai/services/plan-schema.ts` exactly —
+    /// decoded into a separate DTO (not `NightPlan` directly) because the
+    /// response has no `id`/`createdAt`, which `NightPlan` needs for local
+    /// persistence and SwiftUI identity.
+    private struct ConciergePlanStopDTO: Decodable {
+        let time: String
+        let venueSlug: String
+        let venueName: String
+        let note: String
+        let estimatedSpend: Double
+    }
+    private struct ConciergePlanDTO: Decodable {
+        let title: String
+        let summary: String
+        let stops: [ConciergePlanStopDTO]
+        let totalEstimate: Double
+        let insiderTip: String
+    }
+
+    /// POST /api/concierge — guest-accessible by design (no login wall
+    /// anywhere else in Plan's flow), rate-limited server-side by IP.
+    /// Callers should treat any thrown error as "fall back to
+    /// `NightPlan.local`", never surface it raw (02_UX_ARCHITECTURE.md:
+    /// never show technical errors to users).
+    static func fetchConciergePlan(
+        prompt: String,
+        budget: Double? = nil,
+        groupSize: Int? = nil,
+        neighborhood: String? = nil,
+        excludeSlugs: [String] = []
+    ) async throws -> NightPlan {
+        var request = URLRequest(url: baseURL.appendingPathComponent("concierge"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        var body: [String: Any] = ["prompt": prompt]
+        if let budget       { body["budget"] = budget }
+        if let groupSize    { body["groupSize"] = groupSize }
+        if let neighborhood { body["neighborhood"] = neighborhood }
+        if !excludeSlugs.isEmpty { body["excludeSlugs"] = excludeSlugs }
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw ConciergeError.network(error.localizedDescription)
+        }
+        guard let http = response as? HTTPURLResponse else { throw ConciergeError.unavailable }
+        switch http.statusCode {
+        case 200..<300: break
+        case 429:       throw ConciergeError.rateLimited
+        case 503:       throw ConciergeError.notConfigured
+        case 400:       throw ConciergeError.invalidRequest
+        default:        throw ConciergeError.unavailable
+        }
+
+        let dto: ConciergePlanDTO
+        do {
+            dto = try JSONDecoder().decode(ConciergePlanDTO.self, from: data)
+        } catch {
+            throw ConciergeError.unavailable
+        }
+
+        return NightPlan(
+            title: dto.title,
+            summary: dto.summary,
+            stops: dto.stops.map {
+                PlanStop(time: $0.time, venueSlug: $0.venueSlug, venueName: $0.venueName, note: $0.note, estimatedSpend: $0.estimatedSpend)
+            },
+            totalEstimate: dto.totalEstimate,
+            insiderTip: dto.insiderTip
+        )
+    }
 }

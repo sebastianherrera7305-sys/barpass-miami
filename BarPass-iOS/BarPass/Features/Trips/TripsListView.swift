@@ -9,7 +9,6 @@ struct TripsListView: View {
         repository: RepositoryDependencies.trip
     )
 
-    @State private var showCreateFlow = false
     @State private var showManualCreate = false
     @State private var showCreateChoice = false
     @State private var showJoinByCode = false
@@ -52,17 +51,15 @@ struct TripsListView: View {
                 appState.consumeRoute()
             }
         }
+        // "AI" jumps to Plan instead of opening its own generation flow —
+        // Plan is the single surface for prompt/vibe-based generation since
+        // 2026-09-01 (Trips' old "Prompt Your Night" sheet was retired, see
+        // CLAUDE.md → "Plan Consolidation Roadmap"). A plan built there can
+        // be turned into a Trip with its own "Save as Trip" button.
         .confirmationDialog(l10n.t("trips.createChoice.title"), isPresented: $showCreateChoice, titleVisibility: .visible) {
-            Button(l10n.t("trips.createChoice.ai")) { showCreateFlow = true }
+            Button(l10n.t("trips.createChoice.ai")) { appState.requestedTab = 3 }
             Button(l10n.t("trips.createChoice.manual")) { showManualCreate = true }
             Button(l10n.t("tripCreate.cancel"), role: .cancel) { }
-        }
-        .sheet(isPresented: $showCreateFlow) {
-            PromptYourNightView(venues: venueStore.venues) { title, venues in
-                createTrip(title: title, venues: venues)
-            }
-            .presentationDetents([.large])
-            .presentationBackground(.black)
         }
         .sheet(isPresented: $showManualCreate) {
             TripCreateFlow(venues: venueStore.venues, tripStore: tripStore) {
@@ -352,23 +349,6 @@ struct TripsListView: View {
             .background(color.opacity(0.12), in: Capsule())
     }
 
-    private func createTrip(title: String, venues: [BarPassVenue]) {
-        let now = Date()
-        let stops = Stop.sequence(for: venues, tripId: "", date: now)
-        let trip = Trip(
-            creatorId: TripStore.currentUserId,
-            title: title,
-            destinationCity: "Miami",
-            startDate: now,
-            endDate: now,
-            visibility: .privateTrip,
-            stops: stops
-        )
-        Task {
-            await tripStore.create(trip); PointsEngine.shared.award(.createTrip)
-            BPAnalytics.track(.createTrip)
-        }
-    }
 }
 
 // MARK: - Join by code

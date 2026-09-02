@@ -106,6 +106,7 @@
 		EF000002000000000000RP01 /* EventFlyerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF000001000000000000RP01 /* EventFlyerCard.swift */; };
 		EXEN04000000000000RP01 /* ExperienceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXEN03000000000000RP01 /* ExperienceEngine.swift */; };
 		EXSC04000000000000RP01 /* ExperienceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXSC03000000000000RP01 /* ExperienceScorer.swift */; };
+		PEEN04000000000000RP01 /* PlanEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEEN03000000000000RP01 /* PlanEngine.swift */; };
 		F1BA46464607754B4A2D0728 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF352B37244C7C0F8C8D874 /* Foundation.framework */; };
 		FAVS02000000000000RP01 /* FavoritesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAVS01000000000000RP01 /* FavoritesStore.swift */; };
 		FB27B50A40070142DA45268A /* GoHomeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBB1D2978A1CEFD5727A510 /* GoHomeButton.swift */; };
@@ -115,6 +116,7 @@
 		FF000002000000000000AA03 /* VenueDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA03 /* VenueDetailView.swift */; };
 		FF000002000000000000AA04 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA04 /* ExploreView.swift */; };
 		FF000002000000000000AA05 /* PlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA05 /* PlanView.swift */; };
+		FF000002000000000000AA30 /* PlanUpgradeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA30 /* PlanUpgradeSheet.swift */; };
 		FF000002000000000000AA06 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA06 /* ProfileView.swift */; };
 		FF000002000000000000AA07 /* OnboardingVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA07 /* OnboardingVideoView.swift */; };
 		FF000002000000000000AA08 /* Venue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA08 /* Venue.swift */; };
@@ -139,15 +141,16 @@
 		MPOB02000000000000RP01 /* MusicNowPlayingObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = MPOB01000000000000RP01 /* MusicNowPlayingObserver.swift */; };
 		MSRC02000000000000RP01 /* MusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = MSRC01000000000000RP01 /* MusicSource.swift */; };
 		NP0000020000000000000001 /* NightPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = NP0000010000000000000001 /* NightPlan.swift */; };
+		PC0000020000000000000001 /* PlanConversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = PC0000010000000000000001 /* PlanConversation.swift */; };
 		NP000002000000000000RP01 /* NightPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = NP000001000000000000RP01 /* NightPlanner.swift */; };
 		PREP02000000000000RP01 /* PostRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = PREP01000000000000RP01 /* PostRepository.swift */; };
 		PRIV00000000000000000002 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PRIV00000000000000000001 /* PrivacyInfo.xcprivacy */; };
-		PY000002000000000000RP01 /* PromptYourNightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PY000001000000000000RP01 /* PromptYourNightView.swift */; };
-		PYH002000000000000RP99 /* PromptYourNightHomeSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = PYH001000000000000RP99 /* PromptYourNightHomeSection.swift */; };
 		RE0000020000000000000001 /* TripRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = RE0000010000000000000001 /* TripRepository.swift */; };
 		RE0000020000000000000002 /* SupabaseTripRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = RE0000010000000000000002 /* SupabaseTripRepository.swift */; };
 		RE0000020000000000000003 /* PlanRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = RE0000010000000000000003 /* PlanRepository.swift */; };
 		RE0000020000000000000004 /* SupabasePlanRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = RE0000010000000000000004 /* SupabasePlanRepository.swift */; };
+		RE0000020000000000000005 /* ConversationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = RE0000010000000000000005 /* ConversationRepository.swift */; };
+		RE0000020000000000000006 /* SupabaseConversationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = RE0000010000000000000006 /* SupabaseConversationRepository.swift */; };
 		RVSM02000000000000RP01 /* ReviewSummaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVSM01000000000000RP01 /* ReviewSummaryService.swift */; };
 		RVSV02000000000000RP01 /* ReviewSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RVSV01000000000000RP01 /* ReviewSummaryView.swift */; };
 		SPBC02000000000000RP01 /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPBC01000000000000RP01 /* SupabaseConfig.swift */; };
@@ -304,6 +307,7 @@
 		EF000001000000000000RP01 /* EventFlyerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventFlyerCard.swift; path = BarPass/Features/Tonight/EventFlyerCard.swift; sourceTree = SOURCE_ROOT; };
 		EXEN03000000000000RP01 /* ExperienceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceEngine.swift; path = BarPass/Models/ExperienceEngine.swift; sourceTree = SOURCE_ROOT; };
 		EXSC03000000000000RP01 /* ExperienceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceScorer.swift; path = BarPass/Core/Intelligence/ExperienceScorer.swift; sourceTree = SOURCE_ROOT; };
+		PEEN03000000000000RP01 /* PlanEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PlanEngine.swift; path = BarPass/Core/Intelligence/PlanEngine.swift; sourceTree = SOURCE_ROOT; };
 		F35C2CF95EBF470399C6196E /* SelectedCityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SelectedCityStore.swift; path = BarPass/Core/Services/SelectedCityStore.swift; sourceTree = SOURCE_ROOT; };
 		F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileAffiliationRepository.swift; path = BarPass/Repositories/ProfileAffiliationRepository.swift; sourceTree = SOURCE_ROOT; };
 		F863CE708ACF44B3A96D654A /* UniversityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityListView.swift; path = BarPass/Features/CollegeLife/UniversityListView.swift; sourceTree = SOURCE_ROOT; };
@@ -315,6 +319,7 @@
 		FF000001000000000000AA03 /* VenueDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueDetailView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA04 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA05 /* PlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanView.swift; sourceTree = "<group>"; };
+		FF000001000000000000AA30 /* PlanUpgradeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanUpgradeSheet.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA06 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA07 /* OnboardingVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingVideoView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA08 /* Venue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Venue.swift; sourceTree = "<group>"; };
@@ -339,15 +344,16 @@
 		MPOB01000000000000RP01 /* MusicNowPlayingObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicNowPlayingObserver.swift; path = BarPass/Core/Music/MusicNowPlayingObserver.swift; sourceTree = SOURCE_ROOT; };
 		MSRC01000000000000RP01 /* MusicSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MusicSource.swift; path = BarPass/Core/Music/MusicSource.swift; sourceTree = SOURCE_ROOT; };
 		NP0000010000000000000001 /* NightPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NightPlan.swift; sourceTree = "<group>"; };
+		PC0000010000000000000001 /* PlanConversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanConversation.swift; sourceTree = "<group>"; };
 		NP000001000000000000RP01 /* NightPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightPlanner.swift; path = BarPass/Features/Trips/NightPlanner.swift; sourceTree = SOURCE_ROOT; };
 		PREP01000000000000RP01 /* PostRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PostRepository.swift; path = BarPass/Repositories/PostRepository.swift; sourceTree = SOURCE_ROOT; };
 		PRIV00000000000000000001 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		PY000001000000000000RP01 /* PromptYourNightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PromptYourNightView.swift; path = BarPass/Features/Trips/PromptYourNightView.swift; sourceTree = SOURCE_ROOT; };
-		PYH001000000000000RP99 /* PromptYourNightHomeSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PromptYourNightHomeSection.swift; path = BarPass/Features/Tonight/PromptYourNightHomeSection.swift; sourceTree = SOURCE_ROOT; };
 		RE0000010000000000000001 /* TripRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripRepository.swift; sourceTree = "<group>"; };
 		RE0000010000000000000002 /* SupabaseTripRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseTripRepository.swift; sourceTree = "<group>"; };
 		RE0000010000000000000003 /* PlanRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanRepository.swift; sourceTree = "<group>"; };
 		RE0000010000000000000004 /* SupabasePlanRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabasePlanRepository.swift; sourceTree = "<group>"; };
+		RE0000010000000000000005 /* ConversationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationRepository.swift; sourceTree = "<group>"; };
+		RE0000010000000000000006 /* SupabaseConversationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConversationRepository.swift; sourceTree = "<group>"; };
 		RVSM01000000000000RP01 /* ReviewSummaryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ReviewSummaryService.swift; path = BarPass/Core/Services/ReviewSummaryService.swift; sourceTree = SOURCE_ROOT; };
 		RVSV01000000000000RP01 /* ReviewSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ReviewSummaryView.swift; path = BarPass/Features/Tonight/ReviewSummaryView.swift; sourceTree = SOURCE_ROOT; };
 		SPBC01000000000000RP01 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseConfig.swift; path = BarPass/Core/Config/SupabaseConfig.swift; sourceTree = SOURCE_ROOT; };
@@ -577,7 +583,6 @@
 			isa = PBXGroup;
 			children = (
 				EF000001000000000000RP01 /* EventFlyerCard.swift */,
-				PYH001000000000000RP99 /* PromptYourNightHomeSection.swift */,
 				IMGC01000000000000RP01 /* ImageCache.swift */,
 				L10N01000000000000RP01 /* LocalizationService.swift */,
 				THEM01000000000000RP01 /* ThemeService.swift */,
@@ -617,6 +622,7 @@
 				EXEN03000000000000RP01 /* ExperienceEngine.swift */,
 				VTS003000000000000RP01 /* VenueTimeStatus.swift */,
 				EXSC03000000000000RP01 /* ExperienceScorer.swift */,
+				PEEN03000000000000RP01 /* PlanEngine.swift */,
 				VEVW03000000000000RP01 /* VerifyEmailView.swift */,
 				HYWC01000000000000RP01 /* HypeWeekCard.swift */,
 				54C778D8EC6D60879605EA40 /* CheckInButton.swift */,
@@ -652,7 +658,6 @@
 				TR000001000000000000AA03 /* TripCreateFlow.swift */,
 				TR000001000000000000AA04 /* TripDetailView.swift */,
 				TR000001000000000000AA05 /* TripSocial.swift */,
-				PY000001000000000000RP01 /* PromptYourNightView.swift */,
 				NP000001000000000000RP01 /* NightPlanner.swift */,
 			);
 			name = "Recovered References";
@@ -668,6 +673,7 @@
 				FF000001000000000000AA08 /* Venue.swift */,
 				FF000001000000000000AA09 /* VenueStore.swift */,
 				NP0000010000000000000001 /* NightPlan.swift */,
+				PC0000010000000000000001 /* PlanConversation.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -742,6 +748,7 @@
 			isa = PBXGroup;
 			children = (
 				FF000001000000000000AA05 /* PlanView.swift */,
+				FF000001000000000000AA30 /* PlanUpgradeSheet.swift */,
 			);
 			path = Plan;
 			sourceTree = "<group>";
@@ -774,6 +781,8 @@
 				RE0000010000000000000002 /* SupabaseTripRepository.swift */,
 				RE0000010000000000000003 /* PlanRepository.swift */,
 				RE0000010000000000000004 /* SupabasePlanRepository.swift */,
+				RE0000010000000000000005 /* ConversationRepository.swift */,
+				RE0000010000000000000006 /* SupabaseConversationRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -947,7 +956,6 @@
 				FF000002000000000000AA01 /* MainTabView.swift in Sources */,
 				FF000002000000000000AA02 /* TonightView.swift in Sources */,
 				EF000002000000000000RP01 /* EventFlyerCard.swift in Sources */,
-				PYH002000000000000RP99 /* PromptYourNightHomeSection.swift in Sources */,
 				FF000002000000000000AA03 /* VenueDetailView.swift in Sources */,
 				FF000002000000000000AA04 /* ExploreView.swift in Sources */,
 				FF000002000000000000AA05 /* PlanView.swift in Sources */,
@@ -1022,7 +1030,6 @@
 				TR000002000000000000AA03 /* TripCreateFlow.swift in Sources */,
 				TR000002000000000000AA04 /* TripDetailView.swift in Sources */,
 				TR000002000000000000AA05 /* TripSocial.swift in Sources */,
-				PY000002000000000000RP01 /* PromptYourNightView.swift in Sources */,
 				NP000002000000000000RP01 /* NightPlanner.swift in Sources */,
 				FF000002000000000000AA10 /* DesignSystem.swift in Sources */,
 				FF000002000000000000AA11 /* VenueRepository.swift in Sources */,
@@ -1034,6 +1041,11 @@
 				RE0000020000000000000003 /* PlanRepository.swift in Sources */,
 				RE0000020000000000000004 /* SupabasePlanRepository.swift in Sources */,
 				NP0000020000000000000001 /* NightPlan.swift in Sources */,
+				PC0000020000000000000001 /* PlanConversation.swift in Sources */,
+				RE0000020000000000000005 /* ConversationRepository.swift in Sources */,
+				RE0000020000000000000006 /* SupabaseConversationRepository.swift in Sources */,
+				PEEN04000000000000RP01 /* PlanEngine.swift in Sources */,
+				FF000002000000000000AA30 /* PlanUpgradeSheet.swift in Sources */,
 				TS0000020000000000000001 /* TripStore.swift in Sources */,
 				345EF762F181F05CFC873285 /* DeleteAccountView.swift in Sources */,
 				7E5EB2897A93841F178719A9 /* DeepLinkRouter.swift in Sources */,

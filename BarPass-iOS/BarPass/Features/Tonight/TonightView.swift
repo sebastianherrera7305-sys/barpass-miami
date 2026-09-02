@@ -5,12 +5,7 @@ struct TonightView: View {
     @ObservedObject private var favorites = FavoritesStore.shared
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
-    @EnvironmentObject private var appState:   AppState
     @State private var selectedTag: String? = nil
-    /// Rollback switch for the "Prompt Your Night" home section — flip to
-    /// false to instantly restore the old passive "Where to tonight?" Home
-    /// without reverting any code.
-    private let usePromptYourNightHome = true
 
     /// Mood Mode — browse by experience, not venue type. Each mood maps to
     /// keywords matched against type/vibes/tags/music (same approach as
@@ -239,18 +234,6 @@ struct TonightView: View {
                         .padding(.horizontal, BPSpacing.lg)
                         .padding(.top, 60)
 
-                    // "Prompt Your Night" — the new front door, replacing the
-                    // passive "Where to tonight?" line's role (that Text is
-                    // dropped from `header` below since this takes over
-                    // immediately underneath it). Isolated component, real
-                    // venue data, same ExperienceScorer everything else on
-                    // this screen already uses — nothing below this line
-                    // moved, changed, or lost its own state.
-                    if usePromptYourNightHome {
-                        PromptYourNightHomeSection(venues: venueStore.venues, focusRequested: $appState.focusPromptRequested)
-                            .padding(.horizontal, BPSpacing.lg)
-                    }
-
                     HypeWeekCard()
                         .padding(.horizontal, BPSpacing.lg)
 
@@ -395,14 +378,9 @@ struct TonightView: View {
                 .font(.bpTitle1())
                 .foregroundStyle(Color.bpInk)
 
-            // Dropped in favor of PromptYourNightHomeSection directly below,
-            // which now owns "what do you want tonight?" — kept behind the
-            // same flag so disabling the section restores this line too.
-            if !usePromptYourNightHome {
-                Text(l10n.t("home.where"))
-                    .font(.bpBody())
-                    .foregroundStyle(Color.bpTextSecondary)
-            }
+            Text(l10n.t("home.where"))
+                .font(.bpBody())
+                .foregroundStyle(Color.bpTextSecondary)
         }
         .bpAccessibility(label: greeting, hint: l10n.t("tonight.greeting.hint"))
     }
