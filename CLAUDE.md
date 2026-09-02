@@ -381,6 +381,8 @@ La arquitectura de chat conversacional Free/Premium de `BARPASS_PLAN_CHAT_DEVELO
 
 ## Plan Chat Architecture (Fase 1, 2026-09-02)
 
+**PR abierto:** [sebastianherrera7305-sys/barpass-miami#3](https://github.com/sebastianherrera7305-sys/barpass-miami/pull/3) (`felipeberrio:plan-chat-consolidation` → `main`) — felipeberrio solo tiene permiso `READ` sobre el repo de Sebastián, así que el push va al fork y el merge lo tiene que hacer alguien con permiso de escritura en `origin`. Rama rebaseada sobre la punta actual de `origin/main` (incluye el commit de Sebastián/Opus del saludo rotativo, ver abajo) — compila limpio.
+
 Construido sobre la superficie ya consolidada arriba. `Features/Plan/PlanView.swift` pasó de "un prompt → un resultado" a una conversación multi-turno real, siguiendo 02_UX_ARCHITECTURE.md/03_CHAT_ENGINE.md de `BARPASS_PLAN_CHAT_DEVELOPER_DOCS/`.
 
 ### Decisiones tomadas
