@@ -13,6 +13,11 @@ struct PlanView: View {
     @State private var lastPrompt = ""
     @State private var userLocation: CLLocationCoordinate2D?
     @State private var locationService = LocationService()
+    /// Picked once when the screen appears, not on every render — so it
+    /// doesn't reshuffle mid-type. TestFlight feedback was that the header
+    /// always said the same thing on every visit; there are 6 variants per
+    /// language now (see LocalizationService's "plan.headerTitle.N" keys).
+    @State private var greetingIndex = Int.random(in: 0..<6)
     /// Surfaces `savePlan` failures — mainly `SupabasePlanRepository`'s
     /// no-session error for guests. Before this the save silently no-opted
     /// (`try?`), so a guest tapping "Save" saw nothing happen with zero
@@ -87,11 +92,11 @@ struct PlanView: View {
                                 .tracking(3)
                                 .foregroundStyle(amber)
 
-                            Text(l10n.t("plan.headerTitle"))
+                            Text(l10n.t("plan.headerTitle.\(greetingIndex)"))
                                 .font(.bpScaled(26, weight: .bold))
                                 .foregroundStyle(Color.bpInk)
 
-                            Text(l10n.t("plan.headerSubtitle"))
+                            Text(l10n.t("plan.headerSubtitle.\(greetingIndex)"))
                                 .font(.bpScaled(14))
                                 .foregroundStyle(Color.bpInk.opacity(0.75))
                         }
