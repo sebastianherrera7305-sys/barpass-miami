@@ -60,8 +60,14 @@ export async function POST(request: Request) {
   }
 
   const venues = await getVenues();
+  const tier = parsed.data.tier ?? "free";
   const systemInstruction = buildConciergeSystemPrompt(venues, {
     excludeSlugs: parsed.data.excludeSlugs,
+    budget: parsed.data.budget,
+    groupSize: parsed.data.groupSize,
+    neighborhood: parsed.data.neighborhood,
+    tier,
+    rememberedVibe: parsed.data.rememberedVibe,
   });
 
   // Un reintento — el modelo ocasionalmente devuelve JSON corrupto o con un
@@ -106,7 +112,26 @@ export async function POST(request: Request) {
         continue;
       }
 
-      return NextResponse.json(plan.data);
+      // Free/Premium stop-count split is asked for in the prompt
+      // (stopCountBlock), but an LLM's compliance with a count instruction
+      // isn't guaranteed — this is the actual enforcement for Free, so a
+      // model that ignores the instruction still can't hand a Free request
+      // the full multi-stop itinerary that's meant to be a Premium feature
+      // (05_PREMIUM_AI_SPEC.md / 04_FREE_PLAN_SPEC.md "Free should NOT
+      // include... unlimited multi-step reasoning").
+      const FREE_MAX_STOPS = 3;
+      const result =
+        tier === "free" && plan.data.stops.length > FREE_MAX_STOPS
+          ? {
+              ...plan.data,
+              stops: plan.data.stops.slice(0, FREE_MAX_STOPS),
+              totalEstimate: plan.data.stops
+                .slice(0, FREE_MAX_STOPS)
+                .reduce((sum, s) => sum + s.estimatedSpend, 0),
+            }
+          : plan.data;
+
+      return NextResponse.json(result);
     } catch (e) {
       console.error(`Concierge call failed (attempt ${attempt}):`, e);
     }

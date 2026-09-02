@@ -1,13 +1,13 @@
 import Foundation
 
-/// Emotion-first night builder. Turns a set of vibe chips + a natural-language
-/// prompt into a real, sequenced route (warm-up → peak) drawn ONLY from live
-/// venues. Deterministic and local today; the same interface can be backed by
-/// the AI Concierge later without touching the UI.
-///
-/// Scoring itself lives in `ExperienceScorer` (Core/Intelligence) — this type
-/// now owns only what's genuinely Trips-specific: the legacy vibe-chip list,
-/// phase sequencing (warm-up → mid → peak), and the duration-based stop cap.
+/// Shared building blocks for "what moment is this venue right for" —
+/// `ExperienceScorer` (Core/Intelligence) does the actual scoring, `Stop
+/// .sequence` (Models/Trip.swift) uses `phase(of:)` to order a Trip's stops,
+/// and `NightPlan.local` (Models/NightPlan.swift, the Plan tab's offline
+/// fallback) pulls in `vibes` via `ExperienceScorer`. The old route-building
+/// entry point (`plan(venues:selected:prompt:...)`, used only by Trips'
+/// "Prompt Your Night" flow) was retired 2026-09-01 when that flow was
+/// merged into `PlanView` — see CLAUDE.md → "Plan Consolidation Roadmap".
 struct NightVibe: Identifiable, Hashable {
     let id: String
     let emoji: String
@@ -50,53 +50,5 @@ enum NightPlanner {
         case .club:                 return 2   // peak
         default:                    return 1
         }
-    }
-
-    /// A planned stop plus the strongest live signal that put it there.
-    struct PlannedStop: Identifiable {
-        let venue: BarPassVenue
-        let reason: String?
-        var id: String { venue.id }
-    }
-
-    static func plan(venues: [BarPassVenue], selected: Set<String>, prompt: String, passport: MusicPassport? = nil, context: TripContext? = nil) -> [PlannedStop] {
-        guard !venues.isEmpty else { return [] }
-        let now = Date()
-
-        let surprise = ExperienceScorer.isSurprise(selected: selected, prompt: prompt, context: context)
-
-        var scored = venues.map { v in
-            (v, ExperienceScorer.score(venue: v, selected: selected, prompt: prompt, passport: passport, context: context, now: now))
-        }
-        if !surprise && scored.contains(where: { $0.1 >= 1 }) {
-            scored = scored.filter { $0.1 >= 1 }
-        }
-        // Never recommend a closed venue while an open one is available.
-        if scored.contains(where: { $0.0.isOpenNow }) {
-            scored = scored.filter { $0.0.isOpenNow }
-        }
-        let ranked = scored.sorted { $0.1 > $1.1 }.map { $0.0 }
-        let pool = Array(ranked.prefix(12))
-
-        // Shorter outings get fewer stops — a 2-hour after-work relax shouldn't
-        // return a full 4-stop crawl. ~1 stop per 1.5h, clamped to 1...4.
-        let maxStops: Int = {
-            guard let hours = context?.durationHours else { return 4 }
-            return min(4, max(1, Int((hours / 1.5).rounded(.up))))
-        }()
-
-        var chosen: [BarPassVenue] = []
-        for p in [0, 1, 2] {
-            if let cand = pool.first(where: { c in
-                phase(of: c) == p && !chosen.contains(where: { $0.id == c.id })
-            }) { chosen.append(cand) }
-        }
-        for v in pool where chosen.count < maxStops {
-            if !chosen.contains(where: { $0.id == v.id }) { chosen.append(v) }
-        }
-        chosen = Array(chosen.prefix(maxStops))
-        return chosen
-            .sorted { phase(of: $0) < phase(of: $1) }
-            .map { PlannedStop(venue: $0, reason: ExperienceScorer.reason(venue: $0, prompt: prompt, passport: passport, context: context, now: now)) }
     }
 }

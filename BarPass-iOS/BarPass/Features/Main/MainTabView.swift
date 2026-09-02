@@ -51,7 +51,6 @@ struct MainTabView: View {
                 case 0:
                     TonightView()
                         .environmentObject(venueStore)
-                        .environmentObject(appState)
                 case 1:
                     ExploreView()
                         .environmentObject(venueStore)
@@ -219,9 +218,9 @@ struct MainTabView: View {
             appState.consumeRoute()
         case .pass, .profile:
             appState.consumeRoute()
-        case .tonightPrompt:
-            selectedTab = 0
-            appState.focusPromptRequested = true
+        case .planPrompt:
+            selectedTab = 3
+            appState.focusPlanComposerRequested = true
             appState.consumeRoute()
         }
     }

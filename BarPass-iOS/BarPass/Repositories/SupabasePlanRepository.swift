@@ -56,11 +56,18 @@ actor SupabasePlanRepository: PlanRepository {
 
     // MARK: - PlanRepository
 
+    /// Decodes row by row instead of the whole array at once (2026-09-02 bug
+    /// fix): `NightPlan`'s schema changed 2026-09-01, and `Decodable` array
+    /// decoding is atomic — a single pre-migration row (old field names)
+    /// used to take down the entire list instead of just that one row.
     func getPlans() async throws -> [NightPlan] {
         let req = try request("GET", path: "night_plans?select=id,user_id,title,plan&order=created_at.desc")
         let data = try await SupabaseRESTClient.send(req)
-        let rows = try Self.decoder.decode([Row].self, from: data)
-        return rows.map(\.plan)
+        guard let objects = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else { return [] }
+        return objects.compactMap { obj in
+            guard let objData = try? JSONSerialization.data(withJSONObject: obj) else { return nil }
+            return try? Self.decoder.decode(Row.self, from: objData).plan
+        }
     }
 
     /// Upsert by id (matches the overwrite-or-insert semantics

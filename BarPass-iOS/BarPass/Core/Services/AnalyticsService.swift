@@ -17,6 +17,8 @@ enum AnalyticsEvent {
     case createTrip
     case createPlan(method: String)
     case savePlan
+    case planLimitReached
+    case planUpgradeViewed
 
     case startPayment(method: String, amount: Double)
     case paymentSuccess(method: String, amount: Double)
@@ -68,6 +70,8 @@ final class ConsoleAnalyticsService: AnalyticsService {
         case .createTrip:          (emoji, label) = ("✨", "createTrip")
         case .createPlan:          (emoji, label) = ("🌟", "createPlan")
         case .savePlan:            (emoji, label) = ("💾", "savePlan")
+        case .planLimitReached:    (emoji, label) = ("🚧", "planLimitReached")
+        case .planUpgradeViewed:   (emoji, label) = ("👀", "planUpgradeViewed")
         case .startPayment:        (emoji, label) = ("💳", "startPayment")
         case .paymentSuccess:      (emoji, label) = ("✅", "paymentSuccess")
         case .paymentFailed:       (emoji, label) = ("❌", "paymentFailed")
