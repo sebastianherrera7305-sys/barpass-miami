@@ -164,6 +164,16 @@ struct MainTabView: View {
             selectedTab = tab
             appState.requestedTab = nil
         }
+        // Switching tabs while Help is open left `isActive` true but
+        // `currentRoute` stuck on the old tab: the overlay kept dimming the
+        // new screen while looking for the old screen's tip IDs, which never
+        // match, so nothing was ever outlined and the "?" button (hidden
+        // while isActive) never came back to let the user retry. Reported as
+        // "se queda pegado" — closing on tab change is the actual fix; the
+        // instruction banner above is the fallback for when it's still open.
+        .onChange(of: selectedTab) { _, _ in
+            if helpStore.isActive { helpStore.close() }
+        }
         // Cold start: a venue link can arrive before venues finish loading. Retry
         // resolution whenever the catalog updates while a venue route is pending.
         .onReceive(venueStore.$venues) { _ in

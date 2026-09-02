@@ -16,6 +16,16 @@ struct HelpOverlayView: View {
         HelpRegistry.tips(for: store.currentRoute)
     }
 
+    /// Tips this route actually has an anchor for right now. A tip can be
+    /// registered but scrolled out of view (its `.helpTarget` never renders
+    /// an anchor while off-screen), which used to mean the overlay dimmed
+    /// the screen with literally nothing to tap — no outline, no message,
+    /// indistinguishable from the app freezing. Reported by the user as
+    /// "se queda pegado y no ayuda ni guía".
+    private var visibleTips: [HelpTip] {
+        tipsForRoute.filter { anchors[$0.id] != nil }
+    }
+
     var body: some View {
         GeometryReader { proxy in
             ZStack {
@@ -40,9 +50,45 @@ struct HelpOverlayView: View {
                 if let selectedTipID, let tip = HelpRegistry.tip(id: selectedTipID), let anchor = anchors[selectedTipID] {
                     tooltipCard(tip: tip, rect: proxy[anchor], screenSize: proxy.size)
                 }
+
+                // Always-visible instruction + explicit close button, so the
+                // overlay never reads as broken: either there's something to
+                // tap and the user is told so, or there isn't (scrolled out
+                // of view / nothing registered yet) and that's said plainly
+                // instead of leaving a dark screen with no way out but a
+                // guessed background tap.
+                VStack {
+                    instructionBanner
+                    Spacer()
+                }
+                .padding(.top, 8)
             }
         }
         .transition(.opacity.combined(with: .scale(scale: 0.98)))
+    }
+
+    private var instructionBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: visibleTips.isEmpty ? "arrow.up.and.down" : "hand.tap.fill")
+                .foregroundStyle(Color.bpAmber)
+            Text(l10n.t(visibleTips.isEmpty ? "help.overlay.scrollHint" : "help.overlay.tapHint"))
+                .font(.bpScaled(13, weight: .semibold))
+                .foregroundStyle(Color.bpInk)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
+            Button {
+                BPHaptics.light()
+                store.close()
+            } label: {
+                Text(l10n.t("help.overlay.close"))
+                    .font(.bpScaled(13, weight: .bold))
+                    .foregroundStyle(Color.bpAmber)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(BPSpacing.md)
+        .glass(radius: BPRadius.lg)
+        .padding(.horizontal, BPSpacing.lg)
     }
 
     // MARK: - Target outline
