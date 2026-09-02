@@ -1,0 +1,277 @@
+[
+ {
+  "name": "Daiquiri Bar",
+  "city": "Miami",
+  "neighborhood": "Downtown/Bayside"
+ },
+ {
+  "name": "Duffy's Tavern",
+  "city": "Miami",
+  "neighborhood": "West Miami"
+ },
+ {
+  "name": "Brass Ring Bar & Restaurant",
+  "city": "Madison",
+  "neighborhood": "Tenney-Lapham"
+ },
+ {
+  "name": "Barrel Proof",
+  "city": "Nashville",
+  "neighborhood": "Germantown"
+ },
+ {
+  "name": "Seven Seas Bar",
+  "city": "Miami",
+  "neighborhood": "Coral Terrace"
+ },
+ {
+  "name": "Bayou Bar",
+  "city": "New Orleans",
+  "neighborhood": "Lower Garden District"
+ },
+ {
+  "name": "Old North Arcade Bar",
+  "city": "Columbus",
+  "neighborhood": "Old North/Clintonville"
+ },
+ {
+  "name": "Hopleaf",
+  "city": "Chicago",
+  "neighborhood": "Andersonville"
+ },
+ {
+  "name": "Pinewood",
+  "city": "Nashville",
+  "neighborhood": "Rutledge Hill/SoBro"
+ },
+ {
+  "name": "Blue Moon Bar & Grill",
+  "city": "Madison",
+  "neighborhood": "Hill Farms"
+ },
+ {
+  "name": "Lincoln Social Rooftop",
+  "city": "Columbus",
+  "neighborhood": "Short North"
+ },
+ {
+  "name": "Parlay Sporting Club + Kitchen",
+  "city": "Columbus",
+  "neighborhood": "Short North"
+ },
+ {
+  "name": "Herbs and Rye",
+  "city": "Las Vegas",
+  "neighborhood": "W Sahara"
+ },
+ {
+  "name": "The Tavern",
+  "city": "Austin",
+  "neighborhood": "Clarksville"
+ },
+ {
+  "name": "Bar Louie - Nashville",
+  "city": "Nashville",
+  "neighborhood": "The Gulch"
+ },
+ {
+  "name": "Cooter Brown's Tavern",
+  "city": "New Orleans",
+  "neighborhood": "Riverbend"
+ },
+ {
+  "name": "Retro Lounge Columbus",
+  "city": "Columbus",
+  "neighborhood": "Far East Side"
+ },
+ {
+  "name": "Club 185",
+  "city": "Columbus",
+  "neighborhood": "German Village"
+ },
+ {
+  "name": "Woodland's Backyard",
+  "city": "Columbus",
+  "neighborhood": "Grandview Heights"
+ },
+ {
+  "name": "Panchos Rooftop Cantina",
+  "city": "Chicago",
+  "neighborhood": "South Loop"
+ },
+ {
+  "name": "The J. Parker",
+  "city": "Chicago",
+  "neighborhood": "Lincoln Park"
+ },
+ {
+  "name": "First Draft",
+  "city": "Chicago",
+  "neighborhood": "South Loop"
+ },
+ {
+  "name": "Bar Bruno",
+  "city": "Athens",
+  "neighborhood": "Five Points"
+ },
+ {
+  "name": "Alley Bar",
+  "city": "Ann Arbor",
+  "neighborhood": "Downtown"
+ },
+ {
+  "name": "Aperitivo",
+  "city": "Ann Arbor",
+  "neighborhood": "Downtown"
+ },
+ {
+  "name": "Arbor Brewing Company Session Room",
+  "city": "Ann Arbor",
+  "neighborhood": "Scio Township"
+ },
+ {
+  "name": "Babs' Underground",
+  "city": "Ann Arbor",
+  "neighborhood": "Downtown"
+ },
+ {
+  "name": "Bill's Beer Garden",
+  "city": "Ann Arbor",
+  "neighborhood": "Downtown"
+ },
+ {
+  "name": "Bogie's",
+  "city": "Baton Rouge",
+  "neighborhood": "Tigerland/LSU"
+ },
+ {
+  "name": "CLICKS Billiards - Billiards, Games, Sports, Bar & Grill",
+  "city": "Baton Rouge",
+  "neighborhood": "Bocage/Towne Center"
+ },
+ {
+  "name": "Bricks Restaurant & Patio Bar",
+  "city": "Gainesville",
+  "neighborhood": "Downtown"
+ },
+ {
+  "name": "Club Diversity",
+  "city": "Columbus",
+  "neighborhood": "Merion Village"
+ },
+ {
+  "name": "Little Havana Social Club Coffee Lounge",
+  "city": "Miami",
+  "neighborhood": "Calle Ocho"
+ },
+ {
+  "name": "Pharaoh Hookah & Cigar Lounge",
+  "city": "Miami",
+  "neighborhood": "Calle Ocho"
+ },
+ {
+  "name": "Santé Cocktail Lounge",
+  "city": "Miami",
+  "neighborhood": "Doral"
+ },
+ {
+  "name": "Smoke & Barrel Cigar Lounge",
+  "city": "Miami",
+  "neighborhood": "Dadeland/Kendall"
+ },
+ {
+  "name": "Sunset Tavern",
+  "city": "Miami",
+  "neighborhood": "South Miami"
+ },
+ {
+  "name": "The Commodore",
+  "city": "Miami",
+  "neighborhood": "Coconut Grove"
+ },
+ {
+  "name": "1601 Lounge",
+  "city": "Miami",
+  "neighborhood": "Downtown"
+ },
+ {
+  "name": "BT's Gentlemen's Club",
+  "city": "Miami",
+  "neighborhood": "South Miami"
+ },
+ {
+  "name": "Coco Miami",
+  "city": "Miami",
+  "neighborhood": "Design District"
+ },
+ {
+  "name": "Elevar Wynwood",
+  "city": "Miami",
+  "neighborhood": "Edgewater/Midtown"
+ },
+ {
+  "name": "Fresa Lounge",
+  "city": "Miami",
+  "neighborhood": "Flagami"
+ },
+ {
+  "name": "Gekko Lounge",
+  "city": "Miami",
+  "neighborhood": "Brickell"
+ },
+ {
+  "name": "Grand Public Kitchen & Bar",
+  "city": "Miami",
+  "neighborhood": "Coconut Grove"
+ },
+ {
+  "name": "Happy's Stork Lounge and Liquor Store",
+  "city": "Miami",
+  "neighborhood": "North Bay Village"
+ },
+ {
+  "name": "REPUBLICA FOOD & LOUNGE",
+  "city": "Miami",
+  "neighborhood": "Allapattah"
+ },
+ {
+  "name": "Skully's Music-Diner",
+  "city": "Columbus",
+  "neighborhood": "Short North"
+ },
+ {
+  "name": "Dick's Den",
+  "city": "Columbus",
+  "neighborhood": "Old North"
+ },
+ {
+  "name": "Kitty Cohen's",
+  "city": "Austin",
+  "neighborhood": "East Austin"
+ },
+ {
+  "name": "Carragher's",
+  "city": "New York",
+  "neighborhood": "Financial District"
+ },
+ {
+  "name": "Gramps Getaway",
+  "city": "Miami",
+  "neighborhood": "Virginia Key"
+ },
+ {
+  "name": "Las Rosas",
+  "city": "Miami",
+  "neighborhood": "Allapattah"
+ },
+ {
+  "name": "Hot Tin",
+  "city": "New Orleans",
+  "neighborhood": "Lower Garden District"
+ },
+ {
+  "name": "Tonga Hut",
+  "city": "Los Angeles",
+  "neighborhood": "North Hollywood"
+ }
+]

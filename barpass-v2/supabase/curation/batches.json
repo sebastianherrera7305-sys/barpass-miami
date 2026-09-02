@@ -1,0 +1,978 @@
+[
+ {
+  "name": "Seminole Hard Rock Hotel & Casino",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "casino resort en Davie, ~25 millas fuera de Miami"
+ },
+ {
+  "name": "Monty's Raw Bar",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Mango's South Beach",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Bayshore Club Bar & Grill",
+  "genres": [
+   "live",
+   "jazz"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "La Birra Bar (Burgers) - Wynwood",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "restaurante de hamburguesas argentino"
+ },
+ {
+  "name": "Sola Miami Beach",
+  "genres": [
+   "latin"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Mayami Wynwood",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "hip_hop",
+   "pop"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Earls Kitchen + Bar",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "cadena de restaurantes; no existe sede en Coconut Grove"
+ },
+ {
+  "name": "Lola bar",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "barrio mal: es Downtown/Bayside, no Brickell"
+ },
+ {
+  "name": "Rosa Sky",
+  "genres": [
+   "latin"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Lagniappe",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "barrio mal: Edgewater/Midtown"
+ },
+ {
+  "name": "Wet Willie's",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Barsecco",
+  "genres": [
+   "house",
+   "latin",
+   "reggaeton",
+   "pop"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "American Social - Bar & Kitchen - Miami",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Palace Bar & Restaurant",
+  "genres": [
+   "pop"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Flanigan's Seafood Bar and Grill",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "cadena familiar de mariscos"
+ },
+ {
+  "name": "KUSH Wynwood",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "hamburguesas; CERRADO hasta ~2027"
+ },
+ {
+  "name": "Cafe La Trova",
+  "genres": [
+   "live",
+   "latin"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Sugar Rooftop",
+  "genres": [
+   "house"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "The Clevelander Bar",
+  "genres": [
+   "hip_hop",
+   "reggaeton",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Guantanamera tropical café and Lounge",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "barrio mal: Little Havana, no Brickell"
+ },
+ {
+  "name": "Avianca VIP Lounge",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "sala VIP del aeropuerto MIA"
+ },
+ {
+  "name": "Balan's",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Grails Miami - Restaurant & Sports Bar",
+  "genres": [
+   "hip_hop"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Negroni Bistro & Sushi Bar",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "es restaurante, 'club' lo exagera"
+ },
+ {
+  "name": "Astra Miami Rooftop",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Rakija Lounge",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true,
+  "note": "el genero real es balcanico, no esta en el vocabulario"
+ },
+ {
+  "name": "Level 6 Rooftop Restaurant Miami",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Amor Miami",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Yard House",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "cadena; playlist grabada a volumen de conversacion"
+ },
+ {
+  "name": "Miller's Ale House",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "cadena; no existe sede en Coconut Grove"
+ },
+ {
+  "name": "El Carajo",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "The Dirty Rabbit Wynwood",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "hip_hop",
+   "house"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Sweet Liberty Drinks & Supply Company",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Blackbird Ordinary",
+  "genres": [
+   "hip_hop",
+   "house",
+   "latin",
+   "reggaeton",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Mickey Burkes",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Bolivar colombian restaurant bar lounge",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "una fuente lo marca CERRADO: reverificar"
+ },
+ {
+  "name": "Batch Gastropub: Miami",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Turkish Airlines Lounge - Concourse E",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "sala VIP del aeropuerto MIA"
+ },
+ {
+  "name": "CLUB SPACE",
+  "genres": [
+   "house",
+   "tech_house",
+   "edm"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "LoKal",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "hamburgueseria"
+ },
+ {
+  "name": "E11EVEN MIAMI",
+  "genres": [
+   "hip_hop",
+   "edm",
+   "pop",
+   "latin",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Panamericano Bar",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "LIV Nightclub Miami",
+  "genres": [
+   "edm",
+   "hip_hop",
+   "house",
+   "pop"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Voodoo Lounge & Rooftop",
+  "genres": [
+   "hip_hop"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Ark Smoke Shop South Miami - Nature Bar & Lounge",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "smoke shop minorista"
+ },
+ {
+  "name": "Ark Smoke Shop Biscayne - Nature Bar & Lounge",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "smoke shop 24h"
+ },
+ {
+  "name": "Española Cigar Bar & Lounge",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Blue Martini",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "house",
+   "live",
+   "pop"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Swan",
+  "genres": [
+   "hip_hop",
+   "edm"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Miami Mojito Company",
+  "genres": [
+   "latin"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Red Phone Booth",
+  "genres": [
+   "jazz"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Swizzle Rum Bar & Drinkery",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Neme Gastro Bar",
+  "genres": [
+   "live",
+   "jazz",
+   "latin",
+   "reggaeton"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "SoBe Hookah",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Sha Wynwood",
+  "genres": [
+   "live",
+   "house",
+   "tech_house"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Tap 42 Craft Kitchen & Bar - Kendall",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "gastropub; barrio mal (Kendall)"
+ },
+ {
+  "name": "El Patio Wynwood",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "live",
+   "house"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "un Yelp lo marca cerrado; reverificar"
+ },
+ {
+  "name": "Turkish Airlines Lounge",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "sala VIP del aeropuerto MIA"
+ },
+ {
+  "name": "Mac's Club Deuce ♣️",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "dive bar historico: solo rocola, sin programacion"
+ },
+ {
+  "name": "MAD Club Wynwood",
+  "genres": [
+   "edm",
+   "house",
+   "latin"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "The Taurus Coconut Grove",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Fox's Lounge",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "barrio mal: South Miami; rocola, sin programacion"
+ },
+ {
+  "name": "SoBe Hookah At Clevelander Sports Bar",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "MODE Downtown Miami",
+  "genres": [
+   "house",
+   "tech_house",
+   "latin"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "The Auld Dubliner Irish Pub & Kitchen",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Tipsy Flamingo Cocktail Bar",
+  "genres": [
+   "hip_hop",
+   "reggaeton"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown, no Brickell"
+ },
+ {
+  "name": "Hookah bar at Kanoli",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false
+ },
+ {
+  "name": "Syndicate Wynwood",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "kava bar sin alcohol"
+ },
+ {
+  "name": "Bodega Taqueria y Tequila",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "esta fila apunta a Coral Gables, que NO tiene el club escondido"
+ },
+ {
+  "name": "Mama Tried",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "country/honky-tonk/rock: el vocabulario no lo cubre"
+ },
+ {
+  "name": "SoBe Hookah Brickell",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Bellas Cabaret - Miami Strip Club",
+  "genres": [
+   "latin"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true,
+  "note": "club de adultos; barrio mal: Hialeah"
+ },
+ {
+  "name": "Vendôme",
+  "genres": [
+   "house",
+   "hip_hop",
+   "pop"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "JOHNMARTIN's Restaurant & Bar",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Better Days",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Sawa Restaurant & Lounge",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": false,
+  "note": "restaurante; shows de bellydance"
+ },
+ {
+  "name": "Churchill's Pub",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "punk/metal; barrio mal: Little Haiti"
+ },
+ {
+  "name": "Barracuda Taphouse & Grill",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true,
+  "note": "barrio mal: Coconut Grove"
+ },
+ {
+  "name": "Sweet Caroline Karaoke Bar - Brickell",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true,
+  "note": "karaoke, tipado 'club'"
+ },
+ {
+  "name": "Lost Weekend",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Twist",
+  "genres": [
+   "latin",
+   "pop",
+   "hip_hop",
+   "house"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Rosario Miami",
+  "genres": [
+   "latin",
+   "reggaeton"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Daiquiri Bar",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "identidad ambigua; parece Bayside/Downtown"
+ },
+ {
+  "name": "Copper 29 Bar",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Savage Labs Wynwood",
+  "genres": [
+   "house",
+   "tech_house",
+   "jazz",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "305 Sports Bar",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Bougainvillea's Old Florida Tavern",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "barrio mal: South Miami"
+ },
+ {
+  "name": "Rooftop Cinema Club South Beach",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "cine al aire libre"
+ },
+ {
+  "name": "Duffy's Tavern",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Smoke Wynwood",
+  "genres": [
+   "hip_hop"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Seven Seas Bar",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "City Cigar Lounge",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "cigar lounge; barrio mal: Downtown"
+ },
+ {
+  "name": "Cucu's Nest Bar",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "duplicado: la sede 2805 Collins esta CERRADA"
+ },
+ {
+  "name": "Kush Brickell",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "hamburgueseria"
+ },
+ {
+  "name": "Medium Cool Cocktail Lounge",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Azúcar NightClub",
+  "genres": [
+   "latin",
+   "reggaeton"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Corbett's Sports Bar & Grill",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "barrio mal: Pinecrest"
+ },
+ {
+  "name": "Over Under",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Wynballs Billiards Bar & Grill Miami",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "salon de billar"
+ },
+ {
+  "name": "Sandbar Sports Grill",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "The Bar",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Kill Your Idol",
+  "genres": [
+   "live",
+   "jazz"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Tucandela Bar Kendall",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "barrio mal: Kendall"
+ },
+ {
+  "name": "Last Chance Bar & Package",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "esta en Florida City, ~35 millas al sur"
+ },
+ {
+  "name": "Lost Boy Dry Goods",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "South Pointe Tavern",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Hole in the Wall",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "no existe sede en Coconut Grove"
+ },
+ {
+  "name": "Do Not Sit On The Furniture",
+  "genres": [
+   "house",
+   "edm"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "S47 Lounge",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "La Victoria",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "house"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "La Otra at Mad Wynwood",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "house"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "PUB 52 Gastro + Kitchen - South Miami",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "barrio mal: South Miami"
+ },
+ {
+  "name": "Oasis Lounge and Hookah bar",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "The Sylvester",
+  "genres": [
+   "house"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true,
+  "note": "barrio: Midtown"
+ },
+ {
+  "name": "Booby Trap On The River",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "CLUB DE ADULTOS; barrio mal: Allapattah"
+ },
+ {
+  "name": "RedBar Brickell",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "open format real, sin genero defendible"
+ },
+ {
+  "name": "Toreros Bonfire Restaurant and Lounge Miami",
+  "genres": [
+   "latin",
+   "reggaeton"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true,
+  "note": "barrio mal: Little Havana"
+ },
+ {
+  "name": "Club M2 Miami",
+  "genres": [
+   "edm",
+   "house",
+   "latin",
+   "reggaeton"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Club Pink Pony",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "CLUB DE ADULTOS; barrio mal: Doral"
+ }
+]

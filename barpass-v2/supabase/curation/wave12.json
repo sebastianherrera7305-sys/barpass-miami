@@ -1,0 +1,659 @@
+[
+ {
+  "name": "Mission NYC",
+  "city": "New York",
+  "genres": [
+   "edm",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nebula",
+  "city": "New York",
+  "genres": [
+   "edm",
+   "house",
+   "tech_house",
+   "techno"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "NOTHING REALLY MATTERS",
+  "city": "New York",
+  "genres": [
+   "hip_hop",
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nubeluz",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Off the Wagon",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Old Mates Pub",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Old Town Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "vacio DOCUMENTADO: politica declarada de no tener musica"
+ },
+ {
+  "name": "Outer Heaven",
+  "city": "New York",
+  "genres": [
+   "house",
+   "disco",
+   "techno"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Overstory",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Paradise Club",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Black Pearl",
+  "city": "Ann Arbor",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Blue LLama Jazz Club and Restaurant",
+  "city": "Ann Arbor",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Brown Jug Restaurant",
+  "city": "Ann Arbor",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: South University"
+ },
+ {
+  "name": "Cantina",
+  "city": "Ann Arbor",
+  "genres": [
+   "country"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: South University"
+ },
+ {
+  "name": "Club Above",
+  "city": "Ann Arbor",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Conor O'Neill's Irish Pub",
+  "city": "Ann Arbor",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Fraser's Pub",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Good Time Charley's",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: South University"
+ },
+ {
+  "name": "Grizzly Peak Brewing Company",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "HOMES Brewery - Brewpub",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Foreign Exchange Lounge",
+  "city": "Las Vegas",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Garagiste Wine Room I Merchant",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Gatsby's Cocktail Lounge",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ghostbar",
+  "city": "Las Vegas",
+  "genres": [
+   "hip_hop",
+   "reggae",
+   "pop",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Juliet Cocktail Room",
+  "city": "Las Vegas",
+  "genres": [
+   "live",
+   "rnb",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Legacy Club",
+  "city": "Las Vegas",
+  "genres": [
+   "house",
+   "edm",
+   "hip_hop",
+   "latin",
+   "pop",
+   "country",
+   "jazz",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "LIV Nightclub Las Vegas",
+  "city": "Las Vegas",
+  "genres": [
+   "edm",
+   "house",
+   "tech_house",
+   "techno",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "LUV Lounge",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Luxe Lounge - Hookah & Cocktail Bar Las Vegas",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mango Tango Nightclub | Club Nocturno | Las Vegas",
+  "city": "Las Vegas",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "salsa",
+   "bachata",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Flamingo Bar",
+  "city": "Los Angeles",
+  "genres": [
+   "reggaeton",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Florentín Rooftop Bar",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Good Clean Fun",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "High Desert",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jungle Hollywood",
+  "city": "Los Angeles",
+  "genres": [
+   "house",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kiss Kiss Bang Bang",
+  "city": "Los Angeles",
+  "genres": [
+   "disco",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kultur Lounge",
+  "city": "Los Angeles",
+  "genres": [
+   "afrobeats",
+   "reggae",
+   "hip_hop"
+  ],
+  "is_nightlife": true,
+  "note": "cambio de operador: antes The Marke, politica musical distinta"
+ },
+ {
+  "name": "La Boom",
+  "city": "Los Angeles",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "bachata",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "La Costeña Bar",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "La Descarga",
+  "city": "Los Angeles",
+  "genres": [
+   "salsa",
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Hollywood"
+ },
+ {
+  "name": "Coaches Sports Bar & Grill",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Crazy Horse",
+  "city": "Bloomington",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dave & Buster's Bloomington, IN",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "FARMbloomington",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Friendly Beasts Cider Company",
+  "city": "Bloomington",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hoosier Bar & Grill",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hoppy Wobbles Pub",
+  "city": "Bloomington",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Janko's Little Zagreb",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Kilroy's on Kirkwood",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kilroy's Sports Bar",
+  "city": "Bloomington",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Devil's Hideaway",
+  "city": "Tempe",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Doc & Eddy's",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Drop Dead Gorgeous",
+  "city": "Tempe",
+  "genres": [
+   "disco",
+   "funk",
+   "soul"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fat Tuesday",
+  "city": "Tempe",
+  "genres": [
+   "pop",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Final Round",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Four Peaks Brewing Company",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Glow Tempe",
+  "city": "Tempe",
+  "genres": [
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Idle Hands",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Low Key Piano Bar",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "cerrado permanentemente en agosto 2026 tras 12 anios"
+ },
+ {
+  "name": "Lush Cafe and Lounge",
+  "city": "Tempe",
+  "genres": [
+   "rnb",
+   "hip_hop",
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club Mareco's",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Danny's Dive Bar & Grill",
+  "city": "Baton Rouge",
+  "genres": [
+   "live",
+   "americana",
+   "country",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dark 30 Wine & CraftCocktail Bar",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Deuce's Bar and Lounge",
+  "city": "Baton Rouge",
+  "genres": [
+   "blues",
+   "soul",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dj's Club Elite",
+  "city": "Baton Rouge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "DraftKings Sportsbook",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "sala de apuestas dentro del casino The Queen, no es un bar"
+ },
+ {
+  "name": "Edge Lounge at L'Auberge Baton Rouge",
+  "city": "Baton Rouge",
+  "genres": [
+   "live",
+   "rock",
+   "pop",
+   "soul"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Firehaus",
+  "city": "Baton Rouge",
+  "genres": [
+   "rnb",
+   "pop",
+   "house",
+   "afrobeats",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fred's Bar & Grill",
+  "city": "Baton Rouge",
+  "genres": [
+   "live",
+   "rock"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Tigerland"
+ },
+ {
+  "name": "Hayride Scandal",
+  "city": "Baton Rouge",
+  "genres": [
+   "jazz",
+   "funk",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Capital District Social",
+  "city": "Tallahassee",
+  "genres": [
+   "hip_hop",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Charlie Park",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Clydes & Costello's",
+  "city": "Tallahassee",
+  "genres": [
+   "house",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "DEEP Brewing Company",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Duke's & Dottie's",
+  "city": "Tallahassee",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: Midtown"
+ },
+ {
+  "name": "Eve on Adams",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fermentation Lounge",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fire Betty's Arcade Bar",
+  "city": "Tallahassee",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: Midtown"
+ },
+ {
+  "name": "Flamingoz | A Taste of Miami",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Railroad Square"
+ },
+ {
+  "name": "Fuma Cigar Social",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio: Midtown"
+ }
+]

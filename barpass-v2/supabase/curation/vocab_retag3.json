@@ -1,0 +1,7 @@
+[
+ {"name":"Madame X","city":"New York","genres":["dancehall","reggae","soca","hip_hop","rnb","soul","latin","techno"],"is_nightlife":true},
+ {"name":"Le Nocturne Chicago","city":"Chicago","genres":["house","afrobeats","hip_hop","dancehall","soca","reggae"],"is_nightlife":true},
+ {"name":"Masada Nightclub","city":"Chicago","genres":["house","afrobeats","amapiano","dancehall","soca","rnb","techno"],"is_nightlife":true},
+ {"name":"Kultur Lounge","city":"Los Angeles","genres":["afrobeats","amapiano","dancehall","hip_hop"],"is_nightlife":true},
+ {"name":"Amor Miami","city":"Miami","genres":["rnb","afrobeats","amapiano","soca","dancehall"],"is_nightlife":true}
+]

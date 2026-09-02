@@ -1,0 +1,484 @@
+[
+ {
+  "name": "The Walrus",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Forty Deuce Burlesque & Speakeasy",
+  "city": "Columbus",
+  "genres": [
+   "live",
+   "jazz"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "burlesque/adulto"
+ },
+ {
+  "name": "VASO",
+  "city": "Columbus",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Old North Arcade Bar",
+  "city": "Columbus",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "barrio mal: Old North/Clintonville"
+ },
+ {
+  "name": "Boston's Pizza Restaurant & Sports Bar",
+  "city": "Columbus",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "cadena de pizza"
+ },
+ {
+  "name": "Mangos Mediterranean Grill Lounge & Bar",
+  "city": "Columbus",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "The Bluestone",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "rock/punk/americana: fuera del vocabulario"
+ },
+ {
+  "name": "Tip Top Kitchen & Cocktails",
+  "city": "Columbus",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Arch City Tavern",
+  "city": "Columbus",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "230 Fifth Rooftop Bar",
+  "city": "New York",
+  "genres": [
+   "latin",
+   "pop",
+   "house"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Keens Steakhouse",
+  "city": "New York",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "steakhouse historico"
+ },
+ {
+  "name": "McSorley’s Old Ale House",
+  "city": "New York",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true,
+  "note": "sin musica por definicion: vacio es un HECHO, no un hueco"
+ },
+ {
+  "name": "The Dead Rabbit",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true,
+  "note": "irlandesa tradicional"
+ },
+ {
+  "name": "Time Out Market New York",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "confidence": "medium",
+  "is_nightlife": false,
+  "note": "food hall; esta en DUMBO Brooklyn"
+ },
+ {
+  "name": "Fraunces Tavern",
+  "city": "New York",
+  "genres": [
+   "live",
+   "jazz"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Magic Hour Rooftop Bar & Lounge",
+  "city": "New York",
+  "genres": [
+   "hip_hop",
+   "house",
+   "pop"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Birdland Jazz Club",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Refinery Rooftop",
+  "city": "New York",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": true
+ },
+ {
+  "name": "Harlem Tavern",
+  "city": "New York",
+  "genres": [
+   "live",
+   "jazz",
+   "rnb"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Lafitte's Blacksmith Shop Bar",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Pat O'Brien's",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Napoleon House",
+  "city": "New Orleans",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "restaurante diurno"
+ },
+ {
+  "name": "The Spotted Cat Music Club",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "House of Blues New Orleans",
+  "city": "New Orleans",
+  "genres": [
+   "live",
+   "hip_hop",
+   "rnb"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "The Carousel Bar & Lounge",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "Walk-On's Sports Bistreaux - New Orleans",
+  "city": "New Orleans",
+  "genres": [],
+  "confidence": "none",
+  "is_nightlife": false,
+  "note": "cadena deportiva"
+ },
+ {
+  "name": "Bacchanal Fine Wine & Spirits",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "confidence": "high",
+  "is_nightlife": true
+ },
+ {
+  "name": "The World Famous Cats Meow | Karaoke New Orleans",
+  "city": "New Orleans",
+  "genres": [
+   "pop",
+   "hip_hop"
+  ],
+  "confidence": "medium",
+  "is_nightlife": true
+ },
+ {
+  "name": "Aba",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "restaurante mediterraneo"
+ },
+ {
+  "name": "Three Dots and a Dash",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "retype": "bar"
+ },
+ {
+  "name": "Timothy O'Toole's Pub Chicago",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cindy's Rooftop",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jake Melnick's Corner Tap",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Green Mill",
+  "city": "Chicago",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Andy's Jazz Club & Restaurant",
+  "city": "Chicago",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "retype": "lounge"
+ },
+ {
+  "name": "Hopleaf",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "sin musica por diseño; barrio mal: Andersonville"
+ },
+ {
+  "name": "TAO Chicago",
+  "city": "Chicago",
+  "genres": [
+   "hip_hop",
+   "edm",
+   "pop",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Howl at the Moon Chicago",
+  "city": "Chicago",
+  "genres": [
+   "live",
+   "pop"
+  ],
+  "is_nightlife": true,
+  "retype": "bar"
+ },
+ {
+  "name": "Ole Red",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "country"
+ },
+ {
+  "name": "Martin's Bar-B-Que Joint",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": false,
+  "note": "restaurante de barbacoa"
+ },
+ {
+  "name": "Pinewood",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Rutledge Hill/SoBro"
+ },
+ {
+  "name": "Tootsies Orchid Lounge",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "country"
+ },
+ {
+  "name": "Acme Feed & Seed",
+  "city": "Nashville",
+  "genres": [
+   "live",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Friends in Low Places Bar & Honky-Tonk",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "country"
+ },
+ {
+  "name": "Kid Rock's Big Ass Honky Tonk Rock N' Roll Steakhouse",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "country/bluegrass"
+ },
+ {
+  "name": "Robert's Western World",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "country tradicional"
+ },
+ {
+  "name": "Dierks Bentley's Whiskey Row - Nashville",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "country"
+ },
+ {
+  "name": "Zanzibar",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Upstairs at Caroline",
+  "city": "Austin",
+  "genres": [
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Edge Rooftop",
+  "city": "Austin",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Champions Austin Restaurant & Bar",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "bar de lobby de hotel"
+ },
+ {
+  "name": "Ojos Locos Sports Cantina - Austin",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "cadena de 33 locales"
+ },
+ {
+  "name": "Elephant Room",
+  "city": "Austin",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The White Horse",
+  "city": "Austin",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "country/western swing"
+ },
+ {
+  "name": "The Roosevelt Room",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "B.D. Riley's Irish Pub at Mueller",
+  "city": "Austin",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "irlandesa tradicional"
+ }
+]

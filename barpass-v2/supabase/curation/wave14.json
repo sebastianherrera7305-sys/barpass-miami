@@ -1,0 +1,582 @@
+[
+ {
+  "name": "The LIbrary",
+  "city": "Oxford",
+  "genres": [
+   "live",
+   "country",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Sipp on South Lamar",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Walk-On's Sports Bistreaux - Oxford Restaurant",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Whiskey Ranch Oxford",
+  "city": "Oxford",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Palmas Tropical Escape",
+  "city": "Columbus",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "salsa",
+   "bachata"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Proof by the ALIBI",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Pure Ultra Lounge",
+  "city": "Columbus",
+  "genres": [
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rambling House Music Bar",
+  "city": "Columbus",
+  "genres": [
+   "americana",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Renie's Lounge",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sacred Palm",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sky Bar",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Spain Night Club",
+  "city": "Columbus",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Spruce St. Sporting",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Standard Live",
+  "city": "Columbus",
+  "genres": [
+   "rock",
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hi-Lo Lounge",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "tuvo bookings de garage/punk, el ultimo verificable es de 2019"
+ },
+ {
+  "name": "Hidden Gem",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "HYBAR",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Last Resort Grill",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "el club de musica de 1966 ya no existe; hoy es restaurante"
+ },
+ {
+  "name": "Little King's Shuffle Club",
+  "city": "Athens",
+  "genres": [
+   "rock",
+   "soul",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Locos Grill & Pub Athens Eastside",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Locos Grill and Pub",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Magnolias Bar of Athens",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Manhattan Cafe",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Moonshine Bar & Grill",
+  "city": "Athens",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Legends Corner",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "lou/na",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lucky Bastard Saloon",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Martha My Dear",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mother's Ruin",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nashville Tap House",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Donelson, junto al aeropuerto"
+ },
+ {
+  "name": "Night We Met",
+  "city": "Nashville",
+  "genres": [
+   "house",
+   "tech_house",
+   "techno"
+  ],
+  "is_nightlife": true,
+  "note": "cambio de operador: era 12th & Porter, sala de musica en vivo; barrio The Gulch"
+ },
+ {
+  "name": "NoWhere Special",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "reemplazo al Belcourt Supper Club, jul 2026; barrio Hillsboro Village"
+ },
+ {
+  "name": "Nudie's Honky Tonk",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ole Smoky Distillery \"6th & Peabody\"",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Little Gem",
+  "city": "Chapel Hill",
+  "genres": [
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Local 506",
+  "city": "Chapel Hill",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Might As Well Bar & Grill",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "One40 Social",
+  "city": "Chapel Hill",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Pantana Bob's",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sidetrack Bar & Lounge",
+  "city": "Chapel Hill",
+  "genres": [
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Baxter Arcade",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Blue Horn Lounge",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Casual Pint of Chapel Hill",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "cerrado permanentemente en diciembre 2025 tras seis anios"
+ },
+ {
+  "name": "The Cave",
+  "city": "Chapel Hill",
+  "genres": [
+   "rock",
+   "hip_hop",
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Le Nocturne Chicago",
+  "city": "Chicago",
+  "genres": [
+   "house",
+   "afrobeats",
+   "hip_hop",
+   "dancehall",
+   "reggae"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Level Sporting Club",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "LiqrBox",
+  "city": "Chicago",
+  "genres": [
+   "pop",
+   "hip_hop",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lulu's Speakeasy",
+  "city": "Chicago",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Masada Nightclub",
+  "city": "Chicago",
+  "genres": [
+   "house",
+   "afrobeats",
+   "dancehall",
+   "rnb",
+   "techno"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Midnight Noir Lounge & Skydeck",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "MONEYGUN",
+  "city": "Chicago",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nine Bar",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "No Vacancy",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nobody's Darling",
+  "city": "Chicago",
+  "genres": [
+   "soul",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Pattern Break Brewing",
+  "city": "Boulder",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Pearl Street Pub & Cellar",
+  "city": "Boulder",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Postino Boulder",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Press Play Bar",
+  "city": "Boulder",
+  "genres": [
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rayback Collective",
+  "city": "Boulder",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rosetta Hall",
+  "city": "Boulder",
+  "genres": [
+   "house",
+   "hip_hop",
+   "pop",
+   "live",
+   "jazz",
+   "americana"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Siren Cocktail Bar",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Southern Sun Pub & Brewery",
+  "city": "Boulder",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sundown Saloon",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "T-Zero Lounge",
+  "city": "Boulder",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "J&J's Sports Lounge",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jewel of the South",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "JOLIE",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Warehouse District"
+ },
+ {
+  "name": "Kermit's Tremé Mother-in-Law Lounge",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "little bar on gravier",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "NightBloom",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Bywater"
+ },
+ {
+  "name": "Observatory Eleven Bar",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Octavia Cocktail Lounge",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Oz New Orleans",
+  "city": "New Orleans",
+  "genres": [
+   "pop",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Paradise Lounge",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "los DJs del hotel son en Chapel Club, otra sala"
+ }
+]

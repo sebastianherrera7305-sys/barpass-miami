@@ -1,0 +1,476 @@
+[
+ {
+  "name": "Vintage Green Rooftop",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "retype": "bar"
+ },
+ {
+  "name": "House of Yes",
+  "city": "New York",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true,
+  "note": "mucho disco: sin entrada en el vocabulario"
+ },
+ {
+  "name": "Stout NYC",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Space Karaoke Bar & Lounge | Koreatown NYC",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "alquiler de salas de karaoke"
+ },
+ {
+  "name": "Slate",
+  "city": "New York",
+  "genres": [
+   "hip_hop",
+   "pop",
+   "edm",
+   "afrobeats"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Haven Rooftop",
+  "city": "New York",
+  "genres": [
+   "hip_hop",
+   "edm"
+  ],
+  "is_nightlife": true,
+  "retype": "bar"
+ },
+ {
+  "name": "Employees Only",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "retype": "bar"
+ },
+ {
+  "name": "Pig n Whistle",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dutch Fred's",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Campbell",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "LH Rooftop",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Buddy Guy's Legends",
+  "city": "Chicago",
+  "genres": [
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Gus' Sip & Dip",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "LUXBAR",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "American Airlines Flagship Lounge",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Airline lounge inside O'Hare Terminal 3, not a public nightlife venue"
+ },
+ {
+  "name": "Swissport Lounge Chicago",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Contract airport lounge at O'Hare, not a public nightlife venue"
+ },
+ {
+  "name": "ROOF on theWit",
+  "city": "Chicago",
+  "genres": [
+   "pop",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "TNT Rooftop Restaurant",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "restaurante"
+ },
+ {
+  "name": "Brando's Speakeasy",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "karaoke"
+ },
+ {
+  "name": "Budweiser Brickhouse Tavern",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Old Fashioned",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nitty Gritty-Madison",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "su pasado de blues es historico, no programacion actual"
+ },
+ {
+  "name": "Tipsy Cow",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "restaurante"
+ },
+ {
+  "name": "The Coopers Tavern",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "sin musica en vivo, confirmado"
+ },
+ {
+  "name": "Eno Vino Downtown",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "wine bar de hotel"
+ },
+ {
+  "name": "State Street Brats",
+  "city": "Madison",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Off Broadway Drafthouse",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "taproom; ojo: otro negocio con nombre parecido SI tiene musica"
+ },
+ {
+  "name": "The Great Dane Pub & Brewing Company",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "cadena de brewpubs; una sede figura cerrada"
+ },
+ {
+  "name": "Merchant Madison",
+  "city": "Madison",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "afrobeats",
+   "pop",
+   "latin",
+   "reggaeton",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Blue Moon Bar & Grill",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "barrio mal: Hill Farms, no Regent"
+ },
+ {
+  "name": "Seventh Son Brewing Co.",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": false,
+  "note": "brewery; musica solo en aniversarios"
+ },
+ {
+  "name": "The Goat RiverSouth",
+  "city": "Columbus",
+  "genres": [
+   "live",
+   "country",
+   "blues",
+   "jazz"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lincoln Social Rooftop",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Short North"
+ },
+ {
+  "name": "Varsity Club Restaurant & Bar",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports bar de campus"
+ },
+ {
+  "name": "Short North Pint House",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Stone Bar and Kitchen",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "pizzeria; barrio mal"
+ },
+ {
+  "name": "Parlay Sporting Club + Kitchen",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Short North"
+ },
+ {
+  "name": "Bodega",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mandrake Rooftop",
+  "city": "Columbus",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Slammers",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "AREA15",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "distrito de entretenimiento, no un local"
+ },
+ {
+  "name": "Peppermill Restaurant and Fireside Lounge",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true,
+  "retype": "lounge"
+ },
+ {
+  "name": "Tom's Watch Bar",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "cadena de sports bars"
+ },
+ {
+  "name": "BrewDog Las Vegas",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Herbs and Rye",
+  "city": "Las Vegas",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: W Sahara"
+ },
+ {
+  "name": "The Golden Tiki",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Beer Park",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Las Vegas Club Crawl - World Crawl",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Bus tour operator between other clubs, not a venue"
+ },
+ {
+  "name": "Drai's After Hours Las Vegas",
+  "city": "Las Vegas",
+  "genres": [
+   "hip_hop",
+   "house",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Chandelier",
+  "city": "Las Vegas",
+  "genres": [
+   "hip_hop",
+   "edm",
+   "latin",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Perch",
+  "city": "Los Angeles",
+  "genres": [
+   "live",
+   "jazz",
+   "rnb",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tom's Watch Bar - Los Angeles",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "cadena de sports bars"
+ },
+ {
+  "name": "EightyTwo",
+  "city": "Los Angeles",
+  "genres": [
+   "house",
+   "jazz",
+   "rock",
+   "rnb",
+   "afrobeats"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Seven Grand",
+  "city": "Los Angeles",
+  "genres": [
+   "live",
+   "jazz",
+   "blues"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "La Cita Bar",
+  "city": "Los Angeles",
+  "genres": [
+   "latin",
+   "hip_hop",
+   "reggaeton",
+   "rock",
+   "rnb",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "XLanes",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "AVALON Hollywood & Bardot",
+  "city": "Los Angeles",
+  "genres": [
+   "edm",
+   "house",
+   "rnb",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Good Times at Davey Wayne's",
+  "city": "Los Angeles",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "33 Taps Silver Lake",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports bar"
+ },
+ {
+  "name": "Spire 73",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ }
+]

@@ -1,0 +1,10 @@
+[
+ {"name":"Robert's Western World","city":"Nashville","genres":["country","live"],"is_nightlife":true},
+ {"name":"Tootsies Orchid Lounge","city":"Nashville","genres":["country","live"],"is_nightlife":true},
+ {"name":"Ole Red","city":"Nashville","genres":["country","live"],"is_nightlife":true},
+ {"name":"Kid Rock's Big Ass Honky Tonk Rock N' Roll Steakhouse","city":"Nashville","genres":["country","rock","live"],"is_nightlife":true},
+ {"name":"Dierks Bentley's Whiskey Row - Nashville","city":"Nashville","genres":["country","live"],"is_nightlife":true},
+ {"name":"Friends in Low Places Bar & Honky-Tonk","city":"Nashville","genres":["country","live"],"is_nightlife":true},
+ {"name":"Martin's Bar-B-Que Joint","city":"Nashville","genres":["live"],"is_nightlife":false},
+ {"name":"Acme Feed & Seed","city":"Nashville","genres":["rock","live"],"is_nightlife":true}
+]

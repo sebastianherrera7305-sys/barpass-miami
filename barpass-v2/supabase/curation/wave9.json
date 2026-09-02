@@ -1,0 +1,621 @@
+[
+ {
+  "name": "414 Pub Pizza & Karaoke - Tempe",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Alibi",
+  "city": "Tempe",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Louie - Tempe Marketplace",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bogeys Sports Bar & Grill",
+  "city": "Tempe",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bonfire Craft Kitchen and Tap House Tempe",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Boondocks Patio & Grill Tempe",
+  "city": "Tempe",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Brick & Barley - A Neighborhood Bar & Grill",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "CASA Tempe",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Casey Moore's Oyster House",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Castro's Cigar Lounge & Bar",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "1824 Cocktails & Coffee",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Allen Rumsey Cocktail Lounge",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Alley Bar",
+  "city": "Ann Arbor",
+  "genres": [
+   "rnb"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: downtown, no Old West Side"
+ },
+ {
+  "name": "Ann Arbor Distilling Company",
+  "city": "Ann Arbor",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Aperitivo",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: downtown"
+ },
+ {
+  "name": "Arbor Brewing Company Session Room",
+  "city": "Ann Arbor",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Scio Township"
+ },
+ {
+  "name": "ArborTree Lounge",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: corredor Plymouth Rd"
+ },
+ {
+  "name": "Ashley's Restaurant & Pub",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Babs' Underground",
+  "city": "Ann Arbor",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: downtown"
+ },
+ {
+  "name": "Bill's Beer Garden",
+  "city": "Ann Arbor",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: downtown; estacional, cerrado nov-marzo"
+ },
+ {
+  "name": "Dexter's Pub",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Double Tap (Tap Tap) - Madison",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dutch Mill Sports Club",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Echo Tap & Grill",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "FIVE Nightclub",
+  "city": "Madison",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Garver Lounge",
+  "city": "Madison",
+  "genres": [
+   "live",
+   "rock",
+   "latin",
+   "salsa"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Genna's Lounge",
+  "city": "Madison",
+  "genres": [
+   "hip_hop",
+   "funk",
+   "soul",
+   "reggae"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Gib's",
+  "city": "Madison",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Imaginary Factory",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ivory Room Piano Bar",
+  "city": "Madison",
+  "genres": [
+   "live",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "13 Social",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Avanti Night Club",
+  "city": "Baton Rouge",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bald Eagle Pub",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bin 77 Bistro & Sidebar",
+  "city": "Baton Rouge",
+  "genres": [
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bogie's",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Tigerland/LSU"
+ },
+ {
+  "name": "Brickyard South Bar + Patio",
+  "city": "Baton Rouge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Capital Park Bar & Grill",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "CLICKS Billiards - Billiards, Games, Sports, Bar & Grill",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Bocage/Towne Center"
+ },
+ {
+  "name": "Club Eighty-One 50",
+  "city": "Baton Rouge",
+  "genres": [
+   "blues",
+   "rnb",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club Excalibur",
+  "city": "Baton Rouge",
+  "genres": [
+   "rnb",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "renombrado Club Castle, misma direccion"
+ },
+ {
+  "name": "Arcade Bar",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Baby J’s Bar",
+  "city": "Gainesville",
+  "genres": [
+   "jazz",
+   "live",
+   "funk",
+   "soul"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Balls",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Blackadder Brewing Company",
+  "city": "Gainesville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Boxcar",
+  "city": "Gainesville",
+  "genres": [
+   "reggae",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bricks Restaurant & Patio Bar",
+  "city": "Gainesville",
+  "genres": [
+   "hip_hop",
+   "pop"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown, no Pleasant Street"
+ },
+ {
+  "name": "Capones GNV",
+  "city": "Gainesville",
+  "genres": [
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Covey Kitchen + Cocktails",
+  "city": "Gainesville",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": false
+ },
+ {
+  "name": "Crafty Bastards Restaurant",
+  "city": "Gainesville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cry Baby’s",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "4th Quarter Bar & Grille",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "926 Bar & Grill",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bajas",
+  "city": "Tallahassee",
+  "genres": [
+   "latin",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar 1903",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Barrel Proof lounge",
+  "city": "Tallahassee",
+  "genres": [
+   "country",
+   "rock",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Battle Pony",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Blue Tavern",
+  "city": "Tallahassee",
+  "genres": [
+   "blues",
+   "jazz",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bowden's",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Brick House Restaurant & Bar",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bullwinkle's Saloon",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kavakaze",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "bar de kava/kratom, sin alcohol"
+ },
+ {
+  "name": "Classic's Victory's Sports Bar",
+  "city": "Columbus",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club Diversity",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Merion Village"
+ },
+ {
+  "name": "Coaches Bar & Grill",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cure Coffee and Cocktails",
+  "city": "Columbus",
+  "genres": [
+   "hip_hop",
+   "soul"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "DENMARK",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "District West",
+  "city": "Columbus",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "DraftKings Sports & Social Columbus",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "DUECENTO",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Eupouria (You Pour)",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fanatics Sportsbook Columbus",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "casa de apuestas deportivas anexa a la Nationwide Arena, cierra 10pm"
+ },
+ {
+  "name": "Busy Signal",
+  "city": "Austin",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "house",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cain & Abel's",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cheer Up Charlies",
+  "city": "Austin",
+  "genres": [
+   "live",
+   "rock",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club Bantu",
+  "city": "Austin",
+  "genres": [
+   "afrobeats",
+   "latin",
+   "salsa",
+   "bachata"
+  ],
+  "is_nightlife": false,
+  "exclude": "productora/promotora de fiestas, no un local fijo — sus eventos ocurren en venues ajenos"
+ },
+ {
+  "name": "Codependent Cocktails + Coffee",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cosmic Saltillo",
+  "city": "Austin",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dive Bar Austin",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Donn's Depot",
+  "city": "Austin",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Drinks Lounge",
+  "city": "Austin",
+  "genres": [
+   "rock",
+   "soul"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "DrinkWell",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ }
+]

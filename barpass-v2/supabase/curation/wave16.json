@@ -1,0 +1,685 @@
+[
+ {
+  "name": "SMOKE WORLD by LIONSDELIVER.COM",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "smoke shop y hookah lounge sin licencia de licor"
+ },
+ {
+  "name": "The Basement Nightspot",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Brewery",
+  "city": "State College",
+  "genres": [
+   "live",
+   "rock",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Corner Room",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "The Lobby Bar",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "bar dentro del Hotel State College, misma direccion que Zeno's y The Corner Room"
+ },
+ {
+  "name": "The Press: Cider & Craft Beverage Taphouse",
+  "city": "State College",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Shandygaff",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Tavern",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Triplett's",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "restaurante/bar dentro del Nittany Lion Inn"
+ },
+ {
+  "name": "Your Cigar Den and Montecristo Lounge",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "tabaquería con salon BYOB, sin licencia de licor"
+ },
+ {
+  "name": "Zeno's",
+  "city": "State College",
+  "genres": [
+   "live",
+   "blues",
+   "americana",
+   "rock",
+   "funk"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Parlour Bar",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Play Dance Bar",
+  "city": "Nashville",
+  "genres": [
+   "pop",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Pullman Standard Bar",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Pushing Daisies",
+  "city": "Nashville",
+  "genres": [
+   "latin",
+   "reggaeton"
+  ],
+  "is_nightlife": true,
+  "note": "en 570 Broadway pero NO es honky-tonk"
+ },
+ {
+  "name": "Rare Bird",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Redneck Riviera Bar & BBQ",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rivière Rooftop",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Scoreboard Bar & Grill",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "renombrado Scoreboard Opry; barrio Music Valley, no Donelson"
+ },
+ {
+  "name": "Sidebar",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "SkyBar Green Hills",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Green Hills"
+ },
+ {
+  "name": "Skye Lounge",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "HOMES Campus - Beer Garden & Taproom",
+  "city": "Ann Arbor",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hunã",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Jolly Pumpkin Cafe & Brewery",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown; la musica en vivo es de la sede de Dexter"
+ },
+ {
+  "name": "LIVE",
+  "city": "Ann Arbor",
+  "genres": [
+   "live",
+   "rock",
+   "blues",
+   "funk",
+   "country",
+   "hip_hop",
+   "pop",
+   "edm"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Lowertown Bar & Cafe",
+  "city": "Ann Arbor",
+  "genres": [
+   "house",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lucky Strike Ann Arbor",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "bolera y arcade para todas las edades"
+ },
+ {
+  "name": "Mash Bar",
+  "city": "Ann Arbor",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Monty's Public House",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Necto",
+  "city": "Ann Arbor",
+  "genres": [
+   "goth",
+   "edm",
+   "pop",
+   "hip_hop"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Nightcap",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown; los DJs son de Lo-Fi, venue separado en su sotano"
+ },
+ {
+  "name": "North Star Lounge",
+  "city": "Ann Arbor",
+  "genres": [
+   "jazz",
+   "americana",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lennie's Brewpub",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Malibu Grill",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Mona Bar & Lounge",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mother Bear's Pizza Campus",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Nick's English Hut",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Night Moves",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "adult_entertainment"
+ },
+ {
+  "name": "Ocean Sports Bar & Indian Restaurant",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Oliver Winery",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Root Cellar",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Serendipity Martini Bar",
+  "city": "Bloomington",
+  "genres": [
+   "latin",
+   "salsa",
+   "bachata",
+   "reggaeton"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sleeper's Bar",
+  "city": "Bloomington",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Growler Country",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hummingbird Wine Bar",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Just One More",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ken's Tavern",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: The Strip (FSU), no Frenchtown; NO esta cerrado"
+ },
+ {
+  "name": "Level 8 Lounge",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Poor Paul's Pourhouse",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "cerrado permanentemente en abril 2025 tras casi 50 anios"
+ },
+ {
+  "name": "Public House",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: The Strip; mismo complejo y telefono que Ken's Tavern"
+ },
+ {
+  "name": "Recess at CollegeTown",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sharky's Lounge",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Signature Lounge",
+  "city": "Tallahassee",
+  "genres": [
+   "hip_hop",
+   "funk",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Smitty's Taphouse & Grill",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mazaj Hookah Lounge",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mill's Modern Social",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Monkey Pants Bar & Grill",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nara Hookah",
+  "city": "Tempe",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Neon Spur",
+  "city": "Tempe",
+  "genres": [
+   "country",
+   "rock",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Palo Verde Lounge",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "cerrado permanentemente en agosto 2026 tras 62 anios, al morir su dueno"
+ },
+ {
+  "name": "Pedal Haus Brewery - Tempe",
+  "city": "Tempe",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Philly's Sports Grill",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Postino Annex",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rodeo Ranch",
+  "city": "Tempe",
+  "genres": [
+   "country"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "SaltFire Brewery Co Taphouse",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nightclub on Wheels Experience",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "no es un local: es un paquete de fiesta en autobus de GXP Tours; la direccion es una oficina"
+ },
+ {
+  "name": "Nocturno cocktail bar",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "North Show Terrace",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio: The Strip; terraza gratuita del Wynn, no es club"
+ },
+ {
+  "name": "Nowhere Lounge",
+  "city": "Las Vegas",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: The Strip"
+ },
+ {
+  "name": "Oak & Ivy",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "la musica en vivo es del escenario del Container Park, no suya"
+ },
+ {
+  "name": "Oddfellows",
+  "city": "Las Vegas",
+  "genres": [
+   "goth",
+   "rock",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Petite Boheme",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Arts District (18b)"
+ },
+ {
+  "name": "Petrossian Bar",
+  "city": "Las Vegas",
+  "genres": [
+   "live",
+   "jazz",
+   "pop"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: The Strip (el campo tiene una direccion, no un barrio)"
+ },
+ {
+  "name": "Piranha Nightclub",
+  "city": "Las Vegas",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "pop",
+   "house",
+   "edm"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: Paradise / Fruit Loop"
+ },
+ {
+  "name": "PROWL - Cocktail Hideaway",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Arts District (18b)"
+ },
+ {
+  "name": "PUB 365",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio: Paradise, fuera del Strip"
+ },
+ {
+  "name": "Pluck Wine Bar & Restaurant",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Warehouse District"
+ },
+ {
+  "name": "Prohibition",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Q&C Bar",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Razzoo Bar & Patio",
+  "city": "New Orleans",
+  "genres": [
+   "pop",
+   "hip_hop",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Republic NOLA",
+  "city": "New Orleans",
+  "genres": [
+   "edm",
+   "hip_hop",
+   "rock",
+   "pop",
+   "reggaeton",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Warehouse District"
+ },
+ {
+  "name": "Rosie's On The Roof",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Warehouse District; la musica es de BB's Stage Door Canteen, otro edificio"
+ },
+ {
+  "name": "Salon Salon",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "SNEAKY PETE'S",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: French Quarter"
+ },
+ {
+  "name": "The AllWays Lounge & Cabaret",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Double Club",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Garage Music Club",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "direccion: su sitio dice 806 Conti, el catalogo 810"
+ }
+]

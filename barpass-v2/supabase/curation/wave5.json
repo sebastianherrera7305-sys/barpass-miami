@@ -1,0 +1,634 @@
+[
+ {
+  "name": "Skully's Music-Diner",
+  "city": "Columbus",
+  "genres": [
+   "live",
+   "rock",
+   "hip_hop",
+   "edm",
+   "pop"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: Short North"
+ },
+ {
+  "name": "Worthington Tavern",
+  "city": "Columbus",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Byrne's Pub",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "celta/bluegrass: sin entrada en el vocabulario"
+ },
+ {
+  "name": "Union Cafe",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ethyl & Tank",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Char Bar",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "rocola"
+ },
+ {
+  "name": "Ledo's Tavern",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "retype": "bar"
+ },
+ {
+  "name": "Dick's Den",
+  "city": "Columbus",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Old North"
+ },
+ {
+  "name": "Park Street Tavern",
+  "city": "Columbus",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "retype": "bar"
+ },
+ {
+  "name": "D&S Lounge",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: 'Walnut Hills' es de Cincinnati, no Columbus"
+ },
+ {
+  "name": "Azul Rooftop",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hopfields",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "gastropub"
+ },
+ {
+  "name": "Tiki Tatsu-Ya",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "restaurante tiki"
+ },
+ {
+  "name": "Sahara Lounge",
+  "city": "Austin",
+  "genres": [
+   "live",
+   "afrobeats",
+   "blues",
+   "rock",
+   "country"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mister Tramps Sports Pub",
+  "city": "Austin",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Otopia Rooftop Lounge",
+  "city": "Austin",
+  "genres": [
+   "live",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Little Woodrow's West 6th",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "77° Rooftop Patio Bar",
+  "city": "Austin",
+  "genres": [
+   "pop",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mean Eyed Cat",
+  "city": "Austin",
+  "genres": [
+   "live",
+   "country",
+   "blues",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kitty Cohen's",
+  "city": "Austin",
+  "genres": [
+   "hip_hop",
+   "latin"
+  ],
+  "is_nightlife": true,
+  "retype": "bar",
+  "note": "barrio mal: East Austin"
+ },
+ {
+  "name": "Blondies Sports Bar & Grill",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports bar"
+ },
+ {
+  "name": "Flanker Kitchen + Sports Bar",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports bar"
+ },
+ {
+  "name": "Luna Lounge",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Guy Fieri's Flavortown Sports Kitchen",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "restaurante"
+ },
+ {
+  "name": "The Underground Speakeasy and Distillery",
+  "city": "Las Vegas",
+  "genres": [
+   "live",
+   "jazz",
+   "blues"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ojos Locos Sports Cantina - Las Vegas",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "cadena; esta en North Las Vegas"
+ },
+ {
+  "name": "The Front Yard",
+  "city": "Las Vegas",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": false,
+  "note": "beer garden de casino"
+ },
+ {
+  "name": "Fuel Bar Las Vegas",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "La Jolla Nightclub",
+  "city": "Las Vegas",
+  "genres": [
+   "latin",
+   "reggaeton"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Nerd",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barcade"
+ },
+ {
+  "name": "Whiskey Tavern",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "OJO: whiskeytavern.net es el de Covington, no el de NYC"
+ },
+ {
+  "name": "Carragher's",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports pub; barrio mal: Financial District"
+ },
+ {
+  "name": "Bar 54",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "retype": "bar"
+ },
+ {
+  "name": "The Rum House",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "retype": "bar"
+ },
+ {
+  "name": "The Three Monkeys",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Maison Premiere",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "oyster bar; el 'jazz ambiental' solo aparece en agregadores"
+ },
+ {
+  "name": "St. Pat's Bar & Grill NYC",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports bar"
+ },
+ {
+  "name": "Death & Co East Village",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Skylark - Rooftop Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "retype": "bar",
+  "note": "cerrado al publico los fines de semana"
+ },
+ {
+  "name": "Blind Tiger",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Regatta Grove",
+  "city": "Miami",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dante's HiFi",
+  "city": "Miami",
+  "genres": [
+   "hip_hop",
+   "house",
+   "jazz",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Corner",
+  "city": "Miami",
+  "genres": [
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "TuCandela Bar Brickell",
+  "city": "Miami",
+  "genres": [
+   "reggaeton",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Gramps Getaway",
+  "city": "Miami",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: Virginia Key, no Key Biscayne"
+ },
+ {
+  "name": "Candela Bar Brickell",
+  "city": "Miami",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "ViceVersa Miami",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jolene Sound Room",
+  "city": "Miami",
+  "genres": [
+   "house",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Kaiju",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Las Rosas",
+  "city": "Miami",
+  "genres": [
+   "live",
+   "rock",
+   "hip_hop",
+   "rnb",
+   "blues"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Allapattah"
+ },
+ {
+  "name": "Maria's Packaged Goods and Community Bar",
+  "city": "Chicago",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Mine Chicago",
+  "city": "Chicago",
+  "genres": [
+   "reggaeton",
+   "latin",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Scofflaw",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "IO Godfrey Rooftop Lounge",
+  "city": "Chicago",
+  "genres": [
+   "house",
+   "pop",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Aviary",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Machine Cocktail Bar",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fatpour McCormick: Ultimate Chicago Sports Bar",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "AceBounce",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Arbella Cocktail Bar",
+  "city": "Chicago",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Joy District",
+  "city": "Chicago",
+  "genres": [
+   "hip_hop",
+   "edm",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hot Tin",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Lower Garden District"
+ },
+ {
+  "name": "The Bulldog, Uptown",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Beachbum Berry's Latitude 29",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Finn McCool's Irish Pub",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Drip Affogato Bar NOLA",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "The Sazerac Bar",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "MRB Bar & Kitchen",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cane and Table",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Tonique",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cuban Creations Cigar Bar",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Everson Royce Bar",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Library Bar",
+  "city": "Los Angeles",
+  "genres": [
+   "hip_hop",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Frolic Room",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Boardner's by La Belle",
+  "city": "Los Angeles",
+  "genres": [
+   "rock",
+   "pop",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Redwood Bar & Grill",
+  "city": "Los Angeles",
+  "genres": [
+   "rock",
+   "live",
+   "blues",
+   "country",
+   "jazz"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Exchange LA",
+  "city": "Los Angeles",
+  "genres": [
+   "edm",
+   "house",
+   "tech_house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Mayan",
+  "city": "Los Angeles",
+  "genres": [
+   "reggaeton",
+   "latin",
+   "hip_hop",
+   "pop",
+   "afrobeats",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Greyhound Bar & Grill",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Broken Shaker at Freehand Los Angeles",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Tonga Hut",
+  "city": "Los Angeles",
+  "genres": [
+   "rock",
+   "jazz"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: North Hollywood"
+ }
+]

@@ -1,0 +1,768 @@
+[
+ {
+  "name": "The Gray Lady",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Houndstooth",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Rabbit Hole - Tuscaloosa",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Red Shed",
+  "city": "Tuscaloosa",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Wheelhouse Pub",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Top Shelf Tavern",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "Yelp lo da por cerrado (dic 2025) pero su sitio sigue activo con horarios — verificar"
+ },
+ {
+  "name": "Twelve25 Sports Bar",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Urban Bar & Kitchen",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Vitola Fine Cigars Tuscaloosa",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "tienda de cigarros con salon de fumadores, cierra 9-10pm"
+ },
+ {
+  "name": "Walk-On's Sports Bistreaux - Tuscaloosa Restaurant",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "The Globe",
+  "city": "Athens",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Local 706",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The National",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "The Old Pal",
+  "city": "Athens",
+  "genres": [
+   "hip_hop",
+   "disco"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Rail Athens",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Roadhouse",
+  "city": "Athens",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Root",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "comparte 1235 S Milledge con The Pine — posible sala interior"
+ },
+ {
+  "name": "The Royal Peasant",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The World Famous",
+  "city": "Athens",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Toppers International Showbar",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "adult_entertainment"
+ },
+ {
+  "name": "Trappeze Pub",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Walkers Coffee Shop & Pub",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Wonderbar Athens",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tiger Bar",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Top Note",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tribe",
+  "city": "Nashville",
+  "genres": [
+   "pop",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "UP, Rooftop Table & Tavern",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: The Gulch"
+ },
+ {
+  "name": "Urban Cowboy Bar",
+  "city": "Nashville",
+  "genres": [
+   "live",
+   "salsa",
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Urban Cowboy Public House",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Historic Edgefield"
+ },
+ {
+  "name": "Vibes Bar & Lounge",
+  "city": "Nashville",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "soul"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Whiskey Bent Saloon",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Whiskey River Saloon",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Thirsty Lion",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Time Out Lounge",
+  "city": "Tempe",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "University Club At ASU",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "club de facultad de ASU solo para socios, lunes a viernes 7-17h"
+ },
+ {
+  "name": "University Sports Grill",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Varsity Tavern",
+  "city": "Tempe",
+  "genres": [
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Woodshed",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Yucca Tap Room",
+  "city": "Tempe",
+  "genres": [
+   "rock",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Zipps Sports Grill",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Township",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "'Revolution Live Tallahassee' comparte 619 S Woodward — posible sala interior, sin resolver"
+ },
+ {
+  "name": "Vice Society",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Warhorse Whiskey Bar",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Yianni's",
+  "city": "Tallahassee",
+  "genres": [
+   "hip_hop",
+   "edm"
+  ],
+  "is_nightlife": true,
+  "note": "sala del complejo The Tally Strip; el 'cerrado' de Foursquare es un registro de 2010 obsoleto"
+ },
+ {
+  "name": "Zingales Billiards & Sports Bar",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Radio Bar",
+  "city": "Baton Rouge",
+  "genres": [
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Revelry of Baton Rouge",
+  "city": "Baton Rouge",
+  "genres": [
+   "live",
+   "country",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The River Room",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Sportsbook at L'Auberge Baton Rouge",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "sala de apuestas dentro del casino L'Auberge, cierra 10-11pm"
+ },
+ {
+  "name": "The Station Sports Bar and Grill",
+  "city": "Baton Rouge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Tunnel",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "espacio de eventos en el tunel bajo el Hilton, se activa en fechas sueltas y se alquila"
+ },
+ {
+  "name": "Tiger Sports Bar",
+  "city": "Baton Rouge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tipsy Librarian",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "tienda y espacio de clases de coctel, cierra 5:30pm, no es un bar de entrada libre"
+ },
+ {
+  "name": "Truce & Chaos",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Violet Nightclub",
+  "city": "Baton Rouge",
+  "genres": [
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "X-BIO Discotec",
+  "city": "Baton Rouge",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "posible cierre: Yelp y JamBase lo dan por cerrado, ultimo evento con boleteria en 2023 — verificar"
+ },
+ {
+  "name": "The Silverlake Lounge",
+  "city": "Los Angeles",
+  "genres": [
+   "live",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Three Clubs",
+  "city": "Los Angeles",
+  "genres": [
+   "live",
+   "jazz",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Wolves",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Thunderbolt",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "el edificio fue un after de jazz, pero eso termino antes de que abriera"
+ },
+ {
+  "name": "Tiki-Ti",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tiny's Hi-Dive",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Treehouse Rooftop",
+  "city": "Los Angeles",
+  "genres": [
+   "reggaeton",
+   "hip_hop",
+   "latin",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Vandell",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Wolf & Crane Bar",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Zero Lounge",
+  "city": "Los Angeles",
+  "genres": [
+   "pop",
+   "hip_hop",
+   "rnb",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Grotto - Watering Hole",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "The Hidden King - Neighborhood Bar",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "vacio DOCUMENTADO: silencio deliberado, sin TVs y musica minima; barrio mal: Downtown"
+ },
+ {
+  "name": "The Last Word",
+  "city": "Ann Arbor",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "The Ranch Honky Tonk",
+  "city": "Ann Arbor",
+  "genres": [
+   "country",
+   "americana",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown; el country es arriba, el sotano tiene DJs de genero no documentado"
+ },
+ {
+  "name": "The Ravens Club",
+  "city": "Ann Arbor",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: Downtown/Main Street"
+ },
+ {
+  "name": "Uplift Ann Arbor",
+  "city": "Ann Arbor",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Venue by 4M",
+  "city": "Ann Arbor",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: South Industrial; espacio de coworking y eventos, cierra 10pm"
+ },
+ {
+  "name": "The Rose Room",
+  "city": "Austin",
+  "genres": [
+   "edm"
+  ],
+  "is_nightlife": true,
+  "note": "la salsa de 2017-18 termino en 2018, no se arrastro; barrio mal: Domain Northside"
+ },
+ {
+  "name": "the side bar",
+  "city": "Austin",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "los bookings se concentran casi todos en semana de SXSW"
+ },
+ {
+  "name": "The Wheel",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tweedy's Bar",
+  "city": "Austin",
+  "genres": [
+   "rock",
+   "live",
+   "disco"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Twins Nightclub",
+  "city": "Austin",
+  "genres": [
+   "house",
+   "tech_house",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Twins Rooftop",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "es el nivel superior de Twins Nightclub, mismo edificio (219 W 4th = 315 Lavaca)"
+ },
+ {
+  "name": "Uptown",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "es Uptown Sports Club, restaurante de ostras; barrio mal: East Austin/Sixth-Chicon"
+ },
+ {
+  "name": "Victory Lap",
+  "city": "Austin",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "el two-step parece haber terminado en nov 2024"
+ },
+ {
+  "name": "Violet Sky Rooftop Lounge",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "azotea del AC Hotel by Marriott, cierra 10pm y cierra domingos"
+ },
+ {
+  "name": "Voodoo Room",
+  "city": "Austin",
+  "genres": [
+   "edm",
+   "house"
+  ],
+  "is_nightlife": true,
+  "note": "la residencia Wobble Wednesday se mudo al Vulcan Gas Company"
+ },
+ {
+  "name": "Vulcan Gas Company",
+  "city": "Austin",
+  "genres": [
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Workhorse Bar",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Angry Elephant",
+  "city": "College Station",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Backyard",
+  "city": "College Station",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Corner on Northgate",
+  "city": "College Station",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Cove at BearX",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "resort de piscina solo para socios, cierra 8pm y cierra lunes a miercoles"
+ },
+ {
+  "name": "The Draconian Lounge",
+  "city": "College Station",
+  "genres": [
+   "hip_hop",
+   "tech_house",
+   "edm",
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "generos de la autodescripcion del venue, no de actos documentados"
+ },
+ {
+  "name": "The Dry Bean Saloon",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The George, Valencia Hotel Collection",
+  "city": "College Station",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "es el hotel; la musica ocurre en 1791 Whiskey Bar, sala interior ya listada aparte"
+ },
+ {
+  "name": "The Republic Steakhouse",
+  "city": "College Station",
+  "genres": [
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Spot On Northgate",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Tap",
+  "city": "College Station",
+  "genres": [
+   "country",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tipsy Turtle",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Walk-On's Sports Bistreaux - College Station Restaurant",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ }
+]

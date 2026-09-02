@@ -1,0 +1,486 @@
+[
+ {
+  "name": "Liquor Lounge",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Little Havana Social Club Coffee Lounge",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": false,
+  "note": "cafe/cigar lounge; barrio mal: Calle Ocho",
+  "city": "Miami"
+ },
+ {
+  "name": "Lust",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Mae’s Room",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Miami Beach Yacht Party & Club",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Yacht charter operation, not a fixed venue",
+  "city": "Miami"
+ },
+ {
+  "name": "Night Out LLC - Miami NightLife Concierge",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Concierge booking service, not a venue",
+  "city": "Miami"
+ },
+ {
+  "name": "Nightclubs in Miami",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Not a real business: junk directory record",
+  "city": "Miami"
+ },
+ {
+  "name": "Pharaoh Hookah & Cigar Lounge",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Calle Ocho",
+  "city": "Miami"
+ },
+ {
+  "name": "Playmates Club",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "club de adultos",
+  "city": "Miami"
+ },
+ {
+  "name": "Santé Cocktail Lounge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Doral",
+  "city": "Miami"
+ },
+ {
+  "name": "Simmons Bar",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "esta en Homestead, ~44km",
+  "city": "Miami"
+ },
+ {
+  "name": "Sipsip Rum Bar",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "calypso/reggae: falta en el vocabulario",
+  "city": "Miami"
+ },
+ {
+  "name": "Sky Lounge - Celebrity Millennium",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Lounge aboard the cruise ship Celebrity Millennium, not a land venue",
+  "city": "Miami"
+ },
+ {
+  "name": "Smoke & Barrel Cigar Lounge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Dadeland/Kendall",
+  "city": "Miami"
+ },
+ {
+  "name": "Smoke Story Miami Beach",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "SoBe Hookah Wynwood At Grails Sport Bar",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "South Beach Nightclubs",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Promoter/party-bus service reselling entry to other clubs, not a venue",
+  "city": "Miami"
+ },
+ {
+  "name": "Sunset Tavern",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: South Miami",
+  "city": "Miami"
+ },
+ {
+  "name": "The Commodore",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Coconut Grove",
+  "city": "Miami"
+ },
+ {
+  "name": "The Lounge at SLS Brickell",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Tobacco Road",
+  "genres": [
+   "blues",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true,
+  "exclude": "Historic bar closed 2014 and demolished; the Kush tribute is now rebranded and listed closed",
+  "city": "Miami"
+ },
+ {
+  "name": "Ventanas Restaurant Bar & Lounge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": false,
+  "note": "restaurante de hotel; barrio mal",
+  "city": "Miami"
+ },
+ {
+  "name": "VIP South Beach Miami Nightlife - Nightclub Party Packages",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Promoter/concierge selling packages into other clubs, not a venue",
+  "city": "Miami"
+ },
+ {
+  "name": "Vista Rooftop Bar and Lounge",
+  "genres": [
+   "afrobeats",
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Wasska Lounge",
+  "genres": [],
+  "is_nightlife": true,
+  "exclude": "Permanently closed (Yelp); also wrong neighborhood",
+  "city": "Miami"
+ },
+ {
+  "name": "WXYZ Bar & Lounge",
+  "genres": [],
+  "is_nightlife": true,
+  "exclude": "Aloft in-house bar brand; no Aloft exists in Coconut Grove",
+  "city": "Miami"
+ },
+ {
+  "name": "1601 Lounge",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "lobby de hotel; barrio mal: Downtown",
+  "city": "Miami"
+ },
+ {
+  "name": "Bar Crawl Miami",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Guided pub-crawl tour product, not a venue",
+  "city": "Miami"
+ },
+ {
+  "name": "BLUME Nightclub",
+  "genres": [],
+  "is_nightlife": true,
+  "exclude": "Permanently closed (Yelp); site defunct",
+  "city": "Miami"
+ },
+ {
+  "name": "Brother's Keeper Bar",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "BT's Gentlemen's Club",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "club de adultos; barrio mal: South Miami",
+  "city": "Miami"
+ },
+ {
+  "name": "Cafeina Wynwood - Event Venue in Miami",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Relaunched as a private-events venue; the public lounge is closed",
+  "city": "Miami"
+ },
+ {
+  "name": "Cerveceria La Tropical",
+  "genres": [
+   "live",
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "son cubano/salsa",
+  "city": "Miami"
+ },
+ {
+  "name": "Club Madonna",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "club de adultos",
+  "city": "Miami"
+ },
+ {
+  "name": "Coco Miami",
+  "genres": [
+   "hip_hop",
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Design District",
+  "city": "Miami"
+ },
+ {
+  "name": "Crazy About Miami",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "nombre mal: es Crazy About You, restaurante",
+  "city": "Miami"
+ },
+ {
+  "name": "Delirio Tiki Bar by Swizzle",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Dewey's F’ing Bar",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "DOM'S",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Electric 23 Wynwood",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "afrobeats",
+   "reggaeton",
+   "house"
+  ],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Elevar Wynwood",
+  "genres": [
+   "live",
+   "jazz",
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Edgewater/Midtown",
+  "city": "Miami"
+ },
+ {
+  "name": "Elite Miami nightlife Ent",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Promoter LLC registered at a residential apartment, not a venue",
+  "city": "Miami"
+ },
+ {
+  "name": "Empire Social Lounge (Brickell Location)",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Enjoy Kava Bar – South Beach Botanical Lounge",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Fresa Lounge",
+  "genres": [
+   "latin",
+   "reggaeton"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Flagami",
+  "city": "Miami"
+ },
+ {
+  "name": "Gekko Lounge",
+  "genres": [
+   "house",
+   "reggaeton"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Brickell",
+  "city": "Miami"
+ },
+ {
+  "name": "Gold Rush Cabaret",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "club de adultos; barrio mal",
+  "city": "Miami"
+ },
+ {
+  "name": "Grand Public Kitchen & Bar",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Coconut Grove",
+  "city": "Miami"
+ },
+ {
+  "name": "Happy's Stork Lounge and Liquor Store",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: North Bay Village",
+  "city": "Miami"
+ },
+ {
+  "name": "HIGHBAR Pool + Bar + Sky",
+  "genres": [
+   "hip_hop",
+   "house",
+   "pop"
+  ],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Hookah Lounge by La Ferneteria",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "La Epoca Bar",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "wine bar dentro de food hall",
+  "city": "Miami"
+ },
+ {
+  "name": "LATAM Lounge Miami",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Airport VIP lounge inside MIA (Concourse J), not a public nightlife venue",
+  "city": "Miami"
+ },
+ {
+  "name": "Privilege Cocktail Lounge",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Puro bar by la licorera",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true,
+  "exclude": "Exact duplicate of Purobar Lounge (same address 2523 NE 2nd Ave and phone)",
+  "city": "Miami"
+ },
+ {
+  "name": "Purobar Lounge",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Raise the Bar with Britt",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "No such venue exists; mobile bartending personal brand",
+  "city": "Miami"
+ },
+ {
+  "name": "REPUBLICA FOOD & LOUNGE",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Allapattah",
+  "city": "Miami"
+ },
+ {
+  "name": "Revenge miami",
+  "genres": [
+   "hip_hop",
+   "reggaeton",
+   "latin",
+   "rnb",
+   "afrobeats",
+   "live"
+  ],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Royale Society Hospitality",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Promoter/VIP concierge company at an office unit, not a venue",
+  "city": "Miami"
+ },
+ {
+  "name": "Salt Cafe",
+  "genres": [],
+  "is_nightlife": true,
+  "city": "Miami"
+ },
+ {
+  "name": "Salt Kitchen & Lounge",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "Permanently closed since 2025",
+  "city": "Miami"
+ }
+]

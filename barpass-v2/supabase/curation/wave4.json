@@ -1,0 +1,649 @@
+[
+ {
+  "name": "Black Sheep Lodge",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Speakeasy",
+  "city": "Austin",
+  "genres": [
+   "live",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Antone's Nightclub",
+  "city": "Austin",
+  "genres": [
+   "blues",
+   "live",
+   "rnb",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Whisler’s",
+  "city": "Austin",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cedar Door Patio Bar & Grill",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "fuentes se contradicen; el dueño dice que no hay musica en vivo"
+ },
+ {
+  "name": "Crown & Anchor Pub",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Firehouse Lounge",
+  "city": "Austin",
+  "genres": [
+   "jazz",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Barbarella Austin",
+  "city": "Austin",
+  "genres": [
+   "pop",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Tavern",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Clarksville"
+ },
+ {
+  "name": "Blind Pig Pub",
+  "city": "Austin",
+  "genres": [
+   "live",
+   "rock",
+   "country"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Walk-On's Sports Bistreaux - Burbank Restaurant",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "cadena deportiva"
+ },
+ {
+  "name": "SoLou Baton Rouge",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "restaurante tipado club"
+ },
+ {
+  "name": "Walk-On's Sports Bistreaux - Towne Center Restaurant",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "cadena deportiva; barrio mal"
+ },
+ {
+  "name": "Ruth's Chris Steak House",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "steakhouse; barrio mal"
+ },
+ {
+  "name": "The Smiling Dog",
+  "city": "Baton Rouge",
+  "genres": [
+   "live",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mansurs on the Boulevard",
+  "city": "Baton Rouge",
+  "genres": [
+   "live",
+   "jazz"
+  ],
+  "is_nightlife": false,
+  "note": "fine dining con piano de jazz"
+ },
+ {
+  "name": "Court To Table Kitchen & Bar | The Baton Rouge Pickleball & Restaurant Experience",
+  "city": "Baton Rouge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": false,
+  "note": "complejo de pickleball"
+ },
+ {
+  "name": "The Bulldog, Baton Rouge",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "musica de fondo por suscripcion, no programacion"
+ },
+ {
+  "name": "Olive or Twist",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Topgolf Baton Rouge",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "complejo de golf"
+ },
+ {
+  "name": "Honky Tonk Central",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jason Aldean's Kitchen + Rooftop Bar",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Luke's 32 Bridge",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Stillery",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Louie - Nashville",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: The Gulch; la sede Bellevue cerro en 2025"
+ },
+ {
+  "name": "Category 10",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Skull's Rainbow Room",
+  "city": "Nashville",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tin Roof",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Miranda Lambert's Casa Rosa",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Stage on Broadway",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bourbon Street Drinkery",
+  "city": "New Orleans",
+  "genres": [
+   "live",
+   "blues",
+   "jazz"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Manning's Sports Bar and Grill",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports bar"
+ },
+ {
+  "name": "Beach On Bourbon",
+  "city": "New Orleans",
+  "genres": [
+   "live",
+   "pop",
+   "rnb",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Blue Nile",
+  "city": "New Orleans",
+  "genres": [
+   "live",
+   "jazz",
+   "hip_hop",
+   "afrobeats"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Old Absinthe House",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "su fama de blues termino en 1997"
+ },
+ {
+  "name": "Cooter Brown's Tavern",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports bar; barrio mal: Riverbend"
+ },
+ {
+  "name": "The Dungeon",
+  "city": "New Orleans",
+  "genres": [
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Erin Rose",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "rocola"
+ },
+ {
+  "name": "Bayou Beer Garden",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Copper Vine Restaurant",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "restaurante"
+ },
+ {
+  "name": "Mustang Harry's",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports bar"
+ },
+ {
+  "name": "The Keg Room",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports bar irlandes"
+ },
+ {
+  "name": "Monarch Rooftop",
+  "city": "New York",
+  "genres": [
+   "pop",
+   "hip_hop",
+   "house",
+   "edm",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ophelia Lounge NYC",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The DL",
+  "city": "New York",
+  "genres": [
+   "hip_hop",
+   "edm",
+   "reggaeton",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Iron Bar & Lounge NYC - Hell's Kitchen",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Double Chicken Please",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Delancey Rooftop",
+  "city": "New York",
+  "genres": [
+   "live",
+   "reggaeton",
+   "latin",
+   "rock"
+  ],
+  "is_nightlife": true,
+  "note": "distinto de The DL, no fusionar"
+ },
+ {
+  "name": "VALERIE",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "solo brunch dominical"
+ },
+ {
+  "name": "Jimmy's Corner",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "rnb"
+  ],
+  "is_nightlife": true,
+  "note": "solo rocola; en litigio de desalojo"
+ },
+ {
+  "name": "Retro Lounge Columbus",
+  "city": "Columbus",
+  "genres": [
+   "jazz",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Far East Side"
+ },
+ {
+  "name": "Brass Eye",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ace of Cups",
+  "city": "Columbus",
+  "genres": [
+   "rock",
+   "hip_hop",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Good Night John Boy",
+  "city": "Columbus",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club 185",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: German Village"
+ },
+ {
+  "name": "Butcher & Rose",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "steakhouse; barrio mal"
+ },
+ {
+  "name": "Woodland's Backyard",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Grandview Heights; no confundir con Woodlands Tavern"
+ },
+ {
+  "name": "R Bar Arena",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "sports bar, cierra 21-22h"
+ },
+ {
+  "name": "O'Reilly's Pub",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "solo rocola"
+ },
+ {
+  "name": "Fourth Street Taproom & Kitchen",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Island Wing Company Grill & Bar - Tallahassee",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": false,
+  "note": "cadena"
+ },
+ {
+  "name": "Walk-On's Sports Bistreaux - Tallahassee Restaurant",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "cadena"
+ },
+ {
+  "name": "Madison Social",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Glory Days Grill",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "cadena familiar"
+ },
+ {
+  "name": "Bumpa's Local 349",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cancun's Sports Bar and Grill on West Tennessee St",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Liberty Bar and Restaurant",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Corner Pocket Bar & Grill",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hobbit American Grill South",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "cadena de sandwiches"
+ },
+ {
+  "name": "Hangar 38",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "bowling/arcade tipado club"
+ },
+ {
+  "name": "Flight Club Chicago",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "local de dardos"
+ },
+ {
+  "name": "Storyville Chicago",
+  "city": "Chicago",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Panchos Rooftop Cantina",
+  "city": "Chicago",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: South Loop"
+ },
+ {
+  "name": "Chicago Brewhouse Riverwalk",
+  "city": "Chicago",
+  "genres": [
+   "live",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The J. Parker",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Lincoln Park"
+ },
+ {
+  "name": "Theory",
+  "city": "Chicago",
+  "genres": [
+   "hip_hop",
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Green Door Tavern",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "su FAQ dice explicitamente que no hay musica en vivo"
+ },
+ {
+  "name": "First Draft",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: South Loop"
+ },
+ {
+  "name": "RAISED | An Urban Rooftop Bar",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mother Hubbard's Sports Pub",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ }
+]

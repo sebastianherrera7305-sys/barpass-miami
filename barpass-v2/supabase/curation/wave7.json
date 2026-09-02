@@ -1,0 +1,574 @@
+[
+ {
+  "name": "SoBe Hookah",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "SoBe Hookah At Clevelander Sports Bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true,
+  "exclude": "concesion de hookah dentro del Clevelander, misma direccion que un venue ya listado"
+ },
+ {
+  "name": "SoBe Hookah Brickell",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "South Pointe Tavern",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Swizzle Rum Bar & Drinkery",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Syndicate Wynwood",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true,
+  "exclude": "bar de kava/kratom sin alcohol, misma categoria que Enjoy Kava"
+ },
+ {
+  "name": "The Taurus Coconut Grove",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Wet Willie's",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Wynballs Billiards Bar & Grill Miami",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Blue Haven",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Brickyard Craft Kitchen & Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Broadway Lounge",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Buddy's",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cellar Dog",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ciao Ciao Disco",
+  "city": "New York",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Clover Club",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Coyote Ugly New York",
+  "city": "New York",
+  "genres": [
+   "rock",
+   "country",
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dalton's Bar & Grill",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dante West Village",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Best Intentions",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Billy Sunday",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bisous",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bodega Nightclub",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Boleo",
+  "city": "Chicago",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Boulevard",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Broken Shaker at Freehand Chicago",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Buttercup",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cantina Rosa",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cleos Bar and Grill",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Alley Taps",
+  "city": "Nashville",
+  "genres": [
+   "rock",
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Almost Friday Sporting Club",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Attaboy",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Barrel Proof",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Germantown"
+ },
+ {
+  "name": "Barstool Nashville",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Beyond The Edge",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bobby Hotel Rooftop Lounge",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Broadway",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "no es un negocio: es la calle/distrito, registro fantasma de directorio"
+ },
+ {
+  "name": "Brugada Kitchen & Bar",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "City Winery Nashville",
+  "city": "Nashville",
+  "genres": [
+   "live",
+   "country",
+   "rock",
+   "blues",
+   "jazz",
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "1923 Prohibition Bar",
+  "city": "Las Vegas",
+  "genres": [
+   "jazz",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Aft Cocktail Deck",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "All American Sports Kitchen",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Allē Lounge on 66",
+  "city": "Las Vegas",
+  "genres": [
+   "live",
+   "rnb",
+   "jazz"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Audio Bar",
+  "city": "Las Vegas",
+  "genres": [
+   "edm",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Ginza",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bauhaus Vegas",
+  "city": "Las Vegas",
+  "genres": [
+   "house",
+   "tech_house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bizarre Bar",
+  "city": "Las Vegas",
+  "genres": [
+   "latin",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Buddha Bar Las Vegas",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Chickie's & Pete's",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "KUSH Wynwood",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true,
+  "exclude": "cerrado por renovacion plurianual del edificio, reapertura proyectada fin 2026"
+ },
+ {
+  "name": "Lola bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lost Boy Dry Goods",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lost Weekend",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mac's Club Deuce ♣️",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Oasis Lounge and Hookah bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Over Under",
+  "city": "Miami",
+  "genres": [
+   "reggaeton"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Panamericano Bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "RedBar Brickell",
+  "city": "Miami",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "S47 Lounge",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Seven Seas Bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Coral Terrace, no Coral Gables"
+ },
+ {
+  "name": "1931 Lounge",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "21st Amendment Bar at La Louisiane",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "blues",
+   "rnb",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Above The Grid",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Après Lounge",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Avegno Lounge",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Barrel Proof",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bayou Bar",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: Lower Garden District (mismo hotel que Hot Tin)"
+ },
+ {
+  "name": "Bouligny Tavern",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bourbon 'O' Bar",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bourbon Live",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "exclude": "cerrado: 516 Bourbon St lo ocupa ahora The Swamp on Bourbon Street"
+ },
+ {
+  "name": "18 Social",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "33 Taps DTLA",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Academy LA",
+  "city": "Los Angeles",
+  "genres": [
+   "edm",
+   "house",
+   "tech_house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Accomplice Bar",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Lis",
+  "city": "Los Angeles",
+  "genres": [
+   "jazz",
+   "live",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Big Bar",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bigfoot Lodge",
+  "city": "Los Angeles",
+  "genres": [
+   "rock",
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Burgundy Room",
+  "city": "Los Angeles",
+  "genres": [
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Caña Rum Bar",
+  "city": "Los Angeles",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Capri Club",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ }
+]

@@ -1,0 +1,574 @@
+[
+ {
+  "name": "Seminole Hard Rock Hotel & Casino",
+  "old": [],
+  "new": []
+ },
+ {
+  "name": "Monty's Raw Bar",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "live"
+  ]
+ },
+ {
+  "name": "Mango's South Beach",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin",
+   "live"
+  ]
+ },
+ {
+  "name": "Bayshore Club Bar & Grill",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "live",
+   "jazz"
+  ]
+ },
+ {
+  "name": "La Birra Bar (Burgers) - Wynwood",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Sola Miami Beach",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin"
+  ]
+ },
+ {
+  "name": "Mayami Wynwood",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin",
+   "reggaeton",
+   "hip_hop",
+   "pop"
+  ]
+ },
+ {
+  "name": "Earls Kitchen + Bar",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Lola bar",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Rosa Sky",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin"
+  ]
+ },
+ {
+  "name": "Lagniappe",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "jazz",
+   "live"
+  ]
+ },
+ {
+  "name": "Wet Willie's",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Barsecco",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "house",
+   "latin",
+   "reggaeton",
+   "pop"
+  ]
+ },
+ {
+  "name": "American Social - Bar & Kitchen - Miami",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Palace Bar & Restaurant",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "pop"
+  ]
+ },
+ {
+  "name": "Flanigan's Seafood Bar and Grill",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "KUSH Wynwood",
+  "old": [],
+  "new": []
+ },
+ {
+  "name": "Cafe La Trova",
+  "old": [],
+  "new": [
+   "live",
+   "latin"
+  ]
+ },
+ {
+  "name": "Sugar Rooftop",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "house"
+  ]
+ },
+ {
+  "name": "The Clevelander Bar",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "hip_hop",
+   "reggaeton",
+   "live"
+  ]
+ },
+ {
+  "name": "Guantanamera tropical café and Lounge",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin",
+   "live"
+  ]
+ },
+ {
+  "name": "Avianca VIP Lounge",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Balan's",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "live"
+  ]
+ },
+ {
+  "name": "Grails Miami - Restaurant & Sports Bar",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "hip_hop"
+  ]
+ },
+ {
+  "name": "Negroni Bistro & Sushi Bar",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Astra Miami Rooftop",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "live"
+  ]
+ },
+ {
+  "name": "Rakija Lounge",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "live"
+  ]
+ },
+ {
+  "name": "Level 6 Rooftop Restaurant Miami",
+  "old": [],
+  "new": [
+   "live"
+  ]
+ },
+ {
+  "name": "Amor Miami",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Yard House",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Miller's Ale House",
+  "old": [],
+  "new": []
+ },
+ {
+  "name": "El Carajo",
+  "old": [],
+  "new": [
+   "live"
+  ]
+ },
+ {
+  "name": "The Dirty Rabbit Wynwood",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin",
+   "reggaeton",
+   "hip_hop",
+   "house"
+  ]
+ },
+ {
+  "name": "Sweet Liberty Drinks & Supply Company",
+  "old": [],
+  "new": [
+   "live"
+  ]
+ },
+ {
+  "name": "Blackbird Ordinary",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "hip_hop",
+   "house",
+   "latin",
+   "reggaeton",
+   "live"
+  ]
+ },
+ {
+  "name": "Mickey Burkes",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "live"
+  ]
+ },
+ {
+  "name": "Bolivar colombian restaurant bar lounge",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin",
+   "reggaeton",
+   "live"
+  ]
+ },
+ {
+  "name": "Batch Gastropub: Miami",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "live"
+  ]
+ },
+ {
+  "name": "Turkish Airlines Lounge - Concourse E",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "CLUB SPACE",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "house",
+   "tech_house",
+   "edm"
+  ]
+ },
+ {
+  "name": "LoKal",
+  "old": [],
+  "new": []
+ },
+ {
+  "name": "E11EVEN MIAMI",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "hip_hop",
+   "edm",
+   "pop",
+   "latin",
+   "live"
+  ]
+ },
+ {
+  "name": "Panamericano Bar",
+  "old": [],
+  "new": []
+ },
+ {
+  "name": "LIV Nightclub Miami",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "edm",
+   "hip_hop",
+   "house",
+   "pop"
+  ]
+ },
+ {
+  "name": "Voodoo Lounge & Rooftop",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "hip_hop"
+  ]
+ },
+ {
+  "name": "Ark Smoke Shop South Miami - Nature Bar & Lounge",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Ark Smoke Shop Biscayne - Nature Bar & Lounge",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Española Cigar Bar & Lounge",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin",
+   "live"
+  ]
+ },
+ {
+  "name": "Blue Martini",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin",
+   "reggaeton",
+   "house",
+   "live",
+   "pop"
+  ]
+ },
+ {
+  "name": "Swan",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "hip_hop",
+   "edm"
+  ]
+ },
+ {
+  "name": "Miami Mojito Company",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin"
+  ]
+ },
+ {
+  "name": "Red Phone Booth",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "jazz"
+  ]
+ },
+ {
+  "name": "Swizzle Rum Bar & Drinkery",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Neme Gastro Bar",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "live",
+   "jazz",
+   "latin",
+   "reggaeton"
+  ]
+ },
+ {
+  "name": "SoBe Hookah",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Sha Wynwood",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "live",
+   "house",
+   "tech_house"
+  ]
+ },
+ {
+  "name": "Tap 42 Craft Kitchen & Bar - Kendall",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "El Patio Wynwood",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": [
+   "latin",
+   "reggaeton",
+   "live",
+   "house"
+  ]
+ },
+ {
+  "name": "Turkish Airlines Lounge",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ },
+ {
+  "name": "Mac's Club Deuce ♣️",
+  "old": [
+   "house",
+   "hip_hop"
+  ],
+  "new": []
+ }
+]

@@ -1,0 +1,593 @@
+[
+ {
+  "name": "A's Pub at McLanahan's Downtown Market",
+  "city": "State College",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Adam's Apple",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "All American Rathskeller",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "cerrado permanentemente en enero 2018"
+ },
+ {
+  "name": "Alla Spina at HiWay",
+  "city": "State College",
+  "genres": [
+   "americana",
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "American Ale House",
+  "city": "State College",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Antifragile Brewing Company",
+  "city": "State College",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Arena Bar & Grill",
+  "city": "State College",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Bleu",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "cerrado permanentemente en septiembre 2021"
+ },
+ {
+  "name": "Big Spring Spirits Tasting Room at the Scholar Hotel",
+  "city": "State College",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bill Pickle's Tap Room",
+  "city": "State College",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Muse",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Booth's Barbeque and Yard",
+  "city": "Oxford",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Circle and Square",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "City Grocery | Creole • Southern",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Funkys Pizza & Daiquiri Bar",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Harrison's",
+  "city": "Oxford",
+  "genres": [
+   "rock",
+   "country",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kingswood Restaurant and Bar",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Moe's Original BBQ",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mugshots Grill and Bar - Oxford, MS",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Nightbird",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "1785 Bar and Grill",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "9d's Bar Plus",
+  "city": "Athens",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Allgood Lounge",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Athena Bar & Lounge",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Bruno",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "barrio: Five Points"
+ },
+ {
+  "name": "Bar South",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Blind Pig Tavern",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Blue Sky Bar",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Boar's Head Lounge",
+  "city": "Athens",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bourbon Street",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Alcove",
+  "city": "Tuscaloosa",
+  "genres": [
+   "jazz",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Avenue Pub - Downtown Tuscaloosa",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Baumhower's Victory Grille",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Big Al's Inc.",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Brown's Corner",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Catch 22",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club 205 Lounge",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Copper Top",
+  "city": "Tuscaloosa",
+  "genres": [
+   "country",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Crimson Tap House",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "DAVE'S CRIMSON BAR",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "12 Rooftop Bar & Lounge",
+  "city": "College Station",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "bachata"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "1791 Whiskey Bar",
+  "city": "College Station",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Baumhaus",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Block T Bar & Grill",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Bubba's 33",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Caffé Capri",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Cedar Lane",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Christopher's World Grille",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Commanders Cove",
+  "city": "College Station",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dixie Chicken",
+  "city": "College Station",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "B-Side Lounge",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Carolina Brewery",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Clouds Brewing Storm Cellar",
+  "city": "Chapel Hill",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dead Mule Club",
+  "city": "Chapel Hill",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Four Corners",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Franklin Motors",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Good Fortune Chapel Hill",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Goodfellows",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "He's Not Here",
+  "city": "Chapel Hill",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lapin Bleu",
+  "city": "Chapel Hill",
+  "genres": [
+   "jazz",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Alley Bar",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Atlas Ballroom",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Blockhouse Bar",
+  "city": "Bloomington",
+  "genres": [
+   "country",
+   "jazz",
+   "rock",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bloomingfoods Co-op Market",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "supermercado cooperativo, no es un bar"
+ },
+ {
+  "name": "Bluetip Billiards",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Brothers Bar & Grill",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "BuffaLouie's at The Gables",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "C3 Bar",
+  "city": "Bloomington",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cabin Restaurant & Lounge",
+  "city": "Bloomington",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cardinal Spirits",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Attic Bar & Bistro",
+  "city": "Boulder",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Avanti Food and Beverage Boulder",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bohemian Biergarten",
+  "city": "Boulder",
+  "genres": [
+   "country",
+   "blues",
+   "funk",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Boulder Social",
+  "city": "Boulder",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "C Bar",
+  "city": "Boulder",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jungle",
+  "city": "Boulder",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "License No. 1",
+  "city": "Boulder",
+  "genres": [
+   "jazz",
+   "blues",
+   "soul",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mountain Sun Pub & Brewery",
+  "city": "Boulder",
+  "genres": [
+   "jazz",
+   "country",
+   "funk",
+   "reggae",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mudrock's Tap & Tavern",
+  "city": "Boulder",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "ciudad mal: Louisville CO, no Boulder"
+ },
+ {
+  "name": "Outback Saloon",
+  "city": "Boulder",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ }
+]

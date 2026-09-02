@@ -1,0 +1,854 @@
+[
+ {
+  "name": "Sports & Social Green Hills",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tall Tales Rooftop Bar",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Amsterdamian",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Bluebird Cafe",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio: Green Hills"
+ },
+ {
+  "name": "The Fox Bar & Cocktail Club",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Local Nashville",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "rock",
+   "americana",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Lookout at Ole Red",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "es la azotea DENTRO de Ole Red Nashville, misma direccion"
+ },
+ {
+  "name": "The Lounge at 2nd",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Nashville Palace",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Patterson House",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: SoBro"
+ },
+ {
+  "name": "The Spot By Dre and Snoop",
+  "city": "Nashville",
+  "genres": [
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Twelve Thirty Club",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Third and Home",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Germantown; ZIP mal: 37219"
+ },
+ {
+  "name": "Lucky Strike Tuscaloosa",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "centro de entretenimiento familiar: boliche, arcade, fiestas infantiles"
+ },
+ {
+  "name": "Mugshots Grill and Bar - Tuscaloosa, AL",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nocturnal Tavern",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "PopStroke",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "minigolf de lujo y entretenimiento familiar"
+ },
+ {
+  "name": "R&R Cigars Tuscaloosa - The Cigar Mansion",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rhythm & Brews",
+  "city": "Tuscaloosa",
+  "genres": [
+   "rock",
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Roll Call",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "azotea del hotel The Alamite; ZIP mal: 35401, no 35404"
+ },
+ {
+  "name": "Rounders",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Session Cocktails",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Shindig Family Entertainment Center",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "centro de entretenimiento familiar: boliche, laser tag, arcade"
+ },
+ {
+  "name": "Spades Restaurant & Lounge",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The 205",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "azotea del Homewood Suites, piso 6"
+ },
+ {
+  "name": "The Bear Trap",
+  "city": "Tuscaloosa",
+  "genres": [
+   "funk",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "TENN Lounge",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "duplicado exacto de TENN Nightclub — mismo negocio, mismo telefono, dos filas de direccion"
+ },
+ {
+  "name": "TENN Nightclub",
+  "city": "Tallahassee",
+  "genres": [
+   "edm",
+   "house"
+  ],
+  "is_nightlife": true,
+  "note": "sala dentro del complejo The Tally Strip"
+ },
+ {
+  "name": "The Brass Tap",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Filibuster",
+  "city": "Tallahassee",
+  "genres": [
+   "jazz",
+   "country",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "club de socios ($11.11/anio, se puede entrar en la puerta)"
+ },
+ {
+  "name": "The Leon Pub, Inc.",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "vacio DOCUMENTADO: solo rocola alimentada por clientes"
+ },
+ {
+  "name": "The Lounge At Market Square",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Omni Club",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "Yelp dice cerrado feb-2026 y no hay actividad primaria; solo agregadores IA lo dan por abierto — verificar antes de excluir"
+ },
+ {
+  "name": "The Palace Saloon",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "THE SV LOUNGE BAR AND RESTAURANT",
+  "city": "Tallahassee",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Tally Strip",
+  "city": "Tallahassee",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "no es un local: es un complejo de seis salas (Ken's, Public House, Redrocks, TENN, Yianni's) ya listadas por separado"
+ },
+ {
+  "name": "The Warehouse On College",
+  "city": "Tallahassee",
+  "genres": [
+   "hip_hop",
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Wilbury",
+  "city": "Tallahassee",
+  "genres": [
+   "rock",
+   "blues",
+   "funk",
+   "hip_hop",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Top Flite Club",
+  "city": "Tallahassee",
+  "genres": [
+   "rnb",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sound Nightclub",
+  "city": "Los Angeles",
+  "genres": [
+   "house",
+   "tech_house",
+   "techno"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sunset Rooftop",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Continental Club",
+  "city": "Los Angeles",
+  "genres": [
+   "salsa",
+   "bachata",
+   "jazz",
+   "live",
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Escondite",
+  "city": "Los Angeles",
+  "genres": [
+   "live",
+   "rock",
+   "americana",
+   "country",
+   "blues"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Let's Go!",
+  "city": "Los Angeles",
+  "genres": [
+   "disco"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Lounge",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "lounge del Four Seasons Beverly Hills, no es club"
+ },
+ {
+  "name": "The Mermaid",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Nickel Mine",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Normandie Club",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Reserve",
+  "city": "Los Angeles",
+  "genres": [
+   "hip_hop",
+   "reggaeton",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Roger Room",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Rooftop",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "azotea del hotel Wayfarer DTLA, no es club"
+ },
+ {
+  "name": "The Room Hollywood",
+  "city": "Los Angeles",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "soul",
+   "funk",
+   "disco",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Red Stick Social",
+  "city": "Baton Rouge",
+  "genres": [
+   "live",
+   "blues",
+   "jazz",
+   "funk",
+   "soul",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Red's place bar & lounge",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Second Story Bar and Lounge at 214",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Somewhere Neighborhood Bar",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Splash Nightclub",
+  "city": "Baton Rouge",
+  "genres": [
+   "house",
+   "techno",
+   "hip_hop",
+   "pop"
+  ],
+  "is_nightlife": true,
+  "note": "Yelp dice cerrado pero su sitio y Visit Baton Rouge listan horarios actuales — verificar"
+ },
+ {
+  "name": "Sport Zone Pub & Grill",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "restaurante del Holiday Inn, sirve desayuno y cierra 10pm"
+ },
+ {
+  "name": "Squeaky Pete's",
+  "city": "Baton Rouge",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tallulah Crafted Food and Wine Bar",
+  "city": "Baton Rouge",
+  "genres": [
+   "live",
+   "americana",
+   "blues",
+   "jazz"
+  ],
+  "is_nightlife": true,
+  "note": "dentro del hotel Renaissance"
+ },
+ {
+  "name": "TAP 65 Bar & Grill",
+  "city": "Baton Rouge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Brakes Bar",
+  "city": "Baton Rouge",
+  "genres": [
+   "live",
+   "jazz"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Main Lobby",
+  "city": "Baton Rouge",
+  "genres": [
+   "live",
+   "jazz"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Penthouse Club - Baton Rouge",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "adult_entertainment"
+ },
+ {
+  "name": "The R&B Cocktail Lounge",
+  "city": "Baton Rouge",
+  "genres": [
+   "rnb"
+  ],
+  "is_nightlife": true,
+  "note": "mudanza a Bennington Ave declarada en marzo 2026 sin fecha de apertura — verificar direccion"
+ },
+ {
+  "name": "Skysill Rooftop Lounge",
+  "city": "Tempe",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Social Hall Restaurant + Event Venue",
+  "city": "Tempe",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Society",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sunbar Tempe",
+  "city": "Tempe",
+  "genres": [
+   "edm",
+   "house",
+   "techno",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Taste of Tops",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tempe Tavern",
+  "city": "Tempe",
+  "genres": [
+   "rock",
+   "hip_hop",
+   "reggae",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Chill Room",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "bar de kava sin alcohol"
+ },
+ {
+  "name": "The Dark Side",
+  "city": "Tempe",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "speakeasy dentro del Tempe Farmers Market"
+ },
+ {
+  "name": "The HIGH Lounge",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "salon de fumadores solo para socios dentro de un smoke shop"
+ },
+ {
+  "name": "The Hudson Eatery & Bar",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Porch",
+  "city": "Tempe",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Way Station Restaurant & Bar",
+  "city": "Tempe",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": false,
+  "note": "restaurante del lobby de un hotel, cierra 9pm"
+ },
+ {
+  "name": "The Yard At Farmer Arts District",
+  "city": "Tempe",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "complejo; la musica es del Culinary Dropout adentro"
+ },
+ {
+  "name": "Koppe Bridge Bar & Grill",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Logie's",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lupe Tortilla Mexican Restaurant",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Messina Hof Estate Winery",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Napa Flats Wood-Fired Kitchen",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "O'Bannon's Taphouse",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "135 eventos en Songkick pero nada despues de 2019 — historial obsoleto"
+ },
+ {
+  "name": "P.O.E.T.S. Billiards & Bar",
+  "city": "College Station",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Primrose Path Wine Bar",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rebel Draft House",
+  "city": "College Station",
+  "genres": [
+   "country"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Reveille Rooftop Bar",
+  "city": "College Station",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "pop",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "piso 11 del Hilton College Station"
+ },
+ {
+  "name": "Rough Draught Whiskey Bar",
+  "city": "College Station",
+  "genres": [
+   "country",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rush",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "direccion mal: 108 College Main St, no 107"
+ },
+ {
+  "name": "Social Lounge",
+  "city": "College Station",
+  "genres": [
+   "hip_hop",
+   "edm",
+   "techno"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Aquarium on 6th",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Atomic Heart Lounge",
+  "city": "Austin",
+  "genres": [
+   "techno",
+   "house",
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: South/Southeast Austin, no McKinney"
+ },
+ {
+  "name": "The Betty",
+  "city": "Austin",
+  "genres": [
+   "jazz",
+   "live",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Dead Rabbit, Austin",
+  "city": "Austin",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "sesion tradicional irlandesa semanal, sin termino"
+ },
+ {
+  "name": "The Dizzy Rooster",
+  "city": "Austin",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "bookings solo 2015-2019; hoy es bar de DJ"
+ },
+ {
+  "name": "The Far Out Lounge & Stage",
+  "city": "Austin",
+  "genres": [
+   "live",
+   "rock",
+   "latin",
+   "salsa"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Golden Goose",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Golden Horn",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Hole in the Wall",
+  "city": "Austin",
+  "genres": [
+   "rock",
+   "country",
+   "soul",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Library Bar",
+  "city": "Austin",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Nearest Bar",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "NO SE PUDO VERIFICAR QUE EXISTA en 1100 S Lamar — sin sitio, sin listados, sin cobertura"
+ },
+ {
+  "name": "The Ranch",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Rooftop On 6th",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "misma direccion que The Aquarium on 6th (403 E 6th), distinto operador"
+ }
+]

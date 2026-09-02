@@ -1,0 +1,593 @@
+[
+ {
+  "name": "Dave & Buster's Gainesville",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Dragonfly Sushi & Sake Company",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "First Magnitude Brewing Company",
+  "city": "Gainesville",
+  "genres": [
+   "jazz",
+   "funk",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ford's Garage Gainesville",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "GATORS DEN SPORTS GRILL",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Great Outdoors Restaurant",
+  "city": "Gainesville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": false,
+  "note": "CIUDAD MAL: esta en High Springs FL, a 32km de Gainesville"
+ },
+ {
+  "name": "Havana's Wine & Cigar Lounge",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hurricane BTW",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Kin Cocktail Bar & Lounge",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lillian's Music Store",
+  "city": "Gainesville",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Paradise Lost",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Parkside Lounge",
+  "city": "New York",
+  "genres": [
+   "live",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Patent Pending",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Paul's Cocktail Lounge",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Petite",
+  "city": "New York",
+  "genres": [
+   "house",
+   "disco"
+  ],
+  "is_nightlife": true,
+  "note": "nombre real: Petite Disco"
+ },
+ {
+  "name": "PHD Rooftop Lounge at Dream Downtown",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Phebe's",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Reservoir",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Retroclubnyc",
+  "city": "New York",
+  "genres": [
+   "disco",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rooftop Bars NYC",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "REGISTRO MALO: no es un venue, es una etiqueta de directorio. La direccion es 230 Fifth Rooftop Bar",
+  "exclude": "no es un venue: etiqueta de directorio SEO; 1150 Broadway ya esta listado como 230 Fifth Rooftop Bar"
+ },
+ {
+  "name": "Lucky's 1313 Brew Pub",
+  "city": "Madison",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Main Depot",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mason Lounge",
+  "city": "Madison",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Vilas"
+ },
+ {
+  "name": "Mom's Bar",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mondays",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Moon Bar",
+  "city": "Madison",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nitro Beverage Lounge",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Northside Lounge",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Oz by Oz",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Paradise Lounge",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Brothers Bar & Grill",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cafe 210 West",
+  "city": "State College",
+  "genres": [
+   "rock",
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Central Reservation",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "CEO Karaoke",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Champs Downtown",
+  "city": "State College",
+  "genres": [
+   "hip_hop",
+   "edm",
+   "pop",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Champs Sports Grill",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Chumley's",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Doggie's Pub",
+  "city": "State College",
+  "genres": [
+   "rock",
+   "pop",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Federal Taphouse",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fiddlehead",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "restaurante de ensaladas y sopas, cierra 8pm, no sirve alcohol"
+ },
+ {
+  "name": "Downtown Uncorked Winebar",
+  "city": "College Station",
+  "genres": [
+   "americana",
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dragonfly",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Duddley's Draw",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Four Downs Sports Bar",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Good Bull Icehouse",
+  "city": "College Station",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Grand Station Entertainment",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "centro familiar de entretenimiento: bolos, laser tag, minigolf"
+ },
+ {
+  "name": "Hurricane Harry's",
+  "city": "College Station",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "reabrio como Harry's Northgate en 217 University Dr; el local viejo fue demolido"
+ },
+ {
+  "name": "ICON Nightclub and Lounge",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jose's Restaurant",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Knight Club",
+  "city": "College Station",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Druid City Brewing Company Taproom & Ell's Kitchen",
+  "city": "Tuscaloosa",
+  "genres": [
+   "rock",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Egan's Bar",
+  "city": "Tuscaloosa",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "reabrio 2025 como Egan's Irish Pub; el nombre del catalogo es el viejo"
+ },
+ {
+  "name": "FIVE Tuscaloosa",
+  "city": "Tuscaloosa",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Gallettes",
+  "city": "Tuscaloosa",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Grandstand",
+  "city": "Tuscaloosa",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Harry's Bar",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Icon Tuscaloosa",
+  "city": "Tuscaloosa",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Innisfree Irish Pub",
+  "city": "Tuscaloosa",
+  "genres": [
+   "rock",
+   "rnb",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: 'Druid City' es apodo de la ciudad entera, no un barrio"
+ },
+ {
+  "name": "Jackie's Lounge",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Loosa Brews",
+  "city": "Tuscaloosa",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Limestone Rooftop",
+  "city": "Austin",
+  "genres": [
+   "edm",
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Little Woodrow's Tech Ridge",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "LUNA Rooftop",
+  "city": "Austin",
+  "genres": [
+   "house",
+   "latin",
+   "reggaeton"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mala Vida",
+  "city": "Austin",
+  "genres": [
+   "reggaeton",
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Manchaca Sports Bar",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mayfair Austin",
+  "city": "Austin",
+  "genres": [
+   "edm",
+   "house",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Midnight Cowboy",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mockingbird Saloon",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "OK Corral Nightclub",
+  "city": "Austin",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Otro Pedo Sports Bar",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Oxford GolfHouse/Southern Coop",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Quack's",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rafters Music and Food",
+  "city": "Oxford",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Retro Haven",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "ninguna fuente confirma que el negocio exista en esa direccion"
+ },
+ {
+  "name": "Round Table on the Square",
+  "city": "Oxford",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "programacion musical aparentemente dormida desde 2021"
+ },
+ {
+  "name": "Saint Leo | Italian",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Snackbar",
+  "city": "Oxford",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "SoLa",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "The Blind Pig Pub",
+  "city": "Oxford",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Coop",
+  "city": "Oxford",
+  "genres": [
+   "country",
+   "americana",
+   "blues",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ }
+]

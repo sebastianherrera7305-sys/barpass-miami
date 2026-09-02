@@ -1,0 +1,1019 @@
+[
+ {
+  "name": "Raised By Wolves",
+  "city": "Las Vegas",
+  "genres": [
+   "latin",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Red Dwarf",
+  "city": "Las Vegas",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rush Lounge",
+  "city": "Las Vegas",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "S Bar Las Vegas",
+  "city": "Las Vegas",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ski Lodge",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "speakeasy dentro del restaurante Superfrico; el campo barrio tiene 'Chelsea Tower', una torre de hotel"
+ },
+ {
+  "name": "Stray Pirate - Tropical Cocktails & Effects",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Terrace Afterhours Nightclub | Las Vegas Ultimate Afterhours Experience",
+  "city": "Las Vegas",
+  "genres": [
+   "house",
+   "tech_house",
+   "techno"
+  ],
+  "is_nightlife": true,
+  "note": "opera encima del Hustler Club (strip club); el afterhours en si es legitimo"
+ },
+ {
+  "name": "The Cabinet of Curiosities",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Griffin - Classic Cocktails and Coffee",
+  "city": "Las Vegas",
+  "genres": [
+   "rock",
+   "goth",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Stadium",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Underground Lounge",
+  "city": "Las Vegas",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Vegas Vickie's Cocktail Lounge",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Velveteen Rabbit",
+  "city": "Las Vegas",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Vesper Bar",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "el campo barrio tiene una direccion de calle"
+ },
+ {
+  "name": "Vintage Vegas Cocktail Lounge",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "White Whale Cocktail Bar Fremont Street",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "ZAI Nightclub Las Vegas",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "cerrado permanentemente; 700 E Fremont opera ahora como 700 Fremont Experience"
+ },
+ {
+  "name": "Zouk Nightclub",
+  "city": "Las Vegas",
+  "genres": [
+   "edm",
+   "house",
+   "tech_house",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Zuna Nightclub",
+  "city": "Las Vegas",
+  "genres": [
+   "tejano",
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Library Bar",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The O on Lane",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Shapeshifter",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Spacebar",
+  "city": "Columbus",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Speakeasy",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "el propio operador declara en su Instagram que ya no esta en 520 S Front St"
+ },
+ {
+  "name": "The Thirsty Scholar",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Torpedo Room",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "bar dentro del Gateway Film Center"
+ },
+ {
+  "name": "The Valley",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Thirsty's Pub Italian Village",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Threes Above High",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "U.A. Pub",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ugly Tuna Saloona",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "nombre obsoleto: hoy es Ugly Tuna Saloona 2"
+ },
+ {
+  "name": "Understory",
+  "city": "Columbus",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Old North Columbus"
+ },
+ {
+  "name": "Village Idiot",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Wiseguy Lounge - Short North",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "speakeasy en la mitad trasera de Goodfellas Pizzeria"
+ },
+ {
+  "name": "Woody's Tavern",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "instalacion del Ohio Union de OSU"
+ },
+ {
+  "name": "Stereo Nightclub",
+  "city": "Chicago",
+  "genres": [
+   "reggaeton",
+   "latin",
+   "hip_hop",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Bamboo Room at Three Dots and a Dash",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "bar de 22 asientos DENTRO de Three Dots and a Dash"
+ },
+ {
+  "name": "The Bassment - Chicago",
+  "city": "Chicago",
+  "genres": [
+   "blues",
+   "soul",
+   "rock",
+   "house",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Berkshire Room",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Broken Barrel Bar",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The California Clipper",
+  "city": "Chicago",
+  "genres": [
+   "jazz",
+   "live",
+   "house",
+   "techno",
+   "disco",
+   "soul",
+   "funk",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Globe Pub",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Meadowlark",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Office",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "speakeasy de 14 asientos en el sotano de The Aviary"
+ },
+ {
+  "name": "The Pearl Club",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Rabbit Hole",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Riu Rooftop Chicago",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tunnel",
+  "city": "Chicago",
+  "genres": [
+   "edm",
+   "house",
+   "reggaeton",
+   "latin",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Upstairs at The Gwen",
+  "city": "Chicago",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Watra Night Club",
+  "city": "Chicago",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Lone Girl Brewing Company Taproom",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "la musica en la azotea es del brewpub de Waunakee, no de esta sala"
+ },
+ {
+  "name": "The Perch",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "azotea de Mint Mark, se entra por adentro; direccion en duda (1874 vs 1374 E Washington)"
+ },
+ {
+  "name": "The Plaza Tavern",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Red Zone Madison",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "los conciertos son del Annex en 1206 Regent, otra direccion"
+ },
+ {
+  "name": "The Rigby Pub, Grill, and Event Venue",
+  "city": "Madison",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Robin Room",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Wisco",
+  "city": "Madison",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "University of Wisconsin Madison – Sunset Lounge and Restaurant",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "unidad estacional de comida al aire libre del Memorial Union, solo mayo-agosto y con reserva"
+ },
+ {
+  "name": "Up North",
+  "city": "Madison",
+  "genres": [
+   "country",
+   "funk",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Village Bar",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Vintage Spirits & Grill",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Wando's",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Whiskey Jack's Saloon",
+  "city": "Madison",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Wilson's Bar & Grill",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "wilsonslivemusic.com es otro venue en Hi-Nella, Nueva Jersey"
+ },
+ {
+  "name": "Woof's",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rush Nightclub",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "NO SE PUDO VERIFICAR: sin sitio, sin redes, sin listados; 112 S Main lo ocupa otro negocio"
+ },
+ {
+  "name": "Salty Dog Saloon",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Silver Q Billiards & Sports Bar",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Simons",
+  "city": "Gainesville",
+  "genres": [
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Stage 7 Karaoke Party Rooms & Bar",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Atlantic",
+  "city": "Gainesville",
+  "genres": [
+   "rock",
+   "live",
+   "goth"
+  ],
+  "is_nightlife": true,
+  "note": "la direccion del catalogo (19 W University) es la correcta; muchas fuentes traen la vieja"
+ },
+ {
+  "name": "The Bull",
+  "city": "Gainesville",
+  "genres": [
+   "live",
+   "jazz"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Comeback Sports Bar & Grill Gainesville",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "bar dentro del DoubleTree, cierra 9pm"
+ },
+ {
+  "name": "The Dime",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Swamp Restaurant",
+  "city": "Gainesville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Traveler",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Twist Coffee & Cocktails",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "bar del lobby del hotel Gainesville Lodge"
+ },
+ {
+  "name": "University Club",
+  "city": "Gainesville",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "White Buffalo",
+  "city": "Gainesville",
+  "genres": [
+   "pop",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Four Faced Liar",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Half Pint / Ernie's Bar",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "un solo venue con dos nombres, no un duplicado"
+ },
+ {
+  "name": "The Ivory Peacock",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "el jazz/cubano/bluegrass que repiten los directorios es del Flatiron Room, mismo dueno, cruzando la calle"
+ },
+ {
+  "name": "The Library",
+  "city": "New York",
+  "genres": [
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Living Room Bar & Lounge",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "lobby del W Union Square, no es club"
+ },
+ {
+  "name": "The Long Island Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Monster",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Ready Cantina",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "azotea del Moxy East Village"
+ },
+ {
+  "name": "The Red Lion | NYC",
+  "city": "New York",
+  "genres": [
+   "live",
+   "rock",
+   "blues",
+   "soul",
+   "funk"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "THE ROOF",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "azotea del PUBLIC Hotel"
+ },
+ {
+  "name": "The Spaniard",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Up & Up",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "es el antiguo Gaslight Cafe; su historia folk no es su programacion de hoy"
+ },
+ {
+  "name": "Tigre",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Toad Hall",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Top of the Strand Rooftop Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "azotea del Marriott Vacation Club Pulse"
+ },
+ {
+  "name": "VIRGO New York",
+  "city": "New York",
+  "genres": [
+   "house",
+   "disco"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Wicked Willy's",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Social Cantina",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Back Door",
+  "city": "Bloomington",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Bishop Bar",
+  "city": "Bloomington",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Bluebird",
+  "city": "Bloomington",
+  "genres": [
+   "rock",
+   "country",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Cade",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Dunnkirk Library",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "speakeasy dentro de The Upstairs Pub, misma direccion que otra fila de este lote"
+ },
+ {
+  "name": "The Office Lounge & Liquor Store",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Orbit Room",
+  "city": "Bloomington",
+  "genres": [
+   "americana",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Scholars Inn Bakehouse",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "panaderia mayorista, lunes a viernes 9-17h; Yelp la da por cerrada"
+ },
+ {
+  "name": "The Sinkhole Craft Beer Bar",
+  "city": "Bloomington",
+  "genres": [
+   "rock",
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Tap",
+  "city": "Bloomington",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Upstairs Pub",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Trojan Horse",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "deja el 100 E Kirkwood tras 50 anios; reabre en Ellettsville en agosto 2026"
+ },
+ {
+  "name": "Truffles Fine Cuisine & 56 Degrees Bar",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Upland Brewing Co.",
+  "city": "Bloomington",
+  "genres": [
+   "country",
+   "americana",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Uptown Cafe",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Video Saloon",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Yogi's Bar & Grill",
+  "city": "Bloomington",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Gold Mine Saloon",
+  "city": "New Orleans",
+  "genres": [
+   "hip_hop",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Jimani",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Pool Club New Orleans",
+  "city": "New Orleans",
+  "genres": [
+   "house",
+   "rnb"
+  ],
+  "is_nightlife": true,
+  "note": "piso 13 del Virgin Hotels; hermano de Commons Club y Dreamboat"
+ },
+ {
+  "name": "The Pothole NOLA",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Rabbit Hole",
+  "city": "New Orleans",
+  "genres": [
+   "house",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Rusty Nail",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "la ficha de WWOZ parece vieja: cero shows proximos, hoy es bar de whisky y deportes"
+ },
+ {
+  "name": "THE TELL ME BAR",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "disco",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Upper Quarter",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Victorian Lounge",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "sala del hotel Columns; barrio mal: Touro"
+ },
+ {
+  "name": "The Will & The Way",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tragos Amargos",
+  "city": "New Orleans",
+  "genres": [
+   "soul",
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "sala trasera dentro de Taquerias Carnalito"
+ },
+ {
+  "name": "Treehouse",
+  "city": "New Orleans",
+  "genres": [
+   "hip_hop",
+   "rnb"
+  ],
+  "is_nightlife": true,
+  "note": "su sitio muestra nombres de artista de plantilla Wix — no ingerir"
+ },
+ {
+  "name": "Twelve Mile Limit",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Vaughan's Lounge",
+  "city": "New Orleans",
+  "genres": [
+   "funk",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Vieux Sports Saloon and Cafe",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "ZIP mal: 70130, no 70116"
+ },
+ {
+  "name": "Vintage Rock Club",
+  "city": "New Orleans",
+  "genres": [
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Voodoo Two",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Vue",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "azotea del SpringHill Suites, no es club"
+ },
+ {
+  "name": "Wrong Iron On The Greenway",
+  "city": "New Orleans",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true
+ }
+]

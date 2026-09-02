@@ -1,0 +1,599 @@
+[
+ {
+  "name": "City Bar",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "señales de cierre en conflicto: Foursquare cerrado, Yelp activo abr-2026 — verificar"
+ },
+ {
+  "name": "Clarke's Standard",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cloud",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Creature Comforts Downtown Taproom and Brewery",
+  "city": "Athens",
+  "genres": [
+   "rock",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cutters Pub",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dooley's Bar & Grill",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Empourium Athens",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Five and Ten",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "barrio mal: Five Points"
+ },
+ {
+  "name": "Georgia Theatre",
+  "city": "Athens",
+  "genres": [
+   "rock",
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hendershot's",
+  "city": "Athens",
+  "genres": [
+   "americana",
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jade Monkey Cocktail Lounge",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jay's",
+  "city": "Madison",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jordan's Big Ten Pub",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lakeview Lounge",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "sala de comedor/tienda dentro del Memorial Union de UW, cierra 10pm y se paga con tarjeta estudiantil"
+ },
+ {
+  "name": "Lazy Oaf Lounge",
+  "city": "Madison",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Le Tigre Lounge",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Library Cafe & Bar",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Liquid",
+  "city": "Madison",
+  "genres": [
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "LJ's Sports Tavern & Grill",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lockeroom Sports Bar & Grill",
+  "city": "Madison",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dumpster Fire Cocktail Lounge",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Elysium",
+  "city": "Austin",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "goth/industrial — vocabulario no lo cubre, rock es aproximacion"
+ },
+ {
+  "name": "Garage",
+  "city": "Austin",
+  "genres": [
+   "jazz"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Green Light Social",
+  "city": "Austin",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Here Nor There",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Highland Lounge",
+  "city": "Austin",
+  "genres": [
+   "house",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "In Plain Sight",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kinfolk Cocktail Lounge & Spirits Library",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kingdom",
+  "city": "Austin",
+  "genres": [
+   "house",
+   "techno",
+   "tech_house",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lavaca Street Bar",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Germantown Pub",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Harriet's Rooftop",
+  "city": "Nashville",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hidden Bar at Noelle",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Inglewood Lounge",
+  "city": "Nashville",
+  "genres": [
+   "jazz",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jelly Roll's Goodnight Nashville",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Jonathan's Grille",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kane Brown's on Broadway",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "L.A. Jackson",
+  "city": "Nashville",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "funk"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "L27 Rooftop Lounge",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Layla's Honky Tonk",
+  "city": "Nashville",
+  "genres": [
+   "country",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Keybar",
+  "city": "New York",
+  "genres": [
+   "house",
+   "disco",
+   "funk"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lady Blue",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Le Bain",
+  "city": "New York",
+  "genres": [
+   "house",
+   "disco"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Legends",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Little Sister Lounge",
+  "city": "New York",
+  "genres": [
+   "hip_hop"
+  ],
+  "is_nightlife": true,
+  "note": "ZIP mal: 10003, no 10013"
+ },
+ {
+  "name": "Lucky",
+  "city": "New York",
+  "genres": [
+   "live",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mace",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Madame George",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Madame X",
+  "city": "New York",
+  "genres": [
+   "reggae",
+   "hip_hop",
+   "rnb",
+   "soul",
+   "latin",
+   "techno"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Marquee New York",
+  "city": "New York",
+  "genres": [
+   "edm",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ghost Donkey",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "HIDE+SEEK",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hopsmith Chicago",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Icon Bar & Lounge",
+  "city": "Chicago",
+  "genres": [
+   "house",
+   "tech_house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kitty's Cosmopolitan Club",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Kumiko",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "La Bella Trattoria on Rush",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "barrio mal: Streeterville"
+ },
+ {
+  "name": "La Licor Panamericana",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Late Bar",
+  "city": "Chicago",
+  "genres": [
+   "rock",
+   "pop"
+  ],
+  "is_nightlife": true,
+  "note": "goth/darkwave/new wave — vocabulario no lo cubre"
+ },
+ {
+  "name": "Lazy Bird",
+  "city": "Chicago",
+  "genres": [
+   "jazz",
+   "rock",
+   "soul",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fat Harry's",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Finnegan's Easy",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fives",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Foundation Room New Orleans",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "French 75 Bar",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fuego Bourbon",
+  "city": "New Orleans",
+  "genres": [
+   "latin",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ghost Bar",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: French Quarter, no CBD"
+ },
+ {
+  "name": "Good Friends Bar",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hideout Bar",
+  "city": "New Orleans",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "renombrado Oceanas Hideout Bar, misma direccion y telefono"
+ },
+ {
+  "name": "High Five",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Law Bird",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Leo's on the Alley",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Let Me Roll It",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Little West Tavern",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Local Bar Short North",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Short North"
+ },
+ {
+  "name": "Midway",
+  "city": "Columbus",
+  "genres": [
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Noir Lounge",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "generos rechazados: unica fuente era un agregador IA"
+ },
+ {
+  "name": "Novak's Tavern & Patio",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Oldfield's North Fourth Tavern",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Weinland Park"
+ },
+ {
+  "name": "Out-R-Inn",
+  "city": "Columbus",
+  "genres": [
+   "rock"
+  ],
+  "is_nightlife": true
+ }
+]

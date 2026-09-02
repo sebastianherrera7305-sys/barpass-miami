@@ -1,0 +1,665 @@
+[
+ {
+  "name": "The Bitter Bar",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Corner Bar",
+  "city": "Boulder",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Lounge at the Boulder Theater",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "bar previo al show del Boulder Theater, no programa por su cuenta"
+ },
+ {
+  "name": "The Lowdown",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Sink",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Spotted James",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Yeti",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "la direccion es hoy The Kathi Klub, restaurante nepales; el nombre es un alias de delivery"
+ },
+ {
+  "name": "Tonic Alchemy Lounge",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "lounge de kava y shisha, cierra 10pm, sin alcohol"
+ },
+ {
+  "name": "Twisted Pine Brewing Co",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Velvet Elk Lounge",
+  "city": "Boulder",
+  "genres": [
+   "rock",
+   "blues",
+   "country",
+   "funk",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "West End Tavern",
+  "city": "Boulder",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ivar's Sports Bar & Grill",
+  "city": "Baton Rouge",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "La Daiquiris Sports Bar & Grill",
+  "city": "Baton Rouge",
+  "genres": [
+   "rock",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Loft18 Baton Rouge",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lotus Lounge",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "LSU Club at Union Square",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "club de facultad en el campus de LSU: buffet y salon de bodas, cierra 7pm"
+ },
+ {
+  "name": "Mid City Beer Garden",
+  "city": "Baton Rouge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mike's in Tiger Land",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mother's Lounge",
+  "city": "Baton Rouge",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Patio Lounge",
+  "city": "Baton Rouge",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Jefferson/Bocage"
+ },
+ {
+  "name": "Pelican to Mars",
+  "city": "Baton Rouge",
+  "genres": [
+   "rock",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Phil Brady's Bar & Grill",
+  "city": "Baton Rouge",
+  "genres": [
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Gigi's Southern Table",
+  "city": "State College",
+  "genres": [
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Happy Valley Brewing Company",
+  "city": "State College",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Happy Valley LIVE",
+  "city": "State College",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Legends Pub",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lion's Den",
+  "city": "State College",
+  "genres": [
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Local Whiskey",
+  "city": "State College",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Lou's Stick Room",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "es la sala de billar DENTRO de Champs Sports Grill, 1611 N Atherton — posible duplicado",
+  "exclude": "sala de billar dentro de Champs Sports Grill, misma direccion — duplicado del mismo local"
+ },
+ {
+  "name": "Otto's Pub and Brewery",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Phyrst",
+  "city": "State College",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Primanti Bros. Restaurant and Bar",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sharkies Bar & Thrifty Bottle",
+  "city": "State College",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "RT60 Rooftop Bar & Lounge",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Rumpus Room",
+  "city": "New York",
+  "genres": [
+   "house",
+   "disco",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Saint Tuesday",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "schmuck.",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sir Henry’s",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Smithfield Hall NYC",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Somewhere Nowhere NYC - Lounge, Nightclub & Rooftop Pool",
+  "city": "New York",
+  "genres": [
+   "house",
+   "tech_house",
+   "techno"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sour Mouse",
+  "city": "New York",
+  "genres": [
+   "live",
+   "jazz"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Spyglass Rooftop Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "St. Cloud Rooftop",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Standings",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "vacio DOCUMENTADO: politica declarada de no musica ni baile"
+ },
+ {
+  "name": "The Crunkleton",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Gathering Place",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "edificio aprobado para demolicion (2023); sigue operando"
+ },
+ {
+  "name": "The Northside District",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Rookery",
+  "city": "Chapel Hill",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Town Hall Grill",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Top of the Hill Restaurant & Brewery",
+  "city": "Chapel Hill",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Town Hall Burger & Beer Chapel Hill",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Trophy Room",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "TRU",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "VIBEZ UNC",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "edificio aprobado para demolicion (2023); verificar antes del lanzamiento"
+ },
+ {
+  "name": "Zog's Pool",
+  "city": "Chapel Hill",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "el jazz del 108 Henderson es de Imbibe/Rougarou, planta baja — no de Zog's"
+ },
+ {
+  "name": "Paul's Club",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Plain Spoke Cocktail Company",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Players Sports Bar & Grill",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Schenk-Atwood"
+ },
+ {
+  "name": "Pooley's Sports Bar and Event Center",
+  "city": "Madison",
+  "genres": [
+   "live",
+   "country",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Public Parking Bar",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Red Rock Saloon",
+  "city": "Madison",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "RITMO 2",
+  "city": "Madison",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "salsa/bachata/reggaeton solo en un directorio generico — no se escribieron"
+ },
+ {
+  "name": "Roxxy - Madison",
+  "city": "Madison",
+  "genres": [
+   "pop",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "SconnieBar",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "historial de musica en vivo de 2016-2017, hoy sports bar de 37 TVs"
+ },
+ {
+  "name": "Sett Pub",
+  "city": "Madison",
+  "genres": [
+   "live",
+   "rock",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Settle Down Tavern",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "La Lo La Rooftop",
+  "city": "Los Angeles",
+  "genres": [
+   "house",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "LEVEL 8",
+  "city": "Los Angeles",
+  "genres": [
+   "hip_hop",
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "complejo de 8 venues; Mr. Wanderlust es uno de ellos, misma direccion"
+ },
+ {
+  "name": "Melrose Umbrella Co.",
+  "city": "Los Angeles",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mr. Wanderlust",
+  "city": "Los Angeles",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nightingale Plaza",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "cerrado: 643 N La Cienega opera hoy como Zouk Los Angeles"
+ },
+ {
+  "name": "Panamerican Night Club",
+  "city": "Los Angeles",
+  "genres": [
+   "latin",
+   "salsa",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Historic Filipinotown"
+ },
+ {
+  "name": "Pattern Bar",
+  "city": "Los Angeles",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Playhouse Hollywood",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "cerrado permanentemente (~2020): Yelp cerrado, dominio caido, solo lo listan brokers de guestlist"
+ },
+ {
+  "name": "Rhythm Room L.A.",
+  "city": "Los Angeles",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Riviera 31",
+  "city": "Los Angeles",
+  "genres": [
+   "jazz",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Beverly Grove"
+ },
+ {
+  "name": "Skyduster Sports",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "P6 at the LINE Austin",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Paris lounge atx",
+  "city": "Austin",
+  "genres": [
+   "latin",
+   "reggaeton"
+  ],
+  "is_nightlife": true,
+  "note": "es Paris Hookah Lounge"
+ },
+ {
+  "name": "Parlor & Yard",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "bookings de musica pararon en 2023"
+ },
+ {
+  "name": "Poeta Rooftop Bar at East Austin Hotel",
+  "city": "Austin",
+  "genres": [
+   "reggaeton"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Posse East",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Powder Room",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Retail Therapy Cocktail Lounge",
+  "city": "Austin",
+  "genres": [
+   "latin",
+   "salsa",
+   "bachata"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Seven Grand",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Small Victory",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Star Bar",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The 13th floor",
+  "city": "Austin",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ }
+]

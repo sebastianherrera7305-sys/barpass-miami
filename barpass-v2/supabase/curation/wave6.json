@@ -1,0 +1,547 @@
+[
+ {
+  "name": "Corbett's Sports Bar & Grill",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cucu's Nest Bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Daiquiri Bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown/Bayside"
+ },
+ {
+  "name": "Dewey's F’ing Bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Duffy's Tavern",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: West Miami"
+ },
+ {
+  "name": "Enjoy Kava Bar – South Beach Botanical Lounge",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "kava/kratom lounge sin alcohol, misma categoria que los smoke shops"
+ },
+ {
+  "name": "Fox's Lounge",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Grand Public Kitchen & Bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Happy's Stork Lounge and Liquor Store",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "direccion posiblemente vieja tras mudanza"
+ },
+ {
+  "name": "Hole in the Wall",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "1972 Pub",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Azul Rooftop",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Back Lot",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Backspin Texas Sports Bar & Grill",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Hacienda",
+  "city": "Austin",
+  "genres": [
+   "latin",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Moxy",
+  "city": "Austin",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "BBG'S",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Black Sheep Lodge",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Buford's",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Busty's",
+  "city": "Austin",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Antiques on High",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Apt. B",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Arch City Tavern",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Axis Nightclub",
+  "city": "Columbus",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Room",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "instalacion de arte dentro del Columbus Museum of Art, no es un bar independiente"
+ },
+ {
+  "name": "Bodega",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Brass Eye",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bucks Platinum",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "flag": "strip club — decision de producto"
+ },
+ {
+  "name": "Canabar",
+  "city": "Columbus",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Char Bar",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "124 Old Rabbit Club",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "420 Bar & Lounge",
+  "city": "New York",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "hip_hop",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Amor y Amargo",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "ART SoHo - Soho Rooftop Bars, NYC (Arlo Soho)",
+  "city": "New York",
+  "genres": [
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ascent Lounge",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Attaboy",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar 54",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Bonobo",
+  "city": "New York",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Chimera",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Lola",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Room at the Beekman",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Snack",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Barcelona Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bayard's Ale House",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Beauty Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bella Union",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bembe",
+  "city": "New York",
+  "genres": [
+   "latin",
+   "afrobeats"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bemelmans Bar",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Big Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Blind Tiger",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "AceBounce",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "After Chicago",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Aire Rooftop Bar Chicago",
+  "city": "Chicago",
+  "genres": [
+   "house",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Apothecary Cocktail Lounge",
+  "city": "Chicago",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Babe's Sports Bar",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Bambi",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Sotto",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Belmont Tavern",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bernard’s",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Best Bar",
+  "city": "Chicago",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Baldwin Street Grille",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Blue Jack",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Brass Ring Bar & Restaurant",
+  "city": "Madison",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Tenney-Lapham"
+ },
+ {
+  "name": "Camp Trippalindee",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Chasers 2.0",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Church Key",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cielo",
+  "city": "Madison",
+  "genres": [
+   "house",
+   "edm",
+   "latin",
+   "afrobeats"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club LaMark",
+  "city": "Madison",
+  "genres": [
+   "live",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cordial",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Crystal Corner Bar",
+  "city": "Madison",
+  "genres": [
+   "live",
+   "rock",
+   "blues",
+   "country"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "305 Sports Bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "American Social - Bar & Kitchen - Miami",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Amor Miami",
+  "city": "Miami",
+  "genres": [
+   "rnb",
+   "afrobeats"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Bar Kaiju",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Better Days",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Booby Trap On The River",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "adult_entertainment"
+ },
+ {
+  "name": "Brother's Keeper Bar",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Champagne Bar at The Surf Club",
+  "city": "Miami",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "City Cigar Lounge",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club Pink Pony",
+  "city": "Miami",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "adult_entertainment"
+ }
+]

@@ -1,0 +1,636 @@
+[
+ {
+  "name": "Dear Irving on Hudson Rooftop Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Deluxx Fluxx",
+  "city": "New York",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "latin",
+   "reggae"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Down the Hatch",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Downtown Social",
+  "city": "New York",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Elsie Rooftop",
+  "city": "New York",
+  "genres": [
+   "salsa",
+   "latin",
+   "disco",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Evnts Plug",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "plataforma de descubrimiento de eventos, no un local — lista fiestas de terceros"
+ },
+ {
+  "name": "Experimental Cocktail Club",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Grand Army",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Harbor NYC Rooftop",
+  "city": "New York",
+  "genres": [
+   "hip_hop",
+   "edm",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hard Rock Hotel New York",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club Premium Nashville TN",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "COA Rooftop Bar",
+  "city": "Nashville",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: The Gulch"
+ },
+ {
+  "name": "Coral Club",
+  "city": "Nashville",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: East Nashville"
+ },
+ {
+  "name": "Coyote Ugly Nashville",
+  "city": "Nashville",
+  "genres": [
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dirty Little Secret",
+  "city": "Nashville",
+  "genres": [
+   "house",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "DraftKings Sports & Social Nashville",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Famous Friends",
+  "city": "Nashville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Flamingo Cocktail Club",
+  "city": "Nashville",
+  "genres": [
+   "jazz",
+   "live",
+   "funk"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fleet Street Pub",
+  "city": "Nashville",
+  "genres": [
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fogg Street Lawn Club",
+  "city": "Nashville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Wedgewood-Houston"
+ },
+ {
+  "name": "Bruno's Tavern",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Caesars Sportsbook",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "sala de apuestas deportivas dentro del casino, no es un local de nightlife"
+ },
+ {
+  "name": "Chandelier Bar",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Chart Room",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club Continental",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "renombrado Club @7140, misma direccion y telefono"
+ },
+ {
+  "name": "Columns",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Coyote Ugly Saloon",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Cure",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Davenport Lounge",
+  "city": "New Orleans",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dovetail Bar: Coffee & Cocktails",
+  "city": "New Orleans",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Circa Bar",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Clique Bar & Lounge",
+  "city": "Las Vegas",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club EGO Afterhours",
+  "city": "Las Vegas",
+  "genres": [
+   "house",
+   "techno",
+   "tech_house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Collins",
+  "city": "Las Vegas",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Commonwealth",
+  "city": "Las Vegas",
+  "genres": [
+   "hip_hop",
+   "house",
+   "techno"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Corduroy",
+  "city": "Las Vegas",
+  "genres": [
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dark Sister",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Doberman Drawing Room",
+  "city": "Las Vegas",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Eight Cigar Lounge",
+  "city": "Las Vegas",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "FANDOM BAR - Las Vegas",
+  "city": "Las Vegas",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Catch One",
+  "city": "Los Angeles",
+  "genres": [
+   "house",
+   "rock",
+   "reggaeton",
+   "latin",
+   "disco"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Crocker Club",
+  "city": "Los Angeles",
+  "genres": [
+   "hip_hop",
+   "reggaeton",
+   "afrobeats",
+   "latin",
+   "reggae"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dante Beverly Hills",
+  "city": "Los Angeles",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Death & Co Los Angeles",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Desert 5 Spot",
+  "city": "Los Angeles",
+  "genres": [
+   "country",
+   "americana",
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Discotech",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "app de guestlist y reservas, no un local — la direccion es una torre de oficinas"
+ },
+ {
+  "name": "Dragonfly Hollywood",
+  "city": "Los Angeles",
+  "genres": [
+   "hip_hop",
+   "reggaeton",
+   "latin",
+   "afrobeats"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "DTLA Sports Bar & Grill",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Elbow Room",
+  "city": "Los Angeles",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Elevate Lounge",
+  "city": "Los Angeles",
+  "genres": [
+   "reggaeton",
+   "latin",
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "CloudBar at 360 CHICAGO",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "bar dentro de un mirador turistico de pago, cierra 11pm — misma categoria que los airport lounges"
+ },
+ {
+  "name": "Clover Sports and Leisure",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Club X Speakeasy",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dearly Beloved",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Delilah's",
+  "city": "Chicago",
+  "genres": [
+   "rock",
+   "soul",
+   "country",
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Dorothy",
+  "city": "Chicago",
+  "genres": [
+   "pop",
+   "latin",
+   "rock"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "ĒLA Nightclub",
+  "city": "Chicago",
+  "genres": [
+   "house",
+   "tech_house",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Era Social Club",
+  "city": "Chicago",
+  "genres": [
+   "hip_hop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fantasy Nightclub",
+  "city": "Chicago",
+  "genres": [
+   "latin",
+   "reggaeton"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Foundation Room Chicago",
+  "city": "Chicago",
+  "genres": [
+   "hip_hop",
+   "rnb",
+   "afrobeats"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Fours On High",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Galla Park Social",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Gaswerks",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Ginger Rabbit Jazz Lounge",
+  "city": "Columbus",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Goodale Station",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Arena District"
+ },
+ {
+  "name": "Half Baked",
+  "city": "Columbus",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "High Beck Tavern",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "HydeOut Kitchen & Bar",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "I Like It Like That",
+  "city": "Columbus",
+  "genres": [
+   "jazz",
+   "pop",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Grandview"
+ },
+ {
+  "name": "La Boom Columbus",
+  "city": "Columbus",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Harriet's Rooftop",
+  "city": "New York",
+  "genres": [
+   "house",
+   "disco"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hidden Tiger",
+  "city": "New York",
+  "genres": [
+   "hip_hop",
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Hide Rooftop",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Highkey Rainforest Rooftop",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Highwater Rooftop",
+  "city": "New York",
+  "genres": [
+   "house",
+   "hip_hop",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Home Sweet Home",
+  "city": "New York",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "INKwell Harbor Club Rooftop",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "marca de fiestas, no un local — el salon en 621 W 46th es Harbor NYC Rooftop, ya listado aparte"
+ },
+ {
+  "name": "Josie Woods Pub",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Juke Bar",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Katana Kitten",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ }
+]

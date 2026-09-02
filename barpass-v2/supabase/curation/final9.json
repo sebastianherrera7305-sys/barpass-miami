@@ -1,0 +1,11 @@
+[
+ {"name":"Bengal Tap Room","city":"Baton Rouge","genres":[],"is_nightlife":false,"exclude":"cerrado permanentemente en 2025; la propiedad paso al banco"},
+ {"name":"Downtown Wine and Cheese","city":"Gainesville","genres":[],"is_nightlife":false,"exclude":"tienda de vinos, no nightlife; el edificio tiene permiso de demolicion desde 2025"},
+ {"name":"emiliano's","city":"Gainesville","genres":[],"is_nightlife":false,"exclude":"cerrado en diciembre 2019 tras 37 anios; ademas la direccion del catalogo es incorrecta"},
+ {"name":"Fargo's Pit BBQ","city":"College Station","genres":[],"is_nightlife":false,"exclude":"cerrado en julio 2024; era un local de BBQ diurno, nunca nightlife"},
+ {"name":"Jax Bar & Kitchen","city":"State College","genres":[],"is_nightlife":false,"exclude":"cerrado en mayo 2024"},
+ {"name":"Nashville Underground","city":"Nashville","genres":[],"is_nightlife":true,"note":"los generos que circulan describen a The National Underground, otro negocio, en 2011"},
+ {"name":"The Kraken","city":"Chapel Hill","genres":["rock","blues","americana","country","live"],"is_nightlife":true},
+ {"name":"Tin Building by Jean-Georges","city":"New York","genres":[],"is_nightlife":false,"exclude":"cerrado en febrero 2026; era un mercado gastronomico, nunca un bar"},
+ {"name":"Uno","city":"Columbus","genres":[],"is_nightlife":false,"exclude":"cerrado el 1 de noviembre de 2025"}
+]

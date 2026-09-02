@@ -1,0 +1,18 @@
+[
+ {"name":"Ciao Ciao Disco","city":"New York","genres":["house","disco","funk","soul"],"is_nightlife":true},
+ {"name":"Bembe","city":"New York","genres":["latin","afrobeats","reggae"],"is_nightlife":true},
+ {"name":"Arbella Cocktail Bar","city":"Chicago","genres":["house","soul","disco","afrobeats"],"is_nightlife":true},
+ {"name":"Best Intentions","city":"Chicago","genres":["funk","soul"],"is_nightlife":true},
+ {"name":"Apothecary Cocktail Lounge","city":"Chicago","genres":["jazz","soul","live"],"is_nightlife":true},
+ {"name":"Acme Feed & Seed","city":"Nashville","genres":["rock","funk","americana","live"],"is_nightlife":true},
+ {"name":"Bauhaus Vegas","city":"Las Vegas","genres":["house","techno","tech_house"],"is_nightlife":true},
+ {"name":"Academy LA","city":"Los Angeles","genres":["edm","house","tech_house","techno"],"is_nightlife":true},
+ {"name":"Bar Lis","city":"Los Angeles","genres":["jazz","live","house","disco"],"is_nightlife":true},
+ {"name":"Caña Rum Bar","city":"Los Angeles","genres":["latin","salsa","reggaeton","live"],"is_nightlife":true},
+ {"name":"MRB Bar & Kitchen","city":"New Orleans","genres":["live","americana"],"is_nightlife":true},
+ {"name":"21st Amendment Bar at La Louisiane","city":"New Orleans","genres":["jazz","blues","rnb","funk","live"],"is_nightlife":true},
+ {"name":"Dante's HiFi","city":"Miami","genres":["hip_hop","house","jazz","soul","funk","techno"],"is_nightlife":true},
+ {"name":"Jolene Sound Room","city":"Miami","genres":["house","disco","edm"],"is_nightlife":true},
+ {"name":"TuCandela Bar Brickell","city":"Miami","genres":["reggaeton","latin","salsa"],"is_nightlife":true},
+ {"name":"RedBar Brickell","city":"Miami","genres":["latin","salsa"],"is_nightlife":true}
+]

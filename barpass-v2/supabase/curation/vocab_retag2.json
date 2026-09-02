@@ -1,0 +1,10 @@
+[
+ {"name":"Elysium","city":"Austin","genres":["goth","rock","live"],"is_nightlife":true},
+ {"name":"Late Bar","city":"Chicago","genres":["goth","rock","pop"],"is_nightlife":true},
+ {"name":"Boardner's by La Belle","city":"Los Angeles","genres":["goth","rock","pop","live"],"is_nightlife":true},
+ {"name":"Madame X","city":"New York","genres":["dancehall","reggae","hip_hop","rnb","soul","latin","techno"],"is_nightlife":true},
+ {"name":"Deluxx Fluxx","city":"New York","genres":["hip_hop","rnb","latin","dancehall"],"is_nightlife":true},
+ {"name":"Kultur Lounge","city":"Los Angeles","genres":["afrobeats","dancehall","hip_hop"],"is_nightlife":true},
+ {"name":"OK Corral Nightclub","city":"Austin","genres":["tejano","latin","live"],"is_nightlife":true},
+ {"name":"Mala Vida","city":"Austin","genres":["reggaeton","tejano","latin","live"],"is_nightlife":true}
+]

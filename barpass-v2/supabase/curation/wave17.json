@@ -1,0 +1,676 @@
+[
+ {
+  "name": "Sunken Harbor Club",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "exotica/surf/bossa nova sin termino; sala arriba de Gage & Tollner"
+ },
+ {
+  "name": "Superbueno",
+  "city": "New York",
+  "genres": [
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Swift Hibernian Lounge",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "sesion tradicional irlandesa, sin termino"
+ },
+ {
+  "name": "TAO Downtown Nightclub",
+  "city": "New York",
+  "genres": [
+   "hip_hop",
+   "edm"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tap Haus 33",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tara Rose | NYC",
+  "city": "New York",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "TEN11 LOUNGE & BAR (NOMAD)",
+  "city": "New York",
+  "genres": [
+   "house",
+   "afrobeats",
+   "pop",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Back Room",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live",
+   "rock",
+   "rnb",
+   "soul",
+   "funk",
+   "disco",
+   "hip_hop",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Bar at Mandarin Oriental, New York",
+  "city": "New York",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Canuck",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Empire Rooftop",
+  "city": "New York",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Fleur Room",
+  "city": "New York",
+  "genres": [
+   "hip_hop",
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Loosey's Downtown Gainesville",
+  "city": "Gainesville",
+  "genres": [
+   "rock",
+   "live",
+   "americana"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "MacDinton's GNV",
+  "city": "Gainesville",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Main Street Bar & Billiards",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Mark's Prime Steakhouse",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Mother's Pub & Grill North",
+  "city": "Gainesville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Munegin's On 13th",
+  "city": "Gainesville",
+  "genres": [
+   "rock",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Northwest Grille",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Ole Barn",
+  "city": "Gainesville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "registro estatal marcado fuera de negocio (2019) es obsoleto; opera"
+ },
+ {
+  "name": "Original American Kitchen (OAK)",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Palace",
+  "city": "Gainesville",
+  "genres": [],
+  "is_nightlife": false,
+  "exclude": "la direccion es una casa unifamiliar; geocodificacion mala de The Palace Restaurant & Bar, 233 W University Ave"
+ },
+ {
+  "name": "Public & General Restaurant",
+  "city": "Gainesville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Raise Your Glass Wine Bar & Food",
+  "city": "Gainesville",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Stories on High",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Subourbon Southern Kitchen and Spirits",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tailgater's Sports Bar & Grill",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Terrace Bar",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Short North"
+ },
+ {
+  "name": "The Alibi Bourbon & Cocktail Lounge",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Short North"
+ },
+ {
+  "name": "The Big Bar & Grill",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Cave Bar and Lounge",
+  "city": "Columbus",
+  "genres": [
+   "latin",
+   "salsa",
+   "bachata",
+   "reggaeton",
+   "house",
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Citizens Trust",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "The Daily Bar",
+  "city": "Columbus",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Forum",
+  "city": "Columbus",
+  "genres": [
+   "edm",
+   "house"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "The Go Go",
+  "city": "Columbus",
+  "genres": [
+   "disco"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Horseshoe Country Bar & More",
+  "city": "Columbus",
+  "genres": [
+   "country",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: University District"
+ },
+ {
+  "name": "Nighthawks Lounge",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Normal Bar",
+  "city": "Athens",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Nowhere Bar",
+  "city": "Athens",
+  "genres": [
+   "rock",
+   "americana",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Oglethorpe Garage",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Paloma Park",
+  "city": "Athens",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "RODEO NIGHT CLUB ATHENS",
+  "city": "Athens",
+  "genres": [
+   "latin",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "Songkick vacio desde 2024 pero Ticketon tiene calendario 2026 de banda/norteno"
+ },
+ {
+  "name": "SAKE MAMA",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sandbar Athens",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Silver Dollar",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sister Louisa's Church - Athens",
+  "city": "Athens",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Tapped Athens Wine Tasting Market",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "The Catch 22 Gastropub",
+  "city": "Athens",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Old Town Ale House",
+  "city": "Chicago",
+  "genres": [
+   "jazz",
+   "blues"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Parlay Lincoln Park",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Parlay River North",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "PrimeTime Bar & Grill",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "PRYSM Chicago",
+  "city": "Chicago",
+  "genres": [
+   "house",
+   "techno",
+   "edm"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Kingsbury Corridor, no Goose Island"
+ },
+ {
+  "name": "Richard's Bar",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: River West"
+ },
+ {
+  "name": "Rose Lounge",
+  "city": "Chicago",
+  "genres": [
+   "house"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Seven Nightclub Chicago",
+  "city": "Chicago",
+  "genres": [
+   "reggaeton",
+   "latin"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sound Bar",
+  "city": "Chicago",
+  "genres": [
+   "house",
+   "edm",
+   "rnb"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Sportsman's Club",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "probable soul/funk/disco pero RA devolvio 403 — re-chequear"
+ },
+ {
+  "name": "Spybar",
+  "city": "Chicago",
+  "genres": [
+   "house",
+   "tech_house",
+   "techno"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "Standard Bar and Grill",
+  "city": "Chicago",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Wicker Park"
+ },
+ {
+  "name": "Shamrock Bar & Grille",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Smitty's Study Pub",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": false
+ },
+ {
+  "name": "Sotto Night Club",
+  "city": "Madison",
+  "genres": [
+   "latin",
+   "reggaeton",
+   "salsa",
+   "bachata",
+   "edm",
+   "pop"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Arena Sports Bar",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Boathouse",
+  "city": "Madison",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Botanist Social",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "the Cardinal Bar",
+  "city": "Madison",
+  "genres": [
+   "latin",
+   "salsa",
+   "bachata",
+   "reggaeton",
+   "disco",
+   "house",
+   "jazz",
+   "blues",
+   "live"
+  ],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Double U",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Green Room Public House",
+  "city": "Madison",
+  "genres": [
+   "live",
+   "country",
+   "blues"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Schenk-Atwood"
+ },
+ {
+  "name": "The Guild Gaming Lounge",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "The Icehouse",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": false,
+  "note": "el bluegrass de Brewgrass es en la plaza del Edgewater, no aqui"
+ },
+ {
+  "name": "The Kollege Klub",
+  "city": "Madison",
+  "genres": [],
+  "is_nightlife": true
+ },
+ {
+  "name": "Old Town Tavern",
+  "city": "Ann Arbor",
+  "genres": [
+   "live",
+   "jazz",
+   "americana"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Pretzel Bell",
+  "city": "Ann Arbor",
+  "genres": [
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Rabbit Hole",
+  "city": "Ann Arbor",
+  "genres": [
+   "house",
+   "disco",
+   "techno"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown; es el sotano bajo Circ Bar"
+ },
+ {
+  "name": "RAPPOURT",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Northside/Traver, no Logan"
+ },
+ {
+  "name": "Regents Field",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "Rick's American Cafe",
+  "city": "Ann Arbor",
+  "genres": [
+   "pop",
+   "hip_hop"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: South University"
+ },
+ {
+  "name": "Scorekeepers Sports Grill and Pub",
+  "city": "Ann Arbor",
+  "genres": [
+   "pop"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown/State Street"
+ },
+ {
+  "name": "Study Hall Lounge",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: South University"
+ },
+ {
+  "name": "The Blind Pig",
+  "city": "Ann Arbor",
+  "genres": [
+   "rock",
+   "live",
+   "hip_hop",
+   "americana"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown"
+ },
+ {
+  "name": "The Blue Leprechaun",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: South University"
+ },
+ {
+  "name": "The Circ Bar",
+  "city": "Ann Arbor",
+  "genres": [
+   "jazz",
+   "live"
+  ],
+  "is_nightlife": true,
+  "note": "barrio mal: Downtown; el house/disco es del Rabbit Hole en el sotano"
+ },
+ {
+  "name": "The Garage Bar",
+  "city": "Ann Arbor",
+  "genres": [],
+  "is_nightlife": true,
+  "note": "barrio mal: South University"
+ }
+]
