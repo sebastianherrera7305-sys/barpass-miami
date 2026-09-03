@@ -89,9 +89,18 @@ struct ChapterEventsView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(event.title)
-                        .font(.bpHeadline())
-                        .foregroundStyle(Color.bpInk)
+                    HStack(spacing: 6) {
+                        Text(event.title)
+                            .font(.bpHeadline())
+                            .foregroundStyle(Color.bpInk)
+                        if event.isPublic {
+                            Text(l10n.t("greek.events.public"))
+                                .font(.bpTiny())
+                                .padding(.horizontal, 6).padding(.vertical, 2)
+                                .background(Color.bpAmber.opacity(0.15), in: Capsule())
+                                .foregroundStyle(Color.bpAmber)
+                        }
+                    }
                     Text(formattedDate(event.startsAt))
                         .font(.bpCaption())
                         .foregroundStyle(Color.bpAmber)
@@ -197,7 +206,8 @@ struct ChapterEventsView: View {
                 events[idx] = ChapterEvent(
                     id: event.id, title: event.title, description: event.description,
                     locationName: event.locationName, startsAt: event.startsAt, endsAt: event.endsAt,
-                    createdBy: event.createdBy, createdAt: event.createdAt, rsvpCount: count, going: going
+                    createdBy: event.createdBy, createdAt: event.createdAt, rsvpCount: count, going: going,
+                    isPublic: event.isPublic
                 )
             } catch {
                 errorMessage = l10n.t("greek.events.rsvpError")
@@ -227,6 +237,7 @@ private struct CreateChapterEventView: View {
     @State private var startsAt = Date().addingTimeInterval(3600 * 24)
     @State private var hasEndTime = false
     @State private var endsAt = Date().addingTimeInterval(3600 * 27)
+    @State private var isPublic = false
     @State private var isSaving = false
     @State private var errorMessage: String?
 
@@ -245,6 +256,13 @@ private struct CreateChapterEventView: View {
                     if hasEndTime {
                         DatePicker(l10n.t("greek.events.form.ends"), selection: $endsAt)
                     }
+                }
+                Section {
+                    Toggle(l10n.t("greek.events.form.isPublic"), isOn: $isPublic)
+                } footer: {
+                    Text(l10n.t("greek.events.form.isPublic.footer"))
+                        .font(.bpCaption())
+                        .foregroundStyle(Color.bpTextSecondary)
                 }
                 if let errorMessage {
                     Text(errorMessage).font(.bpCaption()).foregroundStyle(Color.bpDanger)
@@ -278,7 +296,8 @@ private struct CreateChapterEventView: View {
                     description: description.trimmingCharacters(in: .whitespaces).isEmpty ? nil : description,
                     locationName: locationName.trimmingCharacters(in: .whitespaces).isEmpty ? nil : locationName,
                     startsAt: startsAt,
-                    endsAt: hasEndTime ? endsAt : nil
+                    endsAt: hasEndTime ? endsAt : nil,
+                    isPublic: isPublic
                 )
                 await onCreated()
                 await MainActor.run { dismiss() }
