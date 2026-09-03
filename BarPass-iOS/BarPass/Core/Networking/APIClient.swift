@@ -58,6 +58,7 @@ enum APIClient {
             case "rate_limited":         return L10n.tSync("api.error.rateLimited")
             case "invalid_payload":      return L10n.tSync("api.error.invalidPayload")
             case "payments_not_configured": return L10n.tSync("api.error.paymentsNotConfigured")
+            case "ai_not_configured", "ai_unavailable": return L10n.tSync("plan.ai.unavailable")
             default: break
             }
         }
@@ -291,6 +292,59 @@ enum APIClient {
             throw APIClientError.server((json["error"] as? String) ?? "referral_code_unavailable")
         }
         return code
+    }
+
+    /// Real AI itinerary from "Remy" (barpass-v2's /api/concierge — an LLM
+    /// call, not a client-side heuristic). Guest-accessible by design (rate
+    /// limited by IP server-side, same as the web Concierge), so no idToken.
+    /// `excludeSlugs` keeps a session from getting the same plan on "Ask
+    /// again". Callers must still have a local fallback for `.network`/
+    /// `.server` (ai_not_configured, rate_limited, ai_unavailable) — this
+    /// throws on anything that isn't a valid plan, it never returns a
+    /// partial/guessed one.
+    struct ConciergeStop: Decodable {
+        let time: String
+        let venueId: String?
+        let venueSlug: String
+        let venueName: String
+        let note: String
+        let estimatedSpend: Double
+    }
+    struct ConciergePlanResponse: Decodable {
+        let title: String
+        let summary: String
+        let stops: [ConciergeStop]
+        let totalEstimate: Double
+        let insiderTip: String
+    }
+
+    static func getConciergePlan(prompt: String, city: String?, excludeSlugs: [String] = []) async throws -> ConciergePlanResponse {
+        var request = URLRequest(url: baseURL.appendingPathComponent("concierge"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        var body: [String: Any] = ["prompt": prompt]
+        if let city { body["city"] = city }
+        if !excludeSlugs.isEmpty { body["excludeSlugs"] = excludeSlugs }
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        // Measured against the real model (moonshotai/kimi-k3, a reasoning
+        // model — it "thinks" before answering): a real plan takes ~35-40s
+        // end to end. 30s would have timed out and silently fallen back to
+        // the local heuristic on almost every real call.
+        request.timeoutInterval = 60
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw APIClientError.network(error.localizedDescription)
+        }
+        guard let http = response as? HTTPURLResponse else { throw APIClientError.invalidResponse }
+        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+        guard (200..<300).contains(http.statusCode) else {
+            throw APIClientError.server(friendlyServerMessage(json, status: http.statusCode, fallbackKey: "plan.ai.unavailable"))
+        }
+        let decoder = JSONDecoder()
+        return try decoder.decode(ConciergePlanResponse.self, from: data)
     }
 
     /// Attributes the authenticated user (the referred one) to the referrer

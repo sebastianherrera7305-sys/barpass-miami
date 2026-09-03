@@ -10,6 +10,11 @@ struct PlanStop: Identifiable, Codable, Hashable {
     let venueNeighborhood: String
     let venuePriceRange: String
     let note: String
+    /// Real Supabase venue id, when a real AI plan resolved one — lets the
+    /// UI deep-link to the actual venue page. Nil for `.sample()`'s
+    /// local heuristic plans (never claimed a specific id) and for any AI
+    /// stop the app couldn't match against its own loaded catalog.
+    var venueId: String? = nil
 }
 
 struct NightPlan: Identifiable, Codable, Hashable {
@@ -19,6 +24,12 @@ struct NightPlan: Identifiable, Codable, Hashable {
     var totalEst: String = ""
     var aiInsight: String = ""
     var createdAt: Date = .now
+    /// True for a real Remy/LLM-generated plan (barpass-v2's /api/concierge)
+    /// — `note`/`aiInsight` are free AI text here, not l10n keys, so the UI
+    /// must render them as plain strings instead of running them through
+    /// `l10n.t(...)`/`String(format:...)` the way `.sample()`'s keyed
+    /// content needs. False for the local rule-based fallback.
+    var isAIGenerated: Bool = false
 
     /// Real-time-aware plan: answers "where should I go right now" instead
     /// of assuming a fixed 8pm→10:30pm→12:30am evening progression. Every
@@ -153,5 +164,36 @@ struct NightPlan: Identifiable, Codable, Hashable {
         case .upcoming(let mins):         return mins <= 60 ? 1 : 2
         case .finished:                   return 3
         }
+    }
+
+    /// Maps a real Remy/LLM response (APIClient.getConciergePlan) into the
+    /// same NightPlan shape the UI already knows how to render. `venues` is
+    /// the already-loaded catalog, used only to resolve a display
+    /// neighborhood/price-tier per stop when the model's own `venueId`
+    /// doesn't come through — the model was told to use real venues, but
+    /// its JSON is untrusted output, not a database read.
+    static func fromConcierge(_ response: APIClient.ConciergePlanResponse, prompt: String, venues: [BarPassVenue]) -> NightPlan {
+        let byId = Dictionary(uniqueKeysWithValues: venues.map { ($0.id, $0) })
+        let byName = Dictionary(venues.map { ($0.name.lowercased(), $0) }, uniquingKeysWith: { a, _ in a })
+
+        let stops = response.stops.map { stop -> PlanStop in
+            let matched = stop.venueId.flatMap { byId[$0] } ?? byName[stop.venueName.lowercased()]
+            return PlanStop(
+                time: stop.time,
+                venueName: stop.venueName,
+                venueNeighborhood: matched?.neighborhood ?? "",
+                venuePriceRange: matched?.priceTier.symbol ?? "",
+                note: stop.note,
+                venueId: matched?.id
+            )
+        }
+
+        return NightPlan(
+            title: response.title,
+            stops: stops,
+            totalEst: String(format: "$%.0f", response.totalEstimate),
+            aiInsight: response.insiderTip,
+            isAIGenerated: true
+        )
     }
 }

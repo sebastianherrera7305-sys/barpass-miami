@@ -293,11 +293,40 @@ struct PlanView: View {
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: saveErrorMessage)
 }
 
+    /// Slugs of every venue already shown in this session's plans — sent as
+    /// `excludeSlugs` so "Ask again" doesn't send Remy the same itinerary
+    /// twice. Cleared only when the app relaunches; this is intentionally
+    /// session-scoped, not persisted.
+    @State private var shownVenueSlugs: [String] = []
+
     private func generatePlan() {
         guard !prompt.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         isLoading = true
         let currentPrompt = prompt
         Task {
+            // Real Remy first (barpass-v2's /api/concierge — an actual LLM,
+            // not the local scoring heuristic). Falls back to the local
+            // rule-based plan on ANY failure (network, rate limit, the AI
+            // key not being configured on Vercel yet) so Plan never breaks
+            // — it just quietly degrades to what it did before this existed.
+            if let response = try? await APIClient.getConciergePlan(
+                prompt: currentPrompt,
+                city: venueStore.selectedCity,
+                excludeSlugs: shownVenueSlugs
+            ) {
+                await MainActor.run {
+                    let generated = NightPlan.fromConcierge(response, prompt: currentPrompt, venues: venueStore.venues)
+                    plan = generated
+                    shownVenueSlugs.append(contentsOf: response.stops.map(\.venueSlug))
+                    lastPrompt = currentPrompt
+                    persistCurrentPlan()
+                    BPAnalytics.track(.createPlan(method: "ai"))
+                    isLoading = false
+                    prompt = ""
+                }
+                return
+            }
+
             try? await Task.sleep(for: .seconds(1.5))
             await MainActor.run {
                 plan = NightPlan.sample(for: currentPrompt, venues: venueStore.venues, userLocation: userLocation)
@@ -406,7 +435,7 @@ struct NightPlanView: View {
                             Text(stop.venueName)
                                 .font(.bpScaled(15, weight: .bold))
                                 .foregroundStyle(Color.bpInk)
-                            Text(l10n.t(stop.note))
+                            Text(plan.isAIGenerated ? stop.note : l10n.t(stop.note))
                                 .font(.bpScaled(12))
                                 .foregroundStyle(Color.bpInk.opacity(0.4))
                             Text("\(stop.venueNeighborhood) · \(stop.venuePriceRange)")
@@ -422,7 +451,7 @@ struct NightPlanView: View {
                 Image(systemName: "sparkles")
                     .font(.bpScaled(13))
                     .foregroundStyle(amber)
-                Text(String(format: l10n.t(plan.aiInsight), plan.stops.first?.venueName ?? ""))
+                Text(plan.isAIGenerated ? plan.aiInsight : String(format: l10n.t(plan.aiInsight), plan.stops.first?.venueName ?? ""))
                     .font(.bpScaled(12))
                     .foregroundStyle(Color.bpInk.opacity(0.45))
             }
