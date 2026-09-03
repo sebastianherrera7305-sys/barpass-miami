@@ -89,10 +89,17 @@ struct FraternityListView: View {
             }
 
             if myChapterId == chapter.id {
-                NavigationLink(destination: ChapterChatView(chapter: chapter)) {
-                    Label(l10n.t("greek.chapter.chat"), systemImage: "bubble.left.and.bubble.right.fill")
-                        .font(.bpScaled(12, weight: .semibold))
-                        .foregroundStyle(Color.bpAmber)
+                HStack(spacing: 16) {
+                    NavigationLink(destination: ChapterChatView(chapter: chapter)) {
+                        Label(l10n.t("greek.chapter.chat"), systemImage: "bubble.left.and.bubble.right.fill")
+                            .font(.bpScaled(12, weight: .semibold))
+                            .foregroundStyle(Color.bpAmber)
+                    }
+                    NavigationLink(destination: ChapterEventsView(chapter: chapter)) {
+                        Label(l10n.t("greek.chapter.events"), systemImage: "calendar")
+                            .font(.bpScaled(12, weight: .semibold))
+                            .foregroundStyle(Color.bpAmber)
+                    }
                 }
             }
         }

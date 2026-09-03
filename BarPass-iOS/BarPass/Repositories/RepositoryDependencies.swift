@@ -16,6 +16,7 @@ enum RepositoryDependencies {
     nonisolated(unsafe) static var greekLife: GreekLifeRepository = SupabaseGreekLifeRepository()
     nonisolated(unsafe) static var profileAffiliation: ProfileAffiliationRepository = SupabaseProfileAffiliationRepository()
     nonisolated(unsafe) static var chapterChat: ChapterChatRepository = SupabaseChapterChatRepository()
+    nonisolated(unsafe) static var chapterEvents: ChapterEventsRepository = SupabaseChapterEventsRepository()
     nonisolated(unsafe) static var birthdate: BirthdateRepository = SupabaseBirthdateRepository()
     nonisolated(unsafe) static var venueCheckin: VenueCheckinRepository = SupabaseVenueCheckinRepository()
     nonisolated(unsafe) static var stadium: StadiumRepository = SupabaseStadiumRepository()
