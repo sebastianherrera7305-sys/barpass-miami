@@ -84,6 +84,14 @@ export interface Venue {
   name: string;
   type: VenueType;
   neighborhood: Neighborhood;
+  /** Real metro (e.g. "Miami", "Austin") — the iOS app has served all 23
+   * cities in the catalogue for a while; the web venue-service select(*)
+   * already returned this column, it just wasn't in the type until the AI
+   * Concierge needed to scope its venue digest to one city instead of
+   * embedding the whole 23-city catalogue into every prompt. Optional
+   * because the local offline-fallback seed (data/venues.ts, Miami-only,
+   * used only when Supabase isn't configured) predates this column. */
+  city?: string;
   address: string;
   lat: number;
   lng: number;

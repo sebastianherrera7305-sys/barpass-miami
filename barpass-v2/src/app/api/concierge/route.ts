@@ -27,10 +27,19 @@ import { checkRateLimit } from "@/lib/rate-limit";
  * without silently login-walling a feature that never had one.
  */
 const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-// Meta's Llama 3.3 70B on NVIDIA's hosted catalog — strong instruction
-// following for a "return exactly this JSON shape" task, generally
-// available (not a preview/limited-access model).
-const NVIDIA_MODEL = "meta/llama-3.3-70b-instruct";
+// Was meta/llama-3.3-70b-instruct — NVIDIA retired it (HTTP 410, "reached
+// its end of life on 2026-08-26") without this route ever noticing, since
+// nothing had exercised it end-to-end since the key was added (it 503'd on
+// missing config the whole time before that). Confirmed against the live
+// NVIDIA account directly: most of the catalog's "available" models 404 for
+// this account despite being listed (e.g. nemotron-70b-instruct, mistral-
+// large-2-instruct, nemotron-nano-3-30b-a3b) — kimi-k3 is one of the few
+// that actually responds, follows response_format: json_object cleanly
+// (content populated correctly, not buried in/blocked by reasoning_content
+// the way openai/gpt-oss-20b came back null), and produces real,
+// specific Miami nightlife knowledge unprompted. Re-verify against
+// GET https://integrate.api.nvidia.com/v1/models if this ever 410s again.
+const NVIDIA_MODEL = "moonshotai/kimi-k3";
 
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -59,8 +68,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "ai_not_configured" }, { status: 503 });
   }
 
-  const venues = await getVenues();
-  const systemInstruction = buildConciergeSystemPrompt(venues, {
+  const allVenues = await getVenues();
+  // Scoped to one metro — see conciergeRequestSchema.city. Falls back to
+  // Miami (the web Concierge's own, still-implicit scope) when the caller
+  // doesn't send one, rather than silently embedding all 23 cities.
+  const targetCity = parsed.data.city ?? "Miami";
+  const venues = allVenues.filter((v) => v.city === targetCity);
+  const systemInstruction = buildConciergeSystemPrompt(venues.length > 0 ? venues : allVenues, {
     excludeSlugs: parsed.data.excludeSlugs,
   });
 

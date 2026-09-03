@@ -37,7 +37,7 @@ export function buildConciergeSystemPrompt(
   const digest = venues
     .map(
       (v) =>
-        `- ${v.name} (slug:${v.slug}) | ${v.type} | ${v.neighborhood} | ` +
+        `- ${v.name} (id:${v.id} slug:${v.slug}) | ${v.type} | ${v.neighborhood} | ` +
         `${v.coverMen === null ? "no cover" : `cover ~$${v.coverMen}`} | ` +
         `avg spend ${v.avgSpend ? `$${v.avgSpend}` : "unknown"} | ${"$".repeat(v.priceTier)} | ` +
         `music: ${v.musicGenres.join("/")} | vibes: ${v.vibes.join(", ")} | ` +
@@ -80,6 +80,7 @@ Respond with ONLY valid JSON, no markdown, exactly this schema:
   "stops": [
     {
       "time": "9:30 PM",
+      "venueId": "id-from-catalog",
       "venueSlug": "slug-from-catalog",
       "venueName": "Venue Name",
       "note": "why here + one concrete insider detail (drink/timing/door/seat)",

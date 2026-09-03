@@ -28,6 +28,7 @@ interface DbVenue {
   name: string;
   type: Venue["type"];
   neighborhood: Venue["neighborhood"];
+  city: string;
   address: string;
   lat: number;
   lng: number;
@@ -89,6 +90,7 @@ function mapDbVenue(v: DbVenue): Venue {
     name: v.name,
     type: v.type,
     neighborhood: v.neighborhood,
+    city: v.city,
     address: v.address,
     lat: v.lat,
     lng: v.lng,
