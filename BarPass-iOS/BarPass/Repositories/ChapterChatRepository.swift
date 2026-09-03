@@ -16,16 +16,16 @@ protocol ChapterChatRepository: Sendable {
 }
 
 final actor SupabaseChapterChatRepository: ChapterChatRepository {
+    /// Message content is encrypted at rest (see chapter_chat_encryption.sql)
+    /// — the raw `chapter_messages` table only has ciphertext to offer, so
+    /// reads go through the decrypting RPC instead of a plain REST GET.
+    /// `chapterId` is accepted for API compatibility but unused: the RPC
+    /// derives the caller's chapter server-side from their own affiliation,
+    /// the same way send_chapter_message() always has.
     func messages(chapterId: String) async throws -> [ChapterMessage] {
         let session = try await SupabaseRESTClient.freshSession()
         let request = try SupabaseRESTClient.request(
-            "GET", path: "chapter_messages",
-            queryItems: [
-                URLQueryItem(name: "select", value: "id,chapter_id,user_id,text,created_at,is_system"),
-                URLQueryItem(name: "chapter_id", value: "eq.\(chapterId)"),
-                URLQueryItem(name: "order", value: "created_at.asc"),
-            ],
-            accessToken: session.accessToken
+            "POST", path: "rpc/get_chapter_messages", body: Data("{}".utf8), accessToken: session.accessToken
         )
         let data = try await SupabaseRESTClient.send(request)
         return try SupabaseRESTClient.decoder.decode([ChapterMessage].self, from: data)
