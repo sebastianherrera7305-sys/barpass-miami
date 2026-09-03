@@ -103,14 +103,22 @@ declare
   v_chapter_id uuid;
   v_key text;
 begin
-  select chapter_id into v_chapter_id from profiles where id = auth.uid();
+  -- Qualified as profiles.chapter_id / profiles.id — this function's own
+  -- RETURNS TABLE declares both `id` and `chapter_id` output columns, so
+  -- PL/pgSQL turns them into implicit variables in scope here. A bare
+  -- reference to either (the pattern every other function in this schema
+  -- uses safely, since none of the others return columns with these exact
+  -- names) is ambiguous: "column reference chapter_id is ambiguous... could
+  -- refer to either a PL/pgSQL variable or a table column." This broke
+  -- every chat load from the moment this function shipped.
+  select profiles.chapter_id into v_chapter_id from profiles where profiles.id = auth.uid();
   if v_chapter_id is null then
     return;
   end if;
   if exists (
     select 1 from chapter_bans
-    where chapter_id = v_chapter_id and user_id = auth.uid()
-      and (expires_at is null or expires_at > now())
+    where chapter_bans.chapter_id = v_chapter_id and chapter_bans.user_id = auth.uid()
+      and (chapter_bans.expires_at is null or chapter_bans.expires_at > now())
   ) then
     return;
   end if;
