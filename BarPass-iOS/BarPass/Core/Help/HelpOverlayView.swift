@@ -93,23 +93,35 @@ struct HelpOverlayView: View {
 
     // MARK: - Target outline
 
+    // A bare Shape + .onTapGesture here used to report an accessibility
+    // frame matching the whole GeometryReader instead of this outline's own
+    // small rect (confirmed via UI-automation: three different outlines all
+    // reported the identical, full-screen frame), and a real tap at the
+    // outline's own visual position resolved to whatever real control sits
+    // underneath instead of this outline — a known SwiftUI pitfall where a
+    // Shape carrying `.onTapGesture` doesn't register as a proper
+    // hit-testable/accessible element the way a real control does. A
+    // `Button` is: reported by the user as tapping a highlighted card
+    // "doing nothing" (or silently triggering whatever's behind it).
     private func targetOutline(for tip: HelpTip, rect: CGRect) -> some View {
         let isSelected = selectedTipID == tip.id
-        return RoundedRectangle(cornerRadius: BPRadius.md)
-            .strokeBorder(Color.bpAmber.opacity(isSelected ? 0.9 : 0.55), lineWidth: isSelected ? 2.5 : 1.5)
-            .background(
-                RoundedRectangle(cornerRadius: BPRadius.md)
-                    .fill(Color.bpAmber.opacity(isSelected ? 0.08 : 0))
-            )
-            .frame(width: rect.width + 10, height: rect.height + 10)
-            .position(x: rect.midX, y: rect.midY)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                BPHaptics.selection()
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { selectedTipID = tip.id }
-                HelpGuideStore.shared.markAsSeen(tip)
-            }
-            .bpAccessibility(label: l10n.t(tip.titleKey), hint: l10n.t(tip.descriptionKey), isButton: true)
+        return Button {
+            BPHaptics.selection()
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { selectedTipID = tip.id }
+            HelpGuideStore.shared.markAsSeen(tip)
+        } label: {
+            RoundedRectangle(cornerRadius: BPRadius.md)
+                .strokeBorder(Color.bpAmber.opacity(isSelected ? 0.9 : 0.55), lineWidth: isSelected ? 2.5 : 1.5)
+                .background(
+                    RoundedRectangle(cornerRadius: BPRadius.md)
+                        .fill(Color.bpAmber.opacity(isSelected ? 0.08 : 0))
+                )
+                .frame(width: rect.width + 10, height: rect.height + 10)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .position(x: rect.midX, y: rect.midY)
+        .bpAccessibility(label: l10n.t(tip.titleKey), hint: l10n.t(tip.descriptionKey), isButton: true)
     }
 
     // MARK: - Tooltip card
