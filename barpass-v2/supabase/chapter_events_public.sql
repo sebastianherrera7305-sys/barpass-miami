@@ -65,7 +65,14 @@ revoke execute on function public.create_chapter_event(text, timestamptz, text, 
 grant execute on function public.create_chapter_event(text, timestamptz, text, text, timestamptz, boolean) to authenticated;
 
 -- list_chapter_events also needs to hand back is_public now, or the client
--- can't show/toggle it consistently after the fact.
+-- can't show/toggle it consistently after the fact. Postgres won't let
+-- CREATE OR REPLACE change a function's OUT-parameter row type (the exact
+-- error this migration hit: "cannot change return type of existing
+-- function" / "Row type defined by OUT parameters is different") — an
+-- explicit DROP first is required whenever a returns-table shape changes,
+-- not just its body.
+drop function if exists public.list_chapter_events();
+
 create or replace function public.list_chapter_events()
 returns table (
   id uuid, title text, description text, location_name text,

@@ -21,6 +21,7 @@ struct RootView: View {
                 NavigationStack {
                     MainTabView()
                 }
+                .id(appState.navResetToken)
                 .ignoresSafeArea()
                 .transition(.opacity)
                 .task { await AppleMusicPlaybackService.playTopSongs() }

@@ -36,6 +36,26 @@ final class AppState: ObservableObject {
     /// TripsListView, etc.) as a child of a NavigationLink; those views own
     /// their own map/search state and aren't designed to be nested.
     @Published var requestedTab:           Int?
+    /// RootView's single NavigationStack wraps ALL five tabs, and every push
+    /// in this app is view-based (`NavigationLink(destination:)`), not
+    /// value-based — so a bound `NavigationPath` can't see or clear those
+    /// pushes. TestFlight: tapping "Nightlife in Coral Gables" from a
+    /// university pushed 2 levels deep (Tonight → Universities → University
+    /// Detail) switched `requestedTab` to Explore, but the user stayed
+    /// looking at University Detail — the tab changed invisibly underneath
+    /// the still-pushed view, reproducible from every university's row.
+    /// Bumping this and giving the NavigationStack `.id(navResetToken)`
+    /// tears the whole stack down and rebuilds it, which — unlike a path
+    /// binding — does clear view-based pushes too.
+    @Published var navResetToken           = 0
+
+    /// The only correct way to switch tabs from a screen that isn't already
+    /// sitting at the tab root — see `navResetToken`. Never set
+    /// `requestedTab` directly from a pushed screen.
+    func switchTabPoppingToRoot(_ tab: Int) {
+        requestedTab = tab
+        navResetToken += 1
+    }
     /// Set when `.tonightPrompt` is consumed (widget "prompt" button) —
     /// TonightView passes this down to PromptYourNightHomeSection, which
     /// focuses its text field on `true` and flips it back to `false`.

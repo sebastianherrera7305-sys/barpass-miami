@@ -32,7 +32,7 @@ struct UniversityDetailView: View {
                     Button {
                         BPHaptics.medium()
                         SelectedCityStore.select(university.venueCity)
-                        appState.requestedTab = 1 // Explore — never push ExploreView() as a child, it owns its own map/search state.
+                        appState.switchTabPoppingToRoot(1) // Explore
                     } label: {
                         rowCard(
                             icon: "map.fill",
