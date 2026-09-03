@@ -176,7 +176,14 @@ language plpgsql security definer set search_path = public as $$
 declare
   v_chapter_id uuid;
 begin
-  select chapter_id into v_chapter_id from profiles where id = auth.uid();
+  -- Qualified as profiles.id, not bare `id` — this function's own RETURNS
+  -- TABLE declares an `id` output column, which PL/pgSQL turns into an
+  -- implicit variable in scope here. A bare `where id = auth.uid()` (fine in
+  -- every OTHER function in this file, none of which return a column named
+  -- id) is ambiguous the moment this function has one, and Postgres refuses
+  -- to guess: "column reference id is ambiguous". Broke every call to this
+  -- function from the very first version.
+  select profiles.chapter_id into v_chapter_id from profiles where profiles.id = auth.uid();
   if v_chapter_id is null then
     return;
   end if;

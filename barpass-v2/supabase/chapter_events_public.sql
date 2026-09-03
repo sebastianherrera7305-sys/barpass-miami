@@ -60,8 +60,14 @@ begin
 end;
 $$;
 
-revoke execute on function public.create_chapter_event(text, timestamptz, text, text, timestamptz) from public, anon;
-revoke execute on function public.create_chapter_event(text, timestamptz, text, text, timestamptz, boolean) from public, anon;
+-- Revoking EXECUTE from the old 5-arg overload wasn't enough — PostgREST
+-- still lists it as a resolution candidate even when the caller has no
+-- grant on it, and errors with "Could not choose the best candidate
+-- function" for every caller (confirmed against a real authenticated test
+-- user, not just service_role, which bypasses grants entirely and was
+-- always going to see this regardless). Only dropping the old overload
+-- actually removes it from PostgREST's schema cache.
+drop function if exists public.create_chapter_event(text, timestamptz, text, text, timestamptz);
 grant execute on function public.create_chapter_event(text, timestamptz, text, text, timestamptz, boolean) to authenticated;
 
 -- list_chapter_events also needs to hand back is_public now, or the client
@@ -83,7 +89,11 @@ language plpgsql security definer set search_path = public as $$
 declare
   v_chapter_id uuid;
 begin
-  select chapter_id into v_chapter_id from profiles where id = auth.uid();
+  -- Qualified as profiles.id — this function's own RETURNS TABLE declares
+  -- an `id` output column, which makes a bare `where id = auth.uid()`
+  -- ambiguous inside PL/pgSQL (it was never disambiguated even in the
+  -- original chapter_events.sql version of this function — see that file).
+  select profiles.chapter_id into v_chapter_id from profiles where profiles.id = auth.uid();
   if v_chapter_id is null then
     return;
   end if;
