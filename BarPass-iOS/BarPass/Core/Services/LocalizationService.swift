@@ -612,6 +612,10 @@ final class L10n: ObservableObject {
             // MARK: - Second pass (Tickets, Wallet, TripDetail, Pass, VenueDetail, +more)
             "common.error": "Error",
             "tickets.navTitle": "Tickets",
+            "tickets.studentPrice": "Precio de estudiante",
+            "tickets.studentPrice.available": "Disponible: $%.0f con tu verificación de estudiante",
+            "tickets.studentPrice.needsVerification": "Verificate como estudiante en tu perfil para desbloquearlo",
+            "tickets.studentPrice.hint": "Activá o desactivá el precio de estudiante para este ticket",
             "tickets.specialEvent": "EVENTO ESPECIAL",
             "tickets.type": "TIPO DE TICKET",
             "tickets.perPerson": "por persona",
@@ -1403,6 +1407,10 @@ final class L10n: ObservableObject {
             // MARK: - Second pass (Tickets, Wallet, TripDetail, Pass, VenueDetail, +more)
             "common.error": "Error",
             "tickets.navTitle": "Tickets",
+            "tickets.studentPrice": "Student price",
+            "tickets.studentPrice.available": "Available: $%.0f with your student verification",
+            "tickets.studentPrice.needsVerification": "Verify as a student in your profile to unlock this",
+            "tickets.studentPrice.hint": "Turn student pricing on or off for this ticket",
             "tickets.specialEvent": "SPECIAL EVENT",
             "tickets.type": "TICKET TYPE",
             "tickets.perPerson": "per person",
@@ -2194,6 +2202,10 @@ final class L10n: ObservableObject {
             // MARK: - Second pass (Tickets, Wallet, TripDetail, Pass, VenueDetail, +more)
             "common.error": "Erro",
             "tickets.navTitle": "Ingressos",
+            "tickets.studentPrice": "Preço de estudante",
+            "tickets.studentPrice.available": "Disponível: $%.0f com sua verificação de estudante",
+            "tickets.studentPrice.needsVerification": "Verifique-se como estudante no seu perfil para desbloquear",
+            "tickets.studentPrice.hint": "Ative ou desative o preço de estudante para este ingresso",
             "tickets.specialEvent": "EVENTO ESPECIAL",
             "tickets.type": "TIPO DE INGRESSO",
             "tickets.perPerson": "por pessoa",

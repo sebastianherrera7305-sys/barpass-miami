@@ -177,6 +177,12 @@ struct VenueEvent: Identifiable, Codable {
     /// invented time) when it doesn't, in which case `VenueTimeStatus`
     /// falls back to its fixed-duration assumption.
     var endDate: Date? = nil
+    /// Whether this event has a real student price at all — `studentPrice`
+    /// only means something when this is true. Both come straight from
+    /// `events.student_eligible`/`student_price_cents`; a venue that never
+    /// set them shows the regular cover, same as before this existed.
+    var studentEligible: Bool = false
+    var studentPrice: Double? = nil
 }
 
 struct BarPassVenue: Identifiable, Codable {

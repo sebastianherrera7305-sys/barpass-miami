@@ -45,6 +45,12 @@ final class AppState: ObservableObject {
     @Published var showPriorityEntry       = false
     @Published var priorityVenueId:        String = ""
     @Published var priorityVenueName:      String = ""
+    /// Set when the user tapped a specific event flyer (not the generic
+    /// "Skip the Line" CTA) — lets EventTicketsView sell a ticket for that
+    /// real event (real cover price, real student price) instead of always
+    /// fabricating a placeholder "tonight" event with no connection to
+    /// anything actually happening at the venue.
+    @Published var priorityEvent:          VenueEvent?
     @Published var appReady                = false
 
     private var cancellables = Set<AnyCancellable>()
@@ -173,6 +179,7 @@ final class AppState: ObservableObject {
         walletBalance = 0
         priorityVenueId = ""
         priorityVenueName = ""
+        priorityEvent = nil
         showActionBar = false
         showAgeGate = false
         showCityPicker = false

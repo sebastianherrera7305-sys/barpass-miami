@@ -83,13 +83,28 @@ struct PriorityEntryHubView: View {
                 .environmentObject(appState)
             }
             .navigationDestination(isPresented: $showTickets) {
-                EventTicketsView(
-                    venueId:   venueId,
-                    venueName: venueName,
-                    eventName: l10n.t("priorityEntry.specialNight"),
-                    eventDate: Date().addingTimeInterval(3600 * 6)
-                )
-                .environmentObject(appState)
+                // A tap on a real event flyer sets appState.priorityEvent
+                // before opening this hub — when present, sell a ticket for
+                // THAT event (real cover, real student price if eligible)
+                // instead of the generic placeholder "tonight" event.
+                if let event = appState.priorityEvent {
+                    EventTicketsView(
+                        venueId:   venueId,
+                        venueName: venueName,
+                        eventName: event.title,
+                        eventDate: event.date,
+                        event:     event
+                    )
+                    .environmentObject(appState)
+                } else {
+                    EventTicketsView(
+                        venueId:   venueId,
+                        venueName: venueName,
+                        eventName: l10n.t("priorityEntry.specialNight"),
+                        eventDate: Date().addingTimeInterval(3600 * 6)
+                    )
+                    .environmentObject(appState)
+                }
             }
         }
         .onAppear {

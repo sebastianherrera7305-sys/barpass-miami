@@ -9,6 +9,7 @@ struct EventFlyerCard: View {
     var width: CGFloat = 220
     var height: CGFloat = 290
 
+    @EnvironmentObject private var appState: AppState
     @ObservedObject private var l10n = L10n.shared
 
     private static let day: DateFormatter = {
@@ -37,6 +38,25 @@ struct EventFlyerCard: View {
     }
 
     var body: some View {
+        Button {
+            BPHaptics.light()
+            appState.priorityVenueId = venue.id
+            appState.priorityVenueName = venue.name
+            appState.priorityEvent = event
+            appState.showPriorityEntry = true
+        } label: {
+            card
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .bpAccessibility(
+            label: String(format: l10n.t("event.card.a11y"), event.title, venue.name),
+            hint: l10n.t("event.card.hint"),
+            isButton: true
+        )
+    }
+
+    private var card: some View {
         ZStack(alignment: .bottomLeading) {
             // Art: real venue photo, clipped to the card (never expands layout).
             if let first = venue.photoUrls.first, let url = URL(string: first) {
@@ -123,11 +143,5 @@ struct EventFlyerCard: View {
         .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.10)))
         .shadow(color: .black.opacity(0.45), radius: 12, y: 6)
-        .accessibilityElement(children: .ignore)
-        .bpAccessibility(
-            label: String(format: l10n.t("event.card.a11y"), event.title, venue.name),
-            hint: l10n.t("event.card.hint"),
-            isButton: true
-        )
     }
 }

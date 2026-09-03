@@ -77,7 +77,19 @@ alter table passes add column if not exists event_id uuid references events(id);
 -- 4. Eligibility check — reescrito contra el schema real (no
 -- orders.items->>'pass_id', que no existe: orders.items está vacío en
 -- toda la data real hoy).
-create or replace function can_purchase_student_ticket(p_event_id uuid, p_user_id uuid)
+--
+-- Originally took p_user_id as a second argument and trusted it — any
+-- authenticated caller could pass a stranger's uuid and learn whether that
+-- specific person is a currently-eligible verified student for a given
+-- event (a real, if narrow, privacy leak: student_verified/expiry status
+-- exposed for any user by guessing/enumerating ids). Zero callers ever
+-- shipped against that signature, so this drops the old overload rather
+-- than versioning around it, and the function now only ever checks the
+-- caller's own auth.uid() — the same "never trust an id the client hands
+-- you" rule every other SECURITY DEFINER function in this schema follows.
+drop function if exists can_purchase_student_ticket(uuid, uuid);
+
+create or replace function can_purchase_student_ticket(p_event_id uuid)
 returns boolean
 language plpgsql
 security definer
@@ -87,8 +99,12 @@ declare
   v_profile profiles%rowtype;
   v_event events%rowtype;
   v_tickets_bought int;
+  v_user_id uuid := auth.uid();
 begin
-  select * into v_profile from profiles where id = p_user_id;
+  if v_user_id is null then
+    return false;
+  end if;
+  select * into v_profile from profiles where id = v_user_id;
   select * into v_event from events where id = p_event_id;
 
   if v_profile.id is null or v_event.id is null then
@@ -115,7 +131,7 @@ begin
   -- ¿No excedió el límite de tickets por estudiante para este evento?
   select count(*) into v_tickets_bought
   from passes
-  where customer_id = p_user_id and event_id = p_event_id;
+  where customer_id = v_user_id and event_id = p_event_id;
 
   if v_tickets_bought >= v_event.max_tickets_per_student then
     return false;
@@ -124,3 +140,6 @@ begin
   return true;
 end;
 $$;
+
+revoke execute on function can_purchase_student_ticket(uuid) from public, anon;
+grant execute on function can_purchase_student_ticket(uuid) to authenticated;

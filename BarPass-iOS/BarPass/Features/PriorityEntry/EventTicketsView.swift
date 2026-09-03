@@ -6,6 +6,12 @@ struct EventTicketsView: View {
     let venueName: String
     let eventName: String
     let eventDate: Date
+    /// The real event being sold, when known (a tap on an actual event
+    /// flyer, not the generic Skip the Line CTA) — carries the real
+    /// event id (needed for the student-price eligibility RPC and to tie
+    /// the charge to something real) and student pricing if the venue set
+    /// any. Nil for the placeholder "buy some ticket for tonight" path.
+    var event: VenueEvent? = nil
 
     @EnvironmentObject private var appState: AppState
     @Environment(\.dismiss)  private var dismiss
@@ -17,13 +23,33 @@ struct EventTicketsView: View {
     @State private var paymentError: String?
     @State private var activeTicket: EventTicket?
     @State private var showTicket    = false
+    @State private var isEligibleForStudentPrice = false
+    @State private var useStudentPrice = false
 
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
 
-    private var subtotal: Double { selectedPkg.price * Double(quantity) }
+    private var studentPricingAvailable: Bool {
+        event?.studentEligible == true && event?.studentPrice != nil
+    }
+    private var unitPrice: Double {
+        (useStudentPrice && isEligibleForStudentPrice) ? (event?.studentPrice ?? selectedPkg.price) : selectedPkg.price
+    }
+    private var subtotal: Double { unitPrice * Double(quantity) }
     private var fee: Double      { 1.50 }
     private var total: Double    { subtotal + fee }
+
+    /// Card/Apple Pay both send this through POST /transactions, which
+    /// requires at least one real item and computes the actual charge from
+    /// it server-side — sending items: [] (the old behavior) made every
+    /// card/Apple Pay ticket purchase fail with a 422 before Stripe was
+    /// ever called.
+    private var lineItem: CartItem {
+        let name = (useStudentPrice && isEligibleForStudentPrice)
+            ? "\(eventName) (\(l10n.t("tickets.studentPrice")))"
+            : "\(eventName) — \(selectedPkg.name)"
+        return CartItem(name: name, price: unitPrice, emoji: selectedPkg.emoji, qty: quantity, venueId: venueId, venueName: venueName)
+    }
 
     var body: some View {
         ZStack {
@@ -32,6 +58,7 @@ struct EventTicketsView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     eventBanner
+                    if studentPricingAvailable { studentPriceBanner }
                     packageSection
                     quantitySection
                     summaryCard
@@ -43,6 +70,7 @@ struct EventTicketsView: View {
         .navigationTitle(l10n.t("tickets.navTitle"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .task { await checkStudentEligibility() }
         .navigationDestination(isPresented: $showTicket) {
             if let t = activeTicket {
                 ActiveTicketView(ticket: t)
@@ -93,6 +121,70 @@ struct EventTicketsView: View {
         f.locale = Locale(identifier: "es_MX")
         f.dateFormat = "d MMM · h:mm a"
         return f.string(from: eventDate)
+    }
+
+    // MARK: - Student price
+
+    /// The eligibility RPC re-checks server-side (real verification status,
+    /// real per-event/per-student ticket cap, real expiry) rather than
+    /// trusting the client's cached `profiles.student_verified` — that flag
+    /// alone doesn't account for a per-event cap or an event that turned
+    /// off student pricing after the client last fetched it.
+    private func checkStudentEligibility() async {
+        guard let event, event.studentEligible, event.studentPrice != nil,
+              let eventUUID = UUID(uuidString: event.id),
+              let session = AuthService.shared.restoreSession()
+        else { return }
+        do {
+            let body = try SupabaseRESTClient.encoder.encode(["p_event_id": eventUUID.uuidString])
+            let request = try SupabaseRESTClient.request(
+                "POST", path: "rpc/can_purchase_student_ticket", body: body, accessToken: session.accessToken
+            )
+            let data = try await SupabaseRESTClient.send(request)
+            isEligibleForStudentPrice = (try? JSONDecoder().decode(Bool.self, from: data)) ?? false
+        } catch {
+            isEligibleForStudentPrice = false
+        }
+    }
+
+    private var studentPriceBanner: some View {
+        Button {
+            BPHaptics.light()
+            withAnimation(.spring(response: 0.3)) { useStudentPrice.toggle() }
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "graduationcap.fill")
+                    .font(.bpScaled(18))
+                    .foregroundStyle(isEligibleForStudentPrice ? gold : Color.bpInk.opacity(0.3))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(l10n.t("tickets.studentPrice"))
+                        .font(.bpScaled(14, weight: .bold))
+                        .foregroundStyle(isEligibleForStudentPrice ? Color.bpInk : Color.bpInk.opacity(0.4))
+                    Text(isEligibleForStudentPrice
+                         ? String(format: l10n.t("tickets.studentPrice.available"), event?.studentPrice ?? 0)
+                         : l10n.t("tickets.studentPrice.needsVerification"))
+                        .font(.bpScaled(11))
+                        .foregroundStyle(Color.bpInk.opacity(0.35))
+                }
+                Spacer()
+                if isEligibleForStudentPrice {
+                    Image(systemName: useStudentPrice ? "checkmark.circle.fill" : "circle")
+                        .font(.bpScaled(20))
+                        .foregroundStyle(useStudentPrice ? gold : Color.bpInk.opacity(0.25))
+                }
+            }
+            .padding(14)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(gold.opacity(useStudentPrice ? 0.1 : 0.04))
+                    .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(useStudentPrice ? 0.4 : 0.12)))
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEligibleForStudentPrice)
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .bpAccessibility(label: l10n.t("tickets.studentPrice"), hint: l10n.t("tickets.studentPrice.hint"), isButton: true)
     }
 
     // MARK: - Package selector
@@ -372,7 +464,7 @@ struct EventTicketsView: View {
                 idToken:    session.accessToken,
                 vendorId:   venueId,
                 customerId: session.user.id,
-                items:      [],
+                items:      [lineItem],
                 stripePaymentMethodId: stripePaymentMethodId
             )
             guard let orderId = (json["transaction"] as? [String: Any])?["id"] as? String else {

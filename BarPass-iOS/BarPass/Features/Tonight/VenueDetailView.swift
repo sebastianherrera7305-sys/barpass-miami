@@ -628,6 +628,10 @@ struct VenueDetailView: View {
             Button {
                 appState.priorityVenueId = venue.id
                 appState.priorityVenueName = venue.name
+                // A prior tap on a specific event flyer could still have
+                // this set — the generic Skip the Line CTA must not
+                // silently reuse someone else's event.
+                appState.priorityEvent = nil
                 appState.showPriorityEntry = true
             } label: {
                 HStack(spacing: 6) {
