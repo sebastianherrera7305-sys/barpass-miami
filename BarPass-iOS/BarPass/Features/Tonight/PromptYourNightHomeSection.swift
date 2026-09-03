@@ -323,10 +323,23 @@ struct PromptYourNightHomeSection: View {
                 // the only type the genre actually lives in. A named genre is a
                 // far more specific request than a broad vibe chip, so a venue
                 // that really carries the asked-for genre is never dropped for
-                // being the "wrong" type; the vibe still shapes the ranking
-                // through ExperienceScorer above.
+                // being the "wrong" type — but ONLY for `.liveMusic`, whose
+                // whole premise ("live music") is genre-agnostic and never
+                // meant to be a venue-type claim in the first place.
+                //
+                // TestFlight regression this introduced: the exemption was
+                // originally written to apply for ANY selected vibe, not just
+                // `.liveMusic` — so $50 + House gave the identical venue list
+                // for Party, Chill, Date, and Upscale alike, since every
+                // house-tagged venue bypassed all four vibes' real type
+                // filters (.club-only for Party; lounge/rooftop/bar for
+                // Chill/Upscale; rooftop/lounge/restaurant for Date). Vibe
+                // selection did nothing whenever a genre was also picked —
+                // exactly the "we're guessing, not giving a real plan"
+                // behavior reported. Party still means a club, Date still
+                // means rooftop/lounge/restaurant, genre or not.
                 ranked = ranked.filter { venue in
-                    if let effectiveGenre, venue.musicGenres.contains(effectiveGenre) { return true }
+                    if selectedVibe == .liveMusic, let effectiveGenre, venue.musicGenres.contains(effectiveGenre) { return true }
                     return allowedTypes.contains(venue.type)
                 }
             }

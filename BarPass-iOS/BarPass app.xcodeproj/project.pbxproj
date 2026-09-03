@@ -58,6 +58,7 @@
 		98E6980599177FA54192F939 /* BarPassTests/ShareManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66E768A00F7416F3E940CCD /* BarPassTests/ShareManagerTests.swift */; };
 		A2CF02FBB442045B9D9084FF /* HelpGuideStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD594030C69C33F1DB823472 /* HelpGuideStore.swift */; };
 		A44EFDEC59D7784580819FD3 /* ChapterChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 792335E55D9363A086C6C79B /* ChapterChatView.swift */; };
+		920C99B1439E4A74519805E7 /* ChapterMembersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A161102B8441EB1CA0BC6AA /* ChapterMembersView.swift */; };
 		D3C94E0FD47E2040B8675C53 /* ChapterEventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A2E6845F2C2D8A282322E2 /* ChapterEventsView.swift */; };
 		A74E2DF0019E057F9578D8AB /* Stadium.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9944A65EAC0560419D02323C /* Stadium.swift */; };
 		A8A6CC267A4D4BA7B9F79410 /* GreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF98E2E20484C3784F7D613 /* GreekLifeRepository.swift */; };
@@ -98,6 +99,8 @@
 		E2136AAC149E09CCCF75EE87 /* TimeContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90DDC921B24BF09D3E8A04F2 /* TimeContext.swift */; };
 		E44CDF7872A2DD52484EE256 /* CartStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA3D664AAE5148E8E014E77 /* CartStore.swift */; };
 		E453AE48EC805F573934230C /* ChapterChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */; };
+		94D790F5FBEEF3EA89E25DAB /* ChapterMembersRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34A3B502C8F3F2C59513E5C /* ChapterMembersRepository.swift */; };
+		19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */; };
 		11AD2991A5DD4361C98E8012 /* ChapterEventsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD933F1F6EF039E08FDF1009 /* ChapterEventsRepository.swift */; };
 		E59E448890306D0FDEF2CA7B /* StadiumDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */; };
 		E7A190DFF6312B338701215F /* HelpOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF3AE92540CD87A9A6850339 /* HelpOverlayView.swift */; };
@@ -233,6 +236,8 @@
 		5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPaymentView.swift; sourceTree = "<group>"; };
 		1B1C5F03E13449629D93859E /* CardEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEntry.swift; sourceTree = "<group>"; };
 		5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatRepository.swift; path = BarPass/Repositories/ChapterChatRepository.swift; sourceTree = SOURCE_ROOT; };
+		F34A3B502C8F3F2C59513E5C /* ChapterMembersRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterMembersRepository.swift; path = BarPass/Repositories/ChapterMembersRepository.swift; sourceTree = SOURCE_ROOT; };
+		C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DisplayNameRepository.swift; path = BarPass/Repositories/DisplayNameRepository.swift; sourceTree = SOURCE_ROOT; };
 		FD933F1F6EF039E08FDF1009 /* ChapterEventsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterEventsRepository.swift; path = BarPass/Repositories/ChapterEventsRepository.swift; sourceTree = SOURCE_ROOT; };
 		61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseGreekLifeRepository.swift; path = BarPass/Repositories/SupabaseGreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
 		656968298CED42FFBA49231A /* CityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityIdentity.swift; path = BarPass/Resources/CityIdentity.swift; sourceTree = SOURCE_ROOT; };
@@ -241,6 +246,7 @@
 		721FC3825B9184C905EB3EF0 /* ShareManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareManager.swift; sourceTree = "<group>"; };
 		75CA2DEEAE28B897B4F7BBE4 /* HelpGuideStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpGuideStoreTests.swift; path = BarPassTests/HelpGuideStoreTests.swift; sourceTree = SOURCE_ROOT; };
 		792335E55D9363A086C6C79B /* ChapterChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatView.swift; path = BarPass/Features/CollegeLife/ChapterChatView.swift; sourceTree = SOURCE_ROOT; };
+		4A161102B8441EB1CA0BC6AA /* ChapterMembersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterMembersView.swift; path = BarPass/Features/CollegeLife/ChapterMembersView.swift; sourceTree = SOURCE_ROOT; };
 		A1A2E6845F2C2D8A282322E2 /* ChapterEventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterEventsView.swift; path = BarPass/Features/CollegeLife/ChapterEventsView.swift; sourceTree = SOURCE_ROOT; };
 		7B25282D5543608685CFCACF /* ExperienceScorerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExperienceScorerTests.swift; path = BarPassTests/ExperienceScorerTests.swift; sourceTree = "<group>"; };
 		7DEB9D058BA5451D3579444B /* DiscoveryScorer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DiscoveryScorer.swift; path = BarPass/Core/Intelligence/DiscoveryScorer.swift; sourceTree = SOURCE_ROOT; };
@@ -596,6 +602,8 @@
 				61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */,
 				F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */,
 				5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */,
+				F34A3B502C8F3F2C59513E5C /* ChapterMembersRepository.swift */,
+				C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */,
 				FD933F1F6EF039E08FDF1009 /* ChapterEventsRepository.swift */,
 				3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */,
 				3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */,
@@ -604,6 +612,7 @@
 				28A173F3C3D34475BC7C8C4D /* SupabaseRESTClient.swift */,
 				F863CE708ACF44B3A96D654A /* UniversityListView.swift */,
 				792335E55D9363A086C6C79B /* ChapterChatView.swift */,
+				4A161102B8441EB1CA0BC6AA /* ChapterMembersView.swift */,
 				A1A2E6845F2C2D8A282322E2 /* ChapterEventsView.swift */,
 				02DB178CA52441D2AC50F78F /* UniversityDetailView.swift */,
 				1D1A059688C549A88BABFEBB /* FraternityListView.swift */,
@@ -1060,8 +1069,11 @@
 				7AC8FF76E544F30232283F9E /* ProfileAffiliationRepository.swift in Sources */,
 				C4DE0A26B74D4F5DBEE8F764 /* UniversityListView.swift in Sources */,
 				A44EFDEC59D7784580819FD3 /* ChapterChatView.swift in Sources */,
+				920C99B1439E4A74519805E7 /* ChapterMembersView.swift in Sources */,
 				D3C94E0FD47E2040B8675C53 /* ChapterEventsView.swift in Sources */,
 				E453AE48EC805F573934230C /* ChapterChatRepository.swift in Sources */,
+				94D790F5FBEEF3EA89E25DAB /* ChapterMembersRepository.swift in Sources */,
+				19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */,
 				11AD2991A5DD4361C98E8012 /* ChapterEventsRepository.swift in Sources */,
 				39E22AF8EE155DF7FC352FBA /* BirthdateRepository.swift in Sources */,
 				6653697AF565692E1B2F279B /* VenueCheckinRepository.swift in Sources */,

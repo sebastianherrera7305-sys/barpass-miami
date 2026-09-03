@@ -17,6 +17,15 @@ struct ProfileView: View {
     @State private var affiliatedChapter: GreekChapter?
     @State private var showAffiliationPicker = false
     @State private var showHomeAddress = false
+    /// This screen used to show the l10n placeholder string "Tu Nombre" /
+    /// "Your Name" unconditionally — never the real value, never editable.
+    /// Every profile looked identical and unnamed; a chapter member roster
+    /// had nothing real to display per member either. nil while loading, so
+    /// the placeholder text still shows briefly rather than "" flashing.
+    @State private var displayName: String?
+    @State private var showEditDisplayName = false
+    @State private var displayNameDraft = ""
+    @State private var isSavingDisplayName = false
 
     private var affiliationSubtitle: String {
         guard let uni = affiliatedUniversity else { return l10n.t("greek.profile.noneHint") }
@@ -52,10 +61,22 @@ struct ProfileView: View {
                         .bpAccessibility(label: l10n.t("profile.avatar"), hint: l10n.t("profile.avatar.hint"))
 
                         VStack(spacing: 4) {
-                            Text(l10n.t("profile.displayName"))
-                                .font(.bpScaled(20, weight: .bold))
-                                .foregroundStyle(Color.bpInk)
-                                .bpAccessibility(label: l10n.t("profile.displayName"), hint: l10n.t("profile.displayName.hint"))
+                            Button {
+                                BPHaptics.light()
+                                displayNameDraft = displayName ?? ""
+                                showEditDisplayName = true
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Text(displayName?.isEmpty == false ? displayName! : l10n.t("profile.displayName"))
+                                        .font(.bpScaled(20, weight: .bold))
+                                        .foregroundStyle(Color.bpInk)
+                                    Image(systemName: "pencil")
+                                        .font(.bpScaled(12))
+                                        .foregroundStyle(Color.bpTextTertiary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .bpAccessibility(label: displayName ?? l10n.t("profile.displayName"), hint: l10n.t("profile.displayName.hint"), isButton: true)
 
                             HStack(spacing: 6) {
                                 Text(level)
@@ -555,6 +576,10 @@ struct ProfileView: View {
             }
         }
         .task { await loadAffiliation() }
+        .task { displayName = (try? await RepositoryDependencies.displayName.getDisplayName()) ?? nil }
+        .sheet(isPresented: $showEditDisplayName) {
+            editDisplayNameSheet
+        }
         .onChange(of: engine.lastAward?.xp) { _, newValue in
             guard newValue != nil else { return }
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { showToast = true }
@@ -608,6 +633,49 @@ struct ProfileView: View {
         }
         if let cid = affiliation.chapterId {
             affiliatedChapter = try? await RepositoryDependencies.greekLife.chapter(id: cid)
+        }
+    }
+
+    private var editDisplayNameSheet: some View {
+        NavigationStack {
+            Form {
+                TextField(l10n.t("profile.displayName.hint"), text: $displayNameDraft)
+                    .textInputAutocapitalization(.words)
+            }
+            .navigationTitle(l10n.t("profile.displayName"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(l10n.t("greek.chat.cancel")) { showEditDisplayName = false }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    if isSavingDisplayName {
+                        ProgressView()
+                    } else {
+                        Button(l10n.t("greek.events.form.save")) { saveDisplayName() }
+                            .disabled(displayNameDraft.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
+                }
+            }
+        }
+        .presentationDetents([.height(160)])
+    }
+
+    private func saveDisplayName() {
+        let trimmed = displayNameDraft.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        isSavingDisplayName = true
+        Task {
+            do {
+                try await RepositoryDependencies.displayName.setDisplayName(trimmed)
+                await MainActor.run {
+                    displayName = trimmed
+                    isSavingDisplayName = false
+                    showEditDisplayName = false
+                }
+            } catch {
+                await MainActor.run { isSavingDisplayName = false }
+            }
         }
     }
 }

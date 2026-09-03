@@ -100,6 +100,11 @@ struct FraternityListView: View {
                             .font(.bpScaled(12, weight: .semibold))
                             .foregroundStyle(Color.bpAmber)
                     }
+                    NavigationLink(destination: ChapterMembersView(chapter: chapter)) {
+                        Label(l10n.t("greek.chapter.members"), systemImage: "person.2.fill")
+                            .font(.bpScaled(12, weight: .semibold))
+                            .foregroundStyle(Color.bpAmber)
+                    }
                 }
             }
         }
