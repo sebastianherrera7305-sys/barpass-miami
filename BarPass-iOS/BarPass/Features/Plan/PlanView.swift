@@ -13,10 +13,14 @@ struct PlanChatMessage: Identifiable, Codable, Equatable {
     /// true (a stream can't resume across app launches), so any message
     /// restored from disk mid-stream is treated as finished, not stuck.
     var isStreaming: Bool = false
+    /// This message ends with an offer to build a real plan — renders a
+    /// tappable "Build my plan" action under it. Only the real build step
+    /// calls the AI; everything before this is instant, native chat.
+    var offerBuild: Bool = false
 
-    init(id: UUID = UUID(), role: String, text: String = "", plan: NightPlan? = nil, isThinking: Bool = false, isStreaming: Bool = false) {
+    init(id: UUID = UUID(), role: String, text: String = "", plan: NightPlan? = nil, isThinking: Bool = false, isStreaming: Bool = false, offerBuild: Bool = false) {
         self.id = id; self.role = role; self.text = text; self.plan = plan
-        self.isThinking = isThinking; self.isStreaming = isStreaming
+        self.isThinking = isThinking; self.isStreaming = isStreaming; self.offerBuild = offerBuild
     }
 }
 
@@ -34,6 +38,14 @@ struct PlanView: View {
     @State private var saveErrorMessage: String?
     @State private var chatErrorMessage: String?
     @State private var streamTask: Task<Void, Never>?
+    /// Set the instant a native message offers to build a plan, cleared the
+    /// moment the user answers either way — only meaningful for the very
+    /// next message, so a later "yes" (answering something else) can't
+    /// accidentally trigger a build.
+    @State private var awaitingConfirmation = false
+    /// Rotates the two native reply variants per state so back-to-back
+    /// turns don't repeat the same phrasing.
+    @State private var nativeTurnCount = 0
 
     private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
@@ -82,20 +94,26 @@ struct PlanView: View {
 
     var body: some View {
         ZStack {
-            BPBackgroundView()
+            // Solid, near-black — deliberately NOT BPBackgroundView's
+            // illustrated city art here. TestFlight feedback (2026-09-04)
+            // called out the decorative header eating the screen with the
+            // keyboard up and asked for a plain Claude/ChatGPT-style chat
+            // instead; a full-bleed illustration also doesn't leave the
+            // message thread the vertical room a real conversation needs.
+            Color(red: 0.04, green: 0.04, blue: 0.045).ignoresSafeArea()
 
             VStack(spacing: 0) {
+                topBar
+
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
-                        VStack(alignment: .leading, spacing: 16) {
-                            header
-
+                        VStack(alignment: .leading, spacing: 18) {
                             if messages.isEmpty {
-                                quickSuggestions
+                                emptyState
                             }
 
                             ForEach(messages) { message in
-                                PlanChatBubble(message: message, onSave: savePlan)
+                                PlanChatBubble(message: message, onSave: savePlan, onBuildPlan: confirmBuildPlan)
                                     .id(message.id)
                                     .padding(.horizontal, 20)
                             }
@@ -106,6 +124,7 @@ struct PlanView: View {
 
                             Color.clear.frame(height: 8).id("bottom")
                         }
+                        .padding(.top, 12)
                         .padding(.bottom, 12)
                     }
                     .onChange(of: messages.count) { _, _ in
@@ -142,41 +161,36 @@ struct PlanView: View {
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: saveErrorMessage)
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("REMY")
-                    .font(.bpScaled(11, weight: .heavy))
-                    .tracking(3)
-                    .foregroundStyle(amber)
+    /// Slim persistent bar — replaces the old full-bleed hero header.
+    /// Always the same small height whether the chat is empty or deep into
+    /// a conversation, so it never competes with the message thread or the
+    /// keyboard for vertical space.
+    private var topBar: some View {
+        HStack(spacing: 6) {
+            Text("REMY")
+                .font(.bpScaled(12, weight: .heavy))
+                .tracking(3)
+                .foregroundStyle(amber)
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 56)
+        .padding(.bottom, 8)
+    }
 
+    private var emptyState: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(l10n.t("plan.headerTitle.\(greetingIndex)"))
-                    .font(.bpScaled(26, weight: .bold))
-                    .foregroundStyle(Color.bpInk)
+                    .font(.bpScaled(24, weight: .bold))
+                    .foregroundStyle(.white)
 
                 Text(l10n.t("plan.headerSubtitle.\(greetingIndex)"))
                     .font(.bpScaled(14))
-                    .foregroundStyle(Color.bpInk.opacity(0.75))
+                    .foregroundStyle(.white.opacity(0.55))
             }
             .padding(.horizontal, 20)
-            .padding(.top, 60)
-        }
-        .background(
-            LinearGradient(
-                colors: [.black.opacity(0.7), .black.opacity(0.55), .clear],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .padding(.bottom, -30)
-        )
-    }
-
-    private var quickSuggestions: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(l10n.t("plan.quickIdeas"))
-                .font(.bpScaled(13, weight: .semibold))
-                .foregroundStyle(Color.bpInk.opacity(0.3))
-                .padding(.horizontal, 20)
+            .padding(.top, 8)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -184,11 +198,11 @@ struct PlanView: View {
                         Button { send(s) } label: {
                             Text(s)
                                 .font(.bpScaled(13))
-                                .foregroundStyle(Color.bpInk.opacity(0.7))
+                                .foregroundStyle(.white.opacity(0.75))
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 9)
-                                .background(Color.bpInk.opacity(0.06), in: Capsule())
-                                .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.09)))
+                                .background(Color.white.opacity(0.07), in: Capsule())
+                                .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
                         }
                         .buttonStyle(.plain)
                         .bpAccessibility(label: s, hint: l10n.t("plan.suggestion.hint"), isButton: true)
@@ -198,13 +212,14 @@ struct PlanView: View {
             }
             .helpTarget("plan.quickIdeas")
         }
+        .padding(.bottom, 8)
     }
 
     private var savedPlansSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(l10n.t("plan.savedPlans"))
                 .font(.bpScaled(13, weight: .semibold))
-                .foregroundStyle(Color.bpInk.opacity(0.3))
+                .foregroundStyle(.white.opacity(0.3))
                 .padding(.horizontal, 20)
 
             ForEach(savedPlans) { p in
@@ -215,14 +230,14 @@ struct PlanView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(p.title)
                             .font(.bpScaled(14, weight: .semibold))
-                            .foregroundStyle(Color.bpInk)
+                            .foregroundStyle(.white)
                         Text(p.stops.map(\.venueName).joined(separator: " → "))
                             .font(.bpScaled(11))
-                            .foregroundStyle(Color.bpInk.opacity(0.4))
+                            .foregroundStyle(.white.opacity(0.4))
                     }
                     .padding(14)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.bpInk.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
+                    .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
                 .bpAccessibility(label: p.title, hint: l10n.t("plan.loadSaved.hint"), isButton: true)
@@ -245,12 +260,12 @@ struct PlanView: View {
                     if input.isEmpty {
                         Text(messages.isEmpty ? l10n.t("plan.promptPlaceholder") : l10n.t("plan.chat.placeholder"))
                             .font(.bpScaled(14))
-                            .foregroundStyle(Color.bpInk.opacity(0.4))
+                            .foregroundStyle(.white.opacity(0.35))
                             .padding(.horizontal, 16)
                             .allowsHitTesting(false)
                     }
                     TextField("", text: $input, axis: .vertical)
-                        .foregroundStyle(Color.bpInk)
+                        .foregroundStyle(.white)
                         .tint(amber)
                         .font(.bpScaled(14))
                         .padding(.horizontal, 16)
@@ -258,8 +273,8 @@ struct PlanView: View {
                         .lineLimit(1...4)
                         .bpAccessibility(label: l10n.t("night.prompt.label"), hint: l10n.t("night.prompt.hint"))
                 }
-                .background(Color.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 22))
-                .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(Color.bpInk.opacity(0.15)))
+                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22))
+                .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(Color.white.opacity(0.12)))
 
                 Button {
                     send(input)
@@ -283,37 +298,76 @@ struct PlanView: View {
         }
         .padding(.top, 8)
         .padding(.bottom, 10)
-        .background(.ultraThinMaterial)
+        .background(Color(red: 0.04, green: 0.04, blue: 0.045))
     }
 
+    /// One user turn of ordinary, native chat — no network call. Reads
+    /// what's been said so far, either asks one quick clarifying question
+    /// or (once there's enough to go on) offers to build the real plan.
+    /// The only path that ever reaches the AI is `confirmBuildPlan()`.
     private func send(_ text: String) {
         let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !clean.isEmpty, !isSending else { return }
         chatErrorMessage = nil
         input = ""
-        isSending = true
 
-        let userMessage = PlanChatMessage(role: "user", text: clean)
-        let assistantId = UUID()
-        messages.append(userMessage)
-        messages.append(PlanChatMessage(id: assistantId, role: "assistant", isStreaming: true))
+        messages.append(PlanChatMessage(role: "user", text: clean))
         persistMessages()
 
-        let history = messages
-            .filter { $0.id != assistantId }
-            .map { APIClient.ConciergeChatTurn(role: $0.role, content: $0.text) }
+        if awaitingConfirmation, RemyLocalChat.isAffirmative(clean) {
+            awaitingConfirmation = false
+            confirmBuildPlan()
+            return
+        }
+        awaitingConfirmation = false
+
+        let context = messages.filter { $0.role == "user" }.map(\.text).joined(separator: " — ")
+        let reply = RemyLocalChat.reply(context: context, turnIndex: nativeTurnCount)
+        nativeTurnCount += 1
+        awaitingConfirmation = reply.offerBuild
+
+        let assistantId = UUID()
+        messages.append(PlanChatMessage(id: assistantId, role: "assistant", isThinking: true))
+        Task {
+            // A short, human-feeling pause — not a network wait. Instant
+            // native replies read as robotic; ~350ms reads as a real beat.
+            try? await Task.sleep(for: .milliseconds(350))
+            await MainActor.run {
+                updateMessage(assistantId) {
+                    $0.isThinking = false
+                    $0.text = reply.text
+                    $0.offerBuild = reply.offerBuild
+                }
+                persistMessages()
+            }
+        }
+    }
+
+    /// The one and only point in this whole screen that calls the real
+    /// Remy (barpass-v2's /api/concierge). Everything the user has said so
+    /// far is condensed into a single message — not the raw local chat
+    /// history, which is full of scripted native replies the model never
+    /// said and shouldn't be confused by.
+    private func confirmBuildPlan() {
+        isSending = true
+        let context = messages.filter { $0.role == "user" }.map(\.text).joined(separator: " — ")
+        let assistantId = UUID()
+        messages.append(PlanChatMessage(id: assistantId, role: "assistant", text: RemyLocalChat.buildingMessage, isStreaming: true))
+        persistMessages()
+
         let city = venueStore.selectedCity
         let venues = venueStore.venues
+        let apiMessages = [APIClient.ConciergeChatTurn(role: "user", content: context)]
 
         streamTask?.cancel()
         streamTask = Task {
             var raw = ""
             do {
-                for try await event in APIClient.streamConciergeChat(messages: history, city: city) {
+                for try await event in APIClient.streamConciergeChat(messages: apiMessages, city: city) {
                     guard !Task.isCancelled else { return }
                     switch event {
                     case .thinking:
-                        updateMessage(assistantId) { $0.isThinking = true }
+                        updateMessage(assistantId) { $0.isThinking = true; $0.text = "" }
                     case .delta(let piece):
                         raw += piece
                         let live = Self.hideOpenFence(raw)
@@ -384,6 +438,7 @@ struct PlanView: View {
 private struct PlanChatBubble: View {
     let message: PlanChatMessage
     let onSave: (NightPlan) -> Void
+    let onBuildPlan: () -> Void
     @ObservedObject private var l10n = L10n.shared
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
 
@@ -404,17 +459,30 @@ private struct PlanChatBubble: View {
                 Spacer(minLength: 40)
             }
         } else {
+            // Claude/ChatGPT-style: plain text, no bubble background — a
+            // card only shows up for the actual plan.
             VStack(alignment: .leading, spacing: 12) {
                 if !message.text.isEmpty || message.isStreaming {
-                    HStack {
-                        Text(message.text)
-                            .font(.bpScaled(14))
-                            .foregroundStyle(Color.bpInk)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
-                        Spacer(minLength: 40)
+                    Text(message.text)
+                        .font(.bpScaled(15))
+                        .foregroundStyle(.white.opacity(0.92))
+                        .lineSpacing(3)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                if message.offerBuild {
+                    Button(action: onBuildPlan) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "sparkles")
+                            Text(l10n.t("plan.chat.buildPlanButton"))
+                        }
+                        .font(.bpScaled(13, weight: .semibold))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(amber, in: Capsule())
                     }
+                    .buttonStyle(.plain)
+                    .bpAccessibility(label: l10n.t("plan.chat.buildPlanButton"), isButton: true)
                 }
                 if let plan = message.plan {
                     NightPlanView(plan: plan, onSave: onSave)
@@ -433,13 +501,9 @@ private struct PlanChatBubble: View {
                     .scaleEffect(1)
                     .modifier(BouncingDot(delay: Double(i) * 0.15))
             }
-            Text(l10n.t("plan.chat.thinking"))
-                .font(.bpScaled(12))
-                .foregroundStyle(Color.bpInk.opacity(0.4))
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 4)
         .padding(.vertical, 10)
-        .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
     }
 }
 
