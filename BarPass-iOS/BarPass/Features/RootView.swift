@@ -22,7 +22,23 @@ struct RootView: View {
                     MainTabView()
                 }
                 .id(appState.navResetToken)
-                .ignoresSafeArea()
+                // `.container` only — NOT the bare `.ignoresSafeArea()`
+                // (defaults to `.all`, which includes `.keyboard`) this used
+                // to be. TestFlight, 2026-09-05, after 5 rounds of patching
+                // Plan's chat keyboard bug at lower levels: THIS is the
+                // actual root cause. Every child screen's manual keyboard
+                // workaround was fighting this blanket ignore, which strips
+                // real, native SwiftUI keyboard-avoidance from the ENTIRE
+                // app at its highest point — no descendant can "opt back
+                // in" to a safe area an ancestor already ignored for the
+                // region it occupies. Scoping this to `.container` restores
+                // genuine keyboard safe-area propagation app-wide (every
+                // text input, not just Plan, now gets it for free, the
+                // normal SwiftUI way); MainTabView's floating tab bar/music
+                // player — the one thing that must NOT move for the
+                // keyboard — opts itself out locally instead (see
+                // MainTabView.swift).
+                .ignoresSafeArea(.container, edges: .all)
                 .transition(.opacity)
                 .task { await AppleMusicPlaybackService.playTopSongs() }
             } else {
