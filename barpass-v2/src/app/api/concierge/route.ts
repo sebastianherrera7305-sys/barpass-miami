@@ -1,130 +1,160 @@
-import { NextResponse } from "next/server";
 import { getVenues } from "@/features/venues/services/venue-service";
-import { buildConciergeSystemPrompt } from "@/features/ai/services/concierge-prompt";
-import {
-  conciergeRequestSchema,
-  nightPlanSchema,
-} from "@/features/ai/services/plan-schema";
+import { buildConciergeSystemPrompt, selectRelevantVenues } from "@/features/ai/services/concierge-prompt";
+import { conciergeChatRequestSchema } from "@/features/ai/services/plan-schema";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/concierge
- * Body: { prompt: string }
- * Returns: NightPlan JSON validated against nightPlanSchema.
+ * Body: { messages: [{role, content}], city? }
+ * Returns: a raw text/plain STREAM of Remy's reply as it's generated —
+ * this is a real chat now, not a single request/response plan generator.
+ * A message may end in a ```json ... ``` fenced NightPlan block; the
+ * client is responsible for detecting and rendering that block as a card
+ * (see plan-schema.ts's nightPlanSchema for what's inside it).
  *
- * NVIDIA NIM (OpenAI-compatible chat completions endpoint) — the key lives
- * ONLY here (server-side, NVIDIA_API_KEY), never in the client bundle.
- * Was Gemini Flash until this swap; same contract (system prompt in, one
- * JSON night-plan object out, validated below) so the rest of the app
- * (schema, prompt builder, client) needed zero changes.
+ * NVIDIA NIM (OpenAI-compatible chat completions endpoint, streaming) —
+ * the key lives ONLY here (server-side, NVIDIA_API_KEY), never in the
+ * client bundle.
  *
- * SECURITY (Pre-Launch Audit, Phase 1 #6): this route had no rate limiting
- * at all — harmless only because no key was set (every call 503'd). Rate-
- * limited by IP rather than gated behind auth: the Concierge is a guest-
- * accessible feature today (no login wall anywhere else in its flow), so
- * requiring auth here would be a product change, not a security fix — this
- * closes the actual gap (unauthenticated cost/DoS abuse of the AI budget)
- * without silently login-walling a feature that never had one.
+ * SECURITY (Pre-Launch Audit, Phase 1 #6): rate-limited by IP rather than
+ * gated behind auth — the Concierge is a guest-accessible feature today
+ * (no login wall anywhere else in its flow), so requiring auth here would
+ * be a product change, not a security fix.
  */
 const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-// Was meta/llama-3.3-70b-instruct — NVIDIA retired it (HTTP 410, "reached
-// its end of life on 2026-08-26") without this route ever noticing, since
-// nothing had exercised it end-to-end since the key was added (it 503'd on
-// missing config the whole time before that). Confirmed against the live
-// NVIDIA account directly: most of the catalog's "available" models 404 for
-// this account despite being listed (e.g. nemotron-70b-instruct, mistral-
-// large-2-instruct, nemotron-nano-3-30b-a3b) — kimi-k3 is one of the few
-// that actually responds, follows response_format: json_object cleanly
-// (content populated correctly, not buried in/blocked by reasoning_content
-// the way openai/gpt-oss-20b came back null), and produces real,
-// specific Miami nightlife knowledge unprompted. Re-verify against
-// GET https://integrate.api.nvidia.com/v1/models if this ever 410s again.
+// Re-verify against GET https://integrate.api.nvidia.com/v1/models if this
+// ever 410s again — most of the catalog's "available" models 404 for this
+// account despite being listed. kimi-k3 is confirmed working and streams
+// cleanly (content deltas, not buried in reasoning_content).
 const NVIDIA_MODEL = "moonshotai/kimi-k3";
 
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  // 10 requests/minuto por IP — cubre uso normal (varios intentos de prompt
-  // en una sesión), frena abuso automatizado del presupuesto de NVIDIA.
+  // 20 requests/minuto por IP — un chat manda muchos más turnos que el
+  // viejo formulario de un solo tiro, así que el límite anterior de 10/min
+  // se quedaba corto para una conversación real de varios mensajes.
   const withinLimit = await checkRateLimit(`concierge:${ip}`, {
-    maxRequests: 10,
+    maxRequests: 20,
     windowSeconds: 60,
   });
   if (!withinLimit) {
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+    return Response.json({ error: "rate_limited" }, { status: 429 });
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+    return Response.json({ error: "invalid_json" }, { status: 400 });
   }
-  const parsed = conciergeRequestSchema.safeParse(body);
+  const parsed = conciergeChatRequestSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+    return Response.json({ error: "invalid_request" }, { status: 400 });
   }
 
   if (!process.env.NVIDIA_API_KEY) {
-    return NextResponse.json({ error: "ai_not_configured" }, { status: 503 });
+    return Response.json({ error: "ai_not_configured" }, { status: 503 });
   }
 
   const allVenues = await getVenues();
-  // Scoped to one metro — see conciergeRequestSchema.city. Falls back to
-  // Miami (the web Concierge's own, still-implicit scope) when the caller
-  // doesn't send one, rather than silently embedding all 23 cities.
   const targetCity = parsed.data.city ?? "Miami";
-  const venues = allVenues.filter((v) => v.city === targetCity);
-  const systemInstruction = buildConciergeSystemPrompt(venues.length > 0 ? venues : allVenues, {
-    excludeSlugs: parsed.data.excludeSlugs,
-  });
+  const cityVenues = allVenues.filter((v) => v.city === targetCity);
+  const venues = cityVenues.length > 0 ? cityVenues : allVenues;
+  const conversationText = parsed.data.messages.map((m) => m.content).join(" ");
+  const systemInstruction = buildConciergeSystemPrompt(selectRelevantVenues(venues, conversationText));
 
-  // Un reintento — el modelo ocasionalmente devuelve JSON corrupto o con un
-  // campo faltante (glitch de generación). Antes esto era un error inmediato
-  // al usuario por algo que una segunda llamada normalmente resuelve solo.
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const response = await fetch(NVIDIA_CHAT_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          model: NVIDIA_MODEL,
-          messages: [
-            { role: "system", content: systemInstruction },
-            { role: "user", content: parsed.data.prompt },
-          ],
-          temperature: 0.9,
-          // Generoso por la misma razón que con Gemini — un plan con varios
-          // stops y notas largas se corta a mitad de generación si el límite
-          // es chico, y rompe el JSON.parse de abajo.
-          max_tokens: 2048,
-          response_format: { type: "json_object" },
-        }),
-      });
-
-      if (!response.ok) {
-        console.error(`Concierge NVIDIA call failed (attempt ${attempt}): HTTP ${response.status}`, await response.text());
-        continue;
-      }
-
-      const completion = await response.json();
-      const raw = completion.choices?.[0]?.message?.content ?? "{}";
-      const parsedJson = JSON.parse(raw);
-      const plan = nightPlanSchema.safeParse(parsedJson);
-
-      if (!plan.success) {
-        console.error(`Concierge JSON failed schema validation (attempt ${attempt}):`, plan.error.issues);
-        continue;
-      }
-
-      return NextResponse.json(plan.data);
-    } catch (e) {
-      console.error(`Concierge call failed (attempt ${attempt}):`, e);
-    }
+  let upstream: Response;
+  try {
+    upstream = await fetch(NVIDIA_CHAT_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
+        "Content-Type": "application/json",
+        Accept: "text/event-stream",
+      },
+      body: JSON.stringify({
+        model: NVIDIA_MODEL,
+        messages: [
+          { role: "system", content: systemInstruction },
+          ...parsed.data.messages,
+        ],
+        temperature: 0.8,
+        max_tokens: 2048,
+        stream: true,
+      }),
+    });
+  } catch (e) {
+    console.error("Concierge NVIDIA fetch failed:", e);
+    return Response.json({ error: "ai_unavailable" }, { status: 502 });
   }
 
-  return NextResponse.json({ error: "ai_unavailable" }, { status: 502 });
+  if (!upstream.ok || !upstream.body) {
+    console.error(`Concierge NVIDIA call failed: HTTP ${upstream.status}`, await upstream.text().catch(() => ""));
+    return Response.json({ error: "ai_unavailable" }, { status: 502 });
+  }
+
+  // NVIDIA streams OpenAI-style SSE ("data: {json}\n\n", ending in
+  // "data: [DONE]"). The client just wants plain text — this transform
+  // unwraps it, plus two 1-byte control markers (\x01, \x02) that never
+  // occur in real text: \x01 fires the instant the model shows ANY sign of
+  // life (its internal "reasoning_content" — kimi-k3 is a reasoning model
+  // and can think for 20-30s before its real answer starts), so the client
+  // can flip from "idle" to a visible "thinking" state within ~1s instead
+  // of showing nothing while the model works. \x02 fires when the real,
+  // user-facing "content" starts — everything after it is the actual
+  // message, forwarded as before.
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let thinkingSignaled = false;
+  let contentSignaled = false;
+  const textStream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const reader = upstream.body!.getReader();
+      const encoder = new TextEncoder();
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data:")) continue;
+            const payload = trimmed.slice(5).trim();
+            if (payload === "[DONE]") continue;
+            try {
+              const chunk = JSON.parse(payload);
+              const delta = chunk.choices?.[0]?.delta;
+              if (!contentSignaled && typeof delta?.reasoning_content === "string" && !thinkingSignaled) {
+                thinkingSignaled = true;
+                controller.enqueue(encoder.encode("\x01"));
+              }
+              if (typeof delta?.content === "string" && delta.content.length > 0) {
+                if (!contentSignaled) {
+                  contentSignaled = true;
+                  controller.enqueue(encoder.encode("\x02"));
+                }
+                controller.enqueue(encoder.encode(delta.content));
+              }
+            } catch {
+              // Partial/malformed SSE line — skip it, next chunk carries on.
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Concierge stream read failed:", e);
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(textStream, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      "X-Accel-Buffering": "no",
+    },
+  });
 }

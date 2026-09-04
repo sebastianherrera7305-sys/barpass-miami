@@ -1,56 +1,69 @@
 import SwiftUI
 import CoreLocation
 
+// MARK: - Chat message model
+
+struct PlanChatMessage: Identifiable, Codable, Equatable {
+    let id: UUID
+    let role: String // "user" | "assistant"
+    var text: String = ""
+    var plan: NightPlan? = nil
+    var isThinking: Bool = false
+    /// True only while a response is actively arriving — never persisted as
+    /// true (a stream can't resume across app launches), so any message
+    /// restored from disk mid-stream is treated as finished, not stuck.
+    var isStreaming: Bool = false
+
+    init(id: UUID = UUID(), role: String, text: String = "", plan: NightPlan? = nil, isThinking: Bool = false, isStreaming: Bool = false) {
+        self.id = id; self.role = role; self.text = text; self.plan = plan
+        self.isThinking = isThinking; self.isStreaming = isStreaming
+    }
+}
+
 struct PlanView: View {
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
     @EnvironmentObject private var appState:   AppState
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var prompt    = ""
-    @State private var isLoading = false
-    @State private var plan: NightPlan? = nil
+    @State private var input     = ""
+    @State private var isSending = false
+    @State private var messages: [PlanChatMessage] = []
     @State private var savedPlans: [NightPlan] = []
-    @State private var lastPrompt = ""
     @State private var userLocation: CLLocationCoordinate2D?
     @State private var locationService = LocationService()
-    /// Picked once when the screen appears, not on every render — so it
-    /// doesn't reshuffle mid-type. TestFlight feedback was that the header
-    /// always said the same thing on every visit; there are 6 variants per
-    /// language now (see LocalizationService's "plan.headerTitle.N" keys).
     @State private var greetingIndex = Int.random(in: 0..<6)
-    /// Surfaces `savePlan` failures — mainly `SupabasePlanRepository`'s
-    /// no-session error for guests. Before this the save silently no-opted
-    /// (`try?`), so a guest tapping "Save" saw nothing happen with zero
-    /// explanation why.
     @State private var saveErrorMessage: String?
+    @State private var chatErrorMessage: String?
+    @State private var streamTask: Task<Void, Never>?
 
     private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
     private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
 
-    /// The on-screen plan lived only in @State, so iOS killing the app in
-    /// the background (common under memory pressure) silently lost it —
-    /// the user came back to a blank Plan tab even though nothing was
-    /// wrong. Mirrored to disk so it survives a real termination, not just
-    /// a suspend.
-    private static let currentPlanKey = "bp_plan_current"
-    private static let lastPromptKey = "bp_plan_lastPrompt"
+    /// Chat history mirrored to disk — an app termination mid-conversation
+    /// (common under memory pressure) shouldn't silently wipe it the way a
+    /// pure @State plan used to.
+    private static let messagesKey = "bp_plan_chat_messages"
 
-    private func persistCurrentPlan() {
-        if let plan, let data = try? JSONEncoder().encode(plan) {
-            UserDefaults.standard.set(data, forKey: Self.currentPlanKey)
-        } else {
-            UserDefaults.standard.removeObject(forKey: Self.currentPlanKey)
+    private func persistMessages() {
+        // Never persist a message mid-stream — a resumed app can't pick a
+        // network stream back up, so it would be stuck showing "thinking"
+        // forever. Flatten those to their last-known text first.
+        let toSave = messages.map { m -> PlanChatMessage in
+            var copy = m
+            copy.isStreaming = false
+            copy.isThinking = false
+            return copy
         }
-        UserDefaults.standard.set(lastPrompt, forKey: Self.lastPromptKey)
+        if let data = try? JSONEncoder().encode(toSave) {
+            UserDefaults.standard.set(data, forKey: Self.messagesKey)
+        }
     }
 
-    private func restoreCurrentPlan() {
-        guard plan == nil else { return }
-        lastPrompt = UserDefaults.standard.string(forKey: Self.lastPromptKey) ?? ""
-        if let data = UserDefaults.standard.data(forKey: Self.currentPlanKey),
-           let restored = try? JSONDecoder().decode(NightPlan.self, from: data) {
-            plan = restored
+    private func restoreMessages() {
+        guard messages.isEmpty else { return }
+        if let data = UserDefaults.standard.data(forKey: Self.messagesKey),
+           let restored = try? JSONDecoder().decode([PlanChatMessage].self, from: data) {
+            messages = restored
         }
     }
 
@@ -71,212 +84,48 @@ struct PlanView: View {
         ZStack {
             BPBackgroundView()
 
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 24) {
+            VStack(spacing: 0) {
+                ScrollViewReader { proxy in
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 16) {
+                            header
 
-                    // Header + input area sit on top of the city art before
-                    // BPBackgroundView's fade reaches full black (that fade
-                    // is tuned for Tonight's header, which sits lower, below
-                    // the mascot logo). Both the input box and the button
-                    // are near-transparent by design — meant to read against
-                    // solid black — so on top of the busy illustration they
-                    // don't just lose contrast, they nearly disappear. A
-                    // single scrim behind this whole block (not per-element
-                    // patches) fixes all of it at once and matches how the
-                    // rest of the screen already looks once the real fade
-                    // kicks in below.
-                    VStack(alignment: .leading, spacing: 24) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("REMY")
-                                .font(.bpScaled(11, weight: .heavy))
-                                .tracking(3)
-                                .foregroundStyle(amber)
-
-                            Text(l10n.t("plan.headerTitle.\(greetingIndex)"))
-                                .font(.bpScaled(26, weight: .bold))
-                                .foregroundStyle(Color.bpInk)
-
-                            Text(l10n.t("plan.headerSubtitle.\(greetingIndex)"))
-                                .font(.bpScaled(14))
-                                .foregroundStyle(Color.bpInk.opacity(0.75))
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 60)
-
-                        // Input area — hidden once a plan exists. Previously
-                        // this stayed on screen unconditionally: generatePlan()
-                        // resets `prompt` to "" on success, so right after
-                        // building a plan the placeholder text and the
-                        // low-opacity disabled button both reappeared sitting
-                        // directly above the results — correct per-field state,
-                        // but read as a broken "ghost" render. An explicit
-                        // "Ask again" pill replaces it instead.
-                        if plan == nil {
-                        VStack(spacing: 12) {
-                            ZStack(alignment: .topLeading) {
-                                if prompt.isEmpty {
-                                    Text(l10n.t("plan.promptPlaceholder"))
-                                        .font(.bpScaled(14))
-                                        .foregroundStyle(Color.bpInk.opacity(0.4))
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 14)
-                                        .allowsHitTesting(false)
-                                }
-                                TextEditor(text: $prompt)
-                                    .foregroundStyle(Color.bpInk)
-                                    .tint(amber)
-                                    .scrollContentBackground(.hidden)
-                                    .background(.clear)
-                                    .font(.bpScaled(14))
-                                    .padding(10)
-                                    .frame(minHeight: 100)
-                                    .bpAccessibility(label: l10n.t("night.prompt.label"), hint: l10n.t("night.prompt.hint"))
+                            if messages.isEmpty {
+                                quickSuggestions
                             }
-                            .background(Color.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 16))
-                            .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.bpInk.opacity(0.15)))
 
-                            Button {
-                                generatePlan()
-                            } label: {
-                                HStack(spacing: 8) {
-                                    if isLoading {
-                                        ProgressView().tint(.black).scaleEffect(0.85)
-                                    } else {
-                                        Image(systemName: "sparkles")
-                                        Text(l10n.t("plan.buildButton"))
-                                            .font(.bpScaled(16, weight: .bold))
-                                    }
-                                }
-                                .foregroundStyle(.black)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(
-                                    LinearGradient(colors: [amber, amberB], startPoint: .leading, endPoint: .trailing),
-                                    in: RoundedRectangle(cornerRadius: 14)
-                                )
+                            ForEach(messages) { message in
+                                PlanChatBubble(message: message, onSave: savePlan)
+                                    .id(message.id)
+                                    .padding(.horizontal, 20)
                             }
-                            .buttonStyle(.plain)
-                            .bpAccessibility(label: l10n.t("plan.buildButton"), hint: l10n.t("plan.buildButton.hint"), isButton: true)
-                            .disabled(prompt.trimmingCharacters(in: .whitespaces).isEmpty || isLoading)
-                            .opacity(prompt.trimmingCharacters(in: .whitespaces).isEmpty ? 0.55 : 1)
-                        }
-                        .padding(.horizontal, 20)
-                        .helpTarget("plan.prompt")
-                        }
-                    }
-                    .background(
-                        LinearGradient(
-                            colors: [.black.opacity(0.7), .black.opacity(0.55), .clear],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        .padding(.bottom, -30)
-                    )
 
-                    // Quick suggestions — hidden once a plan exists, same as
-                    // the input area above.
-                    if plan == nil {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text(l10n.t("plan.quickIdeas"))
-                            .font(.bpScaled(13, weight: .semibold))
-                            .foregroundStyle(Color.bpInk.opacity(0.3))
-                            .padding(.horizontal, 20)
-
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                ForEach(suggestions, id: \.self) { s in
-                                    Button { prompt = s } label: {
-                                        Text(s)
-                                            .font(.bpScaled(13))
-                                            .foregroundStyle(Color.bpInk.opacity(0.7))
-                                            .padding(.horizontal, 14)
-                                            .padding(.vertical, 9)
-                                            .background(Color.bpInk.opacity(0.06), in: Capsule())
-                                            .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.09)))
-                                    }
-                                    .buttonStyle(.plain)
-                                    .bpAccessibility(label: s, hint: l10n.t("plan.suggestion.hint"), isButton: true)
-                                }
+                            if !savedPlans.isEmpty && messages.isEmpty {
+                                savedPlansSection
                             }
-                            .padding(.horizontal, 20)
+
+                            Color.clear.frame(height: 8).id("bottom")
                         }
-                        .helpTarget("plan.quickIdeas")
+                        .padding(.bottom, 12)
                     }
+                    .onChange(of: messages.count) { _, _ in
+                        withAnimation(.easeOut(duration: 0.25)) { proxy.scrollTo("bottom", anchor: .bottom) }
                     }
-
-                    // Plan result
-                    if let plan {
-                        Button {
-                            self.plan = nil
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "arrow.counterclockwise")
-                                Text(l10n.t("plan.askAgain"))
-                            }
-                            .font(.bpScaled(13, weight: .semibold))
-                            .foregroundStyle(Color.bpInk.opacity(0.7))
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 9)
-                            .background(Color.bpInk.opacity(0.06), in: Capsule())
-                            .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.09)))
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.horizontal, 20)
-                        .bpAccessibility(label: l10n.t("plan.askAgain"), isButton: true)
-
-                        NightPlanView(plan: plan, onSave: savePlan)
-                            .padding(.horizontal, 20)
+                    .onChange(of: messages.last?.text) { _, _ in
+                        proxy.scrollTo("bottom", anchor: .bottom)
                     }
-
-                    // Saved plans
-                    if !savedPlans.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text(l10n.t("plan.savedPlans"))
-                                .font(.bpScaled(13, weight: .semibold))
-                                .foregroundStyle(Color.bpInk.opacity(0.3))
-                                .padding(.horizontal, 20)
-
-                            ForEach(savedPlans) { p in
-                                Button { self.plan = p } label: {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(p.title)
-                                            .font(.bpScaled(14, weight: .semibold))
-                                            .foregroundStyle(Color.bpInk)
-                                        Text(p.stops.map(\.venueName).joined(separator: " → "))
-                                            .font(.bpScaled(11))
-                                            .foregroundStyle(Color.bpInk.opacity(0.4))
-                                    }
-                                    .padding(14)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color.bpInk.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
-                                }
-                                .buttonStyle(.plain)
-                                .bpAccessibility(label: p.title, hint: l10n.t("plan.loadSaved.hint"), isButton: true)
-                                .padding(.horizontal, 20)
-                            }
-                        }
-                    }
-
-                    Spacer(minLength: 120)
                 }
+
+                inputBar
             }
-            .refreshable { await refresh() }
         }
         .onAppear { BPAnalytics.track(.viewPlan) }
         .task {
-            restoreCurrentPlan()
+            restoreMessages()
             await loadSavedPlans()
             userLocation = await locationService.requestOnce()
         }
-        // Re-evaluate the current plan's real-time badges when the app comes
-        // back to the foreground — a plan built at 11pm showing "Starts in
-        // 20 min" is stale by 1am if the user just left the app open. Only
-        // regenerates if a plan is already showing; never fires on a timer.
-        .onChange(of: scenePhase) { _, newPhase in
-            guard newPhase == .active, plan != nil, !lastPrompt.isEmpty else { return }
-            plan = NightPlan.sample(for: lastPrompt, venues: venueStore.venues, userLocation: userLocation)
-            persistCurrentPlan()
-        }
+        .onDisappear { streamTask?.cancel() }
         .overlay(alignment: .top) {
             if let saveErrorMessage {
                 Text(saveErrorMessage)
@@ -291,64 +140,219 @@ struct PlanView: View {
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.85), value: saveErrorMessage)
-}
+    }
 
-    /// Slugs of every venue already shown in this session's plans — sent as
-    /// `excludeSlugs` so "Ask again" doesn't send Remy the same itinerary
-    /// twice. Cleared only when the app relaunches; this is intentionally
-    /// session-scoped, not persisted.
-    @State private var shownVenueSlugs: [String] = []
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("REMY")
+                    .font(.bpScaled(11, weight: .heavy))
+                    .tracking(3)
+                    .foregroundStyle(amber)
 
-    private func generatePlan() {
-        guard !prompt.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-        isLoading = true
-        let currentPrompt = prompt
-        Task {
-            // Real Remy first (barpass-v2's /api/concierge — an actual LLM,
-            // not the local scoring heuristic). Falls back to the local
-            // rule-based plan on ANY failure (network, rate limit, the AI
-            // key not being configured on Vercel yet) so Plan never breaks
-            // — it just quietly degrades to what it did before this existed.
-            if let response = try? await APIClient.getConciergePlan(
-                prompt: currentPrompt,
-                city: venueStore.selectedCity,
-                excludeSlugs: shownVenueSlugs
-            ) {
-                await MainActor.run {
-                    let generated = NightPlan.fromConcierge(response, prompt: currentPrompt, venues: venueStore.venues)
-                    plan = generated
-                    shownVenueSlugs.append(contentsOf: response.stops.map(\.venueSlug))
-                    lastPrompt = currentPrompt
-                    persistCurrentPlan()
-                    BPAnalytics.track(.createPlan(method: "ai"))
-                    isLoading = false
-                    prompt = ""
-                }
-                return
+                Text(l10n.t("plan.headerTitle.\(greetingIndex)"))
+                    .font(.bpScaled(26, weight: .bold))
+                    .foregroundStyle(Color.bpInk)
+
+                Text(l10n.t("plan.headerSubtitle.\(greetingIndex)"))
+                    .font(.bpScaled(14))
+                    .foregroundStyle(Color.bpInk.opacity(0.75))
             }
+            .padding(.horizontal, 20)
+            .padding(.top, 60)
+        }
+        .background(
+            LinearGradient(
+                colors: [.black.opacity(0.7), .black.opacity(0.55), .clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .padding(.bottom, -30)
+        )
+    }
 
-            try? await Task.sleep(for: .seconds(1.5))
-            await MainActor.run {
-                plan = NightPlan.sample(for: currentPrompt, venues: venueStore.venues, userLocation: userLocation)
-                lastPrompt = currentPrompt
-                persistCurrentPlan()
-                BPAnalytics.track(.createPlan(method: "prompt"))
-                isLoading = false
-                prompt = ""
+    private var quickSuggestions: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(l10n.t("plan.quickIdeas"))
+                .font(.bpScaled(13, weight: .semibold))
+                .foregroundStyle(Color.bpInk.opacity(0.3))
+                .padding(.horizontal, 20)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(suggestions, id: \.self) { s in
+                        Button { send(s) } label: {
+                            Text(s)
+                                .font(.bpScaled(13))
+                                .foregroundStyle(Color.bpInk.opacity(0.7))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 9)
+                                .background(Color.bpInk.opacity(0.06), in: Capsule())
+                                .overlay(Capsule().strokeBorder(Color.bpInk.opacity(0.09)))
+                        }
+                        .buttonStyle(.plain)
+                        .bpAccessibility(label: s, hint: l10n.t("plan.suggestion.hint"), isButton: true)
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+            .helpTarget("plan.quickIdeas")
+        }
+    }
+
+    private var savedPlansSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(l10n.t("plan.savedPlans"))
+                .font(.bpScaled(13, weight: .semibold))
+                .foregroundStyle(Color.bpInk.opacity(0.3))
+                .padding(.horizontal, 20)
+
+            ForEach(savedPlans) { p in
+                Button {
+                    messages.append(PlanChatMessage(role: "assistant", text: "", plan: p))
+                    persistMessages()
+                } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(p.title)
+                            .font(.bpScaled(14, weight: .semibold))
+                            .foregroundStyle(Color.bpInk)
+                        Text(p.stops.map(\.venueName).joined(separator: " → "))
+                            .font(.bpScaled(11))
+                            .foregroundStyle(Color.bpInk.opacity(0.4))
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.bpInk.opacity(0.05), in: RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+                .bpAccessibility(label: p.title, hint: l10n.t("plan.loadSaved.hint"), isButton: true)
+                .padding(.horizontal, 20)
             }
         }
     }
 
-    /// Pull-to-refresh: re-fetches location and, if a plan is already
-    /// showing, regenerates it against the current moment. Does not fire on
-    /// any timer — only on this explicit gesture, app foreground, or a new
-    /// prompt submission.
-    private func refresh() async {
-        userLocation = await locationService.requestOnce()
-        await loadSavedPlans()
-        if !lastPrompt.isEmpty {
-            plan = NightPlan.sample(for: lastPrompt, venues: venueStore.venues, userLocation: userLocation)
+    private var inputBar: some View {
+        VStack(spacing: 6) {
+            if let chatErrorMessage {
+                Text(chatErrorMessage)
+                    .font(.bpScaled(12, weight: .semibold))
+                    .foregroundStyle(Color.bpDanger)
+                    .padding(.horizontal, 20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            HStack(spacing: 10) {
+                ZStack(alignment: .leading) {
+                    if input.isEmpty {
+                        Text(messages.isEmpty ? l10n.t("plan.promptPlaceholder") : l10n.t("plan.chat.placeholder"))
+                            .font(.bpScaled(14))
+                            .foregroundStyle(Color.bpInk.opacity(0.4))
+                            .padding(.horizontal, 16)
+                            .allowsHitTesting(false)
+                    }
+                    TextField("", text: $input, axis: .vertical)
+                        .foregroundStyle(Color.bpInk)
+                        .tint(amber)
+                        .font(.bpScaled(14))
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .lineLimit(1...4)
+                        .bpAccessibility(label: l10n.t("night.prompt.label"), hint: l10n.t("night.prompt.hint"))
+                }
+                .background(Color.black.opacity(0.35), in: RoundedRectangle(cornerRadius: 22))
+                .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(Color.bpInk.opacity(0.15)))
+
+                Button {
+                    send(input)
+                } label: {
+                    Image(systemName: isSending ? "hourglass" : "arrow.up")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(.black)
+                        .frame(width: 40, height: 40)
+                        .background(
+                            LinearGradient(colors: [amber, amberB], startPoint: .top, endPoint: .bottom),
+                            in: Circle()
+                        )
+                        .opacity(input.trimmingCharacters(in: .whitespaces).isEmpty || isSending ? 0.4 : 1)
+                }
+                .buttonStyle(.plain)
+                .disabled(input.trimmingCharacters(in: .whitespaces).isEmpty || isSending)
+                .bpAccessibility(label: l10n.t("plan.buildButton"), hint: l10n.t("plan.buildButton.hint"), isButton: true)
+            }
+            .padding(.horizontal, 20)
+            .helpTarget("plan.prompt")
         }
+        .padding(.top, 8)
+        .padding(.bottom, 10)
+        .background(.ultraThinMaterial)
+    }
+
+    private func send(_ text: String) {
+        let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty, !isSending else { return }
+        chatErrorMessage = nil
+        input = ""
+        isSending = true
+
+        let userMessage = PlanChatMessage(role: "user", text: clean)
+        let assistantId = UUID()
+        messages.append(userMessage)
+        messages.append(PlanChatMessage(id: assistantId, role: "assistant", isStreaming: true))
+        persistMessages()
+
+        let history = messages
+            .filter { $0.id != assistantId }
+            .map { APIClient.ConciergeChatTurn(role: $0.role, content: $0.text) }
+        let city = venueStore.selectedCity
+        let venues = venueStore.venues
+
+        streamTask?.cancel()
+        streamTask = Task {
+            var raw = ""
+            do {
+                for try await event in APIClient.streamConciergeChat(messages: history, city: city) {
+                    guard !Task.isCancelled else { return }
+                    switch event {
+                    case .thinking:
+                        updateMessage(assistantId) { $0.isThinking = true }
+                    case .delta(let piece):
+                        raw += piece
+                        let live = Self.hideOpenFence(raw)
+                        updateMessage(assistantId) { $0.isThinking = false; $0.text = live }
+                    }
+                }
+                let (finalText, plan) = NightPlan.extractFromChatReply(raw, venues: venues)
+                updateMessage(assistantId) {
+                    $0.text = finalText.isEmpty ? "…" : finalText
+                    $0.plan = plan
+                    $0.isThinking = false
+                    $0.isStreaming = false
+                }
+                if plan != nil { BPAnalytics.track(.createPlan(method: "ai")) }
+            } catch {
+                await MainActor.run {
+                    messages.removeAll { $0.id == assistantId }
+                    chatErrorMessage = error.localizedDescription
+                }
+            }
+            await MainActor.run {
+                isSending = false
+                persistMessages()
+            }
+        }
+    }
+
+    /// Cuts an in-progress, unterminated ```json fence out of the live
+    /// streaming text so a chat bubble never shows raw, half-typed JSON —
+    /// the plan card takes over once the fence closes.
+    private static func hideOpenFence(_ text: String) -> String {
+        guard let range = text.range(of: "```json") else { return text }
+        return String(text[text.startIndex..<range.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    @MainActor
+    private func updateMessage(_ id: UUID, _ mutate: (inout PlanChatMessage) -> Void) {
+        guard let idx = messages.firstIndex(where: { $0.id == id }) else { return }
+        mutate(&messages[idx])
     }
 
     private func savePlan(_ plan: NightPlan) {
@@ -372,6 +376,84 @@ struct PlanView: View {
         guard AuthService.shared.restoreSession() != nil else { return }
         let repo = planRepo
         savedPlans = (try? await repo.getPlans()) ?? []
+    }
+}
+
+// MARK: - Chat bubble
+
+private struct PlanChatBubble: View {
+    let message: PlanChatMessage
+    let onSave: (NightPlan) -> Void
+    @ObservedObject private var l10n = L10n.shared
+    private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
+
+    var body: some View {
+        if message.role == "user" {
+            HStack {
+                Spacer(minLength: 40)
+                Text(message.text)
+                    .font(.bpScaled(14, weight: .semibold))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(amber, in: RoundedRectangle(cornerRadius: 18))
+            }
+        } else if message.isThinking {
+            HStack {
+                thinkingIndicator
+                Spacer(minLength: 40)
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 12) {
+                if !message.text.isEmpty || message.isStreaming {
+                    HStack {
+                        Text(message.text)
+                            .font(.bpScaled(14))
+                            .foregroundStyle(Color.bpInk)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
+                        Spacer(minLength: 40)
+                    }
+                }
+                if let plan = message.plan {
+                    NightPlanView(plan: plan, onSave: onSave)
+                }
+            }
+        }
+    }
+
+    private var thinkingIndicator: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<3, id: \.self) { i in
+                Circle()
+                    .fill(amber)
+                    .frame(width: 6, height: 6)
+                    .opacity(0.4)
+                    .scaleEffect(1)
+                    .modifier(BouncingDot(delay: Double(i) * 0.15))
+            }
+            Text(l10n.t("plan.chat.thinking"))
+                .font(.bpScaled(12))
+                .foregroundStyle(Color.bpInk.opacity(0.4))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(Color.bpInk.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
+    }
+}
+
+private struct BouncingDot: ViewModifier {
+    let delay: Double
+    @State private var up = false
+    func body(content: Content) -> some View {
+        content
+            .offset(y: up ? -3 : 0)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(delay)) {
+                    up = true
+                }
+            }
     }
 }
 

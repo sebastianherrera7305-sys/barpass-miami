@@ -27,12 +27,24 @@ export const nightPlanSchema = z.object({
   insiderTip: z.string().min(1),
 });
 
+// Legacy single-shot request — kept only so nothing on disk references a
+// type that no longer exists; the live route is chat-only now (see below).
 export const conciergeRequestSchema = z.object({
   prompt: z.string().min(2).max(600),
-  // Slugs ya recomendados en esta sesión — sin esto, Remy le manda el mismo
-  // catálogo completo en el mismo orden cada vez y termina repitiendo las
-  // mismas venues turno tras turno.
   excludeSlugs: z.array(z.string()).max(30).optional(),
+  city: z.string().min(1).max(60).optional(),
+});
+
+export const conciergeChatMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().min(1).max(4000),
+});
+
+export const conciergeChatRequestSchema = z.object({
+  // Full turn history — this (not excludeSlugs) is what keeps Remy from
+  // repeating a venue it already suggested earlier in the same chat, since
+  // the model can literally see its own prior messages.
+  messages: z.array(conciergeChatMessageSchema).min(1).max(40),
   // Scopes the venue digest to one metro. Without this, every call embedded
   // the ENTIRE catalog (1800+ venues across 23 cities once the iOS app's
   // multi-city expansion landed here too) into one prompt — expensive,
@@ -42,4 +54,5 @@ export const conciergeRequestSchema = z.object({
   city: z.string().min(1).max(60).optional(),
 });
 
+export type ConciergeChatMessage = z.infer<typeof conciergeChatMessageSchema>;
 export type ValidatedNightPlan = z.infer<typeof nightPlanSchema>;

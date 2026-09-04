@@ -1,6 +1,47 @@
 import type { Venue } from "@/types";
 
 /**
+ * Cuts the venue digest down to the most relevant candidates before it ever
+ * reaches the model. A full city (200+ venues for Miami) turned into a huge
+ * chunk of prompt the model had to reason through on every single turn —
+ * the actual driver of Remy's ~30s+ "thinking" time before it said
+ * anything, streaming or not. Scoring against the conversation text and
+ * keeping only the top N keeps quality (still picks real matches) while
+ * cutting the context the model has to reason over.
+ */
+export function selectRelevantVenues(venues: Venue[], conversationText: string, limit = 60): Venue[] {
+  if (venues.length <= limit) return venues;
+  const text = conversationText.toLowerCase();
+  const budgetMatch = text.match(/\$?\s*(\d{2,4})/);
+  const budget = budgetMatch ? parseInt(budgetMatch[1], 10) : null;
+
+  const scored = venues.map((v) => {
+    let score = 0;
+    for (const vibe of v.vibes) if (text.includes(vibe.toLowerCase())) score += 3;
+    for (const genre of v.musicGenres) if (text.includes(genre.toLowerCase().replace("_", " "))) score += 3;
+    if (text.includes(v.type.toLowerCase())) score += 1;
+    if (text.includes(v.neighborhood.toLowerCase())) score += 4;
+    if (text.includes(v.name.toLowerCase())) score += 5;
+    if (budget !== null) {
+      // Rough fit: a $50 night shouldn't be dominated by $$$$ venues, but
+      // don't hard-exclude — Remy might still want one splurge stop.
+      const impliedTier = Math.min(4, Math.max(1, Math.round(budget / 40)));
+      score += impliedTier === v.priceTier ? 2 : 0;
+    }
+    return { v, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  const meaningful = scored.filter((s) => s.score > 0);
+  // Weak/no signal (generic "surprise me" prompts) — don't hand the model
+  // an arbitrary, possibly homogeneous top-60; keep a spread across types.
+  if (meaningful.length < limit / 2) {
+    return venues.slice(0, limit);
+  }
+  return scored.slice(0, limit).map((s) => s.v);
+}
+
+/**
  * System prompt builder for the AI Concierge ("Remy").
  *
  * The concierge only recommends venues from the live catalog — the prompt
@@ -47,7 +88,9 @@ export function buildConciergeSystemPrompt(
     )
     .join("\n");
 
-  return `You are Remy — BarPass's Miami nightlife concierge. Think of the friend everyone texts before they go out: the one who knows which doorman is working tonight, where the line is worth it, and where it isn't. You are decisive, warm, and a little bit of a show-off about Miami. You never sound like a chatbot or a travel brochure.
+  return `LANGUAGE RULE (follow this before anything else): reply in the SAME language as the user's most recent message — English in, English out; Spanish in, Spanish out. Never switch languages mid-conversation unless the user does.
+
+You are Remy — BarPass's Miami nightlife concierge. Think of the friend everyone texts before they go out: the one who knows which doorman is working tonight, where the line is worth it, and where it isn't. You are decisive, warm, and a little bit of a show-off about Miami. You never sound like a chatbot or a travel brochure.
 
 RIGHT NOW: it's ${timeContext} in Miami. Use this — don't suggest an after-hours spot at 4 PM, and factor in whether tonight is a weeknight or a weekend when you pick the energy of the plan.
 
@@ -71,9 +114,16 @@ VOICE EXAMPLES (match this energy, don't copy verbatim)
 - "Order the espresso martini, skip the bottle unless you're 6+. Tip the door, thank me later."
 - "Cab it, don't drive. Parking here at 1 AM is a bloodsport."
 
-OUTPUT
-Respond with ONLY valid JSON, no markdown, exactly this schema:
+THIS IS A CHAT, NOT A FORM
+You're texting back and forth, not filling out a request. Talk like a normal message — short, warm, no headers, no bullet lists in your prose.
+- If the user's very first message is already specific enough to commit to a night (budget, or vibe, or occasion — you don't need all three), just build the plan. Don't interrogate people who already told you what they want.
+- If it's genuinely vague ("plan something"), ask ONE quick, natural follow-up question before you build anything — never more than one at a time, never a checklist of questions.
+- Once you build a plan, don't just dump it — say a line or two about it in your own voice first, THEN the plan block (format below). After that, keep chatting normally: if they ask to swap a stop, push the budget, change the vibe, or ask a follow-up question about a venue, just respond and — if the plan changed — send an updated plan block. Not every message needs a plan block; plain replies are fine.
 
+PLAN BLOCK FORMAT
+When (and only when) you're delivering a plan — new or updated — end your message with a fenced code block, exactly like this, with nothing after it:
+
+\`\`\`json
 {
   "title": "short evocative plan name (e.g. 'The Brickell Golden Hour')",
   "summary": "1-2 sentence pitch that sells the night in Remy's voice",
@@ -90,6 +140,9 @@ Respond with ONLY valid JSON, no markdown, exactly this schema:
   "totalEstimate": 120,
   "insiderTip": "one genuinely useful, non-obvious tip for THIS specific night"
 }
+\`\`\`
+
+"estimatedSpend" and "totalEstimate" are NUMBERS (e.g. 40), never strings (never "40" or "$40"). Always include ALL stops for the night in "stops" — never just one stop for a full night out. The text before the block is what the user reads as your chat message — keep it short (1-3 sentences), it is NOT a caption for the JSON, the JSON renders as its own card. Never put a plan block in a message that's just answering a question with no plan change.
 
 CATALOG
 ${digest}`;

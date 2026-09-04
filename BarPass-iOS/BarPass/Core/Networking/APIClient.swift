@@ -318,33 +318,103 @@ enum APIClient {
         let insiderTip: String
     }
 
-    static func getConciergePlan(prompt: String, city: String?, excludeSlugs: [String] = []) async throws -> ConciergePlanResponse {
-        var request = URLRequest(url: baseURL.appendingPathComponent("concierge"))
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        var body: [String: Any] = ["prompt": prompt]
-        if let city { body["city"] = city }
-        if !excludeSlugs.isEmpty { body["excludeSlugs"] = excludeSlugs }
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        // Measured against the real model (moonshotai/kimi-k3, a reasoning
-        // model — it "thinks" before answering): a real plan takes ~35-40s
-        // end to end. 30s would have timed out and silently fallen back to
-        // the local heuristic on almost every real call.
-        request.timeoutInterval = 60
+    /// One chat turn sent to POST /api/concierge — `role` is "user" or "assistant".
+    struct ConciergeChatTurn {
+        let role: String
+        let content: String
+    }
 
-        let (data, response): (Data, URLResponse)
-        do {
-            (data, response) = try await URLSession.shared.data(for: request)
-        } catch {
-            throw APIClientError.network(error.localizedDescription)
+    /// A token as it arrives from the streaming concierge chat. The route
+    /// injects two 1-byte control markers ahead of the real text: kimi-k3 is
+    /// a reasoning model that can spend 20-30s "thinking" before it says
+    /// anything user-facing, so `.thinking` fires the instant that reasoning
+    /// starts (usually under a second) — the UI can show a live indicator
+    /// instead of dead air — and `.delta` carries the actual reply text,
+    /// token by token, once it starts.
+    enum ConciergeStreamEvent {
+        case thinking
+        case delta(String)
+    }
+
+    /// Streams one turn of the Remy chat. Throws `.network`/`.server` on
+    /// failure — callers must have a local fallback (e.g. `NightPlan.sample`)
+    /// since this depends on a third-party model that can be slow or, if
+    /// misconfigured server-side, unavailable entirely.
+    static func streamConciergeChat(messages: [ConciergeChatTurn], city: String?) -> AsyncThrowingStream<ConciergeStreamEvent, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    var request = URLRequest(url: baseURL.appendingPathComponent("concierge"))
+                    request.httpMethod = "POST"
+                    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                    var body: [String: Any] = [
+                        "messages": messages.map { ["role": $0.role, "content": $0.content] },
+                    ]
+                    if let city { body["city"] = city }
+                    request.httpBody = try JSONSerialization.data(withJSONObject: body)
+                    // A single message can take kimi-k3 well over a minute
+                    // end to end (thinking + generation) — this is a chat,
+                    // the `.thinking` event is what keeps the UI honest
+                    // during that wait, not a short timeout.
+                    request.timeoutInterval = 150
+
+                    let (bytes, response) = try await URLSession.shared.bytes(for: request)
+                    guard let http = response as? HTTPURLResponse else {
+                        continuation.finish(throwing: APIClientError.invalidResponse)
+                        return
+                    }
+                    guard (200..<300).contains(http.statusCode) else {
+                        var data = Data()
+                        for try await byte in bytes { data.append(byte) }
+                        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+                        continuation.finish(throwing: APIClientError.server(friendlyServerMessage(json, status: http.statusCode, fallbackKey: "plan.ai.unavailable")))
+                        return
+                    }
+
+                    var sentThinking = false
+                    var pendingUTF8: [UInt8] = []
+                    for try await byte in bytes {
+                        try Task.checkCancellation()
+                        if byte == 0x01 {
+                            if !sentThinking { sentThinking = true; continuation.yield(.thinking) }
+                            continue
+                        }
+                        if byte == 0x02 { continue }
+                        pendingUTF8.append(byte)
+                        if let decoded = Self.drainValidUTF8(&pendingUTF8), !decoded.isEmpty {
+                            continuation.yield(.delta(decoded))
+                        }
+                    }
+                    if let tail = String(bytes: pendingUTF8, encoding: .utf8), !tail.isEmpty {
+                        continuation.yield(.delta(tail))
+                    }
+                    continuation.finish()
+                } catch is CancellationError {
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: APIClientError.network(error.localizedDescription))
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
         }
-        guard let http = response as? HTTPURLResponse else { throw APIClientError.invalidResponse }
-        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
-        guard (200..<300).contains(http.statusCode) else {
-            throw APIClientError.server(friendlyServerMessage(json, status: http.statusCode, fallbackKey: "plan.ai.unavailable"))
+    }
+
+    /// Removes and returns the longest valid-UTF8 prefix of `bytes`, leaving
+    /// behind at most 3 trailing bytes that might be an in-progress
+    /// multi-byte character (streamed one byte at a time, a Spanish accent
+    /// or an emoji can straddle two network chunks).
+    private static func drainValidUTF8(_ bytes: inout [UInt8]) -> String? {
+        guard !bytes.isEmpty else { return nil }
+        var keep = 0
+        while keep < min(3, bytes.count) {
+            let cut = bytes.count - keep
+            if let s = String(bytes: bytes[0..<cut], encoding: .utf8) {
+                bytes.removeFirst(cut)
+                return s
+            }
+            keep += 1
         }
-        let decoder = JSONDecoder()
-        return try decoder.decode(ConciergePlanResponse.self, from: data)
+        return nil
     }
 
     /// Attributes the authenticated user (the referred one) to the referrer

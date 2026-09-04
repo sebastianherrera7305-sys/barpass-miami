@@ -196,4 +196,26 @@ struct NightPlan: Identifiable, Codable, Hashable {
             isAIGenerated: true
         )
     }
+
+    /// Pulls a trailing ```json ... ``` fenced NightPlan out of one of
+    /// Remy's chat replies, if the message ends in one — the chat prompt
+    /// tells the model to end a message with this block only when it's
+    /// actually delivering (or updating) a plan; a plain reply has none.
+    /// Returns the visible chat text (fence stripped) alongside the parsed
+    /// plan, or the original text with `plan: nil` if there's no fence or
+    /// it didn't parse.
+    static func extractFromChatReply(_ raw: String, venues: [BarPassVenue]) -> (text: String, plan: NightPlan?) {
+        guard let openRange = raw.range(of: "```json"),
+              let closeRange = raw.range(of: "```", range: openRange.upperBound..<raw.endIndex) else {
+            return (raw.trimmingCharacters(in: .whitespacesAndNewlines), nil)
+        }
+        let jsonText = String(raw[openRange.upperBound..<closeRange.lowerBound])
+        let visibleText = String(raw[raw.startIndex..<openRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let data = jsonText.data(using: .utf8),
+              let response = try? JSONDecoder().decode(APIClient.ConciergePlanResponse.self, from: data) else {
+            return (raw.trimmingCharacters(in: .whitespacesAndNewlines), nil)
+        }
+        let plan = fromConcierge(response, prompt: "", venues: venues)
+        return (visibleText, plan)
+    }
 }
