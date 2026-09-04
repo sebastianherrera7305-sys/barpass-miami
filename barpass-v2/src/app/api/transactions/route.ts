@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requireUser } from "@/lib/supabase/require-user";
+import { requireAgeVerified21 } from "@/lib/age-verification";
 
 /**
  * POST /api/transactions
@@ -46,6 +47,9 @@ export async function POST(request: Request) {
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: "payments_not_configured" }, { status: 503 });
   }
+
+  const ageDenied = await requireAgeVerified21(supabase, user.id);
+  if (ageDenied) return ageDenied;
 
   // 10 compras/minuto por usuario — cubre una noche normal de pedidos,
   // frena card-testing/carding contra este endpoint.

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requireUser } from "@/lib/supabase/require-user";
+import { requireAgeVerified21 } from "@/lib/age-verification";
 
 /**
  * POST /api/passes
@@ -47,6 +48,13 @@ export async function POST(request: Request) {
   const auth = await requireUser(request);
   if (!auth.ok) return auth.response;
   const { supabase, user } = auth;
+
+  // The actual venue-access-granting step (both the card/order path and
+  // the wallet path mint a pass here) — this is THE place to enforce 21+
+  // server-side, covering every payment method at once. See
+  // src/lib/age-verification.ts for why this exists at all.
+  const ageDenied = await requireAgeVerified21(supabase, user.id);
+  if (ageDenied) return ageDenied;
 
   // 10 registros de pase por minuto y por usuario — holgado para una noche
   // real (un pase por compra), pero cierra el martilleo de este endpoint, que
