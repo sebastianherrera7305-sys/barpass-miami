@@ -1,5 +1,36 @@
 import SwiftUI
 import CoreLocation
+import Combine
+import UIKit
+
+/// Tracks the real, live keyboard height via NotificationCenter. MainTabView
+/// deliberately ignores the keyboard entirely for the whole screen (so its
+/// floating tab bar/music player never moves — see its comment for why a
+/// scoped, "let content respond but not chrome" split doesn't work: they're
+/// siblings in one container, and a child can't opt back into space an
+/// ancestor already gave up). This is what lets Plan's composer alone still
+/// rise to meet the keyboard, driven by a real measured height instead of
+/// ambient safe-area propagation that a shared ancestor doesn't offer.
+private final class KeyboardHeight: ObservableObject {
+    @Published var value: CGFloat = 0
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+            .compactMap { $0.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue }
+            .map { $0.cgRectValue.height }
+            .sink { [weak self] height in
+                withAnimation(.easeOut(duration: 0.25)) { self?.value = height }
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+            .sink { [weak self] _ in
+                withAnimation(.easeOut(duration: 0.25)) { self?.value = 0 }
+            }
+            .store(in: &cancellables)
+    }
+}
 
 // MARK: - Chat message model
 
@@ -68,6 +99,8 @@ struct PlanView: View {
     @State private var currentSessionId: UUID = UUID()
     @State private var showHistory = false
     @State private var showCleanupPrompt = false
+    @StateObject private var keyboard = KeyboardHeight()
+    @ObservedObject private var chromeMetrics = BottomChromeMetrics.shared
 
     private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
@@ -221,13 +254,12 @@ struct PlanView: View {
     }
 
     var body: some View {
-        // TestFlight, 2026-09-05: this used to carry a hand-rolled keyboard-
-        // height observer plus manually-computed bottom padding, fighting
-        // an ancestor (RootView) that blanket-ignored the keyboard safe
-        // area for the whole app. With that root cause fixed at the source
-        // (see RootView.swift's comment), this is back to plain, ordinary
-        // SwiftUI: a VStack with the composer last rises above the keyboard
-        // on its own, the normal way, no measuring required.
+        // `alignment: .top` — without it, a plain ZStack centers its
+        // children, and the moment `keyboard.value` padding (below) makes
+        // the content VStack taller, that centering pushes the WHOLE thing
+        // upward — a real screenshot once showed "REMY" and the mascot
+        // overlapping the clock/status bar. Pinning to the top means extra
+        // bottom padding only ever grows downward.
         ZStack(alignment: .top) {
             // Solid, near-black — deliberately NOT BPBackgroundView's
             // illustrated city art here. TestFlight feedback (2026-09-04)
@@ -285,7 +317,20 @@ struct PlanView: View {
 
                 inputBar
             }
+            // Real, measured keyboard height when it's up — MainTabView
+            // ignores the keyboard entirely for the whole screen (its
+            // floating tab bar/music player must never move for it), so
+            // this is the only way this composer rises to meet it. When
+            // the keyboard is DOWN, use the real measured tab-bar-
+            // (+music-player) height instead — `.ignoresSafeArea(.container,
+            // edges: .bottom)` below opts this screen out of MainTabView's
+            // automatic reservation of that same space, which otherwise
+            // stacked on top of this padding and left a dead gap between
+            // the composer and the keyboard. One number, one source of
+            // truth, never both added together.
+            .padding(.bottom, keyboard.value > 0 ? keyboard.value : chromeMetrics.height)
         }
+        .ignoresSafeArea(.container, edges: .bottom)
         .onAppear { BPAnalytics.track(.viewPlan) }
         .task {
             restoreMessages()

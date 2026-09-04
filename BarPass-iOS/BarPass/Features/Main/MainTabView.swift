@@ -93,14 +93,24 @@ struct MainTabView: View {
                     Color.clear.preference(key: BottomChromeHeightPreferenceKey.self, value: geo.size.height)
                 }
             )
-            // This is chrome, not a tab's content — it must never move for
-            // the keyboard (a real screenshot once showed it floating
-            // ABOVE the keyboard, sandwiched over the keys). Scoped here,
-            // to just this overlay, now that RootView no longer blanket-
-            // ignores the keyboard for the whole app (see RootView.swift) —
-            // every tab's own content is free to respond to the keyboard
-            // normally; this is the one piece that opts back out.
-            .ignoresSafeArea(.keyboard, edges: .bottom)
+            // TestFlight, 2026-09-05: a `.ignoresSafeArea(.keyboard)` HERE,
+            // scoped to just this overlay, looked right but a real device
+            // screenshot showed the SAME bug back — this bar rose WITH the
+            // keyboard again. Why: this overlay is a sibling of the tab
+            // content inside one ZStack; once that ZStack's own outer
+            // ignoresSafeArea stopped covering `.keyboard` (so the tab
+            // content COULD respond to it), the ZStack's own proposed size
+            // already shrank for the keyboard — and a child's local
+            // ignoresSafeArea only lets IT render into space its parent
+            // already gives it, it can't restore space the parent didn't
+            // have in the first place. A child can't opt out of a decision
+            // its ancestor already made. Removed — see the outer
+            // `.ignoresSafeArea` below, which now goes back to keeping this
+            // whole screen (chrome included) keyboard-agnostic; Plan's own
+            // composer instead measures the real keyboard height itself
+            // (see PlanView's `KeyboardHeight`) rather than depending on
+            // ambient propagation through this shared container, which has
+            // now proven unreliable in both directions.
 
             // Bottom-trailing, above the tab bar — NOT top-trailing.
             // This is a global overlay drawn on top of whichever screen is
@@ -141,6 +151,7 @@ struct MainTabView: View {
         .onPreferenceChange(BottomChromeHeightPreferenceKey.self) { height in
             guard height > 0 else { return }
             withAnimation(.easeOut(duration: 0.2)) { bottomChromeHeight = height }
+            BottomChromeMetrics.shared.height = height
         }
         // Attached to the OUTER ZStack, not the inner Group — anchors from
         // .helpTarget() still bubble up through the whole tree either way,
@@ -165,18 +176,27 @@ struct MainTabView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             isKeyboardVisible = false
         }
-        // `.container` only — NOT `.keyboard`. TestFlight, 2026-09-05,
-        // after several rounds chasing this at lower levels: the actual
-        // root cause was one level up, in RootView's OWN blanket
-        // `.ignoresSafeArea()` (see its comment) — that stripped real
-        // keyboard-avoidance from this entire screen before anything here
-        // could "opt back in," which is why manual keyboard-height padding
-        // hacks kept fighting themselves. With RootView fixed, this scoped
-        // form is correct: `.container` keeps the floating tab bar flush
-        // past the home indicator (the original intent), and every tab's
-        // content — Plan's chat included — now gets genuine, native
-        // keyboard safe-area behavior for free.
-        .ignoresSafeArea(.container, edges: .bottom)
+        // `.all` (container + keyboard) — TestFlight, 2026-09-05, final
+        // round: scoping this to `.container` only (so tab content could
+        // see the keyboard through the normal safe-area mechanism, while
+        // the tab-bar/music overlay opted itself back out locally) sounded
+        // right and fixed the input-bar-hidden-behind-keyboard bug, but
+        // broke the OTHER direction — a real device screenshot showed the
+        // floating tab bar/music player rising WITH the keyboard again.
+        // Root cause: they're siblings inside this one ZStack; once the
+        // ZStack itself stopped ignoring `.keyboard` (so tab content could
+        // respond), the ZStack's own proposed size already shrank for the
+        // keyboard, and NO child's local `.ignoresSafeArea(.keyboard)` can
+        // restore space a shared ancestor already gave up — it only lets
+        // that child render past safe-area padding WITHIN whatever space
+        // it's already been given. There's no clean split here: this
+        // screen either responds to the keyboard as a whole, or it
+        // doesn't. Going back to `.all` — the tab bar/music player must
+        // NEVER move, full stop — and Plan's composer instead measures the
+        // real keyboard height itself and pads only its own content by it
+        // (see PlanView's `KeyboardHeight`), independent of this ancestor
+        // entirely rather than depending on it.
+        .ignoresSafeArea(.all, edges: .bottom)
         // Theme switch rebuilds the whole tree so every Color.bpAmber re-resolves.
         .id("\(themeService.theme.rawValue)-\(appearanceStore.appearance.rawValue)")
         .task { await venueStore.loadVenues() }
@@ -392,6 +412,20 @@ private struct BottomChromeHeightPreferenceKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = max(value, nextValue())
     }
+}
+
+/// The real, measured height of the floating tab bar + music player,
+/// published for any screen that needs to reserve exactly that much space
+/// itself — currently just Plan, which pads its composer by this amount
+/// when the keyboard is down (and by the real keyboard height instead when
+/// it's up; never both, see PlanView.body). GeometryReader-measured, never
+/// assumed, same source of truth MainTabView itself uses for its own
+/// `.safeAreaInset`.
+@MainActor
+final class BottomChromeMetrics: ObservableObject {
+    static let shared = BottomChromeMetrics()
+    @Published var height: CGFloat = 0
+    private init() {}
 }
 
 /// Same real, measured tab-bar-(+music-player) height as `bottomChromeHeight`
