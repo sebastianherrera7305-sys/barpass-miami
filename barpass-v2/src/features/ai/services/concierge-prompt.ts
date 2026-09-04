@@ -15,6 +15,14 @@ export function selectRelevantVenues(venues: Venue[], conversationText: string, 
   const budgetMatch = text.match(/\$?\s*(\d{2,4})/);
   const budget = budgetMatch ? parseInt(budgetMatch[1], 10) : null;
 
+  // A venue named explicitly by the user MUST reach the model — scoring it
+  // like everything else and hoping it survives into the top N wasn't
+  // enough (a real report: "le pedí Candela Bar y no lo metió" — the venue
+  // was correctly in the catalog the whole time, it just didn't score high
+  // enough, or the low-signal fallback below ignored scores entirely and
+  // took an arbitrary slice). Pinned separately, before any trimming.
+  const named = venues.filter((v) => text.includes(v.name.toLowerCase()));
+
   const scored = venues.map((v) => {
     let score = 0;
     for (const vibe of v.vibes) if (text.includes(vibe.toLowerCase())) score += 3;
@@ -36,7 +44,8 @@ export function selectRelevantVenues(venues: Venue[], conversationText: string, 
   // Weak/no signal (generic "surprise me" prompts) — don't hand the model
   // an arbitrary, possibly homogeneous top-60; keep a spread across types.
   if (meaningful.length < limit / 2) {
-    return venues.slice(0, limit);
+    const rest = venues.filter((v) => !named.includes(v)).slice(0, Math.max(0, limit - named.length));
+    return [...named, ...rest];
   }
   return scored.slice(0, limit).map((s) => s.v);
 }
