@@ -17,10 +17,15 @@ struct PlanChatMessage: Identifiable, Codable, Equatable {
     /// tappable "Build my plan" action under it. Only the real build step
     /// calls the AI; everything before this is instant, native chat.
     var offerBuild: Bool = false
+    /// Tappable quick-suggestion chips attached under this message — used
+    /// on the opening greeting so the old separate "quick ideas" header
+    /// block collapses into the chat itself instead of sitting above it.
+    var suggestions: [String] = []
 
-    init(id: UUID = UUID(), role: String, text: String = "", plan: NightPlan? = nil, isThinking: Bool = false, isStreaming: Bool = false, offerBuild: Bool = false) {
+    init(id: UUID = UUID(), role: String, text: String = "", plan: NightPlan? = nil, isThinking: Bool = false, isStreaming: Bool = false, offerBuild: Bool = false, suggestions: [String] = []) {
         self.id = id; self.role = role; self.text = text; self.plan = plan
         self.isThinking = isThinking; self.isStreaming = isStreaming; self.offerBuild = offerBuild
+        self.suggestions = suggestions
     }
 }
 
@@ -35,7 +40,6 @@ struct PlanView: View {
     @State private var savedPlans: [NightPlan] = []
     @State private var userLocation: CLLocationCoordinate2D?
     @State private var locationService = LocationService()
-    @State private var greetingIndex = Int.random(in: 0..<6)
     @State private var saveErrorMessage: String?
     @State private var chatErrorMessage: String?
     @State private var streamTask: Task<Void, Never>?
@@ -47,6 +51,7 @@ struct PlanView: View {
     /// Rotates the two native reply variants per state so back-to-back
     /// turns don't repeat the same phrasing.
     @State private var nativeTurnCount = 0
+    @State private var displayName: String?
 
     private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
@@ -109,12 +114,8 @@ struct PlanView: View {
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 18) {
-                            if messages.isEmpty {
-                                emptyState
-                            }
-
                             ForEach(messages) { message in
-                                PlanChatBubble(message: message, onSave: savePlan, onBuildPlan: confirmBuildPlan)
+                                PlanChatBubble(message: message, onSave: savePlan, onBuildPlan: confirmBuildPlan, onSuggestion: send)
                                     .id(message.id)
                                     .padding(.horizontal, 20)
                             }
@@ -153,6 +154,8 @@ struct PlanView: View {
             restoreMessages()
             await loadSavedPlans()
             userLocation = await locationService.requestOnce()
+            displayName = try? await RepositoryDependencies.displayName.getDisplayName()
+            greetIfNeeded()
         }
         .onDisappear { streamTask?.cancel() }
         .overlay(alignment: .top) {
@@ -189,41 +192,27 @@ struct PlanView: View {
         .padding(.bottom, 8)
     }
 
-    private var emptyState: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(l10n.t("plan.headerTitle.\(greetingIndex)"))
-                    .font(.bpScaled(24, weight: .bold))
-                    .foregroundStyle(.white)
+    /// A random, casual "what are we doing tonight" opener — mirrors how a
+    /// friend actually texts, not a form header. Personalized with the
+    /// user's display name when one's set; guests just get the plain line.
+    /// TestFlight, 2026-09-04: this used to be static header text sitting
+    /// above the chat; now it's the chat's own first message, so opening
+    /// Plan drops straight into one continuous conversation instead of a
+    /// header block plus a separate "quick ideas" row.
+    private func greetingText() -> String {
+        let variants = (0..<8).map { l10n.t("plan.greeting.\($0)") }
+        let line = variants.randomElement() ?? variants[0]
+        guard let displayName, !displayName.isEmpty else { return line }
+        return "\(displayName) — \(line)"
+    }
 
-                Text(l10n.t("plan.headerSubtitle.\(greetingIndex)"))
-                    .font(.bpScaled(14))
-                    .foregroundStyle(.white.opacity(0.55))
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(suggestions, id: \.self) { s in
-                        Button { send(s) } label: {
-                            Text(s)
-                                .font(.bpScaled(13))
-                                .foregroundStyle(.white.opacity(0.75))
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 9)
-                                .background(Color.white.opacity(0.07), in: Capsule())
-                                .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
-                        }
-                        .buttonStyle(.plain)
-                        .bpAccessibility(label: s, hint: l10n.t("plan.suggestion.hint"), isButton: true)
-                    }
-                }
-                .padding(.horizontal, 20)
-            }
-            .helpTarget("plan.quickIdeas")
-        }
-        .padding(.bottom, 8)
+    /// Fires once, the first time this screen is opened with no history —
+    /// never again after that (restored or continued conversations keep
+    /// whatever's already there).
+    private func greetIfNeeded() {
+        guard messages.isEmpty else { return }
+        messages.append(PlanChatMessage(role: "assistant", text: greetingText(), suggestions: suggestions))
+        persistMessages()
     }
 
     private var savedPlansSection: some View {
@@ -487,6 +476,7 @@ private struct PlanChatBubble: View {
     let message: PlanChatMessage
     let onSave: (NightPlan) -> Void
     let onBuildPlan: () -> Void
+    let onSuggestion: (String) -> Void
     @ObservedObject private var l10n = L10n.shared
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
 
@@ -534,6 +524,26 @@ private struct PlanChatBubble: View {
                 }
                 if let plan = message.plan {
                     NightPlanView(plan: plan, onSave: onSave)
+                }
+                if !message.suggestions.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(message.suggestions, id: \.self) { s in
+                                Button { onSuggestion(s) } label: {
+                                    Text(s)
+                                        .font(.bpScaled(13))
+                                        .foregroundStyle(.white.opacity(0.75))
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 9)
+                                        .background(Color.white.opacity(0.07), in: Capsule())
+                                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
+                                }
+                                .buttonStyle(.plain)
+                                .bpAccessibility(label: s, hint: l10n.t("plan.suggestion.hint"), isButton: true)
+                            }
+                        }
+                    }
+                    .helpTarget("plan.quickIdeas")
                 }
             }
         }
@@ -703,14 +713,21 @@ struct NightPlanView: View {
 private struct BreathingMascot: View {
     @State private var isBig = false
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
+    private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
 
     var body: some View {
         Image("BarPassMascot")
             .resizable()
             .scaledToFit()
-            .frame(width: 22, height: 22)
-            .shadow(color: amber.opacity(isBig ? 0.5 : 0.15), radius: isBig ? 6 : 2)
-            .scaleEffect(isBig ? 1.08 : 1.0)
+            .frame(width: 40, height: 40)
+            .padding(4)
+            .background(
+                Circle().fill(
+                    RadialGradient(colors: [amber.opacity(0.22), .clear], center: .center, startRadius: 2, endRadius: 26)
+                )
+            )
+            .shadow(color: amberB.opacity(isBig ? 0.6 : 0.2), radius: isBig ? 10 : 3)
+            .scaleEffect(isBig ? 1.1 : 1.0)
             .onAppear {
                 withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) {
                     isBig = true

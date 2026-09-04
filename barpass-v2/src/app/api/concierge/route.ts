@@ -12,21 +12,42 @@ import { checkRateLimit } from "@/lib/rate-limit";
  * client is responsible for detecting and rendering that block as a card
  * (see plan-schema.ts's nightPlanSchema for what's inside it).
  *
- * NVIDIA NIM (OpenAI-compatible chat completions endpoint, streaming) —
- * the key lives ONLY here (server-side, NVIDIA_API_KEY), never in the
- * client bundle.
+ * Two OpenAI-compatible providers, both streaming — keys live ONLY here
+ * (server-side), never in the client bundle:
+ *
+ * - Groq (preferred, when GROQ_API_KEY is set): custom LPU hardware, ~120ms
+ *   time-to-first-token and 500-1000+ tok/s. llama-3.3-70b-versatile is NOT
+ *   a reasoning model, so there's no 20-30s "thinking" delay before the
+ *   real answer starts — this is the actual fix for Remy feeling slow, not
+ *   just perceived-slow-but-streaming. Free tier: no credit card, 30
+ *   req/min, up to 14,400 req/day — plenty for this app's current traffic.
+ * - NVIDIA NIM / kimi-k3 (fallback, when only NVIDIA_API_KEY is set): kept
+ *   working exactly as before so nothing breaks if Groq isn't configured
+ *   yet. Genuinely a reasoning model — real 20-30s "thinking" time before
+ *   the first user-facing token, independent of prompt size (confirmed by
+ *   testing: trimming the venue digest from 200+ to 60 venues didn't
+ *   meaningfully change it). Re-verify against GET
+ *   https://integrate.api.nvidia.com/v1/models if kimi-k3 ever 410s.
  *
  * SECURITY (Pre-Launch Audit, Phase 1 #6): rate-limited by IP rather than
  * gated behind auth — the Concierge is a guest-accessible feature today
  * (no login wall anywhere else in its flow), so requiring auth here would
  * be a product change, not a security fix.
  */
+const GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-// Re-verify against GET https://integrate.api.nvidia.com/v1/models if this
-// ever 410s again — most of the catalog's "available" models 404 for this
-// account despite being listed. kimi-k3 is confirmed working and streams
-// cleanly (content deltas, not buried in reasoning_content).
 const NVIDIA_MODEL = "moonshotai/kimi-k3";
+
+function resolveProvider(): { apiKey: string; chatUrl: string; model: string } | null {
+  if (process.env.GROQ_API_KEY) {
+    return { apiKey: process.env.GROQ_API_KEY, chatUrl: GROQ_CHAT_URL, model: GROQ_MODEL };
+  }
+  if (process.env.NVIDIA_API_KEY) {
+    return { apiKey: process.env.NVIDIA_API_KEY, chatUrl: NVIDIA_CHAT_URL, model: NVIDIA_MODEL };
+  }
+  return null;
+}
 
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -52,7 +73,8 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid_request" }, { status: 400 });
   }
 
-  if (!process.env.NVIDIA_API_KEY) {
+  const provider = resolveProvider();
+  if (!provider) {
     return Response.json({ error: "ai_not_configured" }, { status: 503 });
   }
 
@@ -65,15 +87,15 @@ export async function POST(request: Request) {
 
   let upstream: Response;
   try {
-    upstream = await fetch(NVIDIA_CHAT_URL, {
+    upstream = await fetch(provider.chatUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
+        Authorization: `Bearer ${provider.apiKey}`,
         "Content-Type": "application/json",
         Accept: "text/event-stream",
       },
       body: JSON.stringify({
-        model: NVIDIA_MODEL,
+        model: provider.model,
         messages: [
           { role: "system", content: systemInstruction },
           ...parsed.data.messages,
@@ -84,12 +106,12 @@ export async function POST(request: Request) {
       }),
     });
   } catch (e) {
-    console.error("Concierge NVIDIA fetch failed:", e);
+    console.error("Concierge upstream fetch failed:", e);
     return Response.json({ error: "ai_unavailable" }, { status: 502 });
   }
 
   if (!upstream.ok || !upstream.body) {
-    console.error(`Concierge NVIDIA call failed: HTTP ${upstream.status}`, await upstream.text().catch(() => ""));
+    console.error(`Concierge upstream call failed: HTTP ${upstream.status}`, await upstream.text().catch(() => ""));
     return Response.json({ error: "ai_unavailable" }, { status: 502 });
   }
 
