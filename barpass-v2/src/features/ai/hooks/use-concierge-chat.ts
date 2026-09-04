@@ -17,6 +17,10 @@ export interface ConciergeMessage {
   /** Visible chat text — for an in-flight assistant message this grows token by token. */
   text: string;
   plan?: ValidatedNightPlan;
+  /** Quick-reply chips (2-4 short options) parsed out of a ```options fence
+   * — tap-first alternative to typing, for questions with a small set of
+   * natural answers. */
+  options?: string[];
   isStreaming?: boolean;
   /** True from the moment the model shows ANY sign of life until real text starts arriving. */
   isThinking?: boolean;
@@ -29,27 +33,40 @@ const THINKING_MARK = "\x01";
 const CONTENT_MARK = "\x02";
 
 const PLAN_FENCE = /```json\s*([\s\S]*?)```\s*$/;
-const OPEN_FENCE = /```json[\s\S]*$/;
+const OPTIONS_FENCE = /```options\s*([\s\S]*?)```\s*$/;
+const OPEN_FENCE = /```(json|options)[\s\S]*$/;
 
-/** While a message is still streaming, an unterminated ```json fence would
- * otherwise show as raw, half-typed JSON in the chat bubble — cut it off at
- * the fence's start instead so the plan card takes over once it's ready. */
+/** While a message is still streaming, an unterminated ```json/```options
+ * fence would otherwise show as raw, half-typed text in the chat bubble —
+ * cut it off at the fence's start instead so the plan card or option chips
+ * take over once it's ready. */
 function hideOpenFence(text: string): string {
   return text.replace(OPEN_FENCE, "").trim();
 }
 
-function splitPlanFence(raw: string): { text: string; plan?: ValidatedNightPlan } {
-  const match = raw.match(PLAN_FENCE);
-  if (!match) return { text: raw };
-  try {
-    const candidate = JSON.parse(match[1]);
-    const result = nightPlanSchema.safeParse(candidate);
-    if (result.success) {
-      return { text: raw.slice(0, match.index).trim(), plan: result.data };
+function splitPlanFence(raw: string): { text: string; plan?: ValidatedNightPlan; options?: string[] } {
+  const planMatch = raw.match(PLAN_FENCE);
+  if (planMatch) {
+    try {
+      const result = nightPlanSchema.safeParse(JSON.parse(planMatch[1]));
+      if (result.success) {
+        return { text: raw.slice(0, planMatch.index).trim(), plan: result.data };
+      }
+    } catch {
+      // Fence wasn't valid/complete JSON yet (or model glitched) — fall
+      // through and just show the raw text, fence included.
     }
-  } catch {
-    // Fence wasn't valid/complete JSON yet (or model glitched) — fall
-    // through and just show the raw text, fence included.
+  }
+  const optionsMatch = raw.match(OPTIONS_FENCE);
+  if (optionsMatch) {
+    try {
+      const parsed = JSON.parse(optionsMatch[1]);
+      if (Array.isArray(parsed) && parsed.every((o) => typeof o === "string") && parsed.length > 0) {
+        return { text: raw.slice(0, optionsMatch.index).trim(), options: parsed.slice(0, 4) };
+      }
+    } catch {
+      // Same — malformed options fence, show the raw text instead.
+    }
   }
   return { text: raw };
 }
@@ -120,11 +137,11 @@ export function useConciergeChat() {
         }
         raw = raw.includes(CONTENT_MARK) ? raw.slice(raw.indexOf(CONTENT_MARK) + 1) : raw;
 
-        const { text: finalText, plan } = splitPlanFence(raw);
+        const { text: finalText, plan, options } = splitPlanFence(raw);
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantId
-              ? { ...m, text: finalText || "…", plan, isStreaming: false }
+              ? { ...m, text: finalText || "…", plan, options, isStreaming: false }
               : m,
           ),
         );

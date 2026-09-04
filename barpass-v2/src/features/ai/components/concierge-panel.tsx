@@ -86,6 +86,19 @@ export function ConciergePanel() {
                       </div>
                     )}
                     {m.plan && <NightPlanCard plan={m.plan} />}
+                    {m.options && m.options.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {m.options.map((o) => (
+                          <button
+                            key={o}
+                            onClick={() => submit(o)}
+                            className="rounded-full border border-border-subtle bg-surface px-4 py-2 text-[13px] text-text-secondary transition-colors hover:border-amber-brand/40 hover:text-amber-brand"
+                          >
+                            {o}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

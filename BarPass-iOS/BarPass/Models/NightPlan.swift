@@ -209,17 +209,34 @@ struct NightPlan: Identifiable, Codable, Hashable {
     /// plan, or the original text with `plan: nil` if there's no fence or
     /// it didn't parse.
     static func extractFromChatReply(_ raw: String, venues: [BarPassVenue]) -> (text: String, plan: NightPlan?) {
-        guard let openRange = raw.range(of: "```json"),
-              let closeRange = raw.range(of: "```", range: openRange.upperBound..<raw.endIndex) else {
-            return (raw.trimmingCharacters(in: .whitespacesAndNewlines), nil)
+        let (text, plan, _) = extractChatReplyParts(raw, venues: venues)
+        return (text, plan)
+    }
+
+    /// Pulls EITHER a trailing ```json plan block OR a ```options quick-reply
+    /// block out of one of Remy's chat replies — the prompt tells the model
+    /// a message carries at most one of the two, never both. Options are
+    /// tappable chips (2-4 short answers) for questions with a small,
+    /// natural set of answers — "this is a tap-first mobile chat, not a
+    /// typing test."
+    static func extractChatReplyParts(_ raw: String, venues: [BarPassVenue]) -> (text: String, plan: NightPlan?, options: [String]) {
+        for fenceTag in ["json", "options"] {
+            guard let openRange = raw.range(of: "```\(fenceTag)"),
+                  let closeRange = raw.range(of: "```", range: openRange.upperBound..<raw.endIndex) else {
+                continue
+            }
+            let body = String(raw[openRange.upperBound..<closeRange.lowerBound])
+            let visibleText = String(raw[raw.startIndex..<openRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+            guard let data = body.data(using: .utf8) else { continue }
+
+            if fenceTag == "json" {
+                guard let response = try? JSONDecoder().decode(APIClient.ConciergePlanResponse.self, from: data) else { continue }
+                return (visibleText, fromConcierge(response, prompt: "", venues: venues), [])
+            } else {
+                guard let options = try? JSONDecoder().decode([String].self, from: data), !options.isEmpty else { continue }
+                return (visibleText, nil, Array(options.prefix(4)))
+            }
         }
-        let jsonText = String(raw[openRange.upperBound..<closeRange.lowerBound])
-        let visibleText = String(raw[raw.startIndex..<openRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let data = jsonText.data(using: .utf8),
-              let response = try? JSONDecoder().decode(APIClient.ConciergePlanResponse.self, from: data) else {
-            return (raw.trimmingCharacters(in: .whitespacesAndNewlines), nil)
-        }
-        let plan = fromConcierge(response, prompt: "", venues: venues)
-        return (visibleText, plan)
+        return (raw.trimmingCharacters(in: .whitespacesAndNewlines), nil, [])
     }
 }

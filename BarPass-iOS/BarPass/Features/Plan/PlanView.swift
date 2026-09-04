@@ -1,5 +1,37 @@
 import SwiftUI
 import CoreLocation
+import Combine
+import UIKit
+
+/// Tracks the real, live keyboard height via NotificationCenter instead of
+/// relying on SwiftUI's ambient `.keyboard` safe-area propagation — that
+/// mechanism proved unreliable through MainTabView's several nested
+/// overlays (TestFlight, 2026-09-05: the music/tab-bar overlay kept
+/// floating above the keyboard no matter which ancestor's
+/// `.ignoresSafeArea` was adjusted). MainTabView now ignores the keyboard
+/// entirely for the whole screen; this is what lets Plan's input bar alone
+/// still rise to meet it, driven by a real measured height instead of a
+/// safe-area inset that several ancestors disagree about.
+private final class KeyboardHeight: ObservableObject {
+    @Published var value: CGFloat = 0
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+            .compactMap { $0.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue }
+            .map { $0.cgRectValue.height }
+            .sink { [weak self] height in
+                withAnimation(.easeOut(duration: 0.25)) { self?.value = height }
+            }
+            .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+            .sink { [weak self] _ in
+                withAnimation(.easeOut(duration: 0.25)) { self?.value = 0 }
+            }
+            .store(in: &cancellables)
+    }
+}
 
 // MARK: - Chat message model
 
@@ -68,6 +100,7 @@ struct PlanView: View {
     @State private var currentSessionId: UUID = UUID()
     @State private var showHistory = false
     @State private var showCleanupPrompt = false
+    @StateObject private var keyboard = KeyboardHeight()
 
     private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
@@ -270,6 +303,13 @@ struct PlanView: View {
 
                 inputBar
             }
+            // Real, measured keyboard height — not ambient safe-area
+            // propagation, which proved unreliable through MainTabView's
+            // nested overlays (see KeyboardHeight's doc comment). Shifts
+            // this whole VStack (and so, its trailing inputBar) up to meet
+            // the keyboard exactly; MainTabView's tab bar/music player stay
+            // completely fixed underneath, now correctly hidden behind it.
+            .padding(.bottom, keyboard.value)
         }
         .onAppear { BPAnalytics.track(.viewPlan) }
         .task {
@@ -550,10 +590,11 @@ struct PlanView: View {
                         updateMessage(assistantId) { $0.isThinking = false; $0.text = live }
                     }
                 }
-                let (finalText, plan) = NightPlan.extractFromChatReply(raw, venues: venues)
+                let (finalText, plan, options) = NightPlan.extractChatReplyParts(raw, venues: venues)
                 updateMessage(assistantId) {
                     $0.text = finalText.isEmpty ? "…" : finalText
                     $0.plan = plan
+                    $0.suggestions = options
                     $0.isThinking = false
                     $0.isStreaming = false
                 }
@@ -571,12 +612,16 @@ struct PlanView: View {
         }
     }
 
-    /// Cuts an in-progress, unterminated ```json fence out of the live
-    /// streaming text so a chat bubble never shows raw, half-typed JSON —
-    /// the plan card takes over once the fence closes.
+    /// Cuts an in-progress, unterminated ```json/```options fence out of the
+    /// live streaming text so a chat bubble never shows raw, half-typed
+    /// JSON — the plan card or option chips take over once the fence closes.
     private static func hideOpenFence(_ text: String) -> String {
-        guard let range = text.range(of: "```json") else { return text }
-        return String(text[text.startIndex..<range.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+        for tag in ["```json", "```options"] {
+            if let range = text.range(of: tag) {
+                return String(text[text.startIndex..<range.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+        }
+        return text
     }
 
     @MainActor

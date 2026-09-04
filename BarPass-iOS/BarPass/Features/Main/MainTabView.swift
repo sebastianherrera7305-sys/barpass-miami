@@ -93,21 +93,6 @@ struct MainTabView: View {
                     Color.clear.preference(key: BottomChromeHeightPreferenceKey.self, value: geo.size.height)
                 }
             )
-            // TestFlight, 2026-09-04: "esa parte se queda regresa, debería
-            // quedar abajo, no es parte del Chat" — screenshot showed the
-            // music bar AND the tab bar sitting ABOVE the keyboard while
-            // typing in Plan, sandwiched between the real input and the
-            // keys. Cause: the keyboard-safe-area fix above (scoping
-            // MainTabView's ignoresSafeArea from .all to .container) made
-            // this whole ZStack keyboard-aware again — which is correct for
-            // the tab content's own .safeAreaInset, but this floating
-            // overlay isn't part of any tab's content, it's chrome that
-            // should stay pinned to the literal screen bottom (covered by
-            // the keyboard like a normal tab bar) regardless of what's
-            // typing above it. Ignoring just .keyboard here, not
-            // .container, keeps both fixes: text inputs still rise above
-            // the keyboard, and this bar no longer rises WITH it.
-            .ignoresSafeArea(.keyboard, edges: .bottom)
 
             // Bottom-trailing, above the tab bar — NOT top-trailing.
             // This is a global overlay drawn on top of whichever screen is
@@ -172,19 +157,23 @@ struct MainTabView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             isKeyboardVisible = false
         }
-        // `.container` only — NOT `.keyboard` (the default `.all` region
-        // covers both). This is what lets the floating tab bar/music player
-        // sit flush past the home indicator; but the default form silently
-        // ate keyboard-safe-area awareness for every tab's content too,
-        // since a much higher ancestor already "ignoring" the keyboard
-        // region means nothing below it can see the keyboard height change
-        // through the normal safe-area mechanism — no child input bar in
-        // any tab (Plan's chat included) could rise above the keyboard,
-        // regardless of how that tab's own layout was built. Confirmed via
-        // a real TestFlight screenshot (2026-09-04): even after a full
-        // redesign of Plan's own view hierarchy, the input stayed hidden
-        // behind the keyboard — the bug was never in Plan, it was here.
-        .ignoresSafeArea(.container, edges: .bottom)
+        // `.all` (container + keyboard) — TestFlight, 2026-09-05: scoping
+        // this to `.container` only (so children could see the keyboard
+        // through the normal safe-area mechanism) sounded right, but a real
+        // device screenshot showed the SAME bug back: this whole ZStack —
+        // music bar and tab bar included — still shifted up and sat right
+        // above the keyboard. The reason: the keyboard-avoidance that
+        // matters here happens at the hosting-controller level, above this
+        // view entirely — a child `.ignoresSafeArea(.keyboard)` on just the
+        // music+tab-bar overlay (tried first) can't undo space that was
+        // already removed a level up. The only reliable fix is for NOTHING
+        // in this whole screen to shrink for the keyboard, full stop —
+        // Plan's input bar rising above the keyboard is instead handled
+        // explicitly, by measuring the real keyboard height and padding
+        // just that one view by it (see PlanView's `KeyboardHeight`),
+        // rather than depending on ambient safe-area propagation through
+        // several nested ZStacks, which has now proven unreliable twice.
+        .ignoresSafeArea(.all, edges: .bottom)
         // Theme switch rebuilds the whole tree so every Color.bpAmber re-resolves.
         .id("\(themeService.theme.rawValue)-\(appearanceStore.appearance.rawValue)")
         .task { await venueStore.loadVenues() }
