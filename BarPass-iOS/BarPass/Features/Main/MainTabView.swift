@@ -93,6 +93,21 @@ struct MainTabView: View {
                     Color.clear.preference(key: BottomChromeHeightPreferenceKey.self, value: geo.size.height)
                 }
             )
+            // TestFlight, 2026-09-04: "esa parte se queda regresa, debería
+            // quedar abajo, no es parte del Chat" — screenshot showed the
+            // music bar AND the tab bar sitting ABOVE the keyboard while
+            // typing in Plan, sandwiched between the real input and the
+            // keys. Cause: the keyboard-safe-area fix above (scoping
+            // MainTabView's ignoresSafeArea from .all to .container) made
+            // this whole ZStack keyboard-aware again — which is correct for
+            // the tab content's own .safeAreaInset, but this floating
+            // overlay isn't part of any tab's content, it's chrome that
+            // should stay pinned to the literal screen bottom (covered by
+            // the keyboard like a normal tab bar) regardless of what's
+            // typing above it. Ignoring just .keyboard here, not
+            // .container, keeps both fixes: text inputs still rise above
+            // the keyboard, and this bar no longer rises WITH it.
+            .ignoresSafeArea(.keyboard, edges: .bottom)
 
             // Bottom-trailing, above the tab bar — NOT top-trailing.
             // This is a global overlay drawn on top of whichever screen is
