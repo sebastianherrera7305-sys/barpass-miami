@@ -129,7 +129,19 @@ struct MainTabView: View {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { showHelpIntro = true }
             }
         }
-        .ignoresSafeArea(edges: .bottom)
+        // `.container` only — NOT `.keyboard` (the default `.all` region
+        // covers both). This is what lets the floating tab bar/music player
+        // sit flush past the home indicator; but the default form silently
+        // ate keyboard-safe-area awareness for every tab's content too,
+        // since a much higher ancestor already "ignoring" the keyboard
+        // region means nothing below it can see the keyboard height change
+        // through the normal safe-area mechanism — no child input bar in
+        // any tab (Plan's chat included) could rise above the keyboard,
+        // regardless of how that tab's own layout was built. Confirmed via
+        // a real TestFlight screenshot (2026-09-04): even after a full
+        // redesign of Plan's own view hierarchy, the input stayed hidden
+        // behind the keyboard — the bug was never in Plan, it was here.
+        .ignoresSafeArea(.container, edges: .bottom)
         // Theme switch rebuilds the whole tree so every Color.bpAmber re-resolves.
         .id("\(themeService.theme.rawValue)-\(appearanceStore.appearance.rawValue)")
         .task { await venueStore.loadVenues() }

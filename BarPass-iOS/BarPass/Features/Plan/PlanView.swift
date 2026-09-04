@@ -321,6 +321,22 @@ struct PlanView: View {
         }
         awaitingConfirmation = false
 
+        // Generic app/policy questions (booking, cancelling, age, dress
+        // code in general) get a definitive answer instantly — no reason
+        // to route those through the plan-building flow at all.
+        if let faqAnswer = RemyLocalChat.matchFAQ(clean) {
+            let assistantId = UUID()
+            messages.append(PlanChatMessage(id: assistantId, role: "assistant", isThinking: true))
+            Task {
+                try? await Task.sleep(for: .milliseconds(300))
+                await MainActor.run {
+                    updateMessage(assistantId) { $0.isThinking = false; $0.text = faqAnswer }
+                    persistMessages()
+                }
+            }
+            return
+        }
+
         let context = messages.filter { $0.role == "user" }.map(\.text).joined(separator: " — ")
         let reply = RemyLocalChat.reply(context: context, turnIndex: nativeTurnCount)
         nativeTurnCount += 1

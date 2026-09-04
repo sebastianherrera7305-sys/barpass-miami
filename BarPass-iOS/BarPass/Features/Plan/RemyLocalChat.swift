@@ -52,6 +52,40 @@ enum RemyLocalChat {
         return vibeWords.contains { text.contains($0) }
     }
 
+    /// Generic, venue-agnostic questions — how the app works, general
+    /// entry policy — answered instantly and definitively, no API call.
+    /// Deliberately does NOT cover venue-specific facts (a dress code, a
+    /// cover charge, hours for one named place): those aren't knowable
+    /// without a real, current source, and a hardcoded guess here would be
+    /// exactly the fabricated-data problem this app spent months fixing in
+    /// its venue catalog (see CLAUDE.md's venue data provenance notes) —
+    /// venue-specific questions fall through to the real plan flow, which
+    /// reads the live catalog.
+    private struct FAQEntry {
+        let keywords: [String]
+        let key: String
+    }
+    private static let faqEntries: [FAQEntry] = [
+        FAQEntry(keywords: ["book", "reservar", "reserve", "booking", "mesa a través", "how do i book"], key: "plan.chat.faq.bookTable"),
+        FAQEntry(keywords: ["cancel", "cancelar"], key: "plan.chat.faq.cancelReservation"),
+        FAQEntry(keywords: ["age requirement", "how old", "edad", "idade", "21+", "18+"], key: "plan.chat.faq.ageRequirement"),
+        FAQEntry(keywords: ["dress code", "código de vest", "código de vestimenta", "what to wear", "que ponerme", "qué ponerme"], key: "plan.chat.faq.dressCode"),
+        FAQEntry(keywords: ["how much is cover", "cover charge", "precio de entrada", "cuanto es la entrada", "cuánto es la entrada", "preço da entrada"], key: "plan.chat.faq.coverCharge"),
+        FAQEntry(keywords: ["guest list", "lista de invitados", "lista de convidados"], key: "plan.chat.faq.guestList"),
+        FAQEntry(keywords: ["parking", "valet", "estacionamiento", "estacionamento", "parqueo"], key: "plan.chat.faq.parking"),
+    ]
+
+    /// Returns a definitive, generic answer for common app/policy questions
+    /// — checked before anything else, so these never wait on a plan flow
+    /// or a network call.
+    static func matchFAQ(_ text: String) -> String? {
+        let lower = text.lowercased()
+        for entry in faqEntries where entry.keywords.contains(where: { lower.contains($0) }) {
+            return L10n.tSync(entry.key)
+        }
+        return nil
+    }
+
     /// `context` is every user message so far in this conversation, joined —
     /// the same rolling signal the old single-shot prompt used to build
     /// from, just accumulated turn by turn now instead of typed all at once.
