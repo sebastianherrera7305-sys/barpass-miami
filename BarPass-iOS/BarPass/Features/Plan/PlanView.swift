@@ -101,6 +101,7 @@ struct PlanView: View {
     @State private var showHistory = false
     @State private var showCleanupPrompt = false
     @StateObject private var keyboard = KeyboardHeight()
+    @ObservedObject private var chromeMetrics = BottomChromeMetrics.shared
 
     private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
@@ -254,7 +255,14 @@ struct PlanView: View {
     }
 
     var body: some View {
-        ZStack {
+        // `alignment: .top` — TestFlight, 2026-09-05: without it, a plain
+        // ZStack centers its children, and the moment `keyboard.value`
+        // padding (below) made the content VStack taller, that centering
+        // pushed the WHOLE thing upward — a real screenshot showed "REMY"
+        // and the mascot overlapping the clock/status bar. Pinning to the
+        // top means extra bottom padding only ever grows downward, never
+        // shifts the top of the screen out from under the status bar.
+        ZStack(alignment: .top) {
             // Solid, near-black — deliberately NOT BPBackgroundView's
             // illustrated city art here. TestFlight feedback (2026-09-04)
             // called out the decorative header eating the screen with the
@@ -303,14 +311,20 @@ struct PlanView: View {
 
                 inputBar
             }
-            // Real, measured keyboard height — not ambient safe-area
-            // propagation, which proved unreliable through MainTabView's
-            // nested overlays (see KeyboardHeight's doc comment). Shifts
-            // this whole VStack (and so, its trailing inputBar) up to meet
-            // the keyboard exactly; MainTabView's tab bar/music player stay
-            // completely fixed underneath, now correctly hidden behind it.
-            .padding(.bottom, keyboard.value)
+            // Real, measured keyboard height when it's up — not ambient
+            // safe-area propagation, which proved unreliable through
+            // MainTabView's nested overlays (see KeyboardHeight's doc
+            // comment). When the keyboard is DOWN, use the real measured
+            // tab-bar-(+music-player) height instead — `.ignoresSafeArea
+            // (.container, edges: .bottom)` below opts this screen out of
+            // MainTabView's automatic reservation of that same space, which
+            // otherwise stacked on top of the keyboard padding and left a
+            // large empty gap between the input bar and the keyboard (a
+            // real screenshot showed it). One number, one source of truth,
+            // never both added together.
+            .padding(.bottom, keyboard.value > 0 ? keyboard.value : chromeMetrics.height)
         }
+        .ignoresSafeArea(.container, edges: .bottom)
         .onAppear { BPAnalytics.track(.viewPlan) }
         .task {
             restoreMessages()
@@ -993,15 +1007,22 @@ private struct BreathingMascot: View {
         Image("BarPassMascot")
             .resizable()
             .scaledToFit()
-            .frame(width: 40, height: 40)
-            .padding(4)
+            .frame(width: 56, height: 56)
+            .padding(8)
             .background(
                 Circle().fill(
-                    RadialGradient(colors: [amber.opacity(0.22), .clear], center: .center, startRadius: 2, endRadius: 26)
+                    // TestFlight, 2026-09-05: "Yellow se tiene que ver... se
+                    // ve todo feo, muy chiquito" — a faint radial glow at
+                    // 22% opacity read as barely-there at a glance. A real,
+                    // solid amber ring behind the mascot (not just a soft
+                    // gradient) is what actually makes it identifiable
+                    // without having to look closely.
+                    RadialGradient(colors: [amber.opacity(0.55), amber.opacity(0.15), .clear], center: .center, startRadius: 4, endRadius: 42)
                 )
             )
-            .shadow(color: amberB.opacity(isBig ? 0.6 : 0.2), radius: isBig ? 10 : 3)
-            .scaleEffect(isBig ? 1.1 : 1.0)
+            .overlay(Circle().strokeBorder(amber.opacity(0.5), lineWidth: 1.5))
+            .shadow(color: amberB.opacity(isBig ? 0.7 : 0.35), radius: isBig ? 14 : 6)
+            .scaleEffect(isBig ? 1.08 : 1.0)
             .onAppear {
                 withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) {
                     isBig = true

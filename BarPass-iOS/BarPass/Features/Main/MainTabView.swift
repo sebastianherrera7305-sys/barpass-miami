@@ -133,6 +133,7 @@ struct MainTabView: View {
         .onPreferenceChange(BottomChromeHeightPreferenceKey.self) { height in
             guard height > 0 else { return }
             withAnimation(.easeOut(duration: 0.2)) { bottomChromeHeight = height }
+            BottomChromeMetrics.shared.height = height
         }
         // Attached to the OUTER ZStack, not the inner Group — anchors from
         // .helpTarget() still bubble up through the whole tree either way,
@@ -389,6 +390,17 @@ private struct BottomChromeHeightPreferenceKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = max(value, nextValue())
     }
+}
+
+/// Same real, measured tab-bar-(+music-player) height as `bottomChromeHeight`
+/// above, published so a screen that opts out of the parent's automatic
+/// `.safeAreaInset` (Plan does, to avoid double-reserving this space on top
+/// of the keyboard height — see PlanView) can still read the real number
+/// instead of guessing a constant that would silently drift out of sync.
+@MainActor
+final class BottomChromeMetrics: ObservableObject {
+    static let shared = BottomChromeMetrics()
+    @Published var height: CGFloat = 72
 }
 
 #Preview {
