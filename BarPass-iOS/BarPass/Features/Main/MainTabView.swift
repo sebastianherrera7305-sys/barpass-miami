@@ -102,7 +102,19 @@ struct MainTabView: View {
             // encima del botón de crear un trip"). Nothing owns the area just
             // above the tab bar, so one move fixes the collision on every
             // screen instead of nudging them one at a time.
-            if let route = currentHelpRoute, !helpStore.isActive, !isKeyboardVisible {
+            //
+            // Except Plan: unlike every other tab, it keeps its OWN circular
+            // action button (send) permanently docked in that exact corner —
+            // not just while the keyboard is up (`isKeyboardVisible` already
+            // covers that case). TestFlight, 2026-09-05: "el botón de
+            // interrogación... encima del text input" reported again after
+            // the keyboard fix shipped — the remaining overlap is this
+            // static one, button vs. button, keyboard or not. Plan already
+            // has its own `.helpTarget("plan.prompt")` registered and its
+            // own instant local FAQ, so the floating trigger isn't the only
+            // way to get help there; simplest correct fix is to just not
+            // draw it on top of Plan's send button at all.
+            if let route = currentHelpRoute, !helpStore.isActive, !isKeyboardVisible, selectedTab != 3 {
                 VStack {
                     Spacer()
                     HStack {

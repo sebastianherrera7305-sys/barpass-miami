@@ -43,14 +43,6 @@ struct PlanView: View {
     @State private var saveErrorMessage: String?
     @State private var chatErrorMessage: String?
     @State private var streamTask: Task<Void, Never>?
-    /// Set the instant a native message offers to build a plan, cleared the
-    /// moment the user answers either way — only meaningful for the very
-    /// next message, so a later "yes" (answering something else) can't
-    /// accidentally trigger a build.
-    @State private var awaitingConfirmation = false
-    /// Rotates the two native reply variants per state so back-to-back
-    /// turns don't repeat the same phrasing.
-    @State private var nativeTurnCount = 0
     @State private var displayName: String?
 
     private let planRepo = RepositoryDependencies.plan
@@ -85,6 +77,20 @@ struct PlanView: View {
         }
     }
 
+    /// Called from `AuthService.signOut()`. Chat history — including the
+    /// opening greeting, which bakes in whatever `display_name` was fetched
+    /// at generation time ("<name> — <line>") — is plain UserDefaults, not
+    /// scoped per account. Without this, signing out and into a different
+    /// account on the same device left the previous account's personalized
+    /// greeting sitting in the thread forever: `restoreMessages()` sees a
+    /// non-empty history and `greetIfNeeded()`'s `guard messages.isEmpty`
+    /// never regenerates it for the new session. This is what "Remi shows
+    /// the wrong name" actually was — not a bad concatenation, a stale
+    /// cached message from the account that used the device before.
+    static func clearLocalState() {
+        UserDefaults.standard.removeObject(forKey: messagesKey)
+    }
+
     private var suggestions: [String] {
         [
             l10n.t("plan.suggestion.budget"),
@@ -115,7 +121,7 @@ struct PlanView: View {
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 18) {
                             ForEach(messages) { message in
-                                PlanChatBubble(message: message, onSave: savePlan, onBuildPlan: confirmBuildPlan, onSuggestion: send)
+                                PlanChatBubble(message: message, onSave: savePlan, onBuildPlan: sendToRemy, onSuggestion: send)
                                     .id(message.id)
                                     .padding(.horizontal, 20)
                             }
@@ -315,10 +321,25 @@ struct PlanView: View {
         .background(Color(red: 0.04, green: 0.04, blue: 0.045))
     }
 
-    /// One user turn of ordinary, native chat — no network call. Reads
-    /// what's been said so far, either asks one quick clarifying question
-    /// or (once there's enough to go on) offers to build the real plan.
-    /// The only path that ever reaches the AI is `confirmBuildPlan()`.
+    /// One user turn. TestFlight, 2026-09-05: a local "ask budget/vibe"
+    /// template layer used to sit in front of the real AI, only calling it
+    /// once the user explicitly said "yes" to a canned offer — so every
+    /// clarifying question was generic template text with zero awareness
+    /// of what the user had actually said ("mi amiga es mexicana y viene a
+    /// Miami" got the same "give me a budget or vibe" reply as literally
+    /// nothing). A turn-count cap on that layer (previous fix) stopped the
+    /// infinite loop but didn't fix the actual complaint: Remy still
+    /// wasn't reading the conversation. The real fix is architectural, not
+    /// a smarter local template — the real AI (Groq, ~120ms to first
+    /// token, not the old 20-30s reasoning-model excuse for a local fast
+    /// path) already gets the FULL message history and already knows how
+    /// to ask one contextual follow-up or recommend real venues (see its
+    /// system prompt, concierge-prompt.ts) — it just was never being
+    /// asked to do that job until the user said "yes" to a different,
+    /// dumber layer first. Only true app/policy FAQs (booking, age, dress
+    /// code in general) still get an instant local answer; everything
+    /// else — every single turn, starting with the very first — goes
+    /// straight to Remy.
     private func send(_ text: String) {
         let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !clean.isEmpty, !isSending else { return }
@@ -328,22 +349,12 @@ struct PlanView: View {
         messages.append(PlanChatMessage(role: "user", text: clean))
         persistMessages()
 
-        if awaitingConfirmation, RemyLocalChat.isAffirmative(clean) {
-            awaitingConfirmation = false
-            confirmBuildPlan()
-            return
-        }
-        awaitingConfirmation = false
-
-        // Detected from THIS message, not the app's global setting — a user
-        // who types in Spanish gets a Spanish reply from the native layer
-        // too, matching what the real AI backend already does per its own
-        // system prompt, regardless of what language the app UI is set to.
+        // Detected from THIS message, not the app's global setting.
         let detectedLanguage = RemyLocalChat.detectLanguage(clean, fallback: l10n.language)
 
         // Generic app/policy questions (booking, cancelling, age, dress
         // code in general) get a definitive answer instantly — no reason
-        // to route those through the plan-building flow at all.
+        // to route those through the AI at all.
         if let faqAnswer = RemyLocalChat.matchFAQ(clean, language: detectedLanguage) {
             let assistantId = UUID()
             messages.append(PlanChatMessage(id: assistantId, role: "assistant", isThinking: true))
@@ -357,44 +368,28 @@ struct PlanView: View {
             return
         }
 
-        let context = messages.filter { $0.role == "user" }.map(\.text).joined(separator: " — ")
-        let reply = RemyLocalChat.reply(context: context, turnIndex: nativeTurnCount, language: detectedLanguage)
-        nativeTurnCount += 1
-        awaitingConfirmation = reply.offerBuild
-
-        let assistantId = UUID()
-        messages.append(PlanChatMessage(id: assistantId, role: "assistant", isThinking: true))
-        Task {
-            // A short, human-feeling pause — not a network wait. Instant
-            // native replies read as robotic; ~350ms reads as a real beat.
-            try? await Task.sleep(for: .milliseconds(350))
-            await MainActor.run {
-                updateMessage(assistantId) {
-                    $0.isThinking = false
-                    $0.text = reply.text
-                    $0.offerBuild = reply.offerBuild
-                }
-                persistMessages()
-            }
-        }
+        sendToRemy()
     }
 
     /// The one and only point in this whole screen that calls the real
-    /// Remy (barpass-v2's /api/concierge). Everything the user has said so
-    /// far is condensed into a single message — not the raw local chat
-    /// history, which is full of scripted native replies the model never
-    /// said and shouldn't be confused by.
-    private func confirmBuildPlan() {
+    /// Remy (barpass-v2's /api/concierge) — every non-FAQ turn, not just a
+    /// final "build it" confirmation. Sends the actual running transcript
+    /// (both sides, in order) so the model has real conversational memory
+    /// instead of a condensed one-shot summary; the system prompt decides
+    /// on its own, per turn, whether to ask one more contextual question
+    /// or reply with a plan block.
+    private func sendToRemy() {
         isSending = true
-        let context = messages.filter { $0.role == "user" }.map(\.text).joined(separator: " — ")
-        let language = RemyLocalChat.detectLanguage(messages.last(where: { $0.role == "user" })?.text ?? "", fallback: l10n.language)
+        let apiMessages = messages
+            .filter { !$0.text.isEmpty }
+            .map { APIClient.ConciergeChatTurn(role: $0.role, content: $0.text) }
+
         let assistantId = UUID()
-        messages.append(PlanChatMessage(id: assistantId, role: "assistant", text: RemyLocalChat.buildingMessage(language: language), isStreaming: true))
+        messages.append(PlanChatMessage(id: assistantId, role: "assistant", isThinking: true, isStreaming: true))
         persistMessages()
 
         let city = venueStore.selectedCity
         let venues = venueStore.venues
-        let apiMessages = [APIClient.ConciergeChatTurn(role: "user", content: context)]
 
         streamTask?.cancel()
         streamTask = Task {

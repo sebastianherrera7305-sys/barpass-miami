@@ -205,6 +205,12 @@ final class AuthService: @unchecked Sendable {
         // sheet doesn't lose it (see CardDraft). It must not survive into the
         // next person's session on a shared device.
         Task { @MainActor in CardDraft.shared.clear() }
+        // Same shared-device leak, different data: Remy's Plan chat history
+        // (including the opening greeting, which has the previous account's
+        // display name baked into its text) was plain UserDefaults with no
+        // per-account scoping — surfaced as "Remy shows the wrong user's
+        // name" after switching accounts on one device.
+        PlanView.clearLocalState()
     }
 
     /// Permanently deletes the signed-in user's account server-side (Apple
