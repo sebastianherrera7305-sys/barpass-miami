@@ -39,14 +39,24 @@ const GROQ_MODEL = "llama-3.3-70b-versatile";
 const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 const NVIDIA_MODEL = "moonshotai/kimi-k3";
 
-function resolveProvider(): { apiKey: string; chatUrl: string; model: string } | null {
+interface Provider { name: string; apiKey: string; chatUrl: string; model: string }
+
+/** Every configured provider, in preference order — Groq first (fast),
+ * NVIDIA second (slower reasoning model, but a real fallback). Previously
+ * this picked ONE provider and had no runtime fallback: 2026-09-05, a
+ * misconfigured Groq key (a copy-paste mistake, same class of bug as the
+ * earlier NVIDIA_API_KEY= incident) took the ENTIRE Concierge down even
+ * though NVIDIA_API_KEY was still valid — a single bad key shouldn't be
+ * able to do that when a second real option exists. */
+function resolveProviders(): Provider[] {
+  const providers: Provider[] = [];
   if (process.env.GROQ_API_KEY) {
-    return { apiKey: process.env.GROQ_API_KEY, chatUrl: GROQ_CHAT_URL, model: GROQ_MODEL };
+    providers.push({ name: "groq", apiKey: process.env.GROQ_API_KEY, chatUrl: GROQ_CHAT_URL, model: GROQ_MODEL });
   }
   if (process.env.NVIDIA_API_KEY) {
-    return { apiKey: process.env.NVIDIA_API_KEY, chatUrl: NVIDIA_CHAT_URL, model: NVIDIA_MODEL };
+    providers.push({ name: "nvidia", apiKey: process.env.NVIDIA_API_KEY, chatUrl: NVIDIA_CHAT_URL, model: NVIDIA_MODEL });
   }
-  return null;
+  return providers;
 }
 
 export async function POST(request: Request) {
@@ -73,8 +83,8 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid_request" }, { status: 400 });
   }
 
-  const provider = resolveProvider();
-  if (!provider) {
+  const providers = resolveProviders();
+  if (providers.length === 0) {
     return Response.json({ error: "ai_not_configured" }, { status: 503 });
   }
 
@@ -85,33 +95,38 @@ export async function POST(request: Request) {
   const conversationText = parsed.data.messages.map((m) => m.content).join(" ");
   const systemInstruction = buildConciergeSystemPrompt(selectRelevantVenues(venues, conversationText));
 
-  let upstream: Response;
-  try {
-    upstream = await fetch(provider.chatUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${provider.apiKey}`,
-        "Content-Type": "application/json",
-        Accept: "text/event-stream",
-      },
-      body: JSON.stringify({
-        model: provider.model,
-        messages: [
-          { role: "system", content: systemInstruction },
-          ...parsed.data.messages,
-        ],
-        temperature: 0.8,
-        max_tokens: 2048,
-        stream: true,
-      }),
-    });
-  } catch (e) {
-    console.error("Concierge upstream fetch failed:", e);
-    return Response.json({ error: "ai_unavailable" }, { status: 502 });
+  let upstream: Response | null = null;
+  for (const provider of providers) {
+    try {
+      const attempt = await fetch(provider.chatUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${provider.apiKey}`,
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+        },
+        body: JSON.stringify({
+          model: provider.model,
+          messages: [
+            { role: "system", content: systemInstruction },
+            ...parsed.data.messages,
+          ],
+          temperature: 0.8,
+          max_tokens: 2048,
+          stream: true,
+        }),
+      });
+      if (attempt.ok && attempt.body) {
+        upstream = attempt;
+        break;
+      }
+      console.error(`Concierge ${provider.name} call failed: HTTP ${attempt.status}`, await attempt.text().catch(() => ""));
+    } catch (e) {
+      console.error(`Concierge ${provider.name} fetch failed:`, e);
+    }
   }
 
-  if (!upstream.ok || !upstream.body) {
-    console.error(`Concierge upstream call failed: HTTP ${upstream.status}`, await upstream.text().catch(() => ""));
+  if (!upstream || !upstream.body) {
     return Response.json({ error: "ai_unavailable" }, { status: 502 });
   }
 
