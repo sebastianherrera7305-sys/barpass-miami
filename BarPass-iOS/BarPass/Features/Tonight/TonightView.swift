@@ -11,6 +11,11 @@ struct TonightView: View {
     /// false to instantly restore the old passive "Where to tonight?" Home
     /// without reverting any code.
     private let usePromptYourNightHome = true
+    /// Real concerts/nightlife events from Ticketmaster — not tied to a
+    /// BarPass venue, shown as its own discovery row. Silent-fails to an
+    /// empty row (never a visible error) since this is a bonus section on
+    /// top of the app's own catalog, not something the Home feed depends on.
+    @State private var liveEvents: [APIClient.LiveEvent] = []
 
     /// Mood Mode — browse by experience, not venue type. Each mood maps to
     /// keywords matched against type/vibes/tags/music (same approach as
@@ -258,6 +263,10 @@ struct TonightView: View {
                     HypeWeekCard()
                         .padding(.horizontal, BPSpacing.lg)
 
+                    if !liveEvents.isEmpty {
+                        liveEventsThisWeekSection
+                    }
+
                     if let city = venueStore.selectedCity {
                         NavigationLink(destination: UniversityListView(city: city)) {
                             universitiesEntryCard
@@ -350,6 +359,9 @@ struct TonightView: View {
         .task {
             try? await Task.sleep(nanoseconds: 2_500_000_000)
             UserLocationProvider.shared.refreshOnce()
+        }
+        .task {
+            liveEvents = (try? await APIClient.getLiveEvents(city: venueStore.selectedCity ?? "Miami")) ?? []
         }
     }
 
@@ -500,6 +512,31 @@ struct TonightView: View {
             .padding(.horizontal, BPSpacing.lg)
         }
         .helpTarget("tonight.vibeTags")
+    }
+
+    // MARK: - This week (Ticketmaster live events)
+
+    private var liveEventsThisWeekSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(l10n.t("home.thisWeek"))
+                .font(.bpScaled(20, weight: .bold))
+                .foregroundStyle(Color.bpInk)
+                .padding(.horizontal, BPSpacing.lg)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: 14) {
+                    ForEach(liveEvents) { event in
+                        Link(destination: URL(string: event.url) ?? URL(string: "https://ticketmaster.com")!) {
+                            LiveEventCard(event: event)
+                        }
+                        .buttonStyle(.plain)
+                        .bpAccessibility(label: event.name, hint: l10n.t("tonight.event.hint"), isButton: true)
+                    }
+                }
+                .padding(.horizontal, BPSpacing.lg)
+            }
+        }
+        .helpTarget("tonight.thisWeek")
     }
 
     // MARK: - Events tonight (flyer rail)
@@ -847,6 +884,56 @@ struct SmallVenueCard: View {
 }
 
 enum CardStyle { case hero, card }
+
+/// A real Ticketmaster event — deliberately looks distinct from
+/// `EventFlyerCard` (BarPass's own venue events): a plain "Ticketmaster"
+/// caption instead of a pass/entry CTA, since tapping opens Ticketmaster to
+/// buy, not a BarPass venue page.
+private struct LiveEventCard: View {
+    let event: APIClient.LiveEvent
+    @ObservedObject private var l10n = L10n.shared
+
+    private var dateLabel: String {
+        guard let date = event.date else { return "" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        guard let parsed = formatter.date(from: date) else { return date }
+        let display = DateFormatter()
+        display.dateFormat = "EEE, MMM d"
+        display.locale = Locale(identifier: l10n.language.rawValue)
+        return display.string(from: parsed)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            CachedImage(url: event.imageUrl.flatMap(URL.init), targetSize: CGSize(width: 220, height: 130)) { image in
+                image.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Rectangle().fill(Color.bpSurface)
+            }
+            .frame(width: 220, height: 130)
+            .clipShape(RoundedRectangle(cornerRadius: BPRadius.md))
+
+            Text(event.name)
+                .font(.bpScaled(13, weight: .bold))
+                .foregroundStyle(Color.bpInk)
+                .lineLimit(2)
+                .frame(width: 220, alignment: .leading)
+
+            HStack(spacing: 4) {
+                Text([dateLabel, event.venueName].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
+                    .font(.bpSmall())
+                    .foregroundStyle(Color.bpTextSecondary)
+                    .lineLimit(1)
+                Spacer()
+                Text("Ticketmaster")
+                    .font(.bpTiny())
+                    .foregroundStyle(Color.bpTextTertiary)
+            }
+            .frame(width: 220)
+        }
+    }
+}
 
 #Preview {
     NavigationStack {

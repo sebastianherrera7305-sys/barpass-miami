@@ -469,4 +469,40 @@ enum APIClient {
         guard let balance = json["balance"] as? Double else { throw APIClientError.invalidResponse }
         return (balance, json["transactionId"] as? String)
     }
+
+    // MARK: - Live events (Ticketmaster, via /api/events/live)
+
+    /// A real, upcoming concert/nightlife event from Ticketmaster Discovery
+    /// — separate from a BarPass venue's own `VenueEvent`: not tied to any
+    /// venue in our catalog, no BarPass pass/ticket, just discovery + a
+    /// link out to buy on Ticketmaster.
+    struct LiveEvent: Decodable, Identifiable {
+        let id: String
+        let name: String
+        let date: String?
+        let time: String?
+        let imageUrl: String?
+        let venueName: String?
+        let neighborhood: String?
+        let url: String
+        let priceMin: Double?
+        let priceMax: Double?
+    }
+
+    static func getLiveEvents(city: String) async throws -> [LiveEvent] {
+        var components = URLComponents(url: baseURL.appendingPathComponent("events/live"), resolvingAgainstBaseURL: false)!
+        components.queryItems = [URLQueryItem(name: "city", value: city)]
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await URLSession.shared.data(from: components.url!)
+        } catch {
+            throw APIClientError.network(error.localizedDescription)
+        }
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            throw APIClientError.invalidResponse
+        }
+        struct Envelope: Decodable { let events: [LiveEvent] }
+        return try JSONDecoder().decode(Envelope.self, from: data).events
+    }
 }
