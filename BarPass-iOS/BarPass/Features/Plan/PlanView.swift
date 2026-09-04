@@ -29,6 +29,7 @@ struct PlanView: View {
     @EnvironmentObject private var venueStore: VenueStore
     @EnvironmentObject private var appState:   AppState
     @State private var input     = ""
+    @FocusState private var isInputFocused: Bool
     @State private var isSending = false
     @State private var messages: [PlanChatMessage] = []
     @State private var savedPlans: [NightPlan] = []
@@ -133,6 +134,15 @@ struct PlanView: View {
                     .onChange(of: messages.last?.text) { _, _ in
                         proxy.scrollTo("bottom", anchor: .bottom)
                     }
+                    // TestFlight, 2026-09-04: "si quiero dejar de escribir,
+                    // no puedo porque se queda pegado el teclado" — there
+                    // was no way to dismiss it short of tapping Send.
+                    // Interactive dismissal (drag the list down, like
+                    // ChatGPT/Claude) plus a tap-anywhere-in-the-thread
+                    // fallback covers both a deliberate swipe and an
+                    // instinctive tap-away.
+                    .scrollDismissesKeyboard(.interactively)
+                    .onTapGesture { isInputFocused = false }
                 }
 
                 inputBar
@@ -166,7 +176,8 @@ struct PlanView: View {
     /// a conversation, so it never competes with the message thread or the
     /// keyboard for vertical space.
     private var topBar: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
+            BreathingMascot()
             Text("REMY")
                 .font(.bpScaled(12, weight: .heavy))
                 .tracking(3)
@@ -271,6 +282,20 @@ struct PlanView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
                         .lineLimit(1...4)
+                        .focused($isInputFocused)
+                        .toolbar {
+                            // A tap-away or a downward swipe both dismiss
+                            // the keyboard too (see the ScrollView above),
+                            // but a keyboard accessory "Done" is the most
+                            // discoverable of the three, and the one
+                            // TestFlight feedback specifically asked for.
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button(l10n.t("plan.chat.doneKeyboard")) { isInputFocused = false }
+                                    .font(.bpScaled(14, weight: .semibold))
+                                    .foregroundStyle(amber)
+                            }
+                        }
                         .bpAccessibility(label: l10n.t("night.prompt.label"), hint: l10n.t("night.prompt.hint"))
                 }
                 .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22))
@@ -321,10 +346,16 @@ struct PlanView: View {
         }
         awaitingConfirmation = false
 
+        // Detected from THIS message, not the app's global setting — a user
+        // who types in Spanish gets a Spanish reply from the native layer
+        // too, matching what the real AI backend already does per its own
+        // system prompt, regardless of what language the app UI is set to.
+        let detectedLanguage = RemyLocalChat.detectLanguage(clean, fallback: l10n.language)
+
         // Generic app/policy questions (booking, cancelling, age, dress
         // code in general) get a definitive answer instantly — no reason
         // to route those through the plan-building flow at all.
-        if let faqAnswer = RemyLocalChat.matchFAQ(clean) {
+        if let faqAnswer = RemyLocalChat.matchFAQ(clean, language: detectedLanguage) {
             let assistantId = UUID()
             messages.append(PlanChatMessage(id: assistantId, role: "assistant", isThinking: true))
             Task {
@@ -338,7 +369,7 @@ struct PlanView: View {
         }
 
         let context = messages.filter { $0.role == "user" }.map(\.text).joined(separator: " — ")
-        let reply = RemyLocalChat.reply(context: context, turnIndex: nativeTurnCount)
+        let reply = RemyLocalChat.reply(context: context, turnIndex: nativeTurnCount, language: detectedLanguage)
         nativeTurnCount += 1
         awaitingConfirmation = reply.offerBuild
 
@@ -367,8 +398,9 @@ struct PlanView: View {
     private func confirmBuildPlan() {
         isSending = true
         let context = messages.filter { $0.role == "user" }.map(\.text).joined(separator: " — ")
+        let language = RemyLocalChat.detectLanguage(messages.last(where: { $0.role == "user" })?.text ?? "", fallback: l10n.language)
         let assistantId = UUID()
-        messages.append(PlanChatMessage(id: assistantId, role: "assistant", text: RemyLocalChat.buildingMessage, isStreaming: true))
+        messages.append(PlanChatMessage(id: assistantId, role: "assistant", text: RemyLocalChat.buildingMessage(language: language), isStreaming: true))
         persistMessages()
 
         let city = venueStore.selectedCity
@@ -660,5 +692,29 @@ struct NightPlanView: View {
         .padding(18)
         .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Color.bpInk.opacity(0.08)))
+    }
+}
+
+// MARK: - Mascot
+
+/// Our mascot, top of the chat, with a slow "breathing" scale + a soft
+/// amber glow — the same idle-alive cue Claude's own star icon uses so the
+/// chat reads as present even when nothing is streaming.
+private struct BreathingMascot: View {
+    @State private var isBig = false
+    private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
+
+    var body: some View {
+        Image("BarPassMascot")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 22, height: 22)
+            .shadow(color: amber.opacity(isBig ? 0.5 : 0.15), radius: isBig ? 6 : 2)
+            .scaleEffect(isBig ? 1.08 : 1.0)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) {
+                    isBig = true
+                }
+            }
     }
 }

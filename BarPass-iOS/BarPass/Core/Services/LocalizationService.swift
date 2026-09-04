@@ -69,6 +69,16 @@ final class L10n: ObservableObject {
         return tables[lang]?[key] ?? tables[.es]?[key] ?? key
     }
 
+    /// Same lookup, but for an EXPLICIT language rather than the app's
+    /// configured one — for the rare case a caller detects the language of
+    /// a specific piece of text itself (e.g. RemyLocalChat mirroring
+    /// whatever language the user just typed in the chat, independent of
+    /// their app-wide setting — matching what the real AI backend already
+    /// does per its own system prompt).
+    nonisolated static func t(_ key: String, language: AppLanguage) -> String {
+        tables[language]?[key] ?? tables[.es]?[key] ?? key
+    }
+
     nonisolated private static let tables: [AppLanguage: [String: String]] = [
         .es: [
             "venue.crowd.empty": "Vacío", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Lleno", "venue.crowd.max": "A tope", "venue.crowd.na": "N/D",
@@ -593,6 +603,7 @@ final class L10n: ObservableObject {
             "plan.chat.faq.coverCharge": "El cover varía mucho según el venue, la noche y si hay DJ headliner. Te doy el precio exacto de cada lugar cuando arme tu plan.",
             "plan.chat.faq.guestList": "Depende del venue — algunos manejan lista de invitados, otros no. Te confirmo esa parte cuando arme tu plan.",
             "plan.chat.faq.parking": "Varía por venue — algunos tienen valet, otros no. Te lo confirmo cuando arme tu plan.",
+            "plan.chat.doneKeyboard": "Listo",
             "plan.quickIdeas": "Ideas rápidas",
             "plan.save": "Guardar", "plan.save.hint": "Guardar este plan",
             "plan.savedPlans": "Planes guardados", "plan.askAgain": "Pedir otro plan",
@@ -1439,6 +1450,7 @@ final class L10n: ObservableObject {
             "plan.chat.faq.coverCharge": "Cover varies a lot by venue, night, and whether there's a headliner DJ. I'll give you the exact number per stop when I build your plan.",
             "plan.chat.faq.guestList": "Depends on the venue — some run a guest list, some don't. I'll confirm that when I build your plan.",
             "plan.chat.faq.parking": "Varies by venue — some have valet, some don't. I'll confirm it when I build your plan.",
+            "plan.chat.doneKeyboard": "Done",
             "plan.quickIdeas": "Quick ideas",
             "plan.save": "Save", "plan.save.hint": "Save this plan",
             "plan.savedPlans": "Saved plans", "plan.askAgain": "Ask for another plan",
@@ -2285,6 +2297,7 @@ final class L10n: ObservableObject {
             "plan.chat.faq.coverCharge": "O cover varia muito por venue, noite e se tem DJ headliner. Te dou o valor exato de cada parada quando montar seu plano.",
             "plan.chat.faq.guestList": "Depende do venue — alguns têm lista de convidados, outros não. Confirmo isso quando montar seu plano.",
             "plan.chat.faq.parking": "Varia por venue — alguns têm valet, outros não. Confirmo quando montar seu plano.",
+            "plan.chat.doneKeyboard": "Concluído",
             "plan.quickIdeas": "Ideias rápidas",
             "plan.save": "Salvar", "plan.save.hint": "Salvar este plano",
             "plan.savedPlans": "Planos salvos", "plan.askAgain": "Pedir outro plano",

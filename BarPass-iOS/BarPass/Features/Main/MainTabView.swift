@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
@@ -20,6 +21,15 @@ struct MainTabView: View {
     @State private var deepLinkedVenue: BarPassVenue?
     @ObservedObject private var helpStore = HelpGuideStore.shared
     @State private var showHelpIntro = false
+    /// TestFlight, 2026-09-04: "el botón de interrogación está encima del
+    /// botón de mandar" — once Plan's chat could finally rise above the
+    /// keyboard (fixing a separate bug), this floating Help button — fixed
+    /// just above the tab bar — started overlapping the chat's send button
+    /// whenever the keyboard pushed content up. Simplest fix: the Help
+    /// button just isn't relevant while the user is actively typing
+    /// anywhere, so hide it for the keyboard's duration instead of trying
+    /// to dodge every possible input bar position.
+    @State private var isKeyboardVisible = false
 
     /// The REAL, measured height of whatever's floating at the bottom right
     /// now (tab bar alone, or tab bar + music player) — not a guess. Content
@@ -92,7 +102,7 @@ struct MainTabView: View {
             // encima del botón de crear un trip"). Nothing owns the area just
             // above the tab bar, so one move fixes the collision on every
             // screen instead of nudging them one at a time.
-            if let route = currentHelpRoute, !helpStore.isActive {
+            if let route = currentHelpRoute, !helpStore.isActive, !isKeyboardVisible {
                 VStack {
                     Spacer()
                     HStack {
@@ -128,6 +138,12 @@ struct MainTabView: View {
                 try? await Task.sleep(nanoseconds: 800_000_000)
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) { showHelpIntro = true }
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            isKeyboardVisible = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            isKeyboardVisible = false
         }
         // `.container` only — NOT `.keyboard` (the default `.all` region
         // covers both). This is what lets the floating tab bar/music player

@@ -78,10 +78,10 @@ enum RemyLocalChat {
     /// Returns a definitive, generic answer for common app/policy questions
     /// — checked before anything else, so these never wait on a plan flow
     /// or a network call.
-    static func matchFAQ(_ text: String) -> String? {
+    static func matchFAQ(_ text: String, language: AppLanguage) -> String? {
         let lower = text.lowercased()
         for entry in faqEntries where entry.keywords.contains(where: { lower.contains($0) }) {
-            return L10n.tSync(entry.key)
+            return L10n.t(entry.key, language: language)
         }
         return nil
     }
@@ -89,16 +89,45 @@ enum RemyLocalChat {
     /// `context` is every user message so far in this conversation, joined —
     /// the same rolling signal the old single-shot prompt used to build
     /// from, just accumulated turn by turn now instead of typed all at once.
-    static func reply(context: String, turnIndex: Int) -> Reply {
+    static func reply(context: String, turnIndex: Int, language: AppLanguage) -> Reply {
         if hasSignal(context) {
             let variant = turnIndex % 2
-            return Reply(text: L10n.tSync("plan.chat.native.confirm.\(variant)"), offerBuild: true)
+            return Reply(text: L10n.t("plan.chat.native.confirm.\(variant)", language: language), offerBuild: true)
         }
         let variant = turnIndex % 2
-        return Reply(text: L10n.tSync("plan.chat.native.ask.\(variant)"), offerBuild: false)
+        return Reply(text: L10n.t("plan.chat.native.ask.\(variant)", language: language), offerBuild: false)
     }
 
-    static var buildingMessage: String {
-        L10n.tSync("plan.chat.native.building.0")
+    static func buildingMessage(language: AppLanguage) -> String {
+        L10n.t("plan.chat.native.building.0", language: language)
+    }
+
+    /// Detects which of the app's 3 supported languages a single message is
+    /// written in — mirrors the "reply in the user's language" rule already
+    /// in Remy's real AI system prompt, but for the instant native layer,
+    /// which otherwise had no idea what language the user just typed in and
+    /// fell back to whatever the app's global setting happened to be. Character-
+    /// and word-level markers, not a real classifier — good enough for short
+    /// chat messages, and errs toward `fallback` (the app's current language)
+    /// when a message is too short/ambiguous to tell (e.g. "$50", "yes").
+    static func detectLanguage(_ text: String, fallback: AppLanguage) -> AppLanguage {
+        let lower = text.lowercased()
+
+        // Strong, unambiguous markers first — a single hit is enough.
+        if lower.contains(where: { "ãõ".contains($0) }) { return .pt }
+        if lower.contains(where: { "ñ¿¡".contains($0) }) { return .es }
+
+        let ptWords: Set<String> = ["não", "voce", "você", "então", "obrigado", "obrigada", "muito", "aqui", "coisa", "quero", "onde"]
+        let esWords: Set<String> = ["qué", "que", "cómo", "como", "dónde", "donde", "quiero", "gracias", "más", "está", "aquí", "por favor"]
+        let enWords: Set<String> = ["the", "you", "want", "please", "thanks", "where", "how", "what", "with", "for"]
+
+        let tokens = Set(lower.split { !$0.isLetter }.map(String.init))
+        let ptHits = tokens.intersection(ptWords).count
+        let esHits = tokens.intersection(esWords).count
+        let enHits = tokens.intersection(enWords).count
+
+        let best = [(AppLanguage.pt, ptHits), (.es, esHits), (.en, enHits)].max { $0.1 < $1.1 }
+        guard let best, best.1 > 0 else { return fallback }
+        return best.0
     }
 }
