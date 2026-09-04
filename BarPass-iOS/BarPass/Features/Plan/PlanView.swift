@@ -462,19 +462,17 @@ struct PlanView: View {
                         .padding(.vertical, 12)
                         .lineLimit(1...4)
                         .focused($isInputFocused)
-                        .toolbar {
-                            // A tap-away or a downward swipe both dismiss
-                            // the keyboard too (see the ScrollView above),
-                            // but a keyboard accessory "Done" is the most
-                            // discoverable of the three, and the one
-                            // TestFlight feedback specifically asked for.
-                            ToolbarItemGroup(placement: .keyboard) {
-                                Spacer()
-                                Button(l10n.t("plan.chat.doneKeyboard")) { isInputFocused = false }
-                                    .font(.bpScaled(14, weight: .semibold))
-                                    .foregroundStyle(amber)
-                            }
-                        }
+                        // TestFlight, 2026-09-05: a `.toolbar(placement:
+                        // .keyboard)` "Done" button used to live here, but
+                        // that placement makes SwiftUI treat this field as
+                        // having its own input-accessory view — which comes
+                        // with its OWN automatic keyboard-avoidance shift,
+                        // stacking on top of `keyboard.value`'s manual
+                        // padding below and doubling the offset (a real
+                        // screenshot showed the input rise almost off the
+                        // top of the screen). Swipe-to-dismiss and
+                        // tap-away (see the ScrollView above) already cover
+                        // dismissing the keyboard without it.
                         .bpAccessibility(label: l10n.t("night.prompt.label"), hint: l10n.t("night.prompt.hint"))
                 }
                 .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22))
