@@ -135,7 +135,22 @@ export function useConciergeChat() {
             ),
           );
         }
-        raw = raw.includes(CONTENT_MARK) ? raw.slice(raw.indexOf(CONTENT_MARK) + 1) : raw;
+        // Found by audit, 2026-09-05: if the model only ever "thinks"
+        // (reasoning_content) and the stream ends with no real content
+        // delta at all — a token-limit hit mid-reasoning, a provider
+        // hiccup — CONTENT_MARK never arrives. `raw` was left holding just
+        // the bare \x01 control byte, which then rendered as a literal
+        // stray character in the chat bubble with isThinking cleared and
+        // no error shown — a silent, confusing dead end distinct from a
+        // clean failure. Treat "reasoned but said nothing" as the failure
+        // it is, same as a network error: strip stray control bytes, and
+        // if nothing real is left, throw into the same catch block that
+        // already removes the placeholder and surfaces a real error.
+        const hadContent = raw.includes(CONTENT_MARK);
+        raw = hadContent ? raw.slice(raw.indexOf(CONTENT_MARK) + 1) : raw.replace(/[\x01\x02]/g, "");
+        if (!hadContent && raw.trim().length === 0) {
+          throw new Error("concierge_empty_response");
+        }
 
         const { text: finalText, plan, options } = splitPlanFence(raw);
         setMessages((prev) =>
