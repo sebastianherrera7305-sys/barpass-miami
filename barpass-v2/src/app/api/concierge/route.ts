@@ -39,7 +39,7 @@ const GROQ_MODEL = "llama-3.3-70b-versatile";
 const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 const NVIDIA_MODEL = "moonshotai/kimi-k3";
 
-interface Provider { name: string; apiKey: string; chatUrl: string; model: string }
+interface Provider { name: string; apiKey: string; chatUrl: string; model: string; timeoutMs: number }
 
 /** Every configured provider, in preference order — Groq first (fast),
  * NVIDIA second (slower reasoning model, but a real fallback). Previously
@@ -47,14 +47,25 @@ interface Provider { name: string; apiKey: string; chatUrl: string; model: strin
  * misconfigured Groq key (a copy-paste mistake, same class of bug as the
  * earlier NVIDIA_API_KEY= incident) took the ENTIRE Concierge down even
  * though NVIDIA_API_KEY was still valid — a single bad key shouldn't be
- * able to do that when a second real option exists. */
+ * able to do that when a second real option exists.
+ *
+ * `timeoutMs` bounds how long we wait for that provider to even START
+ * responding before moving on — 2026-09-05, a real user hit a ~60s reply
+ * with Groq configured and working (confirmed separately, same day, at a
+ * normal ~3-8s). The old retry loop only caught a provider that failed
+ * outright (non-ok status, thrown fetch); it did nothing for one that's
+ * just slow to connect, which is exactly what an intermittent upstream
+ * slowdown looks like. Groq's own normal ceiling is a few seconds, so 10s
+ * is generous; NVIDIA is a genuine 20-30s reasoning model, so it gets far
+ * more room before we give up on it too.
+ */
 function resolveProviders(): Provider[] {
   const providers: Provider[] = [];
   if (process.env.GROQ_API_KEY) {
-    providers.push({ name: "groq", apiKey: process.env.GROQ_API_KEY, chatUrl: GROQ_CHAT_URL, model: GROQ_MODEL });
+    providers.push({ name: "groq", apiKey: process.env.GROQ_API_KEY, chatUrl: GROQ_CHAT_URL, model: GROQ_MODEL, timeoutMs: 10_000 });
   }
   if (process.env.NVIDIA_API_KEY) {
-    providers.push({ name: "nvidia", apiKey: process.env.NVIDIA_API_KEY, chatUrl: NVIDIA_CHAT_URL, model: NVIDIA_MODEL });
+    providers.push({ name: "nvidia", apiKey: process.env.NVIDIA_API_KEY, chatUrl: NVIDIA_CHAT_URL, model: NVIDIA_MODEL, timeoutMs: 45_000 });
   }
   return providers;
 }
@@ -97,6 +108,8 @@ export async function POST(request: Request) {
 
   let upstream: Response | null = null;
   for (const provider of providers) {
+    const timeoutController = new AbortController();
+    const timeoutId = setTimeout(() => timeoutController.abort(), provider.timeoutMs);
     try {
       const attempt = await fetch(provider.chatUrl, {
         method: "POST",
@@ -115,6 +128,7 @@ export async function POST(request: Request) {
           max_tokens: 2048,
           stream: true,
         }),
+        signal: timeoutController.signal,
       });
       if (attempt.ok && attempt.body) {
         upstream = attempt;
@@ -122,7 +136,10 @@ export async function POST(request: Request) {
       }
       console.error(`Concierge ${provider.name} call failed: HTTP ${attempt.status}`, await attempt.text().catch(() => ""));
     } catch (e) {
-      console.error(`Concierge ${provider.name} fetch failed:`, e);
+      const isTimeout = e instanceof Error && e.name === "AbortError";
+      console.error(`Concierge ${provider.name} fetch ${isTimeout ? `timed out after ${provider.timeoutMs}ms` : "failed"}:`, isTimeout ? "" : e);
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
