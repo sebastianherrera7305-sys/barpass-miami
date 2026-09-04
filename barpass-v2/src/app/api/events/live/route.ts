@@ -76,8 +76,17 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "upstream_unavailable" }, { status: 502 });
   }
 
-  const data = await upstream.json();
-  const rawEvents: any[] = data._embedded?.events ?? [];
+  interface TicketmasterEvent {
+    id: string;
+    name: string;
+    url: string;
+    dates?: { start?: { localDate?: string; localTime?: string } };
+    images?: Array<{ url: string; width: number; ratio?: string }>;
+    priceRanges?: Array<{ min?: number; max?: number }>;
+    _embedded?: { venues?: Array<{ name?: string; city?: { name?: string } }> };
+  }
+  const data = (await upstream.json()) as { _embedded?: { events?: TicketmasterEvent[] } };
+  const rawEvents: TicketmasterEvent[] = data._embedded?.events ?? [];
 
   const events: LiveEvent[] = rawEvents.map((e) => {
     const venue = e._embedded?.venues?.[0];

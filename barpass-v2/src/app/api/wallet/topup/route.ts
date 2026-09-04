@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requireUser } from "@/lib/supabase/require-user";
+import { withRetry } from "@/lib/with-retry";
 
 /**
  * POST /api/wallet/topup
@@ -74,11 +75,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "stripe_error", message: stripeErr.message }, { status: 500 });
   }
 
-  const { data: rpcData, error: rpcError } = await supabase.rpc("adjust_wallet_balance", {
-    p_user_id: user.id,
-    p_amount: amount,
-    p_kind: "topup",
-  });
+  // Charge already succeeded at Stripe — retry the credit a few times
+  // before giving up, so a transient Supabase blip doesn't turn a good
+  // charge into an uncredited one. See src/lib/with-retry.ts.
+  const { data: rpcData, error: rpcError } = await withRetry(() =>
+    supabase.rpc("adjust_wallet_balance", {
+      p_user_id: user.id,
+      p_amount: amount,
+      p_kind: "topup",
+    }),
+  );
 
   if (rpcError || !rpcData?.[0]) {
     // Charge already succeeded — surface clearly rather than silently losing the top-up.

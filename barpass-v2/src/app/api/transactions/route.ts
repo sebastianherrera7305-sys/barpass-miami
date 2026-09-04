@@ -4,6 +4,7 @@ import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requireUser } from "@/lib/supabase/require-user";
 import { requireAgeVerified21 } from "@/lib/age-verification";
+import { withRetry } from "@/lib/with-retry";
 
 /**
  * POST /api/transactions
@@ -133,23 +134,28 @@ export async function POST(request: Request) {
   }
 
   const id = `txn_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  const { data: order, error: insertError } = await supabase
-    .from("orders")
-    .insert({
-      id,
-      idempotency_key: idempotencyKey,
-      vendor_id: vendorId,
-      customer_id: user.id,
-      items,
-      subtotal,
-      tax,
-      total,
-      payment_method: paymentMethod,
-      stripe_payment_intent_id: paymentIntentId,
-      status: "completed",
-    })
-    .select()
-    .single();
+  // Charge already succeeded at Stripe — retry the write a few times before
+  // giving up, so a transient Supabase blip doesn't turn a good charge into
+  // an unrecorded one. See src/lib/with-retry.ts.
+  const { data: order, error: insertError } = await withRetry(() =>
+    supabase
+      .from("orders")
+      .insert({
+        id,
+        idempotency_key: idempotencyKey,
+        vendor_id: vendorId,
+        customer_id: user.id,
+        items,
+        subtotal,
+        tax,
+        total,
+        payment_method: paymentMethod,
+        stripe_payment_intent_id: paymentIntentId,
+        status: "completed",
+      })
+      .select()
+      .single(),
+  );
 
   if (insertError) {
     // Charge already succeeded at Stripe — surface clearly rather than silently losing the order.
