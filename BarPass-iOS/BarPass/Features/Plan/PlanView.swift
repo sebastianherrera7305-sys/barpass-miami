@@ -563,6 +563,17 @@ struct PlanView: View {
                         updateMessage(assistantId) { $0.isThinking = false; $0.text = live }
                     }
                 }
+                // Found by audit, 2026-09-05: if the model only ever
+                // "thinks" (reasoning_content) and the stream ends with no
+                // real content delta at all — a token-limit hit mid-
+                // reasoning, a provider hiccup — `raw` stays empty here.
+                // That used to silently render as a "…" bubble with no
+                // error and no retry affordance, a confusing dead end.
+                // Same web hook fix, same reasoning: treat "reasoned but
+                // said nothing" as the real failure it is.
+                guard !raw.isEmpty else {
+                    throw APIClient.APIClientError.server(L10n.tSync("plan.ai.unavailable"))
+                }
                 let (finalText, plan, options) = NightPlan.extractChatReplyParts(raw, venues: venues)
                 updateMessage(assistantId) {
                     $0.text = finalText.isEmpty ? "…" : finalText

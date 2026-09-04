@@ -58,6 +58,7 @@ enum APIClient {
             case "rate_limited":         return L10n.tSync("api.error.rateLimited")
             case "invalid_payload":      return L10n.tSync("api.error.invalidPayload")
             case "payments_not_configured": return L10n.tSync("api.error.paymentsNotConfigured")
+            case "age_verification_required": return L10n.tSync("api.error.ageVerificationRequired")
             case "ai_not_configured", "ai_unavailable": return L10n.tSync("plan.ai.unavailable")
             default: break
             }
