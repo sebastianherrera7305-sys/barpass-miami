@@ -29,6 +29,26 @@ struct PlanChatMessage: Identifiable, Codable, Equatable {
     }
 }
 
+// MARK: - Chat session model
+
+/// One saved conversation — Plan is now multi-session, like ChatGPT/Claude,
+/// instead of one single ever-growing thread. `title` is derived from the
+/// first real user message the first time it's set (see
+/// `PlanView.finalizeCurrentSessionTitle()`); until then it's the localized
+/// placeholder.
+struct PlanChatSession: Identifiable, Codable, Equatable {
+    let id: UUID
+    var title: String?
+    var messages: [PlanChatMessage]
+    let createdAt: Date
+    var updatedAt: Date
+
+    init(id: UUID = UUID(), title: String? = nil, messages: [PlanChatMessage] = [], createdAt: Date = .now, updatedAt: Date = .now) {
+        self.id = id; self.title = title; self.messages = messages
+        self.createdAt = createdAt; self.updatedAt = updatedAt
+    }
+}
+
 struct PlanView: View {
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
@@ -44,17 +64,31 @@ struct PlanView: View {
     @State private var chatErrorMessage: String?
     @State private var streamTask: Task<Void, Never>?
     @State private var displayName: String?
+    @State private var sessions: [PlanChatSession] = []
+    @State private var currentSessionId: UUID = UUID()
+    @State private var showHistory = false
+    @State private var showCleanupPrompt = false
 
     private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
     private let amberB = Color(red: 0.98, green: 0.86, blue: 0.50)
 
-    /// Chat history mirrored to disk — an app termination mid-conversation
-    /// (common under memory pressure) shouldn't silently wipe it the way a
-    /// pure @State plan used to.
-    private static let messagesKey = "bp_plan_chat_messages"
+    /// Past this many saved sessions, starting a new chat offers to clear
+    /// out the oldest ones instead of letting the list grow forever.
+    private static let cleanupThreshold = 10
+    private static let sessionsKeepAfterCleanup = 6
 
-    private func persistMessages() {
+    private static let sessionsKey = "bp_plan_chat_sessions"
+    private static let currentSessionIdKey = "bp_plan_current_session_id"
+    /// Pre-multi-session storage (a single flat thread) — migrated into a
+    /// session on first launch of this version, then removed.
+    private static let legacyMessagesKey = "bp_plan_chat_messages"
+
+    /// Writes the in-memory `messages` back into their session inside
+    /// `sessions`, then the whole array to disk — the session is the unit
+    /// of truth on disk; `messages`/`currentSessionId` are just the
+    /// in-memory view of "whichever one is open right now".
+    private func persistCurrentSession() {
         // Never persist a message mid-stream — a resumed app can't pick a
         // network stream back up, so it would be stuck showing "thinking"
         // forever. Flatten those to their last-known text first.
@@ -64,31 +98,113 @@ struct PlanView: View {
             copy.isThinking = false
             return copy
         }
-        if let data = try? JSONEncoder().encode(toSave) {
-            UserDefaults.standard.set(data, forKey: Self.messagesKey)
+        if let idx = sessions.firstIndex(where: { $0.id == currentSessionId }) {
+            sessions[idx].messages = toSave
+            sessions[idx].updatedAt = .now
+            if sessions[idx].title == nil, let firstUserText = toSave.first(where: { $0.role == "user" })?.text {
+                sessions[idx].title = String(firstUserText.prefix(48))
+            }
+        } else {
+            sessions.append(PlanChatSession(id: currentSessionId, messages: toSave))
         }
+        if let data = try? JSONEncoder().encode(sessions) {
+            UserDefaults.standard.set(data, forKey: Self.sessionsKey)
+        }
+        UserDefaults.standard.set(currentSessionId.uuidString, forKey: Self.currentSessionIdKey)
     }
+
+    /// Backwards-compat alias — every call site just means "save what's
+    /// changed", which is always the current session now.
+    private func persistMessages() { persistCurrentSession() }
 
     private func restoreMessages() {
-        guard messages.isEmpty else { return }
-        if let data = UserDefaults.standard.data(forKey: Self.messagesKey),
-           let restored = try? JSONDecoder().decode([PlanChatMessage].self, from: data) {
-            messages = restored
+        guard sessions.isEmpty else { return }
+        if let data = UserDefaults.standard.data(forKey: Self.sessionsKey),
+           let restored = try? JSONDecoder().decode([PlanChatSession].self, from: data) {
+            sessions = restored
+        } else if let legacyData = UserDefaults.standard.data(forKey: Self.legacyMessagesKey),
+                  let legacyMessages = try? JSONDecoder().decode([PlanChatMessage].self, from: legacyData),
+                  !legacyMessages.isEmpty {
+            // One-time migration from the single-thread era.
+            sessions = [PlanChatSession(messages: legacyMessages)]
+            UserDefaults.standard.removeObject(forKey: Self.legacyMessagesKey)
+        }
+
+        if let savedIdString = UserDefaults.standard.string(forKey: Self.currentSessionIdKey),
+           let savedId = UUID(uuidString: savedIdString),
+           let session = sessions.first(where: { $0.id == savedId }) {
+            currentSessionId = savedId
+            messages = session.messages
+        } else if let mostRecent = sessions.max(by: { $0.updatedAt < $1.updatedAt }) {
+            currentSessionId = mostRecent.id
+            messages = mostRecent.messages
+        }
+        // Else: no sessions at all yet — currentSessionId keeps its fresh
+        // UUID and messages stays empty; greetIfNeeded() creates the first one.
+    }
+
+    /// Called from `AuthService.signOut()`. Chat history is plain
+    /// UserDefaults, not scoped per account — without this, signing out and
+    /// into a different account on the same device left the previous
+    /// account's sessions (including a greeting with their display name
+    /// baked in) sitting there for the next account.
+    static func clearLocalState() {
+        UserDefaults.standard.removeObject(forKey: sessionsKey)
+        UserDefaults.standard.removeObject(forKey: currentSessionIdKey)
+        UserDefaults.standard.removeObject(forKey: legacyMessagesKey)
+    }
+
+    /// Saves the current conversation and opens a brand new one — a real
+    /// "New chat" like ChatGPT/Claude, not just clearing the thread.
+    /// TestFlight, 2026-09-05: "que se pueda guardar... que después que ya
+    /// tenga diez chats, le pregunte si podemos empezar a borrar."
+    private func startNewChat() {
+        streamTask?.cancel()
+        persistCurrentSession()
+        if sessions.count >= Self.cleanupThreshold {
+            showCleanupPrompt = true
+        }
+        currentSessionId = UUID()
+        messages = []
+        chatErrorMessage = nil
+        greetIfNeeded()
+    }
+
+    private func loadSession(_ session: PlanChatSession) {
+        streamTask?.cancel()
+        persistCurrentSession()
+        currentSessionId = session.id
+        messages = session.messages
+        chatErrorMessage = nil
+        showHistory = false
+    }
+
+    private func deleteSession(_ id: UUID) {
+        sessions.removeAll { $0.id == id }
+        if let data = try? JSONEncoder().encode(sessions) {
+            UserDefaults.standard.set(data, forKey: Self.sessionsKey)
+        }
+        if id == currentSessionId {
+            if let mostRecent = sessions.max(by: { $0.updatedAt < $1.updatedAt }) {
+                currentSessionId = mostRecent.id
+                messages = mostRecent.messages
+            } else {
+                currentSessionId = UUID()
+                messages = []
+                greetIfNeeded()
+            }
         }
     }
 
-    /// Called from `AuthService.signOut()`. Chat history — including the
-    /// opening greeting, which bakes in whatever `display_name` was fetched
-    /// at generation time ("<name> — <line>") — is plain UserDefaults, not
-    /// scoped per account. Without this, signing out and into a different
-    /// account on the same device left the previous account's personalized
-    /// greeting sitting in the thread forever: `restoreMessages()` sees a
-    /// non-empty history and `greetIfNeeded()`'s `guard messages.isEmpty`
-    /// never regenerates it for the new session. This is what "Remi shows
-    /// the wrong name" actually was — not a bad concatenation, a stale
-    /// cached message from the account that used the device before.
-    static func clearLocalState() {
-        UserDefaults.standard.removeObject(forKey: messagesKey)
+    /// Deletes every session except the `sessionsKeepAfterCleanup` most
+    /// recently updated ones (the current one is always kept — it's brand
+    /// new and untouched by this point, so it's already the most recent).
+    private func cleanupOldSessions() {
+        let sorted = sessions.sorted { $0.updatedAt > $1.updatedAt }
+        sessions = Array(sorted.prefix(Self.sessionsKeepAfterCleanup))
+        if let data = try? JSONEncoder().encode(sessions) {
+            UserDefaults.standard.set(data, forKey: Self.sessionsKey)
+        }
     }
 
     private var suggestions: [String] {
@@ -192,10 +308,38 @@ struct PlanView: View {
                 .tracking(3)
                 .foregroundStyle(amber)
             Spacer()
+            Button { showHistory = true } label: {
+                Image(systemName: "clock.arrow.circlepath")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .frame(width: 34, height: 34)
+                    .background(Color.white.opacity(0.07), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .bpAccessibility(label: l10n.t("plan.chat.history"), isButton: true)
+
+            Button { startNewChat() } label: {
+                Image(systemName: "square.and.pencil")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .frame(width: 34, height: 34)
+                    .background(Color.white.opacity(0.07), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .bpAccessibility(label: l10n.t("plan.chat.newChat"), isButton: true)
         }
         .padding(.horizontal, 20)
         .padding(.top, 56)
         .padding(.bottom, 8)
+        .sheet(isPresented: $showHistory) {
+            PlanHistorySheet(sessions: sessions, currentSessionId: currentSessionId, onSelect: loadSession, onDelete: deleteSession)
+        }
+        .alert(l10n.t("plan.chat.cleanup.title"), isPresented: $showCleanupPrompt) {
+            Button(l10n.t("plan.chat.cleanup.deleteOld"), role: .destructive) { cleanupOldSessions() }
+            Button(l10n.t("plan.chat.cleanup.keepAll"), role: .cancel) {}
+        } message: {
+            Text(l10n.t("plan.chat.cleanup.message"))
+        }
     }
 
     /// A random, casual "what are we doing tonight" opener — mirrors how a
@@ -697,6 +841,98 @@ struct NightPlanView: View {
         .padding(18)
         .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Color.bpInk.opacity(0.08)))
+    }
+}
+
+// MARK: - Chat history
+
+/// Past conversations, grouped by month like ChatGPT/Claude's own sidebar —
+/// "que los classifique por mes". Newest session/month first.
+private struct PlanHistorySheet: View {
+    let sessions: [PlanChatSession]
+    let currentSessionId: UUID
+    let onSelect: (PlanChatSession) -> Void
+    let onDelete: (UUID) -> Void
+    @ObservedObject private var l10n = L10n.shared
+    @Environment(\.dismiss) private var dismiss
+    private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
+
+    private var monthGroups: [(label: String, sessions: [PlanChatSession])] {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: l10n.language.rawValue)
+        formatter.setLocalizedDateFormatFromTemplate("MMMM yyyy")
+
+        let sorted = sessions.sorted { $0.updatedAt > $1.updatedAt }
+        var order: [String] = []
+        var buckets: [String: [PlanChatSession]] = [:]
+        for session in sorted {
+            let label = formatter.string(from: session.updatedAt).capitalized
+            if buckets[label] == nil { order.append(label) }
+            buckets[label, default: []].append(session)
+        }
+        return order.map { (label: $0, sessions: buckets[$0] ?? []) }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if sessions.isEmpty {
+                    VStack(spacing: 8) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.system(size: 28))
+                            .foregroundStyle(.white.opacity(0.25))
+                        Text(l10n.t("plan.chat.history.empty"))
+                            .font(.bpScaled(14))
+                            .foregroundStyle(.white.opacity(0.4))
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List {
+                        ForEach(monthGroups, id: \.label) { group in
+                            Section(group.label) {
+                                ForEach(group.sessions) { session in
+                                    Button { onSelect(session) } label: {
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 3) {
+                                                Text(session.title ?? l10n.t("plan.chat.history.untitled"))
+                                                    .font(.bpScaled(14, weight: .semibold))
+                                                    .foregroundStyle(.white)
+                                                    .lineLimit(1)
+                                                Text(session.updatedAt, style: .date)
+                                                    .font(.bpScaled(11))
+                                                    .foregroundStyle(.white.opacity(0.4))
+                                            }
+                                            Spacer()
+                                            if session.id == currentSessionId {
+                                                Circle().fill(amber).frame(width: 6, height: 6)
+                                            }
+                                        }
+                                    }
+                                    .listRowBackground(Color(red: 0.08, green: 0.08, blue: 0.09))
+                                }
+                                .onDelete { offsets in
+                                    for index in offsets { onDelete(group.sessions[index].id) }
+                                }
+                            }
+                        }
+                    }
+                    .scrollContentBackground(.hidden)
+                }
+            }
+            .background(Color(red: 0.04, green: 0.04, blue: 0.045).ignoresSafeArea())
+            .navigationTitle(l10n.t("plan.chat.history"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color(red: 0.04, green: 0.04, blue: 0.045), for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(l10n.t("common.done")) { dismiss() }
+                        .foregroundStyle(amber)
+                }
+            }
+        }
+        .preferredColorScheme(.dark)
     }
 }
 

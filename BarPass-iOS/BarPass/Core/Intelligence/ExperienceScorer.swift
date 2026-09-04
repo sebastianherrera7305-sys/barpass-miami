@@ -57,8 +57,18 @@ enum ExperienceScorer {
             .split { !$0.isLetter }.map(String.init).filter { $0.count > 3 }
         let keys = Set(vibeKeys + promptKeys + intentKeys + companyKeys)
 
+        // Deliberately excludes v.name — TestFlight, 2026-09-05: a Miami
+        // local flagged the "Party" results as embarrassing, and the cause
+        // was this exact haystack matching keywords as raw substrings of
+        // the venue's NAME text, not just its real type/vibe/genre data.
+        // "house" (a real music-genre keyword) matched any venue whose name
+        // happens to contain "house" — "Yard House" and "Miller's Ale
+        // House" (national casual-dining chains, zero relation to house
+        // music) both qualified as "Party" venues this way. Venue name is
+        // marketing copy, not structured data; it should never be a
+        // keyword-match source.
         func haystack(_ v: BarPassVenue) -> String {
-            ([v.type.rawValue, v.name, v.neighborhood] + v.vibes + v.tags
+            ([v.type.rawValue, v.neighborhood] + v.vibes + v.tags
                 + v.musicGenres.map { $0.rawValue }).joined(separator: " ").lowercased()
         }
         func matchedExperienceTags(_ v: BarPassVenue) -> [ExperienceTag] {

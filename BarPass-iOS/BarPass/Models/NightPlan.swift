@@ -61,8 +61,12 @@ struct NightPlan: Identifiable, Codable, Hashable {
         let promptKeys = Set(
             prompt.lowercased().split { !$0.isLetter }.map(String.init).filter { $0.count > 3 }
         )
+        // Deliberately excludes v.name — see ExperienceScorer.swift's
+        // identical fix: matching keywords as raw substrings of a venue's
+        // NAME text produces false positives ("Yard House" / "Miller's Ale
+        // House" matching the "house" music-genre keyword).
         func haystack(_ v: BarPassVenue) -> String {
-            ([v.type.rawValue, v.name, v.neighborhood] + v.vibes + v.tags + v.musicGenres.map(\.rawValue))
+            ([v.type.rawValue, v.neighborhood] + v.vibes + v.tags + v.musicGenres.map(\.rawValue))
                 .joined(separator: " ").lowercased()
         }
         func promptScore(_ v: BarPassVenue) -> Double {

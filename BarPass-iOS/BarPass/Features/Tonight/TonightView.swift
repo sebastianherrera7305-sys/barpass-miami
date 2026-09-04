@@ -47,7 +47,11 @@ struct TonightView: View {
         if let marker = mood.keywords.first, marker.hasPrefix("age:") {
             return venue.ageBracketIds.contains(String(marker.dropFirst(4)))
         }
-        let haystack = ([venue.type.rawValue, venue.name] + venue.vibes + venue.tags
+        // Deliberately excludes venue.name — see ExperienceScorer.swift's
+        // identical fix for why: raw substring matching against a venue's
+        // NAME text produces false positives no keyword-intent check can
+        // catch ("Yard House" / "Miller's Ale House" matching "house").
+        let haystack = ([venue.type.rawValue, venue.neighborhood] + venue.vibes + venue.tags
             + venue.musicGenres.map { $0.rawValue }).joined(separator: " ").lowercased()
         return mood.keywords.contains { haystack.contains($0) }
     }
