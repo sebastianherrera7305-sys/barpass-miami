@@ -88,11 +88,17 @@ struct TripsListView: View {
 
     @MainActor
     private func joinByCode() async {
-        guard !joinCode.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        // TestFlight, 2026-09-05: "no puedo agregar amigos" traced to a
+        // pasted code carrying a trailing space/newline (near-universal
+        // when copying a shared code from Messages/WhatsApp) — the server
+        // RPC now trims too (defense in depth), but there's no reason to
+        // even send the untrimmed string.
+        let cleanCode = joinCode.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanCode.isEmpty else { return }
         isJoiningByCode = true
         joinError = nil
         do {
-            try await tripStore.joinByInviteCode(joinCode)
+            try await tripStore.joinByInviteCode(cleanCode)
             isJoiningByCode = false
             joinCode = ""
             showJoinByCode = false

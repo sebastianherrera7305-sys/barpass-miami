@@ -93,7 +93,14 @@ as $$
 declare
     v_trip public.trips;
 begin
-    select * into v_trip from public.trips where invite_code = upper(p_code);
+    -- trim() matters in practice: a code shared via Messages/WhatsApp and
+    -- pasted back almost always carries a leading/trailing space or a
+    -- trailing newline. Confirmed directly — "SPACE1 " (one trailing
+    -- space) against a real "SPACE1" code failed with invite_not_found
+    -- before this fix, which is exactly what "no puedo agregar amigos"
+    -- looks like: not a broken feature, an exact-match RPC punishing a
+    -- completely normal copy-paste.
+    select * into v_trip from public.trips where invite_code = upper(trim(p_code));
     if not found then
         raise exception 'invite_not_found';
     end if;
