@@ -274,6 +274,42 @@ export async function getVenues(): Promise<Venue[]> {
   return fetchVenues();
 }
 
+// Separate, per-city cache for /api/concierge specifically — that route
+// used to call getVenues() and filter by city client-side, which meant
+// EVERY chat message fetched all 1846 venues across all 23 cities (two
+// full 1000-row pages from Supabase) just to use ~100-200 of them for one
+// city. "es muy lento" investigation, 2026-09-05: this runs before the AI
+// call even starts, on every single message, on every cold serverless
+// instance (the shared 60s cache doesn't survive a cold start, and low
+// traffic means most invocations ARE a cold instance) — pure overhead the
+// model latency numbers never showed because it's a separate step.
+const CITY_CACHE_TTL_MS = 60_000;
+const cityVenueCache = new Map<string, { data: Venue[]; ts: number }>();
+
+export async function getVenuesByCity(city: string): Promise<Venue[]> {
+  const cached = cityVenueCache.get(city);
+  if (cached && Date.now() - cached.ts < CITY_CACHE_TTL_MS) {
+    return cached.data;
+  }
+  if (!isSupabaseConfigured()) {
+    return VENUES.filter((v) => v.city === city);
+  }
+  try {
+    const data = await restGetAll<DbVenue>(
+      `venues?select=*&city=eq.${encodeURIComponent(city)}&excluded_reason=is.null` +
+        "&or=(business_status.is.null,business_status.neq.CLOSED_PERMANENTLY)" +
+        "&order=name",
+    );
+    const venues = data.map(mapDbVenue);
+    cityVenueCache.set(city, { data: venues, ts: Date.now() });
+    return venues;
+  } catch (e) {
+    console.warn(`Supabase venue fetch failed for city=${city}, falling back to full catalog:`, e);
+    const all = await fetchVenues();
+    return all.filter((v) => v.city === city);
+  }
+}
+
 export async function getVenueBySlug(slug: string): Promise<Venue | null> {
   const venues = await fetchVenues();
   return venues.find((v) => v.slug === slug) ?? null;

@@ -1,4 +1,4 @@
-import { getVenues } from "@/features/venues/services/venue-service";
+import { getVenuesByCity } from "@/features/venues/services/venue-service";
 import { buildConciergeSystemPrompt, selectRelevantVenues } from "@/features/ai/services/concierge-prompt";
 import { conciergeChatRequestSchema } from "@/features/ai/services/plan-schema";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -99,10 +99,13 @@ export async function POST(request: Request) {
     return Response.json({ error: "ai_not_configured" }, { status: 503 });
   }
 
-  const allVenues = await getVenues();
   const targetCity = parsed.data.city ?? "Miami";
-  const cityVenues = allVenues.filter((v) => v.city === targetCity);
-  const venues = cityVenues.length > 0 ? cityVenues : allVenues;
+  let venues = await getVenuesByCity(targetCity);
+  // Unknown/mistyped city (empty result) — fall back to Miami rather than
+  // the full 23-city catalog, keeping the same fast, scoped fetch.
+  if (venues.length === 0 && targetCity !== "Miami") {
+    venues = await getVenuesByCity("Miami");
+  }
   const conversationText = parsed.data.messages.map((m) => m.content).join(" ");
   const systemInstruction = buildConciergeSystemPrompt(selectRelevantVenues(venues, conversationText));
 
