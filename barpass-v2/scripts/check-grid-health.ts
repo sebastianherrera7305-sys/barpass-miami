@@ -13,6 +13,8 @@
  * without needing a real alerting pipeline built yet.
  */
 import { createClient } from "@supabase/supabase-js";
+// @ts-expect-error — mismo fallback de transporte que los otros scripts
+import ws from "ws";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -26,7 +28,9 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
 }
 
 async function main() {
-  const supabase = createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!);
+  const supabase = createClient(SUPABASE_URL!, SERVICE_ROLE_KEY!, {
+    realtime: { transport: ws as unknown as typeof WebSocket },
+  });
   const { data, error } = await supabase
     .from("cron_heartbeats")
     .select("job_name, last_run_at")
