@@ -220,6 +220,11 @@ struct VenueDetailView: View {
 
             divider
 
+            VenueMediaSection(venue: venue)
+                .padding(.horizontal, BPSpacing.lg)
+
+            divider
+
             reviewsSection
                 .padding(.horizontal, BPSpacing.lg)
 

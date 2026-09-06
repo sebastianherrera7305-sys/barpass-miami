@@ -120,6 +120,7 @@
 		FF000002000000000000AA03 /* VenueDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA03 /* VenueDetailView.swift */; };
 		FF000002000000000000AA04 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA04 /* ExploreView.swift */; };
 		FF000002000000000000AA05 /* PlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA05 /* PlanView.swift */; };
+		CD0446CD2FE22E4C96DB1EC9 /* VenueMediaRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */; };
 		EF2D822B1ED09EAD1CF53366 /* RemyLocalChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 981C73E1C26EF3207D31A9F2 /* RemyLocalChat.swift */; };
 		FF000002000000000000AA06 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA06 /* ProfileView.swift */; };
 		FF000002000000000000AA07 /* OnboardingVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA07 /* OnboardingVideoView.swift */; };
@@ -168,6 +169,7 @@
 		TS0000020000000000000001 /* TripStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS0000010000000000000001 /* TripStore.swift */; };
 		VEVW04000000000000RP01 /* VerifyEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VEVW03000000000000RP01 /* VerifyEmailView.swift */; };
 		VPSC02000000000000RP01 /* VenuePostsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = VPSC01000000000000RP01 /* VenuePostsSection.swift */; };
+		AA8250A1626D2011294B038D /* VenueMediaSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2F90A7EFCEB52EB5376061 /* VenueMediaSection.swift */; };
 		VPST02000000000000RP01 /* VenuePost.swift in Sources */ = {isa = PBXBuildFile; fileRef = VPST01000000000000RP01 /* VenuePost.swift */; };
 		VTS004000000000000RP01 /* VenueTimeStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = VTS003000000000000RP01 /* VenueTimeStatus.swift */; };
 		WLT002000000000000RP01 /* WalletService.swift in Sources */ = {isa = PBXBuildFile; fileRef = WLT001000000000000RP01 /* WalletService.swift */; };
@@ -326,6 +328,7 @@
 		FF000001000000000000AA03 /* VenueDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueDetailView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA04 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA05 /* PlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanView.swift; sourceTree = "<group>"; };
+		3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaRepository.swift; path = BarPass/Repositories/VenueMediaRepository.swift; sourceTree = SOURCE_ROOT; };
 		981C73E1C26EF3207D31A9F2 /* RemyLocalChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemyLocalChat.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA06 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA07 /* OnboardingVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingVideoView.swift; sourceTree = "<group>"; };
@@ -374,6 +377,7 @@
 		TS0000010000000000000001 /* TripStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripStore.swift; path = BarPass/Features/Stores/TripStore.swift; sourceTree = SOURCE_ROOT; };
 		VEVW03000000000000RP01 /* VerifyEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerifyEmailView.swift; path = BarPass/Features/Auth/VerifyEmailView.swift; sourceTree = SOURCE_ROOT; };
 		VPSC01000000000000RP01 /* VenuePostsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenuePostsSection.swift; path = BarPass/Features/Tonight/VenuePostsSection.swift; sourceTree = SOURCE_ROOT; };
+		FE2F90A7EFCEB52EB5376061 /* VenueMediaSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaSection.swift; path = BarPass/Features/Tonight/VenueMediaSection.swift; sourceTree = SOURCE_ROOT; };
 		VPST01000000000000RP01 /* VenuePost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenuePost.swift; path = BarPass/Models/VenuePost.swift; sourceTree = SOURCE_ROOT; };
 		VTS003000000000000RP01 /* VenueTimeStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueTimeStatus.swift; path = BarPass/Core/Services/VenueTimeStatus.swift; sourceTree = SOURCE_ROOT; };
 		WLT001000000000000RP01 /* WalletService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WalletService.swift; path = BarPass/Core/Services/WalletService.swift; sourceTree = SOURCE_ROOT; };
@@ -606,6 +610,7 @@
 				5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */,
 				F34A3B502C8F3F2C59513E5C /* ChapterMembersRepository.swift */,
 				C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */,
+				3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */,
 				FD933F1F6EF039E08FDF1009 /* ChapterEventsRepository.swift */,
 				3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */,
 				3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */,
@@ -656,6 +661,7 @@
 				AMPS01000000000000RP01 /* AppleMusicPlaybackService.swift */,
 				FAVS01000000000000RP01 /* FavoritesStore.swift */,
 				VPSC01000000000000RP01 /* VenuePostsSection.swift */,
+				FE2F90A7EFCEB52EB5376061 /* VenueMediaSection.swift */,
 				PREP01000000000000RP01 /* PostRepository.swift */,
 				VPST01000000000000RP01 /* VenuePost.swift */,
 				GAMF01000000000000RP01 /* GamificationView.swift */,
@@ -1022,6 +1028,7 @@
 				AMPS02000000000000RP01 /* AppleMusicPlaybackService.swift in Sources */,
 				FAVS02000000000000RP01 /* FavoritesStore.swift in Sources */,
 				VPSC02000000000000RP01 /* VenuePostsSection.swift in Sources */,
+				AA8250A1626D2011294B038D /* VenueMediaSection.swift in Sources */,
 				PREP02000000000000RP01 /* PostRepository.swift in Sources */,
 				VPST02000000000000RP01 /* VenuePost.swift in Sources */,
 				GAMF02000000000000RP01 /* GamificationView.swift in Sources */,
@@ -1078,6 +1085,7 @@
 				E453AE48EC805F573934230C /* ChapterChatRepository.swift in Sources */,
 				94D790F5FBEEF3EA89E25DAB /* ChapterMembersRepository.swift in Sources */,
 				19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */,
+				CD0446CD2FE22E4C96DB1EC9 /* VenueMediaRepository.swift in Sources */,
 				11AD2991A5DD4361C98E8012 /* ChapterEventsRepository.swift in Sources */,
 				39E22AF8EE155DF7FC352FBA /* BirthdateRepository.swift in Sources */,
 				6653697AF565692E1B2F279B /* VenueCheckinRepository.swift in Sources */,
