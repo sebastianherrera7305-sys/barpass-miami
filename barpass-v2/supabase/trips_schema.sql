@@ -100,7 +100,8 @@ begin
     -- before this fix, which is exactly what "no puedo agregar amigos"
     -- looks like: not a broken feature, an exact-match RPC punishing a
     -- completely normal copy-paste.
-    select * into v_trip from public.trips where invite_code = upper(trim(p_code));
+    -- trim() alone leaves newlines/tabs; strip every whitespace char.
+    select * into v_trip from public.trips where invite_code = upper(regexp_replace(p_code, '\s', '', 'g'));
     if not found then
         raise exception 'invite_not_found';
     end if;
