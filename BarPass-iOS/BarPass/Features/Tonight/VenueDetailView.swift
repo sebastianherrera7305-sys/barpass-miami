@@ -183,6 +183,12 @@ struct VenueDetailView: View {
                     .padding(.horizontal, BPSpacing.lg)
             }
 
+            if let guide = VenueInsideGuide.guide(for: venue.id) {
+                divider
+                VenueInsideSection(venue: venue, guide: guide)
+                    .padding(.horizontal, BPSpacing.lg)
+            }
+
             divider
 
             timingSection
