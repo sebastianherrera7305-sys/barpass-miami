@@ -9,7 +9,11 @@ import type { Venue } from "@/types";
  * keeping only the top N keeps quality (still picks real matches) while
  * cutting the context the model has to reason over.
  */
-export function selectRelevantVenues(venues: Venue[], conversationText: string, limit = 60): Venue[] {
+// 35, not 60 (2026-09-06): the 60-venue digest was ~5,000 tokens of prompt
+// on every turn; measured in production at 14-22s per reply even on the fast
+// model. A tap-first chat needs 2-4 stops, and the scorer already ranks by
+// fit — the bottom half of 60 was never getting picked.
+export function selectRelevantVenues(venues: Venue[], conversationText: string, limit = 35): Venue[] {
   if (venues.length <= limit) return venues;
   const text = conversationText.toLowerCase();
   const budgetMatch = text.match(/\$?\s*(\d{2,4})/);
@@ -164,7 +168,7 @@ When (and only when) you're delivering a plan — new or updated — end your me
 }
 \`\`\`
 
-"estimatedSpend" and "totalEstimate" are NUMBERS (e.g. 40), never strings (never "40" or "$40"). Always include ALL stops for the night in "stops" — never just one stop for a full night out. The text before the block is what the user reads as your chat message — keep it short (1-3 sentences), it is NOT a caption for the JSON, the JSON renders as its own card. Never put a plan block in a message that's just answering a question with no plan change.
+"venueId" MUST be the exact value after "id:" in that venue's CATALOG line (a UUID like 4c8cba7a-…) — never the slug, never the name. "venueSlug" is the value after "slug:". "estimatedSpend" and "totalEstimate" are NUMBERS (e.g. 40), never strings (never "40" or "$40"). Always include ALL stops for the night in "stops" — never just one stop for a full night out. The text before the block is what the user reads as your chat message — keep it short (1-3 sentences), it is NOT a caption for the JSON, the JSON renders as its own card. Never put a plan block in a message that's just answering a question with no plan change.
 
 CATALOG
 ${digest}`;

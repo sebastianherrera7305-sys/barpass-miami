@@ -153,7 +153,9 @@ export async function POST(request: Request) {
             ...parsed.data.messages,
           ],
           temperature: 0.8,
-          max_tokens: 2048,
+          // A 3-stop plan block + 2 sentences is ~500 tokens; 2048 only ever
+          // let a rambling reply run long (and slow).
+          max_tokens: 1000,
           stream: true,
           ...provider.extraBody,
         }),
