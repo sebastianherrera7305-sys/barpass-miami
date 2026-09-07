@@ -37,9 +37,28 @@ import { checkRateLimit } from "@/lib/rate-limit";
 const GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const NVIDIA_MODEL = "moonshotai/kimi-k3";
+/** Primary NVIDIA model. Measured 2026-09-06 against this account, 60-venue
+ * prompt, 350-token reply: gpt-oss-20b at reasoning_effort "low" → 0.7s to
+ * first token, 5.3s total. kimi-k3 on the same prompt → 4.4s to first token,
+ * 29s total (and 85s in production with the real prompt), because it thinks
+ * at length before answering and that can't be turned off on NIM (the
+ * `thinking:false` template kwarg is ignored). In production Vercel has ONLY
+ * NVIDIA_API_KEY — no Groq key was ever set there — so this model IS the
+ * chat for every real user; it has to be the fast one. Every other fast
+ * instruct model on NIM (llama-3.1/3.3-70b, llama-4, nemotron, mistral)
+ * returned 410/404 for this account — only kimi-k3 and gpt-oss-20b remain. */
+const NVIDIA_FAST_MODEL = "openai/gpt-oss-20b";
+const NVIDIA_FALLBACK_MODEL = "moonshotai/kimi-k3";
 
-interface Provider { name: string; apiKey: string; chatUrl: string; model: string; timeoutMs: number }
+interface Provider {
+  name: string;
+  apiKey: string;
+  chatUrl: string;
+  model: string;
+  timeoutMs: number;
+  /** Extra OpenAI-compatible body fields this model needs (e.g. reasoning_effort). */
+  extraBody?: Record<string, unknown>;
+}
 
 /** Every configured provider, in preference order — Groq first (fast),
  * NVIDIA second (slower reasoning model, but a real fallback). Previously
@@ -65,7 +84,12 @@ function resolveProviders(): Provider[] {
     providers.push({ name: "groq", apiKey: process.env.GROQ_API_KEY, chatUrl: GROQ_CHAT_URL, model: GROQ_MODEL, timeoutMs: 10_000 });
   }
   if (process.env.NVIDIA_API_KEY) {
-    providers.push({ name: "nvidia", apiKey: process.env.NVIDIA_API_KEY, chatUrl: NVIDIA_CHAT_URL, model: NVIDIA_MODEL, timeoutMs: 45_000 });
+    providers.push({
+      name: "nvidia-fast", apiKey: process.env.NVIDIA_API_KEY, chatUrl: NVIDIA_CHAT_URL,
+      model: NVIDIA_FAST_MODEL, timeoutMs: 15_000, extraBody: { reasoning_effort: "low" },
+    });
+    // Same key, slow model — only reached if gpt-oss-20b is down or rate-limited.
+    providers.push({ name: "nvidia-kimi", apiKey: process.env.NVIDIA_API_KEY, chatUrl: NVIDIA_CHAT_URL, model: NVIDIA_FALLBACK_MODEL, timeoutMs: 45_000 });
   }
   return providers;
 }
@@ -110,6 +134,7 @@ export async function POST(request: Request) {
   const systemInstruction = buildConciergeSystemPrompt(selectRelevantVenues(venues, conversationText));
 
   let upstream: Response | null = null;
+  let servedBy: Provider | null = null;
   for (const provider of providers) {
     const timeoutController = new AbortController();
     const timeoutId = setTimeout(() => timeoutController.abort(), provider.timeoutMs);
@@ -130,11 +155,13 @@ export async function POST(request: Request) {
           temperature: 0.8,
           max_tokens: 2048,
           stream: true,
+          ...provider.extraBody,
         }),
         signal: timeoutController.signal,
       });
       if (attempt.ok && attempt.body) {
         upstream = attempt;
+        servedBy = provider;
         break;
       }
       console.error(`Concierge ${provider.name} call failed: HTTP ${attempt.status}`, await attempt.text().catch(() => ""));
@@ -211,6 +238,10 @@ export async function POST(request: Request) {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
+      // Which provider/model actually answered — so "the chat is slow" can
+      // be measured with one curl instead of guessed at.
+      "X-BP-Provider": servedBy?.name ?? "unknown",
+      "X-BP-Model": servedBy?.model ?? "unknown",
       "X-Accel-Buffering": "no",
     },
   });
