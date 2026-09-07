@@ -16,7 +16,7 @@
  * against the previous run instead of by vibes.
  */
 import { createClient } from "@supabase/supabase-js";
-// @ts-ignore — ws ships no types here; same shim every other script uses for Node 20 realtime.
+// @ts-expect-error — ws ships no types here; same shim every other script uses for Node 20 realtime.
 import ws from "ws";
 import { nightPlanSchema } from "../src/features/ai/services/plan-schema";
 
