@@ -16,6 +16,13 @@ describe("groundPlanBlock", () => {
     expect(out.stops[0].venueId).toBe("uuid-2");
   });
 
+  it("strips bold markers from the card's text fields", () => {
+    const out = JSON.parse(groundPlanBlock(JSON.stringify({ title: "**Noche**", summary: "x", insiderTip: "**tip**", stops: [{ venueId: "uuid-1", note: "pide el **mezcal**" }] }), shortlist));
+    expect(out.title).toBe("Noche");
+    expect(out.insiderTip).toBe("tip");
+    expect(out.stops[0].note).toBe("pide el mezcal");
+  });
+
   it("leaves an unmatched stop and non-JSON input untouched", () => {
     const stop = { venueId: "nope", venueSlug: "nope", venueName: "Nope Bar" };
     expect(JSON.parse(groundPlanBlock(JSON.stringify({ stops: [stop] }), shortlist)).stops[0]).toEqual(stop);

@@ -25,8 +25,12 @@ export function groundPlanBlock(jsonText: string, shortlist: Venue[]): string {
   const bySlug = new Map(shortlist.map((v) => [v.slug.toLowerCase(), v]));
   const byName = new Map(shortlist.map((v) => [v.name.toLowerCase(), v]));
 
-  const plan = parsed as { stops: Array<Record<string, unknown>> };
+  const plan = parsed as Record<string, unknown> & { stops: Array<Record<string, unknown>> };
+  // Same plain-text rule as the prose: the card renders raw strings.
+  const unbold = (x: unknown) => (typeof x === "string" ? x.replace(/\*\*/g, "") : x);
+  for (const k of ["title", "summary", "insiderTip"]) plan[k] = unbold(plan[k]);
   plan.stops = plan.stops.map((stop) => {
+    stop = { ...stop, note: unbold(stop.note), venueName: unbold(stop.venueName) };
     const id = typeof stop.venueId === "string" ? stop.venueId : "";
     const slug = typeof stop.venueSlug === "string" ? stop.venueSlug.toLowerCase() : "";
     const name = typeof stop.venueName === "string" ? stop.venueName.toLowerCase() : "";

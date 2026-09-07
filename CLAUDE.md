@@ -122,6 +122,16 @@ bachata.
 - Every other fast instruct model on this NIM account (llama-3.1/3.3-70b,
   llama-4, nemotron, mistral, gpt-oss-120b) returns 410/404 — only kimi-k3 and
   gpt-oss-20b remain. Re-check `GET /v1/models` before switching.
+- **Measure, don't guess:** `cd barpass-v2 && npm run eval:concierge` runs 6 real
+  prompts against prod and grades language / grounding / open-hours / shape /
+  markdown / latency. 2026-09-06: 78% before the context+grounding work, 91%
+  after (remaining misses are NIM latency variance). Unit tests for the
+  shortlist and grounding live next to `concierge-prompt.ts` / `plan-grounding.ts`.
+- Context the iOS app now sends with every turn: checked-in venue, favorites,
+  device location → proximity/open-now ranking, "USER IS AT" block, distances
+  in the digest, city timezone. The plan block is re-anchored server-side so
+  venueId is always a catalog UUID; reply language is pinned by a trailing
+  system message (the top-of-prompt rule alone was ignored by gpt-oss-20b).
 - The 2-3s answer needs a Groq key (user action: console.groq.com → Vercel env
   → redeploy). Also: rapid test calls trip NIM's 429 — space them out.
 - Supabase Storage: single uploads over ~8MB die from THIS Mac's network (TLS
