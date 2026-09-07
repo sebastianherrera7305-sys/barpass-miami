@@ -27,6 +27,13 @@ describe("selectRelevantVenues", () => {
     expect(en.filter((v) => v.type === "rooftop")).toHaveLength(6);
   });
 
+  it("treats 'Rooftop'/'Sky' in a venue's own name as rooftop evidence (catalog types them as bars)", () => {
+    const sugar = venue({ id: "sugar", name: "Sugar Rooftop", type: "bar" });
+    const rosa = venue({ id: "rosa", name: "Rosa Sky", type: "bar" });
+    const out = selectRelevantVenues([...filler, sugar, rosa], "rooftop con vista para un cumpleaños", 10);
+    expect(out.slice(0, 2).map((v) => v.id).sort()).toEqual(["rosa", "sugar"]);
+  });
+
   it("never returns the venue the user is standing in", () => {
     const here = venue({ id: "here" });
     const out = selectRelevantVenues([here, ...filler], "qué hago después", 20, { excludeId: "here" });

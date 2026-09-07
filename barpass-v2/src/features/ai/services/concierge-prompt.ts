@@ -100,6 +100,11 @@ export function selectRelevantVenues(
     for (const vibe of v.vibes) if (text.includes(vibe.toLowerCase())) score += 3;
     for (const genre of v.musicGenres) if (text.includes(genre.toLowerCase().replace("_", " "))) score += 3;
     if (wantedTypes.has(v.type)) score += 8;
+    // Rooftops are typed "bar"/"club" in this catalog (Miami has 0 venues
+    // typed rooftop, yet Sugar Rooftop, Astra Miami Rooftop, Rosa Sky, Vista
+    // Rooftop Bar… are all there). The venue's own name is a source we can
+    // trust, so "rooftop" in the ask matches "Rooftop"/"Sky" in the name.
+    if (wantedTypes.has("rooftop") && v.type !== "rooftop" && /\b(rooftop|roof|sky|terrace|terraza|azotea)\b/i.test(v.name)) score += 8;
     if (text.includes(v.neighborhood.toLowerCase())) score += 4;
     if (text.includes(v.name.toLowerCase())) score += 5;
     if (budget !== null) {
