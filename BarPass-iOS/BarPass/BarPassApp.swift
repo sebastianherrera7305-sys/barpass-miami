@@ -50,9 +50,23 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     private func registerBackgroundTask() {
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.cacheTaskID, using: nil) { task in
+        // `using: .main`, not nil. Every TestFlight crash on record (builds 22,
+        // 26 and 50 — 2026-09-03, 09-04, 09-06) was this exact spot: with a nil
+        // queue, BGTaskScheduler ran the handler on a background dispatch
+        // queue; the closure calls into this @MainActor delegate, so Swift 6's
+        // runtime isolation check trapped (SIGTRAP in
+        // _dispatch_assert_queue_fail ← swift_task_checkIsolated ← closure #1
+        // in registerBackgroundTask). It fired whenever iOS woke the app in the
+        // background for the hourly refresh ("Role: Non UI", 0.15s after
+        // launch), so the user saw "the app crashed" on the next open without
+        // ever having touched it. Running the handler on the main queue makes
+        // the isolation check pass; the work itself is trivial (reschedule +
+        // complete), so main is also the right queue for it.
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.cacheTaskID, using: .main) { task in
             guard let refreshTask = task as? BGAppRefreshTask else { return }
-            self.handleCacheRefresh(task: refreshTask)
+            MainActor.assumeIsolated {
+                self.handleCacheRefresh(task: refreshTask)
+            }
         }
         scheduleNextCacheRefresh()
     }
