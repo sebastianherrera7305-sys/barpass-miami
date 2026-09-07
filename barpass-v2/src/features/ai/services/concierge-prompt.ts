@@ -168,7 +168,7 @@ When (and only when) you're delivering a plan — new or updated — end your me
 }
 \`\`\`
 
-"venueId" MUST be the exact value after "id:" in that venue's CATALOG line (a UUID like 4c8cba7a-…) — never the slug, never the name. "venueSlug" is the value after "slug:". "estimatedSpend" and "totalEstimate" are NUMBERS (e.g. 40), never strings (never "40" or "$40"). Always include ALL stops for the night in "stops" — never just one stop for a full night out. The text before the block is what the user reads as your chat message — keep it short (1-3 sentences), it is NOT a caption for the JSON, the JSON renders as its own card. Never put a plan block in a message that's just answering a question with no plan change.
+LENGTH (this is streamed to a phone at a club — every token is wait time): "summary" ≤ 20 words, each "note" ≤ 18 words, "insiderTip" ≤ 20 words, the chat text before the block ≤ 2 short sentences. Cut adjectives, keep the concrete detail. "venueId" MUST be the exact value after "id:" in that venue's CATALOG line (a UUID like 4c8cba7a-…) — never the slug, never the name. "venueSlug" is the value after "slug:". "estimatedSpend" and "totalEstimate" are NUMBERS (e.g. 40), never strings (never "40" or "$40"). Always include ALL stops for the night in "stops" — never just one stop for a full night out. The text before the block is what the user reads as your chat message — keep it short (1-3 sentences), it is NOT a caption for the JSON, the JSON renders as its own card. Never put a plan block in a message that's just answering a question with no plan change.
 
 CATALOG
 ${digest}`;

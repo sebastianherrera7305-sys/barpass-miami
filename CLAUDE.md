@@ -108,6 +108,27 @@ performance FORMAT, not a genre, and composes: a honky-tonk is `[country, live]`
 Still missing and seen repeatedly: reggae/calypso, soca, vallenato, merengue,
 bachata.
 
+### AI Concierge in production — what actually serves it (2026-09-06)
+- **Vercel has ONLY `NVIDIA_API_KEY`.** No `GROQ_API_KEY` was ever set there, so
+  the Groq path in `/api/concierge` has never run for a real user. Check with
+  `npx vercel env ls` before assuming a provider is live.
+- Production was measured at **85s per reply** because everything went to
+  `moonshotai/kimi-k3`, a reasoning model that thinks 30-80s; NIM ignores
+  `chat_template_kwargs.thinking=false`. Now served by `openai/gpt-oss-20b`
+  with `reasoning_effort: "low"` (first content ~4s, total 11-15s, content
+  streams at ~25-35 tok/s — that rate is NIM's ceiling, not our code). kimi-k3
+  is the fallback only. The response carries `X-BP-Provider`/`X-BP-Model`:
+  measure with one curl, never guess.
+- Every other fast instruct model on this NIM account (llama-3.1/3.3-70b,
+  llama-4, nemotron, mistral, gpt-oss-120b) returns 410/404 — only kimi-k3 and
+  gpt-oss-20b remain. Re-check `GET /v1/models` before switching.
+- The 2-3s answer needs a Groq key (user action: console.groq.com → Vercel env
+  → redeploy). Also: rapid test calls trip NIM's 429 — space them out.
+- Supabase Storage: single uploads over ~8MB die from THIS Mac's network (TLS
+  "bad record mac"), while the same request from any other network succeeds
+  up to the project's real 50MB cap (413). Don't debug "server limits" from
+  this machine without a second network.
+
 ### Shared helpers (dedupe refactors, 2026-08-31)
 - **iOS — `Repositories/SupabaseRESTClient.swift`**: the one place that knows the Supabase REST base URL, anon key, auth headers, and the snake_case/iso8601 coders. All 12 repositories build requests through `SupabaseRESTClient.request(...)` + `.send(...)` instead of repeating the boilerplate. Two deliberate exceptions keep their own coders/raw calls: `SupabasePlanRepository` (its `plan` jsonb blob must not be re-cased) and the repos that need the raw failure body for custom error mapping (`BirthdateRepository`, `VenueCheckinRepository`).
 - **Web — `src/lib/supabase/require-user.ts`**: `requireUser(request)` wraps Bearer-token parse → env check → service-role client → `auth.getUser()`, returning `{ok, supabase, user}` or a ready `NextResponse`. Used by the 7 privileged routes (passes, referral/code, referral/attribute, transactions, wallet/topup, wallet/spend, account/delete). **Not** for the cookie-session routes (events, promos and their `[id]` variants) — those get their user from RLS via `@/lib/supabase/server`.
