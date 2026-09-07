@@ -101,6 +101,16 @@ struct PlanView: View {
     @State private var showCleanupPrompt = false
     @StateObject private var keyboard = KeyboardHeight()
     @ObservedObject private var chromeMetrics = BottomChromeMetrics.shared
+    @ObservedObject private var checkInStore = CheckInStore.shared
+
+    /// The venue the user is checked in at, if it's in the loaded catalog —
+    /// shown as a chip in the top bar so it's visible that Remy knows where
+    /// you are (capability transparency: the user can tell what the
+    /// assistant knows before typing).
+    private var checkedInVenue: BarPassVenue? {
+        guard let id = checkInStore.activeCheckin?.venueId else { return nil }
+        return venueStore.venues.first { $0.id == id }
+    }
 
     private let planRepo = RepositoryDependencies.plan
     private let amber  = Color(red: 0.92, green: 0.72, blue: 0.28)
@@ -367,6 +377,18 @@ struct PlanView: View {
                 .font(.bpScaled(12, weight: .heavy))
                 .tracking(3)
                 .foregroundStyle(amber)
+            if let venue = checkedInVenue {
+                HStack(spacing: 4) {
+                    Image(systemName: "location.fill").font(.system(size: 9, weight: .bold))
+                    Text(String(format: l10n.t("plan.context.at"), venue.name))
+                        .font(.bpScaled(11, weight: .semibold))
+                        .lineLimit(1)
+                }
+                .foregroundStyle(amber)
+                .padding(.horizontal, 8).padding(.vertical, 4)
+                .background(amber.opacity(0.14), in: Capsule())
+                .bpAccessibility(label: String(format: l10n.t("plan.context.at"), venue.name))
+            }
             Spacer()
             Button { showHistory = true } label: {
                 Image(systemName: "clock.arrow.circlepath")
@@ -592,12 +614,22 @@ struct PlanView: View {
 
         let city = venueStore.selectedCity
         let venues = venueStore.venues
+        // What the app already knows and Remy didn't (2026-09-06): the venue
+        // the user is checked in at, their favorites, and the location fix
+        // this screen already requested on appear. "What's next" from inside
+        // Factory Town now ranks by distance and hours from Factory Town.
+        var context = APIClient.ConciergeContext()
+        context.currentVenueId = checkInStore.activeCheckin?.venueId
+        context.favoriteVenueIds = Array(FavoritesStore.shared.ids.prefix(30))
+        if let userLocation {
+            context.userLocation = (lat: userLocation.latitude, lng: userLocation.longitude)
+        }
 
         streamTask?.cancel()
         streamTask = Task {
             var raw = ""
             do {
-                for try await event in APIClient.streamConciergeChat(messages: apiMessages, city: city) {
+                for try await event in APIClient.streamConciergeChat(messages: apiMessages, city: city, context: context) {
                     guard !Task.isCancelled else { return }
                     switch event {
                     case .thinking:

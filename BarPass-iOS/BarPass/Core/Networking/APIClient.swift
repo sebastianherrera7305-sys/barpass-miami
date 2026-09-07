@@ -341,7 +341,27 @@ enum APIClient {
     /// failure — callers must have a local fallback (e.g. `NightPlan.sample`)
     /// since this depends on a third-party model that can be slow or, if
     /// misconfigured server-side, unavailable entirely.
-    static func streamConciergeChat(messages: [ConciergeChatTurn], city: String?) -> AsyncThrowingStream<ConciergeStreamEvent, Error> {
+    /// What the app already knows about the user that Remy should too:
+    /// where they're checked in (so "what's next" is sequenced from there
+    /// and never suggests the place they're standing in), and what they've
+    /// favorited (taste). Nothing here triggers a new permission prompt.
+    struct ConciergeContext {
+        var currentVenueId: String? = nil
+        var favoriteVenueIds: [String] = []
+        var userLocation: (lat: Double, lng: Double)? = nil
+
+        var isEmpty: Bool { currentVenueId == nil && favoriteVenueIds.isEmpty && userLocation == nil }
+
+        var json: [String: Any] {
+            var out: [String: Any] = [:]
+            if let currentVenueId { out["currentVenueId"] = currentVenueId }
+            if !favoriteVenueIds.isEmpty { out["favoriteVenueIds"] = Array(favoriteVenueIds.prefix(30)) }
+            if let userLocation { out["userLocation"] = ["lat": userLocation.lat, "lng": userLocation.lng] }
+            return out
+        }
+    }
+
+    static func streamConciergeChat(messages: [ConciergeChatTurn], city: String?, context: ConciergeContext = ConciergeContext()) -> AsyncThrowingStream<ConciergeStreamEvent, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
@@ -352,6 +372,7 @@ enum APIClient {
                         "messages": messages.map { ["role": $0.role, "content": $0.content] },
                     ]
                     if let city { body["city"] = city }
+                    if !context.isEmpty { body["context"] = context.json }
                     request.httpBody = try JSONSerialization.data(withJSONObject: body)
                     // A single message can take kimi-k3 well over a minute
                     // end to end (thinking + generation) — this is a chat,
