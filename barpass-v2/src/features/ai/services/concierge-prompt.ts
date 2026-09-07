@@ -83,10 +83,13 @@ export function selectRelevantVenues(
 
   // Venue TYPES the user asked for, in either language. 2026-09-06 eval:
   // "Rooftop con vista para un cumpleaños" got "none of the venues in the
-  // catalog are rooftop venues" — Miami has rooftops, but type matched for
-  // +1 while "open now" gave every venue +2, so the 35-venue shortlist was
-  // effectively random with respect to the one thing the user asked for.
-  // Asked-for types now outweigh everything except an explicit venue name.
+  // catalog are rooftop venues". For Miami that was even TRUE — the catalog
+  // types 0 Miami venues as rooftop (100 bar / 29 club / 26 restaurant / 9
+  // sports_bar / 1 lounge / 1 brewery; real rooftops sit under "bar"), which
+  // is a data gap, not a model bug. But type matched for only +1 while "open
+  // now" gave every venue +2, so in any city the shortlist was effectively
+  // random with respect to the one thing the user asked for. Asked-for types
+  // now outweigh everything except an explicit venue name.
   const wantedTypes = new Set<Venue["type"]>();
   for (const [type, words] of Object.entries(TYPE_SYNONYMS) as [Venue["type"], string[]][]) {
     if (words.some((w) => text.includes(w))) wantedTypes.add(type);
