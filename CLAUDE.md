@@ -67,6 +67,20 @@ barpass-v2/
 - A `Progress 43%: Upload succeeded` line is not a truncated upload; it is
   just the percentage at that instant.
 
+### Crash reports are one API call away — read them before guessing (2026-09-07)
+`GET /v1/apps/{APP_ID}/betaFeedbackCrashSubmissions?sort=-createdDate`, then
+`/v1/betaFeedbackCrashSubmissions/{id}/crashLog` → `attributes.logText` is the
+full, already-symbolicated .crash text (same JWT as `asc_builds.py`).
+`betaFeedbackScreenshotSubmissions` holds the user's TestFlight screenshots +
+comments (68 of them by 2026-09-07). Every crash on record (builds 22, 26, 50)
+was ONE bug: `BGTaskScheduler.register(..., using: nil)` ran its handler on a
+background queue while the closure called into the @MainActor AppDelegate —
+Swift 6 traps (SIGTRAP in `_dispatch_assert_queue_fail`). Fixed in build 55
+with `using: .main` + `MainActor.assumeIsolated`. Pattern to watch for in any
+Apple callback API: if the closure touches main-actor state, pass `.main` or
+hop with `Task { @MainActor in }` — a "Role: Non UI" crash 0.15s after launch
+is this class of bug.
+
 ### Venue data — what is real and what is not (2026-09-01 audit)
 The catalogue is 1846 rows; **1814 are served**, 32 are excluded. Two columns
 answer two different questions and BOTH must be filtered on every read:
