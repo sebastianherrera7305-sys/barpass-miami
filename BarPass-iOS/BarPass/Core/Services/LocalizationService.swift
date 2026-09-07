@@ -83,7 +83,8 @@ final class L10n: ObservableObject {
         .es: [
             "venue.crowd.empty": "Vacío", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Lleno", "venue.crowd.max": "A tope", "venue.crowd.na": "N/D",
             "a11y.loading": "Cargando contenido",
-            "venueMedia.title": "Fotos y videos", "venueMedia.add": "Agregar", "venueMedia.add.hint": "Sube una foto o video desde tu galería",
+            "venueMedia.title": "Fotos y videos", "venueMedia.add": "Agregar", "venueMedia.add.hint": "Sube una foto o video (máx. 60 s) desde tu galería",
+            "venueMedia.compressing": "Comprimiendo video…", "venueMedia.uploading": "Subiendo… %d%%",
             "venueMedia.empty": "Sé el primero en publicar algo de este lugar", "venueMedia.error.load": "No se pudo cargar el archivo",
             "venueMedia.a11y.video": "Video publicado por un usuario", "venueMedia.a11y.photo": "Foto publicada por un usuario",
             "venueDetail.call": "Llamar", "venueDetail.website": "Sitio web",
@@ -951,7 +952,8 @@ final class L10n: ObservableObject {
         .en: [
             "venue.crowd.empty": "Empty", "venue.crowd.chill": "Chill", "venue.crowd.moderate": "Moderate", "venue.crowd.lively": "Lively", "venue.crowd.packed": "Packed", "venue.crowd.max": "Slammed", "venue.crowd.na": "N/A",
             "a11y.loading": "Loading content",
-            "venueMedia.title": "Photos & videos", "venueMedia.add": "Add", "venueMedia.add.hint": "Upload a photo or video from your library",
+            "venueMedia.title": "Photos & videos", "venueMedia.add": "Add", "venueMedia.add.hint": "Upload a photo or video (max 60 s) from your library",
+            "venueMedia.compressing": "Compressing video…", "venueMedia.uploading": "Uploading… %d%%",
             "venueMedia.empty": "Be the first to post something from this place", "venueMedia.error.load": "Couldn't load that file",
             "venueMedia.a11y.video": "Video posted by a user", "venueMedia.a11y.photo": "Photo posted by a user",
             "venueDetail.call": "Call", "venueDetail.website": "Website",
@@ -1819,7 +1821,8 @@ final class L10n: ObservableObject {
         .pt: [
             "venue.crowd.empty": "Vazio", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Cheio", "venue.crowd.max": "Lotado", "venue.crowd.na": "N/D",
             "a11y.loading": "Carregando conteúdo",
-            "venueMedia.title": "Fotos e vídeos", "venueMedia.add": "Adicionar", "venueMedia.add.hint": "Envie uma foto ou vídeo da sua galeria",
+            "venueMedia.title": "Fotos e vídeos", "venueMedia.add": "Adicionar", "venueMedia.add.hint": "Envie uma foto ou vídeo (máx. 60 s) da sua galeria",
+            "venueMedia.compressing": "Comprimindo vídeo…", "venueMedia.uploading": "Enviando… %d%%",
             "venueMedia.empty": "Seja o primeiro a postar algo deste lugar", "venueMedia.error.load": "Não foi possível carregar o arquivo",
             "venueMedia.a11y.video": "Vídeo postado por um usuário", "venueMedia.a11y.photo": "Foto postada por um usuário",
             "venueDetail.call": "Ligar", "venueDetail.website": "Site",

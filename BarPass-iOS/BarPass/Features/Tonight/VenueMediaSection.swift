@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import AVKit
+import AVFoundation
 import UniformTypeIdentifiers
 
 /// Real photos/videos posted by anyone at the venue — "Factory Town" (an
@@ -8,20 +9,32 @@ import UniformTypeIdentifiers
 /// user wants people posting from inside tonight's event, directly in the
 /// app. Deliberately simple for a same-day ship (supabase/venue_media.sql):
 /// picks from the photo library (whatever was just shot tonight already
-/// lands there), no in-app camera, no compression, no moderation queue.
+/// lands there), no in-app camera, no moderation queue.
+///
+/// Media is compressed on-device before upload (720p / max 60s video,
+/// 1600px JPEG photo) and sent in resumable chunks — see
+/// SupabaseVenueMediaRepository for why a raw phone video never made it.
 struct VenueMediaSection: View {
     let venue: BarPassVenue
     @ObservedObject private var l10n = L10n.shared
+    @StateObject private var uploadState = UploadState()
     @State private var items: [VenueMediaItem] = []
     @State private var isLoading = true
     @State private var selectedPickerItem: PhotosPickerItem?
-    @State private var isUploading = false
     @State private var uploadError: String?
     @State private var playingItem: VenueMediaItem?
 
     private let repo: VenueMediaRepository = RepositoryDependencies.venueMedia
 
+    /// Longer clips are trimmed to this before upload — keeps a 720p clip
+    /// around 20-30MB, under Supabase's 50MB object cap with room to spare.
+    static let maxVideoSeconds: Double = 60
+
     var body: some View {
+        // Resolved here, not inside PhotosPicker's label closure — that
+        // closure is nonisolated and can't touch main-actor state.
+        let isBusy = uploadState.stage != nil
+        let addTitle = l10n.t("venueMedia.add")
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(l10n.t("venueMedia.title"))
@@ -29,19 +42,28 @@ struct VenueMediaSection: View {
                 Spacer()
                 PhotosPicker(selection: $selectedPickerItem, matching: .any(of: [.images, .videos])) {
                     HStack(spacing: 5) {
-                        if isUploading {
+                        if isBusy {
                             ProgressView().tint(.black).scaleEffect(0.7)
                         } else {
                             Image(systemName: "plus").font(.bpScaled(12, weight: .bold))
                         }
-                        Text(l10n.t("venueMedia.add")).font(.bpScaled(13, weight: .bold))
+                        Text(addTitle).font(.bpScaled(13, weight: .bold))
                     }
                     .foregroundStyle(.black)
                     .padding(.horizontal, 12).padding(.vertical, 8)
                     .background(Color.bpAmber, in: Capsule())
                 }
-                .disabled(isUploading)
+                .disabled(isBusy)
                 .bpAccessibility(label: l10n.t("venueMedia.add"), hint: l10n.t("venueMedia.add.hint"), isButton: true)
+            }
+
+            if let stage = uploadState.stage {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(stageLabel(stage))
+                        .font(.bpCaption()).foregroundStyle(Color.bpTextSecondary)
+                    ProgressView(value: stage == .uploading ? uploadState.fraction : nil)
+                        .tint(Color.bpAmber)
+                }
             }
 
             if let uploadError {
@@ -76,6 +98,13 @@ struct VenueMediaSection: View {
         }
         .sheet(item: $playingItem) { item in
             mediaViewer(item)
+        }
+    }
+
+    private func stageLabel(_ stage: UploadState.Stage) -> String {
+        switch stage {
+        case .compressing: return l10n.t("venueMedia.compressing")
+        case .uploading: return String(format: l10n.t("venueMedia.uploading"), Int(uploadState.fraction * 100))
         }
     }
 
@@ -140,24 +169,142 @@ struct VenueMediaSection: View {
     }
 
     private func handlePicked(_ pickerItem: PhotosPickerItem) async {
-        isUploading = true
         uploadError = nil
-        defer { isUploading = false; selectedPickerItem = nil }
+        uploadState.fraction = 0
+        defer {
+            uploadState.stage = nil
+            selectedPickerItem = nil
+        }
         let isVideo = pickerItem.supportedContentTypes.contains { $0.conforms(to: .movie) }
+        var tempFiles: [URL] = []
+        defer { tempFiles.forEach { try? FileManager.default.removeItem(at: $0) } }
         do {
-            guard let data = try await pickerItem.loadTransferable(type: Data.self) else {
-                uploadError = l10n.t("venueMedia.error.load")
-                return
+            let fileURL: URL
+            let contentType: String
+            let fileExtension: String
+            if isVideo {
+                uploadState.stage = .compressing
+                // FileRepresentation copies the movie to a temp file instead
+                // of loading hundreds of MB into memory as Data.
+                guard let picked = try await pickerItem.loadTransferable(type: PickedVideo.self) else {
+                    uploadError = l10n.t("venueMedia.error.load")
+                    return
+                }
+                tempFiles.append(picked.url)
+                fileURL = try await VideoCompressor.compress(picked.url, maxSeconds: Self.maxVideoSeconds)
+                tempFiles.append(fileURL)
+                contentType = "video/mp4"
+                fileExtension = "mp4"
+            } else {
+                guard let data = try await pickerItem.loadTransferable(type: Data.self),
+                      let jpeg = ImageDownscaler.jpeg(from: data, maxDimension: 1600) else {
+                    uploadError = l10n.t("venueMedia.error.load")
+                    return
+                }
+                let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".jpg")
+                try jpeg.write(to: tmp)
+                tempFiles.append(tmp)
+                fileURL = tmp
+                contentType = "image/jpeg"
+                fileExtension = "jpg"
             }
+
+            uploadState.stage = .uploading
+            let state = uploadState
             let newItem = try await repo.upload(
-                venueId: venue.id, data: data,
+                venueId: venue.id,
+                fileURL: fileURL,
                 mediaType: isVideo ? .video : .photo,
-                fileExtension: isVideo ? "mov" : "jpg"
-            )
+                contentType: contentType,
+                fileExtension: fileExtension
+            ) { fraction in
+                state.fraction = fraction
+            }
             withAnimation { items.insert(newItem, at: 0) }
             BPHaptics.success()
         } catch {
             uploadError = error.localizedDescription
+            BPHaptics.error()
         }
+    }
+}
+
+/// Main-actor progress holder — a @MainActor class is Sendable, so the
+/// repository's @Sendable progress closure can capture it without dragging
+/// the whole View struct across the actor boundary.
+@MainActor
+private final class UploadState: ObservableObject {
+    enum Stage { case compressing, uploading }
+    @Published var stage: Stage?
+    @Published var fraction: Double = 0
+}
+
+/// Receives a picked movie as a file on disk (copied out of the Photos
+/// sandbox) rather than as in-memory Data.
+private struct PickedVideo: Transferable {
+    let url: URL
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(contentType: .movie) { video in
+            SentTransferredFile(video.url)
+        } importing: { received in
+            let copy = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension(received.file.pathExtension.isEmpty ? "mov" : received.file.pathExtension)
+            try? FileManager.default.removeItem(at: copy)
+            try FileManager.default.copyItem(at: received.file, to: copy)
+            return Self(url: copy)
+        }
+    }
+}
+
+enum VideoCompressor {
+    /// 720p H.264 mp4, trimmed to `maxSeconds`. A 60s clip lands around
+    /// 20-30MB — comfortably under Supabase's 50MB object cap, and ~10x
+    /// smaller than what the camera wrote.
+    static func compress(_ input: URL, maxSeconds: Double) async throws -> URL {
+        let asset = AVURLAsset(url: input)
+        guard let export = AVAssetExportSession(asset: asset, presetName: AVAssetExportPreset1280x720) else {
+            throw VenueMediaError.compressionFailed
+        }
+        let output = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mp4")
+        export.shouldOptimizeForNetworkUse = true
+        let duration = try await asset.load(.duration)
+        if duration.seconds > maxSeconds {
+            export.timeRange = CMTimeRange(start: .zero, duration: CMTime(seconds: maxSeconds, preferredTimescale: 600))
+        }
+        if #available(iOS 18, *) {
+            try await export.export(to: output, as: .mp4)
+        } else {
+            try await legacyExport(export, to: output)
+        }
+        return output
+    }
+
+    @available(iOS, deprecated: 18.0)
+    private static func legacyExport(_ export: AVAssetExportSession, to output: URL) async throws {
+        export.outputURL = output
+        export.outputFileType = .mp4
+        await export.export()
+        guard export.status == .completed else {
+            throw export.error ?? VenueMediaError.compressionFailed
+        }
+    }
+}
+
+enum ImageDownscaler {
+    /// Re-encodes any picked image (HEIC included) as a JPEG no larger than
+    /// `maxDimension` on its long edge — a 48MP HEIC becomes ~400KB.
+    static func jpeg(from data: Data, maxDimension: CGFloat) -> Data? {
+        guard let image = UIImage(data: data) else { return nil }
+        let longest = max(image.size.width, image.size.height)
+        let scale = min(1, maxDimension / max(longest, 1))
+        let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let rendered = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
+        return rendered.jpegData(compressionQuality: 0.82)
     }
 }

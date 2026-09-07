@@ -28,7 +28,13 @@ final class CheckInStore: ObservableObject {
     /// geofencing feature would. Explicit product requirement: without
     /// this, anyone could check in from anywhere, which defeats the whole
     /// point of the Grid (real presence, not self-reported).
-    static let maxCheckInDistanceMeters: Double = 50
+    ///
+    /// 150m, not 50m: venues aren't points. Factory Town (2026-09-06) is a
+    /// seven-acre compound (~170m across) and its pin sits at one edge, so
+    /// someone genuinely inside failed the 50m check as "too far". 150m is
+    /// still ~one block — you can't check in from the club across the
+    /// street, which is the actual abuse this guards against.
+    static let maxCheckInDistanceMeters: Double = 150
 
     /// How much of the GPS's own reported uncertainty we forgive before
     /// comparing to maxCheckInDistanceMeters. Capped — an accuracy reading
