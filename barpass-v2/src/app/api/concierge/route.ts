@@ -1,6 +1,7 @@
 import { getVenuesByCity } from "@/features/venues/services/venue-service";
 import { buildConciergeSystemPrompt, selectRelevantVenues } from "@/features/ai/services/concierge-prompt";
 import { conciergeChatRequestSchema } from "@/features/ai/services/plan-schema";
+import { detectUserLanguage, groundPlanBlock } from "@/features/ai/services/plan-grounding";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
@@ -155,6 +156,8 @@ export async function POST(request: Request) {
     excludeId: currentVenue?.id,
   });
   const systemInstruction = buildConciergeSystemPrompt(shortlist, { currentVenue, favorites, origin, timeZone });
+  const lastUserMessage = [...parsed.data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  const replyLanguage = detectUserLanguage(lastUserMessage);
 
   let upstream: Response | null = null;
   let servedBy: Provider | null = null;
@@ -174,6 +177,16 @@ export async function POST(request: Request) {
           messages: [
             { role: "system", content: systemInstruction },
             ...parsed.data.messages,
+            // Recency-weighted, unambiguous. The LANGUAGE RULE at the top of
+            // a ~4K-token system prompt was being ignored by the 20B model
+            // on 2 of 6 eval prompts (Spanish in, English out). A one-line
+            // instruction placed AFTER the user's message is what it obeys.
+            {
+              role: "system",
+              content: replyLanguage === "es"
+                ? "Responde SOLO en español neutro latinoamericano (nada de 'vos'/'che'). Ni una frase en inglés."
+                : "Reply ONLY in natural American English. Not one sentence in another language.",
+            },
           ],
           temperature: 0.8,
           // A 3-stop plan block + 2 sentences is ~500 tokens; 2048 only ever
@@ -216,10 +229,65 @@ export async function POST(request: Request) {
   let buffer = "";
   let thinkingSignaled = false;
   let contentSignaled = false;
+  // Plan-block grounding (2026-09-06): the ```json fence is held back until
+  // it closes, re-anchored to the shortlist (groundPlanBlock), then emitted
+  // whole. Costs nothing visible — the clients already hide an open fence
+  // and only render the card once it closes — and guarantees every stop's
+  // venueId is a real catalog UUID the model was shown.
+  let fenceBuffer: string | null = null;
+  let pending = ""; // text we've seen but not yet emitted (may hold a partial "```json")
+  const FENCE_OPEN = "```json";
   const textStream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const reader = upstream.body!.getReader();
       const encoder = new TextEncoder();
+      const emit = (s: string) => { if (s.length > 0) controller.enqueue(encoder.encode(s)); };
+      // The 20B model keeps bolding venue names despite the plain-text rule;
+      // the iOS bubble renders raw text, so "**Amor Miami**" showed literally.
+      // Prose (never the JSON block) has its bold markers removed here.
+      const emitProse = (s: string) => emit(s.replace(/\*\*/g, ""));
+      const onContent = (piece: string) => {
+        if (fenceBuffer !== null) {
+          fenceBuffer += piece;
+          const close = fenceBuffer.indexOf("```", FENCE_OPEN.length);
+          if (close === -1) return;
+          const inner = fenceBuffer.slice(FENCE_OPEN.length, close);
+          const after = fenceBuffer.slice(close + 3);
+          emit(`${FENCE_OPEN}\n${groundPlanBlock(inner.trim(), shortlist)}\n\`\`\``);
+          fenceBuffer = null;
+          pending = "";
+          onContent(after);
+          return;
+        }
+        pending += piece;
+        const open = pending.indexOf(FENCE_OPEN);
+        if (open !== -1) {
+          emitProse(pending.slice(0, open));
+          fenceBuffer = pending.slice(open);
+          pending = "";
+          // The fence may have opened AND closed inside this same piece.
+          const rest = fenceBuffer;
+          fenceBuffer = FENCE_OPEN;
+          onContent(rest.slice(FENCE_OPEN.length));
+          return;
+        }
+        // Hold back only a possible partial "```json" prefix (or a lone "*"
+        // that might be the first half of "**") at the tail.
+        let hold = 0;
+        for (let n = Math.min(FENCE_OPEN.length - 1, pending.length); n > 0; n--) {
+          if (FENCE_OPEN.startsWith(pending.slice(pending.length - n))) { hold = n; break; }
+        }
+        if (hold === 0 && pending.endsWith("*")) hold = 1;
+        emitProse(pending.slice(0, pending.length - hold));
+        pending = pending.slice(pending.length - hold);
+      };
+      const flush = () => {
+        // Stream ended: anything still held (a fence that never closed, a
+        // partial prefix) goes out as-is rather than being lost.
+        if (fenceBuffer !== null) { emit(fenceBuffer); fenceBuffer = null; }
+        emitProse(pending);
+        pending = "";
+      };
       try {
         while (true) {
           const { done, value } = await reader.read();
@@ -244,7 +312,7 @@ export async function POST(request: Request) {
                   contentSignaled = true;
                   controller.enqueue(encoder.encode("\x02"));
                 }
-                controller.enqueue(encoder.encode(delta.content));
+                onContent(delta.content);
               }
             } catch {
               // Partial/malformed SSE line — skip it, next chunk carries on.
@@ -254,6 +322,7 @@ export async function POST(request: Request) {
       } catch (e) {
         console.error("Concierge stream read failed:", e);
       } finally {
+        flush();
         controller.close();
       }
     },
