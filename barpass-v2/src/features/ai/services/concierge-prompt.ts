@@ -122,14 +122,45 @@ export function selectRelevantVenues(
   });
 
   scored.sort((a, b) => b.score - a.score);
-  const meaningful = scored.filter((s) => s.score > 0);
-  // Weak/no signal (generic "surprise me" prompts) — don't hand the model
-  // an arbitrary, possibly homogeneous top-60; keep a spread across types.
-  if (meaningful.length < limit / 2) {
-    const rest = venues.filter((v) => !named.includes(v)).slice(0, Math.max(0, limit - named.length));
-    return [...named, ...rest];
+  const namedIds = new Set(named.map((v) => v.id));
+  const positive = scored.filter((s) => s.score > 0 && !namedIds.has(s.v.id)).map((s) => s.v);
+  const rest = scored.filter((s) => s.score <= 0 && !namedIds.has(s.v.id)).map((s) => s.v);
+  // With no other signal, "closest first" is the only sensible order for the
+  // padding — a venue 40 km away should never fill a slot ahead of one 2 km away.
+  if (ctx.origin) {
+    const o = ctx.origin;
+    rest.sort((a, b) => distanceKm(o, a) - distanceKm(o, b));
   }
-  return scored.slice(0, limit).map((s) => s.v);
+
+  // Order: venues the user named → everything with real signal, best first →
+  // then a type-diverse spread of the rest to fill the limit. The previous
+  // version had two bugs the unit tests caught (2026-09-06): when fewer than
+  // limit/2 venues matched, it threw the matches away and took an arbitrary
+  // slice in array order (that's the real reason "rooftop" came back empty
+  // in production); and when many matched, a venue the user named by name
+  // wasn't pinned at all — a closed-now Candela Bar dropped out on score.
+  return [...named, ...positive, ...spreadAcrossTypes(rest)].slice(0, limit);
+}
+
+/** Round-robin across venue types so a weak-signal prompt ("surprise me")
+ * doesn't hand the model 35 bars and nothing else. Keeps each type's own
+ * score order. */
+function spreadAcrossTypes(venues: Venue[]): Venue[] {
+  const buckets = new Map<string, Venue[]>();
+  for (const v of venues) {
+    const b = buckets.get(v.type) ?? [];
+    b.push(v);
+    buckets.set(v.type, b);
+  }
+  const out: Venue[] = [];
+  const queues = [...buckets.values()];
+  while (out.length < venues.length) {
+    for (const q of queues) {
+      const next = q.shift();
+      if (next) out.push(next);
+    }
+  }
+  return out;
 }
 
 /**
