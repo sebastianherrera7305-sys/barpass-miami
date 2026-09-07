@@ -60,6 +60,8 @@ interface DbVenue {
   image_url: string | null;
   instagram_handle: string | null;
   is_trending: boolean;
+  /** IANA zone, e.g. "America/New_York" — the catalog spans 23 cities. */
+  timezone: string | null;
 }
 
 /**
@@ -91,6 +93,7 @@ function mapDbVenue(v: DbVenue): Venue {
     type: v.type,
     neighborhood: v.neighborhood,
     city: v.city,
+    timezone: v.timezone ?? undefined,
     address: v.address,
     lat: v.lat,
     lng: v.lng,

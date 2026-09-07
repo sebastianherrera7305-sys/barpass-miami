@@ -15,6 +15,7 @@
     "enrich:stadiums": "node --env-file=.env.local --import tsx scripts/enrich-stadiums.ts",
     "check:feedback": "node --env-file=.env.local --import tsx scripts/check-testflight-feedback.ts",
     "check:grid-health": "node --env-file=.env.local --import tsx scripts/check-grid-health.ts",
+    "eval:concierge": "node --env-file=.env.local --import tsx scripts/eval-concierge.ts",
     "fix-price-tiers": "node --env-file=.env.local --import tsx scripts/fix-price-tiers.ts",
     "generate-venue-copy": "node --env-file=.env.local --import tsx scripts/generate-venue-copy.ts",
     "derive-tags": "node --env-file=.env.local --import tsx scripts/derive-experience-tags.ts",

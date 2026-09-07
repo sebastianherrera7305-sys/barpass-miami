@@ -92,6 +92,10 @@ export interface Venue {
    * because the local offline-fallback seed (data/venues.ts, Miami-only,
    * used only when Supabase isn't configured) predates this column. */
   city?: string;
+  /** IANA timezone of the venue's city ("America/New_York"). Optional for the
+   * same offline-seed reason as `city`. The Concierge uses it to know what
+   * time it is where the user actually is, instead of assuming Miami. */
+  timezone?: string;
   address: string;
   lat: number;
   lng: number;

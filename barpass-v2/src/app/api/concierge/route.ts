@@ -131,7 +131,30 @@ export async function POST(request: Request) {
     venues = await getVenuesByCity("Miami");
   }
   const conversationText = parsed.data.messages.map((m) => m.content).join(" ");
-  const systemInstruction = buildConciergeSystemPrompt(selectRelevantVenues(venues, conversationText));
+
+  // Real user context (2026-09-06): where they are, what they like, what
+  // time it is THERE. Without it the digest was the same for "what's next"
+  // from inside a venue at 2 AM and for Friday planning from the couch.
+  const ctx = parsed.data.context;
+  const currentVenue = ctx?.currentVenueId ? venues.find((v) => v.id === ctx.currentVenueId) : undefined;
+  const favorites = ctx?.favoriteVenueIds?.length
+    ? venues.filter((v) => ctx.favoriteVenueIds!.includes(v.id))
+    : [];
+  const origin = ctx?.userLocation ?? (currentVenue ? { lat: currentVenue.lat, lng: currentVenue.lng } : undefined);
+  const timeZone = venues[0]?.timezone ?? "America/New_York";
+  const localParts = new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", minute: "numeric", hour12: false })
+    .formatToParts(new Date());
+  const hourPart = Number(localParts.find((p) => p.type === "hour")?.value ?? NaN);
+  const minutePart = Number(localParts.find((p) => p.type === "minute")?.value ?? NaN);
+  const nowMin = Number.isFinite(hourPart) && Number.isFinite(minutePart) ? (hourPart % 24) * 60 + minutePart : undefined;
+
+  const shortlist = selectRelevantVenues(venues, conversationText, 35, {
+    origin,
+    nowMin,
+    favoriteIds: new Set(ctx?.favoriteVenueIds ?? []),
+    excludeId: currentVenue?.id,
+  });
+  const systemInstruction = buildConciergeSystemPrompt(shortlist, { currentVenue, favorites, origin, timeZone });
 
   let upstream: Response | null = null;
   let servedBy: Provider | null = null;

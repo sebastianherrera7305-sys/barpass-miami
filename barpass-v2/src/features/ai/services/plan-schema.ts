@@ -52,7 +52,23 @@ export const conciergeChatRequestSchema = z.object({
   // Austin. Optional so the web Concierge (still Miami-only in its own UI)
   // keeps working with no caller change; falls back to Miami server-side.
   city: z.string().min(1).max(60).optional(),
+  // Where the user actually is and what they already like — the difference
+  // between "here are clubs in Miami" and "you're at Factory Town, here's
+  // what's 8 minutes away and still open at 3 AM". All optional; the web
+  // Concierge sends none of it and keeps working.
+  context: z
+    .object({
+      /** venues.id the user is checked in at right now. */
+      currentVenueId: z.string().min(1).max(64).optional(),
+      /** venues.id list the user has favorited — a taste signal, not a shortlist. */
+      favoriteVenueIds: z.array(z.string().min(1).max(64)).max(30).optional(),
+      /** Device location, when the app already has it (no new prompt is triggered for this). */
+      userLocation: z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }).optional(),
+    })
+    .optional(),
 });
+
+export type ConciergeContextInput = z.infer<typeof conciergeChatRequestSchema>["context"];
 
 export type ConciergeChatMessage = z.infer<typeof conciergeChatMessageSchema>;
 export type ValidatedNightPlan = z.infer<typeof nightPlanSchema>;

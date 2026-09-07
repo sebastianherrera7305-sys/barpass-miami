@@ -13,7 +13,50 @@ import type { Venue } from "@/types";
 // on every turn; measured in production at 14-22s per reply even on the fast
 // model. A tap-first chat needs 2-4 stops, and the scorer already ranks by
 // fit — the bottom half of 60 was never getting picked.
-export function selectRelevantVenues(venues: Venue[], conversationText: string, limit = 35): Venue[] {
+/** Straight-line distance in km — good enough to rank "nearby" for a night out. */
+export function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+/** Minutes since midnight for "22:00"-style strings; null if unparseable. */
+function minutesOf(hhmm: string): number | null {
+  const m = hhmm?.match(/^(\d{1,2}):(\d{2})/);
+  return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : null;
+}
+
+/** True when the venue is open at `nowMin` (minutes since midnight), handling
+ * closing times past midnight ("22:00"–"05:00"). Unknown hours → true, so a
+ * data gap never hides a venue. */
+export function isOpenAt(v: Pick<Venue, "openTime" | "closeTime">, nowMin: number): boolean {
+  const o = minutesOf(v.openTime);
+  const c = minutesOf(v.closeTime);
+  if (o === null || c === null || o === c) return true;
+  return c > o ? nowMin >= o && nowMin < c : nowMin >= o || nowMin < c;
+}
+
+export interface SelectionContext {
+  /** Where the user is (checked-in venue or device) — nearby venues rank higher. */
+  origin?: { lat: number; lng: number };
+  /** Minutes since midnight in the venue's timezone — venues open now rank higher, closed ones sink. */
+  nowMin?: number;
+  /** Favorited venue ids — a mild taste boost, not a hard filter. */
+  favoriteIds?: Set<string>;
+  /** The venue the user is standing in — never a recommendation, so it's excluded here
+   * and injected into the prompt as context instead. */
+  excludeId?: string;
+}
+
+export function selectRelevantVenues(
+  allVenues: Venue[],
+  conversationText: string,
+  limit = 35,
+  ctx: SelectionContext = {},
+): Venue[] {
+  const venues = ctx.excludeId ? allVenues.filter((v) => v.id !== ctx.excludeId) : allVenues;
   if (venues.length <= limit) return venues;
   const text = conversationText.toLowerCase();
   const budgetMatch = text.match(/\$?\s*(\d{2,4})/);
@@ -40,6 +83,19 @@ export function selectRelevantVenues(venues: Venue[], conversationText: string, 
       const impliedTier = Math.min(4, Math.max(1, Math.round(budget / 40)));
       score += impliedTier === v.priceTier ? 2 : 0;
     }
+    // Context signals (2026-09-06). Someone asking "what's next" from inside
+    // Factory Town at 2 AM was getting the same digest as someone planning
+    // Friday from their couch — the model can't rank by distance or hours
+    // it can't see. Proximity beats most keyword matches on purpose: a great
+    // venue 40 minutes away is not "next".
+    if (ctx.origin) {
+      const km = distanceKm(ctx.origin, v);
+      score += km < 1.5 ? 6 : km < 4 ? 4 : km < 8 ? 2 : 0;
+    }
+    if (ctx.nowMin !== undefined) {
+      score += isOpenAt(v, ctx.nowMin) ? 2 : -6;
+    }
+    if (ctx.favoriteIds?.has(v.id)) score += 2;
     return { v, score };
   });
 
@@ -67,16 +123,41 @@ export interface ConciergeContext {
   excludeSlugs?: string[];
   /** Para inyectar hora/día reales — inyectable en tests, default `new Date()`. */
   now?: Date;
+  /** The venue the user is checked in at right now (never recommended back to them). */
+  currentVenue?: Venue;
+  /** Venues the user has favorited — taste signal. */
+  favorites?: Venue[];
+  /** Where the user is — lets the digest carry real distances. */
+  origin?: { lat: number; lng: number };
+  /** IANA zone for "RIGHT NOW" — the city's, not Miami's by default. */
+  timeZone?: string;
 }
 
 export function buildConciergeSystemPrompt(
   venues: Venue[],
   context: ConciergeContext = {},
 ): string {
-  const { excludeSlugs = [], now = new Date() } = context;
+  const { excludeSlugs = [], now = new Date(), currentVenue, favorites = [], origin, timeZone = "America/New_York" } = context;
+
+  // Rough Miami ride time: ~2.5 min/km door to door plus 4 min to get a car.
+  const rideMinutes = (km: number) => Math.max(5, Math.round(4 + km * 2.5));
+
+  const userContextBlock = (() => {
+    const lines: string[] = [];
+    if (currentVenue) {
+      lines.push(`- The user is AT ${currentVenue.name} (${currentVenue.neighborhood}) right now. Never recommend it back to them; "what's next" means somewhere else, sequenced from here.`);
+    }
+    if (origin) {
+      lines.push(`- Distances in the CATALOG are from where the user is. Under 1 km = walkable, say so; otherwise give the ride time shown. Prefer close over perfect at this hour unless they ask for a specific area.`);
+    }
+    if (favorites.length > 0) {
+      lines.push(`- They've favorited: ${favorites.slice(0, 8).map((f) => `${f.name} (${f.type}, ${f.musicGenres.join("/") || "no genre data"})`).join("; ")}. Read taste from this (energy, music, price) — don't just re-suggest these.`);
+    }
+    return lines.length > 0 ? `\n\nUSER CONTEXT (real, from the app — use it)\n${lines.join("\n")}` : "";
+  })();
 
   const timeContext = now.toLocaleString("en-US", {
-    timeZone: "America/New_York",
+    timeZone,
     weekday: "long",
     hour: "numeric",
     minute: "2-digit",
@@ -97,6 +178,7 @@ export function buildConciergeSystemPrompt(
         `music: ${v.musicGenres.join("/")} | vibes: ${v.vibes.join(", ")} | ` +
         `hours ${v.openTime}–${v.closeTime}` +
         (v.happyHourUntil ? ` | happy hour until ${v.happyHourUntil}` : "") +
+        (origin ? ` | ${(() => { const km = distanceKm(origin, v); return km < 1 ? `${Math.round(km * 1000)} m away, walkable` : `${km.toFixed(1)} km away, ~${rideMinutes(km)} min ride`; })()}` : "") +
         ` | best arrival ${v.bestArrivalTime} | ${v.hook}`,
     )
     .join("\n");
@@ -124,6 +206,8 @@ HARD RULES
 - Every fact in a "note" (price, hours, drink, detail) must come from the CATALOG entry for that venue — never state a specific detail you're not sure is real.
 - Language: if the user writes in English, respond in natural American English. If they write in Spanish, respond in neutral Latin American Spanish (the kind used across Latin America and Miami) — never Rioplatense/Argentine Spanish (no "vos", "che", "boludo", or River Plate slang), regardless of what dialect the user themselves writes in.
 - Every "note" must contain at least one concrete, insider-specific detail — a drink, a timing trick, a seat, a heads-up. No filler like "great vibes" or "you'll love it".${excludeBlock}
+- If the CATALOG doesn't give you a specific (a drink name, a doorman's habit, a "secret"), do NOT invent one — say what to ask for at the door or bar instead ("ask what's on the menu tonight"). An invented insider detail is the one thing that gets you fired.
+- Plain text only: no markdown, no **bold**, no headers, no bullet symbols in chat prose — the app renders your words as-is.${userContextBlock}
 - You can't actually book anything outside BarPass — no Uber/Lyft, no restaurant reservations, no ride, no third-party booking. If asked, say so plainly in one line (you're not that, you don't pretend to be), then stay useful: give real, concrete travel/logistics advice instead (which app to use, roughly what a ride between two neighborhoods costs and takes, where to catch one). Never go quiet or ignore the ask — a request you can't fulfill still gets answered, just honestly.
 
 VOICE EXAMPLES (match this energy, don't copy verbatim)
