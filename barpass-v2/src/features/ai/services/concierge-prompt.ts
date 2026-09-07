@@ -13,6 +13,17 @@ import type { Venue } from "@/types";
 // on every turn; measured in production at 14-22s per reply even on the fast
 // model. A tap-first chat needs 2-4 stops, and the scorer already ranks by
 // fit — the bottom half of 60 was never getting picked.
+/** How people actually ask for each venue type, es + en (lowercase, matched as substrings). */
+const TYPE_SYNONYMS: Record<Venue["type"], string[]> = {
+  rooftop: ["rooftop", "azotea", "terraza", "roof", "con vista", "skyline"],
+  club: ["club", "discoteca", "disco", "nightclub", "bailar", "dance floor", "perrear", "rave", "dj"],
+  bar: ["bar ", "bares", "barcito", "dive", "pub", "cerveza", "beer", "tragos", "cocktail", "cóctel", "coctel"],
+  lounge: ["lounge", "chill", "tranquilo", "conversar", "hablar", "first date", "primera cita", "cita"],
+  sports_bar: ["sports bar", "sports", "partido", "game", "fútbol", "futbol", "nfl", "nba", "ver el juego"],
+  restaurant: ["restaurant", "restaurante", "cenar", "dinner", "comer", "comida", "food"],
+  brewery: ["brewery", "cervecería", "cerveceria", "craft beer", "artesanal"],
+};
+
 /** Straight-line distance in km — good enough to rank "nearby" for a night out. */
 export function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
   const R = 6371;
@@ -70,11 +81,22 @@ export function selectRelevantVenues(
   // took an arbitrary slice). Pinned separately, before any trimming.
   const named = venues.filter((v) => text.includes(v.name.toLowerCase()));
 
+  // Venue TYPES the user asked for, in either language. 2026-09-06 eval:
+  // "Rooftop con vista para un cumpleaños" got "none of the venues in the
+  // catalog are rooftop venues" — Miami has rooftops, but type matched for
+  // +1 while "open now" gave every venue +2, so the 35-venue shortlist was
+  // effectively random with respect to the one thing the user asked for.
+  // Asked-for types now outweigh everything except an explicit venue name.
+  const wantedTypes = new Set<Venue["type"]>();
+  for (const [type, words] of Object.entries(TYPE_SYNONYMS) as [Venue["type"], string[]][]) {
+    if (words.some((w) => text.includes(w))) wantedTypes.add(type);
+  }
+
   const scored = venues.map((v) => {
     let score = 0;
     for (const vibe of v.vibes) if (text.includes(vibe.toLowerCase())) score += 3;
     for (const genre of v.musicGenres) if (text.includes(genre.toLowerCase().replace("_", " "))) score += 3;
-    if (text.includes(v.type.toLowerCase())) score += 1;
+    if (wantedTypes.has(v.type)) score += 8;
     if (text.includes(v.neighborhood.toLowerCase())) score += 4;
     if (text.includes(v.name.toLowerCase())) score += 5;
     if (budget !== null) {
@@ -206,7 +228,8 @@ HARD RULES
 - Every fact in a "note" (price, hours, drink, detail) must come from the CATALOG entry for that venue — never state a specific detail you're not sure is real.
 - Language: if the user writes in English, respond in natural American English. If they write in Spanish, respond in neutral Latin American Spanish (the kind used across Latin America and Miami) — never Rioplatense/Argentine Spanish (no "vos", "che", "boludo", or River Plate slang), regardless of what dialect the user themselves writes in.
 - Every "note" must contain at least one concrete, insider-specific detail — a drink, a timing trick, a seat, a heads-up. No filler like "great vibes" or "you'll love it".${excludeBlock}
-- If the CATALOG doesn't give you a specific (a drink name, a doorman's habit, a "secret"), do NOT invent one — say what to ask for at the door or bar instead ("ask what's on the menu tonight"). An invented insider detail is the one thing that gets you fired.
+- If the CATALOG doesn't give you a specific (a drink name, a doorman's habit, a "secret"), do NOT invent one — say what to ask for at the door or bar instead ("ask what's on the menu tonight"). Never name a specific drink, DJ, promoter, or event unless it appears in that venue's CATALOG line. Your concrete details come from what IS there: hours, best arrival time, cover, price level, music, vibes, distance, the hook. An invented insider detail is the one thing that gets you fired.
+- If nothing in the CATALOG matches the exact ask (e.g. no rooftop within reach), say so in ONE sentence in the user's language and immediately give the closest real fit — never answer in a different language than the user, and never stop at "sorry".
 - Plain text only: no markdown, no **bold**, no headers, no bullet symbols in chat prose — the app renders your words as-is.${userContextBlock}
 - You can't actually book anything outside BarPass — no Uber/Lyft, no restaurant reservations, no ride, no third-party booking. If asked, say so plainly in one line (you're not that, you don't pretend to be), then stay useful: give real, concrete travel/logistics advice instead (which app to use, roughly what a ride between two neighborhoods costs and takes, where to catch one). Never go quiet or ignore the ask — a request you can't fulfill still gets answered, just honestly.
 
