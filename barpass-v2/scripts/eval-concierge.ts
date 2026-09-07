@@ -36,8 +36,8 @@ const CASES: Case[] = [
   { prompt: "Can you get me an Uber to LIV?", lang: "en", expectPlan: false },
 ];
 
-const ES_MARKERS = /\b(que|para|noche|donde|dónde|con|los|las|una|esta|pide|llega|vamos)\b/gi;
-const EN_MARKERS = /\b(the|and|with|tonight|order|arrive|get|you|your|then|before)\b/gi;
+const ES_MARKERS = /\b(que|qué|para|noche|donde|dónde|con|los|las|una|esta|está|pide|llega|vamos|aquí|después|luego|si|el|la|de|del|y|tu|te)\b|[¿¡ñ]|[áéíóú]/gi;
+const EN_MARKERS = /\b(the|and|with|tonight|order|arrive|get|you|your|then|before|here|after|at|to|of|is|it|for)\b/gi;
 
 function detectLang(text: string): "es" | "en" {
   const es = (text.match(ES_MARKERS) ?? []).length;
@@ -118,6 +118,7 @@ async function main() {
     }
     checks.fast = (firstContentMs ?? 99999) < 6000 && totalMs < 20000;
 
+    if (!checks.language || !checks.shape) console.log(`   ↳ ${JSON.stringify(text.replace(/```[\s\S]*?```/g, "").trim().slice(0, 140))}`);
     const passed = Object.values(checks).filter(Boolean).length;
     score += passed; max += Object.keys(checks).length;
     rows.push(
