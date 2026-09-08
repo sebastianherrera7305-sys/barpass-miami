@@ -22,7 +22,17 @@ final class VenueStore: ObservableObject {
 
     private let repository: VenueRepository
     /// The full, unfiltered fetch — `venues` is always derived from this.
-    private var allVenues: [BarPassVenue] = []
+    private var allVenues: [BarPassVenue] = [] {
+        didSet { coveredCities = Set(allVenues.compactMap(\.city)) }
+    }
+    /// Every city we actually have venues for. A screen that offers to send
+    /// someone into a city's nightlife must check this first — 24 of the 47
+    /// universities point at a city with zero venues (Durham, Tucson,
+    /// Orlando...), and "Nightlife in X" dropped them onto an empty Explore
+    /// that then reset their city. TestFlight: "the part that says nightlife
+    /// in Coral Gables does not work and it's the same for all the colleges
+    /// and all the 23 cities".
+    @Published private(set) var coveredCities: Set<String> = []
     private var cancellables = Set<AnyCancellable>()
 
     init(repository: VenueRepository = RepositoryDependencies.venue) {

@@ -8,6 +8,7 @@ struct UniversityDetailView: View {
     let university: University
 
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var venueStore: VenueStore
     @ObservedObject private var l10n = L10n.shared
     @State private var publicEvents: [UniversityPublicEvent] = []
     @State private var loadedEvents = false
@@ -29,18 +30,32 @@ struct UniversityDetailView: View {
                     }
                     .buttonStyle(.plain)
 
-                    Button {
-                        BPHaptics.medium()
-                        SelectedCityStore.select(university.venueCity)
-                        appState.switchTabPoppingToRoot(1) // Explore
-                    } label: {
+                    // Only offer the nightlife jump for a city we actually
+                    // cover. Before this check it always navigated, and for
+                    // 24 of 47 universities that meant an empty Explore that
+                    // silently reset the user's selected city.
+                    if venueStore.coveredCities.isEmpty || venueStore.coveredCities.contains(university.venueCity) {
+                        Button {
+                            BPHaptics.medium()
+                            SelectedCityStore.select(university.venueCity)
+                            appState.switchTabPoppingToRoot(1) // Explore
+                        } label: {
+                            rowCard(
+                                icon: "map.fill",
+                                title: String(format: l10n.t("greek.detail.nightlife"), university.city),
+                                subtitle: String(format: l10n.t("greek.detail.nightlifeSubtitle"), university.venueCity)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    } else {
                         rowCard(
-                            icon: "map.fill",
+                            icon: "map",
                             title: String(format: l10n.t("greek.detail.nightlife"), university.city),
-                            subtitle: String(format: l10n.t("greek.detail.nightlifeSubtitle"), university.venueCity)
+                            subtitle: String(format: l10n.t("greek.detail.noCoverage"), university.venueCity)
                         )
+                        .opacity(0.55)
+                        .bpAccessibility(label: String(format: l10n.t("greek.detail.noCoverage"), university.venueCity))
                     }
-                    .buttonStyle(.plain)
 
                     if let officialURL = university.officialURL, let url = URL(string: officialURL) {
                         Link(destination: url) {
