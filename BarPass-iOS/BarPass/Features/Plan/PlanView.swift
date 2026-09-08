@@ -837,6 +837,10 @@ struct NightPlanView: View {
     @EnvironmentObject private var venueStore: VenueStore
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
 
+    /// Venue page opened from a stop — a full-screen cover so the plan (and
+    /// the whole conversation behind it) is still there when they come back.
+    @State private var openVenue: BarPassVenue?
+
     private func venue(for stop: PlanStop) -> BarPassVenue? {
         if let id = stop.venueId, let match = venueStore.venues.first(where: { $0.id == id }) { return match }
         // AI stops that never resolved an id still carry a real name — match
@@ -861,6 +865,57 @@ struct NightPlanView: View {
         }
         guard let url else { return }
         UIApplication.shared.open(url)
+    }
+
+    /// One tap → Uber with the dropoff already set to this stop. Same two-step
+    /// as the venue page: the installed app first (uber:// is declared in
+    /// LSApplicationQueriesSchemes), the mobile web flow when it isn't there,
+    /// so the button never dead-ends. Remy still can't BOOK the ride — this
+    /// hands off to Uber with the destination filled in, which is what
+    /// "pedir Uber directo" actually means from inside another app.
+    private func openUber(_ stop: PlanStop) {
+        BPHaptics.light()
+        guard let v = venue(for: stop) else {
+            // No coordinates: let Uber search by name rather than doing nothing.
+            let q = "\(stop.venueName) \(stop.venueNeighborhood)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            if let web = URL(string: "https://m.uber.com/ul/?action=setPickup&dropoff[formatted_address]=\(q)") {
+                UIApplication.shared.open(web)
+            }
+            return
+        }
+        let nickname = v.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let deepLink = URL(string: "uber://?action=setPickup&dropoff[latitude]=\(v.latitude)&dropoff[longitude]=\(v.longitude)&dropoff[nickname]=\(nickname)")
+        if let deepLink, UIApplication.shared.canOpenURL(deepLink) {
+            UIApplication.shared.open(deepLink)
+        } else if let web = URL(string: "https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=\(v.latitude)&dropoff[longitude]=\(v.longitude)&dropoff[nickname]=\(nickname)") {
+            UIApplication.shared.open(web)
+        }
+    }
+
+    /// What one drink costs here, when we actually know: the venue's own menu
+    /// first (extracted from its website with provenance), then what people
+    /// reported paying at check-out. nil stays nil — no invented number.
+    private func drinkPrice(_ stop: PlanStop) -> Double? {
+        guard let v = venue(for: stop) else { return nil }
+        let menu = v.popularDrinks.map(\.price).filter { $0 > 0 }.sorted()
+        if !menu.isEmpty { return menu[menu.count / 2] }
+        return v.reportedDrinkPrice?.medianDollars
+    }
+
+    /// Small square action — "un cuadradito nada más de tocar que diga Uber".
+    private func stopAction(icon: String, label: String, a11y: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 3) {
+                Image(systemName: icon).font(.bpScaled(15, weight: .semibold))
+                Text(label).font(.bpScaled(9, weight: .bold))
+            }
+            .foregroundStyle(amber)
+            .frame(width: 54, height: 46)
+            .background(amber.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(amber.opacity(0.25)))
+        }
+        .buttonStyle(.plain)
+        .bpAccessibility(label: a11y, isButton: true)
     }
 
     var body: some View {
@@ -908,43 +963,82 @@ struct NightPlanView: View {
                         }
                         .frame(width: 10)
 
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(stop.time)
-                                .font(.bpScaled(11, weight: .bold))
-                                .foregroundStyle(amber)
-                            Text(stop.venueName)
-                                .font(.bpScaled(15, weight: .bold))
-                                .foregroundStyle(Color.bpInk)
-                            Text(plan.isAIGenerated ? stop.note : l10n.t(stop.note))
-                                .font(.bpScaled(12))
-                                .foregroundStyle(Color.bpInk.opacity(0.4))
-                            Text("\(stop.venueNeighborhood) · \(stop.venuePriceRange)")
-                                .font(.bpScaled(11))
-                                .foregroundStyle(Color.bpInk.opacity(0.3))
-                            // The address itself, right in the chat — no
-                            // navigating to the venue page to find out where
-                            // the plan is actually sending you.
-                            if let address = venue(for: stop)?.address, !address.isEmpty {
-                                Text(address)
-                                    .font(.bpScaled(11))
-                                    .foregroundStyle(Color.bpInk.opacity(0.3))
-                                    .fixedSize(horizontal: false, vertical: true)
+                        VStack(alignment: .leading, spacing: 6) {
+                            // Tapping the stop opens the real venue page —
+                            // the plan stops being a static list and becomes
+                            // a way into everything the app knows about the
+                            // place (2026-09-08: "que los planes sean más
+                            // interactivos").
+                            Button {
+                                guard let v = venue(for: stop) else { return }
+                                BPHaptics.light()
+                                openVenue = v
+                            } label: {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(stop.time)
+                                        .font(.bpScaled(11, weight: .bold))
+                                        .foregroundStyle(amber)
+                                    HStack(spacing: 5) {
+                                        Text(stop.venueName)
+                                            .font(.bpScaled(15, weight: .bold))
+                                            .foregroundStyle(Color.bpInk)
+                                            .multilineTextAlignment(.leading)
+                                        if venue(for: stop) != nil {
+                                            Image(systemName: "chevron.right")
+                                                .font(.bpScaled(10, weight: .bold))
+                                                .foregroundStyle(Color.bpInk.opacity(0.3))
+                                        }
+                                    }
+                                    Text(plan.isAIGenerated ? stop.note : l10n.t(stop.note))
+                                        .font(.bpScaled(12))
+                                        .foregroundStyle(Color.bpInk.opacity(0.4))
+                                        .multilineTextAlignment(.leading)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    // Neighborhood, price tier, and — when we
+                                    // have a real number — what a drink costs.
+                                    HStack(spacing: 4) {
+                                        Text("\(stop.venueNeighborhood) · \(stop.venuePriceRange)")
+                                            .font(.bpScaled(11))
+                                            .foregroundStyle(Color.bpInk.opacity(0.3))
+                                        if let price = drinkPrice(stop) {
+                                            Text("·").foregroundStyle(Color.bpInk.opacity(0.2))
+                                            Text(String(format: l10n.t("plan.stop.perDrink"), price))
+                                                .font(.bpScaled(11, weight: .semibold))
+                                                .foregroundStyle(amber.opacity(0.8))
+                                        }
+                                    }
+                                    // The address itself, right in the chat — no
+                                    // navigating to the venue page to find out where
+                                    // the plan is actually sending you.
+                                    if let address = venue(for: stop)?.address, !address.isEmpty {
+                                        Text(address)
+                                            .font(.bpScaled(11))
+                                            .foregroundStyle(Color.bpInk.opacity(0.3))
+                                            .multilineTextAlignment(.leading)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .bpAccessibility(label: "\(stop.time), \(stop.venueName)",
+                                             hint: venue(for: stop) != nil ? l10n.t("plan.stop.open.hint") : "",
+                                             isButton: venue(for: stop) != nil)
+
+                            HStack(spacing: 8) {
+                                stopAction(icon: "map.fill", label: l10n.t("plan.stop.maps"),
+                                           a11y: String(format: l10n.t("plan.stop.directions"), stop.venueName)) {
+                                    openDirections(stop)
+                                }
+                                stopAction(icon: "car.fill", label: "Uber",
+                                           a11y: String(format: l10n.t("plan.stop.uber"), stop.venueName)) {
+                                    openUber(stop)
+                                }
+                                Spacer()
                             }
                         }
                         .padding(.bottom, i < plan.stops.count - 1 ? 20 : 0)
-
-                        Spacer(minLength: 8)
-
-                        Button { openDirections(stop) } label: {
-                            Image(systemName: "arrow.triangle.turn.up.right.circle.fill")
-                                .font(.bpScaled(20))
-                                .foregroundStyle(amber)
-                                .frame(width: 40, height: 40)
-                                .background(amber.opacity(0.12), in: Circle())
-                        }
-                        .buttonStyle(.plain)
-                        .bpAccessibility(label: String(format: l10n.t("plan.stop.directions"), stop.venueName),
-                                         hint: l10n.t("venueDetail.directions.hint"), isButton: true)
                     }
                 }
             }
@@ -1000,6 +1094,9 @@ struct NightPlanView: View {
         .padding(18)
         .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Color.bpInk.opacity(0.08)))
+        .fullScreenCover(item: $openVenue) { venue in
+            NavigationStack { VenueDetailView(venue: venue) }
+        }
     }
 }
 
