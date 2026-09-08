@@ -185,6 +185,12 @@ struct VenueEvent: Identifiable, Codable {
     var studentPrice: Double? = nil
 }
 
+/// Crowd-reported drink price for a venue — real check-out reports, aggregated.
+struct VenueReportedPrice: Codable, Hashable, Sendable {
+    let medianDollars: Double
+    let reportCount: Int
+}
+
 struct BarPassVenue: Identifiable, Codable {
     let id:               String
     let name:             String
@@ -244,6 +250,9 @@ struct BarPassVenue: Identifiable, Codable {
 
     /// Just the ids, for filtering. Keeps existing call sites simple.
     var ageBracketIds: [String] { ageBrackets.map(\.id) }
+    /// Median drink price reported by people at check-out (venue_price_stats:
+    /// 3+ reports, last 180 days). nil until then — never a guessed default.
+    var reportedDrinkPrice: VenueReportedPrice? = nil
     /// Multi-city readiness (Venue Intelligence Roadmap Phase 2). Optional
     /// for decode-safety against any venue cached before these existed —
     /// nil, not "Miami", when a source genuinely doesn't say. The live

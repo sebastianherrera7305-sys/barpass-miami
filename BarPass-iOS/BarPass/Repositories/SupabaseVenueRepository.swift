@@ -136,10 +136,16 @@ final actor SupabaseVenueRepository: VenueRepository {
         async let eventRowsTask = fetchEventRows()
         async let tagRowsTask = fetchExperienceTagRows()
         async let ageBracketRowsTask = fetchAgeBracketRows()
+        async let priceStatsTask = fetchPriceStatRows()
         let venueRows = try await venueRowsTask
         let eventRows = (try? await eventRowsTask) ?? []
         let tagRows = (try? await tagRowsTask) ?? []
         let ageBracketRows = (try? await ageBracketRowsTask) ?? []
+        // Optional by design: the view doesn't exist until
+        // venue_price_reports.sql has been run — a 404 here must never
+        // block the catalog.
+        let priceRows = (try? await priceStatsTask) ?? []
+        let priceByVenue = Dictionary(priceRows.map { ($0.venueId.uuidString.lowercased(), $0) }, uniquingKeysWith: { a, _ in a })
         let eventsByVenue = Dictionary(grouping: eventRows, by: { $0.venueId.uuidString.lowercased() })
         let tagsByVenue = Dictionary(grouping: tagRows, by: { $0.venueId.uuidString.lowercased() })
         let ageBracketsByVenue = Dictionary(grouping: ageBracketRows, by: { $0.venueId.uuidString.lowercased() })
@@ -171,8 +177,16 @@ final actor SupabaseVenueRepository: VenueRepository {
                     reportCount: $0.reportCount
                 )
             }
-            return Self.mapRowToVenue(row, events: venueEvents, experienceTags: venueTags, ageBrackets: venueAgeBrackets)
+            var venue = Self.mapRowToVenue(row, events: venueEvents, experienceTags: venueTags, ageBrackets: venueAgeBrackets)
+            if let stat = priceByVenue[row.id.uuidString.lowercased()] {
+                venue.reportedDrinkPrice = VenueReportedPrice(medianDollars: Double(stat.medianDrinkCents) / 100, reportCount: stat.reportCount)
+            }
+            return venue
         }
+    }
+
+    private func fetchPriceStatRows() async throws -> [SupabasePriceStatRow] {
+        try await publicGet("venue_price_stats", columns: "venue_id,median_drink_cents,report_count")
     }
 
     /// PostgREST caps a single response at the project's default row limit
@@ -590,6 +604,12 @@ struct SupabaseExperienceTagRow: Codable {
     let confidence: TagConfidence
     let source: TagSource
     let computedAt: Date?
+}
+
+struct SupabasePriceStatRow: Codable {
+    let venueId: UUID
+    let medianDrinkCents: Int
+    let reportCount: Int
 }
 
 struct SupabaseAgeBracketRow: Codable {

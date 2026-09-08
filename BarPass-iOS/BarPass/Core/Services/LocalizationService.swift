@@ -83,7 +83,9 @@ final class L10n: ObservableObject {
         .es: [
             "venue.crowd.empty": "Vacío", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Lleno", "venue.crowd.max": "A tope", "venue.crowd.na": "N/D",
             "a11y.loading": "Cargando contenido",
-            "venueMedia.title": "Fotos y videos", "venueMedia.add": "Agregar", "venueMedia.add.hint": "Sube una foto o video (máx. 60 s) desde tu galería",
+            "venueMedia.title": "Fotos y videos",
+            "priceReport.title": "¿Cuánto pagaste por un trago?", "priceReport.subtitle": "Solo un toque. Así todos saben qué esperar en %@.",
+            "budget.title": "PRESUPUESTO", "budget.perDrink": "por trago", "budget.night": "≈ $%.0f por 3 tragos", "budget.nightWithCover": "≈ $%.0f por 3 tragos + cover", "budget.source.menu": "Según el menú del venue", "budget.source.reports": "Según %d personas que pagaron aquí", "budget.reportsAlso": "La gente reporta ~$%.0f (%d reportes)", "budget.none": "Todavía no hay precios de este lugar. Cuando salgas, te preguntamos cuánto pagaste y ayudas a todos.", "venueMedia.add": "Agregar", "venueMedia.add.hint": "Sube una foto o video (máx. 60 s) desde tu galería",
             "venueMedia.compressing": "Comprimiendo video…", "venueMedia.uploading": "Subiendo… %d%%",
             "venueInside.title": "Adentro de %@", "venueInside.disclaimer": "El venue no publica plano y la ubicación de escenarios y barras cambia por evento — esto es la guía de zonas con fuentes, no un mapa dibujado. Si fotografías el mapa de la entrada, súbelo abajo en Fotos y videos.",
             "venueInside.tonight": "Esta noche", "venueInside.zones": "Zonas", "venueInside.barsPrices": "Barras y precios", "venueInside.logistics": "Entrada y logística",
@@ -957,7 +959,9 @@ final class L10n: ObservableObject {
         .en: [
             "venue.crowd.empty": "Empty", "venue.crowd.chill": "Chill", "venue.crowd.moderate": "Moderate", "venue.crowd.lively": "Lively", "venue.crowd.packed": "Packed", "venue.crowd.max": "Slammed", "venue.crowd.na": "N/A",
             "a11y.loading": "Loading content",
-            "venueMedia.title": "Photos & videos", "venueMedia.add": "Add", "venueMedia.add.hint": "Upload a photo or video (max 60 s) from your library",
+            "venueMedia.title": "Photos & videos",
+            "priceReport.title": "What did one drink cost?", "priceReport.subtitle": "One tap. So everyone knows what to expect at %@.",
+            "budget.title": "BUDGET", "budget.perDrink": "per drink", "budget.night": "≈ $%.0f for 3 drinks", "budget.nightWithCover": "≈ $%.0f for 3 drinks + cover", "budget.source.menu": "From the venue's menu", "budget.source.reports": "From %d people who paid here", "budget.reportsAlso": "People report ~$%.0f (%d reports)", "budget.none": "No prices for this place yet. When you leave we'll ask what you paid, and everyone benefits.", "venueMedia.add": "Add", "venueMedia.add.hint": "Upload a photo or video (max 60 s) from your library",
             "venueMedia.compressing": "Compressing video…", "venueMedia.uploading": "Uploading… %d%%",
             "venueInside.title": "Inside %@", "venueInside.disclaimer": "The venue publishes no floor plan and stage/bar positions change per event — this is a sourced zone guide, not a drawn map. If you photograph the map at the entrance, post it below in Photos & videos.",
             "venueInside.tonight": "Tonight", "venueInside.zones": "Zones", "venueInside.barsPrices": "Bars & prices", "venueInside.logistics": "Entry & logistics",
@@ -1831,7 +1835,9 @@ final class L10n: ObservableObject {
         .pt: [
             "venue.crowd.empty": "Vazio", "venue.crowd.chill": "Tranquilo", "venue.crowd.moderate": "Moderado", "venue.crowd.lively": "Animado", "venue.crowd.packed": "Cheio", "venue.crowd.max": "Lotado", "venue.crowd.na": "N/D",
             "a11y.loading": "Carregando conteúdo",
-            "venueMedia.title": "Fotos e vídeos", "venueMedia.add": "Adicionar", "venueMedia.add.hint": "Envie uma foto ou vídeo (máx. 60 s) da sua galeria",
+            "venueMedia.title": "Fotos e vídeos",
+            "priceReport.title": "Quanto custou uma bebida?", "priceReport.subtitle": "Só um toque. Assim todo mundo sabe o que esperar em %@.",
+            "budget.title": "ORÇAMENTO", "budget.perDrink": "por bebida", "budget.night": "≈ $%.0f por 3 bebidas", "budget.nightWithCover": "≈ $%.0f por 3 bebidas + cover", "budget.source.menu": "Segundo o cardápio do lugar", "budget.source.reports": "Segundo %d pessoas que pagaram aqui", "budget.reportsAlso": "As pessoas relatam ~$%.0f (%d relatos)", "budget.none": "Ainda não há preços deste lugar. Quando você sair, perguntamos quanto pagou e todos se beneficiam.", "venueMedia.add": "Adicionar", "venueMedia.add.hint": "Envie uma foto ou vídeo (máx. 60 s) da sua galeria",
             "venueMedia.compressing": "Comprimindo vídeo…", "venueMedia.uploading": "Enviando… %d%%",
             "venueInside.title": "Dentro de %@", "venueInside.disclaimer": "O local não publica planta e a posição de palcos e bares muda por evento — este é um guia de zonas com fontes, não um mapa desenhado. Se fotografar o mapa da entrada, publique abaixo em Fotos e vídeos.",
             "venueInside.tonight": "Hoje à noite", "venueInside.zones": "Zonas", "venueInside.barsPrices": "Bares e preços", "venueInside.logistics": "Entrada e logística",

@@ -178,6 +178,9 @@ struct VenueDetailView: View {
                 .padding(.horizontal, BPSpacing.lg)
                 .helpTarget("venueDetail.checkIn")
 
+            budgetSection
+                .padding(.horizontal, BPSpacing.lg)
+
             if !goodToKnowChips.isEmpty {
                 goodToKnowSection
                     .padding(.horizontal, BPSpacing.lg)
@@ -247,6 +250,59 @@ struct VenueDetailView: View {
     }
 
     // MARK: - Quick stats
+
+    // MARK: - Budget (only from real numbers)
+
+    /// "Presupuesto": what a drink costs here, from the venue's own menu
+    /// (popular_drinks, extracted from its website with provenance) or from
+    /// people's check-out reports (venue_price_stats, 3+ reports). When
+    /// neither exists it says so and asks for help — it never shows a
+    /// number nobody measured. 2026-09-08: "necesitamos saber qué tragos
+    /// venden y a cuánto… para todos".
+    private var budgetSection: some View {
+        let menuPrices = venue.popularDrinks.map(\.price).filter { $0 > 0 }.sorted()
+        let menuMedian: Double? = menuPrices.isEmpty ? nil : menuPrices[menuPrices.count / 2]
+        let reported = venue.reportedDrinkPrice
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label(l10n.t("budget.title"), systemImage: "banknote.fill")
+                    .font(.bpScaled(12, weight: .bold)).foregroundStyle(Color.bpAmber)
+                Spacer()
+            }
+            if let menuMedian {
+                budgetLine(perDrink: menuMedian, sourceText: l10n.t("budget.source.menu"))
+            } else if let reported {
+                budgetLine(perDrink: reported.medianDollars, sourceText: String(format: l10n.t("budget.source.reports"), reported.reportCount))
+            } else {
+                Text(l10n.t("budget.none"))
+                    .font(.bpScaled(13)).foregroundStyle(Color.bpTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if let menuMedian, let reported, abs(menuMedian - reported.medianDollars) >= 3 {
+                Text(String(format: l10n.t("budget.reportsAlso"), reported.medianDollars, reported.reportCount))
+                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextTertiary)
+            }
+        }
+        .padding(14)
+        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpInk.opacity(0.07)))
+    }
+
+    private func budgetLine(perDrink: Double, sourceText: String) -> some View {
+        let cover = Double(venue.coverMen ?? 0)
+        let night = perDrink * 3 + cover
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(String(format: "$%.0f", perDrink))
+                    .font(.bpScaled(24, weight: .black, design: .rounded)).foregroundStyle(Color.bpInk)
+                Text(l10n.t("budget.perDrink")).font(.bpScaled(12)).foregroundStyle(Color.bpTextSecondary)
+                Spacer()
+                Text(String(format: l10n.t(cover > 0 ? "budget.nightWithCover" : "budget.night"), night))
+                    .font(.bpScaled(12, weight: .semibold)).foregroundStyle(Color.bpInk.opacity(0.8))
+            }
+            Text(sourceText).font(.bpScaled(10)).foregroundStyle(Color.bpTextTertiary)
+        }
+    }
 
     private var quickStats: some View {
         HStack(spacing: 0) {

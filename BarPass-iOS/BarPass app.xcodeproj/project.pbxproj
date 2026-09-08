@@ -14,6 +14,7 @@
 		0F61EAC735A9E5FBEEAB0A7D /* StadiumRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162643D77BF970FAA2942A37 /* StadiumRepository.swift */; };
 		0EF6C5915AA240B49202C271 /* SupabaseRESTClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A173F3C3D34475BC7C8C4D /* SupabaseRESTClient.swift */; };
 		12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */; };
+		54F309206E204DE3DF767D25 /* PriceReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B432D473296478898BCF7620 /* PriceReportRepository.swift */; };
 		1381C66FFDBA49BF7D938D04 /* HelpRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */; };
 		1E6D56BE3ACE427DB3D6D36B /* CityMascotIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */; };
 		1FA39B5B4E8C1190DC8683E2 /* HelpGuideStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75CA2DEEAE28B897B4F7BBE4 /* HelpGuideStoreTests.swift */; };
@@ -225,6 +226,7 @@
 		163C5D5B580F4F5CB17391D4 /* LiquidGlassButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiquidGlassButtonStyle.swift; path = BarPass/Resources/LiquidGlassButtonStyle.swift; sourceTree = SOURCE_ROOT; };
 		1D1A059688C549A88BABFEBB /* FraternityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FraternityListView.swift; path = BarPass/Features/CollegeLife/FraternityListView.swift; sourceTree = SOURCE_ROOT; };
 		1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportRepository.swift; path = BarPass/Repositories/AgeReportRepository.swift; sourceTree = SOURCE_ROOT; };
+		B432D473296478898BCF7620 /* PriceReportRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PriceReportRepository.swift; path = BarPass/Repositories/PriceReportRepository.swift; sourceTree = SOURCE_ROOT; };
 		1DBB1D2978A1CEFD5727A510 /* GoHomeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GoHomeButton.swift; path = BarPass/Features/GoHome/GoHomeButton.swift; sourceTree = SOURCE_ROOT; };
 		2373126D43DE228E7095F6A2 /* PriorityEntryHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriorityEntryHubView.swift; sourceTree = "<group>"; };
 		28C5D564990D482ABF8A0AE5 /* CityPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityPickerView.swift; path = BarPass/Features/Onboarding/CityPickerView.swift; sourceTree = SOURCE_ROOT; };
@@ -621,6 +623,7 @@
 				3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */,
 				3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */,
 				1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */,
+				B432D473296478898BCF7620 /* PriceReportRepository.swift */,
 				162643D77BF970FAA2942A37 /* StadiumRepository.swift */,
 				28A173F3C3D34475BC7C8C4D /* SupabaseRESTClient.swift */,
 				F863CE708ACF44B3A96D654A /* UniversityListView.swift */,
@@ -1106,6 +1109,7 @@
 				FB27B50A40070142DA45268A /* GoHomeButton.swift in Sources */,
 				FD87EDAD40F4189CC21E49A7 /* HomeAddressSettingsView.swift in Sources */,
 				12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */,
+				54F309206E204DE3DF767D25 /* PriceReportRepository.swift in Sources */,
 				7BB3D4EC13FA314E51E72F88 /* AgeReportSheet.swift in Sources */,
 				A74E2DF0019E057F9578D8AB /* Stadium.swift in Sources */,
 				0F61EAC735A9E5FBEEAB0A7D /* StadiumRepository.swift in Sources */,
@@ -1160,7 +1164,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 57;
+				CURRENT_PROJECT_VERSION = 58;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1188,7 +1192,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 57;
+				CURRENT_PROJECT_VERSION = 58;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1318,7 +1322,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 57;
+				CURRENT_PROJECT_VERSION = 58;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1341,7 +1345,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 57;
+				CURRENT_PROJECT_VERSION = 58;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
