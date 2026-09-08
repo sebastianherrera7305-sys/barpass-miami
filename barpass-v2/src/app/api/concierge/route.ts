@@ -156,8 +156,11 @@ export async function POST(request: Request) {
     excludeId: currentVenue?.id,
   });
   const systemInstruction = buildConciergeSystemPrompt(shortlist, { currentVenue, favorites, origin, timeZone });
+  // The last message decides; if it's too short to tell (a venue name, "ok"),
+  // fall back to the whole conversation rather than defaulting to English.
   const lastUserMessage = [...parsed.data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
-  const replyLanguage = detectUserLanguage(lastUserMessage);
+  const replyLanguage = detectUserLanguage(lastUserMessage)
+    ?? detectUserLanguage(parsed.data.messages.filter((m) => m.role === "user").map((m) => m.content).join(" "));
 
   let upstream: Response | null = null;
   let servedBy: Provider | null = null;
@@ -181,12 +184,14 @@ export async function POST(request: Request) {
             // a ~4K-token system prompt was being ignored by the 20B model
             // on 2 of 6 eval prompts (Spanish in, English out). A one-line
             // instruction placed AFTER the user's message is what it obeys.
-            {
-              role: "system",
-              content: replyLanguage === "es"
-                ? "Responde SOLO en español neutro latinoamericano (nada de 'vos'/'che'). Ni una frase en inglés."
-                : "Reply ONLY in natural American English. Not one sentence in another language.",
-            },
+            ...(replyLanguage
+              ? [{
+                  role: "system",
+                  content: replyLanguage === "es"
+                    ? "Responde SOLO en español neutro latinoamericano (nada de 'vos'/'che'). Ni una frase en inglés."
+                    : "Reply ONLY in natural American English. Not one sentence in another language.",
+                }]
+              : []),
           ],
           temperature: 0.8,
           // A 3-stop plan block + 2 sentences is ~500 tokens; 2048 only ever
@@ -253,7 +258,10 @@ export async function POST(request: Request) {
           if (close === -1) return;
           const inner = fenceBuffer.slice(FENCE_OPEN.length, close);
           const after = fenceBuffer.slice(close + 3);
-          emit(`${FENCE_OPEN}\n${groundPlanBlock(inner.trim(), shortlist)}\n\`\`\``);
+          const grounded = groundPlanBlock(inner.trim(), shortlist);
+          // null = every stop was invented; drop the block entirely rather
+          // than render an itinerary of places that don't exist.
+          if (grounded) emit(`${FENCE_OPEN}\n${grounded}\n\`\`\``);
           fenceBuffer = null;
           pending = "";
           onContent(after);
