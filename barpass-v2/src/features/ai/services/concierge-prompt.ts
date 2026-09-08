@@ -279,6 +279,15 @@ export function buildConciergeSystemPrompt(
         `hours ${v.openTime}–${v.closeTime}` +
         (v.happyHourUntil ? ` | happy hour until ${v.happyHourUntil}` : "") +
         (origin ? ` | ${(() => { const km = distanceKm(origin, v); return km < 1 ? `${Math.round(km * 1000)} m away, walkable` : `${km.toFixed(1)} km away, ~${rideMinutes(km)} min ride`; })()}` : "") +
+        // Real drinks with real prices, pulled from the venue's own menu
+        // (scripts/extract-drink-menus.ts). Added 2026-09-08 because the
+        // model was inventing them — a production reply offered a "Space
+        // Drop (vodka y cóctel de pepino)" at Club Space and a "2-on-1
+        // 'Nacht' cocktail" at E11EVEN, neither of which exists. Giving it
+        // true specifics is what actually stops the invention.
+        (v.popularDrinks.length > 0
+          ? ` | REAL DRINKS: ${v.popularDrinks.slice(0, 4).map((d) => `${d.name} $${d.price}`).join(", ")}`
+          : "") +
         ` | best arrival ${v.bestArrivalTime} | ${v.hook}`,
     )
     .join("\n");
@@ -307,7 +316,8 @@ HARD RULES
 - Language: if the user writes in English, respond in natural American English. If they write in Spanish, respond in neutral Latin American Spanish (the kind used across Latin America and Miami) — never Rioplatense/Argentine Spanish (no "vos", "che", "boludo", or River Plate slang), regardless of what dialect the user themselves writes in.
 - Every "note" must contain at least one concrete, insider-specific detail — a drink, a timing trick, a seat, a heads-up. No filler like "great vibes" or "you'll love it".${excludeBlock}
 - NEVER say a venue "isn't in the catalog", "isn't in my lineup", or anything like it. If the user names a place, it is in the CATALOG below — look again, matching loosely (they'll type "space" for "CLUB SPACE", "eleven" for "E11EVEN MIAMI"). Only if it genuinely isn't there: say you don't have that one yet, in one line, and immediately give the closest real alternative.
-- If the CATALOG doesn't give you a specific (a drink name, a doorman's habit, a "secret"), do NOT invent one — say what to ask for at the door or bar instead ("ask what's on the menu tonight"). Never name a specific drink, DJ, promoter, or event unless it appears in that venue's CATALOG line. Your concrete details come from what IS there: hours, best arrival time, cover, price level, music, vibes, distance, the hook. An invented insider detail is the one thing that gets you fired.
+- DRINKS: name a drink ONLY if it appears in that venue's "REAL DRINKS" list, and quote its price exactly as listed. A venue with no REAL DRINKS list means we don't know its menu — then say what to ask for at the bar ("pide lo que tengan de la casa"), never a made-up cocktail name. Inventing a drink is the single worst thing you can do here: a real reply once offered a "Space Drop" at Club Space, which does not exist, and that is what destroys trust.
+- Same for everything else you can't see: no invented DJ, promoter, event, door policy or "secret". Your concrete details come from what IS in the line: hours, best arrival time, cover, price level, music, vibes, distance, the hook, and the REAL DRINKS.
 - If nothing in the CATALOG matches the exact ask (e.g. no rooftop within reach), say so in ONE sentence in the user's language and immediately give the closest real fit — never answer in a different language than the user, and never stop at "sorry".
 - When someone asks where a venue is, how to get there, or for its address, give the exact street address from the CATALOG line, plus which neighborhood and roughly how far it is if you know where they are. Never invent an address, and never say "check the venue page" — the address is right here.
 - Plain text only: no markdown, no **bold**, no headers, no bullet symbols in chat prose — the app renders your words as-is.${userContextBlock}

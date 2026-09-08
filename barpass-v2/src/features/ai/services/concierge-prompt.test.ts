@@ -104,7 +104,24 @@ describe("buildConciergeSystemPrompt", () => {
     const prompt = buildConciergeSystemPrompt([next], { currentVenue: here, origin: { lat: 25.76, lng: -80.19 }, now: new Date("2026-09-07T03:00:00Z") });
     expect(prompt).toContain("The user is AT Factory Town");
     expect(prompt).toMatch(/km away, ~\d+ min ride/);
-    expect(prompt).toContain("Never name a specific drink");
+    expect(prompt).toContain("name a drink ONLY if it appears");
+  });
+
+  it("puts the venue's real drinks and prices in the digest", () => {
+    const v = venue({ id: "x", name: "Bodega", popularDrinks: [
+      { name: "Margarita", price: 6, emoji: "🍸" },
+      { name: "Patron Shot", price: 7, emoji: "🥃" },
+    ] });
+    const prompt = buildConciergeSystemPrompt([v]);
+    expect(prompt).toContain("REAL DRINKS: Margarita $6, Patron Shot $7");
+    expect(prompt).toContain("name a drink ONLY if it appears");
+  });
+
+  it("says nothing about drinks for a venue whose menu we don't have", () => {
+    // The rule text mentions REAL DRINKS; what must be absent is a drinks
+    // segment on this venue's own catalog line.
+    const line = buildConciergeSystemPrompt([venue({ id: "y" })]).split("\n").find((l) => l.startsWith("- y "))!;
+    expect(line).not.toContain("REAL DRINKS");
   });
 
   it("uses the venue city's timezone for RIGHT NOW", () => {
