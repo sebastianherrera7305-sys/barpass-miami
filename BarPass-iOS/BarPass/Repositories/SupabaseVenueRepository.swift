@@ -35,10 +35,67 @@ final actor SupabaseVenueRepository: VenueRepository {
            Date().timeIntervalSince(loadedAt) < Self.freshnessWindow {
             return venues
         }
+        if forceRefresh {
+            let venues = await fetchVenuesWithFallback()
+            loadedVenues = venues
+            loadedAt = Date()
+            return venues
+        }
+
+        // Launch path (2026-09-08). Before this, opening the app meant
+        // downloading the ENTIRE 23-city catalog — 2.5MB in two sequential
+        // pages plus events/tags/brackets — decoding 1,800 rows, and only
+        // then showing anything. On LTE that's several seconds of skeleton,
+        // and the disk cache (which had all of it from last time) was used
+        // only if the network FAILED. TestFlight: "tienes que hacer como un
+        // reload para que los venues salgan completos". Now: show what we
+        // have in ~100ms, refresh the full catalog in the background, and
+        // hand the fresh list to VenueStore via .venueCatalogRefreshed.
+        if loadedVenues == nil {
+            if let cached = readCache(), !cached.isEmpty {
+                loadedVenues = cached
+                scheduleBackgroundRefresh()
+                return cached
+            }
+            // First launch, nothing cached: the selected city alone is
+            // ~250KB / 0.2s instead of 2.5MB. The rest arrives behind it.
+            if let city = SelectedCityStore.selectedCity,
+               let quick = try? await fetchFromSupabase(city: city), !quick.isEmpty {
+                loadedVenues = quick
+                scheduleBackgroundRefresh()
+                return quick
+            }
+        } else if let stale = loadedVenues {
+            // Freshness window expired while the app stayed open: serve the
+            // stale list now, refresh behind it.
+            scheduleBackgroundRefresh()
+            return stale
+        }
         let venues = await fetchVenuesWithFallback()
         loadedVenues = venues
         loadedAt = Date()
         return venues
+    }
+
+    private var backgroundRefresh: Task<Void, Never>?
+
+    private func scheduleBackgroundRefresh() {
+        guard backgroundRefresh == nil else { return }
+        backgroundRefresh = Task { [weak self] in
+            guard let self else { return }
+            let venues = await self.fetchVenuesWithFallback()
+            await self.commitBackgroundRefresh(venues)
+        }
+    }
+
+    private func commitBackgroundRefresh(_ venues: [BarPassVenue]) {
+        backgroundRefresh = nil
+        guard !venues.isEmpty else { return }
+        loadedVenues = venues
+        loadedAt = Date()
+        Task { @MainActor in
+            NotificationCenter.default.post(name: .venueCatalogRefreshed, object: venues)
+        }
     }
 
     private func fetchVenuesWithFallback() async -> [BarPassVenue] {
@@ -74,8 +131,8 @@ final actor SupabaseVenueRepository: VenueRepository {
         return try? JSONDecoder().decode([BarPassVenue].self, from: data)
     }
 
-    private func fetchFromSupabase() async throws -> [BarPassVenue] {
-        async let venueRowsTask = fetchVenueRows()
+    private func fetchFromSupabase(city: String? = nil) async throws -> [BarPassVenue] {
+        async let venueRowsTask = fetchVenueRows(city: city)
         async let eventRowsTask = fetchEventRows()
         async let tagRowsTask = fetchExperienceTagRows()
         async let ageBracketRowsTask = fetchAgeBracketRows()
@@ -123,7 +180,7 @@ final actor SupabaseVenueRepository: VenueRepository {
     /// silently truncates the catalog rather than erroring. venues has grown
     /// past that (1839+ rows across all cities), so this pages through with
     /// Range until a page comes back short of pageSize.
-    private func fetchVenueRows() async throws -> [SupabaseVenueRow] {
+    private func fetchVenueRows(city: String? = nil) async throws -> [SupabaseVenueRow] {
         let pageSize = 1000
         var allRows: [SupabaseVenueRow] = []
         var offset = 0
@@ -152,7 +209,7 @@ final actor SupabaseVenueRepository: VenueRepository {
                     // 171 venues Google enrichment never reached. Missing data
                     // must never read as "closed".
                     URLQueryItem(name: "or", value: "(business_status.is.null,business_status.neq.CLOSED_PERMANENTLY)"),
-                ],
+                ] + (city.map { [URLQueryItem(name: "city", value: "eq.\($0)")] } ?? []),
                 accessToken: SupabaseRESTClient.anonKey,
                 extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"]
             )

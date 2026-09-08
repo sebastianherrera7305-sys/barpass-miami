@@ -184,4 +184,7 @@ extension Notification.Name {
     static let deviceTokenReceived = Notification.Name("deviceTokenReceived")
     static let deepLinkReceived    = Notification.Name("deepLinkReceived")
     static let selectedCityChanged = Notification.Name("selectedCityChanged")
+    /// Posted by SupabaseVenueRepository (object: [BarPassVenue]) when a
+    /// background catalog refresh lands after a cache-first launch.
+    static let venueCatalogRefreshed = Notification.Name("venueCatalogRefreshed")
 }

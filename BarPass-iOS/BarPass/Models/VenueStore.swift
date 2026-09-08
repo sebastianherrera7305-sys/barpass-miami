@@ -32,6 +32,19 @@ final class VenueStore: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] city in self?.applyCityFilter(city) }
             .store(in: &cancellables)
+        // Cache-first launch: the repository answers instantly from disk (or
+        // the selected city alone) and refreshes the full catalog behind it.
+        // When that lands, swap it in without a loading state.
+        NotificationCenter.default.publisher(for: .venueCatalogRefreshed)
+            .compactMap { $0.object as? [BarPassVenue] }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] fresh in
+                guard let self else { return }
+                self.allVenues = fresh
+                self.applyCityFilter(SelectedCityStore.selectedCity)
+                self.lastRefreshed = Date()
+            }
+            .store(in: &cancellables)
     }
 
     /// Safe to call repeatedly (foreground, reconnect, tab switch) — only
