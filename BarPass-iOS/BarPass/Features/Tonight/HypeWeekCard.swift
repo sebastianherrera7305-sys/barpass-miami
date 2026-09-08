@@ -98,24 +98,18 @@ struct HypeWeekCard: View {
                     .background(Color.bpAmber.opacity(0.12), in: Capsule())
             }
 
-            Text(String(format: l10n.t("hype.energy"), p.energy))
+            // 2026-09-08: "Energía al 81%" is gone. That number was a weighted
+            // average over a hand-written genre→energy table (reggaetón 0.85,
+            // pop 0.6…) — our opinion shown with percentage precision, and it
+            // never moved because Spotify's top-of-the-month barely changes.
+            // The user called it invented; he was right. What IS measured:
+            // the share of each genre in the user's real listening. Energy
+            // survives only as a coarse tier.
+            Text(l10n.t(energyTierKey(p.energy)))
                 .font(.bpScaled(13, weight: .semibold)).foregroundStyle(Color.bpInk.opacity(0.85))
 
-            // Barra de energía
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.bpInk.opacity(0.08)).frame(height: 5)
-                    Capsule()
-                        .fill(LinearGradient(colors: [Color.bpAmber, Color.bpAmberBright],
-                                             startPoint: .leading, endPoint: .trailing))
-                        .frame(width: geo.size.width * CGFloat(p.energy) / 100, height: 5)
-                }
-            }
-            .frame(height: 5)
-
             if !p.topGenres.isEmpty {
-                Text(p.topGenres.prefix(3).map(\.genre).joined(separator: " + "))
-                    .font(.bpScaled(11, weight: .semibold)).foregroundStyle(Color.bpTextSecondary)
+                genreMix(p.topGenres)
             }
             if !p.topArtists.isEmpty {
                 artistRow(p.topArtists)
@@ -139,7 +133,45 @@ struct HypeWeekCard: View {
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpAmber.opacity(0.2)))
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: String(format: l10n.t("hype.a11y.label"), p.energy, p.nightPersonality))
+        .bpAccessibility(label: String(format: l10n.t("hype.a11y.label"), l10n.t(energyTierKey(p.energy)), p.nightPersonality))
+    }
+
+    private func energyTierKey(_ energy: Int) -> String {
+        switch energy {
+        case 75...: return "hype.energy.high"
+        case 50..<75: return "hype.energy.mid"
+        default: return "hype.energy.low"
+        }
+    }
+
+    /// Real numbers: each genre's share of the listening the source
+    /// reported. Bars are proportional to the top genre so the mix reads at
+    /// a glance; the label carries the actual percentage.
+    private func genreMix(_ genres: [GenreWeight]) -> some View {
+        let shown = Array(genres.prefix(3))
+        let top = max(shown.first?.weight ?? 1, 0.001)
+        return VStack(alignment: .leading, spacing: 5) {
+            ForEach(shown, id: \.genre) { gw in
+                HStack(spacing: 8) {
+                    Text(gw.genre.capitalized)
+                        .font(.bpScaled(11, weight: .semibold)).foregroundStyle(Color.bpInk.opacity(0.85))
+                        .frame(width: 88, alignment: .leading).lineLimit(1)
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(Color.bpInk.opacity(0.08)).frame(height: 5)
+                            Capsule()
+                                .fill(LinearGradient(colors: [Color.bpAmber, Color.bpAmberBright],
+                                                     startPoint: .leading, endPoint: .trailing))
+                                .frame(width: geo.size.width * CGFloat(gw.weight / top), height: 5)
+                        }
+                    }
+                    .frame(height: 5)
+                    Text("\(Int((gw.weight * 100).rounded()))%")
+                        .font(.bpScaled(10, weight: .bold)).foregroundStyle(Color.bpTextSecondary)
+                        .frame(width: 34, alignment: .trailing)
+                }
+            }
+        }
     }
 
     /// Fila de artistas con foto real — antes esto era solo texto plano.

@@ -91,6 +91,7 @@ final class CheckInStore: ObservableObject {
             _ = try await repository.checkIn(venueId: venueId, tripId: tripId)
             await load()
             BPHaptics.success()
+            justCheckedIn = true
         } catch let error as VenueCheckinError {
             errorMessage = Self.message(for: error)
             BPHaptics.error()
@@ -100,6 +101,10 @@ final class CheckInStore: ObservableObject {
         }
         isLoading = false
     }
+
+    /// True right after a successful check-in — CheckInButton presents
+    /// CheckInMomentSheet (post a photo/video from right here, right now).
+    @Published var justCheckedIn = false
 
     /// True right after a successful check-out — the view watches this to
     /// present AgeReportSheet at the one moment we actually know someone
@@ -201,6 +206,11 @@ struct CheckInButton: View {
             }
         }
         .task { await store.load() }
+        .sheet(isPresented: $store.justCheckedIn) {
+            CheckInMomentSheet(venueId: venueId, venueName: venueName) {
+                store.justCheckedIn = false
+            }
+        }
         .sheet(isPresented: $store.justCheckedOut) {
             AgeReportSheet(venueId: venueId, venueName: venueName) {
                 store.justCheckedOut = false
