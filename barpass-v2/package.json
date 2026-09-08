@@ -16,6 +16,7 @@
     "check:feedback": "node --env-file=.env.local --import tsx scripts/check-testflight-feedback.ts",
     "check:grid-health": "node --env-file=.env.local --import tsx scripts/check-grid-health.ts",
     "eval:concierge": "node --env-file=.env.local --import tsx scripts/eval-concierge.ts",
+    "extract:menus": "node --env-file=.env.local --import tsx scripts/extract-drink-menus.ts",
     "fix-price-tiers": "node --env-file=.env.local --import tsx scripts/fix-price-tiers.ts",
     "generate-venue-copy": "node --env-file=.env.local --import tsx scripts/generate-venue-copy.ts",
     "derive-tags": "node --env-file=.env.local --import tsx scripts/derive-experience-tags.ts",
