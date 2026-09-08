@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Venue } from "@/types";
-import { buildConciergeSystemPrompt, isOpenAt, selectRelevantVenues } from "./concierge-prompt";
+import { buildConciergeSystemPrompt, isOpenAt, selectRelevantVenues, userNamedVenue } from "./concierge-prompt";
 
 function venue(over: Partial<Venue> & { id: string }): Venue {
   return {
@@ -58,6 +58,30 @@ describe("selectRelevantVenues", () => {
     const named = venue({ id: "candela", name: "Candela Bar", openTime: "11:00", closeTime: "17:00" });
     const out = selectRelevantVenues([...filler, named], "quiero ir a candela bar", 10, { nowMin: 23 * 60 });
     expect(out.map((v) => v.id)).toContain("candela");
+  });
+});
+
+describe("userNamedVenue", () => {
+  it("matches how people actually type a venue's name", () => {
+    expect(userNamedVenue("quiero ir a space", "CLUB SPACE")).toBe(true);
+    expect(userNamedVenue("space tonight?", "CLUB SPACE")).toBe(true);
+    expect(userNamedVenue("llévame a candela bar", "Candela Bar Brickell")).toBe(false); // needs "brickell" too
+    expect(userNamedVenue("candela brickell", "Candela Bar Brickell")).toBe(true);
+    expect(userNamedVenue("vamos a e11even", "E11EVEN MIAMI")).toBe(true);
+    expect(userNamedVenue("quiero LIV", "LIV Nightclub Miami")).toBe(true);
+    expect(userNamedVenue("Bodega Taqueria y Tequila porfa", "Bodega Taqueria y Tequila")).toBe(true);
+  });
+
+  it("does not match on generic words", () => {
+    expect(userNamedVenue("quiero ir a un bar", "CLUB SPACE")).toBe(false);
+    expect(userNamedVenue("algo en un club", "LIV Nightclub Miami")).toBe(false);
+    expect(userNamedVenue("un rooftop en miami", "Sugar Rooftop")).toBe(false);
+  });
+
+  it("pins a named venue into the shortlist even when it scores nothing else", () => {
+    const space = venue({ id: "space", name: "CLUB SPACE", type: "club" });
+    const out = selectRelevantVenues([...filler, space], "quiero ir a space", 10);
+    expect(out.map((v) => v.id)).toContain("space");
   });
 });
 

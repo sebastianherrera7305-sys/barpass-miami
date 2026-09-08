@@ -24,6 +24,42 @@ const TYPE_SYNONYMS: Record<Venue["type"], string[]> = {
   brewery: ["brewery", "cervecería", "cerveceria", "craft beer", "artesanal"],
 };
 
+/** Words that carry no identity — they appear in hundreds of venue names and
+ * in ordinary sentences, so matching on them means matching everything. */
+const NAME_NOISE = new Set([
+  "club", "bar", "bars", "lounge", "nightclub", "night", "restaurant", "restaurante",
+  "grill", "kitchen", "cafe", "café", "the", "el", "la", "los", "las", "and", "y", "&",
+  "miami", "beach", "south", "downtown", "co", "company", "house", "room", "tavern",
+  "pub", "cantina", "taqueria", "rooftop", "sky", "social", "spot", "place", "at", "de",
+]);
+
+const stripAccents = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+/** Identity-bearing words of a venue name: "CLUB SPACE" → ["space"],
+ * "Candela Bar Brickell" → ["candela","brickell"], "E11EVEN MIAMI" → ["e11even"]. */
+function nameTokens(name: string): string[] {
+  return stripAccents(name.toLowerCase())
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= 3 && !NAME_NOISE.has(w));
+}
+
+/** Did the user actually name this venue? Real report, twice (Candela Bar
+ * 2026-09-05, Club Space 2026-09-08 — "puse que quería ir a space y no da
+ * respuesta"): the old check was `userText.includes(venue.name)`, so typing
+ * "space" never matched the catalog row named "CLUB SPACE", and Remy
+ * answered that the venue doesn't exist while it sat in the catalog,
+ * operational. Match on the identity words instead, in both directions. */
+export function userNamedVenue(text: string, name: string): boolean {
+  const haystack = ` ${stripAccents(text.toLowerCase()).replace(/[^a-z0-9]+/g, " ")} `;
+  if (haystack.includes(` ${stripAccents(name.toLowerCase()).replace(/[^a-z0-9]+/g, " ").trim()} `)) return true;
+  const tokens = nameTokens(name);
+  if (tokens.length === 0) return false;
+  // Every identity word of the name must be present. One-word names ("Space",
+  // "Candela") match on that word; multi-word ones need all of them, so
+  // "brickell" alone doesn't drag in every Brickell venue.
+  return tokens.every((t) => haystack.includes(` ${t} `));
+}
+
 /** Straight-line distance in km — good enough to rank "nearby" for a night out. */
 export function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
   const R = 6371;
@@ -79,7 +115,7 @@ export function selectRelevantVenues(
   // was correctly in the catalog the whole time, it just didn't score high
   // enough, or the low-signal fallback below ignored scores entirely and
   // took an arbitrary slice). Pinned separately, before any trimming.
-  const named = venues.filter((v) => text.includes(v.name.toLowerCase()));
+  const named = venues.filter((v) => userNamedVenue(text, v.name));
 
   // Venue TYPES the user asked for, in either language. 2026-09-06 eval:
   // "Rooftop con vista para un cumpleaños" got "none of the venues in the
@@ -106,7 +142,7 @@ export function selectRelevantVenues(
     // trust, so "rooftop" in the ask matches "Rooftop"/"Sky" in the name.
     if (wantedTypes.has("rooftop") && v.type !== "rooftop" && /\b(rooftop|roof|sky|terrace|terraza|azotea)\b/i.test(v.name)) score += 8;
     if (text.includes(v.neighborhood.toLowerCase())) score += 4;
-    if (text.includes(v.name.toLowerCase())) score += 5;
+    if (userNamedVenue(text, v.name)) score += 5;
     if (budget !== null) {
       // Rough fit: a $50 night shouldn't be dominated by $$$$ venues, but
       // don't hard-exclude — Remy might still want one splurge stop.
@@ -270,6 +306,7 @@ HARD RULES
 - Every fact in a "note" (price, hours, drink, detail) must come from the CATALOG entry for that venue — never state a specific detail you're not sure is real.
 - Language: if the user writes in English, respond in natural American English. If they write in Spanish, respond in neutral Latin American Spanish (the kind used across Latin America and Miami) — never Rioplatense/Argentine Spanish (no "vos", "che", "boludo", or River Plate slang), regardless of what dialect the user themselves writes in.
 - Every "note" must contain at least one concrete, insider-specific detail — a drink, a timing trick, a seat, a heads-up. No filler like "great vibes" or "you'll love it".${excludeBlock}
+- NEVER say a venue "isn't in the catalog", "isn't in my lineup", or anything like it. If the user names a place, it is in the CATALOG below — look again, matching loosely (they'll type "space" for "CLUB SPACE", "eleven" for "E11EVEN MIAMI"). Only if it genuinely isn't there: say you don't have that one yet, in one line, and immediately give the closest real alternative.
 - If the CATALOG doesn't give you a specific (a drink name, a doorman's habit, a "secret"), do NOT invent one — say what to ask for at the door or bar instead ("ask what's on the menu tonight"). Never name a specific drink, DJ, promoter, or event unless it appears in that venue's CATALOG line. Your concrete details come from what IS there: hours, best arrival time, cover, price level, music, vibes, distance, the hook. An invented insider detail is the one thing that gets you fired.
 - If nothing in the CATALOG matches the exact ask (e.g. no rooftop within reach), say so in ONE sentence in the user's language and immediately give the closest real fit — never answer in a different language than the user, and never stop at "sorry".
 - When someone asks where a venue is, how to get there, or for its address, give the exact street address from the CATALOG line, plus which neighborhood and roughly how far it is if you know where they are. Never invent an address, and never say "check the venue page" — the address is right here.
