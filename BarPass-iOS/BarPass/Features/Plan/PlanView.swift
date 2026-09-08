@@ -830,7 +830,38 @@ struct NightPlanView: View {
     let plan: NightPlan
     let onSave: (NightPlan) -> Void
     @ObservedObject private var l10n = L10n.shared
+    /// Resolves each stop's venueId against the loaded catalog so a stop can
+    /// show its real address and open Maps in one tap — same affordance the
+    /// venue page has. TestFlight 2026-09-08: "en el chat… la dirección, que
+    /// nada más estemos a un solo botón, como cuando está dentro del card".
+    @EnvironmentObject private var venueStore: VenueStore
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
+
+    private func venue(for stop: PlanStop) -> BarPassVenue? {
+        if let id = stop.venueId, let match = venueStore.venues.first(where: { $0.id == id }) { return match }
+        // AI stops that never resolved an id still carry a real name — match
+        // it rather than dropping the button entirely.
+        let name = stop.venueName.lowercased()
+        return venueStore.venues.first { $0.name.lowercased() == name }
+    }
+
+    /// One tap → Apple Maps, walking/driving directions from wherever they
+    /// are. Uses the venue's real coordinates when we have them; otherwise a
+    /// name+neighborhood search, which still lands the user in the right place.
+    private func openDirections(_ stop: PlanStop) {
+        BPHaptics.light()
+        BPAnalytics.track(.openMaps(venue: stop.venueName))
+        let url: URL?
+        if let v = venue(for: stop) {
+            let q = v.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            url = URL(string: "https://maps.apple.com/?daddr=\(v.latitude),\(v.longitude)&q=\(q)&dirflg=d")
+        } else {
+            let q = "\(stop.venueName) \(stop.venueNeighborhood)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            url = URL(string: "https://maps.apple.com/?q=\(q)")
+        }
+        guard let url else { return }
+        UIApplication.shared.open(url)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -890,8 +921,30 @@ struct NightPlanView: View {
                             Text("\(stop.venueNeighborhood) · \(stop.venuePriceRange)")
                                 .font(.bpScaled(11))
                                 .foregroundStyle(Color.bpInk.opacity(0.3))
+                            // The address itself, right in the chat — no
+                            // navigating to the venue page to find out where
+                            // the plan is actually sending you.
+                            if let address = venue(for: stop)?.address, !address.isEmpty {
+                                Text(address)
+                                    .font(.bpScaled(11))
+                                    .foregroundStyle(Color.bpInk.opacity(0.3))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
                         .padding(.bottom, i < plan.stops.count - 1 ? 20 : 0)
+
+                        Spacer(minLength: 8)
+
+                        Button { openDirections(stop) } label: {
+                            Image(systemName: "arrow.triangle.turn.up.right.circle.fill")
+                                .font(.bpScaled(20))
+                                .foregroundStyle(amber)
+                                .frame(width: 40, height: 40)
+                                .background(amber.opacity(0.12), in: Circle())
+                        }
+                        .buttonStyle(.plain)
+                        .bpAccessibility(label: String(format: l10n.t("plan.stop.directions"), stop.venueName),
+                                         hint: l10n.t("venueDetail.directions.hint"), isButton: true)
                     }
                 }
             }

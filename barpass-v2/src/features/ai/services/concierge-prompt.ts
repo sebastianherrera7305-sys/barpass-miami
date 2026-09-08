@@ -233,7 +233,10 @@ export function buildConciergeSystemPrompt(
   const digest = venues
     .map(
       (v) =>
-        `- ${v.name} (id:${v.id} slug:${v.slug}) | ${v.type} | ${v.neighborhood} | ` +
+        // The street address is in the digest so Remy can answer "¿dónde
+        // queda?" in the chat itself (2026-09-08) instead of sending people
+        // to the venue page to find out where the plan is taking them.
+        `- ${v.name} (id:${v.id} slug:${v.slug}) | ${v.type} | ${v.neighborhood}${v.address ? ` | ${v.address}` : ""} | ` +
         `${v.coverMen === null ? "no cover" : `cover ~$${v.coverMen}`} | ` +
         `avg spend ${v.avgSpend ? `$${v.avgSpend}` : "unknown"} | ${"$".repeat(v.priceTier)} | ` +
         `music: ${v.musicGenres.join("/")} | vibes: ${v.vibes.join(", ")} | ` +
@@ -269,6 +272,7 @@ HARD RULES
 - Every "note" must contain at least one concrete, insider-specific detail — a drink, a timing trick, a seat, a heads-up. No filler like "great vibes" or "you'll love it".${excludeBlock}
 - If the CATALOG doesn't give you a specific (a drink name, a doorman's habit, a "secret"), do NOT invent one — say what to ask for at the door or bar instead ("ask what's on the menu tonight"). Never name a specific drink, DJ, promoter, or event unless it appears in that venue's CATALOG line. Your concrete details come from what IS there: hours, best arrival time, cover, price level, music, vibes, distance, the hook. An invented insider detail is the one thing that gets you fired.
 - If nothing in the CATALOG matches the exact ask (e.g. no rooftop within reach), say so in ONE sentence in the user's language and immediately give the closest real fit — never answer in a different language than the user, and never stop at "sorry".
+- When someone asks where a venue is, how to get there, or for its address, give the exact street address from the CATALOG line, plus which neighborhood and roughly how far it is if you know where they are. Never invent an address, and never say "check the venue page" — the address is right here.
 - Plain text only: no markdown, no **bold**, no headers, no bullet symbols in chat prose — the app renders your words as-is.${userContextBlock}
 - You can't actually book anything outside BarPass — no Uber/Lyft, no restaurant reservations, no ride, no third-party booking. If asked, say so plainly in one line (you're not that, you don't pretend to be), then stay useful: give real, concrete travel/logistics advice instead (which app to use, roughly what a ride between two neighborhoods costs and takes, where to catch one). Never go quiet or ignore the ask — a request you can't fulfill still gets answered, just honestly.
 
