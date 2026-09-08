@@ -102,6 +102,8 @@ struct PlanView: View {
     @StateObject private var keyboard = KeyboardHeight()
     @ObservedObject private var chromeMetrics = BottomChromeMetrics.shared
     @ObservedObject private var checkInStore = CheckInStore.shared
+    /// Venue opened from a chat message's action row.
+    @State private var chatVenue: BarPassVenue?
 
     /// The venue the user is checked in at, if it's in the loaded catalog —
     /// shown as a chip in the top bar so it's visible that Remy knows where
@@ -286,7 +288,8 @@ struct PlanView: View {
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 18) {
                             ForEach(messages) { message in
-                                PlanChatBubble(message: message, onSave: savePlan, onBuildPlan: sendToRemy, onSuggestion: send)
+                                PlanChatBubble(message: message, onSave: savePlan, onBuildPlan: sendToRemy, onSuggestion: send,
+                                               onOpenVenue: { chatVenue = $0 })
                                     .id(message.id)
                                     .padding(.horizontal, 20)
                             }
@@ -342,6 +345,9 @@ struct PlanView: View {
         }
         .ignoresSafeArea(.container, edges: .bottom)
         .onAppear { BPAnalytics.track(.viewPlan) }
+        .fullScreenCover(item: $chatVenue) { venue in
+            NavigationStack { VenueDetailView(venue: venue) }
+        }
         .task {
             restoreMessages()
             await loadSavedPlans()
@@ -722,8 +728,18 @@ private struct PlanChatBubble: View {
     let onSave: (NightPlan) -> Void
     let onBuildPlan: () -> Void
     let onSuggestion: (String) -> Void
+    var onOpenVenue: ((BarPassVenue) -> Void)? = nil
     @ObservedObject private var l10n = L10n.shared
+    @EnvironmentObject private var venueStore: VenueStore
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
+
+    /// Venues this reply actually names. When the message already carries a
+    /// plan card, the card's own stops have the buttons — no need to repeat
+    /// them above it.
+    private var mentionedVenues: [BarPassVenue] {
+        guard message.plan == nil, !message.isStreaming else { return [] }
+        return VenueQuickActions.mentioned(in: message.text, venues: venueStore.venues)
+    }
 
     var body: some View {
         if message.role == "user" {
@@ -751,6 +767,17 @@ private struct PlanChatBubble: View {
                         .foregroundStyle(.white.opacity(0.92))
                         .lineSpacing(3)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                // Map / Uber for any venue named in a plain reply — asking
+                // "pídeme un Uber a X" is the most common way to want this,
+                // and before 2026-09-08 it produced text with no button at
+                // all because the actions only lived inside a plan card.
+                if !mentionedVenues.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(mentionedVenues) { venue in
+                            VenueActionButtons(venue: venue, showVenueName: mentionedVenues.count > 1, onOpenVenue: onOpenVenue)
+                        }
+                    }
                 }
                 if message.offerBuild {
                     Button(action: onBuildPlan) {
@@ -1026,16 +1053,19 @@ struct NightPlanView: View {
                                              hint: venue(for: stop) != nil ? l10n.t("plan.stop.open.hint") : "",
                                              isButton: venue(for: stop) != nil)
 
-                            HStack(spacing: 8) {
-                                stopAction(icon: "map.fill", label: l10n.t("plan.stop.maps"),
-                                           a11y: String(format: l10n.t("plan.stop.directions"), stop.venueName)) {
-                                    openDirections(stop)
+                            if let v = venue(for: stop) {
+                                VenueActionButtons(venue: v)
+                            } else {
+                                // No catalog match (rare now that the server
+                                // drops invented stops): keep a Maps search
+                                // by name rather than losing the action.
+                                HStack(spacing: 8) {
+                                    stopAction(icon: "map.fill", label: l10n.t("plan.stop.maps"),
+                                               a11y: String(format: l10n.t("plan.stop.directions"), stop.venueName)) {
+                                        openDirections(stop)
+                                    }
+                                    Spacer()
                                 }
-                                stopAction(icon: "car.fill", label: "Uber",
-                                           a11y: String(format: l10n.t("plan.stop.uber"), stop.venueName)) {
-                                    openUber(stop)
-                                }
-                                Spacer()
                             }
                         }
                         .padding(.bottom, i < plan.stops.count - 1 ? 20 : 0)

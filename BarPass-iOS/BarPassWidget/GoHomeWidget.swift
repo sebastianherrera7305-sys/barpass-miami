@@ -68,6 +68,16 @@ struct GoHomeWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: GoHomeEntry
 
+    /// The widget extension doesn't link the app's LocalizationService, so
+    /// this is the one place that needs its own language switch.
+    static var setupPrompt: String {
+        switch Locale.current.language.languageCode?.identifier {
+        case "es": return "Abrí BarPass para armar tu noche"
+        case "pt": return "Abra o BarPass para montar sua noite"
+        default: return "Open BarPass to plan your night"
+        }
+    }
+
     var body: some View {
         Group {
             if family == .systemSmall {
@@ -81,11 +91,23 @@ struct GoHomeWidgetView: View {
             } else if entry.hasHomeAddress {
                 content
             } else {
-                Text("Configurá tu dirección de casa en BarPass")
-                    .font(.caption2)
-                    .multilineTextAlignment(.center)
-                    .padding(8)
-                    .widgetURL(nil)
+                // No home address yet. This used to be a dead end: a
+                // hardcoded Spanish sentence with `.widgetURL(nil)`, so a
+                // Lock Screen widget did literally nothing when tapped and
+                // read as broken to an English user. TestFlight, twice:
+                // "the widget it's not working". Now it opens the app on
+                // Prompt Your Night — useful with or without an address —
+                // and speaks the device's language.
+                VStack(spacing: 2) {
+                    Image("BarPassMascot").resizable().scaledToFit().frame(height: 20)
+                    Text(Self.setupPrompt)
+                        .font(.caption2)
+                        .multilineTextAlignment(.center)
+                        .minimumScaleFactor(0.7)
+                        .lineLimit(2)
+                }
+                .padding(6)
+                .widgetURL(entry.promptURL)
             }
         }
         // Required since iOS 17 — a manual .background() on the root view

@@ -170,6 +170,7 @@
 		TS0000020000000000000001 /* TripStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS0000010000000000000001 /* TripStore.swift */; };
 		VEVW04000000000000RP01 /* VerifyEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VEVW03000000000000RP01 /* VerifyEmailView.swift */; };
 		VPSC02000000000000RP01 /* VenuePostsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = VPSC01000000000000RP01 /* VenuePostsSection.swift */; };
+		1FCF5C4F2C26CEA682D5D76A /* VenueQuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C9312B79E236AEA352CD22B /* VenueQuickActions.swift */; };
 		6035C796BCCE8CD291C46E17 /* CheckInMomentSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168795511AEBC5150B3BC58F /* CheckInMomentSheet.swift */; };
 		93528C23589A20AC5002B931 /* VenueMediaUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */; };
 		A104DAB76A550EF94AC67A29 /* VenueInsideGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7025BEC6A2E4D77DE5757388 /* VenueInsideGuide.swift */; };
@@ -382,6 +383,7 @@
 		TS0000010000000000000001 /* TripStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripStore.swift; path = BarPass/Features/Stores/TripStore.swift; sourceTree = SOURCE_ROOT; };
 		VEVW03000000000000RP01 /* VerifyEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerifyEmailView.swift; path = BarPass/Features/Auth/VerifyEmailView.swift; sourceTree = SOURCE_ROOT; };
 		VPSC01000000000000RP01 /* VenuePostsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenuePostsSection.swift; path = BarPass/Features/Tonight/VenuePostsSection.swift; sourceTree = SOURCE_ROOT; };
+		7C9312B79E236AEA352CD22B /* VenueQuickActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueQuickActions.swift; path = BarPass/Features/Plan/VenueQuickActions.swift; sourceTree = SOURCE_ROOT; };
 		168795511AEBC5150B3BC58F /* CheckInMomentSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckInMomentSheet.swift; path = BarPass/Features/Tonight/CheckInMomentSheet.swift; sourceTree = SOURCE_ROOT; };
 		6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaUploader.swift; path = BarPass/Features/Tonight/VenueMediaUploader.swift; sourceTree = SOURCE_ROOT; };
 		7025BEC6A2E4D77DE5757388 /* VenueInsideGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueInsideGuide.swift; path = BarPass/Features/Tonight/VenueInsideGuide.swift; sourceTree = SOURCE_ROOT; };
@@ -670,6 +672,7 @@
 				AMPS01000000000000RP01 /* AppleMusicPlaybackService.swift */,
 				FAVS01000000000000RP01 /* FavoritesStore.swift */,
 				VPSC01000000000000RP01 /* VenuePostsSection.swift */,
+				7C9312B79E236AEA352CD22B /* VenueQuickActions.swift */,
 				168795511AEBC5150B3BC58F /* CheckInMomentSheet.swift */,
 				6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */,
 				7025BEC6A2E4D77DE5757388 /* VenueInsideGuide.swift */,
@@ -1040,6 +1043,7 @@
 				AMPS02000000000000RP01 /* AppleMusicPlaybackService.swift in Sources */,
 				FAVS02000000000000RP01 /* FavoritesStore.swift in Sources */,
 				VPSC02000000000000RP01 /* VenuePostsSection.swift in Sources */,
+				1FCF5C4F2C26CEA682D5D76A /* VenueQuickActions.swift in Sources */,
 				6035C796BCCE8CD291C46E17 /* CheckInMomentSheet.swift in Sources */,
 				93528C23589A20AC5002B931 /* VenueMediaUploader.swift in Sources */,
 				A104DAB76A550EF94AC67A29 /* VenueInsideGuide.swift in Sources */,
@@ -1164,7 +1168,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 62;
+				CURRENT_PROJECT_VERSION = 63;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1192,7 +1196,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 62;
+				CURRENT_PROJECT_VERSION = 63;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1322,7 +1326,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 62;
+				CURRENT_PROJECT_VERSION = 63;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1345,7 +1349,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 62;
+				CURRENT_PROJECT_VERSION = 63;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
