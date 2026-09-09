@@ -87,10 +87,14 @@ export async function POST(request: Request) {
   // Idempotent retry: a flaky response after the insert already succeeded
   // shouldn't be treated as an error, but it must NOT re-verify (and
   // re-consume) the payment source a second time.
+  // Scoped to the caller: pass_code is client-chosen and travels inside
+  // shared QR/share cards, so an unscoped lookup handed anyone who had seen
+  // a code the full record of someone else's pass (owner, amount, validity).
   const { data: existingPass } = await supabase
     .from("passes")
     .select()
     .eq("pass_code", passCode)
+    .eq("customer_id", user.id)
     .maybeSingle();
   if (existingPass) {
     return NextResponse.json({ success: true, pass: existingPass });
@@ -136,6 +140,34 @@ export async function POST(request: Request) {
     }
     verifiedAmount = Math.abs(Number(txn.amount));
     sourceWalletTransactionId = txn.id;
+  }
+
+  // The payment source proves money moved; it does NOT prove the right
+  // amount moved. Verified 2026-09-09: nothing compared verifiedAmount to a
+  // price, and /api/wallet/spend takes any positive amount — so a $0.01
+  // wallet spend minted a real, redeemable table pass (redeem checks the
+  // code, venue and expiry, never the amount). The price has to come from
+  // the server.
+  //
+  // No price configured for this venue+kind = refuse. The alternative is to
+  // invent a floor, and a made-up price is exactly how a $0.01 pass becomes
+  // a $9 one instead of an error.
+  const { data: priceRow } = await supabase
+    .from("venue_pass_prices")
+    .select("unit_price")
+    .eq("venue_id", venueId)
+    .eq("kind", kind)
+    .maybeSingle();
+  if (!priceRow) {
+    return NextResponse.json({ error: "price_not_configured" }, { status: 409 });
+  }
+  const expectedAmount = Number(priceRow.unit_price) * quantity;
+  // Half a cent of slack for float/rounding on the client's total, nothing more.
+  if (verifiedAmount + 0.005 < expectedAmount) {
+    return NextResponse.json(
+      { error: "payment_below_price", expected: expectedAmount, paid: verifiedAmount },
+      { status: 402 },
+    );
   }
 
   const { data: pass, error: insertError } = await supabase

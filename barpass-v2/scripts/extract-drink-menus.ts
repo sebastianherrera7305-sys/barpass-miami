@@ -29,6 +29,10 @@ const flag = (n: string) => { const i = args.indexOf(n); return i === -1 ? undef
 const CITY = flag("--city") ?? "Miami";
 const LIMIT = Number(flag("--limit") ?? 9999);
 const ONLY = flag("--only");
+/** A file of "<venue id>\t<city>" lines — one process for a whole retry list
+ * instead of one npm/tsx boot per venue (2026-09-08: the per-venue loop was
+ * spending ~2 min each on startup + a full catalog query, for a 3.5h run). */
+const IDS_FILE = flag("--ids-file");
 const APPLY = args.includes("--apply");
 const FORCE = args.includes("--force"); // re-extract venues that already have popular_drinks
 
@@ -148,12 +152,20 @@ function happyHourEnd(hours?: string): string | null {
 async function main() {
   const supabase = createClient(SUPABASE_URL, SERVICE_KEY, { realtime: { transport: ws as unknown as typeof WebSocket } });
   let q = supabase.from("venues").select("id,name,city,type,website,popular_drinks,field_sources")
-    .eq("city", CITY).is("excluded_reason", null).not("website", "is", null).order("name");
-  if (ONLY) q = q.eq("id", ONLY);
+    .is("excluded_reason", null).not("website", "is", null).order("name");
+  if (IDS_FILE) {
+    const ids = (await import("node:fs")).readFileSync(IDS_FILE, "utf8")
+      .split("\n").map((l) => l.split("\t")[0].trim()).filter(Boolean);
+    q = q.in("id", ids);
+  } else if (ONLY) {
+    q = q.eq("id", ONLY);
+  } else {
+    q = q.eq("city", CITY);
+  }
   const { data, error } = await q;
   if (error) throw error;
-  const venues = (data as DbVenue[]).filter((v) => FORCE || ONLY || !(Array.isArray(v.popular_drinks) && v.popular_drinks.length) && !(typeof v.popular_drinks === "string" && v.popular_drinks.length > 2)).slice(0, LIMIT);
-  console.log(`${venues.length} venues in ${CITY} to try (${APPLY ? "APPLY" : "dry run"})`);
+  const venues = (data as DbVenue[]).filter((v) => FORCE || ONLY || IDS_FILE || !(Array.isArray(v.popular_drinks) && v.popular_drinks.length) && !(typeof v.popular_drinks === "string" && v.popular_drinks.length > 2)).slice(0, LIMIT);
+  console.log(`${venues.length} venues ${IDS_FILE ? "from list" : `in ${CITY}`} to try (${APPLY ? "APPLY" : "dry run"})`);
 
   let withMenu = 0, written = 0;
   for (const v of venues) {

@@ -85,6 +85,10 @@ export async function POST(request: Request) {
       .from("orders")
       .select("*")
       .eq("idempotency_key", idempotencyKey)
+      // Scoped to the caller: without this, replaying someone else's
+      // Idempotency-Key returned their whole order row (customer id, items,
+      // totals, Stripe payment intent).
+      .eq("customer_id", user.id)
       .maybeSingle();
     if (existing) {
       return NextResponse.json({ success: true, transaction: existing });
