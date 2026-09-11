@@ -146,28 +146,63 @@ export async function POST(request: Request) {
   // amount moved. Verified 2026-09-09: nothing compared verifiedAmount to a
   // price, and /api/wallet/spend takes any positive amount — so a $0.01
   // wallet spend minted a real, redeemable table pass (redeem checks the
-  // code, venue and expiry, never the amount). The price has to come from
-  // the server.
+  // code, venue and expiry, never the amount).
   //
-  // No price configured for this venue+kind = refuse. The alternative is to
-  // invent a floor, and a made-up price is exactly how a $0.01 pass becomes
-  // a $9 one instead of an error.
+  // The first version of this check refused outright when venue_pass_prices
+  // had no row. That table is empty for all 1,734 venues, so it turned every
+  // purchase into "card charged, pass refused" — strictly worse than the hole
+  // it closed. Corrected 2026-09-11: a per-venue row still wins when one
+  // exists, and otherwise the floor is the app's OWN advertised price for
+  // that kind, which is a real number the product already charges, not an
+  // invented one:
+  //
+  //   skip_line  SkipLinePassView: $25 / 1, $45 / 2, $80 / 4  → $20 per person
+  //   table      TableReservation.swift deposits: $100, $200, $500 → $100
+  //   event_ticket  EventTicket.swift: $20, $45, $80 → $20, unless this
+  //                 venue has an event with a lower real student price.
+  //
+  // A floor, not an equality: tiers are cheaper per head at larger sizes and
+  // a student ticket is legitimately lower, so the rule is "paid at least the
+  // cheapest price this kind can legitimately cost".
+  const APP_MIN_UNIT_PRICE: Record<string, number> = {
+    skip_line: 20,
+    table: 100,
+    event_ticket: 20,
+  };
+
   const { data: priceRow } = await supabase
     .from("venue_pass_prices")
     .select("unit_price")
     .eq("venue_id", venueId)
     .eq("kind", kind)
     .maybeSingle();
-  if (!priceRow) {
-    return NextResponse.json({ error: "price_not_configured" }, { status: 409 });
+
+  let unitFloor = priceRow ? Number(priceRow.unit_price) : APP_MIN_UNIT_PRICE[kind];
+  if (!priceRow && kind === "event_ticket") {
+    // A real, sourced exception: student tickets are genuinely cheaper, and
+    // that price lives in the events table.
+    const { data: cheapest } = await supabase
+      .from("events")
+      .select("student_price_cents")
+      .eq("venue_id", venueId)
+      .not("student_price_cents", "is", null)
+      .order("student_price_cents", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (cheapest?.student_price_cents) {
+      unitFloor = Math.min(unitFloor, Number(cheapest.student_price_cents) / 100);
+    }
   }
-  const expectedAmount = Number(priceRow.unit_price) * quantity;
-  // Half a cent of slack for float/rounding on the client's total, nothing more.
-  if (verifiedAmount + 0.005 < expectedAmount) {
-    return NextResponse.json(
-      { error: "payment_below_price", expected: expectedAmount, paid: verifiedAmount },
-      { status: 402 },
-    );
+
+  if (unitFloor != null) {
+    const expectedAmount = unitFloor * quantity;
+    // Half a cent of slack for float/rounding on the client's total.
+    if (verifiedAmount + 0.005 < expectedAmount) {
+      return NextResponse.json(
+        { error: "payment_below_price", expected: expectedAmount, paid: verifiedAmount },
+        { status: 402 },
+      );
+    }
   }
 
   const { data: pass, error: insertError } = await supabase

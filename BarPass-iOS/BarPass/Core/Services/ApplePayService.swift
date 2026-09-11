@@ -24,6 +24,12 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
     private var charge: ((String) async throws -> String)?
     private var pendingAmount: Double = 0
     private var pendingLabel: String  = ""
+    /// PKPaymentAuthorizationController's `delegate` is WEAK and the sheet
+    /// only lives as long as someone holds the controller. Keeping it here
+    /// means the service alone is enough to keep the flow alive — a caller
+    /// that forgets to retain the service is still broken, but a caller that
+    /// retains it can no longer lose the controller.
+    private var controller: PKPaymentAuthorizationController?
 
     func canMakePayments() -> Bool {
         PKPaymentAuthorizationController.canMakePayments()
@@ -65,6 +71,7 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
 
         let controller = PKPaymentAuthorizationController(paymentRequest: request)
         controller.delegate = self
+        self.controller = controller
         controller.present()
     }
 
@@ -103,6 +110,7 @@ final class ApplePayService: NSObject, PKPaymentAuthorizationControllerDelegate 
     }
 
     func paymentAuthorizationControllerDidFinish(_ controller: PKPaymentAuthorizationController) {
+        self.controller = nil
         controller.dismiss()
         if let c = completion {
             c(ApplePayResult(success: false, stripePaymentMethodId: nil, orderId: nil, amount: pendingAmount, label: pendingLabel, error: "cancelled"))

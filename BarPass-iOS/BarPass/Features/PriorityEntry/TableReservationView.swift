@@ -13,6 +13,7 @@ struct TableReservationView: View {
     @State private var guestCount:      Int          = 2
     @State private var selectedSlot:    Int          = 0
     @State private var isProcessing:    Bool         = false
+    @State private var applePay = ApplePayService()
     @State private var paymentError:    String?
     @State private var reservation:     TableReservation?
     @State private var showConfirm:     Bool         = false
@@ -368,7 +369,11 @@ struct TableReservationView: View {
             }
             isProcessing = true
             paymentError = nil
-            let svc = ApplePayService()
+            // Retained by the view, not a local: the payment controller's delegate
+            // is weak, so a local ApplePayService was deallocated the moment this
+            // closure returned — the Apple Pay sheet then hung forever and
+            // isProcessing was never cleared. CartView already did this right.
+            let svc = applePay
             svc.requestPayment(amount: Decimal(selectedPackage.deposit),
                                label: "\(l10n.t("table.applePay.label")) · \(venueName)") { stripePaymentMethodId in
                 let json = try await APIClient.createApplePayTransaction(

@@ -195,7 +195,8 @@ create policy "report a message" on public.chapter_message_reports for insert
 
 create table if not exists public.venue_pass_prices (
     venue_id   text not null,
-    kind       text not null check (kind in ('skip_line', 'table', 'ticket', 'drink')),
+    -- The kinds the app actually sends (see passes/route.ts's zod enum).
+    kind       text not null check (kind in ('skip_line', 'table', 'event_ticket')),
     unit_price numeric(10,2) not null check (unit_price >= 0),
     currency   text not null default 'USD',
     updated_at timestamptz not null default now(),

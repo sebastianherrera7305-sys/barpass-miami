@@ -12,6 +12,7 @@ struct SkipLinePassView: View {
 
     @State private var selected: PassOption = .solo
     @State private var isProcessing = false
+    @State private var applePay = ApplePayService()
     @State private var activePass: SkipLinePass?
     @State private var showPass = false
     @State private var paymentError: String?
@@ -299,7 +300,11 @@ struct SkipLinePassView: View {
             }
             isProcessing = true
             paymentError = nil
-            let svc = ApplePayService()
+            // Retained by the view, not a local: the payment controller's delegate
+            // is weak, so a local ApplePayService was deallocated the moment this
+            // closure returned — the Apple Pay sheet then hung forever and
+            // isProcessing was never cleared. CartView already did this right.
+            let svc = applePay
             svc.requestPayment(amount: Decimal(selected.price),
                                label: String(format: l10n.t("pass.applePayLabel"), venueName)) { stripePaymentMethodId in
                 let json = try await APIClient.createApplePayTransaction(

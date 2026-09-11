@@ -20,6 +20,7 @@ struct EventTicketsView: View {
     @State private var selectedPkg:  TicketPackage = .vip
     @State private var quantity:     Int = 1
     @State private var isProcessing  = false
+    @State private var applePay = ApplePayService()
     @State private var paymentError: String?
     @State private var activeTicket: EventTicket?
     @State private var showTicket    = false
@@ -457,7 +458,11 @@ struct EventTicketsView: View {
         }
         isProcessing = true
         paymentError = nil
-        let svc = ApplePayService()
+        // Retained by the view, not a local: the payment controller's delegate
+        // is weak, so a local ApplePayService was deallocated the moment this
+        // closure returned — the Apple Pay sheet then hung forever and
+        // isProcessing was never cleared. CartView already did this right.
+        let svc = applePay
         svc.requestPayment(amount: Decimal(total),
                            label: String(format: l10n.t("pass.applePayLabel"), venueName)) { stripePaymentMethodId in
             let json = try await APIClient.createApplePayTransaction(
