@@ -115,7 +115,13 @@ struct CachedImage<Content: View, Placeholder: View>: View {
 
     private func load() async {
         guard let url else { return }
-        if let cached = ImageCache.image(for: url) { uiImage = cached; return }
+        // Ask the backend for a photo sized for THIS view instead of the
+        // 262 KB original. TestFlight from inside a club, 2026-09-11: "tooo
+        // slow inside of the club… like it's impossible". A feed screen was
+        // pulling 2 MB+ of images over congested venue LTE; at 200 px a card
+        // photo is ~5 KB.
+        let sourceURL = PhotoURL.sized(url, for: targetSize)
+        if let cached = ImageCache.image(for: sourceURL) { uiImage = cached; return }
 
         // View.task runs on the MainActor — decoding there freezes the whole
         // UI (the login was untouchable while 181 hidden cards loaded). All
@@ -128,7 +134,7 @@ struct CachedImage<Content: View, Placeholder: View>: View {
             // propia red por afuera de URLCache y nunca persistía nada:
             // cada apertura de la app volvía a descargar TODAS las
             // imágenes de cero, sin importar lo ya cacheado.
-            guard let (data, _) = try? await URLSession.shared.data(from: url) else { return nil }
+            guard let (data, _) = try? await URLSession.shared.data(from: sourceURL) else { return nil }
             let opts: CFDictionary = [
                 kCGImageSourceShouldCache: false,
                 kCGImageSourceCreateThumbnailFromImageAlways: true,
@@ -143,7 +149,42 @@ struct CachedImage<Content: View, Placeholder: View>: View {
         }.value
 
         guard let img else { return }
-        ImageCache.store(img, for: url, priority: prio)
+        ImageCache.store(img, for: sourceURL, priority: prio)
         if !Task.isCancelled { uiImage = img }
+    }
+}
+
+/// Rewrites a remote photo URL to go through the backend's image optimizer at
+/// the size the view actually needs.
+///
+/// Only the hosts our own venue photos come from are rewritten; anything else
+/// (a bundled asset, a URL from a future source) is returned untouched rather
+/// than sent somewhere it doesn't belong. The width list mirrors the one
+/// configured server-side — an unlisted width is rejected there, so keeping
+/// them in step matters.
+enum PhotoURL {
+    private static let optimizableHosts: Set<String> = [
+        "lh3.googleusercontent.com",
+        "places.googleapis.com",
+        "maps.googleapis.com",
+        "\(SupabaseConfig.projectRef).supabase.co",
+    ]
+
+    /// Must stay in sync with images.imageSizes + deviceSizes in
+    /// barpass-v2/next.config.ts.
+    private static let availableWidths = [200, 400, 600, 640, 828, 1080]
+
+    static func sized(_ url: URL, for targetSize: CGSize?) -> URL {
+        guard let host = url.host, optimizableHosts.contains(host) else { return url }
+        // Points → pixels, then up to the next width we actually serve.
+        let points = max(targetSize?.width ?? 0, targetSize?.height ?? 0)
+        let wanted = points > 0 ? Int((points * UIScreen.main.scale).rounded()) : 640
+        let width = availableWidths.first { $0 >= wanted } ?? availableWidths.last!
+
+        guard let encoded = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
+              // APIClient.baseURL ends in /api; the optimizer is at the site root.
+              let optimized = URL(string: "\(APIClient.baseURL.deletingLastPathComponent().absoluteString)_next/image?url=\(encoded)&w=\(width)&q=75")
+        else { return url }
+        return optimized
     }
 }

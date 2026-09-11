@@ -13,6 +13,9 @@ import Foundation
 /// `auth.uid()`, so guest mode (no session) can't read/write trips at all.
 actor SupabaseTripRepository: TripRepository {
     private static let columns = "id,creator_id,title,destination_city,start_date,end_date,cover_image,visibility,status,member_ids,co_organizer_ids,pending_requests,invite_code,stops"
+    /// Same columns minus invite_code and pending_requests — the view doesn't
+    /// expose them, and a stranger's trip has no business carrying either.
+    private static let discoverableColumns = "id,creator_id,title,destination_city,start_date,end_date,cover_image,visibility,status,member_ids,co_organizer_ids,stops"
 
     struct NoSessionError: LocalizedError {
         // Was hardcoded Spanish, so a device set to English showed this
@@ -37,8 +40,30 @@ actor SupabaseTripRepository: TripRepository {
 
     // MARK: - TripRepository
 
+    /// Two fetches, on purpose (2026-09-11 security fix). `trips` now only
+    /// returns rows you actually belong to — before, its RLS also matched
+    /// "any non-private trip", which handed every logged-in user the
+    /// invite_code of strangers' trips. Verified by exploiting it: a brand
+    /// new account read a code and joined someone else's trip.
+    ///
+    /// Discovery still works, through `discoverable_trips` — a view with the
+    /// same shape minus the credential. A trip found there is joined the way
+    /// it always should have been: by a code its owner chose to share.
     func getTrips() async throws -> [Trip] {
-        let req = try request("GET", path: "trips?select=\(Self.columns)&order=start_date.asc")
+        async let mineTask = fetchTrips(from: "trips?select=\(Self.columns)&order=start_date.asc")
+        // A failure here must not take the user's own trips down with it
+        // (older app versions run against a database without the view).
+        async let discoverableTask = try? fetchTrips(
+            from: "discoverable_trips?select=\(Self.discoverableColumns)&order=start_date.asc")
+
+        let mine = try await mineTask
+        let discoverable = await discoverableTask ?? []
+        let mineIds = Set(mine.map(\.id))
+        return mine + discoverable.filter { !mineIds.contains($0.id) }
+    }
+
+    private func fetchTrips(from path: String) async throws -> [Trip] {
+        let req = try request("GET", path: path)
         let data = try await SupabaseRESTClient.send(req)
         return try SupabaseRESTClient.decoder.decode([Trip].self, from: data)
     }
