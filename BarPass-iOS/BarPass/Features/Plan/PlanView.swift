@@ -636,7 +636,12 @@ struct PlanView: View {
             var raw = ""
             do {
                 for try await event in APIClient.streamConciergeChat(messages: apiMessages, city: city, context: context) {
-                    guard !Task.isCancelled else { return }
+                    // `break`, never `return`: an early return skipped the
+                    // trailing `isSending = false`, so tapping "new chat" or a
+                    // history entry while Remy was replying (both cancel this
+                    // task) left the composer disabled forever. Cancellation
+                    // must always fall through to the cleanup below.
+                    if Task.isCancelled { break }
                     switch event {
                     case .thinking:
                         updateMessage(assistantId) { $0.isThinking = true; $0.text = "" }
@@ -654,27 +659,39 @@ struct PlanView: View {
                 // error and no retry affordance, a confusing dead end.
                 // Same web hook fix, same reasoning: treat "reasoned but
                 // said nothing" as the real failure it is.
-                guard !raw.isEmpty else {
-                    throw APIClient.APIClientError.server(L10n.tSync("plan.ai.unavailable"))
+                // A cancelled stream is not a failure and not a reply: the
+                // screen it belonged to is already gone (new chat / other
+                // session), so finalize nothing and surface no error — just
+                // fall through to the cleanup.
+                if !Task.isCancelled {
+                    guard !raw.isEmpty else {
+                        throw APIClient.APIClientError.server(L10n.tSync("plan.ai.unavailable"))
+                    }
+                    let (finalText, plan, options) = NightPlan.extractChatReplyParts(raw, venues: venues)
+                    updateMessage(assistantId) {
+                        $0.text = finalText.isEmpty ? "…" : finalText
+                        $0.plan = plan
+                        $0.suggestions = options
+                        $0.isThinking = false
+                        $0.isStreaming = false
+                    }
+                    if plan != nil { BPAnalytics.track(.createPlan(method: "ai")) }
                 }
-                let (finalText, plan, options) = NightPlan.extractChatReplyParts(raw, venues: venues)
-                updateMessage(assistantId) {
-                    $0.text = finalText.isEmpty ? "…" : finalText
-                    $0.plan = plan
-                    $0.suggestions = options
-                    $0.isThinking = false
-                    $0.isStreaming = false
-                }
-                if plan != nil { BPAnalytics.track(.createPlan(method: "ai")) }
             } catch {
                 await MainActor.run {
-                    messages.removeAll { $0.id == assistantId }
-                    chatErrorMessage = error.localizedDescription
+                    if !Task.isCancelled {
+                        messages.removeAll { $0.id == assistantId }
+                        chatErrorMessage = error.localizedDescription
+                    }
                 }
             }
             await MainActor.run {
+                // Unconditional: this is what re-enables the composer.
                 isSending = false
-                persistMessages()
+                // …but don't write the transcript back when we were cancelled;
+                // the screen has already moved to a different session and
+                // persisting here would overwrite it.
+                if !Task.isCancelled { persistMessages() }
             }
         }
     }

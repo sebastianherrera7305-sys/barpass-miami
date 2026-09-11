@@ -7,6 +7,19 @@ enum APIClient {
 
     static let baseURL = URL(string: "https://barpass-v2.vercel.app/api")!
 
+    /// Not `URLSession.shared`: its default 60s request timeout meant a tap on
+    /// Pay inside a venue on bad LTE sat on a spinner for a full minute before
+    /// saying anything. 20s is past the p99 of these routes and still short
+    /// enough to fail while the user is watching. The concierge stream builds
+    /// its own request with an explicit 150s timeout and deliberately does NOT
+    /// use this session — that one is a long-lived stream by design.
+    private static let httpSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 20
+        config.timeoutIntervalForResource = 60
+        return URLSession(configuration: config)
+    }()
+
     enum APIClientError: LocalizedError {
         case notAuthenticated
         case sessionExpired
@@ -148,7 +161,7 @@ enum APIClient {
 
         let (data, response): (Data, URLResponse)
         do {
-            (data, response) = try await URLSession.shared.data(for: request)
+            (data, response) = try await httpSession.data(for: request)
         } catch {
             throw APIClientError.network(error.localizedDescription)
         }
@@ -221,7 +234,7 @@ enum APIClient {
             "paymentSource": paymentSource.jsonValue
         ]
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        _ = try? await URLSession.shared.data(for: request)
+        _ = try? await httpSession.data(for: request)
     }
 
     /// Charges a card and credits the amount to BarPass Wallet via
@@ -261,7 +274,7 @@ enum APIClient {
 
         let (data, response): (Data, URLResponse)
         do {
-            (data, response) = try await URLSession.shared.data(for: request)
+            (data, response) = try await httpSession.data(for: request)
         } catch {
             throw APIClientError.network(error.localizedDescription)
         }
@@ -283,7 +296,7 @@ enum APIClient {
 
         let (data, response): (Data, URLResponse)
         do {
-            (data, response) = try await URLSession.shared.data(for: request)
+            (data, response) = try await httpSession.data(for: request)
         } catch {
             throw APIClientError.network(error.localizedDescription)
         }
@@ -453,7 +466,7 @@ enum APIClient {
 
         let (data, response): (Data, URLResponse)
         do {
-            (data, response) = try await URLSession.shared.data(for: request)
+            (data, response) = try await httpSession.data(for: request)
         } catch {
             throw APIClientError.network(error.localizedDescription)
         }
@@ -477,7 +490,7 @@ enum APIClient {
 
         let (data, response): (Data, URLResponse)
         do {
-            (data, response) = try await URLSession.shared.data(for: request)
+            (data, response) = try await httpSession.data(for: request)
         } catch {
             throw APIClientError.network(error.localizedDescription)
         }
@@ -517,7 +530,7 @@ enum APIClient {
 
         let (data, response): (Data, URLResponse)
         do {
-            (data, response) = try await URLSession.shared.data(from: components.url!)
+            (data, response) = try await httpSession.data(from: components.url!)
         } catch {
             throw APIClientError.network(error.localizedDescription)
         }

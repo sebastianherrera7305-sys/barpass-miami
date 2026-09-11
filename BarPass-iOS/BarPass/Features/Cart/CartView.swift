@@ -336,10 +336,14 @@ struct CartView: View {
         isProcessing = false
         let total = cart.total
         let items = cart.items.map { "\($0.emoji) \($0.name)" }.joined(separator: ", ")
+        // venueName must be captured BEFORE clear(), exactly like items/total
+        // above: clear() resets it, so reading it afterwards made every single
+        // order confirmation show an empty venue ("Order confirmed at ").
+        let venue = cart.venueName
         cart.clear()
         dismiss()
         appState.lastOrderConfirmation = OrderConfirmation(
-            venue:  cart.venueName,
+            venue:  venue,
             items:  items,
             total:  total,
             method: method

@@ -87,7 +87,13 @@ final class AuthService: @unchecked Sendable {
 
     @discardableResult
     func refreshIfNeeded() async -> Bool {
-        guard let session = restoreSession(), session.isExpired else { return true }
+        // "No session at all" is a failure, not a success. The single guard
+        // this used to be returned `true` when restoreSession() was nil, so a
+        // signed-out user sailed past every caller's auth check and hit the
+        // API unauthenticated — surfacing as a generic server error instead of
+        // "please sign in".
+        guard let session = restoreSession() else { return false }
+        guard session.isExpired else { return true }
 
         let (task, owner) = claimRefreshTask(for: session)
         let result = await task.value

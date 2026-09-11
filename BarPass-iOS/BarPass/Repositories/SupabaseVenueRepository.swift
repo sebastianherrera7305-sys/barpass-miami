@@ -253,13 +253,30 @@ final actor SupabaseVenueRepository: VenueRepository {
         try await publicGet("venue_age_effective", columns: Self.ageBracketColumns)
     }
 
+    /// Pages with `Range`, for the same reason `fetchVenueRows()` does: a plain
+    /// GET is silently truncated at PostgREST's 1000-row cap. This had no
+    /// paging at all, and venue_experience_tags is already at 787 rows — it
+    /// would have crossed the cap with no error and no empty result, just
+    /// quietly worse recommendations for whatever fell off the end.
     private func publicGet<T: Decodable>(_ path: String, columns: String) async throws -> [T] {
-        let request = try SupabaseRESTClient.request(
-            "GET", path: path, queryItems: [URLQueryItem(name: "select", value: columns)],
-            accessToken: SupabaseRESTClient.anonKey
-        )
-        let data = try await SupabaseRESTClient.send(request)
-        return try SupabaseRESTClient.decoder.decode([T].self, from: data)
+        let pageSize = 1000
+        var allRows: [T] = []
+        var offset = 0
+
+        while true {
+            let request = try SupabaseRESTClient.request(
+                "GET", path: path, queryItems: [URLQueryItem(name: "select", value: columns)],
+                accessToken: SupabaseRESTClient.anonKey,
+                extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"]
+            )
+            let data = try await SupabaseRESTClient.send(request)
+            let page = try SupabaseRESTClient.decoder.decode([T].self, from: data)
+            allRows.append(contentsOf: page)
+            if page.count < pageSize { break }
+            offset += pageSize
+        }
+
+        return allRows
     }
 
     // MARK: - VenueRepository

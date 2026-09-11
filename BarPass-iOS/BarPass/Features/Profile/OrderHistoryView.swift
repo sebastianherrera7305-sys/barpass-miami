@@ -8,6 +8,11 @@ struct OrderHistoryView: View {
     @ObservedObject private var l10n = L10n.shared
     @State private var entries: [HistoryEntry] = []
     @State private var isLoading = true
+    /// Set when the fetch throws. Previously any failure (an expired token
+    /// coming back 401 above all) was swallowed and rendered as the "no orders
+    /// yet" empty state — a user who had just paid saw nothing and had no way
+    /// to retry. An error is not an empty list.
+    @State private var loadFailed = false
 
     var body: some View {
         ZStack {
@@ -15,6 +20,8 @@ struct OrderHistoryView: View {
 
             if isLoading {
                 BarPassLoadingView()
+            } else if loadFailed {
+                errorState
             } else if entries.isEmpty {
                 emptyState
             } else {
@@ -38,6 +45,27 @@ struct OrderHistoryView: View {
                 .font(.bpScaled(15, weight: .semibold))
                 .foregroundStyle(Color.bpInk.opacity(0.6))
         }
+    }
+
+    private var errorState: some View {
+        VStack(spacing: 12) {
+            Text("⚠️").font(.system(size: 40))
+            Text(l10n.t("orders.error"))
+                .font(.bpScaled(15, weight: .semibold))
+                .foregroundStyle(Color.bpInk.opacity(0.6))
+                .multilineTextAlignment(.center)
+            Button {
+                Task { await load() }
+            } label: {
+                Text(l10n.t("trips.retry"))
+                    .font(.bpScaled(13, weight: .bold))
+                    .foregroundStyle(Color.bpAmber)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(Color.bpSurface, in: Capsule())
+            }
+        }
+        .padding(24)
     }
 
     private func row(_ entry: HistoryEntry) -> some View {
@@ -69,11 +97,17 @@ struct OrderHistoryView: View {
     }
 
     private func load() async {
-        guard let session = AuthService.shared.restoreSession() else { isLoading = false; return }
-        async let orders = OrderHistoryService.fetchOrders(session: session)
-        async let passes = OrderHistoryService.fetchPasses(session: session)
-        let combined = (await orders).map(HistoryEntry.init(order:)) + (await passes).map(HistoryEntry.init(pass:))
-        entries = combined.sorted { $0.createdAt > $1.createdAt }
+        isLoading = true
+        loadFailed = false
+        do {
+            async let orders = OrderHistoryService.fetchOrders()
+            async let passes = OrderHistoryService.fetchPasses()
+            let combined = try await orders.map(HistoryEntry.init(order:))
+                + (try await passes).map(HistoryEntry.init(pass:))
+            entries = combined.sorted { $0.createdAt > $1.createdAt }
+        } catch {
+            loadFailed = true
+        }
         isLoading = false
     }
 }

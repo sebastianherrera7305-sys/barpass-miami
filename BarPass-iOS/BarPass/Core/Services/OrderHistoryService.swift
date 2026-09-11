@@ -4,9 +4,6 @@ import Foundation
 /// REST — RLS ("readable by owner") does the scoping, so no server route
 /// is needed just to display history.
 enum OrderHistoryService {
-    private static let supabaseURL = SupabaseConfig.url.absoluteString
-    private static let anonKey = SupabaseConfig.anonKey
-
     struct OrderRow: Decodable {
         let id: String
         let vendor_id: String
@@ -28,24 +25,28 @@ enum OrderHistoryService {
         let created_at: Date
     }
 
-    static func fetchOrders(session: AuthSession) async -> [OrderRow] {
-        await fetch(path: "orders?select=id,vendor_id,total,payment_method,status,created_at&order=created_at.desc&limit=50", session: session)
+    static func fetchOrders() async throws -> [OrderRow] {
+        try await fetch(path: "orders?select=id,vendor_id,total,payment_method,status,created_at&order=created_at.desc&limit=50")
     }
 
-    static func fetchPasses(session: AuthSession) async -> [PassRow] {
-        await fetch(path: "passes?select=id,pass_code,kind,venue_name,quantity,amount,valid_until,redeemed_at,created_at&order=created_at.desc&limit=50", session: session)
+    static func fetchPasses() async throws -> [PassRow] {
+        try await fetch(path: "passes?select=id,pass_code,kind,venue_name,quantity,amount,valid_until,redeemed_at,created_at&order=created_at.desc&limit=50")
     }
 
-    private static func fetch<T: Decodable>(path: String, session: AuthSession) async -> [T] {
-        guard let url = URL(string: "\(supabaseURL)/rest/v1/\(path)") else { return [] }
-        var request = URLRequest(url: url)
-        request.setValue(anonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
-
-        guard let (data, _) = try? await URLSession.shared.data(for: request) else { return [] }
+    /// Throws instead of swallowing. `try?` on the request plus `?? []` on the
+    /// decode used to turn every failure — most importantly an expired JWT
+    /// coming back 401 — into a cheerful "no orders yet", so a user who had
+    /// just paid opened their history and saw an empty state. A stale token is
+    /// also why this now goes through `SupabaseRESTClient.freshSession()` like
+    /// the rest of the RLS-scoped reads, instead of taking whatever token the
+    /// caller happened to be holding.
+    private static func fetch<T: Decodable>(path: String) async throws -> [T] {
+        let session = try await SupabaseRESTClient.freshSession()
+        let request = try SupabaseRESTClient.request("GET", path: path, accessToken: session.accessToken)
+        let data = try await SupabaseRESTClient.send(request)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601WithFractionalSeconds
-        return (try? decoder.decode([T].self, from: data)) ?? []
+        return try decoder.decode([T].self, from: data)
     }
 }
 

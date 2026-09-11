@@ -45,19 +45,24 @@ actor SupabasePlanRepository: PlanRepository {
         return d
     }()
 
-    private func session() throws -> AuthSession {
-        guard let s = AuthService.shared.restoreSession() else { throw NoSessionError() }
-        return s
+    /// `freshSession()`, not a bare `restoreSession()`: reading the cached
+    /// session directly handed PostgREST whatever JWT happened to be on disk,
+    /// so once the ~59-minute token expired every save/load of a plan failed
+    /// with a 401 until some *other* screen happened to refresh it. This
+    /// refreshes first, exactly like every other RLS-scoped repository.
+    private func session() async throws -> AuthSession {
+        do { return try await SupabaseRESTClient.freshSession() }
+        catch { throw NoSessionError() }
     }
 
-    private func request(_ method: String, path: String, body: Data? = nil) throws -> URLRequest {
-        try SupabaseRESTClient.request(method, path: path, body: body, accessToken: try session().accessToken)
+    private func request(_ method: String, path: String, body: Data? = nil) async throws -> URLRequest {
+        try SupabaseRESTClient.request(method, path: path, body: body, accessToken: try await session().accessToken)
     }
 
     // MARK: - PlanRepository
 
     func getPlans() async throws -> [NightPlan] {
-        let req = try request("GET", path: "night_plans?select=id,user_id,title,plan&order=created_at.desc")
+        let req = try await request("GET", path: "night_plans?select=id,user_id,title,plan&order=created_at.desc")
         let data = try await SupabaseRESTClient.send(req)
         let rows = try Self.decoder.decode([Row].self, from: data)
         return rows.map(\.plan)
@@ -67,11 +72,11 @@ actor SupabasePlanRepository: PlanRepository {
     /// `LocalPlanRepository` had) — one POST with `resolution=merge-
     /// duplicates` instead of a separate exists-check + PATCH/POST branch.
     func savePlan(_ plan: NightPlan) async throws {
-        let userId = try session().user.id
-        let row = Row(id: plan.id, userId: userId, title: plan.title, plan: plan)
+        let authSession = try await session()
+        let row = Row(id: plan.id, userId: authSession.user.id, title: plan.title, plan: plan)
         let body = try Self.encoder.encode(row)
         let req = try SupabaseRESTClient.request(
-            "POST", path: "night_plans", body: body, accessToken: try session().accessToken,
+            "POST", path: "night_plans", body: body, accessToken: authSession.accessToken,
             extraHeaders: ["Prefer": "return=minimal,resolution=merge-duplicates"]
         )
         let (data, response) = try await URLSession.shared.data(for: req)
@@ -81,7 +86,7 @@ actor SupabasePlanRepository: PlanRepository {
     }
 
     func deletePlan(_ plan: NightPlan) async throws {
-        let req = try request("DELETE", path: "night_plans?id=eq.\(plan.id)")
+        let req = try await request("DELETE", path: "night_plans?id=eq.\(plan.id)")
         try await SupabaseRESTClient.send(req)
     }
 }
