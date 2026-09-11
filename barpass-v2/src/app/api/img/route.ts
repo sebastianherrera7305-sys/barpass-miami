@@ -1,5 +1,11 @@
 import sharp from "sharp";
 
+// sharp is a native module: it must run on the Node.js runtime (not Edge) and
+// must not be bundled — Vercel needs to ship its platform binary as-is. Both
+// are declared here and in next.config.ts (serverExternalPackages).
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/img?u=<encoded image url>&w=<width>
  *
