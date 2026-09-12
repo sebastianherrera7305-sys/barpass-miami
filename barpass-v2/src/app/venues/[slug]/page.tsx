@@ -168,27 +168,55 @@ export default async function VenuePage({
         )}
       </div>
 
-      {venue.popularDrinks.length > 0 && (
-        <section className="mt-8">
-          <h3 className="text-lg font-bold">What to order</h3>
-          <div className="mt-3 flex gap-3 overflow-x-auto no-scrollbar">
-            {venue.popularDrinks.map((drink) => (
-              <div
-                key={drink.name}
-                className="flex shrink-0 items-center gap-3 rounded-[16px] border border-border-subtle bg-surface px-4 py-3"
-              >
-                <span className="text-2xl">{drink.emoji}</span>
-                <div>
-                  <p className="text-sm font-semibold">{drink.name}</p>
-                  <p className="text-xs text-amber-brand">
-                    {formatUSD(drink.price)}
-                  </p>
+      {/* Drinks & prices. Only prices read from the venue's own menu are
+          stored (scripts/extract-drink-menus.ts); ~1 in 9 venues has any.
+          The empty state says so instead of hiding the section — a missing
+          number is a fact worth stating, a "$0" or a blank card is not. */}
+      <section className="mt-8">
+        <h3 className="text-lg font-bold">What to order</h3>
+        {venue.popularDrinks.length > 0 ? (
+          <>
+            <div className="mt-3 flex gap-3 overflow-x-auto no-scrollbar">
+              {venue.popularDrinks.map((drink) => (
+                <div
+                  key={drink.name}
+                  className="flex shrink-0 items-center gap-3 rounded-[16px] border border-border-subtle bg-surface px-4 py-3"
+                >
+                  <span className="text-2xl">{drink.emoji}</span>
+                  <div>
+                    <p className="text-sm font-semibold">{drink.name}</p>
+                    <p className="text-xs text-amber-brand">
+                      {formatUSD(drink.price)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+              ))}
+            </div>
+            {venue.drinksSource && (
+              <p className="mt-2 text-[11px] text-text-tertiary">
+                Prices from{" "}
+                {venue.drinksSource.url ? (
+                  <a
+                    href={venue.drinksSource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline decoration-dotted underline-offset-2 hover:text-text-secondary"
+                  >
+                    the venue&apos;s menu
+                  </a>
+                ) : (
+                  "the venue's menu"
+                )}
+                {venue.drinksSource.date && ` as of ${venue.drinksSource.date}`}. Menus change — confirm at the bar.
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="mt-3 rounded-[16px] border border-dashed border-border-subtle px-4 py-3 text-sm text-text-secondary">
+            No drink prices yet. We only list prices read from a venue&apos;s own menu, and this one hasn&apos;t published any we could verify.
+          </p>
+        )}
+      </section>
 
       {venue.upcomingEvents.length > 0 && (
         <section className="mt-8">

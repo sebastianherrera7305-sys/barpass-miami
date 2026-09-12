@@ -479,8 +479,12 @@ final actor SupabaseVenueRepository: VenueRepository {
 
     private static func mapPopularDrinks(_ field: SupabasePopularDrinksField?) -> [PopularDrink] {
         guard let field else { return [] }
-        return field.items.enumerated().map { i, item in
-            PopularDrink(id: "supabase-\(i)", name: item.name, price: item.price ?? 0, emoji: item.emoji ?? "🍸")
+        // A drink with no price is dropped, not shown as "$0". Absence must never
+        // render as a value — avg_spend = 0 showed as a confident "$0" on 1,665
+        // venues before that rule existed, and VenueDetailView prints "$%.0f".
+        return field.items.enumerated().compactMap { i, item in
+            guard let price = item.price, price > 0 else { return nil }
+            return PopularDrink(id: "supabase-\(i)", name: item.name, price: price, emoji: item.emoji ?? "🍸")
         }
     }
 

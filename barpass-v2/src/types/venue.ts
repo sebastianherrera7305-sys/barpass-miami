@@ -132,6 +132,13 @@ export interface Venue {
   peakHours: string;
 
   popularDrinks: PopularDrink[];
+  /**
+   * Where popularDrinks came from (venues.field_sources.popular_drinks):
+   * the venue's own menu page and the day it was read. Shown next to the
+   * prices so a reader knows they are real and how old they are. Absent when
+   * there are no drinks or the row predates provenance tracking.
+   */
+  drinksSource?: { url: string | null; date: string | null } | null;
   upcomingEvents: VenueEvent[];
 
   emoji: string;

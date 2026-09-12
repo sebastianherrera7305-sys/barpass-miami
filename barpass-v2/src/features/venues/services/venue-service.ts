@@ -62,12 +62,18 @@ interface DbVenue {
   is_trending: boolean;
   /** IANA zone, e.g. "America/New_York" — the catalog spans 23 cities. */
   timezone: string | null;
+  /** Per-field provenance, see supabase/venue_field_provenance.sql. */
+  field_sources: Record<string, { url?: unknown; date?: unknown; at?: unknown } | undefined> | null;
 }
 
 /**
  * popular_drinks is stored in Supabase as a JSON-encoded STRING (legacy of
  * the seed script), not a jsonb array — same quirk the iOS decoder handles.
  * Accept both shapes and never crash a page over it.
+ *
+ * An item without a positive price is dropped, not shown as "$0": the whole
+ * point of this list is the price, and avg_spend = 0 rendering as a confident
+ * "$0" on 1,665 venues was a real bug in this codebase.
  */
 function parseDrinks(raw: unknown): Venue["popularDrinks"] {
   let arr: unknown = raw;
@@ -78,12 +84,35 @@ function parseDrinks(raw: unknown): Venue["popularDrinks"] {
   return arr
     .filter((d): d is Record<string, unknown> => !!d && typeof d === "object")
     .map((d) => ({
-      name: String(d.name ?? ""),
-      price: Number(d.price ?? 0),
+      name: String(d.name ?? "").trim(),
+      price: Number(d.price),
       emoji: String(d.emoji ?? "🍸"),
     }))
-    .filter((d) => d.name.length > 0);
+    .filter((d) => d.name.length > 0 && Number.isFinite(d.price) && d.price > 0);
 }
+
+function drinksSource(fs: DbVenue["field_sources"]): Venue["drinksSource"] {
+  const p = fs?.popular_drinks;
+  if (!p) return null;
+  const url = typeof p.url === "string" ? p.url : null;
+  const date = typeof p.date === "string" ? p.date : typeof p.at === "string" ? p.at : null;
+  return url || date ? { url, date } : null;
+}
+
+/**
+ * The bundled catalog is a 2026-07-06 snapshot of 8 Miami venues whose
+ * drinks, happy hour and avg spend were typed in by hand with no source —
+ * the same seed batch whose music_genres turned out to be fabricated. It is
+ * only ever served when Supabase is unreachable, and even then it must not
+ * show prices nobody read from a menu.
+ */
+const FALLBACK_VENUES: Venue[] = VENUES.map((v) => ({
+  ...v,
+  popularDrinks: [],
+  drinksSource: null,
+  happyHourUntil: null,
+  avgSpend: null,
+}));
 
 function mapDbVenue(v: DbVenue): Venue {
   return {
@@ -120,6 +149,7 @@ function mapDbVenue(v: DbVenue): Venue {
     bestArrivalTime: v.best_arrival_time,
     peakHours: v.peak_hours,
     popularDrinks: parseDrinks(v.popular_drinks),
+    drinksSource: drinksSource(v.field_sources),
     emoji: v.emoji,
     imageUrl: v.image_url,
     instagramHandle: v.instagram_handle,
@@ -221,7 +251,7 @@ async function restGetAll<T>(path: string): Promise<T[]> {
 async function fetchVenuesUncached(): Promise<Venue[]> {
   if (!isSupabaseConfigured()) {
     _isServingLiveData = false;
-    return VENUES;
+    return FALLBACK_VENUES;
   }
   try {
     // excluded_reason: "should this be in a nightlife app at all" (airport
@@ -267,7 +297,7 @@ async function fetchVenuesUncached(): Promise<Venue[]> {
   } catch (e) {
     console.warn("Supabase venue fetch failed, falling back to local:", e);
     _isServingLiveData = false;
-    return VENUES;
+    return FALLBACK_VENUES;
   }
 }
 
@@ -295,7 +325,7 @@ export async function getVenuesByCity(city: string): Promise<Venue[]> {
     return cached.data;
   }
   if (!isSupabaseConfigured()) {
-    return VENUES.filter((v) => v.city === city);
+    return FALLBACK_VENUES.filter((v) => v.city === city);
   }
   try {
     const data = await restGetAll<DbVenue>(
