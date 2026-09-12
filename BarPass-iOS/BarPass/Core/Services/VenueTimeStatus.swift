@@ -11,27 +11,65 @@ enum VenueTimeStatus {
 
     /// Parses "11:00 PM" / "5:00 AM" / "23:00" style strings into minutes
     /// since midnight (24h). Returns nil if unparseable.
+    ///
+    /// Hand-rolled on purpose. The previous version compiled an
+    /// NSRegularExpression and allocated a DateFormatter, a Locale and a
+    /// Calendar on every call. That is fine a few times a screen and fatal in
+    /// a ranking pass: `VenueRanking.goingOutScore` calls this three times per
+    /// venue, so one Tonight render over the full catalogue made ~5,400
+    /// DateFormatters on the main thread and the app froze in build 63
+    /// ("fui a salir y se quedó pegado", 2026-09-12). A character scan costs
+    /// microseconds and allocates nothing.
     static func minutesSinceMidnight(_ raw: String) -> Int? {
-        let trimmed = raw.trimmingCharacters(in: .whitespaces).uppercased()
-        guard !trimmed.isEmpty else { return nil }
+        var hour = 0
+        var minute = 0
+        var sawColon = false
+        var hourDigits = 0
+        var minuteDigits = 0
+        var isPM: Bool? = nil
 
-        // 24h "HH:mm"
-        if trimmed.range(of: #"^\d{1,2}:\d{2}$"#, options: .regularExpression) != nil {
-            let parts = trimmed.split(separator: ":")
-            guard parts.count == 2, let h = Int(parts[0]), let m = Int(parts[1]),
-                  (0..<24).contains(h), (0..<60).contains(m) else { return nil }
-            return h * 60 + m
+        for ch in raw {
+            switch ch {
+            case "0"..."9":
+                let digit = Int(ch.wholeNumberValue ?? -1)
+                guard digit >= 0 else { return nil }
+                if sawColon {
+                    minuteDigits += 1
+                    if minuteDigits > 2 { return nil }
+                    minute = minute * 10 + digit
+                } else {
+                    hourDigits += 1
+                    if hourDigits > 2 { return nil }
+                    hour = hour * 10 + digit
+                }
+            case ":":
+                if sawColon || hourDigits == 0 { return nil }
+                sawColon = true
+            case "a", "A":
+                if isPM != nil { return nil }
+                isPM = false
+            case "p", "P":
+                if isPM != nil { return nil }
+                isPM = true
+            // Separators and the "M" of AM/PM carry no information.
+            case "m", "M", " ", ".", "\t":
+                continue
+            default:
+                return nil
+            }
         }
 
-        // 12h "H:mm AM/PM"
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "h:mm a"
-        let cleaned = trimmed.replacingOccurrences(of: ".", with: "")
-        guard let date = formatter.date(from: cleaned) else { return nil }
-        let comps = Calendar(identifier: .gregorian).dateComponents([.hour, .minute], from: date)
-        guard let h = comps.hour, let m = comps.minute else { return nil }
-        return h * 60 + m
+        guard sawColon, hourDigits > 0, minuteDigits == 2, minute < 60 else { return nil }
+
+        if let isPM {
+            // 12-hour clock: 12 AM is midnight, 12 PM is noon.
+            guard (1...12).contains(hour) else { return nil }
+            if hour == 12 { hour = 0 }
+            if isPM { hour += 12 }
+        } else {
+            guard hour < 24 else { return nil }
+        }
+        return hour * 60 + minute
     }
 
     /// True if `now` falls within [openTime, closeTime), correctly handling

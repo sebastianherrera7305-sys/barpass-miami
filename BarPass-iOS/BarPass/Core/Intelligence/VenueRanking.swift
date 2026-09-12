@@ -70,15 +70,25 @@ enum VenueRanking {
     /// and do a lot of people actually go. Rating is a tiebreaker here, not
     /// the axis.
     static func goingOutScore(_ venue: BarPassVenue, at date: Date = Date(), mean: Double) -> Double {
-        var score = 0.0
+        goingOutScore(venue, arrivalMinute: Self.arrivalMinute(from: date), mean: mean)
+    }
 
-        // Still open an hour from now — you're deciding where to head, not
-        // where you already are. A place that closes before you arrive is
-        // worth nothing regardless of how good it is.
+    /// Minute-of-day an hour from `date` — when you would actually arrive.
+    /// Computed once per ranking pass rather than once per venue: building a
+    /// Calendar and doing date arithmetic 1,800 times on the main thread is
+    /// the other half of the build-63 freeze.
+    private static func arrivalMinute(from date: Date) -> Int {
         let cal = Calendar.current
         let soon = cal.date(byAdding: .hour, value: 1, to: date) ?? date
-        let minute = cal.component(.hour, from: soon) * 60 + cal.component(.minute, from: soon)
-        guard venue.isOpenAt(minutesSinceMidnight: minute) else { return 0 }
+        return cal.component(.hour, from: soon) * 60 + cal.component(.minute, from: soon)
+    }
+
+    static func goingOutScore(_ venue: BarPassVenue, arrivalMinute: Int, mean: Double) -> Double {
+        var score = 0.0
+
+        // Still open when you'd arrive. A place that closes before you get
+        // there is worth nothing regardless of how good it is.
+        guard venue.isOpenAt(minutesSinceMidnight: arrivalMinute) else { return 0 }
 
         // How late it goes is the single strongest signal of what kind of
         // night a place is for. A 2 AM close is a going-out venue; a 10 PM
@@ -123,8 +133,9 @@ enum VenueRanking {
     /// is worse than showing nothing.
     static func goingOutNow(_ venues: [BarPassVenue], at date: Date = Date(), limit: Int = 20) -> [BarPassVenue] {
         let mean = meanRating(of: venues)
+        let arrival = arrivalMinute(from: date)
         return venues
-            .map { ($0, goingOutScore($0, at: date, mean: mean)) }
+            .map { ($0, goingOutScore($0, arrivalMinute: arrival, mean: mean)) }
             .filter { $0.1 > 0 }
             .sorted { $0.1 > $1.1 }
             .prefix(limit)
