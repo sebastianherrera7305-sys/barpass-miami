@@ -1,0 +1,110 @@
+<title>gator study</title>
+<style>html,body{margin:0;background:#F5F0E1}svg{display:block}</style>
+<!--
+  Attempt 6, and a change of subject rather than another round of coordinate
+  nudging. Five head studies failed for the same reason: a close-up face has to
+  survive scrutiny of the eye, the brow, the teeth and the jaw hinge all at
+  once, and any one of them being slightly wrong makes the whole thing read as
+  generated mush.
+
+  A full-body side silhouette has none of that exposure. "Alligator" is carried
+  entirely by the outline — long blunt snout, low slung body, splayed short
+  legs, a tail as long as everything else, and the sawtooth ridge down the
+  back. Get the proportions right and it reads at a glance; there is no face to
+  get wrong. This is also the shape language the rest of the city art uses:
+  flat fills, heavy black keylines, no gradients.
+
+  Proportions used (measured against real Alligator mississippiensis):
+  head 25% of total length, body 35%, tail 40%. Back height about 1/9 of
+  length. Legs short, elbows out, feet under the shoulder and hip.
+-->
+<svg id="g" width="1020" height="460" viewBox="0 0 1020 460" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1020" height="460" fill="#F5F0E1"/>
+
+  <g stroke="#000" stroke-width="9" stroke-linejoin="round" stroke-linecap="round">
+
+    <!-- FAR LEGS, drawn first and darker so the near side reads as closer. -->
+    <g fill="#17512F">
+      <path d="M348 268 C 344 292 336 306 326 316 C 318 324 322 334 334 334
+               L 382 334 C 392 334 394 324 386 318 C 374 310 378 290 384 272 Z"/>
+      <path d="M628 266 C 624 292 614 308 602 318 C 594 326 598 336 610 336
+               L 666 336 C 676 336 678 326 670 320 C 656 312 662 290 668 270 Z"/>
+    </g>
+
+    <!-- BACK SCUTES. Bases sit under the body path, so only the ridge shows.
+         They shrink and lean back along the tail — that taper is most of what
+         makes a tail read as a tail. -->
+    <g fill="#17512F">
+      <path d="M352 216 l36 -2 -14 -32 Z"/>
+      <path d="M404 210 l36 -2 -14 -32 Z"/>
+      <path d="M456 205 l36 -1 -13 -31 Z"/>
+      <path d="M508 202 l36 0 -13 -30 Z"/>
+      <path d="M560 203 l36 2 -12 -29 Z"/>
+      <path d="M612 212 l35 5 -10 -28 Z"/>
+      <path d="M662 228 l34 8 -9 -26 Z"/>
+      <path d="M712 246 l32 9 -8 -24 Z"/>
+      <path d="M760 264 l30 9 -7 -21 Z"/>
+      <path d="M808 281 l28 8 -6 -19 Z"/>
+      <path d="M854 295 l25 7 -5 -16 Z"/>
+      <path d="M898 306 l22 6 -4 -14 Z"/>
+    </g>
+
+    <!-- THE ANIMAL: one continuous silhouette, snout to tail tip and back
+         along the belly. No internal seams. -->
+    <path d="M40 252
+             C 44 232 70 224 112 224
+             L 202 220
+             C 232 218 244 206 250 192
+             C 258 172 288 172 296 194
+             C 302 212 314 218 332 220
+             C 374 224 402 214 442 206
+             C 502 196 562 200 620 214
+             C 650 220 674 232 702 244
+             C 790 278, 886 306, 982 322
+             C 996 324, 998 332, 980 332
+             C 880 333, 782 316, 700 296
+             C 656 300, 560 306, 470 304
+             C 400 302 350 296 318 288
+             L 236 280
+             C 180 278 90 272 58 266
+             C 44 264 36 260 40 252 Z"
+          fill="#2A7D42"/>
+
+    <!-- NEAR LEGS. Short, elbow out, foot flat — a gator stands on bent legs,
+         not under itself like a dog. -->
+    <g fill="#2A7D42">
+      <path d="M312 286 C 308 310 298 326 286 336 C 278 344 282 356 294 356
+               L 346 356 C 356 356 358 344 350 338 C 336 330 342 310 350 288 Z"/>
+      <path d="M590 284 C 586 310 574 326 562 336 C 554 344 558 356 570 356
+               L 630 356 C 640 356 642 344 634 338 C 620 330 626 310 634 286 Z"/>
+    </g>
+    <!-- Toes: three per foot, just enough to stop the foot reading as a stump. -->
+    <g fill="#2A7D42" stroke-width="7">
+      <path d="M290 350 l-24 10 24 6 Z"/>
+      <path d="M312 352 l-24 12 24 6 Z"/>
+      <path d="M566 350 l-24 10 24 6 Z"/>
+      <path d="M588 352 l-24 12 24 6 Z"/>
+    </g>
+
+    <!-- JAW LINE. The single most identifying mark on a gator: a long straight
+         mouth running most of the head, not a short muzzle. -->
+    <path d="M46 258 C 110 266 180 272 246 276" fill="none" stroke-width="8"/>
+
+    <!-- Two teeth poking over the closed lip — real, and the detail everyone
+         recognises. Any more than a couple turns into a comb. -->
+    <g fill="#F5F0E1" stroke-width="6">
+      <path d="M88 262 l28 3 -15 21 Z"/>
+      <path d="M152 269 l28 2 -15 21 Z"/>
+    </g>
+
+    <!-- Nostril at the tip of the snout. -->
+    <ellipse cx="68" cy="238" rx="11" ry="8" fill="#17512F" stroke-width="6"/>
+
+    <!-- EYE, sitting on the raised mound already in the silhouette. Small: a
+         gator's eye is tiny relative to its head, and oversizing it was what
+         made every earlier study look like a cartoon frog. -->
+    <ellipse cx="273" cy="196" rx="15" ry="12" fill="#F5F0E1" stroke-width="7"/>
+    <ellipse cx="276" cy="196" rx="5" ry="9" fill="#000" stroke="none"/>
+
+  </g>
+</svg>
