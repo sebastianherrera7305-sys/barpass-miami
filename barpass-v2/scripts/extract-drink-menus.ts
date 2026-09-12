@@ -106,40 +106,66 @@ interface DbVenue {
 const UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
 const HUMAN_SOURCES = new Set(["manual_research", "user_report"]);
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Why the last fetchText() returned null — printed so a failed site has a reason in the log
+ * (bot wall vs timeout vs non-HTML), which is what decides whether a human must collect prices. */
+let lastFetchError = "";
+
 async function fetchText(url: string, ms = 12000): Promise<{ html: string; finalUrl: string } | null> {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
+  lastFetchError = "";
   try {
     const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "text/html,*/*" }, signal: ctrl.signal, redirect: "follow" });
-    if (!res.ok) return null;
+    if (!res.ok) { lastFetchError = `HTTP ${res.status}`; return null; }
     const ct = res.headers.get("content-type") ?? "";
-    if (!ct.includes("html")) return null;
+    if (!ct.includes("html")) { lastFetchError = `not HTML (${ct.split(";")[0] || "no content-type"})`; return null; }
     return { html: await res.text(), finalUrl: res.url };
-  } catch { return null; } finally { clearTimeout(t); }
+  } catch (e) {
+    lastFetchError = e instanceof Error && e.name === "AbortError" ? `timeout after ${ms / 1000}s` : `${e instanceof Error ? e.cause instanceof Error ? e.cause.message : e.message : e}`;
+    return null;
+  } finally { clearTimeout(t); }
 }
+
+/** Minimum gap between two model calls. NIM answers 429 to rapid calls (CLAUDE.md, 2026-09-06). */
+const MODEL_PACE_MS = 1500;
+const MODEL_RETRIES = 4;
 
 /** Ask the model, then keep only what the rules module can verify against the page text. */
 async function extract(venue: DbVenue, text: string): Promise<Extracted | null> {
   const prompt = extractionPrompt(venue, text);
-  // Bounded: one hung NIM call (undici headers timeout at 5 min) took the
-  // whole run down on the first dry run. 120s is generous for a 1.2K-token reply.
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 120_000);
-  let json: { choices?: Array<{ message?: { content?: string } }> };
-  try {
-    const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${NVIDIA_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: MODEL, reasoning_effort: "low", temperature: 0, max_tokens: 1200,
-        messages: [{ role: "user", content: prompt }] }),
-      signal: ctrl.signal,
-    });
-    if (!res.ok) { console.error(`  model HTTP ${res.status} for ${venue.name}`); return null; }
-    json = await res.json();
-  } catch (e) {
-    console.error(`  model call failed for ${venue.name}: ${e instanceof Error ? e.name : e}`);
-    return null;
-  } finally { clearTimeout(timer); }
+  let json: { choices?: Array<{ message?: { content?: string } }> } | null = null;
+  for (let attempt = 1; attempt <= MODEL_RETRIES && !json; attempt++) {
+    // Bounded: one hung NIM call (undici headers timeout at 5 min) took the
+    // whole run down on the first dry run. 120s is generous for a 1.2K-token reply.
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 120_000);
+    try {
+      const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${NVIDIA_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: MODEL, reasoning_effort: "low", temperature: 0, max_tokens: 1200,
+          messages: [{ role: "user", content: prompt }] }),
+        signal: ctrl.signal,
+      });
+      if (res.status === 429 || res.status >= 500) {
+        // Rate-limited or upstream hiccup: back off (10s, 20s, 40s) and retry instead of
+        // dropping the venue — before this, a 429 silently skipped it with nothing recorded.
+        const wait = 10_000 * 2 ** (attempt - 1);
+        console.error(`  model HTTP ${res.status} for ${venue.name} — attempt ${attempt}/${MODEL_RETRIES}, waiting ${wait / 1000}s`);
+        await res.text().catch(() => undefined);
+        if (attempt < MODEL_RETRIES) await sleep(wait);
+        continue;
+      }
+      if (!res.ok) { console.error(`  model HTTP ${res.status} for ${venue.name}`); return null; }
+      json = await res.json();
+    } catch (e) {
+      console.error(`  model call failed for ${venue.name}: ${e instanceof Error ? e.name : e}`);
+      return null;
+    } finally { clearTimeout(timer); await sleep(MODEL_PACE_MS); }
+  }
+  if (!json) return null;
   const content: string = json.choices?.[0]?.message?.content ?? "";
   const m = content.match(/\{[\s\S]*\}/);
   if (!m) return null;
@@ -181,6 +207,19 @@ function skipReason(v: DbVenue): string | null {
 
 async function main() {
   const supabase = createClient(SUPABASE_URL!, SERVICE_KEY!, { realtime: { transport: ws as unknown as typeof WebSocket } });
+  /** One venue update, retried through a transient Supabase hiccup.
+   * 2026-09-12: a "Gateway Timeout" on the provenance write lost the finding
+   * outright, so the venue would be re-crawled (and re-billed) next run. */
+  const updateVenue = async (id: string, patch: Record<string, unknown>): Promise<string | null> => {
+    let last = "";
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const { error } = await supabase.from("venues").update(patch).eq("id", id);
+      if (!error) return null;
+      last = error.message;
+      if (attempt < 3) await sleep(3000 * attempt);
+    }
+    return last;
+  };
   let q = supabase.from("venues").select("id,name,city,type,website,popular_drinks,happy_hour_until,field_sources")
     .is("excluded_reason", null)
     .or("business_status.is.null,business_status.neq.CLOSED_PERMANENTLY")
@@ -210,7 +249,7 @@ async function main() {
   let withMenu = 0, written = 0, noneRecorded = 0;
   for (const v of venues) {
     const home = await fetchText(v.website!);
-    if (!home) { console.log(`- ${v.name}: site unreachable`); continue; }
+    if (!home) { console.log(`- ${v.name}: site unreachable (${lastFetchError}) ${v.website}`); continue; }
     const links = menuLinks(home.html, home.finalUrl, MAX_PAGES - 1);
     // Menu pages first, the home page last: the model reads a bounded slice
     // of this text, and a home page rarely holds the drink list.
@@ -238,8 +277,8 @@ async function main() {
         fs.popular_drinks = { source: "venue website menu", method: used.length === 0 ? "no_priced_text" : "llm_extract", model: used.length === 0 ? undefined : MODEL,
           result: "none_published", at: today, fetched_at: fetchedAt, url: home.finalUrl, pages,
           notes: `Site reachable; ${pages.length} page(s) read; no drink with a printed price found. Re-try after ${RECHECK_DAYS} days.` };
-        const { error: upErr } = await supabase.from("venues").update({ field_sources: fs }).eq("id", v.id);
-        if (upErr) console.error(`  provenance write failed for ${v.name}:`, upErr.message); else noneRecorded++;
+        const upErr = await updateVenue(v.id, { field_sources: fs });
+        if (upErr) console.error(`  provenance write failed for ${v.name}: ${upErr}`); else noneRecorded++;
       }
       continue;
     }
@@ -270,9 +309,8 @@ async function main() {
       }
     }
     patch.field_sources = fs;
-    const { error: upErr } = await supabase.from("venues").update(patch).eq("id", v.id);
-    if (upErr) console.error(`  write failed for ${v.name}:`, upErr.message); else written++;
-    await new Promise((r) => setTimeout(r, 1500)); // NIM rate limit
+    const upErr = await updateVenue(v.id, patch);
+    if (upErr) console.error(`  write failed for ${v.name}: ${upErr}`); else written++;
   }
   console.log(`\nDone: ${withMenu}/${venues.length} venues had priced drink menus on their site${APPLY ? `, ${written} written, ${noneRecorded} recorded as none_published` : ""}.`);
 }

@@ -86,9 +86,14 @@ export function menuLinks(html: string, base: string, limit = 6): string[] {
       if (u.origin !== origin) continue;
       if (ASSET_PATH.test(u.pathname)) continue;
       const clean = u.toString().split("?")[0];
-      if (clean.replace(/\/$/, "") === self) continue;
-      if (seen.has(clean)) continue;
-      seen.add(clean);
+      // Dedupe on the slash-insensitive form: Astra Miami offered both
+      // "/menus/" and "/menus", the same 20k-char page fetched twice, and the
+      // model only ever reads the first PROMPT_TEXT_CHARS — so a duplicate
+      // silently costs a real menu page its place in the budget.
+      const key = clean.replace(/\/$/, "");
+      if (key === self) continue;
+      if (seen.has(key)) continue;
+      seen.add(key);
       (hrefHit ? byHref : byLabel).push(clean);
     } catch { /* bad href */ }
   }

@@ -181,6 +181,16 @@ describe("htmlToText / menuLinks", () => {
     expect(menuLinks(html, "https://bar.example/")).not.toContain("https://bar.example/assets/bar.css");
   });
 
+  it("treats /menus and /menus/ as one page", () => {
+    // Astra Miami listed both; the same 20k-char menu was fetched twice and
+    // ate the model's text budget, pushing a real page out.
+    const dup = `<a href="/menus/">Menus</a><a href="/menus">Menu</a><a href="/drinks">Drinks</a>`;
+    expect(menuLinks(dup, "https://astra.example/")).toEqual([
+      "https://astra.example/drinks",
+      "https://astra.example/menus/",
+    ]);
+  });
+
   it("respects the limit", () => {
     expect(menuLinks(html, "https://bar.example/", 1)).toEqual(["https://bar.example/specials"]);
   });
