@@ -129,7 +129,7 @@ function mapDbVenue(v: DbVenue): Venue {
     hook: v.hook,
     description: v.description,
     rating: v.rating,
-    reviewCount: v.review_count,
+    reviewCount: v.review_count ?? 0,
     coverMen: v.cover_men,
     coverWomen: v.cover_women,
     priceTier: v.price_tier as Venue["priceTier"],

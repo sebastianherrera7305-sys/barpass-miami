@@ -93,9 +93,11 @@ export default async function VenuePage({
         <p className="flex items-center gap-1.5 rounded-full bg-surface px-4 py-2 text-sm font-bold text-amber-brand">
           <Star className="h-4 w-4 fill-current" />
           {venue.rating}
-          <span className="font-normal text-text-tertiary">
-            ({venue.reviewCount.toLocaleString()})
-          </span>
+          {venue.reviewCount > 0 && (
+            <span className="font-normal text-text-tertiary">
+              ({venue.reviewCount.toLocaleString()})
+            </span>
+          )}
         </p>
       </div>
 
