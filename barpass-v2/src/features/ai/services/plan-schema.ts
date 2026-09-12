@@ -37,14 +37,24 @@ export const conciergeRequestSchema = z.object({
 
 export const conciergeChatMessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
-  content: z.string().min(1).max(4000),
+  // 8000, not 4000 (2026-09-12): the iOS app echoes Remy's own prior replies
+  // back as `assistant` turns, and a reply with a full plan block runs
+  // ~1500-3000 chars. The per-request token budget is enforced by
+  // trimConciergeHistory below, not by rejecting a long turn with a 400
+  // the user can't do anything about.
+  content: z.string().min(1).max(8000),
 });
 
 export const conciergeChatRequestSchema = z.object({
   // Full turn history — this (not excludeSlugs) is what keeps Remy from
   // repeating a venue it already suggested earlier in the same chat, since
   // the model can literally see its own prior messages.
-  messages: z.array(conciergeChatMessageSchema).min(1).max(40),
+  // 200, not 40 (2026-09-12): the iOS app sends the WHOLE persisted chat
+  // on every turn with no client-side cap, so a chat that reached 41
+  // messages was rejected with 400 invalid_request on every turn from then
+  // on — permanently, for that chat. Accept a long history and trim it
+  // server-side (trimConciergeHistory) instead of failing the request.
+  messages: z.array(conciergeChatMessageSchema).min(1).max(200),
   // Scopes the venue digest to one metro. Without this, every call embedded
   // the ENTIRE catalog (1800+ venues across 23 cities once the iOS app's
   // multi-city expansion landed here too) into one prompt — expensive,
@@ -72,3 +82,35 @@ export type ConciergeContextInput = z.infer<typeof conciergeChatRequestSchema>["
 
 export type ConciergeChatMessage = z.infer<typeof conciergeChatMessageSchema>;
 export type ValidatedNightPlan = z.infer<typeof nightPlanSchema>;
+
+/** Most recent turns to send upstream. 24 turns is ~12 exchanges — more than
+ * a night-planning chat needs for continuity; older turns only add prompt
+ * tokens (cost + latency) on every request. */
+export const CONCIERGE_MAX_HISTORY_TURNS = 24;
+/** Character budget for the history that goes upstream (~6K tokens). */
+export const CONCIERGE_MAX_HISTORY_CHARS = 24_000;
+
+/**
+ * Bounds what reaches the model: the newest turns, most-recent first, until
+ * either the turn cap or the character budget is hit. The last message is
+ * always kept (it's the one being answered), truncated to the budget if it
+ * alone exceeds it. Pure — nothing here throws.
+ */
+export function trimConciergeHistory(
+  messages: ConciergeChatMessage[],
+  { maxTurns = CONCIERGE_MAX_HISTORY_TURNS, maxChars = CONCIERGE_MAX_HISTORY_CHARS } = {},
+): ConciergeChatMessage[] {
+  if (messages.length === 0) return [];
+  const last = messages[messages.length - 1];
+  const kept: ConciergeChatMessage[] = [
+    last.content.length > maxChars ? { ...last, content: last.content.slice(0, maxChars) } : last,
+  ];
+  let chars = kept[0].content.length;
+  for (let i = messages.length - 2; i >= 0 && kept.length < maxTurns; i--) {
+    const m = messages[i];
+    if (chars + m.content.length > maxChars) break;
+    chars += m.content.length;
+    kept.push(m);
+  }
+  return kept.reverse();
+}

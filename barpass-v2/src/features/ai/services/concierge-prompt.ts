@@ -230,6 +230,16 @@ export interface ConciergeContext {
   timeZone?: string;
 }
 
+/** Catalog text is DATA from Google/venue owners, not instructions. The
+ * digest is line-oriented and the stream parser keys on "```", so a name
+ * carrying a newline, a control byte or backticks could break a digest line
+ * or forge a fence. Those characters are the only ones stripped — the text
+ * itself is passed through untouched so nothing real is altered. */
+export function safeCatalogText(s: string | null | undefined): string {
+  if (!s) return "";
+  return s.replace(/[\u0000-\u001f\u007f`]/g, " ").replace(/\s+/g, " ").trim();
+}
+
 export function buildConciergeSystemPrompt(
   venues: Venue[],
   context: ConciergeContext = {},
@@ -242,13 +252,13 @@ export function buildConciergeSystemPrompt(
   const userContextBlock = (() => {
     const lines: string[] = [];
     if (currentVenue) {
-      lines.push(`- The user is AT ${currentVenue.name} (${currentVenue.neighborhood}) right now. Never recommend it back to them; "what's next" means somewhere else, sequenced from here.`);
+      lines.push(`- The user is AT ${safeCatalogText(currentVenue.name)} (${safeCatalogText(currentVenue.neighborhood)}) right now. Never recommend it back to them; "what's next" means somewhere else, sequenced from here.`);
     }
     if (origin) {
       lines.push(`- Distances in the CATALOG are from where the user is. Under 1 km = walkable, say so; otherwise give the ride time shown. Prefer close over perfect at this hour unless they ask for a specific area.`);
     }
     if (favorites.length > 0) {
-      lines.push(`- They've favorited: ${favorites.slice(0, 8).map((f) => `${f.name} (${f.type}, ${f.musicGenres.join("/") || "no genre data"})`).join("; ")}. Read taste from this (energy, music, price) — don't just re-suggest these.`);
+      lines.push(`- They've favorited: ${favorites.slice(0, 8).map((f) => `${safeCatalogText(f.name)} (${f.type}, ${f.musicGenres.join("/") || "no genre data"})`).join("; ")}. Read taste from this (energy, music, price) — don't just re-suggest these.`);
     }
     return lines.length > 0 ? `\n\nUSER CONTEXT (real, from the app — use it)\n${lines.join("\n")}` : "";
   })();
@@ -272,7 +282,7 @@ export function buildConciergeSystemPrompt(
         // The street address is in the digest so Remy can answer "¿dónde
         // queda?" in the chat itself (2026-09-08) instead of sending people
         // to the venue page to find out where the plan is taking them.
-        `- ${v.name} (id:${v.id} slug:${v.slug}) | ${v.type} | ${v.neighborhood}${v.address ? ` | ${v.address}` : ""} | ` +
+        `- ${safeCatalogText(v.name)} (id:${v.id} slug:${safeCatalogText(v.slug)}) | ${v.type} | ${safeCatalogText(v.neighborhood)}${v.address ? ` | ${safeCatalogText(v.address)}` : ""} | ` +
         `${v.coverMen === null ? "no cover" : `cover ~$${v.coverMen}`} | ` +
         `avg spend ${v.avgSpend ? `$${v.avgSpend}` : "unknown"} | ${"$".repeat(v.priceTier)} | ` +
         `music: ${v.musicGenres.join("/")} | vibes: ${v.vibes.join(", ")} | ` +
@@ -286,9 +296,9 @@ export function buildConciergeSystemPrompt(
         // 'Nacht' cocktail" at E11EVEN, neither of which exists. Giving it
         // true specifics is what actually stops the invention.
         (v.popularDrinks.length > 0
-          ? ` | REAL DRINKS: ${v.popularDrinks.slice(0, 4).map((d) => `${d.name} $${d.price}`).join(", ")}`
+          ? ` | REAL DRINKS: ${v.popularDrinks.slice(0, 4).map((d) => `${safeCatalogText(d.name)} $${d.price}`).join(", ")}`
           : "") +
-        ` | best arrival ${v.bestArrivalTime} | ${v.hook}`,
+        ` | best arrival ${safeCatalogText(v.bestArrivalTime)} | ${safeCatalogText(v.hook)}`,
     )
     .join("\n");
 

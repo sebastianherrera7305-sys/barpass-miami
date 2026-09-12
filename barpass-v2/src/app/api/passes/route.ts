@@ -100,6 +100,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, pass: existingPass });
   }
 
+  // Idempotent on the PAYMENT, not just on the code (2026-09-12). The iOS
+  // app now keeps a durable outbox and re-sends this request after a lost
+  // response, a timeout, or a relaunch. Both `source_order_id` and
+  // `source_wallet_transaction_id` are UNIQUE (pass_payment_verification.sql,
+  // re-asserted in passes_idempotency_2026_09_12.sql), so if this payment
+  // already backs a pass of THIS user, the only correct answer is that pass —
+  // never a 409 that the client would have to show as "your paid pass
+  // failed". Scoped to the caller so a leaked order id can't read someone
+  // else's pass.
+  const sourceColumn =
+    paymentSource.type === "order" ? "source_order_id" : "source_wallet_transaction_id";
+  const sourceValue =
+    paymentSource.type === "order" ? paymentSource.orderId : paymentSource.walletTransactionId;
+  const { data: passForPayment } = await supabase
+    .from("passes")
+    .select()
+    .eq(sourceColumn, sourceValue)
+    .eq("customer_id", user.id)
+    .maybeSingle();
+  if (passForPayment) {
+    return NextResponse.json({ success: true, pass: passForPayment });
+  }
+
   // Verify the payment source server-side and derive the real amount from
   // it — the client's own claimed amount is never trusted or used.
   let verifiedAmount: number;
@@ -224,17 +247,29 @@ export async function POST(request: Request) {
 
   if (insertError) {
     if (insertError.code === "23505") {
-      if (insertError.message.includes("pass_code")) {
-        // Duplicate pass_code — client retry racing this same request.
-        const { data: retryExisting } = await supabase
-          .from("passes")
-          .select()
-          .eq("pass_code", passCode)
-          .maybeSingle();
-        return NextResponse.json({ success: true, pass: retryExisting });
+      // A unique violation here means a concurrent request (a client retry
+      // racing this one) won the insert. Whichever column collided, the
+      // answer for the SAME user is the pass that already exists — looked
+      // up by the payment source, which is the identity that matters, and
+      // scoped to the caller (the old pass_code lookup here was unscoped
+      // and handed back another user's pass on a code collision).
+      const { data: raced } = await supabase
+        .from("passes")
+        .select()
+        .eq(sourceColumn, sourceValue)
+        .eq("customer_id", user.id)
+        .maybeSingle();
+      if (raced) {
+        return NextResponse.json({ success: true, pass: raced });
       }
-      // The order or wallet debit already backed a different pass —
-      // this payment has already been spent on a pass, reject the reuse.
+      if (insertError.message.includes("pass_code")) {
+        // The code itself is taken by a different user's pass. The client
+        // must mint a new code for this same payment — retrying with this
+        // one can never succeed.
+        return NextResponse.json({ error: "pass_code_taken" }, { status: 409 });
+      }
+      // The order or wallet debit already backs someone ELSE's pass —
+      // this payment has already been spent, reject the reuse.
       return NextResponse.json({ error: "payment_already_used" }, { status: 409 });
     }
     return NextResponse.json(

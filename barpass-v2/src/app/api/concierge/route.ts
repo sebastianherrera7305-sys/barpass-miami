@@ -1,6 +1,6 @@
 import { getVenuesByCity } from "@/features/venues/services/venue-service";
 import { buildConciergeSystemPrompt, selectRelevantVenues } from "@/features/ai/services/concierge-prompt";
-import { conciergeChatRequestSchema } from "@/features/ai/services/plan-schema";
+import { conciergeChatRequestSchema, trimConciergeHistory } from "@/features/ai/services/plan-schema";
 import { detectUserLanguage, groundPlanBlock } from "@/features/ai/services/plan-grounding";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -51,6 +51,63 @@ const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 const NVIDIA_FAST_MODEL = "openai/gpt-oss-20b";
 const NVIDIA_FALLBACK_MODEL = "moonshotai/kimi-k3";
 
+/**
+ * Vercel function budget for one chat turn. Production has already served
+ * 85s kimi-k3 replies (2026-09-06), so the account's ceiling is above the
+ * 60s legacy default; this pins the budget explicitly and stays under the
+ * iOS client's own 150s request timeout. The in-route watchdog below
+ * (STREAM_TOTAL_MS / STREAM_IDLE_MS) ends the stream cleanly BEFORE this
+ * limit is reached — a platform kill mid-stream is a bare cut the client
+ * can't distinguish from a finished reply.
+ */
+export const maxDuration = 120;
+/** Hard ceiling on one upstream stream, connect included. */
+const STREAM_TOTAL_MS = 110_000;
+/** Abort if the upstream sends NOTHING for this long. Both NIM models stream
+ * reasoning deltas continuously while thinking, so a healthy stream is never
+ * quiet for 45s — only a hung connection is. */
+const STREAM_IDLE_MS = 45_000;
+const WATCHDOG_TICK_MS = 2_000;
+
+/** Which upstream statuses mean "try the next provider". 429/5xx are the
+ * provider being busy or down; 401/403/404/410 are THAT provider's key or
+ * model being wrong (2026-09-05: a bad Groq key must not take the whole chat
+ * down while NVIDIA is fine; every retired NIM model 410s). 400/413/422 mean
+ * OUR request is malformed and would be rejected by the next provider just
+ * the same — surface it instead of burning a second call. */
+function isRetryableUpstreamStatus(status: number): boolean {
+  if (status >= 500) return true;
+  return [401, 403, 404, 408, 409, 410, 425, 429].includes(status);
+}
+
+/** Error shape every client renders: `error` is the stable machine code the
+ * iOS `friendlyServerMessage` switch keys on (unknown codes fall back to the
+ * "Remy isn't available" copy), `message` is a human default for anything
+ * else, `retryable` tells a client whether "try again" is honest. */
+function aiError(
+  code: string,
+  status: number,
+  message: string,
+  { retryable = false, retryAfterSeconds }: { retryable?: boolean; retryAfterSeconds?: number } = {},
+): Response {
+  const headers: Record<string, string> = { "Cache-Control": "no-store" };
+  if (retryAfterSeconds) headers["Retry-After"] = String(retryAfterSeconds);
+  return Response.json({ error: code, message, retryable }, { status, headers });
+}
+
+/** An invalid IANA name from the catalog must not 500 the chat: both
+ * Intl.DateTimeFormat and toLocaleString throw RangeError on one. */
+function safeTimeZone(tz: string | undefined, fallback = "America/New_York"): string {
+  if (!tz) return fallback;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: tz });
+    return tz;
+  } catch {
+    console.error(`Concierge: invalid venue timezone "${tz}", using ${fallback}`);
+    return fallback;
+  }
+}
+
 interface Provider {
   name: string;
   apiKey: string;
@@ -100,38 +157,66 @@ export async function POST(request: Request) {
   // 20 requests/minuto por IP — un chat manda muchos más turnos que el
   // viejo formulario de un solo tiro, así que el límite anterior de 10/min
   // se quedaba corto para una conversación real de varios mensajes.
-  const withinLimit = await checkRateLimit(`concierge:${ip}`, {
-    maxRequests: 20,
-    windowSeconds: 60,
-  });
-  if (!withinLimit) {
-    return Response.json({ error: "rate_limited" }, { status: 429 });
+  // Plus a daily cap (2026-09-12): this route is deliberately open (the
+  // iOS app sends no bearer here — guest-accessible by design, see
+  // APIClient.streamConciergeChat), so the per-minute window alone lets one
+  // IP run ~28K model calls a day. 400/day is far above any real user's
+  // chatting and bounds what an abuser can cost. Both checks fail-open.
+  const [withinMinute, withinDay] = await Promise.all([
+    checkRateLimit(`concierge:${ip}`, { maxRequests: 20, windowSeconds: 60 }),
+    checkRateLimit(`concierge-day:${ip}`, { maxRequests: 400, windowSeconds: 86_400 }),
+  ]);
+  if (!withinMinute) {
+    return aiError("rate_limited", 429, "Remy is busy — give it a minute and try again.", { retryable: true, retryAfterSeconds: 60 });
+  }
+  if (!withinDay) {
+    return aiError("rate_limited", 429, "You've reached today's chat limit. Remy will be back tomorrow.", { retryAfterSeconds: 3600 });
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return Response.json({ error: "invalid_json" }, { status: 400 });
+    return aiError("invalid_json", 400, "Malformed request body.");
   }
   const parsed = conciergeChatRequestSchema.safeParse(body);
   if (!parsed.success) {
-    return Response.json({ error: "invalid_request" }, { status: 400 });
+    return aiError("invalid_request", 400, "Malformed chat request.");
   }
 
   const providers = resolveProviders();
   if (providers.length === 0) {
-    return Response.json({ error: "ai_not_configured" }, { status: 503 });
+    return aiError("ai_not_configured", 503, "Remy isn't available right now.");
+  }
+
+  // The user already left the screen (the iOS stream cancels its URLSession
+  // task on dismiss) — don't spend a model call answering nobody.
+  if (request.signal.aborted) {
+    return aiError("client_closed", 499, "Client went away.");
   }
 
   const targetCity = parsed.data.city ?? "Miami";
-  let venues = await getVenuesByCity(targetCity);
-  // Unknown/mistyped city (empty result) — fall back to Miami rather than
-  // the full 23-city catalog, keeping the same fast, scoped fetch.
-  if (venues.length === 0 && targetCity !== "Miami") {
-    venues = await getVenuesByCity("Miami");
+  let venues: Awaited<ReturnType<typeof getVenuesByCity>> = [];
+  try {
+    venues = await getVenuesByCity(targetCity);
+    // Unknown/mistyped city (empty result) — fall back to Miami rather than
+    // the full 23-city catalog, keeping the same fast, scoped fetch.
+    if (venues.length === 0 && targetCity !== "Miami") {
+      venues = await getVenuesByCity("Miami");
+    }
+  } catch (e) {
+    // getVenuesByCity already falls back to the full-catalog fetch; if THAT
+    // throws too, Supabase is down. A 503 the client renders beats a 500.
+    console.error("Concierge venue fetch failed:", e);
   }
-  const conversationText = parsed.data.messages.map((m) => m.content).join(" ");
+  if (venues.length === 0) {
+    // With no catalog the model has nothing real to ground on and would
+    // invent venues; every plan block would be dropped by grounding anyway.
+    return aiError("venues_unavailable", 503, "Remy can't reach the venue list right now — try again in a moment.", { retryable: true, retryAfterSeconds: 15 });
+  }
+  // Bound what reaches the model: newest turns within a token budget.
+  const history = trimConciergeHistory(parsed.data.messages);
+  const conversationText = history.map((m) => m.content).join(" ");
 
   // Real user context (2026-09-06): where they are, what they like, what
   // time it is THERE. Without it the digest was the same for "what's next"
@@ -142,7 +227,7 @@ export async function POST(request: Request) {
     ? venues.filter((v) => ctx.favoriteVenueIds!.includes(v.id))
     : [];
   const origin = ctx?.userLocation ?? (currentVenue ? { lat: currentVenue.lat, lng: currentVenue.lng } : undefined);
-  const timeZone = venues[0]?.timezone ?? "America/New_York";
+  const timeZone = safeTimeZone(venues[0]?.timezone);
   const localParts = new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", minute: "numeric", hour12: false })
     .formatToParts(new Date());
   const hourPart = Number(localParts.find((p) => p.type === "hour")?.value ?? NaN);
@@ -158,15 +243,24 @@ export async function POST(request: Request) {
   const systemInstruction = buildConciergeSystemPrompt(shortlist, { currentVenue, favorites, origin, timeZone });
   // The last message decides; if it's too short to tell (a venue name, "ok"),
   // fall back to the whole conversation rather than defaulting to English.
-  const lastUserMessage = [...parsed.data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  const lastUserMessage = [...history].reverse().find((m) => m.role === "user")?.content ?? "";
   const replyLanguage = detectUserLanguage(lastUserMessage)
-    ?? detectUserLanguage(parsed.data.messages.filter((m) => m.role === "user").map((m) => m.content).join(" "));
+    ?? detectUserLanguage(history.filter((m) => m.role === "user").map((m) => m.content).join(" "));
 
   let upstream: Response | null = null;
   let servedBy: Provider | null = null;
+  // One controller outlives the connect phase: it aborts the upstream
+  // stream on client disconnect, on the idle/total watchdog, and when the
+  // response stream is cancelled. A new one per provider attempt.
+  let upstreamController = new AbortController();
+  let terminal: { status: number; provider: string } | null = null;
+  let sawRateLimit = false;
   for (const provider of providers) {
-    const timeoutController = new AbortController();
-    const timeoutId = setTimeout(() => timeoutController.abort(), provider.timeoutMs);
+    if (request.signal.aborted) break;
+    upstreamController = new AbortController();
+    const connectTimer = setTimeout(() => upstreamController.abort(new Error("connect_timeout")), provider.timeoutMs);
+    const onClientAbort = () => upstreamController.abort(new Error("client_disconnected"));
+    request.signal.addEventListener("abort", onClientAbort, { once: true });
     try {
       const attempt = await fetch(provider.chatUrl, {
         method: "POST",
@@ -179,7 +273,7 @@ export async function POST(request: Request) {
           model: provider.model,
           messages: [
             { role: "system", content: systemInstruction },
-            ...parsed.data.messages,
+            ...history,
             // Recency-weighted, unambiguous. The LANGUAGE RULE at the top of
             // a ~4K-token system prompt was being ignored by the 20B model
             // on 2 of 6 eval prompts (Spanish in, English out). A one-line
@@ -200,24 +294,49 @@ export async function POST(request: Request) {
           stream: true,
           ...provider.extraBody,
         }),
-        signal: timeoutController.signal,
+        signal: upstreamController.signal,
       });
       if (attempt.ok && attempt.body) {
         upstream = attempt;
         servedBy = provider;
+        // Keep the client-abort listener: it now guards the streaming phase.
+        clearTimeout(connectTimer);
         break;
       }
-      console.error(`Concierge ${provider.name} call failed: HTTP ${attempt.status}`, await attempt.text().catch(() => ""));
+      const detail = await attempt.text().catch(() => "");
+      console.error(`Concierge ${provider.name} call failed: HTTP ${attempt.status}`, detail.slice(0, 500));
+      if (attempt.status === 429) sawRateLimit = true;
+      if (!isRetryableUpstreamStatus(attempt.status)) {
+        terminal = { status: attempt.status, provider: provider.name };
+        break;
+      }
     } catch (e) {
-      const isTimeout = e instanceof Error && e.name === "AbortError";
+      if (request.signal.aborted) break;
+      const reason = upstreamController.signal.reason;
+      const isTimeout = reason instanceof Error && reason.message === "connect_timeout";
       console.error(`Concierge ${provider.name} fetch ${isTimeout ? `timed out after ${provider.timeoutMs}ms` : "failed"}:`, isTimeout ? "" : e);
     } finally {
-      clearTimeout(timeoutId);
+      clearTimeout(connectTimer);
+      if (!upstream) request.signal.removeEventListener("abort", onClientAbort);
     }
   }
 
+  if (request.signal.aborted) {
+    upstreamController.abort(new Error("client_disconnected"));
+    return aiError("client_closed", 499, "Client went away.");
+  }
+  if (terminal) {
+    // Our request was rejected as malformed (400/413/422) — a bug on our
+    // side, not a busy provider; say so instead of inviting a retry.
+    return aiError("ai_request_rejected", 502, "Remy couldn't process that message. Try rephrasing it.");
+  }
   if (!upstream || !upstream.body) {
-    return Response.json({ error: "ai_unavailable" }, { status: 502 });
+    return aiError(
+      "ai_unavailable",
+      sawRateLimit ? 503 : 502,
+      "Remy is busy right now — try again in a moment.",
+      { retryable: true, retryAfterSeconds: sawRateLimit ? 20 : 10 },
+    );
   }
 
   // NVIDIA streams OpenAI-style SSE ("data: {json}\n\n", ending in
@@ -242,10 +361,28 @@ export async function POST(request: Request) {
   let fenceBuffer: string | null = null;
   let pending = ""; // text we've seen but not yet emitted (may hold a partial "```json")
   const FENCE_OPEN = "```json";
+  const upstreamAbort = upstreamController;
+  const startedAt = Date.now();
+  let lastChunkAt = startedAt;
+  let watchdog: ReturnType<typeof setInterval> | null = null;
   const textStream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const reader = upstream.body!.getReader();
       const encoder = new TextEncoder();
+      // Hung or stalled upstream: a stream that goes quiet, or one that
+      // just never ends, used to sit until Vercel killed the function —
+      // a bare cut the client can't tell from a finished reply. Aborting
+      // the reader ends it through the normal flush/close path instead.
+      watchdog = setInterval(() => {
+        const now = Date.now();
+        if (now - lastChunkAt > STREAM_IDLE_MS) {
+          console.error(`Concierge ${servedBy?.name} stream idle for ${STREAM_IDLE_MS}ms — aborting`);
+          upstreamAbort.abort(new Error("stream_idle"));
+        } else if (now - startedAt > STREAM_TOTAL_MS) {
+          console.error(`Concierge ${servedBy?.name} stream exceeded ${STREAM_TOTAL_MS}ms — aborting`);
+          upstreamAbort.abort(new Error("stream_total"));
+        }
+      }, WATCHDOG_TICK_MS);
       const emit = (s: string) => { if (s.length > 0) controller.enqueue(encoder.encode(s)); };
       // The 20B model keeps bolding venue names despite the plain-text rule;
       // the iOS bubble renders raw text, so "**Amor Miami**" showed literally.
@@ -279,20 +416,31 @@ export async function POST(request: Request) {
           onContent(rest.slice(FENCE_OPEN.length));
           return;
         }
-        // Hold back only a possible partial "```json" prefix (or a lone "*"
-        // that might be the first half of "**") at the tail.
+        // Hold back only a possible partial "```json" prefix, or a trailing
+        // "*"/"**" that might be the start of a bold marker, at the tail.
+        // Both stars must be held (2026-09-12): when a token was exactly
+        // "**", holding one emitted the other alone, so "**Sugar**" streamed
+        // as "*Sugar*" — a stray star the iOS bubble shows literally.
         let hold = 0;
         for (let n = Math.min(FENCE_OPEN.length - 1, pending.length); n > 0; n--) {
           if (FENCE_OPEN.startsWith(pending.slice(pending.length - n))) { hold = n; break; }
         }
-        if (hold === 0 && pending.endsWith("*")) hold = 1;
+        if (hold === 0) hold = pending.endsWith("**") ? 2 : pending.endsWith("*") ? 1 : 0;
         emitProse(pending.slice(0, pending.length - hold));
         pending = pending.slice(pending.length - hold);
       };
       const flush = () => {
-        // Stream ended: anything still held (a fence that never closed, a
-        // partial prefix) goes out as-is rather than being lost.
-        if (fenceBuffer !== null) { emit(fenceBuffer); fenceBuffer = null; }
+        // Stream ended with a ```json fence still open (token limit hit,
+        // upstream cut, watchdog abort): the clients only render a CLOSED
+        // fence — iOS `extractChatReplyParts` returns the raw text when it
+        // can't find the closing ``` — so emitting it as-is showed half a
+        // JSON object in the chat bubble. A partial plan can't be grounded
+        // or rendered; drop it. If nothing else was said, the client sees an
+        // empty reply and shows its "try again" state, which is honest.
+        if (fenceBuffer !== null) {
+          console.error(`Concierge ${servedBy?.name}: stream ended inside an open plan fence (${fenceBuffer.length} chars) — dropped`);
+          fenceBuffer = null;
+        }
         emitProse(pending);
         pending = "";
       };
@@ -300,6 +448,7 @@ export async function POST(request: Request) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
+          lastChunkAt = Date.now();
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
           buffer = lines.pop() ?? "";
@@ -310,6 +459,13 @@ export async function POST(request: Request) {
             if (payload === "[DONE]") continue;
             try {
               const chunk = JSON.parse(payload);
+              // Some OpenAI-compatible servers report a mid-stream failure
+              // as a 200 SSE event carrying an error object. Log it; the
+              // stream then ends through the normal flush/close.
+              if (chunk && typeof chunk === "object" && "error" in chunk && !("choices" in chunk)) {
+                console.error(`Concierge ${servedBy?.name} in-stream error:`, JSON.stringify(chunk.error).slice(0, 300));
+                continue;
+              }
               const delta = chunk.choices?.[0]?.delta;
               if (!contentSignaled && typeof delta?.reasoning_content === "string" && !thinkingSignaled) {
                 thinkingSignaled = true;
@@ -328,11 +484,25 @@ export async function POST(request: Request) {
           }
         }
       } catch (e) {
-        console.error("Concierge stream read failed:", e);
+        const reason = upstreamAbort.signal.reason;
+        const why = reason instanceof Error ? reason.message : null;
+        if (why === "client_disconnected") {
+          // Not an error: the user left. Nothing to flush to nobody.
+        } else {
+          console.error(`Concierge stream read failed (${why ?? "upstream"}):`, why ? "" : e);
+        }
       } finally {
+        if (watchdog) clearInterval(watchdog);
         flush();
-        controller.close();
+        try { controller.close(); } catch { /* already closed by cancel() */ }
       }
+    },
+    cancel() {
+      // The response consumer went away (client disconnect surfaced through
+      // the stream): stop the upstream generation so it doesn't run to
+      // completion for nobody.
+      if (watchdog) clearInterval(watchdog);
+      upstreamAbort.abort(new Error("client_disconnected"));
     },
   });
 
