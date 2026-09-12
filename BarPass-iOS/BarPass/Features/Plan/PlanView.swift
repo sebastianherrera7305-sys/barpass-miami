@@ -351,7 +351,12 @@ struct PlanView: View {
         .task {
             restoreMessages()
             await loadSavedPlans()
-            userLocation = await locationService.requestOnce()
+            // Coarse is enough for "near you" ranking; if permission is
+            // denied or no fix arrives the concierge simply ranks without
+            // proximity — `requestOnce` maps every LocationError to nil,
+            // and that absence is the intended behavior here, not an error
+            // to show in the chat.
+            userLocation = await locationService.requestOnce(.coarse)
             displayName = try? await RepositoryDependencies.displayName.getDisplayName()
             greetIfNeeded()
         }

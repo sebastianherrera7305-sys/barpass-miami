@@ -15,6 +15,8 @@ import AVKit
 struct VenueMediaSection: View {
     let venue: BarPassVenue
     @ObservedObject private var l10n = L10n.shared
+    /// So the pending line clears itself the moment the queued upload lands.
+    @ObservedObject private var queue = OfflineQueue.shared
     @StateObject private var uploader = VenueMediaUploader()
     @State private var items: [VenueMediaItem] = []
     @State private var isLoading = true
@@ -59,7 +61,18 @@ struct VenueMediaSection: View {
                 }
             }
 
-            if let uploadError = uploader.error {
+            // Queued is not an error: the file is saved and will upload
+            // itself. Red text here is what made a normal night inside a
+            // club look like a broken app.
+            if uploader.queuedForLater || queue.hasPending(.venueMedia, venueId: venue.id) {
+                HStack(spacing: 5) {
+                    Image(systemName: "arrow.up.circle")
+                        .font(.bpScaled(11, weight: .semibold))
+                    Text(OfflineQueueStrings.mediaQueued(l10n.language))
+                        .font(.bpCaption())
+                }
+                .foregroundStyle(Color.bpAmber)
+            } else if let uploadError = uploader.error {
                 Text(uploadError).font(.bpCaption()).foregroundStyle(Color.bpDanger)
             }
 

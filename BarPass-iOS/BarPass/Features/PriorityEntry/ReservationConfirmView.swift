@@ -3,6 +3,10 @@ import CoreImage.CIFilterBuiltins
 
 struct ReservationConfirmView: View {
     let reservation: TableReservation
+    /// Previews only — a live reservation takes its status from the outbox.
+    var statusOverride: PassRegistrationOutbox.Status? = nil
+
+    @ObservedObject private var outbox = PassRegistrationOutbox.shared
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var l10n = L10n.shared
 
@@ -94,26 +98,35 @@ struct ReservationConfirmView: View {
 
                 dashedDivider
 
-                // QR + code
+                // QR + code — only once the server has the reservation.
+                // Until then (or if it was refused) the same slot says so,
+                // instead of showing a QR the door can't redeem.
                 VStack(spacing: 10) {
-                    qrCodeImage
-                        .resizable()
-                        .interpolation(.none)
-                        .scaledToFit()
-                        .frame(width: 130, height: 130)
-                        .padding(12)
-                        .background(.white, in: RoundedRectangle(cornerRadius: 12))
-                        .padding(.top, 16)
+                    if status.isRegistered {
+                        qrCodeImage
+                            .resizable()
+                            .interpolation(.none)
+                            .scaledToFit()
+                            .frame(width: 130, height: 130)
+                            .padding(12)
+                            .background(.white, in: RoundedRectangle(cornerRadius: 12))
+                            .padding(.top, 16)
 
-                    Text(reservation.confirmCode)
-                        .font(.bpScaled(14, weight: .medium, design: .monospaced))
-                        .foregroundStyle(Color.bpInk.opacity(0.35))
-                        .tracking(2)
-                        .padding(.bottom, 18)
+                        Text(reservation.confirmCode)
+                            .font(.bpScaled(14, weight: .medium, design: .monospaced))
+                            .foregroundStyle(Color.bpInk.opacity(0.35))
+                            .tracking(2)
+                            .padding(.bottom, 18)
+                    } else {
+                        PassIssueBadge(status: status)
+                            .padding(.top, 16)
+                        PassIssueStateView(status: status, side: 110)
+                            .padding(.bottom, 18)
+                    }
                 }
             }
         }
-        .accessibilityElement(children: .ignore)
+        .accessibilityElement(children: status.isRegistered ? .ignore : .contain)
         .bpAccessibility(label: String(format: l10n.t("reservationConfirm.a11y.label"), reservation.venueName), hint: l10n.t("reservationConfirm.a11y.hint"))
     }
 
@@ -138,6 +151,8 @@ struct ReservationConfirmView: View {
                         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.25)))
                 }
                 .buttonStyle(.plain)
+                .disabled(!status.isRegistered)
+                .opacity(status.isRegistered ? 1 : 0.4)
                 .bpAccessibility(label: l10n.t("reservationConfirm.share"), hint: l10n.t("reservationConfirm.share.hint"), isButton: true)
 
                 Button { dismiss() } label: {
@@ -159,6 +174,12 @@ struct ReservationConfirmView: View {
     }
 
     // MARK: - Helpers
+
+    /// `nil` from the outbox (never saw this code) is pending, never
+    /// registered — the QR is only shown on the server's word.
+    private var status: PassRegistrationOutbox.Status {
+        statusOverride ?? outbox.status(for: reservation.confirmCode) ?? .pending(attempts: 0, lastError: nil)
+    }
 
     private var packageEmoji: String {
         TablePackage.all.first { $0.id == reservation.packageId }?.emoji ?? "🍾"
@@ -211,5 +232,5 @@ struct ReservationConfirmView: View {
         package: TablePackage.all[1], guestCount: 4,
         timeSlot: "11:00 PM", slotDate: Date(),
         payMethod: "Apple Pay"
-    ))
+    ), statusOverride: .registered)
 }

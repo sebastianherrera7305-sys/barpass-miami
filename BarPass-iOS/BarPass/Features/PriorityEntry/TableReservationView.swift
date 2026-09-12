@@ -20,6 +20,10 @@ struct TableReservationView: View {
     /// Set by `CardPaymentView.onOrderId` just before `onSuccess` fires for
     /// the card flow — bridges the real order id into `completeReservation`.
     @State private var pendingCardOrderId: String?
+    /// One idempotency key per (package, attempt-series) — see
+    /// SkipLinePassView.applePayKeys. A retry after a lost response must
+    /// not deposit twice.
+    @State private var applePayKeys: [String: String] = [:]
 
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
@@ -374,6 +378,10 @@ struct TableReservationView: View {
             // closure returned — the Apple Pay sheet then hung forever and
             // isProcessing was never cleared. CartView already did this right.
             let svc = applePay
+            let optionKey = "\(selectedPackage.id)-\(guestCount)-\(selectedSlot)"
+            let idempotencyKey = applePayKeys[optionKey]
+                ?? APIClient.generateIdempotencyKey(vendorId: venueId, staffId: APIClient.selfCheckoutStaffId)
+            applePayKeys[optionKey] = idempotencyKey
             svc.requestPayment(amount: Decimal(selectedPackage.deposit),
                                label: "\(l10n.t("table.applePay.label")) · \(venueName)") { stripePaymentMethodId in
                 let json = try await APIClient.createApplePayTransaction(
@@ -381,7 +389,8 @@ struct TableReservationView: View {
                     vendorId:   venueId,
                     customerId: session.user.id,
                     items:      [CartItem(name: "\(l10n.t("table.summary.table")): \(selectedPackage.name)", price: selectedPackage.deposit, emoji: "🍾", qty: 1, venueId: venueId, venueName: venueName)],
-                    stripePaymentMethodId: stripePaymentMethodId
+                    stripePaymentMethodId: stripePaymentMethodId,
+                    idempotencyKey: idempotencyKey
                 )
                 guard let orderId = (json["transaction"] as? [String: Any])?["id"] as? String else {
                     throw APIClient.APIClientError.invalidResponse
@@ -391,6 +400,7 @@ struct TableReservationView: View {
                 Task { @MainActor in
                     isProcessing = false
                     if result.success, let orderId = result.orderId {
+                        applePayKeys[optionKey] = nil   // charged: the next buy is a new order
                         completeReservation(method: "Apple Pay", paymentSource: .order(orderId: orderId))
                     } else if let error = result.error, error != "cancelled" {
                         paymentError = error
@@ -502,6 +512,14 @@ struct TableReservationView: View {
             slotDate:   timeSlots[selectedSlot].1,
             payMethod:  method
         )
+        // Durable + retried; ReservationConfirmView shows the QR only once
+        // the server has this reservation on record (see PassRegistrationOutbox).
+        PassRegistrationOutbox.shared.register(APIClient.PassRegistration(
+            passCode: r.confirmCode, kind: "table",
+            venueId: r.venueId, venueName: r.venueName, quantity: r.guestCount,
+            validUntil: r.date.addingTimeInterval(4 * 3600), paymentSource: paymentSource
+        ))
+
         reservation = r
         showConfirm = true
 
@@ -510,16 +528,6 @@ struct TableReservationView: View {
             body: String(format: l10n.t("table.reminder.body"), r.venueName),
             at: r.date
         )
-
-        if let session = AuthService.shared.restoreSession() {
-            Task {
-                await APIClient.registerPass(
-                    idToken: session.accessToken, passCode: r.confirmCode, kind: "table",
-                    venueId: r.venueId, venueName: r.venueName, quantity: r.guestCount,
-                    validUntil: r.date.addingTimeInterval(4 * 3600), paymentSource: paymentSource
-                )
-            }
-        }
     }
 }
 

@@ -40,6 +40,13 @@ struct PriorityEntryHubView: View {
                             .padding(.top, 28)
                             .padding(.bottom, 36)
 
+                        // Paid passes still waiting to be issued (or refused)
+                        // stay visible here after their confirmation screen
+                        // is gone — money paid is never silently pending.
+                        PassOutboxStrip()
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 12)
+
                         VStack(spacing: 12) {
                             optionCard(options[0]) { BPAnalytics.track(.buySkipLinePass(venue: venueName)); showSkipLine = true }
                             optionCard(options[1]) { BPAnalytics.track(.buyTableReservation(venue: venueName)); showTable    = true }

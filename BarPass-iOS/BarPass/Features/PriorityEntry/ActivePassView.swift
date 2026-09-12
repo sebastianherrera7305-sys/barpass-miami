@@ -4,7 +4,10 @@ import CoreImage.CIFilterBuiltins
 struct ActivePassView: View {
     @ObservedObject private var l10n = L10n.shared
     let pass: SkipLinePass
+    /// Previews only — a live pass takes its status from the outbox.
+    var statusOverride: PassRegistrationOutbox.Status? = nil
 
+    @ObservedObject private var outbox = PassRegistrationOutbox.shared
     @Environment(\.dismiss) private var dismiss
     @State private var timeString = ""
     @State private var pulse      = false
@@ -89,14 +92,10 @@ struct ActivePassView: View {
                             .foregroundStyle(Color.bpInk.opacity(0.45))
                     }
                     Spacer()
-                    // Valid badge
+                    // Valid / pending / not-issued badge — says what the
+                    // server knows, not what the card was charged.
                     if pass.isValid {
-                        Label(l10n.t("pass.validBadge"), systemImage: "checkmark.seal.fill")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(.black)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(gold, in: Capsule())
+                        PassIssueBadge(status: status)
                     }
                 }
                 .padding(.horizontal, 22)
@@ -106,21 +105,28 @@ struct ActivePassView: View {
                 // Dashed divider
                 dashedDivider
 
-                // QR code
-                qrCodeImage
-                    .resizable()
-                    .interpolation(.none)
-                    .scaledToFit()
-                    .frame(width: 200, height: 200)
-                    .padding(16)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 16))
-                    .padding(.vertical, 24)
+                // QR code — only once the server has this pass. A QR for a
+                // pass that isn't registered yet would scan as "not found" at
+                // the door, so pending/failed draw their own state instead.
+                if status.isRegistered {
+                    qrCodeImage
+                        .resizable()
+                        .interpolation(.none)
+                        .scaledToFit()
+                        .frame(width: 200, height: 200)
+                        .padding(16)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 16))
+                        .padding(.vertical, 24)
 
-                // Pass code
-                Text(pass.passCode)
-                    .font(.bpScaled(13, weight: .medium, design: .monospaced))
-                    .foregroundStyle(Color.bpInk.opacity(0.35))
-                    .tracking(2)
+                    // Pass code
+                    Text(pass.passCode)
+                        .font(.bpScaled(13, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color.bpInk.opacity(0.35))
+                        .tracking(2)
+                } else {
+                    PassIssueStateView(status: status, side: 200)
+                        .padding(.vertical, 24)
+                }
 
                 // Dashed divider
                 dashedDivider.padding(.top, 18)
@@ -156,7 +162,7 @@ struct ActivePassView: View {
         // (border width + glow radius). Leaving it false keeps the pass at
         // its resting state, so neither animation ever starts.
         .onAppear { pulse = !reduceMotion }
-        .accessibilityElement(children: .ignore)
+        .accessibilityElement(children: status.isRegistered ? .ignore : .contain)
         .bpAccessibility(label: String(format: l10n.t("pass.qr.a11y"), pass.venueName), hint: l10n.t("pass.qr.hint"))
     }
 
@@ -176,6 +182,9 @@ struct ActivePassView: View {
                     .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(gold.opacity(0.25)))
             }
             .buttonStyle(.plain)
+            // Nothing to share until the pass exists server-side.
+            .disabled(!status.isRegistered)
+            .opacity(status.isRegistered ? 1 : 0.4)
             .bpAccessibility(label: l10n.t("reservationConfirm.share"), hint: l10n.t("pass.share.hint"), isButton: true)
 
             Button { dismiss() } label: {
@@ -193,6 +202,12 @@ struct ActivePassView: View {
     }
 
     // MARK: - Helpers
+
+    /// `nil` from the outbox means it never saw this code — treated as
+    /// pending, never as registered: a QR is only shown on the server's word.
+    private var status: PassRegistrationOutbox.Status {
+        statusOverride ?? outbox.status(for: pass.passCode) ?? .pending(attempts: 0, lastError: nil)
+    }
 
     private var quantityLabel: String {
         switch pass.quantity {
@@ -240,7 +255,20 @@ struct ActivePassView: View {
     }
 }
 
-#Preview {
+#Preview("Registered") {
     ActivePassView(pass: .new(venueId: "liv", venueName: "LIV Miami",
-                              quantity: 2, amount: 45, payMethod: "Apple Pay"))
+                              quantity: 2, amount: 45, payMethod: "Apple Pay"),
+                   statusOverride: .registered)
+}
+
+#Preview("Pending") {
+    ActivePassView(pass: .new(venueId: "liv", venueName: "LIV Miami",
+                              quantity: 2, amount: 45, payMethod: "Apple Pay"),
+                   statusOverride: .pending(attempts: 3, lastError: "timed out"))
+}
+
+#Preview("Failed") {
+    ActivePassView(pass: .new(venueId: "liv", venueName: "LIV Miami",
+                              quantity: 2, amount: 45, payMethod: "Apple Pay"),
+                   statusOverride: .failed(code: "payment_below_price", reference: "txn_1757_ab12cd"))
 }

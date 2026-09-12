@@ -11,6 +11,9 @@ struct AgeReportSheet: View {
     let onDismiss: () -> Void
 
     @ObservedObject private var l10n = L10n.shared
+    /// Drives the "se envía cuando vuelva la señal" line below — honest
+    /// about a report that is saved but not yet delivered.
+    @ObservedObject private var queue = OfflineQueue.shared
     @Environment(\.dismiss) private var dismiss
     @State private var isSubmitting = false
     /// Step 2 (2026-09-08): "¿cuánto pagaste por un trago?" — same sheet,
@@ -30,6 +33,10 @@ struct AgeReportSheet: View {
     private let options: [(bracket: String, label: String)] = [
         ("18_25", "18-25"), ("25_35", "25-35"), ("35_50", "35-50"),
     ]
+
+    private var queuedReports: Int {
+        queue.pendingCount(of: .ageReport) + queue.pendingCount(of: .priceReport)
+    }
 
     var body: some View {
         VStack(spacing: BPSpacing.lg) {
@@ -105,6 +112,14 @@ struct AgeReportSheet: View {
                 .padding(.horizontal, BPSpacing.lg)
             }
 
+            if queuedReports > 0 {
+                Text(OfflineQueueStrings.willSend(l10n.language))
+                    .font(.bpScaled(11, weight: .semibold))
+                    .foregroundStyle(Color.bpAmber)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, BPSpacing.lg)
+            }
+
             Button {
                 onDismiss()
                 dismiss()
@@ -122,12 +137,24 @@ struct AgeReportSheet: View {
         .presentationDragIndicator(.visible)
     }
 
+    /// Both reports get the same treatment: try live for a moment, and the
+    /// instant that looks hopeless put it on the queue and move the sheet
+    /// on. The user is walking out of a club; they must never watch a
+    /// spinner here, and the old `try?` threw the report away on any
+    /// failure without telling anyone.
     private func submit(_ bracket: String) {
         isSubmitting = true
         BPHaptics.light()
+        let repo = repository
+        let venueId = venueId
         Task {
-            try? await repository.reportPerceivedAge(venueId: venueId, bracket: bracket)
+            let result = await OfflineQueue.attempt(seconds: 3, operation: {
+                try await repo.reportPerceivedAge(venueId: venueId, bracket: bracket)
+            })
             await MainActor.run {
+                if case .succeeded = result {} else {
+                    OfflineQueue.shared.enqueue(.ageReport, ["venueId": venueId, "bracket": bracket])
+                }
                 BPHaptics.success()
                 // Don't close yet — one more tap for the price.
                 isSubmitting = false
@@ -139,9 +166,16 @@ struct AgeReportSheet: View {
     private func submitPrice(_ cents: Int) {
         isSubmitting = true
         BPHaptics.light()
+        let repo = priceRepository
+        let venueId = venueId
         Task {
-            try? await priceRepository.reportDrinkPrice(venueId: venueId, cents: cents)
+            let result = await OfflineQueue.attempt(seconds: 3, operation: {
+                try await repo.reportDrinkPrice(venueId: venueId, cents: cents)
+            })
             await MainActor.run {
+                if case .succeeded = result {} else {
+                    OfflineQueue.shared.enqueue(.priceReport, ["venueId": venueId, "cents": String(cents)])
+                }
                 BPHaptics.success()
                 onDismiss()
                 dismiss()

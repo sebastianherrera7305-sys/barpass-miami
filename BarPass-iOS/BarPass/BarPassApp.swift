@@ -9,10 +9,17 @@ struct BarPassApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var cart     = CartStore()
     @ObservedObject private var appearanceStore = AppearanceStore.shared
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         ImageCache.configure()
         StripeAPI.defaultPublishableKey = StripeConfig.publishableKey
+        // Everything done inside a venue (check-in, the photo, the age and
+        // price reports) is queued locally when the network can't carry it.
+        // The queue holds no repositories of its own, so the app has to tell
+        // it how to perform each kind — and it must happen before any view
+        // can enqueue, hence init and not a .task.
+        OfflineQueue.shared.installPerformHandlers()
     }
 
     var body: some Scene {
@@ -35,6 +42,15 @@ struct BarPassApp: App {
                     appState.deepLinkURL = url
                     appState.pendingRoute = route
                 }
+                // Launch and every return to the foreground: the walk out of
+                // the club is usually where the signal comes back, and the
+                // app is in the user's hand at that exact moment. The queue's
+                // own NWPathMonitor covers reconnects while the app is open;
+                // this covers the far more common "phone was in a pocket".
+                .onChange(of: scenePhase) { _, phase in
+                    guard phase == .active else { return }
+                    Task { await OfflineQueue.shared.flush() }
+                }
         }
     }
 }
@@ -46,6 +62,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         registerBackgroundTask()
+        PassRegistrationOutbox.shared.start()
         return true
     }
 

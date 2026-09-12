@@ -26,7 +26,10 @@ struct CityIdentity {
         "Chicago":         CityIdentity(emoji: "🌆", nickname: "Chi",              theme: .oceanBlue),
         "New Orleans":     CityIdentity(emoji: "🎭", nickname: "NOLA",             theme: .ultra),
         // College towns
-        "Gainesville":     CityIdentity(emoji: "🐊", nickname: "Gator Nation",     theme: .miamiNight),
+        // Its own palette, not Miami's amber — a Gainesville user opening
+        // the app was seeing the 305's colors, which is the one thing a
+        // city identity exists to prevent.
+        "Gainesville":     CityIdentity(emoji: "🐊", nickname: "Gator Nation",     theme: .gatorNation),
         "Tempe":           CityIdentity(emoji: "🔥", nickname: "Sun Devil Nation", theme: .f1),
         "Scottsdale":      CityIdentity(emoji: "🔥", nickname: "Sun Devil Nation", theme: .f1),
         "Athens":          CityIdentity(emoji: "🐶", nickname: "Bulldog Nation",   theme: .f1),

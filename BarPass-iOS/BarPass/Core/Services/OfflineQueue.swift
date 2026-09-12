@@ -146,3 +146,192 @@ final class OfflineQueue: ObservableObject {
         return decoded
     }
 }
+
+// MARK: - Pending lookups used by the UI
+
+extension OfflineQueue {
+    /// True when an action of this kind for this venue is still waiting.
+    /// Views use it to show "subiendo…" instead of either a plain success
+    /// (a lie — nothing has reached the server yet) or an error (also a
+    /// lie — it WILL be retried).
+    func hasPending(_ kind: PendingAction.Kind, venueId: String) -> Bool {
+        pending.contains { $0.kind == kind && $0.payload["venueId"] == venueId }
+    }
+}
+
+// MARK: - Bounded live attempt
+
+/// What happened when we tried to do the thing live before falling back to
+/// the queue.
+enum OfflineAttempt: Sendable {
+    /// It landed. Nothing was queued.
+    case succeeded
+    /// It didn't land in time, or failed for a reason a retry can fix.
+    case queue
+    /// It failed for a reason no retry can fix (an underage user, a missing
+    /// birthdate). The message is already localized and meant for the user.
+    case permanentFailure(String)
+}
+
+extension OfflineQueue {
+    /// Runs `op`, but never lets the user wait on contended venue LTE for
+    /// longer than `seconds`. Past the deadline the in-flight task is
+    /// cancelled (so nothing lands twice) and the caller enqueues instead.
+    ///
+    /// `classify` turns an error into a user-facing message when retrying
+    /// is pointless; returning nil means "queue it and try again later".
+    static func attempt(
+        seconds: Double,
+        classify: @escaping @Sendable (Error) -> String? = { _ in nil },
+        operation: @escaping @Sendable () async throws -> Void
+    ) async -> OfflineAttempt {
+        await withTaskGroup(of: OfflineAttempt.self) { group in
+            group.addTask {
+                do {
+                    try await operation()
+                    return .succeeded
+                } catch {
+                    if let message = classify(error) { return .permanentFailure(message) }
+                    return .queue
+                }
+            }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                return .queue
+            }
+            let first = await group.next() ?? .queue
+            group.cancelAll()
+            return first
+        }
+    }
+}
+
+// MARK: - Staged media files
+
+extension OfflineQueue {
+    /// A queued photo/video can't travel inside the `[String: String]`
+    /// payload, and an absolute path can't either: the app container's UUID
+    /// changes across reinstalls and OS migrations, so a path captured
+    /// tonight may not resolve tomorrow. What IS stable is a file name
+    /// relative to this directory, which is what the payload carries.
+    static let mediaDirectory: URL = {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        let dir = base.appendingPathComponent("BarPassOfflineMedia", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }()
+
+    /// Copies an already-compressed file out of the temporary directory
+    /// (which iOS may purge at any time) and into the queue's own
+    /// directory. Returns the file name to put in the payload.
+    static func stageMedia(_ fileURL: URL, fileExtension: String) throws -> String {
+        let name = "\(UUID().uuidString).\(fileExtension)"
+        try FileManager.default.copyItem(at: fileURL, to: mediaDirectory.appendingPathComponent(name))
+        return name
+    }
+}
+
+// MARK: - Dispatch
+
+extension OfflineQueue {
+    /// Wires each kind to the repository that actually performs it. Called
+    /// once from BarPassApp.init — the queue itself deliberately knows no
+    /// repositories.
+    ///
+    /// Throwing from a handler means "not done, try again later". Returning
+    /// normally means "done, or never going to be done" — both drop the
+    /// action, which is why the permanently-impossible cases below return
+    /// instead of throwing: retrying an underage check-in on every
+    /// reconnect for eight attempts would just burn battery.
+    func installPerformHandlers() {
+        perform = { action in
+            switch action.kind {
+            case .checkIn:
+                guard let venueId = action.payload["venueId"] else { return }
+                do {
+                    _ = try await RepositoryDependencies.venueCheckin.checkIn(
+                        venueId: venueId,
+                        tripId: action.payload["tripId"]
+                    )
+                } catch let error as VenueCheckinError {
+                    switch error {
+                    case .birthdateRequired, .underage: return   // never fixable by a retry
+                    case .network: throw error
+                    }
+                }
+                // The button in the venue page reads this store; refresh it
+                // so a check-in that landed while queued stops showing as
+                // pending.
+                await CheckInStore.shared.load()
+
+            case .ageReport:
+                guard let venueId = action.payload["venueId"],
+                      let bracket = action.payload["bracket"] else { return }
+                try await SupabaseAgeReportRepository().reportPerceivedAge(venueId: venueId, bracket: bracket)
+
+            case .priceReport:
+                guard let venueId = action.payload["venueId"],
+                      let cents = action.payload["cents"].flatMap(Int.init) else { return }
+                try await SupabasePriceReportRepository().reportDrinkPrice(venueId: venueId, cents: cents)
+
+            case .venueMedia:
+                guard let venueId = action.payload["venueId"],
+                      let fileName = action.payload["fileName"],
+                      let contentType = action.payload["contentType"],
+                      let fileExtension = action.payload["fileExtension"],
+                      let mediaType = action.payload["mediaType"].flatMap(VenueMediaType.init(rawValue:))
+                else { return }
+                let fileURL = Self.mediaDirectory.appendingPathComponent(fileName)
+                // The file is gone (purged, or the user deleted app data).
+                // There is nothing left to upload, so drop it rather than
+                // retry a file that will never come back.
+                guard FileManager.default.fileExists(atPath: fileURL.path) else { return }
+                _ = try await RepositoryDependencies.venueMedia.upload(
+                    venueId: venueId,
+                    fileURL: fileURL,
+                    mediaType: mediaType,
+                    contentType: contentType,
+                    fileExtension: fileExtension,
+                    progress: { _ in }
+                )
+                try? FileManager.default.removeItem(at: fileURL)
+            }
+        }
+    }
+}
+
+// MARK: - Strings
+
+/// These three strings live here rather than in LocalizationService because
+/// they belong to the queue and are used by every screen that feeds it.
+enum OfflineQueueStrings {
+    /// "subiendo…" — the action is saved locally and on its way.
+    static func uploading(_ language: AppLanguage) -> String {
+        switch language {
+        case .es: return "Subiendo…"
+        case .en: return "Uploading…"
+        case .pt: return "Enviando…"
+        }
+    }
+
+    /// Shown next to an action that is queued: no signal right now, but it
+    /// is not lost.
+    static func willSend(_ language: AppLanguage) -> String {
+        switch language {
+        case .es: return "Guardado. Se envía solo cuando vuelva la señal."
+        case .en: return "Saved. It'll send itself when the signal is back."
+        case .pt: return "Salvo. Será enviado quando o sinal voltar."
+        }
+    }
+
+    /// The photo/video variant — it says explicitly that it is not on the
+    /// venue page yet, because claiming otherwise would be false.
+    static func mediaQueued(_ language: AppLanguage) -> String {
+        switch language {
+        case .es: return "Guardado. Se sube solo cuando vuelva la señal."
+        case .en: return "Saved. It'll upload when the signal is back."
+        case .pt: return "Salvo. Será enviado quando o sinal voltar."
+        }
+    }
+}

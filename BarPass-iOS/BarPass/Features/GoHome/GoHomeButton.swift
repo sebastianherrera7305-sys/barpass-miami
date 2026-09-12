@@ -52,7 +52,12 @@ final class GoHomeStore: ObservableObject {
     /// Maps if location permission isn't available — never silently no-ops.
     func openRideHome() async {
         guard let home = homeAddress else { return }
-        let pickup = await locationService.requestOnce()
+        // Coarse pickup pre-fill. On any LocationError (denied, precise
+        // off, no fix in 8s) `requestOnce` yields nil and the URL below
+        // falls back to `pickup=my_location`, which lets Uber resolve the
+        // pickup with its own permission — so a denial here is not a dead
+        // end and needs no message of its own.
+        let pickup = await locationService.requestOnce(.coarse)
 
         // Built as one literal string, not via URLComponents.queryItems —
         // assigning `.queryItems = [...]` REPLACES whatever the initial

@@ -24,6 +24,10 @@ struct EventTicketsView: View {
     @State private var paymentError: String?
     @State private var activeTicket: EventTicket?
     @State private var showTicket    = false
+    /// One idempotency key per (package, quantity, price, attempt-series) —
+    /// see SkipLinePassView.applePayKeys. A retry after a lost response
+    /// must not charge twice.
+    @State private var applePayKeys: [String: String] = [:]
     @State private var isEligibleForStudentPrice = false
     @State private var useStudentPrice = false
 
@@ -463,6 +467,10 @@ struct EventTicketsView: View {
         // closure returned — the Apple Pay sheet then hung forever and
         // isProcessing was never cleared. CartView already did this right.
         let svc = applePay
+        let optionKey = "\(selectedPkg.name)-\(quantity)-\(total)"
+        let idempotencyKey = applePayKeys[optionKey]
+            ?? APIClient.generateIdempotencyKey(vendorId: venueId, staffId: APIClient.selfCheckoutStaffId)
+        applePayKeys[optionKey] = idempotencyKey
         svc.requestPayment(amount: Decimal(total),
                            label: String(format: l10n.t("pass.applePayLabel"), venueName)) { stripePaymentMethodId in
             let json = try await APIClient.createApplePayTransaction(
@@ -470,7 +478,8 @@ struct EventTicketsView: View {
                 vendorId:   venueId,
                 customerId: session.user.id,
                 items:      [lineItem],
-                stripePaymentMethodId: stripePaymentMethodId
+                stripePaymentMethodId: stripePaymentMethodId,
+                idempotencyKey: idempotencyKey
             )
             guard let orderId = (json["transaction"] as? [String: Any])?["id"] as? String else {
                 throw APIClient.APIClientError.invalidResponse
@@ -480,14 +489,15 @@ struct EventTicketsView: View {
             Task { @MainActor in
                 isProcessing = false
                 if result.success, let orderId = result.orderId {
+                    applePayKeys[optionKey] = nil   // charged: the next buy is a new order
                     let ticket = EventTicket.new(
                         eventName: eventName, venueName: venueName, venueId: venueId,
                         eventDate: eventDate, quantity: quantity,
                         package: selectedPkg.name, amount: total, payMethod: "Apple Pay"
                     )
+                    registerTicket(ticket, paymentSource: .order(orderId: orderId))
                     activeTicket = ticket
                     showTicket   = true
-                    registerTicket(ticket, paymentSource: .order(orderId: orderId))
                 } else if let error = result.error, error != "cancelled" {
                     paymentError = error
                     BPHaptics.error()
@@ -511,9 +521,9 @@ struct EventTicketsView: View {
                         eventDate: eventDate, quantity: quantity,
                         package: selectedPkg.name, amount: total, payMethod: "BarPass Wallet"
                     )
+                    registerTicket(ticket, paymentSource: .wallet(transactionId: transactionId))
                     activeTicket = ticket
                     showTicket   = true
-                    registerTicket(ticket, paymentSource: .wallet(transactionId: transactionId))
                 }
             } catch {
                 await MainActor.run {
@@ -533,14 +543,13 @@ struct EventTicketsView: View {
             validUntil: ticket.expiresAt
         )
 
-        guard let session = AuthService.shared.restoreSession() else { return }
-        Task {
-            await APIClient.registerPass(
-                idToken: session.accessToken, passCode: ticket.ticketCode, kind: "event_ticket",
-                venueId: ticket.venueId, venueName: ticket.venueName, quantity: ticket.quantity,
-                validUntil: ticket.expiresAt, paymentSource: paymentSource
-            )
-        }
+        // Durable + retried; ActiveTicketView shows the QR only once the
+        // server has the ticket on record (see PassRegistrationOutbox).
+        PassRegistrationOutbox.shared.register(APIClient.PassRegistration(
+            passCode: ticket.ticketCode, kind: "event_ticket",
+            venueId: ticket.venueId, venueName: ticket.venueName, quantity: ticket.quantity,
+            validUntil: ticket.expiresAt, paymentSource: paymentSource
+        ))
     }
 }
 

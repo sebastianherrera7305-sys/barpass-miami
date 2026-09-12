@@ -15,6 +15,13 @@ struct CheckInMomentSheet: View {
     @StateObject private var uploader = VenueMediaUploader()
     @State private var pickerItem: PhotosPickerItem?
     @State private var uploaded = false
+    @State private var queuedForLater = false
+
+    private var subtitle: String {
+        if uploaded { return l10n.t("checkin.moment.done") }
+        if queuedForLater { return OfflineQueueStrings.mediaQueued(l10n.language) }
+        return l10n.t("checkin.moment.subtitle")
+    }
 
     var body: some View {
         let isBusy = uploader.isBusy
@@ -30,8 +37,12 @@ struct CheckInMomentSheet: View {
                 Text(String(format: l10n.t("checkin.moment.title"), venueName))
                     .font(.bpTitle2()).foregroundStyle(Color.bpInk)
                     .multilineTextAlignment(.center)
-                Text(uploaded ? l10n.t("checkin.moment.done") : l10n.t("checkin.moment.subtitle"))
-                    .font(.bpBody()).foregroundStyle(uploaded ? Color.bpGreen : Color.bpTextSecondary)
+                // Three distinct states, never conflated: posted (green,
+                // it really is on the venue page), queued (amber, saved but
+                // not there yet), or the invitation.
+                Text(subtitle)
+                    .font(.bpBody())
+                    .foregroundStyle(uploaded ? Color.bpGreen : (queuedForLater ? Color.bpAmber : Color.bpTextSecondary))
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal, 24)
@@ -52,7 +63,10 @@ struct CheckInMomentSheet: View {
                     .padding(.horizontal, 24)
             }
 
-            if uploaded {
+            // Queued counts as finished for the purposes of this sheet —
+            // there is nothing more for the user to do, and re-offering the
+            // picker would suggest the first attempt was thrown away.
+            if uploaded || queuedForLater {
                 Button {
                     BPHaptics.light()
                     onDone()
@@ -106,6 +120,8 @@ struct CheckInMomentSheet: View {
             Task {
                 if await uploader.upload(newItem, venueId: venueId) != nil {
                     withAnimation { uploaded = true }
+                } else if uploader.queuedForLater {
+                    withAnimation { queuedForLater = true }
                 }
                 pickerItem = nil
             }

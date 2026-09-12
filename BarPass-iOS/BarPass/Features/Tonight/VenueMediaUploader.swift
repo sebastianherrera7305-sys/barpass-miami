@@ -16,6 +16,11 @@ final class VenueMediaUploader: ObservableObject {
     @Published var stage: Stage?
     @Published var fraction: Double = 0
     @Published var error: String?
+    /// The file is compressed, saved outside the temp directory and on the
+    /// queue — it is NOT on the venue page yet. Views must say exactly that:
+    /// a green "posted!" would be a lie and a red error would be one too,
+    /// since this will be retried on its own.
+    @Published var queuedForLater = false
 
     /// Longer clips are trimmed to this before upload — keeps a 720p clip
     /// around 20-30MB, under Supabase's 50MB object cap with room to spare.
@@ -42,11 +47,16 @@ final class VenueMediaUploader: ObservableObject {
     /// one) and returns nil. Never throws — callers just react to the result.
     func upload(_ pickerItem: PhotosPickerItem, venueId: String) async -> VenueMediaItem? {
         error = nil
+        queuedForLater = false
         fraction = 0
         defer { stage = nil }
         let isVideo = pickerItem.supportedContentTypes.contains { $0.conforms(to: .movie) }
         var tempFiles: [URL] = []
         defer { tempFiles.forEach { try? FileManager.default.removeItem(at: $0) } }
+        // Hoisted out of the `do` so the catch below can still see what was
+        // compressed and hand it to the queue. Nil means we never got as far
+        // as a usable file — that IS a real error worth showing.
+        var prepared: (url: URL, contentType: String, fileExtension: String)?
         do {
             let fileURL: URL
             let contentType: String
@@ -78,6 +88,8 @@ final class VenueMediaUploader: ObservableObject {
                 fileExtension = "jpg"
             }
 
+            prepared = (fileURL, contentType, fileExtension)
+
             stage = .uploading
             let item = try await repo.upload(
                 venueId: venueId,
@@ -91,8 +103,27 @@ final class VenueMediaUploader: ObservableObject {
             BPHaptics.success()
             return item
         } catch {
-            self.error = error.localizedDescription
-            BPHaptics.error()
+            // Venue LTE dropped the upload. The compressed file lives in the
+            // temp directory, which iOS purges whenever it likes, so copy it
+            // into the queue's own directory before the `defer` above deletes
+            // it — then the queue re-uploads on reconnect, foreground or the
+            // next launch. Only a file we could never even prepare (or could
+            // not copy) is reported to the user as a failure.
+            if let prepared,
+               let fileName = try? OfflineQueue.stageMedia(prepared.url, fileExtension: prepared.fileExtension) {
+                OfflineQueue.shared.enqueue(.venueMedia, [
+                    "venueId": venueId,
+                    "fileName": fileName,
+                    "mediaType": (isVideo ? VenueMediaType.video : .photo).rawValue,
+                    "contentType": prepared.contentType,
+                    "fileExtension": prepared.fileExtension,
+                ])
+                queuedForLater = true
+                BPHaptics.medium()
+            } else {
+                self.error = error.localizedDescription
+                BPHaptics.error()
+            }
             return nil
         }
     }

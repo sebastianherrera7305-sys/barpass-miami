@@ -12,6 +12,7 @@ enum BPTheme: String, CaseIterable, Identifiable {
     case ultra      = "ultra"
     case f1         = "f1"
     case artBasel   = "art_basel"
+    case gatorNation = "gator_nation"
 
     var id: String { rawValue }
 
@@ -23,6 +24,7 @@ enum BPTheme: String, CaseIterable, Identifiable {
         case .ultra:      return "Ultra"
         case .f1:         return "F1"
         case .artBasel:   return "Art Basel"
+        case .gatorNation: return "Gator Nation"
         }
     }
 
@@ -35,6 +37,17 @@ enum BPTheme: String, CaseIterable, Identifiable {
         case .ultra:      return (Color(red: 0.62, green: 0.40, blue: 0.98), Color(red: 0.78, green: 0.62, blue: 1.00))
         case .f1:         return (Color(red: 0.95, green: 0.22, blue: 0.20), Color(red: 1.00, green: 0.45, blue: 0.40))
         case .artBasel:   return (Color(red: 0.20, green: 0.85, blue: 0.65), Color(red: 0.50, green: 0.95, blue: 0.80))
+        // Gainesville's orange, not Miami's amber: UF's #FA4616 opened up
+        // slightly (more green, less saturation in the red) so it still
+        // reads as *that* orange while carrying small text on near-black —
+        // the literal brand value is dark enough that captions at
+        // .bpCaption() start to mud out against the surface. The blue half
+        // of the school's palette (#0021A5) is deliberately NOT the accent: at that
+        // darkness it is nearly invisible on the app's black surfaces, so
+        // it carries the background composition instead (see
+        // `backgroundBlobs`), exactly how Miami puts coral in the blobs and
+        // keeps the warm tone as the accent.
+        case .gatorNation: return (Color(red: 0.98, green: 0.42, blue: 0.13), Color(red: 1.00, green: 0.64, blue: 0.32))
         }
     }
 
@@ -89,6 +102,20 @@ enum BPTheme: String, CaseIterable, Identifiable {
             return [
                 BackgroundBlob(point: UnitPoint(x: 0.24, y: 0.42), color: accent, radius: 0.34, opacity: 0.40, blur: 2),
                 BackgroundBlob(point: UnitPoint(x: 0.78, y: 0.18), color: bright, radius: 0.18, opacity: 0.36, blur: 2),
+            ]
+        case .gatorNation:
+            // Swamp at night: the deep UF blue as the dominant mass high
+            // and left, orange answering it low and right — the two-color
+            // school pairing read as one composition instead of two
+            // recolors of the same shape. The blue is raised well above the
+            // literal #0021A5 because a flat shape that dark against black
+            // is only visible as its outline; a touch of green in the small
+            // low shape is the swamp, and keeps the trio from looking like
+            // a plain complementary split.
+            return [
+                BackgroundBlob(point: UnitPoint(x: 0.22, y: 0.19), color: Color(red: 0.12, green: 0.26, blue: 0.72), radius: 0.40, opacity: 0.50, blur: 2),
+                BackgroundBlob(point: UnitPoint(x: 0.80, y: 0.62), color: accent, radius: 0.26, opacity: 0.42, blur: 2),
+                BackgroundBlob(point: UnitPoint(x: 0.40, y: 0.86), color: Color(red: 0.18, green: 0.52, blue: 0.32), radius: 0.18, opacity: 0.32, blur: 2),
             ]
         }
     }

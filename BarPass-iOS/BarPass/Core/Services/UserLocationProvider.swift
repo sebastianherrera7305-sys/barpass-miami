@@ -22,7 +22,19 @@ final class UserLocationProvider: ObservableObject {
         guard !didRequest else { return }
         didRequest = true
         Task {
-            coordinate = await service.requestOnce()
+            do {
+                coordinate = try await service.requestFix(.coarse).coordinate
+            } catch LocationError.timedOut(let best?) {
+                // Wider than the coarse ceiling, but for scoring a rough
+                // neighborhood still beats no location at all.
+                coordinate = best.coordinate
+            } catch {
+                // Denied / precise-off / no fix: by design the signal is
+                // simply absent here (documented above). Nothing to tell
+                // the user on a feed screen; CheckInButton is where the
+                // reason gets surfaced.
+                coordinate = nil
+            }
         }
     }
 }

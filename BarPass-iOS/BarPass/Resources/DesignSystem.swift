@@ -246,6 +246,15 @@ enum CityBackgroundArt {
     private static let names: [String: String] = [
         "Miami": "CityArtMiami",
         "New York": "CityArtNewYork",
+        // Gainesville, 2026-09-12. Same composition language as Miami's art —
+        // sunburst, concentric rings, heavy keylines, fade to black — in UF's
+        // orange and blue, because Gainesville was literally rendering Miami's
+        // palette before this. The centre is a ring motif rather than a gator:
+        // three hand-authored mascot attempts all read as generated mush, and
+        // a bad mascot on every screen is worse than none. The gator identity
+        // lives in the 🐊 and GatorMascotBadge; drop a real illustration into
+        // this one JPG the day there is one.
+        "Gainesville": "CityArtGainesville",
     ]
 
     static func imageName(for city: String?) -> String? {

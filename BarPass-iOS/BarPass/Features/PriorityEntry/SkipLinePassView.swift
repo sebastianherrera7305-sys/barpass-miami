@@ -19,6 +19,11 @@ struct SkipLinePassView: View {
     /// Set by `CardPaymentView.onOrderId` just before `onSuccess` fires for
     /// the card flow — bridges the real order id into `completePass`.
     @State private var pendingCardOrderId: String?
+    /// One idempotency key per (option, attempt-series): a retry after a
+    /// lost response re-sends the SAME key, so POST /transactions returns
+    /// the order it already charged instead of charging the card again.
+    /// Keyed by option so switching Solo → Pareja starts a fresh key.
+    @State private var applePayKeys: [String: String] = [:]
 
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
     private let goldB = Color(red: 0.96, green: 0.72, blue: 0.19)
@@ -305,6 +310,10 @@ struct SkipLinePassView: View {
             // closure returned — the Apple Pay sheet then hung forever and
             // isProcessing was never cleared. CartView already did this right.
             let svc = applePay
+            let optionKey = "\(selected)"
+            let idempotencyKey = applePayKeys[optionKey]
+                ?? APIClient.generateIdempotencyKey(vendorId: venueId, staffId: APIClient.selfCheckoutStaffId)
+            applePayKeys[optionKey] = idempotencyKey
             svc.requestPayment(amount: Decimal(selected.price),
                                label: String(format: l10n.t("pass.applePayLabel"), venueName)) { stripePaymentMethodId in
                 let json = try await APIClient.createApplePayTransaction(
@@ -312,7 +321,8 @@ struct SkipLinePassView: View {
                     vendorId:   venueId,
                     customerId: session.user.id,
                     items:      [CartItem(name: "\(l10n.t("priorityEntry.skipLine")) — \(l10n.t(selected.labelKey))", price: selected.price, emoji: selected.emoji, qty: 1, venueId: venueId, venueName: venueName)],
-                    stripePaymentMethodId: stripePaymentMethodId
+                    stripePaymentMethodId: stripePaymentMethodId,
+                    idempotencyKey: idempotencyKey
                 )
                 guard let orderId = (json["transaction"] as? [String: Any])?["id"] as? String else {
                     throw APIClient.APIClientError.invalidResponse
@@ -322,6 +332,7 @@ struct SkipLinePassView: View {
                 Task { @MainActor in
                     isProcessing = false
                     if result.success, let orderId = result.orderId {
+                        applePayKeys[optionKey] = nil   // charged: the next buy is a new order
                         completePass(method: "Apple Pay", paymentSource: .order(orderId: orderId))
                     } else if let error = result.error, error != "cancelled" {
                         paymentError = error
@@ -434,6 +445,16 @@ struct SkipLinePassView: View {
             amount:    selected.price,
             payMethod: method
         )
+        // Durable, retried, and the source of truth for what ActivePassView
+        // shows: the QR only appears once the server has confirmed the pass.
+        // Registered BEFORE the screen is presented so its status is never
+        // "unknown" for the first frame.
+        PassRegistrationOutbox.shared.register(APIClient.PassRegistration(
+            passCode: pass.passCode, kind: "skip_line",
+            venueId: pass.venueId, venueName: pass.venueName, quantity: pass.quantity,
+            validUntil: pass.validUntil, paymentSource: paymentSource
+        ))
+
         activePass = pass
         showPass   = true
 
@@ -442,16 +463,6 @@ struct SkipLinePassView: View {
             body: String(format: l10n.t("pass.reminder.body"), pass.venueName),
             validUntil: pass.validUntil
         )
-
-        if let session = AuthService.shared.restoreSession() {
-            Task {
-                await APIClient.registerPass(
-                    idToken: session.accessToken, passCode: pass.passCode, kind: "skip_line",
-                    venueId: pass.venueId, venueName: pass.venueName, quantity: pass.quantity,
-                    validUntil: pass.validUntil, paymentSource: paymentSource
-                )
-            }
-        }
     }
 }
 

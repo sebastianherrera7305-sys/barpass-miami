@@ -4,7 +4,10 @@ import CoreImage.CIFilterBuiltins
 struct ActiveTicketView: View {
     @ObservedObject private var l10n = L10n.shared
     let ticket: EventTicket
+    /// Previews only — a live ticket takes its status from the outbox.
+    var statusOverride: PassRegistrationOutbox.Status? = nil
 
+    @ObservedObject private var outbox = PassRegistrationOutbox.shared
     @Environment(\.dismiss) private var dismiss
 
     private let gold  = Color(red: 0.85, green: 0.63, blue: 0.09)
@@ -117,18 +120,34 @@ struct ActiveTicketView: View {
                         .shadow(color: gold.opacity(pulse ? 0.5 : 0.2), radius: pulse ? 18 : 8)
                         .animation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true), value: pulse)
 
-                    if let qr = generateQR() {
+                    if status.isRegistered, let qr = generateQR() {
                         Image(uiImage: qr)
                             .interpolation(.none)
                             .resizable()
                             .frame(width: 160, height: 160)
+                    } else if !status.isRegistered {
+                        // Paid but not yet on the server (or refused): no QR,
+                        // because it would scan as "not found" at the door.
+                        Group {
+                            switch status {
+                            case .pending:  ProgressView().tint(gold).scaleEffect(1.3)
+                            case .failed:   Image(systemName: "exclamationmark.triangle.fill").font(.bpScaled(34)).foregroundStyle(Color.bpDanger)
+                            case .registered: EmptyView()
+                            }
+                        }
                     }
                 }
 
-                Text(ticket.ticketCode)
-                    .font(.bpScaled(18, weight: .bold, design: .monospaced))
-                    .foregroundStyle(Color.bpInk)
-                    .tracking(4)
+                if status.isRegistered {
+                    Text(ticket.ticketCode)
+                        .font(.bpScaled(18, weight: .bold, design: .monospaced))
+                        .foregroundStyle(Color.bpInk)
+                        .tracking(4)
+                } else {
+                    PassIssueBadge(status: status)
+                    PassIssueStateView(status: status, side: 0)
+                        .padding(.top, -12)
+                }
 
                 HStack(spacing: 6) {
                     Image(systemName: "person.fill")
@@ -150,7 +169,7 @@ struct ActiveTicketView: View {
                 .shadow(color: .black.opacity(0.4), radius: 20, y: 8)
         )
         .padding(.horizontal, 20)
-        .accessibilityElement(children: .ignore)
+        .accessibilityElement(children: status.isRegistered ? .ignore : .contain)
         .bpAccessibility(label: String(format: l10n.t("ticket.qr.a11y"), ticket.eventName, ticket.venueName), hint: l10n.t("ticket.qr.hint"))
     }
 
@@ -240,6 +259,8 @@ struct ActiveTicketView: View {
                     .strokeBorder(Color.bpInk.opacity(0.12)))
             }
             .buttonStyle(.plain)
+            .disabled(!status.isRegistered)
+            .opacity(status.isRegistered ? 1 : 0.4)
             .bpAccessibility(label: l10n.t("reservationConfirm.share"), hint: l10n.t("ticket.share.hint"), isButton: true)
 
             Button { dismiss() } label: {
@@ -258,6 +279,14 @@ struct ActiveTicketView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)
+    }
+
+    // MARK: - Registration status
+
+    /// `nil` from the outbox (never saw this code) is pending, never
+    /// registered — the QR is only shown on the server's word.
+    private var status: PassRegistrationOutbox.Status {
+        statusOverride ?? outbox.status(for: ticket.ticketCode) ?? .pending(attempts: 0, lastError: nil)
     }
 
     // MARK: - QR generator
@@ -283,6 +312,6 @@ struct ActiveTicketView: View {
             eventDate: Date().addingTimeInterval(3600 * 5),
             quantity: 2, package: "VIP Access",
             amount: 91.50, payMethod: "Apple Pay"
-        ))
+        ), statusOverride: .registered)
     }
 }

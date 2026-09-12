@@ -132,10 +132,27 @@ struct TonightView: View {
         return picked
     }
 
+    /// Mood Mode's takeover feed. The mood/keyword filter is unchanged — only
+    /// the order is.
+    ///
+    /// It used to sort by `(isTrending, rating)`, raw Google rating, which is
+    /// the Gainesville bug in miniature: picking 🎉 Party put a 5.0-from-nine-
+    /// reviews spot above the college bar with 1,204 reviews, and kept venues
+    /// that close at 6 PM in a list whose own empty state promises "Nothing
+    /// open for that mood right now." `goingOutNow` is what that sentence
+    /// always claimed this list was — still open an hour from now, how late it
+    /// goes, how many people actually go, with a confidence-weighted rating as
+    /// the tiebreak instead of the axis. Trending is still rewarded, now as one
+    /// signal inside the score rather than a bucket that outranks everything.
+    ///
+    /// No `limit`: the section header counts what's here, and truncating would
+    /// make that count a different number than the one the user can scroll to.
+    /// Venues whose hours are missing are NOT dropped — `isOpenAt` reads
+    /// unknown hours as open on purpose, and nothing here overrides that.
     private var moodVenues: [BarPassVenue] {
         guard let tag = selectedTag, let mood = moods.first(where: { $0.label == tag }) else { return [] }
-        return venueStore.venues.filter { matches($0, mood) }
-            .sorted { ($0.isTrending ? 1 : 0, $0.rating) > ($1.isTrending ? 1 : 0, $1.rating) }
+        let matched = venueStore.venues.filter { matches($0, mood) }
+        return VenueRanking.goingOutNow(matched, limit: matched.count)
     }
 
     /// Evita que la misma venue aparezca repetida en varias secciones del
@@ -148,11 +165,20 @@ struct TonightView: View {
         let openNow: [BarPassVenue]
         /// Top 3 neighborhoods by venue count in the current city — real
         /// data-derived grouping, not 3 Miami names hardcoded everywhere.
-        /// Each neighborhood's venues are sorted by review_count (the
-        /// closest real proxy for "most famous / most people want to go")
-        /// with rating as a tiebreaker, so the front of each section is
-        /// the neighborhood's actual most-popular spot, not DB insertion
-        /// order.
+        /// Each neighborhood is ordered by `VenueRanking.ranked`: how good
+        /// the place is, with its rating pulled toward the catalog average
+        /// in proportion to how few people reviewed it.
+        ///
+        /// This is a browse-the-area list ("what's good in Wynwood"), not a
+        /// where's-the-night-right-now list, so it stays quality-driven and
+        /// keeps venues that are closed at this hour — unlike Mood Mode,
+        /// emptying these rails every afternoon would be a regression, not
+        /// a fix. What changed is that raw `review_count` no longer decides
+        /// it alone: sorting purely on volume put whichever chain restaurant
+        /// has the most reviews at the front of its neighborhood regardless
+        /// of whether anyone rates it well. Volume still counts, as the
+        /// confidence weight that stops a 5.0 from nine reviews leading a
+        /// section.
         let neighborhoods: [(name: String, venues: [BarPassVenue])]
     }
 
@@ -224,10 +250,7 @@ struct TonightView: View {
             .sorted { $0.value.count > $1.value.count }
             .prefix(3)
             .map { name, venues -> (name: String, venues: [BarPassVenue]) in
-                let ranked = venues.sorted {
-                    $0.reviewCount != $1.reviewCount ? $0.reviewCount > $1.reviewCount : $0.rating > $1.rating
-                }
-                return (name, take(ranked))
+                (name, take(VenueRanking.ranked(venues)))
             }
 
         return DedupedFeed(
@@ -296,10 +319,10 @@ struct TonightView: View {
                             .frame(maxWidth: .infinity).padding(.vertical, 40)
                         } else {
                             section(title: String(format: l10n.t("home.mood.count"), tag, moodVenues.count),
-                                    venues: Array(moodVenues.prefix(3)), style: .hero)
+                                    venues: Array(moodVenues.prefix(3)), style: .hero, ranking: .goingOut)
                             if moodVenues.count > 3 {
                                 section(title: l10n.t("home.mood.more"),
-                                        venues: Array(moodVenues.dropFirst(3).prefix(12)), style: .card)
+                                        venues: Array(moodVenues.dropFirst(3).prefix(12)), style: .card, ranking: .goingOut)
                             }
                         }
                     } else {
@@ -592,7 +615,8 @@ struct TonightView: View {
 
     // MARK: - Sections
 
-    private func section(title: String, venues: [BarPassVenue], style: CardStyle) -> some View {
+    private func section(title: String, venues: [BarPassVenue], style: CardStyle,
+                         ranking: VenueRankingSource = .experience) -> some View {
         VStack(alignment: .leading, spacing: BPSpacing.md) {
             Text(title)
                 .font(.bpHeadline())
@@ -606,7 +630,7 @@ struct TonightView: View {
                             zoomedSource(for: venue) {
                                 Group {
                                     switch style {
-                                    case .hero: HeroVenueCard(venue: venue)
+                                    case .hero: HeroVenueCard(venue: venue, ranking: ranking)
                                     case .card: SmallVenueCard(venue: venue)
                                     }
                                 }
@@ -663,22 +687,37 @@ struct VenuePhotoFallback: View {
 struct HeroVenueCard: View {
     @ObservedObject private var l10n = L10n.shared
     let venue: BarPassVenue
+    /// Which scorer ordered the list this card is in. Defaults to
+    /// `.experience` because that's what every caller used when the badge was
+    /// hardwired to `ExperienceScorer`.
+    var ranking: VenueRankingSource = .experience
 
     // The photo below must be pinned to exactly these — see the comment there.
     private static let cardWidth: CGFloat = 280
     private static let cardHeight: CGFloat = 180
 
-    /// Same call `recommendedForYou` scores with, so the badge shown here
-    /// always matches the real reason this card ranked where it did — never
-    /// independent, possibly-inconsistent copy.
+    /// The badge reads from whichever scorer actually ordered this list, so it
+    /// always states the real reason this card ranked where it did — never
+    /// independent, possibly-inconsistent copy. `recommendedForYou` and the
+    /// other `ExperienceScorer` rails keep `ExperienceScorer.reason`; Mood
+    /// Mode is ordered by `VenueRanking.goingOutNow`, so it gets that scorer's
+    /// own reason instead of an "near you"/"matches your music" line that had
+    /// no part in putting it there. Both return nil rather than reach for a
+    /// reason the venue's data doesn't support, and a nil badge simply isn't
+    /// drawn.
     private var reasonText: String? {
-        ExperienceScorer.reason(
-            venue: venue,
-            passport: MusicProfileStore.shared.passport,
-            context: TripContext(),
-            now: Date(),
-            userCoordinate: UserLocationProvider.shared.coordinate
-        )
+        switch ranking {
+        case .experience:
+            return ExperienceScorer.reason(
+                venue: venue,
+                passport: MusicProfileStore.shared.passport,
+                context: TripContext(),
+                now: Date(),
+                userCoordinate: UserLocationProvider.shared.coordinate
+            )
+        case .goingOut:
+            return VenueRanking.goingOutReason(venue)
+        }
     }
 
     var body: some View {
@@ -884,6 +923,18 @@ struct SmallVenueCard: View {
 }
 
 enum CardStyle { case hero, card }
+
+/// Which scorer put this list in the order it's in. A card's "why this
+/// ranked here" badge is read from the same scorer that ordered the list, so
+/// it can't drift into stating a reason that had nothing to do with the
+/// position the venue is actually in. Adding a list means saying which
+/// ranking it used; it does not mean writing new badge copy.
+enum VenueRankingSource {
+    /// `ExperienceScorer` — the personalized "for you" ranking.
+    case experience
+    /// `VenueRanking.goingOutNow` — open now, late, and busy.
+    case goingOut
+}
 
 /// A real Ticketmaster event — deliberately looks distinct from
 /// `EventFlyerCard` (BarPass's own venue events): a plain "Ticketmaster"

@@ -19,6 +19,10 @@ struct CardPaymentView: View {
     @State private var loading     = false
     @State private var errorMsg    = ""
     @FocusState private var activeFocus: CardEntry.Field?
+    /// Minted on the first Pay tap and reused by every retry from this
+    /// screen: POST /transactions returns the order it already charged for
+    /// a key it has seen, so "timeout → tap Pay again" can't charge twice.
+    @State private var idempotencyKey: String?
 
 
     private let gold = Color(red: 0.85, green: 0.63, blue: 0.09)
@@ -198,6 +202,9 @@ struct CardPaymentView: View {
             return
         }
 
+        let key = idempotencyKey ?? APIClient.generateIdempotencyKey(vendorId: vendorId, staffId: APIClient.selfCheckoutStaffId)
+        idempotencyKey = key
+
         Task {
             do {
                 guard let paymentParams = draft.entry.stripeParams() else {
@@ -211,7 +218,8 @@ struct CardPaymentView: View {
                     vendorId:   self.vendorId,
                     customerId: session.user.id,
                     items:      self.items,
-                    stripePaymentMethodId: paymentMethod.stripeId
+                    stripePaymentMethodId: paymentMethod.stripeId,
+                    idempotencyKey: key
                 )
                 let orderId = (json["transaction"] as? [String: Any])?["id"] as? String
                 await MainActor.run {

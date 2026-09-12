@@ -92,16 +92,24 @@ enum APIClient {
     /// Charges a card order through POST /transactions. `stripePaymentMethodId`
     /// must come from a client-side Stripe tokenization call — raw card data
     /// is never sent to this backend.
+    ///
+    /// `idempotencyKey`: pass the SAME key for every retry of one checkout
+    /// (see `generateIdempotencyKey`). POST /transactions returns the
+    /// existing order for a key it has already charged, so a request whose
+    /// response was lost on bad LTE can be re-sent without charging the card
+    /// twice. Omitted → a fresh key per call, i.e. no replay protection.
     static func createCardTransaction(
         idToken: String,
         vendorId: String,
         customerId: String?,
         items: [CartItem],
-        stripePaymentMethodId: String
+        stripePaymentMethodId: String,
+        idempotencyKey: String? = nil
     ) async throws -> [String: Any] {
         try await createTransaction(
             idToken: idToken, vendorId: vendorId, customerId: customerId,
-            items: items, paymentMethod: "card", stripePaymentMethodId: stripePaymentMethodId
+            items: items, paymentMethod: "card", stripePaymentMethodId: stripePaymentMethodId,
+            idempotencyKey: idempotencyKey
         )
     }
 
@@ -114,13 +122,20 @@ enum APIClient {
         vendorId: String,
         customerId: String?,
         items: [CartItem],
-        stripePaymentMethodId: String
+        stripePaymentMethodId: String,
+        idempotencyKey: String? = nil
     ) async throws -> [String: Any] {
         try await createTransaction(
             idToken: idToken, vendorId: vendorId, customerId: customerId,
-            items: items, paymentMethod: "apple_pay", stripePaymentMethodId: stripePaymentMethodId
+            items: items, paymentMethod: "apple_pay", stripePaymentMethodId: stripePaymentMethodId,
+            idempotencyKey: idempotencyKey
         )
     }
+
+    /// The staff id every self-service checkout is recorded under — also
+    /// what `generateIdempotencyKey` needs from callers that mint a
+    /// per-checkout key up front.
+    static let selfCheckoutStaffId = "self_checkout"
 
     private static func createTransaction(
         idToken: String,
@@ -128,16 +143,17 @@ enum APIClient {
         customerId: String?,
         items: [CartItem],
         paymentMethod: String,
-        stripePaymentMethodId: String
+        stripePaymentMethodId: String,
+        idempotencyKey: String?
     ) async throws -> [String: Any] {
-        let staffId = "self_checkout"
+        let staffId = selfCheckoutStaffId
         let token = try await freshToken(idToken)
 
         var request = URLRequest(url: baseURL.appendingPathComponent("transactions"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        request.setValue(generateIdempotencyKey(vendorId: vendorId, staffId: staffId),
+        request.setValue(idempotencyKey ?? generateIdempotencyKey(vendorId: vendorId, staffId: staffId),
                           forHTTPHeaderField: "idempotency-key")
 
         let itemPayload = items.map { item -> [String: Any] in
@@ -182,7 +198,8 @@ enum APIClient {
     /// Which verified payment backs a pass being registered — POST /passes
     /// requires one of these; a pass can no longer be created from a raw
     /// client-supplied amount (see barpass-v2/supabase/pass_payment_verification.sql).
-    enum PassPaymentSource {
+    /// Codable so a registration can wait on disk in `PassRegistrationOutbox`.
+    enum PassPaymentSource: Codable, Equatable, Sendable {
         /// A real Stripe-backed order, from POST /transactions' response.
         case order(orderId: String)
         /// A real BarPass Wallet debit, from POST /wallet/spend's response.
@@ -196,28 +213,103 @@ enum APIClient {
                 return ["type": "wallet", "walletTransactionId": transactionId]
             }
         }
+
+        /// What a user can quote to support when a paid pass could not be
+        /// issued: the order id or wallet transaction id the money is under.
+        var reference: String {
+            switch self {
+            case .order(let orderId):          return orderId
+            case .wallet(let transactionId):   return transactionId
+            }
+        }
+    }
+
+    /// Everything POST /passes needs to mint one pass. Built the moment a
+    /// payment succeeds and kept — on disk if necessary — until the server
+    /// has confirmed it; re-sending the identical struct is safe because the
+    /// route is idempotent on (paymentSource, user) and on (passCode, user).
+    struct PassRegistration: Codable, Equatable, Sendable {
+        let passCode:      String
+        /// "skip_line" | "event_ticket" | "table"
+        let kind:          String
+        let venueId:       String
+        let venueName:     String
+        let quantity:      Int
+        let validUntil:    Date
+        let paymentSource: PassPaymentSource
+    }
+
+    /// Why a pass registration did not succeed. The split matters: a
+    /// `.transient` failure means the request may never have reached the
+    /// server (or its answer never came back) and MUST be retried — the
+    /// user has already paid. A `.rejected` one is the server's considered
+    /// answer (below the price floor, payment already used, ...) and
+    /// retrying the same bytes can only yield the same answer.
+    enum PassRegistrationError: LocalizedError, Equatable {
+        /// Offline, DNS, TLS, timeout — nothing definitive happened.
+        case transient(String)
+        /// 5xx / 429 / 408: the server had a bad moment; try again later.
+        case serverUnavailable(status: Int, code: String?)
+        /// The session could not be refreshed right now. The registration
+        /// stays queued until a valid session exists again.
+        case sessionExpired
+        /// A definitive 4xx with the server's own short error code.
+        case rejected(status: Int, code: String, message: String?)
+
+        var isRetryable: Bool {
+            switch self {
+            case .transient, .serverUnavailable, .sessionExpired: return true
+            case .rejected: return false
+            }
+        }
+
+        /// The server's short code, when it gave one — keyed on by the UI.
+        var code: String? {
+            switch self {
+            case .transient:                        return nil
+            case .serverUnavailable(_, let code):   return code
+            case .sessionExpired:                   return "session_expired"
+            case .rejected(_, let code, _):         return code
+            }
+        }
+
+        var errorDescription: String? {
+            switch self {
+            case .transient(let msg):                    return msg
+            case .serverUnavailable(let status, let c):  return "HTTP \(status)\(c.map { " (\($0))" } ?? "")"
+            case .sessionExpired:                        return L10n.tSync("api.error.sessionExpired")
+            case .rejected(let status, let code, let m): return m ?? "\(code) (HTTP \(status))"
+            }
+        }
+    }
+
+    /// The server's record of a registered pass, as far as the app needs it.
+    struct RegisteredPass: Equatable, Sendable {
+        let serverId: String?
+        let passCode: String
     }
 
     /// Registers a Skip the Line / event ticket / table pass server-side so
     /// its QR code has a real record door staff can check against (see
     /// POST /passes/redeem, used by the web validation page). `amount` is
     /// derived server-side from `paymentSource` — never trusted from here.
-    /// Best-effort: the local pass still shows and works offline if this
-    /// fails — it just won't be checkable at the door until connectivity
-    /// returns.
-    static func registerPass(
-        idToken: String,
-        passCode: String,
-        kind: String,
-        venueId: String,
-        venueName: String,
-        quantity: Int,
-        validUntil: Date,
-        paymentSource: PassPaymentSource
-    ) async {
-        // Best-effort by design (this function can't throw), so a failed
-        // refresh falls back to the caller's token rather than aborting.
-        let token = (try? await freshToken(idToken)) ?? idToken
+    ///
+    /// This is NOT best-effort any more. Until 2026-09-12 it ignored the
+    /// HTTP status and swallowed every error, so a paid pass could silently
+    /// never exist server-side (charged, no QR, turned away at the door).
+    /// It now throws a `PassRegistrationError` on anything but a 2xx, and
+    /// callers go through `PassRegistrationOutbox`, which persists and
+    /// retries the retryable ones. Uses `httpSession` (20s timeout), so a
+    /// dead LTE link fails fast instead of holding the screen for a minute.
+    static func registerPass(_ registration: PassRegistration, idToken: String) async throws -> RegisteredPass {
+        let token: String
+        do {
+            token = try await freshToken(idToken)
+        } catch APIClientError.sessionExpired {
+            throw PassRegistrationError.sessionExpired
+        } catch {
+            throw PassRegistrationError.transient(error.localizedDescription)
+        }
 
         var request = URLRequest(url: baseURL.appendingPathComponent("passes"))
         request.httpMethod = "POST"
@@ -225,16 +317,52 @@ enum APIClient {
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
 
         let body: [String: Any] = [
-            "passCode":      passCode,
-            "kind":          kind,
-            "venueId":       venueId,
-            "venueName":     venueName,
-            "quantity":      quantity,
-            "validUntil":    ISO8601DateFormatter().string(from: validUntil),
-            "paymentSource": paymentSource.jsonValue
+            "passCode":      registration.passCode,
+            "kind":          registration.kind,
+            "venueId":       registration.venueId,
+            "venueName":     registration.venueName,
+            "quantity":      registration.quantity,
+            "validUntil":    ISO8601DateFormatter().string(from: registration.validUntil),
+            "paymentSource": registration.paymentSource.jsonValue
         ]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-        _ = try? await httpSession.data(for: request)
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await httpSession.data(for: request)
+        } catch {
+            throw PassRegistrationError.transient(error.localizedDescription)
+        }
+        guard let http = response as? HTTPURLResponse else {
+            throw PassRegistrationError.transient("invalid response")
+        }
+
+        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+        let code = json["error"] as? String
+
+        switch http.statusCode {
+        case 200..<300:
+            let pass = json["pass"] as? [String: Any]
+            return RegisteredPass(
+                serverId: pass?["id"] as? String,
+                passCode: (pass?["pass_code"] as? String) ?? registration.passCode
+            )
+        case 401:
+            // The token was refreshed just above; a 401 now means the
+            // session itself is gone. Keep the registration; it will go
+            // through once the user is signed in again.
+            throw PassRegistrationError.sessionExpired
+        case 408, 429, 500..<600:
+            throw PassRegistrationError.serverUnavailable(status: http.statusCode, code: code)
+        default:
+            // Never echo json["message"] to the user here — see
+            // friendlyServerMessage — but keep it for the outbox log.
+            throw PassRegistrationError.rejected(
+                status: http.statusCode,
+                code: code ?? "http_\(http.statusCode)",
+                message: nil
+            )
+        }
     }
 
     /// Charges a card and credits the amount to BarPass Wallet via

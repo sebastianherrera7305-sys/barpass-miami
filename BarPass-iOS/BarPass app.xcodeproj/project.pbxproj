@@ -36,6 +36,7 @@
 		DC0F9B36910A4B57AAAEEAAC /* CardEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B1C5F03E13449629D93859E /* CardEntry.swift */; };
 		4DA58C700ED24E96B99C812B /* University.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4BB265491D4A7E864C255E /* University.swift */; };
 		4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */; };
+		B7E2A4C1F0D9438A6E5B2C03 /* PassIssueStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E2A4C1F0D9438A6E5B2C04 /* PassIssueStatusView.swift */; };
 		5088325E9E6E36AB9FB16A81 /* UserLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC72D4050837ED089C03C05 /* UserLocationProvider.swift */; };
 		523167EE1BE844FD9D19B062 /* SupabaseGreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */; };
 		58B304D6CCCBB61826E1F150 /* BarPassTests/AuthTokenRefreshTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE939BD56D206ED35B073C2 /* BarPassTests/AuthTokenRefreshTests.swift */; };
@@ -71,6 +72,8 @@
 		AA0000010000000000000004 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000004 /* SplashView.swift */; };
 		AA0000010000000000000009 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000009 /* LocationService.swift */; };
 		AA000001000000000000000A /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000A /* NotificationService.swift */; };
+		A11B19AC0FF1240000000001 /* OfflineQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000002 /* OfflineQueue.swift */; };
+		B7E2A4C1F0D9438A6E5B2C01 /* PassRegistrationOutbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E2A4C1F0D9438A6E5B2C02 /* PassRegistrationOutbox.swift */; };
 		AA000001000000000000000C /* ApplePayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000C /* ApplePayService.swift */; };
 		AA000001000000000000000D /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000D /* CacheManager.swift */; };
 		AA000001000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000F /* Assets.xcassets */; };
@@ -170,6 +173,7 @@
 		TS0000020000000000000001 /* TripStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS0000010000000000000001 /* TripStore.swift */; };
 		VEVW04000000000000RP01 /* VerifyEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VEVW03000000000000RP01 /* VerifyEmailView.swift */; };
 		VPSC02000000000000RP01 /* VenuePostsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = VPSC01000000000000RP01 /* VenuePostsSection.swift */; };
+		35863ABBF504D7CB2BA28C8E /* VenueRanking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CF9FD7EDEB52D4CD9AF7497 /* VenueRanking.swift */; };
 		1FCF5C4F2C26CEA682D5D76A /* VenueQuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C9312B79E236AEA352CD22B /* VenueQuickActions.swift */; };
 		6035C796BCCE8CD291C46E17 /* CheckInMomentSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168795511AEBC5150B3BC58F /* CheckInMomentSheet.swift */; };
 		93528C23589A20AC5002B931 /* VenueMediaUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */; };
@@ -280,6 +284,8 @@
 		AA0000020000000000000004 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		AA0000020000000000000009 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		AA000002000000000000000A /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		A11B19AC0FF1240000000002 /* OfflineQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineQueue.swift; sourceTree = "<group>"; };
+		B7E2A4C1F0D9438A6E5B2C02 /* PassRegistrationOutbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassRegistrationOutbox.swift; sourceTree = "<group>"; };
 		AA000002000000000000000C /* ApplePayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayService.swift; sourceTree = "<group>"; };
 		AA000002000000000000000D /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
 		AA000002000000000000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -287,6 +293,7 @@
 		AA00000200000000000000A1 /* BarPass app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BarPass app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD594030C69C33F1DB823472 /* HelpGuideStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpGuideStore.swift; path = BarPass/Core/Help/HelpGuideStore.swift; sourceTree = SOURCE_ROOT; };
 		AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveTicketView.swift; sourceTree = "<group>"; };
+		B7E2A4C1F0D9438A6E5B2C04 /* PassIssueStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassIssueStatusView.swift; sourceTree = "<group>"; };
 		AGGT01000000000000RP01 /* AgeGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateService.swift; path = BarPass/Core/Services/AgeGateService.swift; sourceTree = SOURCE_ROOT; };
 		AGGT03000000000000RP01 /* AgeGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateView.swift; path = BarPass/Features/Onboarding/AgeGateView.swift; sourceTree = SOURCE_ROOT; };
 		AMPS01000000000000RP01 /* AppleMusicPlaybackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleMusicPlaybackService.swift; path = BarPass/Core/Music/AppleMusicPlaybackService.swift; sourceTree = SOURCE_ROOT; };
@@ -383,6 +390,7 @@
 		TS0000010000000000000001 /* TripStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripStore.swift; path = BarPass/Features/Stores/TripStore.swift; sourceTree = SOURCE_ROOT; };
 		VEVW03000000000000RP01 /* VerifyEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerifyEmailView.swift; path = BarPass/Features/Auth/VerifyEmailView.swift; sourceTree = SOURCE_ROOT; };
 		VPSC01000000000000RP01 /* VenuePostsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenuePostsSection.swift; path = BarPass/Features/Tonight/VenuePostsSection.swift; sourceTree = SOURCE_ROOT; };
+		8CF9FD7EDEB52D4CD9AF7497 /* VenueRanking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueRanking.swift; path = BarPass/Core/Intelligence/VenueRanking.swift; sourceTree = SOURCE_ROOT; };
 		7C9312B79E236AEA352CD22B /* VenueQuickActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueQuickActions.swift; path = BarPass/Features/Plan/VenueQuickActions.swift; sourceTree = SOURCE_ROOT; };
 		168795511AEBC5150B3BC58F /* CheckInMomentSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckInMomentSheet.swift; path = BarPass/Features/Tonight/CheckInMomentSheet.swift; sourceTree = SOURCE_ROOT; };
 		6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaUploader.swift; path = BarPass/Features/Tonight/VenueMediaUploader.swift; sourceTree = SOURCE_ROOT; };
@@ -521,6 +529,8 @@
 			children = (
 				AA0000020000000000000009 /* LocationService.swift */,
 				AA000002000000000000000A /* NotificationService.swift */,
+				A11B19AC0FF1240000000002 /* OfflineQueue.swift */,
+				B7E2A4C1F0D9438A6E5B2C02 /* PassRegistrationOutbox.swift */,
 				AA000002000000000000000C /* ApplePayService.swift */,
 				FF000001000000000000AB01 /* StripeConfig.swift */,
 				FF000001000000000000AB02 /* APIClient.swift */,
@@ -672,6 +682,7 @@
 				AMPS01000000000000RP01 /* AppleMusicPlaybackService.swift */,
 				FAVS01000000000000RP01 /* FavoritesStore.swift */,
 				VPSC01000000000000RP01 /* VenuePostsSection.swift */,
+				8CF9FD7EDEB52D4CD9AF7497 /* VenueRanking.swift */,
 				7C9312B79E236AEA352CD22B /* VenueQuickActions.swift */,
 				168795511AEBC5150B3BC58F /* CheckInMomentSheet.swift */,
 				6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */,
@@ -726,6 +737,7 @@
 			children = (
 				138CCFF5EDE420FFDFA78DC8 /* EventTicketsView.swift */,
 				AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */,
+				B7E2A4C1F0D9438A6E5B2C04 /* PassIssueStatusView.swift */,
 				8C54DE23E3FEFE20783A41C3 /* SkipLinePassView.swift */,
 				D0C516E6C74A66937CBB9B8F /* ActivePassView.swift */,
 				C2F2D00744D57ECA5B25B120 /* TableReservationView.swift */,
@@ -982,6 +994,7 @@
 				01609A069EE22D5E5CDAF602 /* EventTicket.swift in Sources */,
 				A957F031255C8A30AB61608E /* EventTicketsView.swift in Sources */,
 				4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */,
+				B7E2A4C1F0D9438A6E5B2C03 /* PassIssueStatusView.swift in Sources */,
 				EE000002000000000000001A /* NativeAuthView.swift in Sources */,
 				FF000002000000000000AA01 /* MainTabView.swift in Sources */,
 				FF000002000000000000AA02 /* TonightView.swift in Sources */,
@@ -1043,6 +1056,7 @@
 				AMPS02000000000000RP01 /* AppleMusicPlaybackService.swift in Sources */,
 				FAVS02000000000000RP01 /* FavoritesStore.swift in Sources */,
 				VPSC02000000000000RP01 /* VenuePostsSection.swift in Sources */,
+				35863ABBF504D7CB2BA28C8E /* VenueRanking.swift in Sources */,
 				1FCF5C4F2C26CEA682D5D76A /* VenueQuickActions.swift in Sources */,
 				6035C796BCCE8CD291C46E17 /* CheckInMomentSheet.swift in Sources */,
 				93528C23589A20AC5002B931 /* VenueMediaUploader.swift in Sources */,
@@ -1058,6 +1072,8 @@
 				RVSM02000000000000RP01 /* ReviewSummaryService.swift in Sources */,
 				AA0000010000000000000009 /* LocationService.swift in Sources */,
 				AA000001000000000000000A /* NotificationService.swift in Sources */,
+				A11B19AC0FF1240000000001 /* OfflineQueue.swift in Sources */,
+				B7E2A4C1F0D9438A6E5B2C01 /* PassRegistrationOutbox.swift in Sources */,
 				AA000001000000000000000C /* ApplePayService.swift in Sources */,
 				AA000001000000000000000D /* CacheManager.swift in Sources */,
 				FF000002000000000000AA20 /* AuthService.swift in Sources */,
