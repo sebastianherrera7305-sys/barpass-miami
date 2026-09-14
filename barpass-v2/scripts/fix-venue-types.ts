@@ -30,15 +30,34 @@ if (!city && !all) {
   process.exit(1);
 }
 
-async function signals(placeId: string): Promise<TypeSignals | null> {
-  const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-    headers: {
-      "X-Goog-Api-Key": PLACES_API_KEY!,
-      "X-Goog-FieldMask": "primaryType,types,servesBeer,servesWine,servesCocktails",
-    },
-  });
-  if (!res.ok) return null;
-  return (await res.json()) as TypeSignals;
+/** One transient network error used to kill the whole run: 3,900 sequential
+ *  fetches and no catch, so a single blip threw and the process exited. Retry
+ *  the network, never an actual HTTP answer from Google — a 404 means the place
+ *  is gone and retrying it is just burning quota. */
+async function signals(placeId: string, retries = 3): Promise<TypeSignals | null> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
+        headers: {
+          "X-Goog-Api-Key": PLACES_API_KEY!,
+          "X-Goog-FieldMask": "primaryType,types,servesBeer,servesWine,servesCocktails",
+        },
+      });
+      if (res.status === 429 || res.status >= 500) {
+        if (attempt >= retries) return null;
+        await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+        continue;
+      }
+      if (!res.ok) return null;
+      return (await res.json()) as TypeSignals;
+    } catch (err) {
+      if (attempt >= retries) {
+        console.error(`  red falló para ${placeId}: ${(err as Error).message}`);
+        return null;
+      }
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+    }
+  }
 }
 
 async function main() {

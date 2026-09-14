@@ -58,13 +58,27 @@ export function toWeeklyHours(periods: Period[] | undefined): DayHours[] | null 
   return out.length ? out : null;
 }
 
-async function fetchPeriods(placeId: string): Promise<Period[] | undefined> {
-  const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-    headers: { "X-Goog-Api-Key": PLACES_API_KEY!, "X-Goog-FieldMask": "regularOpeningHours.periods" },
-  });
-  if (!res.ok) return undefined;
-  const d = (await res.json()) as { regularOpeningHours?: { periods?: Period[] } };
-  return d.regularOpeningHours?.periods;
+/** Same hardening as fix-venue-types.ts: a thrown fetch must not end a run of
+ *  thousands. Retries the network and 429/5xx, never a real 4xx. */
+async function fetchPeriods(placeId: string, retries = 3): Promise<Period[] | undefined> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
+        headers: { "X-Goog-Api-Key": PLACES_API_KEY!, "X-Goog-FieldMask": "regularOpeningHours.periods" },
+      });
+      if (res.status === 429 || res.status >= 500) {
+        if (attempt >= retries) return undefined;
+        await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+        continue;
+      }
+      if (!res.ok) return undefined;
+      const d = (await res.json()) as { regularOpeningHours?: { periods?: Period[] } };
+      return d.regularOpeningHours?.periods;
+    } catch {
+      if (attempt >= retries) return undefined;
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+    }
+  }
 }
 
 async function main() {
