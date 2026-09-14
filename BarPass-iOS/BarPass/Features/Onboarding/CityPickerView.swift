@@ -98,9 +98,15 @@ struct CityPickerView: View {
     }
 
     private func loadCities() async {
-        let venues = (try? await RepositoryDependencies.venue.getVenues()) ?? []
-        let counts = Dictionary(grouping: venues.compactMap(\.city)) { $0 }
-            .mapValues(\.count)
+        // The dedicated city index, NOT getVenues(). Since venue fetching was
+        // scoped to the selected city (2026-09-13), getVenues() returns only
+        // the city you are already in — so this screen listed exactly one
+        // option and there was no way out of it. TestFlight, from Gainesville:
+        // "no me deja salirme de gainesville". The index is a separate
+        // select=city read of ~24KB, disk-cached, and exists precisely so a
+        // partial catalogue can still answer "which cities do we cover".
+        let index = (try? await RepositoryDependencies.venue.getCityCounts()) ?? [:]
+        let counts = index
             .map { (city: $0.key, count: $0.value) }
             .sorted { $0.count > $1.count }
 
