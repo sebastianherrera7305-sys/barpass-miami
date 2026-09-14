@@ -60,16 +60,24 @@ async function resolvePhotoUri(photoName: string): Promise<string | null> {
 }
 
 async function main() {
-  const { data: rows, error } = await supabase
-    .from("venues")
-    .select("id,name,city,google_place_id,image_url")
-    .like("image_url", "%places.googleapis.com%");
-  if (error) throw new Error(error.message);
+  // PostgREST caps responses at 1000 rows; page so a large batch can never be
+  // silently truncated the way fix-venue-types.ts was.
+  const rows: { id: string; name: string; city: string | null; google_place_id: string | null; image_url: string | null }[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from("venues")
+      .select("id,name,city,google_place_id,image_url")
+      .like("image_url", "%places.googleapis.com%")
+      .range(from, from + 999);
+    if (error) throw new Error(error.message);
+    rows.push(...((data ?? []) as typeof rows));
+    if ((data?.length ?? 0) < 1000) break;
+  }
 
-  console.log(`${rows?.length ?? 0} venues holding a key-bearing / expiring photo URL\n`);
+  console.log(`${rows.length} venues holding a key-bearing / expiring photo URL\n`);
   let fixed = 0, cleared = 0, failed = 0;
 
-  for (const v of rows ?? []) {
+  for (const v of rows) {
     if (!v.google_place_id) {
       console.log(`  [sin place_id] ${v.name} (${v.city})`);
       failed++;

@@ -42,14 +42,23 @@ async function signals(placeId: string): Promise<TypeSignals | null> {
 }
 
 async function main() {
-  let q = supabase.from("venues").select("id,name,type,city,google_place_id").not("google_place_id", "is", null);
-  if (city) q = q.eq("city", city);
-  const { data: rows, error } = await q;
-  if (error) throw new Error(error.message);
-  console.log(`${rows?.length ?? 0} venues to re-classify${city ? ` in ${city}` : ""}\n`);
+  // PostgREST caps every response at 1000 rows. A bare select silently
+  // processed the first 999 of 3,919 and reported success — the same cap that
+  // made add-venues.ts "discover" venues it already had. Page explicitly.
+  const rows: { id: string; name: string; type: string; city: string | null; google_place_id: string }[] = [];
+  for (let from = 0; ; from += 1000) {
+    let q = supabase.from("venues").select("id,name,type,city,google_place_id")
+      .not("google_place_id", "is", null).range(from, from + 999);
+    if (city) q = q.eq("city", city);
+    const { data, error } = await q;
+    if (error) throw new Error(error.message);
+    rows.push(...((data ?? []) as typeof rows));
+    if ((data?.length ?? 0) < 1000) break;
+  }
+  console.log(`${rows.length} venues to re-classify${city ? ` in ${city}` : ""}\n`);
 
   let retyped = 0, excluded = 0, unchanged = 0, failed = 0;
-  for (const v of rows ?? []) {
+  for (const v of rows) {
     const s = await signals(v.google_place_id as string);
     if (!s) { failed++; continue; }
     const { kind, reason } = classify(s);
