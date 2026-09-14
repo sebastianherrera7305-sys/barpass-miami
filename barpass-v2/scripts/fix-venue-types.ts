@@ -64,9 +64,9 @@ async function main() {
   // PostgREST caps every response at 1000 rows. A bare select silently
   // processed the first 999 of 3,919 and reported success — the same cap that
   // made add-venues.ts "discover" venues it already had. Page explicitly.
-  const rows: { id: string; name: string; type: string; city: string | null; google_place_id: string; hours: { day: number; open: string; close: string }[] | null }[] = [];
+  const rows: { id: string; name: string; type: string; city: string | null; google_place_id: string; hours: { day: number; open: string; close: string }[] | null; excluded_reason: string | null }[] = [];
   for (let from = 0; ; from += 1000) {
-    let q = supabase.from("venues").select("id,name,type,city,google_place_id,hours")
+    let q = supabase.from("venues").select("id,name,type,city,google_place_id,hours,excluded_reason")
       .not("google_place_id", "is", null).range(from, from + 999);
     if (city) q = q.eq("city", city);
     const { data, error } = await q;
@@ -76,7 +76,7 @@ async function main() {
   }
   console.log(`${rows.length} venues to re-classify${city ? ` in ${city}` : ""}\n`);
 
-  let retyped = 0, excluded = 0, unchanged = 0, failed = 0;
+  let retyped = 0, excluded = 0, unchanged = 0, failed = 0, restored = 0;
   for (const v of rows) {
     const s = await signals(v.google_place_id as string);
     if (!s) { failed++; continue; }
@@ -90,6 +90,17 @@ async function main() {
         if (e) { console.error(`    ERROR: ${e.message}`); failed++; continue; }
       }
       excluded++;
+    } else if (v.excluded_reason === "not_nightlife") {
+      // A previous pass excluded it on its label alone. It now classifies as a
+      // venue, so put it back — an exclusion this script made must be one this
+      // script can undo, or a bad rule is permanent.
+      console.log(`  [de vuelta] ${v.name} — ${reason}`);
+      if (!dryRun) {
+        const { error: e } = await supabase.from("venues")
+          .update({ excluded_reason: null, type: kind }).eq("id", v.id);
+        if (e) { console.error(`    ERROR: ${e.message}`); failed++; continue; }
+      }
+      restored++;
     } else if (kind === "bar" && SPECIFIC_NIGHTLIFE.has(v.type as string)) {
       // Google's primaryType is "bar" for plenty of rooftops, lounges and
       // sports bars. Whatever is already on the row is more specific and was
@@ -109,7 +120,7 @@ async function main() {
     }
     await new Promise((r) => setTimeout(r, 80));
   }
-  console.log(`\n${dryRun ? "[DRY RUN] " : ""}re-tipados: ${retyped}   excluidos: ${excluded}   sin cambio: ${unchanged}   fallaron: ${failed}`);
+  console.log(`\n${dryRun ? "[DRY RUN] " : ""}re-tipados: ${retyped}   excluidos: ${excluded}   restaurados: ${restored}   sin cambio: ${unchanged}   fallaron: ${failed}`);
 }
 
 main();

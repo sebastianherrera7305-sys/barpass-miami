@@ -19,7 +19,7 @@ const NIGHTLIFE_PRIMARY = new Set([
   "night_club", "dance_hall",
   "bar", "pub", "cocktail_bar", "wine_bar", "sports_bar", "gastropub",
   "bar_and_grill", "beer_garden", "brewery", "brewpub", "beer_hall",
-  "karaoke", "live_music_venue", "comedy_club", "lounge", "hookah_bar",
+  "karaoke", "live_music_venue", "concert_hall", "comedy_club", "lounge", "hookah_bar",
 ]);
 
 /** Primary types that are restaurants first. They can stay in the catalogue —
@@ -96,10 +96,17 @@ export function classify(s: TypeSignals): Classification {
   }
 
   if (NOT_NIGHTLIFE.has(primary)) {
-    // One escape hatch, and it has to be earned: a place Google files as
-    // something else but that is listed as a night club AND actually pours
-    // drinks is a venue (a warehouse "event_venue" that runs club nights).
+    // Escape hatches, both earned by behaviour rather than by label.
+    // A warehouse Google files as "event_venue" that is also listed as a night
+    // club and pours drinks is a club.
     if (all.has("night_club") && pours) return { kind: "club", reason: `primary=${primary} but night_club + serves alcohol` };
+    // And anything that pours drinks and is open past midnight is somewhere
+    // people go out — AREA15 in Las Vegas is filed as a tourist_attraction,
+    // Lucky Strike as a bowling_alley, and a concert hall as a concert_hall.
+    // The same test that rescued the college bars applies here.
+    if (pours && lateNights(s.hours) >= 1) {
+      return { kind: "bar", reason: `primary=${primary} but open past midnight and serves alcohol` };
+    }
     return { kind: null, reason: `primary=${primary} is not nightlife` };
   }
 
