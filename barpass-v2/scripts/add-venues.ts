@@ -197,6 +197,61 @@ async function searchOnce(query: string): Promise<PlaceSummary[]> {
 }
 
 /** Corre todas las variantes y fusiona resultados, deduplicando por place_id. */
+/** Google Places "Nearby Search" — a geographic sweep, not a phrase match.
+ *  Text Search ranks by relevance to a query and caps at 20 results per call,
+ *  so in a dense bar strip it silently drops real venues: a Gainesville audit
+ *  on 2026-09-12 found 25 operational bars/clubs that no text query surfaced.
+ *  A circle sweep has no such blind spot. */
+async function searchNearbyOnce(lat: number, lng: number, radius: number): Promise<PlaceSummary[]> {
+  const res = await fetchWithRetry("https://places.googleapis.com/v1/places:searchNearby", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Goog-Api-Key": PLACES_API_KEY!,
+      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.types",
+    },
+    body: JSON.stringify({
+      includedTypes: ["bar", "night_club", "pub", "wine_bar", "bar_and_grill"],
+      maxResultCount: 20,
+      locationRestriction: { circle: { center: { latitude: lat, longitude: lng }, radius } },
+    }),
+  });
+  if (!res.ok) {
+    console.error(`  searchNearby failed at ${lat},${lng} (${res.status}): ${await res.text()}`);
+    return [];
+  }
+  return ((await res.json()) as SearchResponse).places ?? [];
+}
+
+/** Real coordinates for a place name via Google — null if unresolvable, never invented. */
+async function resolveLocation(query: string): Promise<{ lat: number; lng: number } | null> {
+  const first = (await searchOnce(query))[0];
+  if (!first) return null;
+  const details = await fetchDetails(first.id);
+  if (!details?.location) return null;
+  return { lat: details.location.latitude, lng: details.location.longitude };
+}
+
+/** Overlapping circles around each anchor: 3x3 grid ~1.2km apart, r=1200m.
+ *  The overlap is deliberate — a venue sitting on a cell edge would otherwise
+ *  fall into the gap between two 20-result caps. Dedup by place_id makes the
+ *  redundant coverage free. */
+async function sweepAround(anchors: { lat: number; lng: number }[]): Promise<PlaceSummary[]> {
+  const merged = new Map<string, PlaceSummary>();
+  const stepLat = 1.2 / 111;
+  for (const a of anchors) {
+    const stepLng = 1.2 / (111 * Math.cos((a.lat * Math.PI) / 180));
+    for (const dy of [-1, 0, 1]) {
+      for (const dx of [-1, 0, 1]) {
+        const found = await searchNearbyOnce(a.lat + dy * stepLat, a.lng + dx * stepLng, 1200);
+        for (const p of found) if (!merged.has(p.id)) merged.set(p.id, p);
+        await new Promise((r) => setTimeout(r, 150));
+      }
+    }
+  }
+  return [...merged.values()];
+}
+
 async function searchCity(city: string, collegeQuery: string | null): Promise<PlaceSummary[]> {
   const queries = buildQueries(city, collegeQuery);
   const merged = new Map<string, PlaceSummary>();
@@ -205,6 +260,24 @@ async function searchCity(city: string, collegeQuery: string | null): Promise<Pl
     const results = await searchOnce(q);
     for (const p of results) if (!merged.has(p.id)) merged.set(p.id, p);
     await new Promise((r) => setTimeout(r, 200));
+  }
+  const fromText = merged.size;
+
+  // Geographic sweep on top of the phrase queries. Anchors are resolved
+  // through Google, never hard-coded.
+  const anchors: { lat: number; lng: number }[] = [];
+  const cityCenter = await resolveLocation(`downtown ${city}`);
+  if (cityCenter) anchors.push(cityCenter);
+  if (collegeQuery) {
+    const campus = await resolveLocation(collegeQuery);
+    if (campus) anchors.push(campus);
+  }
+  if (anchors.length === 0) {
+    console.log("  (no real anchor could be resolved — geographic sweep skipped)");
+  } else {
+    console.log(`  barrido geográfico sobre ${anchors.length} ancla(s)...`);
+    for (const p of await sweepAround(anchors)) if (!merged.has(p.id)) merged.set(p.id, p);
+    console.log(`  el barrido agregó ${merged.size - fromText} candidatos que ninguna query de texto encontró.`);
   }
   return [...merged.values()];
 }
@@ -227,10 +300,24 @@ async function fetchDetails(placeId: string): Promise<PlaceDetails | null> {
   return (await res.json()) as PlaceDetails;
 }
 
-function firstPhotoUrl(details: PlaceDetails): string | null {
+/** Resolves a Places photo to the keyless CDN URL, because the media URL is
+ *  not safe to store. Two reasons, both hit in production on 2026-09-13:
+ *  it embeds GOOGLE_PLACES_API_KEY and venues.image_url is world-readable
+ *  through the anon key, and the photo resource name expires — 69 rows had
+ *  rotted to HTTP 400 ("No muestro ninguna foto en el venue"). The resolved
+ *  lh3.googleusercontent.com URL carries no key and does not expire; that is
+ *  what the other 1,728 healthy rows already hold. */
+async function firstPhotoUrl(details: PlaceDetails): Promise<string | null> {
   const photoName = details.photos?.[0]?.name;
   if (!photoName) return null;
-  return `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=1200&key=${PLACES_API_KEY}`;
+  const res = await fetch(
+    `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=1200&skipHttpRedirect=true`,
+    { headers: { "X-Goog-Api-Key": PLACES_API_KEY! } },
+  );
+  if (!res.ok) return null;
+  const uri = ((await res.json()) as { photoUri?: string }).photoUri ?? null;
+  // Belt and braces: never persist anything still carrying a key.
+  return uri && !uri.includes("key=") && !uri.includes("AIza") ? uri : null;
 }
 
 /** Haversine — km entre dos puntos. Solo para mostrar distancia al campus en el reporte. */
@@ -242,14 +329,21 @@ function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   return 2 * R * Math.asin(Math.sqrt(s));
 }
 
-/** Ubicación real del campus, vía Google — null si no se pudo resolver (nunca inventada). */
-async function resolveCollegeLocation(collegeQuery: string): Promise<{ lat: number; lng: number } | null> {
-  const results = await searchOnce(collegeQuery);
-  const first = results[0];
-  if (!first) return null;
-  const details = await fetchDetails(first.id);
-  if (!details?.location) return null;
-  return { lat: details.location.latitude, lng: details.location.longitude };
+/** PostgREST caps every response at 1000 rows. Reading the dedup sets with a
+ *  bare select therefore saw only the first 1000 of 1871 venues, so venues past
+ *  that point looked new: a Gainesville run "discovered" Simons, White Buffalo
+ *  and Ole Barn, all long since in the table, and 11 inserts died on the slug
+ *  unique constraint. Page explicitly instead. */
+async function selectAllVenues(columns: string): Promise<Record<string, unknown>[]> {
+  const out: Record<string, unknown>[] = [];
+  const page = 1000;
+  for (let from = 0; ; from += page) {
+    const { data, error } = await supabase.from("venues").select(columns).range(from, from + page - 1);
+    if (error) throw new Error(`selectAllVenues(${columns}) falló: ${error.message}`);
+    const rows = (data ?? []) as unknown as Record<string, unknown>[];
+    out.push(...rows);
+    if (rows.length < page) return out;
+  }
 }
 
 async function main() {
@@ -257,7 +351,7 @@ async function main() {
   const [cityName, stateAbbr] = city.split(",").map((s) => s.trim());
   const timezone = resolveTimezone(stateAbbr ?? "FL");
 
-  const collegeLocation = collegeArg ? await resolveCollegeLocation(collegeArg) : null;
+  const collegeLocation = collegeArg ? await resolveLocation(collegeArg) : null;
   if (collegeArg && !collegeLocation) {
     console.log(`  (no se pudo resolver la ubicación real de "${collegeArg}" — se omite el cálculo de distancia)`);
   }
@@ -268,8 +362,11 @@ async function main() {
 
   // Duplicados: contra TODA la tabla, por google_place_id (una cadena real
   // podría aparecer en más de una ciudad, pero un place_id nunca se repite).
-  const { data: existing } = await supabase.from("venues").select("google_place_id").not("google_place_id", "is", null);
-  const existingIds = new Set((existing ?? []).map((v) => v.google_place_id));
+  const existingIds = new Set(
+    (await selectAllVenues("google_place_id"))
+      .map((v) => v.google_place_id as string | null)
+      .filter((id): id is string => id !== null),
+  );
 
   // slug = name+city collides for real, distinct venues (chains with two
   // locations in one city, or two separate Google listings for the same
@@ -277,8 +374,7 @@ async function main() {
   // batch). Track every slug already claimed, in the DB or earlier in this
   // same run, and disambiguate with the place_id rather than silently
   // dropping the insert on a unique-constraint error.
-  const { data: existingSlugs } = await supabase.from("venues").select("slug");
-  const claimedSlugs = new Set((existingSlugs ?? []).map((v) => v.slug));
+  const claimedSlugs = new Set((await selectAllVenues("slug")).map((v) => v.slug as string));
 
   let validCandidates = 0, inserted = 0, insertFailed = 0, skippedDup = 0, skippedType = 0, skippedNoHours = 0, skippedClosed = 0, skippedWrongCity = 0, processed = 0;
 
@@ -377,7 +473,7 @@ async function main() {
       peak_hours: "",
       popular_drinks: "[]",
       emoji: type === "club" ? "🎵" : type === "brewery" ? "🍺" : "🍸",
-      image_url: firstPhotoUrl(details),
+      image_url: await firstPhotoUrl(details),
       instagram_handle: null,
       is_trending: false,
       phone: details.nationalPhoneNumber ?? null,

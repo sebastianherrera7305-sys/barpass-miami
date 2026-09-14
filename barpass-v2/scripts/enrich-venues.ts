@@ -115,10 +115,24 @@ async function fetchPlaceDetails(placeId: string): Promise<PlaceDetails | null> 
 }
 
 /** URL directa de la primera foto real del venue — null si Google no tiene ninguna. */
-function firstPhotoUrl(details: PlaceDetails): string | null {
+/** Resolves a Places photo to the keyless CDN URL, because the media URL is
+ *  not safe to store. Two reasons, both hit in production on 2026-09-13:
+ *  it embeds GOOGLE_PLACES_API_KEY and venues.image_url is world-readable
+ *  through the anon key, and the photo resource name expires — 69 rows had
+ *  rotted to HTTP 400 ("No muestro ninguna foto en el venue"). The resolved
+ *  lh3.googleusercontent.com URL carries no key and does not expire; that is
+ *  what the other 1,728 healthy rows already hold. */
+async function firstPhotoUrl(details: PlaceDetails): Promise<string | null> {
   const photoName = details.photos?.[0]?.name;
   if (!photoName) return null;
-  return `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=1200&key=${PLACES_API_KEY}`;
+  const res = await fetch(
+    `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=1200&skipHttpRedirect=true`,
+    { headers: { "X-Goog-Api-Key": PLACES_API_KEY! } },
+  );
+  if (!res.ok) return null;
+  const uri = ((await res.json()) as { photoUri?: string }).photoUri ?? null;
+  // Belt and braces: never persist anything still carrying a key.
+  return uri && !uri.includes("key=") && !uri.includes("AIza") ? uri : null;
 }
 
 async function enrichVenue(venue: VenueRow): Promise<void> {
@@ -147,7 +161,7 @@ async function enrichVenue(venue: VenueRow): Promise<void> {
   if (typeof details.rating === "number") update.rating = details.rating;
   if (typeof details.userRatingCount === "number") update.review_count = details.userRatingCount;
   if (details.businessStatus) update.business_status = details.businessStatus;
-  const photoUrl = firstPhotoUrl(details);
+  const photoUrl = await firstPhotoUrl(details);
   // Do not clobber a photo whose provenance says it was written deliberately.
   // The 2026-09-01 backfill stored pre-sized, key-free URLs (~40-160KB); this
   // script still builds the old 1.3MB form, so an unguarded re-run would

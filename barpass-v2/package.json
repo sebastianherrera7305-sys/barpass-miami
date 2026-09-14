@@ -23,7 +23,8 @@
     "resolve-photos": "node --env-file=.env.local --import tsx scripts/resolve-photos.ts",
     "add-venues": "node --env-file=.env.local --import tsx scripts/add-venues.ts",
     "fetch-logos": "node --env-file=.env.local --import tsx scripts/fetch-logos.ts",
-    "seed-events": "node --env-file=.env.local --import tsx scripts/seed-real-events.ts"
+    "seed-events": "node --env-file=.env.local --import tsx scripts/seed-real-events.ts",
+    "fix:photos": "node --env-file=.env.local --import tsx scripts/fix-venue-photos.ts"
   },
   "dependencies": {
     "@google/genai": "^2.11.0",
