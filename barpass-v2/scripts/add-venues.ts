@@ -6,6 +6,7 @@
  *
  * Uso:
  *   npm run add-venues -- --city="Gainesville, FL" [--dry-run] [--limit=20]
+ *                        [--anchor="Little Havana, Miami"]   (repetible)
  *
  * Requiere en .env.local: GOOGLE_PLACES_API_KEY, NEXT_PUBLIC_SUPABASE_URL,
  * SUPABASE_SERVICE_ROLE_KEY.
@@ -13,6 +14,7 @@
 import { createClient } from "@supabase/supabase-js";
 // @ts-expect-error — 'ws' no trae tipos propios, ver enrich-venues.ts.
 import ws from "ws";
+import { classify } from "./venue-type-rules";
 
 const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -31,6 +33,14 @@ const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const cityArg = args.find((a) => a.startsWith("--city="))?.replace("--city=", "");
 const collegeArg = args.find((a) => a.startsWith("--college="))?.replace("--college=", "") ?? null;
+// Repeatable --anchor="Little Havana, Miami": extra real places to centre the
+// geographic sweep on. One anchor ("downtown <city>") covers ~2.4km, which is
+// fine for Gainesville and badly short for a metro whose nightlife is spread
+// across several districts — a Miami run on 2026-09-13 missed Ball & Chain
+// (Little Havana) and everything in South Beach for exactly this reason.
+// Each value is resolved through Google like any other anchor; nothing is
+// hard-coded and the city check still applies to every result.
+const anchorArgs = args.filter((a) => a.startsWith("--anchor=")).map((a) => a.replace("--anchor=", ""));
 // Sin --limit: cobertura real completa, no un tope artificial (pedido §1).
 const limitArg = args.find((a) => a.startsWith("--limit="))?.replace("--limit=", "");
 const limit = limitArg ? parseInt(limitArg, 10) : Infinity;
@@ -63,6 +73,10 @@ interface PlaceDetails {
   regularOpeningHours?: { periods?: { open?: { hour: number; minute: number }; close?: { hour: number; minute: number } }[] };
   photos?: { name: string }[];
   priceLevel?: string;
+  primaryType?: string;
+  servesBeer?: boolean;
+  servesWine?: boolean;
+  servesCocktails?: boolean;
   addressComponents?: { longText: string; types: string[] }[];
   accessibilityOptions?: { wheelchairAccessibleEntrance?: boolean };
   outdoorSeating?: boolean;
@@ -74,14 +88,13 @@ interface PlaceDetails {
   restroom?: boolean;
 }
 
-/** Google type -> nuestro enum constreñido. null = no es un venue de nightlife real. */
-function mapType(types: string[] | undefined): string | null {
-  const t = new Set(types ?? []);
-  if (t.has("night_club")) return "club";
-  if (t.has("bar") || t.has("pub") || t.has("wine_bar")) return "bar";
-  if (t.has("brewery") || t.has("bar_and_grill")) return "brewery";
-  if (t.has("restaurant")) return "restaurant";
-  return null;
+/** Google type -> our constrained enum, via the shared, tested classifier.
+ *  The old version asked "does the types array contain 'bar'?", and every chain
+ *  restaurant with a liquor licence does — which is how Olive Garden, Outback,
+ *  LongHorn, three Sonny's BBQ and a liquor store ended up filed as Gainesville
+ *  bars, burying the actual college bars. See scripts/venue-type-rules.ts. */
+function mapType(details: { types?: string[]; primaryType?: string; servesBeer?: boolean; servesWine?: boolean; servesCocktails?: boolean }): string | null {
+  return classify(details).kind;
 }
 
 const PRICE_LEVEL_MAP: Record<string, number> = {
@@ -117,6 +130,14 @@ const STATE_TIMEZONE: Record<string, string> = {
 // Extend this as other consolidated-metro cities are added to the pipeline.
 const CITY_ALIASES: Record<string, string[]> = {
   "New York": ["New York", "Brooklyn", "Queens", "Bronx", "Staten Island", "Manhattan", "Long Island City", "Astoria"],
+  // Coconut Grove has no municipal government of its own — it was annexed by
+  // the City of Miami in 1925 and its addresses are Miami addresses (ZIP
+  // 33133), but Google formats them as "Coconut Grove, FL". Same class of fact
+  // as the NYC boroughs. Deliberately NOT here: Coral Gables, Miami Beach,
+  // Doral, Hialeah — those are legally separate cities, and including them
+  // would be a product decision, not a fact. (Note that Miami Beach addresses
+  // pass the check anyway, because "Miami Beach" contains "Miami".)
+  Miami: ["Miami", "Coconut Grove"],
 };
 
 function resolveTimezone(stateAbbr: string): string {
@@ -137,7 +158,7 @@ function slugify(name: string, city: string): string {
  * al final nightlife general de la ciudad. `collegeQuery` es opcional —
  * ciudades sin universidad asociada solo corren las genéricas.
  */
-function buildQueries(city: string, collegeQuery: string | null): string[] {
+function buildQueries(city: string, collegeQuery: string | null, areas: string[] = []): string[] {
   const collegeFirst = collegeQuery
     ? [
         `college bars near ${collegeQuery}`,
@@ -156,6 +177,7 @@ function buildQueries(city: string, collegeQuery: string | null): string[] {
     `rooftop bars in ${city}`,
     `late night bars in ${city}`,
     `popular nightlife near downtown ${city}`,
+    ...areas.flatMap((a) => [`bars and nightclubs in ${a}`, `nightlife in ${a}`]),
   ];
 }
 
@@ -167,7 +189,14 @@ function buildQueries(city: string, collegeQuery: string | null): string[] {
 async function fetchWithRetry(url: string, init: RequestInit, retries = 3): Promise<Response> {
   for (let attempt = 0; ; attempt++) {
     try {
-      return await fetch(url, init);
+      const res = await fetch(url, init);
+      // Buffer the body HERE, inside the try. Returning the un-read Response
+      // left the body read at the call site, outside any retry: a Miami run on
+      // 2026-09-13 died mid-sweep with UND_ERR_BODY_TIMEOUT ("TypeError:
+      // terminated") after ~90 Google calls, losing the whole run. Re-wrapping
+      // keeps every caller's `res.ok` / `res.json()` working unchanged.
+      const body = await res.text();
+      return new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
     } catch (err) {
       if (attempt >= retries) throw err;
       const delay = 500 * 2 ** attempt;
@@ -252,8 +281,33 @@ async function sweepAround(anchors: { lat: number; lng: number }[]): Promise<Pla
   return [...merged.values()];
 }
 
-async function searchCity(city: string, collegeQuery: string | null): Promise<PlaceSummary[]> {
-  const queries = buildQueries(city, collegeQuery);
+/** Distinct ~2.4km cells that this city's existing venues fall into, each
+ *  returned as the centre of the cell. Derived purely from data we already
+ *  hold, so there is no hand-listed set of neighbourhoods to go stale. */
+async function occupiedCells(cityName: string): Promise<{ lat: number; lng: number }[]> {
+  const { data, error } = await supabase
+    .from("venues")
+    .select("lat,lng")
+    .eq("city", cityName)
+    .not("lat", "is", null);
+  if (error || !data?.length) return [];
+  const CELL_KM = 2.4;
+  const stepLat = CELL_KM / 111;
+  const seen = new Map<string, { lat: number; lng: number }>();
+  for (const v of data as { lat: number; lng: number }[]) {
+    if (!v.lat || !v.lng) continue;
+    const stepLng = CELL_KM / (111 * Math.cos((v.lat * Math.PI) / 180));
+    const row = Math.round(v.lat / stepLat);
+    const col = Math.round(v.lng / stepLng);
+    const key = `${row}:${col}`;
+    if (!seen.has(key)) seen.set(key, { lat: row * stepLat, lng: col * stepLng });
+  }
+  return [...seen.values()];
+}
+
+
+async function searchCity(city: string, collegeQuery: string | null, extraAnchors: string[] = []): Promise<PlaceSummary[]> {
+  const queries = buildQueries(city, collegeQuery, extraAnchors);
   const merged = new Map<string, PlaceSummary>();
   for (const q of queries) {
     console.log(`  buscando: "${q}"`);
@@ -272,6 +326,19 @@ async function searchCity(city: string, collegeQuery: string | null): Promise<Pl
     const campus = await resolveLocation(collegeQuery);
     if (campus) anchors.push(campus);
   }
+  // Anchor on where this city's nightlife ACTUALLY is, not just where its
+  // downtown is. A 3x3 grid at 1.2km spacing reaches about 2.4km, and Miami's
+  // Little Havana sits 3km west of downtown — Ball & Chain and Kiki on the
+  // River, both open and both famous, fell straight through that gap. The
+  // venues already in the catalogue are a free, honest map of the real
+  // nightlife geography, so tile whatever area they occupy. Cells are ~2.4km
+  // so the sweep's own grid overlaps them.
+  for (const cell of await occupiedCells(city.split(",")[0].trim())) anchors.push(cell);
+  for (const a of extraAnchors) {
+    const loc = await resolveLocation(a);
+    if (loc) anchors.push(loc);
+    else console.log(`  (no se pudo resolver el ancla "${a}" — se omite)`);
+  }
   if (anchors.length === 0) {
     console.log("  (no real anchor could be resolved — geographic sweep skipped)");
   } else {
@@ -286,7 +353,8 @@ async function fetchDetails(placeId: string): Promise<PlaceDetails | null> {
   const fields = [
     "id", "displayName", "formattedAddress", "location", "nationalPhoneNumber",
     "websiteUri", "rating", "userRatingCount", "businessStatus", "types",
-    "regularOpeningHours", "photos", "priceLevel", "addressComponents",
+    "regularOpeningHours", "photos", "priceLevel", "addressComponents", "primaryType",
+    "servesBeer", "servesWine", "servesCocktails",
     "accessibilityOptions", "outdoorSeating", "goodForGroups",
     "goodForWatchingSports", "liveMusic", "reservable", "servesVegetarianFood", "restroom",
   ].join(",");
@@ -310,7 +378,7 @@ async function fetchDetails(placeId: string): Promise<PlaceDetails | null> {
 async function firstPhotoUrl(details: PlaceDetails): Promise<string | null> {
   const photoName = details.photos?.[0]?.name;
   if (!photoName) return null;
-  const res = await fetch(
+  const res = await fetchWithRetry(
     `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=1200&skipHttpRedirect=true`,
     { headers: { "X-Goog-Api-Key": PLACES_API_KEY! } },
   );
@@ -357,7 +425,7 @@ async function main() {
   }
 
   console.log(`Buscando venues reales en "${city}"${collegeArg ? ` (college-first: ${collegeArg})` : ""}...`);
-  const results = await searchCity(city, collegeArg);
+  const results = await searchCity(city, collegeArg, anchorArgs);
   console.log(`\n${results.length} candidatos únicos tras fusionar todas las queries.\n`);
 
   // Duplicados: contra TODA la tabla, por google_place_id (una cadena real
@@ -421,7 +489,7 @@ async function main() {
       continue;
     }
 
-    const type = mapType(details.types);
+    const type = mapType(details);
     if (!type) {
       console.log(`  [tipo]    ${name} — types=${(details.types ?? []).join(",")} no mapea a nuestro enum`);
       skippedType++;

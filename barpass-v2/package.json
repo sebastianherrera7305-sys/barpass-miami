@@ -24,7 +24,9 @@
     "add-venues": "node --env-file=.env.local --import tsx scripts/add-venues.ts",
     "fetch-logos": "node --env-file=.env.local --import tsx scripts/fetch-logos.ts",
     "seed-events": "node --env-file=.env.local --import tsx scripts/seed-real-events.ts",
-    "fix:photos": "node --env-file=.env.local --import tsx scripts/fix-venue-photos.ts"
+    "fix:photos": "node --env-file=.env.local --import tsx scripts/fix-venue-photos.ts",
+    "fix:types": "node --env-file=.env.local --import tsx scripts/fix-venue-types.ts",
+    "dedupe:address": "node --env-file=.env.local --import tsx scripts/dedupe-same-address.ts"
   },
   "dependencies": {
     "@google/genai": "^2.11.0",
