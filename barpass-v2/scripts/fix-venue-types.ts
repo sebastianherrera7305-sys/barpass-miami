@@ -82,7 +82,26 @@ async function main() {
     if (!s) { failed++; continue; }
     const { kind, reason } = classify({ ...s, hours: v.hours });
 
-    if (kind === null) {
+    if (kind === "unknown") {
+      // Google told us nothing. Keep the row exactly as it is — and if a
+      // previous pass excluded it on this same silence, undo that.
+      if (v.excluded_reason === "not_nightlife") {
+        console.log(`  [de vuelta] ${v.name} — ${reason}`);
+        if (!dryRun) {
+          const { error: e } = await supabase.from("venues")
+            .update({ excluded_reason: null }).eq("id", v.id);
+          if (e) { console.error(`    ERROR: ${e.message}`); failed++; continue; }
+        }
+        restored++;
+      } else {
+        unchanged++;
+      }
+    } else if (kind === null && SPECIFIC_NIGHTLIFE.has(v.type as string)) {
+      // Positively not a venue by Google — but the catalogue already types it
+      // as real nightlife, which is the stronger claim. Leave it and say so.
+      console.log(`  [conservado] ${v.name} (${v.type}) — Google dice "${reason}", se respeta el tipo existente`);
+      unchanged++;
+    } else if (kind === null) {
       console.log(`  [fuera]   ${v.name} — ${reason}`);
       if (!dryRun) {
         const { error: e } = await supabase.from("venues")

@@ -35,15 +35,24 @@ describe("classify", () => {
   });
 
   it("rejects things that are not venues at all", () => {
-    for (const p of ["liquor_store", "farm", "indoor_golf_course",
-                     "performing_arts_theater", "store", "bowling_alley"]) {
+    // Strong evidence only. A shop is a shop whatever else is missing.
+    for (const p of ["liquor_store", "farm", "indoor_golf_course", "store", "movie_theater"]) {
       expect(classify({ primaryType: p, types: ["bar"] }).kind).toBeNull();
     }
   });
 
   it("lets a warehouse that actually runs club nights through", () => {
     expect(classify({ primaryType: "event_venue", types: ["night_club", "event_venue"], servesBeer: true }).kind).toBe("club");
-    expect(classify({ primaryType: "event_venue", types: ["event_venue"] }).kind).toBeNull();
+  });
+
+  it("never excludes on Google's silence — Factory Town", () => {
+    // Factory Town, Miami: primaryType event_venue, no hours, no alcohol flags.
+    // A real warehouse club. "unknown" means keep whatever the catalogue holds.
+    expect(classify({ primaryType: "event_venue", types: ["event_venue", "point_of_interest"] }).kind).toBe("unknown");
+    expect(classify({ primaryType: "point_of_interest", types: [] }).kind).toBe("unknown");
+    // A bowling alley that pours and runs late is somewhere people go out.
+    expect(classify({ primaryType: "bowling_alley", types: ["bar"], servesBeer: true,
+                      hours: [{ day: 5, open: "16:00", close: "02:00" }] }).kind).toBe("bar");
   });
 
   it("keeps kava bars and pool halls, which are real college nightlife", () => {

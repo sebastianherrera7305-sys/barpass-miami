@@ -27,13 +27,27 @@ const NIGHTLIFE_PRIMARY = new Set([
  *  going-out scorer already ranks `restaurant` at zero. */
 const RESTAURANT_PRIMARY = /(_restaurant|steak_house|bistro|diner|cafe|cafeteria|food_court|deli|bakery|breakfast|brunch|fast_food|pizza|sandwich|sushi|ramen|barbecue|seafood|buffet)/;
 
-/** Primary types that do not belong in a nightlife app at all. */
+/** Primary types that are STRONG evidence a place is not a venue. A shop is a
+ *  shop; no amount of missing data changes that. */
 const NOT_NIGHTLIFE = new Set([
   "store", "liquor_store", "grocery_store", "convenience_store", "farm",
-  "indoor_golf_course", "golf_course", "performing_arts_theater", "movie_theater",
-  "bowling_alley", "amusement_center", "gym", "spa", "hotel", "lodging",
-  "event_venue", "banquet_hall", "wedding_venue", "corporate_office",
-  "tourist_attraction", "park", "stadium",
+  "indoor_golf_course", "golf_course", "movie_theater",
+  "gym", "spa", "hotel", "lodging", "corporate_office", "park", "stadium",
+]);
+
+/** Primary types that say almost nothing either way. Google files real
+ *  warehouse clubs as "event_venue" — Factory Town in Miami has primaryType
+ *  event_venue, no opening hours and no alcohol flags at all, and an earlier
+ *  version of this file excluded it on that basis. It is a club the owner has
+ *  personally been to and that this app has built features for.
+ *
+ *  Absence of evidence is not evidence. A thin Google record must never
+ *  overturn a type the catalogue already holds — the same rule as everywhere
+ *  else here: an empty value is a fact, not a licence to guess. */
+const AMBIGUOUS = new Set([
+  "event_venue", "banquet_hall", "wedding_venue", "point_of_interest",
+  "establishment", "tourist_attraction", "amusement_center", "bowling_alley",
+  "performing_arts_theater", "service", "market",
 ]);
 
 export interface TypeSignals {
@@ -59,8 +73,9 @@ export function lateNights(hours: TypeSignals["hours"]): number {
 export type VenueKind = "club" | "bar" | "lounge" | "sports_bar" | "rooftop" | "brewery" | "restaurant";
 
 export interface Classification {
-  /** null = does not belong in a nightlife catalogue. */
-  kind: VenueKind | null;
+  /** null = positively not a venue. "unknown" = Google says nothing useful;
+   *  the caller must keep whatever the catalogue already holds. */
+  kind: VenueKind | "unknown" | null;
   /** Why, for provenance and for the report. */
   reason: string;
 }
@@ -93,6 +108,17 @@ export function classify(s: TypeSignals): Classification {
       return { kind: "bar", reason: `primary=${primary} but open past midnight and serves alcohol` };
     }
     return { kind: "restaurant", reason: `primary=${primary}` };
+  }
+
+  if (AMBIGUOUS.has(primary)) {
+    // Decide on behaviour if we have any, otherwise hand the decision back to
+    // the caller (which keeps whatever the row already says).
+    if (all.has("night_club")) return { kind: "club", reason: `types include night_club (primary=${primary})` };
+    if (pours && lateNights(s.hours) >= 1) {
+      return { kind: "bar", reason: `primary=${primary} but open past midnight and serves alcohol` };
+    }
+    if (all.has("bar")) return { kind: "bar", reason: `types include bar (primary=${primary})` };
+    return { kind: "unknown", reason: `primary=${primary} tells us nothing; keeping what we have` };
   }
 
   if (NOT_NIGHTLIFE.has(primary)) {
