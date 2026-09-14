@@ -1,8 +1,21 @@
 import Foundation
 
 final actor SupabaseVenueRepository: VenueRepository {
-    private var loadedVenues: [BarPassVenue]?
-    private var loadedAt: Date?
+    /// Venues we have, keyed by the city they were fetched for. `""` is the
+    /// unscoped fetch, used only before a city has ever been chosen.
+    ///
+    /// 2026-09-13: every launch and every refresh used to download the WHOLE
+    /// 23-city catalogue (1,899 rows × 45 columns, ~2.7MB in two sequential
+    /// pages) plus events/tags/age-brackets/price-stats for all 23 cities, in
+    /// order to render the ~160 venues of ONE city. Inside a club on contended
+    /// LTE that saturates the connection and starves image loads, the AI chat
+    /// and check-in — the #1 reported complaint ("too slow inside the club").
+    /// Now each city is fetched on its own (~250KB) and KEPT here, so
+    /// switching back to a city already visited costs nothing.
+    private var venuesByCity: [String: [BarPassVenue]] = [:]
+    private var loadedAtByCity: [String: Date] = [:]
+    private var refreshingCities: Set<String> = []
+    private static let allCitiesKey = ""
 
     /// How long the in-memory snapshot is trusted before a call to
     /// `getVenues()` triggers a real network fetch again. Without this, the
@@ -21,93 +34,132 @@ final actor SupabaseVenueRepository: VenueRepository {
     /// Cache en disco de la última lista real obtenida — antes el fallback
     /// sin red era 1 sola venue hardcodeada de preview (LocalVenueRepository),
     /// lo cual hacía que la app se sintiera rota sin conexión.
-    private static let cacheURL: URL = {
+    ///
+    /// One file PER CITY (plus one for the city index) instead of a single
+    /// whole-catalogue blob: a city-scoped world must never be able to write
+    /// one city's venues into a file the next launch reads back as "the whole
+    /// catalogue". The legacy single file is migrated on first read below.
+    private static let cacheDirectory: URL = {
+        let base = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        let dir = base.appendingPathComponent("BarPassVenueCache", isDirectory: true)
+        // Application Support is NOT created for us on iOS — without this the
+        // old `write(to:)` silently failed on a fresh install and the offline
+        // fallback never had anything to serve.
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }()
+
+    private static let legacyCacheURL: URL = {
         let base = FileManager.default
             .urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         return base.appendingPathComponent("BarPassVenueCache.json")
     }()
 
+    private static let cityIndexCacheURL = cacheDirectory.appendingPathComponent("city-index.json")
+
+    private static func cacheURL(forKey key: String) -> URL {
+        // Cities are free text from the DB ("New York", "Washington, D.C.") —
+        // never interpolate one straight into a path.
+        let safe = key.isEmpty
+            ? "all"
+            : key.unicodeScalars.map { CharacterSet.alphanumerics.contains($0) ? Character($0) : "_" }
+                 .reduce(into: "") { $0.append($1) }
+        return cacheDirectory.appendingPathComponent("city-\(safe).json")
+    }
+
+    /// The single list every consumer sees: every city fetched so far, in a
+    /// stable order, deduplicated by id. Callers (VenueStore) filter it down
+    /// to the selected city themselves.
+    private func mergedVenues() -> [BarPassVenue] {
+        var seen = Set<String>()
+        var out: [BarPassVenue] = []
+        for key in venuesByCity.keys.sorted() {
+            for venue in venuesByCity[key] ?? [] where seen.insert(venue.id).inserted {
+                out.append(venue)
+            }
+        }
+        return out
+    }
+
     private func ensureVenues(forceRefresh: Bool = false) async throws -> [BarPassVenue] {
+        let city = SelectedCityStore.selectedCity
+        let key = city ?? Self.allCitiesKey
+
         if !forceRefresh,
-           let venues = loadedVenues,
-           let loadedAt,
-           Date().timeIntervalSince(loadedAt) < Self.freshnessWindow {
-            return venues
+           venuesByCity[key] != nil,
+           let at = loadedAtByCity[key],
+           Date().timeIntervalSince(at) < Self.freshnessWindow {
+            return mergedVenues()
         }
         if forceRefresh {
-            let venues = await fetchVenuesWithFallback()
-            loadedVenues = venues
-            loadedAt = Date()
-            return venues
+            let venues = await fetchVenuesWithFallback(city: city)
+            commit(venues, key: key)
+            return mergedVenues()
         }
 
-        // Launch path (2026-09-08). Before this, opening the app meant
-        // downloading the ENTIRE 23-city catalog — 2.5MB in two sequential
-        // pages plus events/tags/brackets — decoding 1,800 rows, and only
-        // then showing anything. On LTE that's several seconds of skeleton,
-        // and the disk cache (which had all of it from last time) was used
-        // only if the network FAILED. TestFlight: "tienes que hacer como un
-        // reload para que los venues salgan completos". Now: show what we
-        // have in ~100ms, refresh the full catalog in the background, and
-        // hand the fresh list to VenueStore via .venueCatalogRefreshed.
-        if loadedVenues == nil {
-            if let cached = readCache(), !cached.isEmpty {
-                loadedVenues = cached
-                scheduleBackgroundRefresh()
-                return cached
+        // Launch path (2026-09-08). Show what we have in ~100ms, refresh the
+        // selected city in the background, and hand the fresh list to
+        // VenueStore via .venueCatalogRefreshed.
+        if venuesByCity[key] == nil {
+            migrateLegacyCacheIfNeeded()
+            if let cached = readCache(key: key), !cached.isEmpty {
+                venuesByCity[key] = cached
+                scheduleBackgroundRefresh(city: city)
+                return mergedVenues()
             }
-            // First launch, nothing cached: the selected city alone is
-            // ~250KB / 0.2s instead of 2.5MB. The rest arrives behind it.
-            if let city = SelectedCityStore.selectedCity,
-               let quick = try? await fetchFromSupabase(city: city), !quick.isEmpty {
-                loadedVenues = quick
-                scheduleBackgroundRefresh()
-                return quick
-            }
-        } else if let stale = loadedVenues {
+        } else {
             // Freshness window expired while the app stayed open: serve the
             // stale list now, refresh behind it.
-            scheduleBackgroundRefresh()
-            return stale
+            scheduleBackgroundRefresh(city: city)
+            return mergedVenues()
         }
-        let venues = await fetchVenuesWithFallback()
-        loadedVenues = venues
-        loadedAt = Date()
-        return venues
+        let venues = await fetchVenuesWithFallback(city: city)
+        commit(venues, key: key)
+        return mergedVenues()
     }
 
-    private var backgroundRefresh: Task<Void, Never>?
-
-    private func scheduleBackgroundRefresh() {
-        guard backgroundRefresh == nil else { return }
-        backgroundRefresh = Task { [weak self] in
-            guard let self else { return }
-            let venues = await self.fetchVenuesWithFallback()
-            await self.commitBackgroundRefresh(venues)
-        }
-    }
-
-    private func commitBackgroundRefresh(_ venues: [BarPassVenue]) {
-        backgroundRefresh = nil
+    private func commit(_ venues: [BarPassVenue], key: String) {
         guard !venues.isEmpty else { return }
-        loadedVenues = venues
-        loadedAt = Date()
-        Task { @MainActor in
-            NotificationCenter.default.post(name: .venueCatalogRefreshed, object: venues)
+        venuesByCity[key] = venues
+        loadedAtByCity[key] = Date()
+    }
+
+    private func scheduleBackgroundRefresh(city: String?) {
+        let key = city ?? Self.allCitiesKey
+        guard !refreshingCities.contains(key) else { return }
+        refreshingCities.insert(key)
+        Task { [weak self] in
+            guard let self else { return }
+            let venues = await self.fetchVenuesWithFallback(city: city)
+            await self.commitBackgroundRefresh(venues, key: key)
         }
     }
 
-    private func fetchVenuesWithFallback() async -> [BarPassVenue] {
+    private func commitBackgroundRefresh(_ venues: [BarPassVenue], key: String) {
+        refreshingCities.remove(key)
+        guard !venues.isEmpty else { return }
+        commit(venues, key: key)
+        let merged = mergedVenues()
+        Task { @MainActor in
+            NotificationCenter.default.post(name: .venueCatalogRefreshed, object: merged)
+        }
+    }
+
+    private func fetchVenuesWithFallback(city: String?) async -> [BarPassVenue] {
+        let key = city ?? Self.allCitiesKey
         do {
-            let venues = try await fetchFromSupabase()
-            persistCache(venues)
+            let venues = try await fetchFromSupabase(city: city)
+            persistCache(venues, key: key)
             return venues
         } catch {
             #if DEBUG
             print("⚠️ SupabaseVenueRepository: fetch failed, falling back to cache. Error: \(error)")
             #endif
-            if let cached = readCache(), !cached.isEmpty {
+            migrateLegacyCacheIfNeeded()
+            if let cached = readCache(key: key), !cached.isEmpty {
                 return cached
             }
             do {
@@ -121,23 +173,46 @@ final actor SupabaseVenueRepository: VenueRepository {
         }
     }
 
-    private func persistCache(_ venues: [BarPassVenue]) {
+    private func persistCache(_ venues: [BarPassVenue], key: String) {
         guard let data = try? JSONEncoder().encode(venues) else { return }
-        try? data.write(to: Self.cacheURL, options: .atomic)
+        try? data.write(to: Self.cacheURL(forKey: key), options: .atomic)
     }
 
-    private func readCache() -> [BarPassVenue]? {
-        guard let data = try? Data(contentsOf: Self.cacheURL) else { return nil }
+    private func readCache(key: String) -> [BarPassVenue]? {
+        guard let data = try? Data(contentsOf: Self.cacheURL(forKey: key)) else { return nil }
         return try? JSONDecoder().decode([BarPassVenue].self, from: data)
     }
 
+    private var didMigrateLegacyCache = false
+
+    /// Installs updating from a build before the city split have one big
+    /// BarPassVenueCache.json holding every city. Split it into the per-city
+    /// files (so an offline first launch still has the selected city) and
+    /// delete it — never read it as if it were one city's data.
+    private func migrateLegacyCacheIfNeeded() {
+        guard !didMigrateLegacyCache else { return }
+        didMigrateLegacyCache = true
+        guard let data = try? Data(contentsOf: Self.legacyCacheURL),
+              let venues = try? JSONDecoder().decode([BarPassVenue].self, from: data) else { return }
+        for (city, cityVenues) in Dictionary(grouping: venues.filter { $0.city != nil }, by: { $0.city! }) {
+            persistCache(cityVenues, key: city)
+        }
+        try? FileManager.default.removeItem(at: Self.legacyCacheURL)
+    }
+
     private func fetchFromSupabase(city: String? = nil) async throws -> [BarPassVenue] {
-        async let venueRowsTask = fetchVenueRows(city: city)
-        async let eventRowsTask = fetchEventRows()
-        async let tagRowsTask = fetchExperienceTagRows()
-        async let ageBracketRowsTask = fetchAgeBracketRows()
-        async let priceStatsTask = fetchPriceStatRows()
-        let venueRows = try await venueRowsTask
+        // Venues first, then everything else scoped to exactly those venue
+        // ids. None of events / venue_experience_tags / venue_age_effective /
+        // venue_price_stats has a `city` column (they all key off venue_id),
+        // so the ids ARE the city scope — no column invented, and no 155KB of
+        // another city's tags on the wire.
+        let venueRows = try await fetchVenueRows(city: city)
+        let venueIds = city == nil ? nil : venueRows.map(\.id)
+
+        async let eventRowsTask = fetchEventRows(venueIds: venueIds)
+        async let tagRowsTask = fetchExperienceTagRows(venueIds: venueIds)
+        async let ageBracketRowsTask = fetchAgeBracketRows(venueIds: venueIds)
+        async let priceStatsTask = fetchPriceStatRows(venueIds: venueIds)
         let eventRows = (try? await eventRowsTask) ?? []
         let tagRows = (try? await tagRowsTask) ?? []
         let ageBracketRows = (try? await ageBracketRowsTask) ?? []
@@ -185,8 +260,8 @@ final actor SupabaseVenueRepository: VenueRepository {
         }
     }
 
-    private func fetchPriceStatRows() async throws -> [SupabasePriceStatRow] {
-        try await publicGet("venue_price_stats", columns: "venue_id,median_drink_cents,report_count")
+    private func fetchPriceStatRows(venueIds: [UUID]?) async throws -> [SupabasePriceStatRow] {
+        try await publicGet("venue_price_stats", columns: "venue_id,median_drink_cents,report_count", venueIds: venueIds)
     }
 
     /// PostgREST caps a single response at the project's default row limit
@@ -237,20 +312,22 @@ final actor SupabaseVenueRepository: VenueRepository {
         return allRows
     }
 
-    private func fetchEventRows() async throws -> [SupabaseEventRow] {
-        try await publicGet("events", columns: Self.eventColumns)
+    private func fetchEventRows(venueIds: [UUID]?) async throws -> [SupabaseEventRow] {
+        try await publicGet("events", columns: Self.eventColumns, venueIds: venueIds)
     }
 
-    private func fetchExperienceTagRows() async throws -> [SupabaseExperienceTagRow] {
-        try await publicGet("venue_experience_tags", columns: Self.tagColumns)
+    private func fetchExperienceTagRows(venueIds: [UUID]?) async throws -> [SupabaseExperienceTagRow] {
+        try await publicGet("venue_experience_tags", columns: Self.tagColumns, venueIds: venueIds)
     }
 
-    private func fetchAgeBracketRows() async throws -> [SupabaseAgeBracketRow] {
+    private func fetchAgeBracketRows(venueIds: [UUID]?) async throws -> [SupabaseAgeBracketRow] {
         // venue_age_effective (venue_age_reports.sql): real user checkout
         // reports win per-bracket once there are 3+ of them, otherwise
         // falls back to venue_age_brackets (Kimi research) for that bracket
         // — never the raw research table alone.
-        try await publicGet("venue_age_effective", columns: Self.ageBracketColumns)
+        // NOTE: query the VIEW, never the underlying venue_age_brackets table
+        // — the table has no report_count column and the decode would fail.
+        try await publicGet("venue_age_effective", columns: Self.ageBracketColumns, venueIds: venueIds)
     }
 
     /// Pages with `Range`, for the same reason `fetchVenueRows()` does: a plain
@@ -258,14 +335,33 @@ final actor SupabaseVenueRepository: VenueRepository {
     /// paging at all, and venue_experience_tags is already at 787 rows — it
     /// would have crossed the cap with no error and no empty result, just
     /// quietly worse recommendations for whatever fell off the end.
-    private func publicGet<T: Decodable>(_ path: String, columns: String) async throws -> [T] {
+    ///
+    /// `venueIds` (nil = every city, as before) scopes the read to the loaded
+    /// city's venues via `venue_id=in.(…)`. The ids are sent in chunks so the
+    /// URL can't grow unbounded — a whole city at once would be a ~6KB query
+    /// string today and worse as cities grow.
+    private func publicGet<T: Decodable>(_ path: String, columns: String, venueIds: [UUID]? = nil) async throws -> [T] {
+        guard let venueIds else { return try await publicGetPaged(path, columns: columns, filter: nil) }
+        // An empty city (nothing matched) has nothing to join against —
+        // `in.()` is a syntax error, not an empty result.
+        guard !venueIds.isEmpty else { return [] }
+        var rows: [T] = []
+        for chunk in stride(from: 0, to: venueIds.count, by: 80).map({ Array(venueIds[$0..<min($0 + 80, venueIds.count)]) }) {
+            let list = chunk.map { $0.uuidString.lowercased() }.joined(separator: ",")
+            rows += try await publicGetPaged(path, columns: columns, filter: URLQueryItem(name: "venue_id", value: "in.(\(list))"))
+        }
+        return rows
+    }
+
+    private func publicGetPaged<T: Decodable>(_ path: String, columns: String, filter: URLQueryItem?) async throws -> [T] {
         let pageSize = 1000
         var allRows: [T] = []
         var offset = 0
 
         while true {
             let request = try SupabaseRESTClient.request(
-                "GET", path: path, queryItems: [URLQueryItem(name: "select", value: columns)],
+                "GET", path: path,
+                queryItems: [URLQueryItem(name: "select", value: columns)] + (filter.map { [$0] } ?? []),
                 accessToken: SupabaseRESTClient.anonKey,
                 extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"]
             )
@@ -277,6 +373,105 @@ final actor SupabaseVenueRepository: VenueRepository {
         }
 
         return allRows
+    }
+
+    // MARK: - City index
+
+    /// Which cities have venues, and how many. ~42KB over two pages
+    /// (`select=city` only) against 2.7MB for the catalogue it replaces.
+    ///
+    /// This exists because `coveredCities` used to be derived from the venue
+    /// list itself (`Set(allVenues.compactMap(\.city))`). With a city-scoped
+    /// fetch that would collapse to the one loaded city, and the universities
+    /// screens — which ask "does city X have any nightlife" before offering to
+    /// send someone there — would have regressed to the TestFlight bug
+    /// "nightlife in Coral Gables does not work ... same for all the colleges".
+    private var cityIndex: [String: Int]?
+    private var cityIndexLoadedAt: Date?
+    private var refreshingCityIndex = false
+    /// Cities are added by a seeding script, not by users — a day is plenty.
+    private static let cityIndexFreshnessWindow: TimeInterval = 24 * 60 * 60
+
+    func getCityCounts() async throws -> [String: Int] {
+        if let cityIndex, let at = cityIndexLoadedAt,
+           Date().timeIntervalSince(at) < Self.cityIndexFreshnessWindow {
+            return cityIndex
+        }
+        if let stale = cityIndex {
+            scheduleCityIndexRefresh()
+            return stale
+        }
+        if let cached = readCityIndexCache(), !cached.isEmpty {
+            cityIndex = cached
+            scheduleCityIndexRefresh()
+            return cached
+        }
+        let fresh = try await fetchCityCounts()
+        cityIndex = fresh
+        cityIndexLoadedAt = Date()
+        persistCityIndex(fresh)
+        return fresh
+    }
+
+    private func scheduleCityIndexRefresh() {
+        guard !refreshingCityIndex else { return }
+        refreshingCityIndex = true
+        Task { [weak self] in
+            guard let self else { return }
+            let counts = try? await self.fetchCityCounts()
+            await self.commitCityIndexRefresh(counts)
+        }
+    }
+
+    private func commitCityIndexRefresh(_ counts: [String: Int]?) {
+        refreshingCityIndex = false
+        guard let counts, !counts.isEmpty else { return }
+        cityIndex = counts
+        cityIndexLoadedAt = Date()
+        persistCityIndex(counts)
+        Task { @MainActor in
+            NotificationCenter.default.post(name: .venueCityIndexRefreshed, object: counts)
+        }
+    }
+
+    private func fetchCityCounts() async throws -> [String: Int] {
+        let pageSize = 1000
+        var counts: [String: Int] = [:]
+        var offset = 0
+        while true {
+            let request = try SupabaseRESTClient.request(
+                "GET", path: "venues",
+                queryItems: [
+                    URLQueryItem(name: "select", value: "city"),
+                    // Same two filters as the catalogue read — a city whose
+                    // only rows are excluded or permanently closed must not
+                    // count as covered.
+                    URLQueryItem(name: "excluded_reason", value: "is.null"),
+                    URLQueryItem(name: "or", value: "(business_status.is.null,business_status.neq.CLOSED_PERMANENTLY)"),
+                ],
+                accessToken: SupabaseRESTClient.anonKey,
+                extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"]
+            )
+            let data = try await SupabaseRESTClient.send(request)
+            let page = try SupabaseRESTClient.decoder.decode([SupabaseCityRow].self, from: data)
+            for row in page {
+                guard let city = row.city, !city.isEmpty else { continue }
+                counts[city, default: 0] += 1
+            }
+            if page.count < pageSize { break }
+            offset += pageSize
+        }
+        return counts
+    }
+
+    private func persistCityIndex(_ counts: [String: Int]) {
+        guard let data = try? JSONEncoder().encode(counts) else { return }
+        try? data.write(to: Self.cityIndexCacheURL, options: .atomic)
+    }
+
+    private func readCityIndexCache() -> [String: Int]? {
+        guard let data = try? Data(contentsOf: Self.cityIndexCacheURL) else { return nil }
+        return try? JSONDecoder().decode([String: Int].self, from: data)
     }
 
     // MARK: - VenueRepository
@@ -625,6 +820,12 @@ struct SupabaseExperienceTagRow: Codable {
     let confidence: TagConfidence
     let source: TagSource
     let computedAt: Date?
+}
+
+/// Just the `city` column — the whole point of the covered-cities query is
+/// that it costs tens of KB, not megabytes.
+struct SupabaseCityRow: Codable {
+    let city: String?
 }
 
 struct SupabasePriceStatRow: Codable {

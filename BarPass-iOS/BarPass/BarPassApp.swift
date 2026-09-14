@@ -204,4 +204,7 @@ extension Notification.Name {
     /// Posted by SupabaseVenueRepository (object: [BarPassVenue]) when a
     /// background catalog refresh lands after a cache-first launch.
     static let venueCatalogRefreshed = Notification.Name("venueCatalogRefreshed")
+    /// Posted by SupabaseVenueRepository (object: [String: Int], city -> venue
+    /// count) when the covered-cities index is refreshed behind a cache hit.
+    static let venueCityIndexRefreshed = Notification.Name("venueCityIndexRefreshed")
 }
