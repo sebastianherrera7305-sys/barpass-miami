@@ -27,6 +27,17 @@ const nextConfig: NextConfig = {
     // optimizer's cache fragmenting into hundreds of one-off sizes.
     imageSizes: [200, 400, 600],
     deviceSizes: [640, 828, 1080],
+    // AVIF first. Measured on a real venue photo at w=1080: JPEG 129KB,
+    // WebP 143KB (bigger — WebP is not a win on photographic content at this
+    // quality), AVIF materially smaller. Next negotiates on the Accept header
+    // and falls back to JPEG for a client that does not ask, so nothing
+    // breaks; iOS decodes AVIF natively since 16.
+    formats: ["image/avif", "image/webp"],
+    // Quality is an allow-list: anything not in it is rejected with a 400,
+    // which is why an earlier q=70 attempt failed outright. A venue card is a
+    // small, dark, moving surface — 60 is indistinguishable there and much
+    // cheaper. 75 stays for the full-screen detail header.
+    qualities: [45, 60, 75],
     minimumCacheTTL: 31536000,
   },
 };
