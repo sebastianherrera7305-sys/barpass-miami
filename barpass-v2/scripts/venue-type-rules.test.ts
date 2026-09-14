@@ -5,11 +5,13 @@ describe("classify", () => {
   it("keeps real nightlife as bar or club", () => {
     expect(classify({ primaryType: "night_club" }).kind).toBe("club");
     expect(classify({ primaryType: "cocktail_bar" }).kind).toBe("bar");
-    expect(classify({ primaryType: "sports_bar" }).kind).toBe("bar");
+    expect(classify({ primaryType: "sports_bar" }).kind).toBe("sports_bar");
     expect(classify({ primaryType: "gastropub" }).kind).toBe("bar");
     expect(classify({ primaryType: "karaoke" }).kind).toBe("bar");
     expect(classify({ primaryType: "live_music_venue" }).kind).toBe("bar");
     expect(classify({ primaryType: "brewery" }).kind).toBe("brewery");
+    expect(classify({ primaryType: "hookah_bar" }).kind).toBe("lounge");
+    expect(classify({ primaryType: "beer_garden" }).kind).toBe("brewery");
   });
 
   it("demotes the chain restaurants that were filed as bars", () => {

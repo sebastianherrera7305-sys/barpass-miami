@@ -44,7 +44,7 @@ export interface TypeSignals {
   servesCocktails?: boolean;
 }
 
-export type VenueKind = "club" | "bar" | "brewery" | "restaurant";
+export type VenueKind = "club" | "bar" | "lounge" | "sports_bar" | "rooftop" | "brewery" | "restaurant";
 
 export interface Classification {
   /** null = does not belong in a nightlife catalogue. */
@@ -58,10 +58,15 @@ export function classify(s: TypeSignals): Classification {
   const all = new Set(s.types ?? []);
   const pours = Boolean(s.servesCocktails || s.servesBeer || s.servesWine);
 
+  // Keep the finer distinctions the app actually ranks on: the going-out
+  // scorer weights club 18, bar 15, lounge and rooftop 10, brewery and sports
+  // bar 6. Collapsing everything to "bar" would silently re-rank the catalogue.
   if (primary === "night_club" || primary === "dance_hall") return { kind: "club", reason: `primary=${primary}` };
-  if (primary === "brewery" || primary === "brewpub" || primary === "beer_hall") {
+  if (primary === "brewery" || primary === "brewpub" || primary === "beer_hall" || primary === "beer_garden") {
     return { kind: "brewery", reason: `primary=${primary}` };
   }
+  if (primary === "sports_bar") return { kind: "sports_bar", reason: `primary=${primary}` };
+  if (primary === "lounge" || primary === "hookah_bar") return { kind: "lounge", reason: `primary=${primary}` };
   if (NIGHTLIFE_PRIMARY.has(primary)) return { kind: "bar", reason: `primary=${primary}` };
 
   if (RESTAURANT_PRIMARY.test(primary) || primary === "restaurant") {

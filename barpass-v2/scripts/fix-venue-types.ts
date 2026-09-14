@@ -22,6 +22,8 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const all = args.includes("--all");
+const SPECIFIC_NIGHTLIFE = new Set(["club", "rooftop", "lounge", "sports_bar", "brewery"]);
+
 const city = args.find((a) => a.startsWith("--city="))?.replace("--city=", "");
 if (!city && !all) {
   console.error('Falta --city="Gainesville" (o --all)');
@@ -60,6 +62,13 @@ async function main() {
         if (e) { console.error(`    ERROR: ${e.message}`); failed++; continue; }
       }
       excluded++;
+    } else if (kind === "bar" && SPECIFIC_NIGHTLIFE.has(v.type as string)) {
+      // Google's primaryType is "bar" for plenty of rooftops, lounges and
+      // sports bars. Whatever is already on the row is more specific and was
+      // set deliberately; a generic "bar" is not new information, and
+      // overwriting would re-rank the venue (club 18 / bar 15 / lounge 10 /
+      // sports bar 6 in the going-out scorer).
+      unchanged++;
     } else if (kind !== v.type) {
       console.log(`  [tipo]    ${v.name} — ${v.type} -> ${kind}  (${reason})`);
       if (!dryRun) {
