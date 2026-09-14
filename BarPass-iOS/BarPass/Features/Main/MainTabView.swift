@@ -56,25 +56,29 @@ struct MainTabView: View {
         ZStack(alignment: .bottom) {
             Group {
                 switch selectedTab {
-                case 0:
-                    TonightView()
-                        .environmentObject(venueStore)
-                        .environmentObject(appState)
-                case 1:
-                    ExploreView()
-                        .environmentObject(venueStore)
-                case 2:
-                    TripsListView()
-                        .environmentObject(venueStore)
-                case 3:
-                    PlanView()
-                        .environmentObject(venueStore)
-                        .environmentObject(appState)
-                default:
-                    ProfileView()
-                        .environmentObject(appState)
+                case 0:  TonightView()
+                case 1:  ExploreView()
+                case 2:  TripsListView()
+                case 3:  PlanView()
+                default: ProfileView()
                 }
             }
+            // Injected ONCE for every tab, not per case.
+            //
+            // Per-tab injection meant a view crashed the moment it was reached
+            // from a tab that happened not to supply what it declares. Trips
+            // declares @EnvironmentObject appState and was never given it, so
+            // `appState.$pendingRoute` in its body was a hard
+            // "No ObservableObject of type AppState found" — and
+            // UniversityDetailView declares BOTH, so it could only ever be
+            // opened from Tonight or Plan. TestFlight: "cada vez que cliqueo el
+            // botón de entrar a la universidad... crashea".
+            //
+            // An environment object is a reference, so handing both to every
+            // tab costs nothing; the asymmetry was never an optimisation, just
+            // an invitation for the next screen to crash.
+            .environmentObject(venueStore)
+            .environmentObject(appState)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: bottomChromeHeight) }
 
