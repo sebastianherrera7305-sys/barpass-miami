@@ -70,25 +70,25 @@ enum VenueRanking {
     /// and do a lot of people actually go. Rating is a tiebreaker here, not
     /// the axis.
     static func goingOutScore(_ venue: BarPassVenue, at date: Date = Date(), mean: Double) -> Double {
-        goingOutScore(venue, arrivalMinute: Self.arrivalMinute(from: date), mean: mean)
+        goingOutScore(venue, arrival: Self.arrival(from: date), mean: mean)
     }
 
     /// Minute-of-day an hour from `date` — when you would actually arrive.
     /// Computed once per ranking pass rather than once per venue: building a
     /// Calendar and doing date arithmetic 1,800 times on the main thread is
     /// the other half of the build-63 freeze.
-    private static func arrivalMinute(from date: Date) -> Int {
+    private static func arrival(from date: Date) -> (weekday: Int, minute: Int) {
         let cal = Calendar.current
         let soon = cal.date(byAdding: .hour, value: 1, to: date) ?? date
-        return cal.component(.hour, from: soon) * 60 + cal.component(.minute, from: soon)
+        return VenueTimeStatus.weekdayAndMinute(soon, calendar: cal)
     }
 
-    static func goingOutScore(_ venue: BarPassVenue, arrivalMinute: Int, mean: Double) -> Double {
+    static func goingOutScore(_ venue: BarPassVenue, arrival: (weekday: Int, minute: Int), mean: Double) -> Double {
         var score = 0.0
 
         // Still open when you'd arrive. A place that closes before you get
         // there is worth nothing regardless of how good it is.
-        guard venue.isOpenAt(minutesSinceMidnight: arrivalMinute) else { return 0 }
+        guard venue.isOpen(atMinute: arrival.minute, weekday: arrival.weekday) else { return 0 }
 
         // How late it goes is the single strongest signal of what kind of
         // night a place is for. A 2 AM close is a going-out venue; a 10 PM
@@ -133,9 +133,9 @@ enum VenueRanking {
     /// is worse than showing nothing.
     static func goingOutNow(_ venues: [BarPassVenue], at date: Date = Date(), limit: Int = 20) -> [BarPassVenue] {
         let mean = meanRating(of: venues)
-        let arrival = arrivalMinute(from: date)
+        let when = arrival(from: date)
         return venues
-            .map { ($0, goingOutScore($0, arrivalMinute: arrival, mean: mean)) }
+            .map { ($0, goingOutScore($0, arrival: when, mean: mean)) }
             .filter { $0.1 > 0 }
             .sorted { $0.1 > $1.1 }
             .prefix(limit)
@@ -195,6 +195,16 @@ extension BarPassVenue {
     /// real data every venue fell into the "unknown hours" branch and counted
     /// as open around the clock — the lenient fallback was doing all the work
     /// and the check itself was dead.
+    /// Open at this minute on this weekday. Uses the venue's real weekly
+    /// schedule when we have one, and falls back to the single dayless pair
+    /// when we don't — a data gap must never silently hide a venue.
+    func isOpen(atMinute minute: Int, weekday: Int) -> Bool {
+        if let weeklyHours, !weeklyHours.isEmpty {
+            return VenueTimeStatus.isOpen(weeklyHours, atMinute: minute, weekday: weekday)
+        }
+        return isOpenAt(minutesSinceMidnight: minute)
+    }
+
     func isOpenAt(minutesSinceMidnight now: Int) -> Bool {
         func mins(_ s: String) -> Int? { VenueTimeStatus.minutesSinceMidnight(s) }
         guard let open = mins(openTime), let close = mins(closeTime), open != close else { return true }

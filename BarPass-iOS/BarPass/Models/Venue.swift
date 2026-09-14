@@ -137,6 +137,15 @@ enum PriceTier: Int, Codable, CaseIterable, Sendable {
     }
 }
 
+/// One opening period, keyed by the day it OPENS. 0 = Sunday, matching Google.
+/// A `close` earlier than `open` means it closes the following day — the normal
+/// case for a nightlife venue, and it needs no extra field to say so.
+struct VenueDayHours: Codable, Equatable, Hashable, Sendable {
+    let day: Int
+    let open: String
+    let close: String
+}
+
 struct PopularDrink: Identifiable, Codable {
     let id: String
     let name: String
@@ -211,6 +220,12 @@ struct BarPassVenue: Identifiable, Codable {
     var priceTier:        PriceTier = .unknown
     let openTime:         String
     let closeTime:        String
+    /// The REAL weekly schedule, when Google has one. `openTime`/`closeTime`
+    /// are a single dayless pair, which is a lie for most nightlife: Rush
+    /// Nightclub opens Friday 8pm and Saturday 9pm and is shut the other five
+    /// days, but was stored as "20:00-02:00" and shown as open on a Tuesday.
+    /// nil means we genuinely don't know, and the single pair is the fallback.
+    var weeklyHours:      [VenueDayHours]? = nil
     let avgSpend:         String
     let dressCode:        String
     let parking:          String

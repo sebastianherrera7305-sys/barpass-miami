@@ -26,7 +26,8 @@
     "seed-events": "node --env-file=.env.local --import tsx scripts/seed-real-events.ts",
     "fix:photos": "node --env-file=.env.local --import tsx scripts/fix-venue-photos.ts",
     "fix:types": "node --env-file=.env.local --import tsx scripts/fix-venue-types.ts",
-    "dedupe:address": "node --env-file=.env.local --import tsx scripts/dedupe-same-address.ts"
+    "dedupe:address": "node --env-file=.env.local --import tsx scripts/dedupe-same-address.ts",
+    "backfill:hours": "node --env-file=.env.local --import tsx scripts/backfill-venue-hours.ts"
   },
   "dependencies": {
     "@google/genai": "^2.11.0",

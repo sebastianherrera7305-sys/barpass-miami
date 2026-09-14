@@ -72,6 +72,45 @@ enum VenueTimeStatus {
         return hour * 60 + minute
     }
 
+    // MARK: - Real weekly hours
+
+    /// Open at a given minute-of-day on a given weekday (0 = Sunday), using the
+    /// venue's REAL schedule.
+    ///
+    /// A single `open_time`/`close_time` pair cannot express a nightlife week.
+    /// Rush Nightclub in Gainesville opens Friday 8pm-2am and Saturday 9pm-2am
+    /// and is closed the other five days; stored as one dayless pair it read as
+    /// open every night, including the Tuesday a user checked.
+    ///
+    /// An entry whose close is earlier than its open runs past midnight, so it
+    /// also covers the early hours of the FOLLOWING day — that is what makes
+    /// "still open at 1am on Saturday" resolve against Friday's entry.
+    static func isOpen(_ weekly: [VenueDayHours], atMinute minute: Int, weekday: Int) -> Bool {
+        for entry in weekly {
+            guard let open = minutesSinceMidnight(entry.open),
+                  let close = minutesSinceMidnight(entry.close) else { continue }
+            if close > open {
+                if entry.day == weekday, minute >= open, minute < close { return true }
+            } else if close < open {
+                // Runs past midnight: the tail belongs to the next day.
+                if entry.day == weekday, minute >= open { return true }
+                if entry.day == (weekday + 6) % 7, minute < close { return true }
+            } else {
+                // open == close is how a 24-hour venue can arrive.
+                if entry.day == weekday { return true }
+            }
+        }
+        return false
+    }
+
+    /// Weekday (0 = Sunday) and minute-of-day for a Date, in one pass.
+    static func weekdayAndMinute(_ date: Date, calendar: Calendar = .current) -> (weekday: Int, minute: Int) {
+        let c = calendar.dateComponents([.weekday, .hour, .minute], from: date)
+        // Calendar's .weekday is 1-based with Sunday = 1; Google (and our
+        // stored `day`) is 0-based with Sunday = 0.
+        return (((c.weekday ?? 1) - 1), (c.hour ?? 0) * 60 + (c.minute ?? 0))
+    }
+
     /// True if `now` falls within [openTime, closeTime), correctly handling
     /// overnight ranges (e.g. open 11:00 PM, close 5:00 AM).
     static func isOpenNow(openTime: String, closeTime: String, now: Date = Date()) -> Bool {

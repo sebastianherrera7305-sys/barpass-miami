@@ -26,7 +26,7 @@ final actor SupabaseVenueRepository: VenueRepository {
 
     /// Exact columns the decoder uses — `select=*` shipped dead columns on
     /// every app launch (egress is the free-tier bottleneck).
-    private static let venueColumns = "id,slug,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,price_tier,avg_spend,open_time,close_time,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom,city,country,timezone"
+    private static let venueColumns = "id,slug,name,type,neighborhood,address,lat,lng,hook,description,rating,review_count,cover_men,cover_women,price_tier,avg_spend,open_time,close_time,hours,happy_hour_until,music_genres,vibes,dress_code,parking,crowd_level,best_arrival_time,peak_hours,popular_drinks,emoji,image_url,instagram_handle,is_trending,phone,website,wheelchair_accessible,outdoor_seating,good_for_groups,good_for_watching_sports,has_live_music,reservable,serves_vegetarian_food,restroom,city,country,timezone"
     private static let eventColumns = "id,venue_id,title,description,starts_at,ends_at,cover_price,student_eligible,student_price_cents"
     private static let tagColumns = "venue_id,tag_id,category,confidence,source,computed_at"
     private static let ageBracketColumns = "venue_id,bracket,source,report_count"
@@ -568,6 +568,7 @@ final actor SupabaseVenueRepository: VenueRepository {
             priceTier: PriceTier(rawSupabaseValue: row.priceTier),
             openTime: Self.formatTime24to12(row.openTime),
             closeTime: Self.formatTime24to12(row.closeTime),
+            weeklyHours: row.hours,
             avgSpend: Self.formatAvgSpend(row.avgSpend, priceTier: row.priceTier),
             // Antes inventaba "Smart casual"/"Street parking available" cuando
             // la base no tenía el dato — eso es exactamente lo que la regla
@@ -586,7 +587,7 @@ final actor SupabaseVenueRepository: VenueRepository {
             isTrending: row.isTrending ?? false,
             hasHappyHour: row.happyHourUntil != nil,
             happyHourUntil: row.happyHourUntil,
-            isOpenNow: Self.computeIsOpenNow(openTime: row.openTime, closeTime: row.closeTime),
+            isOpenNow: Self.computeIsOpenNow(weekly: row.hours, openTime: row.openTime, closeTime: row.closeTime),
             photoUrls: row.imageUrl.map { [$0] } ?? [],
             editorial: Self.buildEditorial(hook: row.hook, description: row.description),
             phone: row.phone,
@@ -726,8 +727,15 @@ final actor SupabaseVenueRepository: VenueRepository {
         return tags
     }
 
-    private static func computeIsOpenNow(openTime: String, closeTime: String) -> Bool {
-        VenueTimeStatus.isOpenNow(openTime: openTime, closeTime: closeTime)
+    /// The "Open" badge. Prefers the real weekly schedule; the single dayless
+    /// pair is only a fallback for rows Google has no hours for. Showing a
+    /// venue as open on a night it is shut is worse than showing nothing.
+    private static func computeIsOpenNow(weekly: [VenueDayHours]?, openTime: String, closeTime: String) -> Bool {
+        if let weekly, !weekly.isEmpty {
+            let now = VenueTimeStatus.weekdayAndMinute(Date())
+            return VenueTimeStatus.isOpen(weekly, atMinute: now.minute, weekday: now.weekday)
+        }
+        return VenueTimeStatus.isOpenNow(openTime: openTime, closeTime: closeTime)
     }
 
     private static func buildEditorial(hook: String?, description: String?) -> String? {
@@ -757,6 +765,7 @@ struct SupabaseVenueRow: Codable {
     let avgSpend: Int?
     let openTime: String
     let closeTime: String
+    let hours: [VenueDayHours]?
     let happyHourUntil: String?
     let musicGenres: [String]?
     let vibes: [String]?
