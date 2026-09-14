@@ -1,7 +1,8 @@
 import { getVenuesByCity } from "@/features/venues/services/venue-service";
 import { buildConciergeSystemPrompt, selectRelevantVenues } from "@/features/ai/services/concierge-prompt";
 import { conciergeChatRequestSchema, trimConciergeHistory } from "@/features/ai/services/plan-schema";
-import { detectUserLanguage, groundPlanBlock } from "@/features/ai/services/plan-grounding";
+import { detectUserLanguage } from "@/features/ai/services/plan-grounding";
+import { createReplyTransform } from "@/features/ai/services/reply-stream";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 /**
@@ -353,14 +354,17 @@ export async function POST(request: Request) {
   let buffer = "";
   let thinkingSignaled = false;
   let contentSignaled = false;
-  // Plan-block grounding (2026-09-06): the ```json fence is held back until
-  // it closes, re-anchored to the shortlist (groundPlanBlock), then emitted
-  // whole. Costs nothing visible — the clients already hide an open fence
-  // and only render the card once it closes — and guarantees every stop's
-  // venueId is a real catalog UUID the model was shown.
-  let fenceBuffer: string | null = null;
-  let pending = ""; // text we've seen but not yet emitted (may hold a partial "```json")
-  const FENCE_OPEN = "```json";
+  // Everything between the model's deltas and the client's bytes lives in
+  // createReplyTransform (see reply-stream.ts): it grounds and VALIDATES the
+  // plan block, guarantees the block is the last thing in the message (the
+  // web parses it with an end-anchored regex, so a sign-off after it made
+  // the whole JSON render as visible text), strips the markdown the model
+  // emits despite the plain-text rule, and rescues quick replies the model
+  // wrote inline as `Options: ["a","b"]`. Unit-tested in reply-stream.test.ts.
+  const transform = createReplyTransform({
+    shortlist,
+    onDrop: (reason) => console.error(`Concierge ${servedBy?.name}: ${reason}`),
+  });
   const upstreamAbort = upstreamController;
   const startedAt = Date.now();
   let lastChunkAt = startedAt;
@@ -384,66 +388,8 @@ export async function POST(request: Request) {
         }
       }, WATCHDOG_TICK_MS);
       const emit = (s: string) => { if (s.length > 0) controller.enqueue(encoder.encode(s)); };
-      // The 20B model keeps bolding venue names despite the plain-text rule;
-      // the iOS bubble renders raw text, so "**Amor Miami**" showed literally.
-      // Prose (never the JSON block) has its bold markers removed here.
-      const emitProse = (s: string) => emit(s.replace(/\*\*/g, ""));
-      const onContent = (piece: string) => {
-        if (fenceBuffer !== null) {
-          fenceBuffer += piece;
-          const close = fenceBuffer.indexOf("```", FENCE_OPEN.length);
-          if (close === -1) return;
-          const inner = fenceBuffer.slice(FENCE_OPEN.length, close);
-          const after = fenceBuffer.slice(close + 3);
-          const grounded = groundPlanBlock(inner.trim(), shortlist);
-          // null = every stop was invented; drop the block entirely rather
-          // than render an itinerary of places that don't exist.
-          if (grounded) emit(`${FENCE_OPEN}\n${grounded}\n\`\`\``);
-          fenceBuffer = null;
-          pending = "";
-          onContent(after);
-          return;
-        }
-        pending += piece;
-        const open = pending.indexOf(FENCE_OPEN);
-        if (open !== -1) {
-          emitProse(pending.slice(0, open));
-          fenceBuffer = pending.slice(open);
-          pending = "";
-          // The fence may have opened AND closed inside this same piece.
-          const rest = fenceBuffer;
-          fenceBuffer = FENCE_OPEN;
-          onContent(rest.slice(FENCE_OPEN.length));
-          return;
-        }
-        // Hold back only a possible partial "```json" prefix, or a trailing
-        // "*"/"**" that might be the start of a bold marker, at the tail.
-        // Both stars must be held (2026-09-12): when a token was exactly
-        // "**", holding one emitted the other alone, so "**Sugar**" streamed
-        // as "*Sugar*" — a stray star the iOS bubble shows literally.
-        let hold = 0;
-        for (let n = Math.min(FENCE_OPEN.length - 1, pending.length); n > 0; n--) {
-          if (FENCE_OPEN.startsWith(pending.slice(pending.length - n))) { hold = n; break; }
-        }
-        if (hold === 0) hold = pending.endsWith("**") ? 2 : pending.endsWith("*") ? 1 : 0;
-        emitProse(pending.slice(0, pending.length - hold));
-        pending = pending.slice(pending.length - hold);
-      };
-      const flush = () => {
-        // Stream ended with a ```json fence still open (token limit hit,
-        // upstream cut, watchdog abort): the clients only render a CLOSED
-        // fence — iOS `extractChatReplyParts` returns the raw text when it
-        // can't find the closing ``` — so emitting it as-is showed half a
-        // JSON object in the chat bubble. A partial plan can't be grounded
-        // or rendered; drop it. If nothing else was said, the client sees an
-        // empty reply and shows its "try again" state, which is honest.
-        if (fenceBuffer !== null) {
-          console.error(`Concierge ${servedBy?.name}: stream ended inside an open plan fence (${fenceBuffer.length} chars) — dropped`);
-          fenceBuffer = null;
-        }
-        emitProse(pending);
-        pending = "";
-      };
+      const onContent = (piece: string) => emit(transform.push(piece));
+      const flush = () => emit(transform.flush());
       try {
         while (true) {
           const { done, value } = await reader.read();

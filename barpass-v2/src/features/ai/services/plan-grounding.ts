@@ -1,6 +1,22 @@
 import type { Venue } from "@/types";
 
 /**
+ * A money field the model wrote as text ("40", "$40", "$40 per person",
+ * "~$35") turned back into the number the schema requires. Anything with no
+ * digits at all — or an already-valid number — is returned untouched, so a
+ * genuinely missing field still fails validation instead of becoming a
+ * confident, invented 0 (the `avg_spend = 0` lesson).
+ */
+function coerceMoney(value: unknown): unknown {
+  if (typeof value === "number") return value;
+  if (typeof value !== "string") return value;
+  const m = value.replace(/,/g, "").match(/-?\d+(?:\.\d+)?/);
+  if (!m) return value;
+  const n = Number(m[0]);
+  return Number.isFinite(n) && n >= 0 ? n : value;
+}
+
+/**
  * Perplexity-style "verify the citation": the model's plan block is untrusted,
  * and a 20B model will occasionally put a slug or a name where the UUID goes,
  * or drift a name by a word. Every stop is re-anchored to the shortlist the
@@ -30,9 +46,21 @@ export function groundPlanBlock(jsonText: string, shortlist: Venue[]): string | 
   // Same plain-text rule as the prose: the card renders raw strings.
   const unbold = (x: unknown) => (typeof x === "string" ? x.replace(/\*\*/g, "") : x);
   for (const k of ["title", "summary", "insiderTip"]) plan[k] = unbold(plan[k]);
+  // The prompt says estimatedSpend/totalEstimate are NUMBERS and the 20B
+  // model still writes "40", "$40" or "$40 per person". nightPlanSchema
+  // requires z.number(), and a block that fails it is not rendered as a
+  // card by either client — the web falls through and shows the RAW JSON in
+  // the chat bubble ("escribió la respuesta en código"). A money string is
+  // unambiguous, so repair it here instead of losing the whole plan.
+  plan.totalEstimate = coerceMoney(plan.totalEstimate);
   const grounded: Array<Record<string, unknown>> = [];
   for (const raw of plan.stops) {
-    const stop: Record<string, unknown> = { ...raw, note: unbold(raw.note), venueName: unbold(raw.venueName) };
+    const stop: Record<string, unknown> = {
+      ...raw,
+      note: unbold(raw.note),
+      venueName: unbold(raw.venueName),
+      estimatedSpend: coerceMoney(raw.estimatedSpend),
+    };
     const id = typeof stop.venueId === "string" ? stop.venueId : "";
     const slug = typeof stop.venueSlug === "string" ? stop.venueSlug.toLowerCase() : "";
     const name = typeof stop.venueName === "string" ? stop.venueName.toLowerCase() : "";
