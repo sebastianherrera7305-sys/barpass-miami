@@ -86,9 +86,25 @@ final class VenueStore: ObservableObject {
     /// shows the loading skeleton on the very first call. Later calls refresh
     /// the list in place; the repository itself decides whether that means a
     /// real network fetch or a still-fresh cache hit.
+    /// After this long the skeleton comes down no matter what the network is
+    /// doing. TestFlight, 2026-09-13: "no carga nada" — an infinite grey
+    /// skeleton on every screen. `isLoading` starts true and was only ever
+    /// cleared when the fetch returned, so any request that stalled left the
+    /// whole app looking dead. Showing an empty state, or a stale cached list,
+    /// is always better than showing a lie that never resolves.
+    private static let loadDeadline: Duration = .seconds(15)
+
     func loadVenues() async {
         if venues.isEmpty { isLoading = true }
         loadError = nil
+        // Independent of the fetch: even if the await below never returns, the
+        // user gets the app back.
+        let skeletonDeadline = Task { [weak self] in
+            try? await Task.sleep(for: Self.loadDeadline)
+            guard !Task.isCancelled, let self, self.isLoading else { return }
+            self.isLoading = false
+        }
+        defer { skeletonDeadline.cancel() }
         // Both in flight at once: the city index is a separate, tiny
         // (~42KB, usually disk-cached) query, and it must land BEFORE the
         // filter runs — otherwise a city that is legitimately covered but

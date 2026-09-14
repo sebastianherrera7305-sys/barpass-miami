@@ -11,21 +11,25 @@
 		0058F433096FE68B59B9F1EE /* UniversityIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */; };
 		01609A069EE22D5E5CDAF602 /* EventTicket.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5086AAE9CBD601116597BE /* EventTicket.swift */; };
 		045900B0B0374875CD4DF42D /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856638E27CF7A56A57535A80 /* KeychainServiceTests.swift */; };
-		0F61EAC735A9E5FBEEAB0A7D /* StadiumRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162643D77BF970FAA2942A37 /* StadiumRepository.swift */; };
 		0EF6C5915AA240B49202C271 /* SupabaseRESTClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A173F3C3D34475BC7C8C4D /* SupabaseRESTClient.swift */; };
+		0F61EAC735A9E5FBEEAB0A7D /* StadiumRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162643D77BF970FAA2942A37 /* StadiumRepository.swift */; };
+		11AD2991A5DD4361C98E8012 /* ChapterEventsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD933F1F6EF039E08FDF1009 /* ChapterEventsRepository.swift */; };
 		12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */; };
-		54F309206E204DE3DF767D25 /* PriceReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B432D473296478898BCF7620 /* PriceReportRepository.swift */; };
 		1381C66FFDBA49BF7D938D04 /* HelpRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */; };
+		19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */; };
 		1E6D56BE3ACE427DB3D6D36B /* CityMascotIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */; };
 		1FA39B5B4E8C1190DC8683E2 /* HelpGuideStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75CA2DEEAE28B897B4F7BBE4 /* HelpGuideStoreTests.swift */; };
+		1FCF5C4F2C26CEA682D5D76A /* VenueQuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C9312B79E236AEA352CD22B /* VenueQuickActions.swift */; };
 		247910BD9F5933841A403D3A /* ExperienceScorerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B25282D5543608685CFCACF /* ExperienceScorerTests.swift */; };
 		25E4AAF65D8C63C40C3FD6BA /* PriceTierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C3DFC6C83DA2445542EDA60 /* PriceTierTests.swift */; };
 		271A1755648951074C082C7E /* BarPassWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2ACCCBF0A93A18BFF314E986 /* BarPassWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2780C01B2FC36D2F946AA949 /* CollegeNightlifeCuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8573B32468D00824A6FB632 /* CollegeNightlifeCuration.swift */; };
 		2A0BC0EA1346366A63326961 /* CartItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8568370BB34F88D6D61CD5B2 /* CartItem.swift */; };
 		2FD00D94265BF1B464B7C912 /* BarPassTests/DeepLinkRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F14D299B6CF077F28A63D3 /* BarPassTests/DeepLinkRouterTests.swift */; };
+		30A2AAC69C5841AC813C4D6B /* TasteQuizView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8E9C227C0946B4A257B07E /* TasteQuizView.swift */; };
 		30D51A75A5B95FDE56B0FBB0 /* CartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECEA1F54438283EF27ED535E /* CartView.swift */; };
 		345EF762F181F05CFC873285 /* DeleteAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */; };
+		35863ABBF504D7CB2BA28C8E /* VenueRanking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CF9FD7EDEB52D4CD9AF7497 /* VenueRanking.swift */; };
 		35C0EF5692CBE8A6227C1745 /* ShareManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 721FC3825B9184C905EB3EF0 /* ShareManager.swift */; };
 		39E22AF8EE155DF7FC352FBA /* BirthdateRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */; };
 		3B7C8E2A419DF605B8A61C90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6A2E4C1F8B9D7016C3E5F420 /* Assets.xcassets */; };
@@ -33,13 +37,13 @@
 		40CD7131F382690E2735FB1C /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB6374016627134BFCC83D6 /* ShareCardView.swift */; };
 		498B1F017E9F0F4CE0F713B3 /* DiscoveryScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEB9D058BA5451D3579444B /* DiscoveryScorer.swift */; };
 		4AD4CD88E1366A6ACA462B08 /* CardPaymentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */; };
-		DC0F9B36910A4B57AAAEEAAC /* CardEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B1C5F03E13449629D93859E /* CardEntry.swift */; };
 		4DA58C700ED24E96B99C812B /* University.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED4BB265491D4A7E864C255E /* University.swift */; };
 		4E168AA3A3AFCB6213C96918 /* ActiveTicketView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */; };
-		B7E2A4C1F0D9438A6E5B2C03 /* PassIssueStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E2A4C1F0D9438A6E5B2C04 /* PassIssueStatusView.swift */; };
 		5088325E9E6E36AB9FB16A81 /* UserLocationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC72D4050837ED089C03C05 /* UserLocationProvider.swift */; };
 		523167EE1BE844FD9D19B062 /* SupabaseGreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */; };
+		54F309206E204DE3DF767D25 /* PriceReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B432D473296478898BCF7620 /* PriceReportRepository.swift */; };
 		58B304D6CCCBB61826E1F150 /* BarPassTests/AuthTokenRefreshTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FE939BD56D206ED35B073C2 /* BarPassTests/AuthTokenRefreshTests.swift */; };
+		6035C796BCCE8CD291C46E17 /* CheckInMomentSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168795511AEBC5150B3BC58F /* CheckInMomentSheet.swift */; };
 		64BC73EEB97843B5A2ADC6DC /* LiquidGlassButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163C5D5B580F4F5CB17391D4 /* LiquidGlassButtonStyle.swift */; };
 		650C9C3329EE0838B574E7CA /* BarPassWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0C24D42852CE5379B6D0C7 /* BarPassWidgetBundle.swift */; };
 		6653697AF565692E1B2F279B /* VenueCheckinRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */; };
@@ -48,7 +52,6 @@
 		6DB2BBFD9C2F38D3220A684A /* HypeEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3963062AE9823148A85E40 /* HypeEngineTests.swift */; };
 		75652242527C4F55B1D4A669 /* FraternityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1A059688C549A88BABFEBB /* FraternityListView.swift */; };
 		7A79EB5E27ED4C56B9B794AF /* CityPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C5D564990D482ABF8A0AE5 /* CityPickerView.swift */; };
-		30A2AAC69C5841AC813C4D6B /* TasteQuizView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E8E9C227C0946B4A257B07E /* TasteQuizView.swift */; };
 		7AC8FF76E544F30232283F9E /* ProfileAffiliationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */; };
 		7B6B03398BDEC6245300D80C /* SkipLinePass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */; };
 		7BB3D4EC13FA314E51E72F88 /* AgeReportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */; };
@@ -57,11 +60,14 @@
 		80A5280DA8DF78405C1E0A01 /* TableReservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA759652D778C1B0CD58E463 /* TableReservation.swift */; };
 		8A1DDE6046186E41A8635D09 /* ActivePassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0C516E6C74A66937CBB9B8F /* ActivePassView.swift */; };
 		90618CE0C09E2971F82286BE /* StadiumsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */; };
+		920C99B1439E4A74519805E7 /* ChapterMembersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A161102B8441EB1CA0BC6AA /* ChapterMembersView.swift */; };
+		93528C23589A20AC5002B931 /* VenueMediaUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */; };
+		94D790F5FBEEF3EA89E25DAB /* ChapterMembersRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34A3B502C8F3F2C59513E5C /* ChapterMembersRepository.swift */; };
 		98E6980599177FA54192F939 /* BarPassTests/ShareManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66E768A00F7416F3E940CCD /* BarPassTests/ShareManagerTests.swift */; };
+		A104DAB76A550EF94AC67A29 /* VenueInsideGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7025BEC6A2E4D77DE5757388 /* VenueInsideGuide.swift */; };
+		A11B19AC0FF1240000000001 /* OfflineQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000002 /* OfflineQueue.swift */; };
 		A2CF02FBB442045B9D9084FF /* HelpGuideStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD594030C69C33F1DB823472 /* HelpGuideStore.swift */; };
 		A44EFDEC59D7784580819FD3 /* ChapterChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 792335E55D9363A086C6C79B /* ChapterChatView.swift */; };
-		920C99B1439E4A74519805E7 /* ChapterMembersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A161102B8441EB1CA0BC6AA /* ChapterMembersView.swift */; };
-		D3C94E0FD47E2040B8675C53 /* ChapterEventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A2E6845F2C2D8A282322E2 /* ChapterEventsView.swift */; };
 		A74E2DF0019E057F9578D8AB /* Stadium.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9944A65EAC0560419D02323C /* Stadium.swift */; };
 		A8A6CC267A4D4BA7B9F79410 /* GreekLifeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF98E2E20484C3784F7D613 /* GreekLifeRepository.swift */; };
 		A957F031255C8A30AB61608E /* EventTicketsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 138CCFF5EDE420FFDFA78DC8 /* EventTicketsView.swift */; };
@@ -72,17 +78,18 @@
 		AA0000010000000000000004 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000004 /* SplashView.swift */; };
 		AA0000010000000000000009 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000020000000000000009 /* LocationService.swift */; };
 		AA000001000000000000000A /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000A /* NotificationService.swift */; };
-		A11B19AC0FF1240000000001 /* OfflineQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000002 /* OfflineQueue.swift */; };
-		B7E2A4C1F0D9438A6E5B2C01 /* PassRegistrationOutbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E2A4C1F0D9438A6E5B2C02 /* PassRegistrationOutbox.swift */; };
 		AA000001000000000000000C /* ApplePayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000C /* ApplePayService.swift */; };
 		AA000001000000000000000D /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000D /* CacheManager.swift */; };
 		AA000001000000000000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000002000000000000000F /* Assets.xcassets */; };
+		AA8250A1626D2011294B038D /* VenueMediaSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2F90A7EFCEB52EB5376061 /* VenueMediaSection.swift */; };
 		AGGT02000000000000RP01 /* AgeGateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AGGT01000000000000RP01 /* AgeGateService.swift */; };
 		AGGT04000000000000RP01 /* AgeGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AGGT03000000000000RP01 /* AgeGateView.swift */; };
 		AMPS02000000000000RP01 /* AppleMusicPlaybackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AMPS01000000000000RP01 /* AppleMusicPlaybackService.swift */; };
 		AMSC02000000000000RP01 /* AppleMusicSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AMSC01000000000000RP01 /* AppleMusicSource.swift */; };
 		AN0000010000000000000001 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AN0000020000000000000001 /* AnalyticsService.swift */; };
 		AUTP02000000000000RP01 /* AutoplayPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTP01000000000000RP01 /* AutoplayPreference.swift */; };
+		B7E2A4C1F0D9438A6E5B2C01 /* PassRegistrationOutbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E2A4C1F0D9438A6E5B2C02 /* PassRegistrationOutbox.swift */; };
+		B7E2A4C1F0D9438A6E5B2C03 /* PassIssueStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E2A4C1F0D9438A6E5B2C04 /* PassIssueStatusView.swift */; };
 		B9A71D8F490D7C4F6A542FE3 /* AffiliationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D676FAF3C8541AE12E83DCCC /* AffiliationPickerView.swift */; };
 		BB000001000000000000000E /* barpass-logo.svg in Resources */ = {isa = PBXBuildFile; fileRef = BB000002000000000000000E /* barpass-logo.svg */; };
 		BBAAF54C30060C2A00E490E9 /* Stripe in Frameworks */ = {isa = PBXBuildFile; productRef = SPM00000000000000000002 /* Stripe */; };
@@ -95,17 +102,17 @@
 		CC000001000000000000LG01 /* venue_logos.json in Resources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000LG01 /* venue_logos.json */; };
 		CC000001000000000000LG02 /* VenueLogos.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000LG02 /* VenueLogos.swift */; };
 		CC000001000000000000ME01 /* venue_media.json in Resources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000ME01 /* venue_media.json */; };
+		CD0446CD2FE22E4C96DB1EC9 /* VenueMediaRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */; };
 		CE1FC5AD84F9D0E40E7E0898 /* HomeAddressRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F33027CA0AAAD146EE78DA8 /* HomeAddressRepository.swift */; };
 		CEF97FC6EA40560FF2D7D0EF /* SkipLinePassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C54DE23E3FEFE20783A41C3 /* SkipLinePassView.swift */; };
+		D3C94E0FD47E2040B8675C53 /* ChapterEventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A2E6845F2C2D8A282322E2 /* ChapterEventsView.swift */; };
 		D8328AFA30179FA9AA6E5296 /* HelpRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858A2988E7A0989998ED59 /* HelpRegistryTests.swift */; };
 		D8865A1397474618901E5092 /* BarPassLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE8C91D8ECDD43B6AE34CEA4 /* BarPassLoadingView.swift */; };
+		DC0F9B36910A4B57AAAEEAAC /* CardEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B1C5F03E13449629D93859E /* CardEntry.swift */; };
 		DDC733155D1594F75D48A1D0 /* TableReservationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F2D00744D57ECA5B25B120 /* TableReservationView.swift */; };
 		E2136AAC149E09CCCF75EE87 /* TimeContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90DDC921B24BF09D3E8A04F2 /* TimeContext.swift */; };
 		E44CDF7872A2DD52484EE256 /* CartStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA3D664AAE5148E8E014E77 /* CartStore.swift */; };
 		E453AE48EC805F573934230C /* ChapterChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */; };
-		94D790F5FBEEF3EA89E25DAB /* ChapterMembersRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34A3B502C8F3F2C59513E5C /* ChapterMembersRepository.swift */; };
-		19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */; };
-		11AD2991A5DD4361C98E8012 /* ChapterEventsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD933F1F6EF039E08FDF1009 /* ChapterEventsRepository.swift */; };
 		E59E448890306D0FDEF2CA7B /* StadiumDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */; };
 		E7A190DFF6312B338701215F /* HelpOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF3AE92540CD87A9A6850339 /* HelpOverlayView.swift */; };
 		EBF12578C120CFBF1FA60335 /* PriorityEntryHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2373126D43DE228E7095F6A2 /* PriorityEntryHubView.swift */; };
@@ -113,6 +120,7 @@
 		EE000002000000000000001A /* NativeAuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000001000000000000001A /* NativeAuthView.swift */; };
 		EE01BC57203A630FF06E9694 /* HelpTargetAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B255F26D4A13547562CDF99B /* HelpTargetAnchor.swift */; };
 		EF000002000000000000RP01 /* EventFlyerCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF000001000000000000RP01 /* EventFlyerCard.swift */; };
+		EF2D822B1ED09EAD1CF53366 /* RemyLocalChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 981C73E1C26EF3207D31A9F2 /* RemyLocalChat.swift */; };
 		EXEN04000000000000RP01 /* ExperienceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXEN03000000000000RP01 /* ExperienceEngine.swift */; };
 		EXSC04000000000000RP01 /* ExperienceScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EXSC03000000000000RP01 /* ExperienceScorer.swift */; };
 		F1BA46464607754B4A2D0728 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7DF352B37244C7C0F8C8D874 /* Foundation.framework */; };
@@ -124,8 +132,6 @@
 		FF000002000000000000AA03 /* VenueDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA03 /* VenueDetailView.swift */; };
 		FF000002000000000000AA04 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA04 /* ExploreView.swift */; };
 		FF000002000000000000AA05 /* PlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA05 /* PlanView.swift */; };
-		CD0446CD2FE22E4C96DB1EC9 /* VenueMediaRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */; };
-		EF2D822B1ED09EAD1CF53366 /* RemyLocalChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 981C73E1C26EF3207D31A9F2 /* RemyLocalChat.swift */; };
 		FF000002000000000000AA06 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA06 /* ProfileView.swift */; };
 		FF000002000000000000AA07 /* OnboardingVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA07 /* OnboardingVideoView.swift */; };
 		FF000002000000000000AA08 /* Venue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA08 /* Venue.swift */; };
@@ -173,12 +179,6 @@
 		TS0000020000000000000001 /* TripStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = TS0000010000000000000001 /* TripStore.swift */; };
 		VEVW04000000000000RP01 /* VerifyEmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VEVW03000000000000RP01 /* VerifyEmailView.swift */; };
 		VPSC02000000000000RP01 /* VenuePostsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = VPSC01000000000000RP01 /* VenuePostsSection.swift */; };
-		35863ABBF504D7CB2BA28C8E /* VenueRanking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CF9FD7EDEB52D4CD9AF7497 /* VenueRanking.swift */; };
-		1FCF5C4F2C26CEA682D5D76A /* VenueQuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C9312B79E236AEA352CD22B /* VenueQuickActions.swift */; };
-		6035C796BCCE8CD291C46E17 /* CheckInMomentSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168795511AEBC5150B3BC58F /* CheckInMomentSheet.swift */; };
-		93528C23589A20AC5002B931 /* VenueMediaUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */; };
-		A104DAB76A550EF94AC67A29 /* VenueInsideGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7025BEC6A2E4D77DE5757388 /* VenueInsideGuide.swift */; };
-		AA8250A1626D2011294B038D /* VenueMediaSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2F90A7EFCEB52EB5376061 /* VenueMediaSection.swift */; };
 		VPST02000000000000RP01 /* VenuePost.swift in Sources */ = {isa = PBXBuildFile; fileRef = VPST01000000000000RP01 /* VenuePost.swift */; };
 		VTS004000000000000RP01 /* VenueTimeStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = VTS003000000000000RP01 /* VenueTimeStatus.swift */; };
 		WLT002000000000000RP01 /* WalletService.swift in Sources */ = {isa = PBXBuildFile; fileRef = WLT001000000000000RP01 /* WalletService.swift */; };
@@ -227,56 +227,60 @@
 		138CCFF5EDE420FFDFA78DC8 /* EventTicketsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTicketsView.swift; sourceTree = "<group>"; };
 		153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipLinePass.swift; sourceTree = "<group>"; };
 		162643D77BF970FAA2942A37 /* StadiumRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumRepository.swift; path = BarPass/Repositories/StadiumRepository.swift; sourceTree = SOURCE_ROOT; };
-		28A173F3C3D34475BC7C8C4D /* SupabaseRESTClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseRESTClient.swift; path = BarPass/Repositories/SupabaseRESTClient.swift; sourceTree = SOURCE_ROOT; };
 		163C5D5B580F4F5CB17391D4 /* LiquidGlassButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiquidGlassButtonStyle.swift; path = BarPass/Resources/LiquidGlassButtonStyle.swift; sourceTree = SOURCE_ROOT; };
+		168795511AEBC5150B3BC58F /* CheckInMomentSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckInMomentSheet.swift; path = BarPass/Features/Tonight/CheckInMomentSheet.swift; sourceTree = SOURCE_ROOT; };
+		1B1C5F03E13449629D93859E /* CardEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEntry.swift; sourceTree = "<group>"; };
 		1D1A059688C549A88BABFEBB /* FraternityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FraternityListView.swift; path = BarPass/Features/CollegeLife/FraternityListView.swift; sourceTree = SOURCE_ROOT; };
 		1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportRepository.swift; path = BarPass/Repositories/AgeReportRepository.swift; sourceTree = SOURCE_ROOT; };
-		B432D473296478898BCF7620 /* PriceReportRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PriceReportRepository.swift; path = BarPass/Repositories/PriceReportRepository.swift; sourceTree = SOURCE_ROOT; };
 		1DBB1D2978A1CEFD5727A510 /* GoHomeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GoHomeButton.swift; path = BarPass/Features/GoHome/GoHomeButton.swift; sourceTree = SOURCE_ROOT; };
 		2373126D43DE228E7095F6A2 /* PriorityEntryHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriorityEntryHubView.swift; sourceTree = "<group>"; };
+		28A173F3C3D34475BC7C8C4D /* SupabaseRESTClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseRESTClient.swift; path = BarPass/Repositories/SupabaseRESTClient.swift; sourceTree = SOURCE_ROOT; };
 		28C5D564990D482ABF8A0AE5 /* CityPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityPickerView.swift; path = BarPass/Features/Onboarding/CityPickerView.swift; sourceTree = SOURCE_ROOT; };
-		7E8E9C227C0946B4A257B07E /* TasteQuizView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TasteQuizView.swift; path = BarPass/Features/Onboarding/TasteQuizView.swift; sourceTree = SOURCE_ROOT; };
 		2ACCCBF0A93A18BFF314E986 /* BarPassWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BarPassWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaRepository.swift; path = BarPass/Repositories/VenueMediaRepository.swift; sourceTree = SOURCE_ROOT; };
 		3AA3D664AAE5148E8E014E77 /* CartStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartStore.swift; sourceTree = "<group>"; };
 		3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueCheckinRepository.swift; path = BarPass/Repositories/VenueCheckinRepository.swift; sourceTree = SOURCE_ROOT; };
 		3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BirthdateRepository.swift; path = BarPass/Repositories/BirthdateRepository.swift; sourceTree = SOURCE_ROOT; };
 		43EAE48B333A4F13A08FC333 /* ComicHalftoneBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ComicHalftoneBackground.swift; path = BarPass/Resources/ComicHalftoneBackground.swift; sourceTree = SOURCE_ROOT; };
 		4534C465198E6FF9A92B4C7D /* DeepLinkRouter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
 		457BF8CA0B0C5084EECB9173 /* GoHomeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GoHomeWidget.swift; path = BarPassWidget/GoHomeWidget.swift; sourceTree = SOURCE_ROOT; };
+		4A161102B8441EB1CA0BC6AA /* ChapterMembersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterMembersView.swift; path = BarPass/Features/CollegeLife/ChapterMembersView.swift; sourceTree = SOURCE_ROOT; };
 		4C3963062AE9823148A85E40 /* HypeEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HypeEngineTests.swift; path = BarPassTests/HypeEngineTests.swift; sourceTree = "<group>"; };
 		4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumsListView.swift; path = BarPass/Features/Stadiums/StadiumsListView.swift; sourceTree = SOURCE_ROOT; };
 		54C778D8EC6D60879605EA40 /* CheckInButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckInButton.swift; path = BarPass/Features/Tonight/CheckInButton.swift; sourceTree = SOURCE_ROOT; };
 		5537BE5E60B5E2B88983E17D /* CardPaymentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPaymentView.swift; sourceTree = "<group>"; };
-		1B1C5F03E13449629D93859E /* CardEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardEntry.swift; sourceTree = "<group>"; };
 		5819FD4F3C4D29678A50A7BB /* ChapterChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatRepository.swift; path = BarPass/Repositories/ChapterChatRepository.swift; sourceTree = SOURCE_ROOT; };
-		F34A3B502C8F3F2C59513E5C /* ChapterMembersRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterMembersRepository.swift; path = BarPass/Repositories/ChapterMembersRepository.swift; sourceTree = SOURCE_ROOT; };
-		C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DisplayNameRepository.swift; path = BarPass/Repositories/DisplayNameRepository.swift; sourceTree = SOURCE_ROOT; };
-		FD933F1F6EF039E08FDF1009 /* ChapterEventsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterEventsRepository.swift; path = BarPass/Repositories/ChapterEventsRepository.swift; sourceTree = SOURCE_ROOT; };
 		61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseGreekLifeRepository.swift; path = BarPass/Repositories/SupabaseGreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
+		6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaUploader.swift; path = BarPass/Features/Tonight/VenueMediaUploader.swift; sourceTree = SOURCE_ROOT; };
 		656968298CED42FFBA49231A /* CityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityIdentity.swift; path = BarPass/Resources/CityIdentity.swift; sourceTree = SOURCE_ROOT; };
 		6A2E4C1F8B9D7016C3E5F420 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = BarPassWidget/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		6EB6374016627134BFCC83D6 /* ShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
+		7025BEC6A2E4D77DE5757388 /* VenueInsideGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueInsideGuide.swift; path = BarPass/Features/Tonight/VenueInsideGuide.swift; sourceTree = SOURCE_ROOT; };
 		721FC3825B9184C905EB3EF0 /* ShareManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareManager.swift; sourceTree = "<group>"; };
 		75CA2DEEAE28B897B4F7BBE4 /* HelpGuideStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpGuideStoreTests.swift; path = BarPassTests/HelpGuideStoreTests.swift; sourceTree = SOURCE_ROOT; };
 		792335E55D9363A086C6C79B /* ChapterChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterChatView.swift; path = BarPass/Features/CollegeLife/ChapterChatView.swift; sourceTree = SOURCE_ROOT; };
-		4A161102B8441EB1CA0BC6AA /* ChapterMembersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterMembersView.swift; path = BarPass/Features/CollegeLife/ChapterMembersView.swift; sourceTree = SOURCE_ROOT; };
-		A1A2E6845F2C2D8A282322E2 /* ChapterEventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterEventsView.swift; path = BarPass/Features/CollegeLife/ChapterEventsView.swift; sourceTree = SOURCE_ROOT; };
 		7B25282D5543608685CFCACF /* ExperienceScorerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExperienceScorerTests.swift; path = BarPassTests/ExperienceScorerTests.swift; sourceTree = "<group>"; };
+		7C9312B79E236AEA352CD22B /* VenueQuickActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueQuickActions.swift; path = BarPass/Features/Plan/VenueQuickActions.swift; sourceTree = SOURCE_ROOT; };
 		7DEB9D058BA5451D3579444B /* DiscoveryScorer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DiscoveryScorer.swift; path = BarPass/Core/Intelligence/DiscoveryScorer.swift; sourceTree = SOURCE_ROOT; };
 		7DF352B37244C7C0F8C8D874 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		7E8E9C227C0946B4A257B07E /* TasteQuizView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TasteQuizView.swift; path = BarPass/Features/Onboarding/TasteQuizView.swift; sourceTree = SOURCE_ROOT; };
 		829CF36B09B1ECDF96A87195 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = BarPassWidget/Info.plist; sourceTree = SOURCE_ROOT; };
 		83F14D299B6CF077F28A63D3 /* BarPassTests/DeepLinkRouterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/DeepLinkRouterTests.swift; sourceTree = "<group>"; };
 		856638E27CF7A56A57535A80 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KeychainServiceTests.swift; path = BarPassTests/KeychainServiceTests.swift; sourceTree = "<group>"; };
 		8568370BB34F88D6D61CD5B2 /* CartItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartItem.swift; sourceTree = "<group>"; };
 		8C3DFC6C83DA2445542EDA60 /* PriceTierTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PriceTierTests.swift; path = BarPassTests/PriceTierTests.swift; sourceTree = SOURCE_ROOT; };
 		8C54DE23E3FEFE20783A41C3 /* SkipLinePassView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkipLinePassView.swift; sourceTree = "<group>"; };
+		8CF9FD7EDEB52D4CD9AF7497 /* VenueRanking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueRanking.swift; path = BarPass/Core/Intelligence/VenueRanking.swift; sourceTree = SOURCE_ROOT; };
 		90DDC921B24BF09D3E8A04F2 /* TimeContext.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TimeContext.swift; path = BarPass/Core/Intelligence/TimeContext.swift; sourceTree = SOURCE_ROOT; };
 		93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAccountView.swift; sourceTree = "<group>"; };
 		97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpRegistry.swift; path = BarPass/Core/Help/HelpRegistry.swift; sourceTree = SOURCE_ROOT; };
+		981C73E1C26EF3207D31A9F2 /* RemyLocalChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemyLocalChat.swift; sourceTree = "<group>"; };
 		9944A65EAC0560419D02323C /* Stadium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Stadium.swift; path = BarPass/Models/Stadium.swift; sourceTree = SOURCE_ROOT; };
 		9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportSheet.swift; path = BarPass/Features/Tonight/AgeReportSheet.swift; sourceTree = SOURCE_ROOT; };
 		9EC72D4050837ED089C03C05 /* UserLocationProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UserLocationProvider.swift; path = BarPass/Core/Services/UserLocationProvider.swift; sourceTree = SOURCE_ROOT; };
 		9F0C24D42852CE5379B6D0C7 /* BarPassWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BarPassWidgetBundle.swift; path = BarPassWidget/BarPassWidgetBundle.swift; sourceTree = SOURCE_ROOT; };
+		A11B19AC0FF1240000000002 /* OfflineQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineQueue.swift; sourceTree = "<group>"; };
+		A1A2E6845F2C2D8A282322E2 /* ChapterEventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterEventsView.swift; path = BarPass/Features/CollegeLife/ChapterEventsView.swift; sourceTree = SOURCE_ROOT; };
 		A440E8AE84CC06E1FC645071 /* StadiumDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumDetailView.swift; path = BarPass/Features/Stadiums/StadiumDetailView.swift; sourceTree = SOURCE_ROOT; };
 		AA0000020000000000000001 /* BarPassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarPassApp.swift; sourceTree = "<group>"; };
 		AA0000020000000000000002 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -284,8 +288,6 @@
 		AA0000020000000000000004 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		AA0000020000000000000009 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		AA000002000000000000000A /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-		A11B19AC0FF1240000000002 /* OfflineQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineQueue.swift; sourceTree = "<group>"; };
-		B7E2A4C1F0D9438A6E5B2C02 /* PassRegistrationOutbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassRegistrationOutbox.swift; sourceTree = "<group>"; };
 		AA000002000000000000000C /* ApplePayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplePayService.swift; sourceTree = "<group>"; };
 		AA000002000000000000000D /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
 		AA000002000000000000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -293,7 +295,6 @@
 		AA00000200000000000000A1 /* BarPass app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BarPass app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD594030C69C33F1DB823472 /* HelpGuideStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpGuideStore.swift; path = BarPass/Core/Help/HelpGuideStore.swift; sourceTree = SOURCE_ROOT; };
 		AF70D02E008F3D9BF18B5C2A /* ActiveTicketView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveTicketView.swift; sourceTree = "<group>"; };
-		B7E2A4C1F0D9438A6E5B2C04 /* PassIssueStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassIssueStatusView.swift; sourceTree = "<group>"; };
 		AGGT01000000000000RP01 /* AgeGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateService.swift; path = BarPass/Core/Services/AgeGateService.swift; sourceTree = SOURCE_ROOT; };
 		AGGT03000000000000RP01 /* AgeGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeGateView.swift; path = BarPass/Features/Onboarding/AgeGateView.swift; sourceTree = SOURCE_ROOT; };
 		AMPS01000000000000RP01 /* AppleMusicPlaybackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppleMusicPlaybackService.swift; path = BarPass/Core/Music/AppleMusicPlaybackService.swift; sourceTree = SOURCE_ROOT; };
@@ -301,11 +302,15 @@
 		AN0000020000000000000001 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalyticsService.swift; path = BarPass/Core/Services/AnalyticsService.swift; sourceTree = SOURCE_ROOT; };
 		AUTP01000000000000RP01 /* AutoplayPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AutoplayPreference.swift; path = BarPass/Core/Music/AutoplayPreference.swift; sourceTree = SOURCE_ROOT; };
 		B255F26D4A13547562CDF99B /* HelpTargetAnchor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpTargetAnchor.swift; path = BarPass/Core/Help/HelpTargetAnchor.swift; sourceTree = SOURCE_ROOT; };
+		B432D473296478898BCF7620 /* PriceReportRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PriceReportRepository.swift; path = BarPass/Repositories/PriceReportRepository.swift; sourceTree = SOURCE_ROOT; };
 		B5FD295D2AEC77C73B63773F /* UniversityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityIdentity.swift; path = BarPass/Resources/UniversityIdentity.swift; sourceTree = SOURCE_ROOT; };
+		B7E2A4C1F0D9438A6E5B2C02 /* PassRegistrationOutbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassRegistrationOutbox.swift; sourceTree = "<group>"; };
+		B7E2A4C1F0D9438A6E5B2C04 /* PassIssueStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassIssueStatusView.swift; sourceTree = "<group>"; };
 		BB000002000000000000000E /* barpass-logo.svg */ = {isa = PBXFileReference; lastKnownFileType = image.svg; path = "barpass-logo.svg"; sourceTree = "<group>"; };
 		BF31AC3E1809B2072DE6CA9C /* ModelCodableTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ModelCodableTests.swift; path = BarPassTests/ModelCodableTests.swift; sourceTree = "<group>"; };
 		BF3AE92540CD87A9A6850339 /* HelpOverlayView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpOverlayView.swift; path = BarPass/Core/Help/HelpOverlayView.swift; sourceTree = SOURCE_ROOT; };
 		C2F2D00744D57ECA5B25B120 /* TableReservationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableReservationView.swift; sourceTree = "<group>"; };
+		C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DisplayNameRepository.swift; path = BarPass/Repositories/DisplayNameRepository.swift; sourceTree = SOURCE_ROOT; };
 		CA759652D778C1B0CD58E463 /* TableReservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableReservation.swift; sourceTree = "<group>"; };
 		CC000002000000000000LG01 /* venue_logos.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = venue_logos.json; sourceTree = "<group>"; };
 		CC000002000000000000LG02 /* VenueLogos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueLogos.swift; sourceTree = "<group>"; };
@@ -330,19 +335,20 @@
 		EF000001000000000000RP01 /* EventFlyerCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EventFlyerCard.swift; path = BarPass/Features/Tonight/EventFlyerCard.swift; sourceTree = SOURCE_ROOT; };
 		EXEN03000000000000RP01 /* ExperienceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceEngine.swift; path = BarPass/Models/ExperienceEngine.swift; sourceTree = SOURCE_ROOT; };
 		EXSC03000000000000RP01 /* ExperienceScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExperienceScorer.swift; path = BarPass/Core/Intelligence/ExperienceScorer.swift; sourceTree = SOURCE_ROOT; };
+		F34A3B502C8F3F2C59513E5C /* ChapterMembersRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterMembersRepository.swift; path = BarPass/Repositories/ChapterMembersRepository.swift; sourceTree = SOURCE_ROOT; };
 		F35C2CF95EBF470399C6196E /* SelectedCityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SelectedCityStore.swift; path = BarPass/Core/Services/SelectedCityStore.swift; sourceTree = SOURCE_ROOT; };
 		F73CA2A13288F0D519A0E585 /* ProfileAffiliationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfileAffiliationRepository.swift; path = BarPass/Repositories/ProfileAffiliationRepository.swift; sourceTree = SOURCE_ROOT; };
 		F863CE708ACF44B3A96D654A /* UniversityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UniversityListView.swift; path = BarPass/Features/CollegeLife/UniversityListView.swift; sourceTree = SOURCE_ROOT; };
 		FAVS01000000000000RP01 /* FavoritesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FavoritesStore.swift; path = BarPass/Core/Services/FavoritesStore.swift; sourceTree = SOURCE_ROOT; };
 		FB5086AAE9CBD601116597BE /* EventTicket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTicket.swift; sourceTree = "<group>"; };
+		FD933F1F6EF039E08FDF1009 /* ChapterEventsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ChapterEventsRepository.swift; path = BarPass/Repositories/ChapterEventsRepository.swift; sourceTree = SOURCE_ROOT; };
 		FDE1AEB039250C8DA5E41CE1 /* ReferralService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReferralService.swift; sourceTree = "<group>"; };
+		FE2F90A7EFCEB52EB5376061 /* VenueMediaSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaSection.swift; path = BarPass/Features/Tonight/VenueMediaSection.swift; sourceTree = SOURCE_ROOT; };
 		FF000001000000000000AA01 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA02 /* TonightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA03 /* VenueDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueDetailView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA04 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA05 /* PlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanView.swift; sourceTree = "<group>"; };
-		3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaRepository.swift; path = BarPass/Repositories/VenueMediaRepository.swift; sourceTree = SOURCE_ROOT; };
-		981C73E1C26EF3207D31A9F2 /* RemyLocalChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemyLocalChat.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA06 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA07 /* OnboardingVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingVideoView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA08 /* Venue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Venue.swift; sourceTree = "<group>"; };
@@ -390,12 +396,6 @@
 		TS0000010000000000000001 /* TripStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripStore.swift; path = BarPass/Features/Stores/TripStore.swift; sourceTree = SOURCE_ROOT; };
 		VEVW03000000000000RP01 /* VerifyEmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VerifyEmailView.swift; path = BarPass/Features/Auth/VerifyEmailView.swift; sourceTree = SOURCE_ROOT; };
 		VPSC01000000000000RP01 /* VenuePostsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenuePostsSection.swift; path = BarPass/Features/Tonight/VenuePostsSection.swift; sourceTree = SOURCE_ROOT; };
-		8CF9FD7EDEB52D4CD9AF7497 /* VenueRanking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueRanking.swift; path = BarPass/Core/Intelligence/VenueRanking.swift; sourceTree = SOURCE_ROOT; };
-		7C9312B79E236AEA352CD22B /* VenueQuickActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueQuickActions.swift; path = BarPass/Features/Plan/VenueQuickActions.swift; sourceTree = SOURCE_ROOT; };
-		168795511AEBC5150B3BC58F /* CheckInMomentSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckInMomentSheet.swift; path = BarPass/Features/Tonight/CheckInMomentSheet.swift; sourceTree = SOURCE_ROOT; };
-		6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaUploader.swift; path = BarPass/Features/Tonight/VenueMediaUploader.swift; sourceTree = SOURCE_ROOT; };
-		7025BEC6A2E4D77DE5757388 /* VenueInsideGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueInsideGuide.swift; path = BarPass/Features/Tonight/VenueInsideGuide.swift; sourceTree = SOURCE_ROOT; };
-		FE2F90A7EFCEB52EB5376061 /* VenueMediaSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaSection.swift; path = BarPass/Features/Tonight/VenueMediaSection.swift; sourceTree = SOURCE_ROOT; };
 		VPST01000000000000RP01 /* VenuePost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenuePost.swift; path = BarPass/Models/VenuePost.swift; sourceTree = SOURCE_ROOT; };
 		VTS003000000000000RP01 /* VenueTimeStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueTimeStatus.swift; path = BarPass/Core/Services/VenueTimeStatus.swift; sourceTree = SOURCE_ROOT; };
 		WLT001000000000000RP01 /* WalletService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WalletService.swift; path = BarPass/Core/Services/WalletService.swift; sourceTree = SOURCE_ROOT; };
@@ -534,7 +534,6 @@
 				AA000002000000000000000C /* ApplePayService.swift */,
 				FF000001000000000000AB01 /* StripeConfig.swift */,
 				FF000001000000000000AB02 /* APIClient.swift */,
-				FF000001000000000000AA20 /* AuthService.swift */,
 				AN0000020000000000000001 /* AnalyticsService.swift */,
 				4534C465198E6FF9A92B4C7D /* DeepLinkRouter.swift */,
 				FDE1AEB039250C8DA5E41CE1 /* ReferralService.swift */,
@@ -711,12 +710,13 @@
 			isa = PBXGroup;
 			children = (
 				FB5086AAE9CBD601116597BE /* EventTicket.swift */,
+				NP0000010000000000000001 /* NightPlan.swift */,
 				8568370BB34F88D6D61CD5B2 /* CartItem.swift */,
+				FF000001000000000000AA20 /* AuthService.swift */,
 				153300EE3F4D2CCA932EBDCB /* SkipLinePass.swift */,
 				CA759652D778C1B0CD58E463 /* TableReservation.swift */,
 				FF000001000000000000AA08 /* Venue.swift */,
 				FF000001000000000000AA09 /* VenueStore.swift */,
-				NP0000010000000000000001 /* NightPlan.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1184,7 +1184,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1212,7 +1212,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1342,7 +1342,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1365,7 +1365,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 64;
+				CURRENT_PROJECT_VERSION = 65;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;

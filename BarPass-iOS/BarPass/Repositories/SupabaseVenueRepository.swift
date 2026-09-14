@@ -300,7 +300,8 @@ final actor SupabaseVenueRepository: VenueRepository {
                     URLQueryItem(name: "or", value: "(business_status.is.null,business_status.neq.CLOSED_PERMANENTLY)"),
                 ] + (city.map { [URLQueryItem(name: "city", value: "eq.\($0)")] } ?? []),
                 accessToken: SupabaseRESTClient.anonKey,
-                extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"]
+                extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"],
+                timeout: Self.requestTimeout
             )
             let data = try await SupabaseRESTClient.send(request)
             let page = try SupabaseRESTClient.decoder.decode([SupabaseVenueRow].self, from: data)
@@ -340,20 +341,50 @@ final actor SupabaseVenueRepository: VenueRepository {
     /// city's venues via `venue_id=in.(…)`. The ids are sent in chunks so the
     /// URL can't grow unbounded — a whole city at once would be a ~6KB query
     /// string today and worse as cities grow.
-    private func publicGet<T: Decodable>(_ path: String, columns: String, venueIds: [UUID]? = nil) async throws -> [T] {
+    /// Chunk size for `venue_id=in.(…)`. A UUID is 36 chars plus a comma, so
+    /// 200 ids is ~7.4KB of query string — inside every proxy's URL limit with
+    /// room to spare, and it turns a 161-venue city from 3 round trips per
+    /// table into 1.
+    /// Per-request deadline for catalogue reads. URLSession defaults to 60s,
+    /// and the launch path issues several requests, so a stalled connection
+    /// used to mean minutes of grey skeleton. 12s is far longer than a healthy
+    /// call (measured 0.25-1.4s) and short enough that failing over to the
+    /// disk cache still feels like a launch.
+    private static let requestTimeout: TimeInterval = 12
+
+    private static let idChunkSize = 200
+
+    private func publicGet<T: Decodable & Sendable>(_ path: String, columns: String, venueIds: [UUID]? = nil) async throws -> [T] {
         guard let venueIds else { return try await publicGetPaged(path, columns: columns, filter: nil) }
         // An empty city (nothing matched) has nothing to join against —
         // `in.()` is a syntax error, not an empty result.
         guard !venueIds.isEmpty else { return [] }
-        var rows: [T] = []
-        for chunk in stride(from: 0, to: venueIds.count, by: 80).map({ Array(venueIds[$0..<min($0 + 80, venueIds.count)]) }) {
-            let list = chunk.map { $0.uuidString.lowercased() }.joined(separator: ",")
-            rows += try await publicGetPaged(path, columns: columns, filter: URLQueryItem(name: "venue_id", value: "in.(\(list))"))
+
+        let chunks = stride(from: 0, to: venueIds.count, by: Self.idChunkSize)
+            .map { Array(venueIds[$0..<min($0 + Self.idChunkSize, venueIds.count)]) }
+
+        // Concurrently, not one after another. Scoping these four tables to the
+        // city's venue ids (2026-09-13) was right for bytes but wrong for round
+        // trips: at 80 ids a chunk it turned 4 unscoped requests into 12
+        // sequential ones, and on a contended connection every one of those
+        // waits out the full per-request timeout before the next even starts.
+        // That is what made the feed sit on a skeleton forever.
+        return try await withThrowingTaskGroup(of: [T].self) { group in
+            for chunk in chunks {
+                group.addTask {
+                    let list = chunk.map { $0.uuidString.lowercased() }.joined(separator: ",")
+                    return try await self.publicGetPaged(
+                        path, columns: columns,
+                        filter: URLQueryItem(name: "venue_id", value: "in.(\(list))"))
+                }
+            }
+            var rows: [T] = []
+            for try await page in group { rows += page }
+            return rows
         }
-        return rows
     }
 
-    private func publicGetPaged<T: Decodable>(_ path: String, columns: String, filter: URLQueryItem?) async throws -> [T] {
+    private func publicGetPaged<T: Decodable & Sendable>(_ path: String, columns: String, filter: URLQueryItem?) async throws -> [T] {
         let pageSize = 1000
         var allRows: [T] = []
         var offset = 0
@@ -363,7 +394,8 @@ final actor SupabaseVenueRepository: VenueRepository {
                 "GET", path: path,
                 queryItems: [URLQueryItem(name: "select", value: columns)] + (filter.map { [$0] } ?? []),
                 accessToken: SupabaseRESTClient.anonKey,
-                extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"]
+                extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"],
+                timeout: Self.requestTimeout
             )
             let data = try await SupabaseRESTClient.send(request)
             let page = try SupabaseRESTClient.decoder.decode([T].self, from: data)
@@ -450,7 +482,8 @@ final actor SupabaseVenueRepository: VenueRepository {
                     URLQueryItem(name: "or", value: "(business_status.is.null,business_status.neq.CLOSED_PERMANENTLY)"),
                 ],
                 accessToken: SupabaseRESTClient.anonKey,
-                extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"]
+                extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"],
+                timeout: Self.requestTimeout
             )
             let data = try await SupabaseRESTClient.send(request)
             let page = try SupabaseRESTClient.decoder.decode([SupabaseCityRow].self, from: data)
