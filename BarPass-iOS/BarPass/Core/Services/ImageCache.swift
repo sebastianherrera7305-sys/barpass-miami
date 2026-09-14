@@ -134,7 +134,14 @@ struct CachedImage<Content: View, Placeholder: View>: View {
             // propia red por afuera de URLCache y nunca persistía nada:
             // cada apertura de la app volvía a descargar TODAS las
             // imágenes de cero, sin importar lo ya cacheado.
-            guard let (data, _) = try? await URLSession.shared.data(from: sourceURL) else { return nil }
+            // Ask for AVIF explicitly. URLSession's default Accept is */*, and
+            // Next's optimizer negotiates on that header — so every venue photo
+            // was coming back as JPEG. Measured on a real card image at w=1080:
+            // JPEG 129KB, AVIF 73KB, and 33KB once the width is capped below.
+            // iOS has decoded AVIF natively since 16 and the app targets 17+.
+            var request = URLRequest(url: sourceURL)
+            request.setValue("image/avif,image/webp,image/jpeg,*/*", forHTTPHeaderField: "Accept")
+            guard let (data, _) = try? await URLSession.shared.data(for: request) else { return nil }
             let opts: CFDictionary = [
                 kCGImageSourceShouldCache: false,
                 kCGImageSourceCreateThumbnailFromImageAlways: true,
@@ -178,12 +185,24 @@ enum PhotoURL {
         guard let host = url.host, optimizableHosts.contains(host) else { return url }
         // Points → pixels, then up to the next width we actually serve.
         let points = max(targetSize?.width ?? 0, targetSize?.height ?? 0)
-        let wanted = points > 0 ? Int((points * UIScreen.main.scale).rounded()) : 640
+        // Cap at 2x. A 3x phone asking for a full-width card was pulling the
+        // 1080 rendition — 129KB each, and a feed shows a dozen. These are
+        // photographs behind a dark scrim with text over them, not line art:
+        // the difference between 2x and 3x is invisible there, and the byte
+        // difference is not. TestFlight from inside a club: "too slow for a
+        // club", and after a night in Gainesville, "bajemos el peso de las
+        // imágenes para que cargue más rápido, sin perder la contextura".
+        let scale = min(UIScreen.main.scale, 2)
+        let wanted = points > 0 ? Int((points * scale).rounded()) : 640
         let width = availableWidths.first { $0 >= wanted } ?? availableWidths.last!
+        // Quality is an allow-list on the server (45/60/75). 60 is
+        // indistinguishable on a small scrolling card; the full-bleed detail
+        // header, which is the only place a photo is looked AT, keeps 75.
+        let quality = width >= 828 ? 75 : 60
 
         guard let encoded = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .alphanumerics),
               // APIClient.baseURL ends in /api; the optimizer is at the site root.
-              let optimized = URL(string: "\(APIClient.baseURL.deletingLastPathComponent().absoluteString)_next/image?url=\(encoded)&w=\(width)&q=75")
+              let optimized = URL(string: "\(APIClient.baseURL.deletingLastPathComponent().absoluteString)_next/image?url=\(encoded)&w=\(width)&q=\(quality)")
         else { return url }
         return optimized
     }
