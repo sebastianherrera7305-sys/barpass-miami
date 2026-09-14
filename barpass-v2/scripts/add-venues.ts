@@ -70,7 +70,7 @@ interface PlaceDetails {
   userRatingCount?: number;
   businessStatus?: string;
   types?: string[];
-  regularOpeningHours?: { periods?: { open?: { hour: number; minute: number }; close?: { hour: number; minute: number } }[] };
+  regularOpeningHours?: { periods?: { open?: { day?: number; hour: number; minute: number }; close?: { day?: number; hour: number; minute: number } }[] };
   photos?: { name: string }[];
   priceLevel?: string;
   primaryType?: string;
@@ -93,8 +93,40 @@ interface PlaceDetails {
  *  restaurant with a liquor licence does — which is how Olive Garden, Outback,
  *  LongHorn, three Sonny's BBQ and a liquor store ended up filed as Gainesville
  *  bars, burying the actual college bars. See scripts/venue-type-rules.ts. */
-function mapType(details: { types?: string[]; primaryType?: string; servesBeer?: boolean; servesWine?: boolean; servesCocktails?: boolean }): string | null {
-  return classify(details).kind;
+function mapType(details: PlaceDetails): string | null {
+  const kind = classify({ ...details, hours: toClassifierHours(details.regularOpeningHours) }).kind;
+  // "unknown" is not a type — it is the classifier saying "Google told me
+  // nothing useful; keep whatever the catalogue already holds". On the INSERT
+  // path there is nothing to hold, and `kind` being a truthy string sailed
+  // straight past the `if (!type)` guard: a Gainesville dry run on 2026-09-14
+  // produced "The Standard at Gainesville" — a student apartment block — as a
+  // valid candidate with type "unknown", which is not in the venues type enum.
+  // A place Google cannot describe is one we cannot honestly file, so skip it.
+  return kind === "unknown" ? null : kind;
+}
+
+/** Google's periods -> the {day, open, close} shape classify() reads.
+ *  Without this the `hours` field was simply absent, `lateNights()` always
+ *  returned 0, and the classifier's late-night rescue — "pours alcohol AND
+ *  open past midnight is nightlife regardless of Google's label" — could
+ *  never fire on the insert path. That rescue is precisely what keeps the
+ *  college blind spot (a pizza place open till 3am, a bodega till 3am) from
+ *  being filed as `restaurant`, which the going-out scorer ranks at zero. */
+function toClassifierHours(
+  h: PlaceDetails["regularOpeningHours"],
+): { day: number; open: string; close: string }[] | null {
+  const periods = h?.periods;
+  if (!periods?.length) return null;
+  const out: { day: number; open: string; close: string }[] = [];
+  for (const p of periods) {
+    if (!p.open || !p.close) continue;
+    out.push({
+      day: p.open.day ?? 0,
+      open: formatTime(p.open.hour, p.open.minute),
+      close: formatTime(p.close.hour, p.close.minute),
+    });
+  }
+  return out.length ? out : null;
 }
 
 const PRICE_LEVEL_MAP: Record<string, number> = {
@@ -158,6 +190,17 @@ function slugify(name: string, city: string): string {
  * al final nightlife general de la ciudad. `collegeQuery` es opcional —
  * ciudades sin universidad asociada solo corren las genéricas.
  */
+/** The late-night-food queries, by exact text. A candidate found ONLY by one
+ *  of these must still prove it is a night place: see LATE_NIGHT_GATE below. */
+function lateNightFoodQueries(city: string, collegeQuery: string | null): string[] {
+  return [
+    ...(collegeQuery ? [`late night food near ${collegeQuery}`, `late night pizza near ${collegeQuery}`] : []),
+    `late night food in ${city}`,
+    `late night pizza in ${city}`,
+    `food truck park in ${city}`,
+  ];
+}
+
 function buildQueries(city: string, collegeQuery: string | null, areas: string[] = []): string[] {
   const collegeFirst = collegeQuery
     ? [
@@ -165,6 +208,9 @@ function buildQueries(city: string, collegeQuery: string | null, areas: string[]
         `bars near ${collegeQuery}`,
         `nightclubs near ${collegeQuery}`,
         `student nightlife near ${collegeQuery}`,
+        `late night food near ${collegeQuery}`,
+        `late night pizza near ${collegeQuery}`,
+        `pool halls and kava bars near ${collegeQuery}`,
       ]
     : [];
   return [
@@ -176,6 +222,18 @@ function buildQueries(city: string, collegeQuery: string | null, areas: string[]
     `cocktail bars in ${city}`,
     `rooftop bars in ${city}`,
     `late night bars in ${city}`,
+    // Google's category for a place is not the same question as "do students
+    // go out there". The strip's late-night pizza counter, taqueria and
+    // bodega are typed `pizza_restaurant` / `restaurant`, so no bar/club
+    // phrase and no bar-typed Nearby sweep ever returns them — a Gainesville
+    // audit on 2026-09-14 found Gumby's (open 3am daily), Gator Bodega (3am),
+    // Tela Latin Grill (2am) and Piesanos University all invisible to this
+    // script while being exactly what the college market asks for. The
+    // classifier already decides honestly what they are; discovery just has
+    // to reach them.
+    `late night food in ${city}`,
+    `late night pizza in ${city}`,
+    `food truck park in ${city}`,
     `popular nightlife near downtown ${city}`,
     ...areas.flatMap((a) => [`bars and nightclubs in ${a}`, `nightlife in ${a}`]),
   ];
@@ -306,15 +364,26 @@ async function occupiedCells(cityName: string): Promise<{ lat: number; lng: numb
 }
 
 
+/** place_ids that ONLY a late-night-food query returned. Filled by searchCity. */
+const foodQueryOnly = new Set<string>();
+
 async function searchCity(city: string, collegeQuery: string | null, extraAnchors: string[] = []): Promise<PlaceSummary[]> {
   const queries = buildQueries(city, collegeQuery, extraAnchors);
+  const foodQueries = new Set(lateNightFoodQueries(city, collegeQuery));
   const merged = new Map<string, PlaceSummary>();
+  const fromOtherQuery = new Set<string>();
   for (const q of queries) {
     console.log(`  buscando: "${q}"`);
     const results = await searchOnce(q);
-    for (const p of results) if (!merged.has(p.id)) merged.set(p.id, p);
+    const isFoodQuery = foodQueries.has(q);
+    for (const p of results) {
+      if (!merged.has(p.id)) merged.set(p.id, p);
+      if (isFoodQuery) foodQueryOnly.add(p.id);
+      else fromOtherQuery.add(p.id);
+    }
     await new Promise((r) => setTimeout(r, 200));
   }
+  for (const id of fromOtherQuery) foodQueryOnly.delete(id);
   const fromText = merged.size;
 
   // Geographic sweep on top of the phrase queries. Anchors are resolved
@@ -343,7 +412,10 @@ async function searchCity(city: string, collegeQuery: string | null, extraAnchor
     console.log("  (no real anchor could be resolved — geographic sweep skipped)");
   } else {
     console.log(`  barrido geográfico sobre ${anchors.length} ancla(s)...`);
-    for (const p of await sweepAround(anchors)) if (!merged.has(p.id)) merged.set(p.id, p);
+    for (const p of await sweepAround(anchors)) {
+      if (!merged.has(p.id)) merged.set(p.id, p);
+      foodQueryOnly.delete(p.id);
+    }
     console.log(`  el barrido agregó ${merged.size - fromText} candidatos que ninguna query de texto encontró.`);
   }
   return [...merged.values()];
@@ -444,7 +516,7 @@ async function main() {
   // dropping the insert on a unique-constraint error.
   const claimedSlugs = new Set((await selectAllVenues("slug")).map((v) => v.slug as string));
 
-  let validCandidates = 0, inserted = 0, insertFailed = 0, skippedDup = 0, skippedType = 0, skippedNoHours = 0, skippedClosed = 0, skippedWrongCity = 0, processed = 0;
+  let validCandidates = 0, inserted = 0, insertFailed = 0, skippedDup = 0, skippedType = 0, skippedNoHours = 0, skippedClosed = 0, skippedWrongCity = 0, skippedNotLate = 0, processed = 0;
 
   for (const summary of results) {
     if (processed >= limit) break;
@@ -502,6 +574,26 @@ async function main() {
     if (!period?.open || !period?.close) {
       console.log(`  [horario] ${name} — Google no tiene horario real, se omite`);
       skippedNoHours++;
+      continue;
+    }
+
+    // LATE_NIGHT_GATE. Asking Google for "late night food" / "late night
+    // pizza" is the only way the strip's 3am pizza counter and its food truck
+    // park become reachable at all — no bar phrase and no bar-typed Nearby
+    // sweep returns them. But the same queries also return every Domino's,
+    // Papa John's and Pizza Hut delivery counter in the county, and a
+    // delivery counter is not somewhere anyone goes out.
+    //
+    // So a candidate that ONLY a late-night-food query found has to pass this
+    // project's own nightlife test, the one venue-type-rules.ts is built on:
+    // pours alcohol AND is open past midnight. That is exactly what `type`
+    // being something other than "restaurant" means for these rows, and it is
+    // read off Google's own hours and drink flags — no judgment call, nothing
+    // invented. Gumby's (3am, full bar) and Piesanos University pass it; the
+    // delivery chains do not.
+    if (foodQueryOnly.has(summary.id) && type === "restaurant") {
+      console.log(`  [no-tarde] ${name} — solo lo trajo una query de late-night food y no pasa el test (alcohol + pasada la medianoche)`);
+      skippedNotLate++;
       continue;
     }
 
@@ -591,6 +683,7 @@ async function main() {
   console.log(`  sin horario real:   ${skippedNoHours}`);
   console.log(`  cerrados:           ${skippedClosed}`);
   console.log(`  ciudad incorrecta:  ${skippedWrongCity}`);
+  console.log(`  no abre de noche:   ${skippedNotLate}`);
 }
 
 main();

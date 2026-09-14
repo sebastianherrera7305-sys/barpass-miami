@@ -65,8 +65,10 @@ export interface TypeSignals {
 export function lateNights(hours: TypeSignals["hours"]): number {
   if (!hours?.length) return 0;
   return hours.filter((h) => {
-    const hh = Number(h.close.split(":")[0]);
-    return Number.isFinite(hh) && hh >= 0 && hh < 8;
+    const [hh, mm] = h.close.split(":").map(Number);
+    if (!Number.isFinite(hh) || !Number.isFinite(mm)) return false;
+    if (hh === 0 && mm === 0) return false; // closing AT midnight is not past it
+    return hh >= 0 && hh < 8;
   }).length;
 }
 

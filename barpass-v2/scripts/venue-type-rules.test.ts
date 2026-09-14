@@ -34,6 +34,15 @@ describe("classify", () => {
     expect(classify({ primaryType: "diner", hours: late }).kind).toBe("restaurant");
   });
 
+  it("closing AT midnight is not open past midnight", () => {
+    // Blaze Pizza: fast-casual counter, closes 00:00 Fri/Sat, beer only. It
+    // was being classified `bar` and imported on that technicality.
+    const midnight = [{ day: 5, open: "11:00", close: "00:00" }];
+    expect(classify({ primaryType: "pizza_restaurant", servesBeer: true, hours: midnight }).kind).toBe("restaurant");
+    const past = [{ day: 5, open: "11:00", close: "00:30" }];
+    expect(classify({ primaryType: "pizza_restaurant", servesBeer: true, hours: past }).kind).toBe("bar");
+  });
+
   it("rejects things that are not venues at all", () => {
     // Strong evidence only. A shop is a shop whatever else is missing.
     for (const p of ["liquor_store", "farm", "indoor_golf_course", "store", "movie_theater"]) {
