@@ -45,9 +45,9 @@ async function main() {
   // PostgREST caps every response at 1000 rows. A bare select silently
   // processed the first 999 of 3,919 and reported success — the same cap that
   // made add-venues.ts "discover" venues it already had. Page explicitly.
-  const rows: { id: string; name: string; type: string; city: string | null; google_place_id: string }[] = [];
+  const rows: { id: string; name: string; type: string; city: string | null; google_place_id: string; hours: { day: number; open: string; close: string }[] | null }[] = [];
   for (let from = 0; ; from += 1000) {
-    let q = supabase.from("venues").select("id,name,type,city,google_place_id")
+    let q = supabase.from("venues").select("id,name,type,city,google_place_id,hours")
       .not("google_place_id", "is", null).range(from, from + 999);
     if (city) q = q.eq("city", city);
     const { data, error } = await q;
@@ -61,7 +61,7 @@ async function main() {
   for (const v of rows) {
     const s = await signals(v.google_place_id as string);
     if (!s) { failed++; continue; }
-    const { kind, reason } = classify(s);
+    const { kind, reason } = classify({ ...s, hours: v.hours });
 
     if (kind === null) {
       console.log(`  [fuera]   ${v.name} — ${reason}`);

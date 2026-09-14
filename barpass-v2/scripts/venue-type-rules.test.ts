@@ -23,6 +23,17 @@ describe("classify", () => {
     }
   });
 
+  it("keeps a late-night spot that serves drinks, whatever Google calls it", () => {
+    // Miller's Ale House and The TOP: american_restaurant, open till 2am.
+    const late = [{ day: 5, open: "11:00", close: "02:00" }];
+    expect(classify({ primaryType: "american_restaurant", servesBeer: true, hours: late }).kind).toBe("bar");
+    // Sonny's BBQ: same class of primary type, closes at 9pm. Still a restaurant.
+    const early = [{ day: 5, open: "11:00", close: "21:00" }];
+    expect(classify({ primaryType: "barbecue_restaurant", servesBeer: true, hours: early }).kind).toBe("restaurant");
+    // Late but dry — a 24h diner is not nightlife.
+    expect(classify({ primaryType: "diner", hours: late }).kind).toBe("restaurant");
+  });
+
   it("rejects things that are not venues at all", () => {
     for (const p of ["liquor_store", "farm", "indoor_golf_course",
                      "performing_arts_theater", "store", "bowling_alley"]) {

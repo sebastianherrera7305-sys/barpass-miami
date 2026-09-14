@@ -42,6 +42,18 @@ export interface TypeSignals {
   servesBeer?: boolean;
   servesWine?: boolean;
   servesCocktails?: boolean;
+  /** The venue's real weekly schedule, if we have it. */
+  hours?: { day: number; open: string; close: string }[] | null;
+}
+
+/** Nights per week this venue is still open after midnight. A close time
+ *  between 00:00 and 08:00 belongs to the previous night. */
+export function lateNights(hours: TypeSignals["hours"]): number {
+  if (!hours?.length) return 0;
+  return hours.filter((h) => {
+    const hh = Number(h.close.split(":")[0]);
+    return Number.isFinite(hh) && hh >= 0 && hh < 8;
+  }).length;
 }
 
 export type VenueKind = "club" | "bar" | "lounge" | "sports_bar" | "rooftop" | "brewery" | "restaurant";
@@ -70,6 +82,16 @@ export function classify(s: TypeSignals): Classification {
   if (NIGHTLIFE_PRIMARY.has(primary)) return { kind: "bar", reason: `primary=${primary}` };
 
   if (RESTAURANT_PRIMARY.test(primary) || primary === "restaurant") {
+    // …unless it actually behaves like a bar. Google files Miller's Ale House
+    // and The TOP as `american_restaurant`; both pour drinks and both are open
+    // until 2am, and both are where UF students actually go. Calling them
+    // restaurants drops them out of the going-out feed entirely, because
+    // VenueRanking scores `restaurant` at zero — the opposite of what the
+    // college market needs. Sonny's BBQ closes at 9pm and stays a restaurant,
+    // so this separates the two cleanly.
+    if (pours && lateNights(s.hours) >= 1) {
+      return { kind: "bar", reason: `primary=${primary} but open past midnight and serves alcohol` };
+    }
     return { kind: "restaurant", reason: `primary=${primary}` };
   }
 
