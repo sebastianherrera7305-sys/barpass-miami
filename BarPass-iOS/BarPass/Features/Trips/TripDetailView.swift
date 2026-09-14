@@ -7,6 +7,11 @@ struct TripDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var showJoinRequest: Stop? = nil
+    /// stop id -> user ids who voted. Loaded once with the trip and mutated
+    /// optimistically: a vote that fails server-side is rolled back, so the
+    /// count never lies about what the group actually chose.
+    @State private var votesByStop: [String: [String]] = [:]
+    @State private var votingStopId: String? = nil
     @State private var ratingTarget: RatingTarget? = nil
     @State private var selectedStop: Stop? = nil
     @State private var showEditTrip = false
@@ -57,6 +62,7 @@ struct TripDetailView: View {
                     .padding(.horizontal, BPSpacing.lg)
                 }
             }
+            .task { await loadVotes() }
             .navigationTitle(currentTrip.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -241,12 +247,95 @@ struct TripDetailView: View {
                         .bpAccessibility(label: l10n.t("tripDetail.requests.label"), hint: l10n.t("tripDetail.requests.hint"), isButton: true)
                     }
                 }
+
+                voteRow(stop)
             }
         }
         .padding(12)
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
         .bpAccessibility(label: stop.venueName, hint: l10n.t("tripDetail.stopRow.hint"), isButton: true)
+    }
+
+    // MARK: - Voting
+
+    /// The stop (or stops, on a tie) with the most votes. Nil until somebody
+    /// votes — crowning a "winner" out of zero votes would be a lie.
+    private var winningStopIds: Set<String> {
+        let best = votesByStop.values.map(\.count).max() ?? 0
+        guard best > 0 else { return [] }
+        return Set(votesByStop.filter { $0.value.count == best }.keys)
+    }
+
+    private func voteRow(_ stop: Stop) -> some View {
+        let voters = votesByStop[stop.id] ?? []
+        let mine = voters.contains(AuthService.shared.restoreSession()?.user.id ?? "")
+        let winning = winningStopIds.contains(stop.id)
+        return HStack(spacing: 8) {
+            Button {
+                BPHaptics.light()
+                Task { await toggleVote(stop) }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: mine ? "hand.thumbsup.fill" : "hand.thumbsup")
+                        .font(.bpScaled(10))
+                    if !voters.isEmpty {
+                        Text("\(voters.count)").font(.bpTiny())
+                    }
+                }
+                .foregroundStyle(mine ? amber : Color.bpTextSecondary)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 5)
+                .background(
+                    Capsule().fill(mine ? amber.opacity(0.14) : Color.white.opacity(0.05))
+                )
+                .overlay(Capsule().strokeBorder(mine ? amber.opacity(0.45) : Color.bpBorder))
+            }
+            .buttonStyle(.plain)
+            .disabled(votingStopId == stop.id)
+            .bpAccessibility(
+                label: String(format: l10n.t("tripDetail.vote.label"), stop.venueName),
+                hint: l10n.t(mine ? "tripDetail.vote.hint.remove" : "tripDetail.vote.hint.add"),
+                isButton: true)
+
+            // Only ever shown once somebody has voted.
+            if winning, (votesByStop[stop.id]?.count ?? 0) > 0 {
+                Text(l10n.t("tripDetail.vote.winning"))
+                    .font(.bpTiny())
+                    .foregroundStyle(Color.bpGreen)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func toggleVote(_ stop: Stop) async {
+        guard let userId = AuthService.shared.restoreSession()?.user.id else { return }
+        let had = (votesByStop[stop.id] ?? []).contains(userId)
+        votingStopId = stop.id
+        defer { votingStopId = nil }
+
+        // Optimistic, then rolled back on failure. A vote count that stays
+        // wrong is worse than a vote that visibly didn't take.
+        var next = votesByStop[stop.id] ?? []
+        if had { next.removeAll { $0 == userId } } else { next.append(userId) }
+        votesByStop[stop.id] = next
+
+        do {
+            if had {
+                try await RepositoryDependencies.tripStopVote.unvote(stopId: stop.id)
+            } else {
+                try await RepositoryDependencies.tripStopVote.vote(tripId: currentTrip.id, stopId: stop.id)
+            }
+        } catch {
+            var rolled = votesByStop[stop.id] ?? []
+            if had { rolled.append(userId) } else { rolled.removeAll { $0 == userId } }
+            votesByStop[stop.id] = rolled
+            BPHaptics.error()
+        }
+    }
+
+    private func loadVotes() async {
+        votesByStop = (try? await RepositoryDependencies.tripStopVote.votes(tripId: currentTrip.id)) ?? [:]
     }
 
     // MARK: - Members

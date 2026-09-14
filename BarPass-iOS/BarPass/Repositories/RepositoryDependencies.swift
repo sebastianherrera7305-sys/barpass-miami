@@ -12,6 +12,9 @@ enum RepositoryDependencies {
     // Supabase (schema.sql), same auth-gated pattern as trips. Guest mode
     // can't read/write plans (RLS scopes everything to auth.uid()).
     nonisolated(unsafe) static var plan: PlanRepository = SupabasePlanRepository()
+
+    /// Votes on a trip's stops — "votan entre varios spots y gana uno".
+    nonisolated(unsafe) static var tripStopVote: TripStopVoteRepository = SupabaseTripStopVoteRepository()
     nonisolated(unsafe) static var post: PostRepository = SupabasePostRepository()
     nonisolated(unsafe) static var greekLife: GreekLifeRepository = SupabaseGreekLifeRepository()
     nonisolated(unsafe) static var profileAffiliation: ProfileAffiliationRepository = SupabaseProfileAffiliationRepository()
