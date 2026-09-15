@@ -346,7 +346,7 @@ struct PlanView: View {
         .ignoresSafeArea(.container, edges: .bottom)
         .onAppear { BPAnalytics.track(.viewPlan) }
         .fullScreenCover(item: $chatVenue) { venue in
-            NavigationStack { VenueDetailView(venue: venue) }
+            NavigationStack { VenueDetailView(venue: venue).appState(appState) }
         }
         .task {
             restoreMessages()

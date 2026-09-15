@@ -79,6 +79,9 @@ struct MainTabView: View {
             // an invitation for the next screen to crash.
             .environmentObject(venueStore)
             .environmentObject(appState)
+            // Also as an optional-readable value, for screens presented inside a
+            // sheet or cover where @EnvironmentObject cannot be trusted.
+            .appState(appState)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .safeAreaInset(edge: .bottom) { Color.clear.frame(height: bottomChromeHeight) }
 
@@ -259,7 +262,7 @@ struct MainTabView: View {
             // invisible e intocable. Y como el botón flotante se oculta
             // mientras `isActive` es true, no quedaba forma de apagarlo — la
             // app se sentía trabada. Reportado desde TestFlight.
-            NavigationStack { VenueDetailView(venue: venue) }
+            NavigationStack { VenueDetailView(venue: venue).appState(appState) }
                 .overlayPreferenceValue(HelpAnchorPreferenceKey.self) { anchors in
                     if helpStore.isActive {
                         HelpOverlayView(anchors: anchors)

@@ -16,6 +16,7 @@
 		11AD2991A5DD4361C98E8012 /* ChapterEventsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD933F1F6EF039E08FDF1009 /* ChapterEventsRepository.swift */; };
 		12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */; };
 		1381C66FFDBA49BF7D938D04 /* HelpRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */; };
+		A11B19AC0FF1240000000031 /* AppStateEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000032 /* AppStateEnvironment.swift */; };
 		19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */; };
 		1E6D56BE3ACE427DB3D6D36B /* CityMascotIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */; };
 		1FA39B5B4E8C1190DC8683E2 /* HelpGuideStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75CA2DEEAE28B897B4F7BBE4 /* HelpGuideStoreTests.swift */; };
@@ -309,6 +310,7 @@
 		90DDC921B24BF09D3E8A04F2 /* TimeContext.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TimeContext.swift; path = BarPass/Core/Intelligence/TimeContext.swift; sourceTree = SOURCE_ROOT; };
 		93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAccountView.swift; sourceTree = "<group>"; };
 		97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpRegistry.swift; path = BarPass/Core/Help/HelpRegistry.swift; sourceTree = SOURCE_ROOT; };
+		A11B19AC0FF1240000000032 /* AppStateEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppStateEnvironment.swift; path = BarPass/Core/Services/AppStateEnvironment.swift; sourceTree = SOURCE_ROOT; };
 		981C73E1C26EF3207D31A9F2 /* RemyLocalChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemyLocalChat.swift; sourceTree = "<group>"; };
 		9944A65EAC0560419D02323C /* Stadium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Stadium.swift; path = BarPass/Models/Stadium.swift; sourceTree = SOURCE_ROOT; };
 		9B98197BF7876DD34EFC9C45 /* AgeReportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AgeReportSheet.swift; path = BarPass/Features/Tonight/AgeReportSheet.swift; sourceTree = SOURCE_ROOT; };
@@ -557,6 +559,7 @@
 				7DEB9D058BA5451D3579444B /* DiscoveryScorer.swift */,
 				9EC72D4050837ED089C03C05 /* UserLocationProvider.swift */,
 				97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */,
+				A11B19AC0FF1240000000032 /* AppStateEnvironment.swift */,
 				AD594030C69C33F1DB823472 /* HelpGuideStore.swift */,
 				B255F26D4A13547562CDF99B /* HelpTargetAnchor.swift */,
 				BF3AE92540CD87A9A6850339 /* HelpOverlayView.swift */,
@@ -1183,6 +1186,7 @@
 				498B1F017E9F0F4CE0F713B3 /* DiscoveryScorer.swift in Sources */,
 				5088325E9E6E36AB9FB16A81 /* UserLocationProvider.swift in Sources */,
 				1381C66FFDBA49BF7D938D04 /* HelpRegistry.swift in Sources */,
+				A11B19AC0FF1240000000031 /* AppStateEnvironment.swift in Sources */,
 				A2CF02FBB442045B9D9084FF /* HelpGuideStore.swift in Sources */,
 				EE01BC57203A630FF06E9694 /* HelpTargetAnchor.swift in Sources */,
 				E7A190DFF6312B338701215F /* HelpOverlayView.swift in Sources */,
@@ -1284,7 +1288,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 72;
+				CURRENT_PROJECT_VERSION = 73;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1312,7 +1316,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 72;
+				CURRENT_PROJECT_VERSION = 73;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1442,7 +1446,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 72;
+				CURRENT_PROJECT_VERSION = 73;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1465,7 +1469,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 72;
+				CURRENT_PROJECT_VERSION = 73;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;

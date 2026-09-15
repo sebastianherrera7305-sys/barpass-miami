@@ -6,12 +6,25 @@ import SwiftUI
 /// under a parallel university-specific model.
 struct UniversityDetailView: View {
     let university: University
+    /// Handed down from Tonight, which owns AppState. Passing a closure instead
+    /// of reading @EnvironmentObject is deliberate: this screen crashed on
+    /// build 71 at exactly this line (EnvironmentObject.error, iOS 26.3) even
+    /// after MainTabView was changed to inject both objects into every tab, so
+    /// the environment demonstrably does not survive the two NavigationLink
+    /// hops that reach here. A view that cannot be built without an ambient
+    /// object it has no way to check for is a crash waiting for the next
+    /// entry point; taking what it needs as parameters cannot fail that way.
+    var onOpenNightlife: ((String) -> Void)? = nil
 
-    @EnvironmentObject private var appState: AppState
-    @EnvironmentObject private var venueStore: VenueStore
     @ObservedObject private var l10n = L10n.shared
     @State private var publicEvents: [UniversityPublicEvent] = []
     @State private var loadedEvents = false
+    /// Which cities the catalogue actually covers. Read straight from the
+    /// repository rather than VenueStore — it is the same ~24KB city index
+    /// VenueStore itself uses, and this way the screen owns its own data.
+    /// Empty means "not loaded yet", and an unknown city is never claimed to
+    /// be uncovered on the strength of a failed fetch.
+    @State private var coveredCities: Set<String> = []
 
     var body: some View {
         ZStack {
@@ -34,11 +47,11 @@ struct UniversityDetailView: View {
                     // cover. Before this check it always navigated, and for
                     // 24 of 47 universities that meant an empty Explore that
                     // silently reset the user's selected city.
-                    if venueStore.coveredCities.isEmpty || venueStore.coveredCities.contains(university.venueCity) {
+                    if coveredCities.isEmpty || coveredCities.contains(university.venueCity) {
                         Button {
                             BPHaptics.medium()
                             SelectedCityStore.select(university.venueCity)
-                            appState.switchTabPoppingToRoot(1) // Explore
+                            onOpenNightlife?(university.venueCity)
                         } label: {
                             rowCard(
                                 icon: "map.fill",
@@ -72,6 +85,9 @@ struct UniversityDetailView: View {
         .task {
             publicEvents = (try? await RepositoryDependencies.chapterEvents.publicEvents(universityId: university.id)) ?? []
             loadedEvents = true
+            if let counts = try? await RepositoryDependencies.venue.getCityCounts() {
+                coveredCities = Set(counts.keys)
+            }
         }
     }
 

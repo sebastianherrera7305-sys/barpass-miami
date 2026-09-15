@@ -9,9 +9,13 @@ struct UniversityListView: View {
     @State private var universities: [University] = []
     @State private var isLoading = true
     private let city: String
+    /// Passed straight through to the detail screen. See UniversityDetailView
+    /// for why this is a closure and not an @EnvironmentObject.
+    private let onOpenNightlife: ((String) -> Void)?
 
-    init(city: String) {
+    init(city: String, onOpenNightlife: ((String) -> Void)? = nil) {
         self.city = city
+        self.onOpenNightlife = onOpenNightlife
     }
 
     var body: some View {
@@ -26,7 +30,7 @@ struct UniversityListView: View {
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         ForEach(universities) { uni in
-                            NavigationLink(destination: UniversityDetailView(university: uni)) {
+                            NavigationLink(destination: UniversityDetailView(university: uni, onOpenNightlife: onOpenNightlife)) {
                                 universityCard(uni)
                             }
                             .buttonStyle(.plain)

@@ -291,7 +291,9 @@ struct TonightView: View {
                     }
 
                     if let city = venueStore.selectedCity {
-                        NavigationLink(destination: UniversityListView(city: city)) {
+                        NavigationLink(destination: UniversityListView(city: city, onOpenNightlife: { _ in
+                            appState.switchTabPoppingToRoot(1) // Explore
+                        })) {
                             universitiesEntryCard
                         }
                         .buttonStyle(.plain)

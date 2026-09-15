@@ -5,7 +5,17 @@ struct VenueDetailView: View {
     let venue: BarPassVenue
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var l10n = L10n.shared
-    @EnvironmentObject private var appState: AppState
+    /// Optional on purpose. This screen is presented from six different
+    /// places, several of them inside a .fullScreenCover or a .sheet, and one
+    /// of those presenters (NightPlanView) holds no AppState itself. A hard
+    /// @EnvironmentObject would make every one of those a potential
+    /// "No ObservableObject of type AppState found" trap — which is exactly
+    /// how UniversityDetailView crashed on build 71, at the line that read one.
+    ///
+    /// @Environment with a nil default degrades instead of trapping: the cart
+    /// and priority-entry actions hide when there is no AppState to act on,
+    /// which is honest, rather than taking the whole app down.
+    @Environment(\.appStateIfPresent) private var appStateOptional
     @ObservedObject private var favorites = FavoritesStore.shared
     @ObservedObject private var points = PointsEngine.shared
     @State private var showReviewComposer = false
@@ -699,6 +709,10 @@ struct VenueDetailView: View {
             .bpAccessibility(label: l10n.t("venueDetail.save"), hint: l10n.t("venueDetail.save.hint"), isButton: true)
             .helpTarget("venueDetail.save")
 
+            // Shown only when there is an AppState to hand the purchase flow
+            // to. A Skip the Line button that silently does nothing on tap is
+            // worse than one that isn't there.
+            if let appState = appStateOptional {
             Button {
                 appState.priorityVenueId = venue.id
                 appState.priorityVenueName = venue.name
@@ -724,6 +738,7 @@ struct VenueDetailView: View {
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("priorityEntry.skipLine"), hint: l10n.t("venueDetail.skipLine.hint"), isButton: true)
             .helpTarget("venueDetail.skipLine")
+            }
 
             Button {
                 BPAnalytics.track(.openMaps(venue: venue.name))
