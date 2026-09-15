@@ -124,6 +124,7 @@
 		FRND00000000000000000004 /* FriendsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000003 /* FriendsRepository.swift */; };
 		FRND00000000000000000006 /* FriendChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000005 /* FriendChatRepository.swift */; };
 		FRND00000000000000000008 /* FriendsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000007 /* FriendsListView.swift */; };
+		A11B19AC0FF1240000000041 /* SocialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000042 /* SocialView.swift */; };
 		A11B19AC0FF1240000000021 /* NamePromptSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000022 /* NamePromptSheet.swift */; };
 		FRND00000000000000000016 /* FriendRowViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000015 /* FriendRowViews.swift */; };
 		FRND00000000000000000010 /* AddFriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000009 /* AddFriendView.swift */; };
@@ -269,6 +270,7 @@
 		FRND00000000000000000003 /* FriendsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendsRepository.swift; path = BarPass/Repositories/FriendsRepository.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000005 /* FriendChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendChatRepository.swift; path = BarPass/Repositories/FriendChatRepository.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000007 /* FriendsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendsListView.swift; path = BarPass/Features/Friends/FriendsListView.swift; sourceTree = SOURCE_ROOT; };
+		A11B19AC0FF1240000000042 /* SocialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SocialView.swift; path = BarPass/Features/Social/SocialView.swift; sourceTree = SOURCE_ROOT; };
 		A11B19AC0FF1240000000022 /* NamePromptSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NamePromptSheet.swift; path = BarPass/Features/Friends/NamePromptSheet.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000015 /* FriendRowViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendRowViews.swift; path = BarPass/Features/Friends/FriendRowViews.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000009 /* AddFriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddFriendView.swift; path = BarPass/Features/Friends/AddFriendView.swift; sourceTree = SOURCE_ROOT; };
@@ -688,6 +690,7 @@
 				FRND00000000000000000003 /* FriendsRepository.swift */,
 				FRND00000000000000000005 /* FriendChatRepository.swift */,
 				FRND00000000000000000007 /* FriendsListView.swift */,
+				A11B19AC0FF1240000000042 /* SocialView.swift */,
 				A11B19AC0FF1240000000022 /* NamePromptSheet.swift */,
 				FRND00000000000000000015 /* FriendRowViews.swift */,
 				FRND00000000000000000009 /* AddFriendView.swift */,
@@ -1207,6 +1210,7 @@
 				FRND00000000000000000004 /* FriendsRepository.swift in Sources */,
 				FRND00000000000000000006 /* FriendChatRepository.swift in Sources */,
 				FRND00000000000000000008 /* FriendsListView.swift in Sources */,
+				A11B19AC0FF1240000000041 /* SocialView.swift in Sources */,
 				A11B19AC0FF1240000000021 /* NamePromptSheet.swift in Sources */,
 				FRND00000000000000000016 /* FriendRowViews.swift in Sources */,
 				FRND00000000000000000010 /* AddFriendView.swift in Sources */,
@@ -1288,7 +1292,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1316,7 +1320,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1446,7 +1450,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1469,7 +1473,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;

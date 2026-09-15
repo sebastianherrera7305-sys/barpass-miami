@@ -290,18 +290,14 @@ struct TonightView: View {
                         liveEventsThisWeekSection
                     }
 
-                    if let city = venueStore.selectedCity {
-                        NavigationLink(destination: UniversityListView(city: city, onOpenNightlife: { _ in
-                            appState.switchTabPoppingToRoot(1) // Explore
-                        })) {
-                            universitiesEntryCard
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.horizontal, BPSpacing.lg)
-                    }
 
-                    NavigationLink(destination: StadiumsListView()) {
-                        stadiumsEntryCard
+                    // Remy lives here now. The Plan tab was retired in the
+                    // 2026-09-15 restructure and its prompt is already at the
+                    // top of this screen — but that prompt only does local
+                    // scoring, so without this entry the actual AI chat (and
+                    // its saved history) became unreachable.
+                    NavigationLink(destination: PlanView()) {
+                        remyEntryCard
                     }
                     .buttonStyle(.plain)
                     .padding(.horizontal, BPSpacing.lg)
@@ -481,6 +477,34 @@ struct TonightView: View {
         .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
         .bpAccessibility(label: l10n.t("greek.universityList.title"), hint: l10n.t("greek.universityList.hint"), isButton: true)
         .helpTarget("tonight.universities")
+    }
+
+    /// Reached from the row above. Deliberately styled like the entry cards it
+    /// sits beside rather than as a floating assistant button — Remy is one of
+    /// the ways to answer "where tonight", not a separate product.
+    private var remyEntryCard: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "sparkles")
+                .font(.bpScaled(20))
+                .foregroundStyle(Color.bpAmber)
+                .frame(width: 34)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(l10n.t("tonight.remy.title"))
+                    .font(.bpHeadline())
+                    .foregroundStyle(Color.bpInk)
+                Text(l10n.t("tonight.remy.hint"))
+                    .font(.bpCaption())
+                    .foregroundStyle(Color.bpTextSecondary)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.bpScaled(13, weight: .semibold))
+                .foregroundStyle(Color.bpTextTertiary)
+        }
+        .padding(BPSpacing.md)
+        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
+        .bpAccessibility(label: l10n.t("tonight.remy.title"), hint: l10n.t("tonight.remy.hint"), isButton: true)
     }
 
     private var stadiumsEntryCard: some View {

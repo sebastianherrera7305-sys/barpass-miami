@@ -45,8 +45,8 @@ struct MainTabView: View {
         switch selectedTab {
         case 0: return .tonight
         case 1: return .explore
-        case 2: return .trips
-        case 3: return .plan
+        case 2: return nil          // Social has no help route yet
+        case 3: return .trips
         case 4: return .profile
         default: return nil
         }
@@ -58,8 +58,8 @@ struct MainTabView: View {
                 switch selectedTab {
                 case 0:  TonightView()
                 case 1:  ExploreView()
-                case 2:  TripsListView()
-                case 3:  PlanView()
+                case 2:  SocialView()
+                case 3:  TripsListView()
                 default: ProfileView()
                 }
             }
@@ -139,7 +139,7 @@ struct MainTabView: View {
             // own instant local FAQ, so the floating trigger isn't the only
             // way to get help there; simplest correct fix is to just not
             // draw it on top of Plan's send button at all.
-            if let route = currentHelpRoute, !helpStore.isActive, !isKeyboardVisible, selectedTab != 3 {
+            if let route = currentHelpRoute, !helpStore.isActive, !isKeyboardVisible {
                 VStack {
                     Spacer()
                     HStack {
@@ -277,7 +277,7 @@ struct MainTabView: View {
     private func handleDeepLink(_ route: DeepLinkRoute) {
         switch route {
         case .trip:
-            selectedTab = 2 // TripsListView observes pendingRoute and opens the sheet.
+            selectedTab = 3 // TripsListView observes pendingRoute and opens the sheet.
         case .venue(let id):
             if let venue = venueStore.venues.first(where: { $0.id == id }) {
                 deepLinkedVenue = venue
@@ -365,17 +365,17 @@ struct MainTabView: View {
     private func tabButton(index: Int) -> some View {
         let isSelected = selectedTab == index
         let items: [(icon: String, label: String)] = [
-            ("flame.fill",    l10n.t("tab.tonight")),
-            ("map.fill",      l10n.t("tab.explore")),
-            ("suitcase.fill", l10n.t("tab.trips")),
-            ("sparkles",      l10n.t("tab.plan")),
-            ("person.fill",   l10n.t("tab.me")),
+            ("flame.fill",       l10n.t("tab.tonight")),
+            ("map.fill",         l10n.t("tab.explore")),
+            ("person.2.fill",    l10n.t("tab.social")),
+            ("suitcase.fill",    l10n.t("tab.trips")),
+            ("person.fill",      l10n.t("tab.me")),
         ]
         let item = items[index]
 
         return Button {
             BPHaptics.light()
-            let screenNames = ["Tonight", "Explore", "Trips", "Plan", "Profile"]
+            let screenNames = ["Tonight", "Explore", "Social", "Trips", "Profile"]
             BPAnalytics.screen(screenNames[index])
             withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                 selectedTab = index
