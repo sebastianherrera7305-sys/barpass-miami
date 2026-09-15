@@ -58,7 +58,7 @@ struct MainTabView: View {
                 switch selectedTab {
                 case 0:  TonightView()
                 case 1:  ExploreView()
-                case 2:  SocialView()
+                case 2:  SocialView(venueStore: venueStore)
                 case 3:  TripsListView()
                 default: ProfileView()
                 }
