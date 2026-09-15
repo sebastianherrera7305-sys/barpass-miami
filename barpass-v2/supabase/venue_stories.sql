@@ -121,8 +121,19 @@ $$;
 -- 2. CLOSE THE user_id LEAK PROPERLY
 -- ═══════════════════════════════════════════════════════════════════
 -- anon was revoked on 2026-09-09; authenticated was not. Both now.
-revoke select (user_id) on public.venue_media from anon;
-revoke select (user_id) on public.venue_media from authenticated;
+-- A column-level REVOKE is silently a no-op while a TABLE-level grant stands:
+-- Postgres checks the table grant first and never consults the column list.
+-- That is why the 2026-09-09 line `revoke select (user_id) ... from anon`
+-- appeared to work only after the table grant was also revoked, and why the
+-- same one-liner aimed at `authenticated` did nothing at all — verified
+-- 2026-09-15 by signing up a fresh account and reading user_id straight back.
+-- Revoke the table, then grant back exactly the columns that are public.
+revoke select on public.venue_media from anon;
+revoke select on public.venue_media from authenticated;
+grant select (id, venue_id, media_url, media_type, created_at)
+  on public.venue_media to anon;
+grant select (id, venue_id, media_url, media_type, created_at)
+  on public.venue_media to authenticated;
 
 -- Inserting still needs the column (the INSERT policy checks
 -- user_id = auth.uid()), so make sure that grant is intact.
