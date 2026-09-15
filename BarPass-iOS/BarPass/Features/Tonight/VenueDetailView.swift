@@ -178,6 +178,13 @@ struct VenueDetailView: View {
                 .padding(.horizontal, BPSpacing.lg)
                 .helpTarget("venueDetail.checkIn")
 
+            // Directly under the check-in, and far above the photo grid at
+            // the bottom of this page. Tonight is perishable — it is worth
+            // nothing at 6am — so it goes where the eye already is, not
+            // behind eight sections of static catalogue data.
+            VenueStoriesStrip(venue: venue)
+                .padding(.horizontal, BPSpacing.lg)
+
             budgetSection
                 .padding(.horizontal, BPSpacing.lg)
 

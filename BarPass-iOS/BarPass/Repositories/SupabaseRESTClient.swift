@@ -66,14 +66,58 @@ enum SupabaseRESTClient {
         return data
     }
 
-    /// The `convertFromSnakeCase` + `.iso8601` decoder every repository
+    /// The `convertFromSnakeCase` + ISO-8601 decoder every repository
     /// rebuilt locally.
+    ///
+    /// The date strategy is NOT plain `.iso8601`. Postgres renders a
+    /// `timestamptz` with however many fractional digits the value
+    /// actually has — `…:45+00:00` when it lands on a whole second and
+    /// `…:45.123456+00:00` the rest of the time — and `.iso8601` throws on
+    /// the second form. Every repository reading a row with a `now()`
+    /// default was therefore one microsecond away from decoding nothing,
+    /// which surfaces as an empty list rather than an error because the
+    /// call sites use `try?`. `HostEventCoding` already carried this fix
+    /// locally; this is the same tolerance for the PostgREST path.
     static let decoder: JSONDecoder = {
         let d = JSONDecoder()
         d.keyDecodingStrategy = .convertFromSnakeCase
-        d.dateDecodingStrategy = .iso8601
+        d.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let raw = try container.decode(String.self)
+            if let date = parseTimestamp(raw) { return date }
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date: \(raw)")
+        }
         return d
     }()
+
+    // Shared, not per-call. `ISO8601DateFormatter` is not `Sendable`, but
+    // parsing on it is thread-safe and it is only ever read here. Building
+    // one per decode is the mistake that froze build 63: a catalogue load
+    // decodes two timestamps on each of ~1,800 venues, and that is 3,600
+    // formatter allocations on whatever thread got there first.
+    nonisolated(unsafe) private static let fractionalFormatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+
+    nonisolated(unsafe) private static let plainFormatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
+
+    /// Tries fractional, then plain, then plain with the fraction cut out —
+    /// the last one covers the 6-digit microsecond precision Postgres emits,
+    /// which `ISO8601DateFormatter` does not reliably accept even with
+    /// `.withFractionalSeconds`.
+    static func parseTimestamp(_ raw: String) -> Date? {
+        if let date = fractionalFormatter.date(from: raw) { return date }
+        if let date = plainFormatter.date(from: raw) { return date }
+        guard let dot = raw.firstIndex(of: ".") else { return nil }
+        let tail = raw[dot...].drop(while: { $0.isNumber || $0 == "." })
+        return plainFormatter.date(from: String(raw[raw.startIndex..<dot]) + tail)
+    }
 
     /// The matching encoder, for the repositories that also rebuilt this.
     static let encoder: JSONEncoder = {

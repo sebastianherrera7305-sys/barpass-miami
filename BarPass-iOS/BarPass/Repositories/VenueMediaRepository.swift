@@ -5,9 +5,17 @@ enum VenueMediaType: String, Codable {
 }
 
 struct VenueMediaItem: Identifiable, Codable, Equatable {
+    /// The columns a client is allowed to read. `user_id` is deliberately
+    /// absent and deliberately NOT requested: SELECT on that column is
+    /// revoked from both `anon` and `authenticated`
+    /// (supabase/venue_stories.sql), so a `select=*` here is a 42501, not a
+    /// row with a missing field. Knowing which named person was inside
+    /// which venue is exactly the location history that must never leave
+    /// the database.
+    static let columns = "id,venue_id,media_url,media_type,created_at"
+
     let id: String
     let venueId: String
-    let userId: String
     let mediaUrl: String
     let mediaType: VenueMediaType
     let createdAt: Date
@@ -73,7 +81,7 @@ actor SupabaseVenueMediaRepository: VenueMediaRepository {
         let req = try SupabaseRESTClient.request(
             "GET", path: "venue_media",
             queryItems: [
-                URLQueryItem(name: "select", value: "*"),
+                URLQueryItem(name: "select", value: VenueMediaItem.columns),
                 URLQueryItem(name: "venue_id", value: "eq.\(venueId)"),
                 URLQueryItem(name: "order", value: "created_at.desc"),
             ]
@@ -160,8 +168,13 @@ actor SupabaseVenueMediaRepository: VenueMediaRepository {
         let body = try SupabaseRESTClient.encoder.encode(
             NewRow(venueId: venueId, userId: session.user.id, mediaUrl: publicURL, mediaType: mediaType)
         )
+        // `select=` shapes the returned representation. Without it PostgREST
+        // returns every column, including the one we are no longer allowed
+        // to read, and the insert fails on the way back out.
         let insertReq = try SupabaseRESTClient.request(
-            "POST", path: "venue_media", body: body, accessToken: session.accessToken,
+            "POST", path: "venue_media",
+            queryItems: [URLQueryItem(name: "select", value: VenueMediaItem.columns)],
+            body: body, accessToken: session.accessToken,
             extraHeaders: ["Prefer": "return=representation"]
         )
         let insertData = try await SupabaseRESTClient.send(insertReq)

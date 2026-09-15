@@ -27,4 +27,14 @@ enum RepositoryDependencies {
     nonisolated(unsafe) static var displayName: DisplayNameRepository = SupabaseDisplayNameRepository()
     nonisolated(unsafe) static var chapterMembers: ChapterMembersRepository = SupabaseChapterMembersRepository()
     nonisolated(unsafe) static var venueMedia: VenueMediaRepository = SupabaseVenueMediaRepository()
+
+    /// Stories — the same venue_media rows, read inside the night they were
+    /// posted in (supabase/venue_stories.sql). No new table, no new upload
+    /// path; posting a photo after a check-in already creates one.
+    nonisolated(unsafe) static var venueStory: VenueStoryRepository = SupabaseVenueStoryRepository()
+
+    /// Host-run nights (free RSVP tiers, waiting list, door). Writes go
+    /// through barpass-v2's /api/host-events routes, not PostgREST — the RPCs
+    /// behind them hold the locks and rate limits.
+    nonisolated(unsafe) static var hostEvent: HostEventRepository = BarPassHostEventRepository()
 }

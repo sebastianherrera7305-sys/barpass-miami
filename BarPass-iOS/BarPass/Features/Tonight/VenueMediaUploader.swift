@@ -101,6 +101,12 @@ final class VenueMediaUploader: ObservableObject {
                 self?.fraction = fraction
             }
             BPHaptics.success()
+            // The row that just landed IS tonight's story, so the crowd
+            // count on every card for this venue is now stale. Refresh it
+            // immediately rather than after the store's interval — the one
+            // person guaranteed to look for their own frame is the person
+            // who just posted it.
+            VenueStoryPulseStore.shared.invalidate()
             return item
         } catch {
             // Venue LTE dropped the upload. The compressed file lives in the

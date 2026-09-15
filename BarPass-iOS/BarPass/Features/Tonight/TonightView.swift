@@ -367,8 +367,15 @@ struct TonightView: View {
                     Spacer(minLength: 120)
                 }
             }
-            .refreshable { await venueStore.forceRefresh() }
+            .refreshable {
+                await venueStore.forceRefresh()
+                VenueStoryPulseStore.shared.refresh(force: true)
+            }
         }
+        // One request for the entire feed, not one per card. The pulse view
+        // only ever holds the night in progress, so it is a handful of rows
+        // for the whole catalogue.
+        .task { VenueStoryPulseStore.shared.refresh() }
         // One-shot, cached in UserLocationProvider — never a per-card fetch.
         // If permission is denied, `coordinate` just stays nil and every
         // distance-based signal in the scorer is silently absent.
@@ -686,6 +693,10 @@ struct VenuePhotoFallback: View {
 
 struct HeroVenueCard: View {
     @ObservedObject private var l10n = L10n.shared
+    /// The card ignores its children for VoiceOver, so the crowd count has
+    /// to be spoken by the card itself or it is invisible to a screen
+    /// reader entirely.
+    @ObservedObject private var storyPulse = VenueStoryPulseStore.shared
     let venue: BarPassVenue
     /// Which scorer ordered the list this card is in. Defaults to
     /// `.experience` because that's what every caller used when the badge was
@@ -705,6 +716,12 @@ struct HeroVenueCard: View {
     /// no part in putting it there. Both return nil rather than reach for a
     /// reason the venue's data doesn't support, and a nil badge simply isn't
     /// drawn.
+    /// Appended to the card's spoken hint — never a name, only a count.
+    private var storyHint: String {
+        guard let pulse = storyPulse.pulse(for: venue.id), pulse.posterCount > 0 else { return "" }
+        return " " + String(format: l10n.t("story.badge.a11y"), pulse.posterCount)
+    }
+
     private var reasonText: String? {
         switch ranking {
         case .experience:
@@ -761,6 +778,10 @@ struct HeroVenueCard: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
+                    // First in the row, ahead of "trending" and happy hour:
+                    // those are properties of the venue, this is the only
+                    // thing on the card that happened tonight.
+                    VenueStoryBadge(venueId: venue.id)
                     if venue.isTrending {
                         Text(l10n.t("tonight.trending.badge"))
                             .font(.bpTiny())
@@ -839,7 +860,7 @@ struct HeroVenueCard: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("tonight.venue.hint"), venue.neighborhood, venue.type.rawValue, venue.rating), isButton: true)
+        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("tonight.venue.hint"), venue.neighborhood, venue.type.rawValue, venue.rating) + storyHint, isButton: true)
         .bpEntrance(offset: CGSize(width: 0, height: 20), delay: 0.1)
     }
 
@@ -849,7 +870,13 @@ struct HeroVenueCard: View {
 
 struct SmallVenueCard: View {
     @ObservedObject private var l10n = L10n.shared
+    @ObservedObject private var storyPulse = VenueStoryPulseStore.shared
     let venue: BarPassVenue
+
+    private var storyHint: String {
+        guard let pulse = storyPulse.pulse(for: venue.id), pulse.posterCount > 0 else { return "" }
+        return " " + String(format: l10n.t("story.badge.a11y"), pulse.posterCount)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -886,6 +913,10 @@ struct SmallVenueCard: View {
                         .bpAccessibility(label: String(format: l10n.t("tonight.hhUntil.a11y"), until))
                 }
             }
+            .overlay(alignment: .bottomLeading) {
+                VenueStoryBadge(venueId: venue.id)
+                    .padding(6)
+            }
 
             // TestFlight feedback: "cards are not well design they have ui
             // problems" — single-line truncation was chopping longer venue
@@ -917,7 +948,7 @@ struct SmallVenueCard: View {
         }
         .frame(width: 150)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("tonight.venueShort.hint"), venue.neighborhood, venue.rating), isButton: true)
+        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("tonight.venueShort.hint"), venue.neighborhood, venue.rating) + storyHint, isButton: true)
         .bpEntrance(offset: CGSize(width: 0, height: 10), delay: 0.15)
     }
 }
