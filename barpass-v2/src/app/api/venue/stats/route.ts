@@ -2,9 +2,15 @@ import { NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { venueSecretMatches } from "@/lib/venue-secret";
+import {
+  summariseNight,
+  startOfVenueDay,
+  type OrderRow,
+  type PassRow,
+} from "@/features/venue-owner/services/owner-night-summary";
 
 /**
- * GET /api/venue/stats?venueId=liv-miami
+ * GET /api/venue/stats?venueId=<venues.id uuid>
  * Today's numbers for one venue — validated against that venue's own secret,
  * read from the locked-down `venue_secrets` table (supabase/
  * venue_secrets_lockdown.sql), since this is staff tooling, not a
@@ -50,8 +56,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "not_authorized" }, { status: 401 });
   }
 
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
+  // Midnight in the VENUE's timezone: the catalogue spans 23 cities, and a
+  // Miami bar's Saturday night is not the server's UTC Saturday.
+  const { data: venueRow } = await supabase
+    .from("venues")
+    .select("timezone")
+    .eq("id", venueId)
+    .maybeSingle();
+  const startOfDay = startOfVenueDay(new Date(), (venueRow?.timezone as string | null) ?? null);
 
   const [ordersRes, passesRes] = await Promise.all([
     supabase
@@ -62,7 +74,7 @@ export async function GET(request: Request) {
       .order("created_at", { ascending: false }),
     supabase
       .from("passes")
-      .select("id, kind, quantity, amount, redeemed_at, created_at")
+      .select("id, kind, quantity, amount, redeemed_at, created_at, source_order_id")
       .eq("venue_id", venueId)
       .gte("created_at", startOfDay.toISOString())
       .order("created_at", { ascending: false }),
@@ -75,15 +87,20 @@ export async function GET(request: Request) {
     );
   }
 
-  const orders = ordersRes.data ?? [];
-  const passes = passesRes.data ?? [];
+  const orders = (ordersRes.data ?? []) as OrderRow[];
+  const passes = (passesRes.data ?? []) as PassRow[];
+  // A card-paid pass writes BOTH an orders row and a passes row, so summing
+  // both columns reported every card sale twice. summariseNight counts a pass
+  // only when no counted order already backs it.
+  const tonight = summariseNight(orders, passes);
 
   return NextResponse.json({
     venueId,
-    revenueToday: orders.reduce((s, o) => s + Number(o.total), 0) + passes.reduce((s, p) => s + Number(p.amount), 0),
-    ordersToday: orders.length,
-    passesIssuedToday: passes.length,
-    passesRedeemedToday: passes.filter((p) => p.redeemed_at).length,
+    revenueToday: tonight.revenue,
+    ordersToday: tonight.orders,
+    passesIssuedToday: tonight.passesIssued,
+    passesRedeemedToday: tonight.passesRedeemed,
+    guestsOnPassesToday: tonight.guestsOnPasses,
     recentOrders: orders.slice(0, 20),
     recentPasses: passes.slice(0, 20),
   });
