@@ -27,7 +27,9 @@
     "fix:photos": "node --env-file=.env.local --import tsx scripts/fix-venue-photos.ts",
     "fix:types": "node --env-file=.env.local --import tsx scripts/fix-venue-types.ts",
     "dedupe:address": "node --env-file=.env.local --import tsx scripts/dedupe-same-address.ts",
-    "backfill:hours": "node --env-file=.env.local --import tsx scripts/backfill-venue-hours.ts"
+    "backfill:hours": "node --env-file=.env.local --import tsx scripts/backfill-venue-hours.ts",
+    "refresh:core": "node --env-file=.env.local --import tsx scripts/refresh-venue-core-data.ts",
+    "apply:researched": "node --env-file=.env.local --import tsx scripts/apply-researched-venue-fields.ts"
   },
   "dependencies": {
     "@google/genai": "^2.11.0",
