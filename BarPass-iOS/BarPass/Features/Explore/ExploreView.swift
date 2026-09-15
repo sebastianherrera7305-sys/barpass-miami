@@ -14,6 +14,8 @@ struct ExploreView: View {
     @State private var visibleSpan: CLLocationDegrees = 0.08
     @State private var stadiums: [Stadium] = []
     @State private var selectedStadium: Stadium? = nil
+    @ObservedObject private var friendsTonight = FriendsTonightStore.shared
+    @State private var showFriends = false
 
     static let defaultRegion = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 25.78, longitude: -80.19),
@@ -175,6 +177,27 @@ struct ExploreView: View {
                 }
                 .helpTarget("explore.filters")
 
+                // "Tus amigos esta noche" — only ever shows friends who
+                // opted into sharing, and only inside the night still in
+                // progress. When the strip is empty because the USER has
+                // sharing off, it says so instead of showing nothing.
+                FriendsTonightStrip(
+                    store: friendsTonight,
+                    onSelect: { person in
+                        selectedStadium = nil
+                        selectedVenue = venueStore.venues.first(where: { $0.id == person.venueId })
+                        withAnimation(.easeInOut(duration: 0.4)) {
+                            cameraPosition = .region(MKCoordinateRegion(
+                                center: CLLocationCoordinate2D(latitude: person.venueLat, longitude: person.venueLng),
+                                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                            ))
+                        }
+                    },
+                    onOpenFriends: { showFriends = true }
+                )
+                .padding(.horizontal, BPSpacing.lg)
+                .padding(.top, 4)
+
                 Spacer()
 
                 if !showList, let venue = selectedVenue {
@@ -197,6 +220,10 @@ struct ExploreView: View {
             mapLoadTriggered = true
             recenterOnCurrentCity()
             Task { stadiums = (try? await RepositoryDependencies.stadium.allStadiums()) ?? [] }
+            Task { await friendsTonight.refresh() }
+        }
+        .sheet(isPresented: $showFriends, onDismiss: { Task { await friendsTonight.refresh(force: true) } }) {
+            NavigationStack { FriendsListView() }
         }
         .onChange(of: venueStore.selectedCity) { _, _ in recenterOnCurrentCity() }
     }
@@ -293,6 +320,23 @@ struct ExploreView: View {
                         .onTapGesture {
                             BPHaptics.light()
                             withAnimation(.spring(response: 0.3)) { selectedVenue = nil }
+                        }
+                }
+                .annotationTitles(.hidden)
+            }
+
+            // Friend pins sit ON TOP of the venue/cluster pins on purpose:
+            // a place with someone you know inside is the one thing on this
+            // map you want to spot first.
+            ForEach(friendsTonight.venues) { group in
+                Annotation(group.venueName, coordinate: group.coordinate) {
+                    FriendsAtVenueMarker(group: group)
+                        .onTapGesture {
+                            BPHaptics.light()
+                            withAnimation(.spring(response: 0.3)) {
+                                selectedStadium = nil
+                                selectedVenue = venueStore.venues.first(where: { $0.id == group.venueId })
+                            }
                         }
                 }
                 .annotationTitles(.hidden)

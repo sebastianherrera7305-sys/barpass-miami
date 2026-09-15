@@ -33,6 +33,16 @@ enum RepositoryDependencies {
     /// path; posting a photo after a check-in already creates one.
     nonisolated(unsafe) static var venueStory: VenueStoryRepository = SupabaseVenueStoryRepository()
 
+    /// The friend graph (barpass-v2/supabase/friend_graph_schema.sql):
+    /// symmetric, mutual-accept friendships plus discovery, blocking, and
+    /// "who's out tonight". Every call is a SECURITY DEFINER RPC — the
+    /// underlying tables have no client grants worth reading.
+    nonisolated(unsafe) static var friends: FriendsRepository = SupabaseFriendsRepository()
+
+    /// 1:1 DMs between accepted friends — same encrypted-at-rest,
+    /// RPC-only, rate-limited, reportable design as the chapter chat.
+    nonisolated(unsafe) static var friendChat: FriendChatRepository = SupabaseFriendChatRepository()
+
     /// Host-run nights (free RSVP tiers, waiting list, door). Writes go
     /// through barpass-v2's /api/host-events routes, not PostgREST — the RPCs
     /// behind them hold the locks and rate limits.

@@ -119,6 +119,14 @@
 		CC000001000000000000ME01 /* venue_media.json in Resources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000ME01 /* venue_media.json */; };
 		CD0446CD2FE22E4C96DB1EC9 /* VenueMediaRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */; };
 		BB01STORYREPOBUILD000001 /* VenueStoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01STORYREPOFILEREF0001 /* VenueStoryRepository.swift */; };
+		FRND00000000000000000002 /* Friend.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000001 /* Friend.swift */; };
+		FRND00000000000000000004 /* FriendsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000003 /* FriendsRepository.swift */; };
+		FRND00000000000000000006 /* FriendChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000005 /* FriendChatRepository.swift */; };
+		FRND00000000000000000008 /* FriendsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000007 /* FriendsListView.swift */; };
+		FRND00000000000000000016 /* FriendRowViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000015 /* FriendRowViews.swift */; };
+		FRND00000000000000000010 /* AddFriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000009 /* AddFriendView.swift */; };
+		FRND00000000000000000012 /* FriendChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000011 /* FriendChatView.swift */; };
+		FRND00000000000000000014 /* FriendsTonightStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000013 /* FriendsTonightStore.swift */; };
 		CE1FC5AD84F9D0E40E7E0898 /* HomeAddressRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F33027CA0AAAD146EE78DA8 /* HomeAddressRepository.swift */; };
 		CEF97FC6EA40560FF2D7D0EF /* SkipLinePassView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C54DE23E3FEFE20783A41C3 /* SkipLinePassView.swift */; };
 		D3C94E0FD47E2040B8675C53 /* ChapterEventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A2E6845F2C2D8A282322E2 /* ChapterEventsView.swift */; };
@@ -255,6 +263,14 @@
 		2ACCCBF0A93A18BFF314E986 /* BarPassWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BarPassWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaRepository.swift; path = BarPass/Repositories/VenueMediaRepository.swift; sourceTree = SOURCE_ROOT; };
 		BB01STORYREPOFILEREF0001 /* VenueStoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueStoryRepository.swift; path = BarPass/Repositories/VenueStoryRepository.swift; sourceTree = SOURCE_ROOT; };
+		FRND00000000000000000001 /* Friend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Friend.swift; path = BarPass/Models/Friend.swift; sourceTree = SOURCE_ROOT; };
+		FRND00000000000000000003 /* FriendsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendsRepository.swift; path = BarPass/Repositories/FriendsRepository.swift; sourceTree = SOURCE_ROOT; };
+		FRND00000000000000000005 /* FriendChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendChatRepository.swift; path = BarPass/Repositories/FriendChatRepository.swift; sourceTree = SOURCE_ROOT; };
+		FRND00000000000000000007 /* FriendsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendsListView.swift; path = BarPass/Features/Friends/FriendsListView.swift; sourceTree = SOURCE_ROOT; };
+		FRND00000000000000000015 /* FriendRowViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendRowViews.swift; path = BarPass/Features/Friends/FriendRowViews.swift; sourceTree = SOURCE_ROOT; };
+		FRND00000000000000000009 /* AddFriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddFriendView.swift; path = BarPass/Features/Friends/AddFriendView.swift; sourceTree = SOURCE_ROOT; };
+		FRND00000000000000000011 /* FriendChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendChatView.swift; path = BarPass/Features/Friends/FriendChatView.swift; sourceTree = SOURCE_ROOT; };
+		FRND00000000000000000013 /* FriendsTonightStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendsTonightStore.swift; path = BarPass/Features/Friends/FriendsTonightStore.swift; sourceTree = SOURCE_ROOT; };
 		3AA3D664AAE5148E8E014E77 /* CartStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartStore.swift; sourceTree = "<group>"; };
 		3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueCheckinRepository.swift; path = BarPass/Repositories/VenueCheckinRepository.swift; sourceTree = SOURCE_ROOT; };
 		3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BirthdateRepository.swift; path = BarPass/Repositories/BirthdateRepository.swift; sourceTree = SOURCE_ROOT; };
@@ -663,6 +679,14 @@
 				C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */,
 				3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */,
 				BB01STORYREPOFILEREF0001 /* VenueStoryRepository.swift */,
+				FRND00000000000000000001 /* Friend.swift */,
+				FRND00000000000000000003 /* FriendsRepository.swift */,
+				FRND00000000000000000005 /* FriendChatRepository.swift */,
+				FRND00000000000000000007 /* FriendsListView.swift */,
+				FRND00000000000000000015 /* FriendRowViews.swift */,
+				FRND00000000000000000009 /* AddFriendView.swift */,
+				FRND00000000000000000011 /* FriendChatView.swift */,
+				FRND00000000000000000013 /* FriendsTonightStore.swift */,
 				FD933F1F6EF039E08FDF1009 /* ChapterEventsRepository.swift */,
 				3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */,
 				3C1FE68152B880D89A768DE8 /* VenueCheckinRepository.swift */,
@@ -1172,6 +1196,14 @@
 				19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */,
 				CD0446CD2FE22E4C96DB1EC9 /* VenueMediaRepository.swift in Sources */,
 				BB01STORYREPOBUILD000001 /* VenueStoryRepository.swift in Sources */,
+				FRND00000000000000000002 /* Friend.swift in Sources */,
+				FRND00000000000000000004 /* FriendsRepository.swift in Sources */,
+				FRND00000000000000000006 /* FriendChatRepository.swift in Sources */,
+				FRND00000000000000000008 /* FriendsListView.swift in Sources */,
+				FRND00000000000000000016 /* FriendRowViews.swift in Sources */,
+				FRND00000000000000000010 /* AddFriendView.swift in Sources */,
+				FRND00000000000000000012 /* FriendChatView.swift in Sources */,
+				FRND00000000000000000014 /* FriendsTonightStore.swift in Sources */,
 				11AD2991A5DD4361C98E8012 /* ChapterEventsRepository.swift in Sources */,
 				39E22AF8EE155DF7FC352FBA /* BirthdateRepository.swift in Sources */,
 				6653697AF565692E1B2F279B /* VenueCheckinRepository.swift in Sources */,
@@ -1248,7 +1280,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 71;
+				CURRENT_PROJECT_VERSION = 72;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1276,7 +1308,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 71;
+				CURRENT_PROJECT_VERSION = 72;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1406,7 +1438,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 71;
+				CURRENT_PROJECT_VERSION = 72;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1429,7 +1461,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 71;
+				CURRENT_PROJECT_VERSION = 72;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;

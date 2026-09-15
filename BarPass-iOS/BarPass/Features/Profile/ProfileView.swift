@@ -222,6 +222,33 @@ struct ProfileView: View {
                                      hint: l10n.t("host.events.hint"), isButton: true)
                     .padding(.horizontal, BPSpacing.lg)
 
+                    // Amigos — la puerta a todo lo social (agregar gente,
+                    // chat 1:1, y "dónde están esta noche" en el mapa).
+                    NavigationLink {
+                        FriendsListView()
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text("👥").font(.bpScaled(22))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(l10n.t("profile.friends.title"))
+                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
+                                Text(l10n.t("profile.friends.subtitle"))
+                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.bpScaled(13, weight: .semibold))
+                                .foregroundStyle(Color.bpAmber)
+                        }
+                        .padding(16)
+                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
+                    }
+                    .buttonStyle(.plain)
+                    .bpAccessibility(label: l10n.t("profile.friends.title"),
+                                     hint: l10n.t("profile.friends.hint"), isButton: true)
+                    .padding(.horizontal, BPSpacing.lg)
+
                     // Dirección de casa (botón "Ir a casa")
                     Button {
                         BPHaptics.light()
