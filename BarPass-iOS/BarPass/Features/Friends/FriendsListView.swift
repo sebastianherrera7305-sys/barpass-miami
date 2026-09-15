@@ -16,6 +16,12 @@ struct FriendsListView: View {
     @State private var showAdd = false
     @State private var sharingLocation = false
     @State private var pendingBlock: FriendEdge?
+    /// Asked once, here, because this is the screen where a name starts to
+    /// matter. Until 2026-09-15 the signup trigger stored the literal
+    /// placeholder 'Nightlifer', so 10 of 11 accounts shared one name and
+    /// search returned ten identical people; the column holds NULL now, which
+    /// is what makes "has this person chosen a name?" answerable at all.
+    @State private var showNamePrompt = false
 
     private var friends: [FriendEdge] { edges.filter { $0.relation == .friend } }
     private var incoming: [FriendEdge] { edges.filter { $0.relation == .incoming } }
@@ -55,6 +61,9 @@ struct FriendsListView: View {
         .navigationTitle(l10n.t("friends.title"))
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
+        .sheet(isPresented: $showNamePrompt) {
+            NamePromptSheet { _ in Task { await load() } }
+        }
         .sheet(isPresented: $showAdd, onDismiss: { Task { await load() } }) {
             NavigationStack { AddFriendView() }
         }
@@ -156,6 +165,15 @@ struct FriendsListView: View {
 
     private func load() async {
         errorMessage = nil
+        // Ask for a name only if there genuinely isn't one. Never nag someone
+        // who already chose, and never stack on top of another sheet. A failed
+        // lookup is NOT treated as "no name" — that would prompt every time
+        // the network hiccups.
+        if !showAdd, !showNamePrompt,
+           let stored = try? await RepositoryDependencies.displayName.getDisplayName(),
+           (stored ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            showNamePrompt = true
+        }
         do {
             async let edgesTask = RepositoryDependencies.friends.list()
             async let threadsTask = RepositoryDependencies.friendChat.threads()

@@ -123,6 +123,7 @@
 		FRND00000000000000000004 /* FriendsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000003 /* FriendsRepository.swift */; };
 		FRND00000000000000000006 /* FriendChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000005 /* FriendChatRepository.swift */; };
 		FRND00000000000000000008 /* FriendsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000007 /* FriendsListView.swift */; };
+		A11B19AC0FF1240000000021 /* NamePromptSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000022 /* NamePromptSheet.swift */; };
 		FRND00000000000000000016 /* FriendRowViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000015 /* FriendRowViews.swift */; };
 		FRND00000000000000000010 /* AddFriendView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000009 /* AddFriendView.swift */; };
 		FRND00000000000000000012 /* FriendChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000011 /* FriendChatView.swift */; };
@@ -267,6 +268,7 @@
 		FRND00000000000000000003 /* FriendsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendsRepository.swift; path = BarPass/Repositories/FriendsRepository.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000005 /* FriendChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendChatRepository.swift; path = BarPass/Repositories/FriendChatRepository.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000007 /* FriendsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendsListView.swift; path = BarPass/Features/Friends/FriendsListView.swift; sourceTree = SOURCE_ROOT; };
+		A11B19AC0FF1240000000022 /* NamePromptSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NamePromptSheet.swift; path = BarPass/Features/Friends/NamePromptSheet.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000015 /* FriendRowViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendRowViews.swift; path = BarPass/Features/Friends/FriendRowViews.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000009 /* AddFriendView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddFriendView.swift; path = BarPass/Features/Friends/AddFriendView.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000011 /* FriendChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendChatView.swift; path = BarPass/Features/Friends/FriendChatView.swift; sourceTree = SOURCE_ROOT; };
@@ -683,6 +685,7 @@
 				FRND00000000000000000003 /* FriendsRepository.swift */,
 				FRND00000000000000000005 /* FriendChatRepository.swift */,
 				FRND00000000000000000007 /* FriendsListView.swift */,
+				A11B19AC0FF1240000000022 /* NamePromptSheet.swift */,
 				FRND00000000000000000015 /* FriendRowViews.swift */,
 				FRND00000000000000000009 /* AddFriendView.swift */,
 				FRND00000000000000000011 /* FriendChatView.swift */,
@@ -1200,6 +1203,7 @@
 				FRND00000000000000000004 /* FriendsRepository.swift in Sources */,
 				FRND00000000000000000006 /* FriendChatRepository.swift in Sources */,
 				FRND00000000000000000008 /* FriendsListView.swift in Sources */,
+				A11B19AC0FF1240000000021 /* NamePromptSheet.swift in Sources */,
 				FRND00000000000000000016 /* FriendRowViews.swift in Sources */,
 				FRND00000000000000000010 /* AddFriendView.swift in Sources */,
 				FRND00000000000000000012 /* FriendChatView.swift in Sources */,
