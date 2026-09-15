@@ -296,7 +296,15 @@ struct TonightView: View {
                     // top of this screen — but that prompt only does local
                     // scoring, so without this entry the actual AI chat (and
                     // its saved history) became unreachable.
-                    NavigationLink(destination: PlanView()) {
+                    // Handed over explicitly. PlanView declares
+                    // @EnvironmentObject for both VenueStore and AppState, and
+                    // this is a NavigationLink push — the exact shape that
+                    // crashed UniversityDetailView on build 71 and again here
+                    // on 75. TonightView definitely holds both, so passing
+                    // them at the destination removes the doubt entirely.
+                    NavigationLink(destination: PlanView()
+                        .environmentObject(venueStore)
+                        .environmentObject(appState)) {
                         remyEntryCard
                     }
                     .buttonStyle(.plain)

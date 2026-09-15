@@ -56,7 +56,11 @@ struct HostEventCreateView: View {
             }
         }
         .sheet(isPresented: $showVenuePicker) {
+            // Handed over explicitly: the picker reads VenueStore, and a sheet
+            // is where the ambient environment is least reliable. Same class of
+            // crash as Remy and the university screen.
             HostEventVenuePicker(selection: $venue)
+                .environmentObject(venueStore)
         }
         .sheet(item: $editingTier) { draft in
             NavigationStack {
