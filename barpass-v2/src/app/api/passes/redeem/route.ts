@@ -124,5 +124,51 @@ export async function POST(request: Request) {
     }
   }
 
+  // ── Escanear el pase ES el check-in ────────────────────────────────────
+  // El check-in manual no funciona y hay evidencia, no opinión: 32 check-ins
+  // en toda la historia de la app, hechos por 2 personas, y CERO check-outs.
+  // Nadie abre una app para avisar que llegó a un bar, y muchísimo menos para
+  // avisar que se va.
+  //
+  // Pero la puerta sí escanea, porque le conviene: es como cobra. Ese escaneo
+  // es una prueba de presencia mejor que cualquier GPS — la validó el local,
+  // no la declaró el usuario — y llega con la hora exacta de entrada, que es
+  // justo el dato que llena peak_hours y best_arrival_time sin preguntarle
+  // nada a nadie.
+  //
+  // No es fatal: si esto falla, el pase igual se canjeó y la persona entra.
+  // Esa es la jerarquía correcta — primero la puerta, después nuestros datos.
+  //
+  // Privacidad: esta fila sólo la ven los amigos de esa persona si ELLA tiene
+  // el compartir ubicación activado (friend_graph_schema.sql filtra por
+  // friend.share_location_with_friends). El escaneo no publica a nadie que no
+  // haya dicho que sí.
+  if (updated.customer_id) {
+    // Idempotente: dos escaneos de la misma noche (un pase de mesa y uno de
+    // entrada, o un re-escaneo en la puerta) son una sola visita.
+    const { data: openCheckin } = await supabase
+      .from("venue_checkins")
+      .select("id")
+      .eq("user_id", updated.customer_id)
+      .eq("venue_id", venueId)
+      .is("checked_out_at", null)
+      .gt("checked_in_at", new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString())
+      .maybeSingle();
+
+    if (!openCheckin) {
+      const { error: checkinError } = await supabase
+        .from("venue_checkins")
+        .insert({ user_id: updated.customer_id, venue_id: venueId });
+      if (checkinError) {
+        console.error("[redeem] auto check-in failed (non-fatal)", {
+          customerId: updated.customer_id,
+          venueId,
+          code: checkinError.code,
+          message: checkinError.message,
+        });
+      }
+    }
+  }
+
   return NextResponse.json({ success: true, pass: updated });
 }
