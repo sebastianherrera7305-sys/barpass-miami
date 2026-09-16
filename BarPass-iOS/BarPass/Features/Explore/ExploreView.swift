@@ -77,7 +77,8 @@ struct ExploreView: View {
             let q = searchText.lowercased()
             return v.name.lowercased().contains(q) ||
                    v.neighborhood.lowercased().contains(q) ||
-                   v.type.rawValue.lowercased().contains(q)
+                   v.type.rawValue.lowercased().contains(q) ||
+                   v.type.displayName.lowercased().contains(q)
         }
         // DiscoveryScorer, not ExperienceScorer — see that type's doc
         // comment. Harmless for the map (pins place by lat/lng regardless
@@ -700,7 +701,7 @@ struct VenueListRow: View {
                 Text(venue.name)
                     .font(.bpScaled(15, weight: .semibold))
                     .foregroundStyle(Color.bpInk)
-                Text("\(venue.neighborhood) · \(venue.type.rawValue)")
+                Text("\(venue.neighborhood) · \(venue.type.displayName)")
                     .font(.bpScaled(12))
                     .foregroundStyle(Color.bpTextSecondary)
                 HStack(spacing: 4) {
@@ -727,6 +728,6 @@ struct VenueListRow: View {
         .padding(.horizontal, BPSpacing.lg)
         .padding(.vertical, 14)
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("explore.listRow.hint"), venue.neighborhood, venue.type.rawValue, "\(venue.rating)"), isButton: true)
+        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("explore.listRow.hint"), venue.neighborhood, venue.type.displayName, "\(venue.rating)"), isButton: true)
     }
 }

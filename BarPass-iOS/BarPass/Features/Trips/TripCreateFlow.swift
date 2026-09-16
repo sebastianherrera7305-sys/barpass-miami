@@ -239,7 +239,7 @@ struct TripCreateFlow: View {
                                     Text(v.name)
                                         .font(.bpHeadline())
                                         .foregroundStyle(Color.bpInk)
-                                    Text("\(v.neighborhood) · \(v.type.rawValue)")
+                                    Text("\(v.neighborhood) · \(v.type.displayName)")
                                         .font(.bpSmall())
                                         .foregroundStyle(Color.bpTextSecondary)
                                 }

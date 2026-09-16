@@ -10,6 +10,21 @@ enum VenueType: String, Codable, CaseIterable {
     case sportsBar  = "Sports Bar"
     case restaurant = "Restaurant"
     case brewery    = "Brewery"
+
+    /// What the user reads. The rawValue is the value that travels to and
+    /// from the database, so it stays English and untouched; every screen
+    /// that shows a type to a human uses this instead.
+    var displayName: String {
+        switch self {
+        case .club:       return L10n.tSync("venueType.club")
+        case .rooftop:    return L10n.tSync("venueType.rooftop")
+        case .bar:        return L10n.tSync("venueType.bar")
+        case .lounge:     return L10n.tSync("venueType.lounge")
+        case .sportsBar:  return L10n.tSync("venueType.sportsBar")
+        case .restaurant: return L10n.tSync("venueType.restaurant")
+        case .brewery:    return L10n.tSync("venueType.brewery")
+        }
+    }
 }
 
 /// One age bracket a venue fits, and where that claim comes from.

@@ -56,7 +56,7 @@ struct TonightView: View {
         // identical fix for why: raw substring matching against a venue's
         // NAME text produces false positives no keyword-intent check can
         // catch ("Yard House" / "Miller's Ale House" matching "house").
-        let haystack = ([venue.type.rawValue, venue.neighborhood] + venue.vibes + venue.tags
+        let haystack = ([venue.type.rawValue, venue.type.displayName, venue.neighborhood] + venue.vibes + venue.tags
             + venue.musicGenres.map { $0.rawValue }).joined(separator: " ").lowercased()
         return mood.keywords.contains { haystack.contains($0) }
     }
@@ -852,7 +852,7 @@ struct HeroVenueCard: View {
                         .font(.bpSmall())
                         .foregroundStyle(.white.opacity(0.75))
                     Text("·").foregroundStyle(.white.opacity(0.5))
-                    Label(venue.type.rawValue, systemImage: "music.note")
+                    Label(venue.type.displayName, systemImage: "music.note")
                         .font(.bpSmall())
                         .foregroundStyle(.white.opacity(0.75))
                 }
@@ -894,7 +894,7 @@ struct HeroVenueCard: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("tonight.venue.hint"), venue.neighborhood, venue.type.rawValue, venue.rating) + storyHint, isButton: true)
+        .bpAccessibility(label: venue.name, hint: String(format: l10n.t("tonight.venue.hint"), venue.neighborhood, venue.type.displayName, venue.rating) + storyHint, isButton: true)
         .bpEntrance(offset: CGSize(width: 0, height: 20), delay: 0.1)
     }
 

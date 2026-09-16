@@ -1217,6 +1217,17 @@ final class L10n: ObservableObject {
             "stadiums.upcomingEvents": "Próximos eventos", "stadiums.unverified": "sin verificar",
             "stadiums.mySectionPlaceholder": "¿En qué sección estás? (ej. 118)", "stadiums.sameSection": "tu sección", "stadiums.sectionsAway": "secciones", "stadiums.sectionPrefix": "Sec.", "common.done": "Listo", "stadiums.enterSectionHint": "Poné tu sección para ver hacia dónde caminar",
             "stadiums.legendBar": "Bares", "stadiums.legendOther": "Otros", "stadiums.legendYou": "Vos",
+            // MARK: City-neutral branding + venue types shown to the user
+            "splash.tagline": "VIDA NOCTURNA",
+            "share.card.tagline": "La noche, en su mejor versión.",
+            "share.card.tagline.city": "%@, en su mejor versión.",
+            "venueType.club": "Club",
+            "venueType.rooftop": "Terraza",
+            "venueType.bar": "Bar",
+            "venueType.lounge": "Lounge",
+            "venueType.sportsBar": "Bar deportivo",
+            "venueType.restaurant": "Restaurante",
+            "venueType.brewery": "Cervecería",
         ],
         .en: [
             // MARK: Host events (nights run by a promoter)
@@ -2348,6 +2359,17 @@ final class L10n: ObservableObject {
             "stadiums.upcomingEvents": "Upcoming events", "stadiums.unverified": "unverified",
             "stadiums.mySectionPlaceholder": "What section are you in? (e.g. 118)", "stadiums.sameSection": "your section", "stadiums.sectionsAway": "sections", "stadiums.sectionPrefix": "Sec.", "common.done": "Done", "stadiums.enterSectionHint": "Enter your section to see which way to walk",
             "stadiums.legendBar": "Bars", "stadiums.legendOther": "Other", "stadiums.legendYou": "You",
+            // MARK: City-neutral branding + venue types shown to the user
+            "splash.tagline": "NIGHTLIFE",
+            "share.card.tagline": "Nightlife, at its best.",
+            "share.card.tagline.city": "%@, at its best.",
+            "venueType.club": "Club",
+            "venueType.rooftop": "Rooftop",
+            "venueType.bar": "Bar",
+            "venueType.lounge": "Lounge",
+            "venueType.sportsBar": "Sports Bar",
+            "venueType.restaurant": "Restaurant",
+            "venueType.brewery": "Brewery",
         ],
         .pt: [
             // MARK: Host events (nights run by a promoter)
@@ -3479,6 +3501,17 @@ final class L10n: ObservableObject {
             "stadiums.upcomingEvents": "Próximos eventos", "stadiums.unverified": "não verificado",
             "stadiums.mySectionPlaceholder": "Em que seção você está? (ex. 118)", "stadiums.sameSection": "sua seção", "stadiums.sectionsAway": "seções", "stadiums.sectionPrefix": "Seç.", "common.done": "Pronto", "stadiums.enterSectionHint": "Digite sua seção para ver para onde ir",
             "stadiums.legendBar": "Bares", "stadiums.legendOther": "Outros", "stadiums.legendYou": "Você",
+            // MARK: City-neutral branding + venue types shown to the user
+            "splash.tagline": "VIDA NOTURNA",
+            "share.card.tagline": "A noite, no seu melhor.",
+            "share.card.tagline.city": "%@, no seu melhor.",
+            "venueType.club": "Balada",
+            "venueType.rooftop": "Rooftop",
+            "venueType.bar": "Bar",
+            "venueType.lounge": "Lounge",
+            "venueType.sportsBar": "Bar esportivo",
+            "venueType.restaurant": "Restaurante",
+            "venueType.brewery": "Cervejaria",
         ],
     ]
 }

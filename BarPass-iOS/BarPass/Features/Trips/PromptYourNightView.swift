@@ -193,7 +193,7 @@ struct PromptYourNightView: View {
                         Text(String(format: l10n.t("night.stop"), i + 1))
                             .font(.bpScaled(9, weight: .bold)).foregroundStyle(Color.bpAmber)
                         Text(v.name).font(.bpScaled(15, weight: .semibold)).foregroundStyle(Color.bpInk)
-                        Text("\(v.neighborhood) · \(v.type.rawValue)")
+                        Text("\(v.neighborhood) · \(v.type.displayName)")
                             .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
                         if let reason = stop.reason {
                             Text(reason)

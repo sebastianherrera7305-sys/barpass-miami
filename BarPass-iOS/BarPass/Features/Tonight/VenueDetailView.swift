@@ -133,7 +133,7 @@ struct VenueDetailView: View {
                             .font(.bpScaled(12)).foregroundStyle(Color.white.opacity(0.65))
                     }
                     Text("·").foregroundStyle(.white.opacity(0.35))
-                    Text(venue.type.rawValue)
+                    Text(venue.type.displayName)
                         .font(.bpScaled(13)).foregroundStyle(Color.white.opacity(0.65))
                     Text("·").foregroundStyle(.white.opacity(0.35))
                     Text(venue.neighborhood)

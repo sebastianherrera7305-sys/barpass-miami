@@ -49,7 +49,7 @@ struct ShareCardView: View {
                 metaRow(icon: "qrcode", text: code)
 
             case .referral(let inviteCode):
-                Text("Miami, at its best.")
+                Text(referralTagline)
                     .font(.system(size: 22, weight: .black, design: .rounded))
                     .foregroundStyle(Color.bpInk)
                 metaRow(icon: "ticket.fill", text: inviteCode)
@@ -62,6 +62,17 @@ struct ShareCardView: View {
         .background(Color.bpCardBackground)
         .overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(Color.bpAmber.opacity(0.25), lineWidth: 1))
         .clipShape(RoundedRectangle(cornerRadius: 24))
+    }
+
+    /// The card is an image the user posts, so it must never name a city
+    /// the user isn't in — the app covers 23 of them. Names the city the
+    /// user actually picked when there is one, and otherwise says something
+    /// that is true everywhere rather than guessing.
+    private var referralTagline: String {
+        if let city = SelectedCityStore.selectedCity, !city.isEmpty {
+            return String(format: L10n.tSync("share.card.tagline.city"), city)
+        }
+        return L10n.tSync("share.card.tagline")
     }
 
     private func metaRow(icon: String, text: String) -> some View {
