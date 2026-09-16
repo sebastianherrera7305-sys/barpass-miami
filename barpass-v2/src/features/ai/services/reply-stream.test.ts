@@ -3,32 +3,37 @@ import type { Venue } from "@/types";
 import { createReplyTransform, sanitizeProse } from "./reply-stream";
 
 const v = (id: string, slug: string, name: string) => ({ id, slug, name }) as Venue;
-const shortlist = [v("uuid-1", "sugar-rooftop", "Sugar Rooftop"), v("uuid-2", "amor-miami", "Amor Miami")];
+const shortlist = [
+  v("uuid-1", "sugar-rooftop", "Sugar Rooftop"),
+  v("uuid-2", "amor-miami", "Amor Miami"),
+  v("uuid-3", "club-space", "Club Space"),
+  v("uuid-4", "candela-bar", "Candela Bar"),
+];
+
+const stop = (over: Record<string, unknown> = {}) => ({
+  time: "10:30 PM",
+  venueId: "uuid-1",
+  venueSlug: "sugar-rooftop",
+  venueName: "Sugar Rooftop",
+  note: "Pide el mezcal antes de las 11.",
+  estimatedSpend: 40,
+  ...over,
+});
 
 const plan = (over: Record<string, unknown> = {}, stopOver: Record<string, unknown> = {}) =>
   JSON.stringify({
     title: "Noche Wynwood",
     summary: "De la terraza a la pista.",
-    stops: [
-      {
-        time: "10:30 PM",
-        venueId: "uuid-1",
-        venueSlug: "sugar-rooftop",
-        venueName: "Sugar Rooftop",
-        note: "Pide el mezcal antes de las 11.",
-        estimatedSpend: 40,
-        ...stopOver,
-      },
-    ],
+    stops: [stop(stopOver)],
     totalEstimate: 40,
     insiderTip: "Llega temprano, la fila se pone fea.",
     ...over,
   });
 
 /** Feed a whole reply through in one piece and return what a client sees. */
-function run(reply: string, pieces = 1): { out: string; drops: string[] } {
+function run(reply: string, pieces = 1, options: { tier?: "free" | "premium" } = {}): { out: string; drops: string[] } {
   const drops: string[] = [];
-  const t = createReplyTransform({ shortlist, onDrop: (r) => drops.push(r) });
+  const t = createReplyTransform({ shortlist, tier: options.tier, onDrop: (r) => drops.push(r) });
   let out = "";
   const size = Math.ceil(reply.length / pieces);
   for (let i = 0; i < reply.length; i += size) out += t.push(reply.slice(i, i + size));
@@ -145,6 +150,47 @@ describe("createReplyTransform — quick replies", () => {
     expect(out).toMatch(PLAN_FENCE);
     expect(out).not.toContain("```options");
     expect(drops.some((d) => /both a plan and an options block/.test(d))).toBe(true);
+  });
+});
+
+describe("createReplyTransform — Free vs Premium stop count", () => {
+  const fourStopPlan = plan({
+    stops: [
+      stop({ venueId: "uuid-1", venueSlug: "sugar-rooftop", venueName: "Sugar Rooftop", estimatedSpend: 40 }),
+      stop({ venueId: "uuid-2", venueSlug: "amor-miami", venueName: "Amor Miami", estimatedSpend: 30 }),
+      stop({ venueId: "uuid-3", venueSlug: "club-space", venueName: "Club Space", estimatedSpend: 50 }),
+      stop({ venueId: "uuid-4", venueSlug: "candela-bar", venueName: "Candela Bar", estimatedSpend: 20 }),
+    ],
+    totalEstimate: 140,
+  });
+
+  it("trims a Free plan to 3 stops regardless of what the model wrote, and recomputes the total", () => {
+    const { out, drops } = run(`Va:\n\`\`\`json\n${fourStopPlan}\n\`\`\``, 1, { tier: "free" });
+    const parsed = JSON.parse(out.match(PLAN_FENCE)![1]);
+    expect(parsed.stops).toHaveLength(3);
+    expect(parsed.stops.map((s: { venueSlug: string }) => s.venueSlug)).toEqual(["sugar-rooftop", "amor-miami", "club-space"]);
+    expect(parsed.totalEstimate).toBe(120); // 40 + 30 + 50, not the model's 140
+    expect(drops).toEqual([]);
+  });
+
+  it("leaves a Premium plan's full stop count alone", () => {
+    const { out } = run(`Va:\n\`\`\`json\n${fourStopPlan}\n\`\`\``, 1, { tier: "premium" });
+    const parsed = JSON.parse(out.match(PLAN_FENCE)![1]);
+    expect(parsed.stops).toHaveLength(4);
+    expect(parsed.totalEstimate).toBe(140);
+  });
+
+  it("defaults to the Free trim when no tier is passed", () => {
+    const { out } = run(`Va:\n\`\`\`json\n${fourStopPlan}\n\`\`\``);
+    const parsed = JSON.parse(out.match(PLAN_FENCE)![1]);
+    expect(parsed.stops).toHaveLength(3);
+  });
+
+  it("leaves a short plan under the cap untouched either way", () => {
+    const { out } = run(`Va:\n\`\`\`json\n${plan()}\n\`\`\``, 1, { tier: "free" });
+    const parsed = JSON.parse(out.match(PLAN_FENCE)![1]);
+    expect(parsed.stops).toHaveLength(1);
+    expect(parsed.totalEstimate).toBe(40);
   });
 });
 

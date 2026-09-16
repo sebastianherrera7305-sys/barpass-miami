@@ -133,7 +133,19 @@ export interface ReplyTransformOptions {
   shortlist: Venue[];
   /** Why a block was dropped — wired to console.error by the route. */
   onDrop?: (reason: string) => void;
+  /** Premium vs Free (2026-09-16) — the prompt already asks the model for
+   * fewer stops on Free (concierge-prompt.ts's tier block), but an LLM's
+   * compliance with a count instruction isn't guaranteed. This is the real
+   * enforcement: a Free plan is trimmed here regardless of what the model
+   * wrote, so Free can never end up with the full Premium itinerary just
+   * because the model ignored the instruction. Defaults to "free" — a
+   * caller that doesn't pass this gets the safer (more restrictive)
+   * behavior, not an accidental Premium-width plan. */
+  tier?: "free" | "premium";
 }
+
+/** Free never sees more than this many stops, however many the model wrote. */
+const FREE_MAX_STOPS = 3;
 
 export interface ReplyTransform {
   /** Feed one content delta; returns the text to write to the client now. */
@@ -142,7 +154,7 @@ export interface ReplyTransform {
   flush(): string;
 }
 
-export function createReplyTransform({ shortlist, onDrop }: ReplyTransformOptions): ReplyTransform {
+export function createReplyTransform({ shortlist, onDrop, tier = "free" }: ReplyTransformOptions): ReplyTransform {
   let pending = "";
   /** Inside a fence: the raw text from the opening tag onward. */
   let fenceBuffer: string | null = null;
@@ -167,8 +179,21 @@ export function createReplyTransform({ shortlist, onDrop }: ReplyTransformOption
       onDrop?.("plan block was not valid JSON");
       return;
     }
-    if (!nightPlanSchema.safeParse(parsed).success) {
+    const result = nightPlanSchema.safeParse(parsed);
+    if (!result.success) {
       onDrop?.("plan block failed nightPlanSchema — would have rendered as raw JSON");
+      return;
+    }
+    // Free enforcement (2026-09-16) — see ReplyTransformOptions.tier's doc
+    // comment. Recomputes totalEstimate from the kept stops rather than
+    // trusting the model's own total, which summed all the stops being cut.
+    if (tier === "free" && result.data.stops.length > FREE_MAX_STOPS) {
+      const stops = result.data.stops.slice(0, FREE_MAX_STOPS);
+      heldPlan = JSON.stringify({
+        ...result.data,
+        stops,
+        totalEstimate: stops.reduce((sum, s) => sum + s.estimatedSpend, 0),
+      });
       return;
     }
     heldPlan = grounded;
