@@ -111,6 +111,51 @@ export function menuLinks(html: string, base: string, limit = 6): string[] {
 }
 
 /** True when the page text has a "$<n>" anywhere — the cheap pre-filter before paying for a model call. */
+/**
+ * Menu assets — the JPG/PNG/PDF a venue publishes INSTEAD of an HTML menu.
+ *
+ * This is the real shape of the problem in a college town, measured on
+ * 2026-09-16: of 12 Gainesville venues, the text extractor found one menu.
+ * Boxcar publishes its full drink list as `6-9-25-Boxcar-Menu-for-Web.jpg` —
+ * 24 priced drinks that no amount of HTML parsing will ever see. Capone's and
+ * Blackadder are the same story on subpages. So: collect what looks like a
+ * menu image or PDF, and let a vision model read it.
+ *
+ * Deliberately narrow: the file extension must be an image/PDF AND either the
+ * URL or its link text must mention a menu/drink word. A bar's homepage is
+ * full of photos of people holding glasses, and reading all of them costs
+ * money and returns nothing.
+ */
+export function menuAssets(html: string, base: string, limit = 4): string[] {
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const wanted = /\.(jpe?g|png|webp|pdf)(\?|#|$)/i;
+  const menuish = /menu|drink|cocktail|beer|wine|bar\b|happy.?hour|carta|bebida/i;
+  const re = /<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]{0,120}?)<\/a>/gi;
+  // A thumbnail is never a readable menu. Wix/WordPress bake the rendered
+  // size into the URL (`w_147,h_98`, `-150x150.jpg`), and the first run spent
+  // a model call on a 147px stock photo of a beer tap because its filename
+  // said "Beer".
+  const thumbnail = (href: string) => {
+    const w = /(?:^|[/_,-])w[_,-](\d{2,4})/i.exec(href)?.[1] ?? /-(\d{2,4})x\d{2,4}\.(?:jpe?g|png|webp)/i.exec(href)?.[1];
+    return w !== undefined && Number(w) < 600;
+  };
+  const push = (href: string, label: string) => {
+    if (!wanted.test(href)) return;
+    if (!menuish.test(href) && !menuish.test(label)) return;
+    if (thumbnail(href)) return;
+    let abs: string;
+    try { abs = new URL(href, base).toString(); } catch { return; }
+    if (seen.has(abs)) return;
+    seen.add(abs);
+    out.push(abs);
+  };
+  for (const m of html.matchAll(re)) push(m[1], m[2].replace(/<[^>]+>/g, " "));
+  // Some sites drop the menu in as a bare <img> with no anchor around it.
+  for (const m of html.matchAll(/<img\b[^>]*src="([^"]+)"[^>]*>/gi)) push(m[1], m[0]);
+  return out.slice(0, limit);
+}
+
 export function hasPricedText(text: string): boolean {
   return /\$\s?\d/.test(text);
 }

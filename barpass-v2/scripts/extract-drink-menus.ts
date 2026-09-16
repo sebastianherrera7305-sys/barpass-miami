@@ -36,12 +36,16 @@ import { createClient } from "@supabase/supabase-js";
 // @ts-expect-error — ws ships no types here; same shim every other script uses for Node 20 realtime.
 import ws from "ws";
 import {
-  htmlToText, menuLinks, hasPricedText, sanitizeDrinks, pickTopDrinks, happyHourEnd, extractionPrompt,
+  htmlToText, menuLinks, menuAssets, hasPricedText, sanitizeDrinks, pickTopDrinks, happyHourEnd, extractionPrompt,
   type Extracted, type ExtractedDrink, type ExtractedHappyHour,
 } from "./drink-menu-rules";
 
 const args = process.argv.slice(2);
 const flag = (n: string) => { const i = args.indexOf(n); return i === -1 ? undefined : args[i + 1]; };
+/** The vision pass costs a model call per image, so it can be turned off for a
+ *  cheap text-only sweep. On by default: without it the hit rate in a college
+ *  town was 1 in 12. */
+const USE_VISION = !args.includes("--no-vision");
 
 if (args.includes("--help") || args.includes("-h")) {
   console.log(`extract-drink-menus — real drink prices from each venue's own website.
@@ -54,9 +58,10 @@ if (args.includes("--help") || args.includes("-h")) {
   --force              re-extract venues that already have popular_drinks, and overwrite
                        manual_research / user_report provenance (off by default)
   --recheck-days <n>   re-try venues recorded as "none_published" older than n days (default 90)
+  --no-vision          skip reading menus published as images/PDFs (cheaper, much lower hit rate)
   --help               this text
 
-Env (from .env.local): NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, NVIDIA_API_KEY`);
+Env (from .env.local): NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, NVIDIA_API_KEY, GEMINI_API_KEY (vision)`);
   process.exit(0);
 }
 
@@ -117,7 +122,15 @@ async function fetchText(url: string, ms = 12000): Promise<{ html: string; final
   const t = setTimeout(() => ctrl.abort(), ms);
   lastFetchError = "";
   try {
-    const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "text/html,*/*" }, signal: ctrl.signal, redirect: "follow" });
+    // Full browser-shaped headers: several venue hosts answer 403 to a bare
+    // User-Agent (balls.poi.place did, in the Gainesville pilot).
+    const res = await fetch(url, { headers: {
+      "User-Agent": UA,
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Sec-Fetch-Dest": "document", "Sec-Fetch-Mode": "navigate", "Sec-Fetch-Site": "none",
+      "Upgrade-Insecure-Requests": "1",
+    }, signal: ctrl.signal, redirect: "follow" });
     if (!res.ok) { lastFetchError = `HTTP ${res.status}`; return null; }
     const ct = res.headers.get("content-type") ?? "";
     if (!ct.includes("html")) { lastFetchError = `not HTML (${ct.split(";")[0] || "no content-type"})`; return null; }
@@ -126,6 +139,104 @@ async function fetchText(url: string, ms = 12000): Promise<{ html: string; final
     lastFetchError = e instanceof Error && e.name === "AbortError" ? `timeout after ${ms / 1000}s` : `${e instanceof Error ? e.cause instanceof Error ? e.cause.message : e.message : e}`;
     return null;
   } finally { clearTimeout(t); }
+}
+
+/** The vision pass: read the menu a venue published as a picture.
+ *
+ * Measured 2026-09-16 on Boxcar (Gainesville), whose entire drink list is a
+ * JPG: the text pipeline returned nothing, this returned 24 priced drinks.
+ *
+ * The model is asked for a verbatim transcription ALONGSIDE the structured
+ * items, and the same sanitizer then checks every price against that
+ * transcription — the identical invariant the HTML path uses, with the
+ * model's own reading of the image standing in for the page text. The
+ * transcription is stored in provenance so a human can audit any price
+ * without re-downloading the image.
+ */
+const VISION_MODEL = "gemini-3.6-flash";
+/** 20 requests/minute on the free tier → one every 3.5s, with room to spare. */
+const VISION_PACE_MS = 3500;
+let lastVisionCallAt = 0;
+const GEMINI_KEY = process.env.GEMINI_API_KEY;
+const MAX_ASSET_BYTES = 8 * 1024 * 1024;
+
+async function fetchAsset(url: string): Promise<{ b64: string; mime: string } | null> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 20000);
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": UA }, signal: ctrl.signal, redirect: "follow" });
+    if (!res.ok) return null;
+    const mime = (res.headers.get("content-type") ?? "").split(";")[0].trim();
+    if (!/^(image\/(jpeg|png|webp)|application\/pdf)$/.test(mime)) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.byteLength > MAX_ASSET_BYTES || buf.byteLength < 1024) return null;
+    return { b64: buf.toString("base64"), mime };
+  } catch { return null; } finally { clearTimeout(t); }
+}
+
+/** Set when a vision call could not be MADE (quota, network, bad asset) — as
+ *  opposed to being made and finding no priced drinks. The difference decides
+ *  whether we may write "this venue publishes no prices", and getting it wrong
+ *  is how a run on 2026-09-16 recorded that lie about venues whose menu image
+ *  was never read: the free Gemini tier allows 20 requests a minute and the
+ *  sweep burned through it. */
+let visionUnavailable = false;
+
+async function visionExtract(venue: DbVenue, assetUrl: string): Promise<{ drinks: ExtractedDrink[]; transcript: string } | null> {
+  if (!GEMINI_KEY) { visionUnavailable = true; return null; }
+  const asset = await fetchAsset(assetUrl);
+  if (!asset) return null;
+  // Stay under the free tier's 20 requests/minute instead of discovering it
+  // through a wall of 429s.
+  const since = Date.now() - lastVisionCallAt;
+  if (since < VISION_PACE_MS) await sleep(VISION_PACE_MS - since);
+  lastVisionCallAt = Date.now();
+  const prompt = [
+    `This is a menu published by "${venue.name}" (${venue.city}).`,
+    "Return ONLY JSON, no prose, no code fence:",
+    '{"transcript":"every line of text you can read, verbatim, including the prices","drinks":[{"name":"...","price":0.00,"category":"cocktail|beer|wine|shot|spirit|other"}]}',
+    "Rules: include a drink ONLY if a price is printed next to it on this image.",
+    "Never guess or round a price. No food. If the image is not a drink menu, return an empty drinks array.",
+  ].join("\n");
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: asset.mime, data: asset.b64 } }] }],
+    generationConfig: { temperature: 0 },
+  });
+  // A 503 here is transient and expensive to ignore: the first Gainesville
+  // run lost Boxcar's 24-item menu to one, fell through to a smaller image,
+  // and recorded 6 drinks as if that were the whole card.
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 180000);
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${VISION_MODEL}:generateContent`,
+        { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_KEY }, body, signal: ctrl.signal });
+      if (res.status === 429 || res.status >= 500) {
+        // Google tells us exactly how long to wait ("Please retry in 18.2s") —
+        // use it instead of guessing.
+        const bodyText = await res.text().catch(() => "");
+        const told = Number(/retry in ([\d.]+)s/i.exec(bodyText)?.[1] ?? 0) * 1000;
+        const wait = Math.max(told + 1500, 8000 * attempt);
+        console.error(`  vision HTTP ${res.status} — attempt ${attempt}/4, waiting ${Math.round(wait / 1000)}s`);
+        if (attempt < 4) { await sleep(wait); continue; }
+        visionUnavailable = true;
+        return null;
+      }
+      if (!res.ok) { console.error(`  vision HTTP ${res.status} on ${assetUrl}`); visionUnavailable = true; return null; }
+      const data = await res.json() as { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> };
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+      const json = raw.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+      const parsed = JSON.parse(json) as { transcript?: string; drinks?: unknown };
+      const transcript = typeof parsed.transcript === "string" ? parsed.transcript : "";
+      // Same gate as the HTML path: a price that isn't in the text we read is dropped.
+      return { drinks: sanitizeDrinks(parsed.drinks, transcript), transcript };
+    } catch (e) {
+      console.error(`  vision failed on ${assetUrl}: ${e instanceof Error ? e.message : e}`);
+      visionUnavailable = true;
+      return null;
+    } finally { clearTimeout(t); }
+  }
+  return null;
 }
 
 /** Minimum gap between two model calls. NIM answers 429 to rapid calls (CLAUDE.md, 2026-09-06). */
@@ -246,19 +357,40 @@ async function main() {
   }
   console.log(`${venues.length} venues ${IDS_FILE ? "from list" : ONLY ? "by id" : `in ${CITY}`} to try (${APPLY ? "APPLY" : "dry run"})`);
 
-  let withMenu = 0, written = 0, noneRecorded = 0;
+  let withMenu = 0, written = 0, noneRecorded = 0, viaVision = 0;
+  // A run on 2026-09-16 lost its DNS half-way through Gainesville and marched
+  // on, printing "site unreachable" for 45 venues in a row — including
+  // facebook.com and olivegarden.com, which are plainly fine. That is OUR
+  // network failing, not theirs, and a sweep that keeps going produces a
+  // city's worth of false negatives. Stop instead, and say so.
+  let consecutiveNetworkFailures = 0;
   for (const v of venues) {
     const home = await fetchText(v.website!);
-    if (!home) { console.log(`- ${v.name}: site unreachable (${lastFetchError}) ${v.website}`); continue; }
+    if (!home) {
+      console.log(`- ${v.name}: site unreachable (${lastFetchError}) ${v.website}`);
+      if (/ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ETIMEDOUT|fetch failed/i.test(lastFetchError)) {
+        if (++consecutiveNetworkFailures >= 5) {
+          console.error(`\nSTOPPING: ${consecutiveNetworkFailures} network failures in a row — this machine lost DNS or connectivity, the sites are probably fine.`);
+          console.error("Nothing was recorded for them. Re-run when the network is back; venues already done are skipped.");
+          break;
+        }
+      } else consecutiveNetworkFailures = 0;
+      continue;
+    }
+    consecutiveNetworkFailures = 0;
     const links = menuLinks(home.html, home.finalUrl, MAX_PAGES - 1);
     // Menu pages first, the home page last: the model reads a bounded slice
     // of this text, and a home page rarely holds the drink list.
     const pages = [...links.filter((l) => l !== home.finalUrl), home.finalUrl].slice(-MAX_PAGES);
     let text = "";
     const used: string[] = [];
+    // Kept for the vision pass: the menu is often a picture ON one of these
+    // pages, and by then the HTML is gone if we only keep the text.
+    const readPages: Array<{ url: string; html: string }> = [];
     for (const url of pages) {
       const page = url === home.finalUrl ? home : await fetchText(url);
       if (!page) continue;
+      readPages.push({ url: page.finalUrl, html: page.html });
       const t = htmlToText(page.html);
       if (hasPricedText(t)) { text += `\n\n[${url}]\n${t}`; used.push(url); }
     }
@@ -269,10 +401,30 @@ async function main() {
     const ex = hasPricedText(text) ? await extract(v, text) : { drinks: [], happy_hour: null };
     if (!ex) { console.log(`- ${v.name}: model call failed (nothing recorded)`); continue; }
 
-    if (ex.drinks.length === 0) {
+    // The text path found nothing. Before writing this venue off, look for a
+    // menu published as an image or PDF — which is what most bars actually do.
+    let visionHit: { drinks: ExtractedDrink[]; transcript: string; url: string } | null = null;
+    visionUnavailable = false;
+    let hadAssets = false;
+    if (ex.drinks.length === 0 && USE_VISION && GEMINI_KEY) {
+      const assets = readPages.flatMap((p) => menuAssets(p.html, p.url, 2)).slice(0, 3);
+      hadAssets = assets.length > 0;
+      for (const asset of assets) {
+        const got = await visionExtract(v, asset);
+        if (got && got.drinks.length > 0) { visionHit = { ...got, url: asset }; break; }
+      }
+    }
+
+    if (ex.drinks.length === 0 && !visionHit) {
       console.log(`- ${v.name}: ${used.length === 0 ? `no priced text on site (${pages.length} pages)` : "prices on site but no verifiable drink items"}`);
       // Record the finding so the venue is not re-crawled next run — unless it
-      // already has drinks (a --force re-check that found nothing keeps them).
+      // already has drinks (a --force re-check that found nothing keeps them),
+      // or unless the venue publishes a menu image we were never able to read.
+      // "We ran out of quota" is not evidence that a bar publishes no prices.
+      if (hadAssets && visionUnavailable) {
+        console.log(`  ↳ ${v.name} publishes a menu image we could not read (quota/transport) — nothing recorded, will retry`);
+        continue;
+      }
       if (APPLY && !hasDrinks(v)) {
         fs.popular_drinks = { source: "venue website menu", method: used.length === 0 ? "no_priced_text" : "llm_extract", model: used.length === 0 ? undefined : MODEL,
           result: "none_published", at: today, fetched_at: fetchedAt, url: home.finalUrl, pages,
@@ -284,13 +436,21 @@ async function main() {
     }
 
     withMenu++;
+    if (visionHit) {
+      viaVision++;
+      ex.drinks = visionHit.drinks;
+    }
     const top = pickTopDrinks(ex.drinks, 6);
     const hhEnd = happyHourEnd(ex.happy_hour?.hours);
-    console.log(`+ ${v.name}: ${ex.drinks.length} priced drinks` + (ex.happy_hour ? ` | HH ${ex.happy_hour.days ?? ""} ${ex.happy_hour.hours ?? ""} → ${hhEnd ?? "not one clock time, not written"}` : ""));
+    console.log(`+ ${v.name}: ${ex.drinks.length} priced drinks${visionHit ? " (from the menu image)" : ""}` + (ex.happy_hour ? ` | HH ${ex.happy_hour.days ?? ""} ${ex.happy_hour.hours ?? ""} → ${hhEnd ?? "not one clock time, not written"}` : ""));
     for (const d of ex.drinks.slice(0, 6)) console.log(`     $${d.price.toFixed(2).padStart(6)}  ${d.category.padEnd(8)} ${d.name}`);
 
     if (!APPLY) continue;
-    fs.popular_drinks = { source: "venue website menu", method: "llm_extract", model: MODEL, confidence: "high",
+    fs.popular_drinks = visionHit
+      ? { source: "venue menu image", method: "vision_extract", model: VISION_MODEL, confidence: "high",
+          at: today, date: today, fetched_at: fetchedAt, url: visionHit.url, pages: [visionHit.url], items: ex.drinks,
+          notes: `${ex.drinks.length} priced items read from the menu image the venue publishes; every price verified against the model's own verbatim transcription of that image. Transcript: ${visionHit.transcript.slice(0, 1500)}` }
+      : { source: "venue website menu", method: "llm_extract", model: MODEL, confidence: "high",
       at: today, date: today, fetched_at: fetchedAt, url: used[0], pages: used, items: ex.drinks,
       notes: `${ex.drinks.length} priced items extracted from the venue's own menu page(s); every price verified to appear verbatim in the page text (drink-menu-rules.priceAppearsInText). Full list: ${ex.drinks.map((d) => `${d.name} $${d.price}`).join("; ")}` };
     const patch: Record<string, unknown> = { popular_drinks: top };
@@ -312,7 +472,7 @@ async function main() {
     const upErr = await updateVenue(v.id, patch);
     if (upErr) console.error(`  write failed for ${v.name}: ${upErr}`); else written++;
   }
-  console.log(`\nDone: ${withMenu}/${venues.length} venues had priced drink menus on their site${APPLY ? `, ${written} written, ${noneRecorded} recorded as none_published` : ""}.`);
+  console.log(`\nDone: ${withMenu}/${venues.length} venues had priced drink menus (${viaVision} readable only as an image)${APPLY ? `, ${written} written, ${noneRecorded} recorded as none_published` : ""}.`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

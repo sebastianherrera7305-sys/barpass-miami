@@ -6,6 +6,7 @@ import {
   pickTopDrinks,
   htmlToText,
   menuLinks,
+  menuAssets,
   extractionPrompt,
 } from "./drink-menu-rules";
 
@@ -208,5 +209,28 @@ describe("extractionPrompt", () => {
   it("bounds the page text it sends", () => {
     const p = extractionPrompt({ name: "X", type: "bar", city: "Miami" }, "a".repeat(20_000));
     expect(p.length).toBeLessThan(15_500);
+  });
+});
+
+describe("menuAssets", () => {
+  const base = "https://bar.example/";
+  it("takes a menu image published as a JPG", () => {
+    const html = `<a href="/s/6-9-25-Boxcar-Menu-for-Web.jpg">Click here</a>`;
+    expect(menuAssets(html, base)).toEqual(["https://bar.example/s/6-9-25-Boxcar-Menu-for-Web.jpg"]);
+  });
+  it("takes a PDF card and resolves it absolutely", () => {
+    expect(menuAssets(`<a href="drinks.pdf">Our cocktails</a>`, base)).toEqual(["https://bar.example/drinks.pdf"]);
+  });
+  it("ignores a decorative photo whose URL merely says beer", () => {
+    // Real case: a 147px Wix stock photo of a beer tap cost a model call.
+    const html = `<img src="https://static.wixstatic.com/media/x~mv2.jpeg/v1/fill/w_147,h_98/Beer%20pouring.jpeg">`;
+    expect(menuAssets(html, base)).toEqual([]);
+  });
+  it("ignores images that have nothing to do with a menu", () => {
+    expect(menuAssets(`<img src="/hero-party.jpg">`, base)).toEqual([]);
+  });
+  it("does not return the same asset twice", () => {
+    const html = `<a href="/menu.jpg">Menu</a><img src="/menu.jpg">`;
+    expect(menuAssets(html, base)).toHaveLength(1);
   });
 });
