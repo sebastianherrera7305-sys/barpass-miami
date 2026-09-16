@@ -5,6 +5,9 @@ struct RootView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var cart:     CartStore
     @ObservedObject private var checkInStore = CheckInStore.shared
+    /// The real, measured tab-bar (+ music player) height, so this column
+    /// can be placed relative to the help button instead of guessing.
+    @ObservedObject private var chromeMetrics = BottomChromeMetrics.shared
 
     var body: some View {
         ZStack {
@@ -144,8 +147,19 @@ struct RootView: View {
                     .bpAccessibility(label: l10n.t("root.cart"), hint: l10n.t("root.cart.hint"), isButton: true)
                 }
             }
-            .padding(.trailing, 16)
-            .padding(.bottom, 100)
+            // TestFlight, 2026-09-09: "los dos botones chocan" — a
+            // screenshot with the go-home button drawn straight on top of
+            // the help "?". Both are global bottom-trailing overlays, but
+            // they live in different view trees (this one in RootView, the
+            // help trigger in MainTabView) and each was positioned with its
+            // own guess: 16/100 here, BPSpacing.lg / chrome+md there. At
+            // the chrome height a music player produces, those two guesses
+            // land in the same place. Now this column is anchored to the
+            // help button's own geometry — same trailing edge, stacked
+            // directly above its 44pt tap target — so they share one column
+            // and can't overlap at any chrome height.
+            .padding(.trailing, BPSpacing.lg)
+            .padding(.bottom, chromeMetrics.height + BPSpacing.md + 44 + 10)
         }
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: cart.itemCount)
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: checkInStore.activeCheckin?.checkinId)

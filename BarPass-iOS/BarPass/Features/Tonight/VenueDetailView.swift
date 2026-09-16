@@ -18,6 +18,7 @@ struct VenueDetailView: View {
     @Environment(\.appStateIfPresent) private var appStateOptional
     @ObservedObject private var favorites = FavoritesStore.shared
     @ObservedObject private var points = PointsEngine.shared
+    @State private var communityHeroUrl: String?
     @State private var showReviewComposer = false
     @State private var reviewMessage: String?
 
@@ -38,6 +39,7 @@ struct VenueDetailView: View {
             ctaBar
         }
             .onAppear { BPAnalytics.track(.viewVenue(venue.id)) }
+            .task { await loadCommunityHero() }
             .navigationBarHidden(true)
         .overlay(alignment: .topLeading) { navBar }
         .sheet(isPresented: $showReviewComposer) {
@@ -144,7 +146,17 @@ struct VenueDetailView: View {
         .frame(height: 300)
     }
 
-    /// Real Google photo when available, emoji gradient as graceful fallback.
+    /// Real Google photo when available, then a photo somebody actually
+    /// posted from inside the place, then the emoji gradient.
+    ///
+    /// TestFlight 2026-09-13, "No muestro ninguna foto en el venue" (Rush
+    /// Nightclub, Gainesville): Google has no photo for that place — asked
+    /// again on 2026-09-16 for all 38 catalogue rows with an empty
+    /// `image_url`, and it has none for any of them. There is nothing to
+    /// fetch and nothing honest to invent, so the only real picture of a
+    /// room like that is the one a person standing in it posted. This
+    /// promotes it to the hero instead of leaving it buried at the bottom
+    /// of the page while the top of the screen says "no photo".
     @ViewBuilder private var heroBackground: some View {
         if let first = venue.photoUrls.first, let url = URL(string: first) {
             CachedImage(url: url, targetSize: CGSize(width: 420, height: 420), priority: .hot) { image in
@@ -161,9 +173,28 @@ struct VenueDetailView: View {
                     BarPassLoadingView(size: 48)
                 }
             }
+        } else if let posted = communityHeroUrl, let url = URL(string: posted) {
+            CachedImage(url: url, targetSize: CGSize(width: 420, height: 420), priority: .hot) { image in
+                Color.clear
+                    .overlay(image.resizable().scaledToFill())
+                    .clipped()
+            } placeholder: {
+                heroEmojiFallback
+            }
         } else {
             heroEmojiFallback
         }
+    }
+
+    /// Newest photo posted from this venue, when the catalogue has none.
+    /// Photos only — a video's `mediaUrl` is a file to play, not a still.
+    private func loadCommunityHero() async {
+        guard venue.photoUrls.isEmpty, communityHeroUrl == nil else { return }
+        let items = (try? await RepositoryDependencies.venueMedia.media(for: venue.id)) ?? []
+        communityHeroUrl = items
+            .filter { $0.mediaType == .photo }
+            .max { $0.createdAt < $1.createdAt }?
+            .mediaUrl
     }
 
     private var heroEmojiFallback: some View {
