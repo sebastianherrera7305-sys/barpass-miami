@@ -17,6 +17,8 @@
 		12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */; };
 		1381C66FFDBA49BF7D938D04 /* HelpRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */; };
 		A11B19AC0FF1240000000031 /* AppStateEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000032 /* AppStateEnvironment.swift */; };
+		A11B19AC0FF1240000000073 /* VenueTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000074 /* VenueTabView.swift */; };
+		A11B19AC0FF1240000000071 /* VenueTabRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000072 /* VenueTabRepository.swift */; };
 		A11B19AC0FF1240000000063 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000064 /* FeedbackView.swift */; };
 		A11B19AC0FF1240000000061 /* FeedbackRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000062 /* FeedbackRepository.swift */; };
 		A11B19AC0FF1240000000051 /* HomeShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000052 /* HomeShortcuts.swift */; };
@@ -316,6 +318,8 @@
 		93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAccountView.swift; sourceTree = "<group>"; };
 		97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpRegistry.swift; path = BarPass/Core/Help/HelpRegistry.swift; sourceTree = SOURCE_ROOT; };
 		A11B19AC0FF1240000000032 /* AppStateEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppStateEnvironment.swift; path = BarPass/Core/Services/AppStateEnvironment.swift; sourceTree = SOURCE_ROOT; };
+		A11B19AC0FF1240000000074 /* VenueTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueTabView.swift; path = BarPass/Features/Tab/VenueTabView.swift; sourceTree = SOURCE_ROOT; };
+		A11B19AC0FF1240000000072 /* VenueTabRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueTabRepository.swift; path = BarPass/Repositories/VenueTabRepository.swift; sourceTree = SOURCE_ROOT; };
 		A11B19AC0FF1240000000064 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FeedbackView.swift; path = BarPass/Features/Feedback/FeedbackView.swift; sourceTree = SOURCE_ROOT; };
 		A11B19AC0FF1240000000062 /* FeedbackRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FeedbackRepository.swift; path = BarPass/Repositories/FeedbackRepository.swift; sourceTree = SOURCE_ROOT; };
 		A11B19AC0FF1240000000052 /* HomeShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HomeShortcuts.swift; path = BarPass/Core/Services/HomeShortcuts.swift; sourceTree = SOURCE_ROOT; };
@@ -568,6 +572,8 @@
 				9EC72D4050837ED089C03C05 /* UserLocationProvider.swift */,
 				97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */,
 				A11B19AC0FF1240000000032 /* AppStateEnvironment.swift */,
+				A11B19AC0FF1240000000074 /* VenueTabView.swift */,
+				A11B19AC0FF1240000000072 /* VenueTabRepository.swift */,
 				A11B19AC0FF1240000000064 /* FeedbackView.swift */,
 				A11B19AC0FF1240000000062 /* FeedbackRepository.swift */,
 				A11B19AC0FF1240000000052 /* HomeShortcuts.swift */,
@@ -1199,6 +1205,8 @@
 				5088325E9E6E36AB9FB16A81 /* UserLocationProvider.swift in Sources */,
 				1381C66FFDBA49BF7D938D04 /* HelpRegistry.swift in Sources */,
 				A11B19AC0FF1240000000031 /* AppStateEnvironment.swift in Sources */,
+				A11B19AC0FF1240000000073 /* VenueTabView.swift in Sources */,
+				A11B19AC0FF1240000000071 /* VenueTabRepository.swift in Sources */,
 				A11B19AC0FF1240000000063 /* FeedbackView.swift in Sources */,
 				A11B19AC0FF1240000000061 /* FeedbackRepository.swift in Sources */,
 				A11B19AC0FF1240000000051 /* HomeShortcuts.swift in Sources */,
