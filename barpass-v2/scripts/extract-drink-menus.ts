@@ -40,6 +40,16 @@ import {
   type Extracted, type ExtractedDrink, type ExtractedHappyHour,
 } from "./drink-menu-rules";
 
+import dns from "node:dns";
+
+// El resolver del sistema se ahoga con cientos de consultas seguidas: dos
+// corridas se cortaron a mitad de ciudad con ENOTFOUND en sitios que estaban
+// perfectos (facebook.com entre ellos). Cloudflare y Google aguantan este
+// volumen sin pestañear, y `ipv4first` evita el camino AAAA que en esta red
+// es el que más falla.
+dns.setServers(["1.1.1.1", "8.8.8.8", "1.0.0.1"]);
+dns.setDefaultResultOrder("ipv4first");
+
 const args = process.argv.slice(2);
 const flag = (n: string) => { const i = args.indexOf(n); return i === -1 ? undefined : args[i + 1]; };
 /** The vision pass costs a model call per image, so it can be turned off for a
@@ -124,21 +134,43 @@ async function fetchText(url: string, ms = 12000): Promise<{ html: string; final
   try {
     // Full browser-shaped headers: several venue hosts answer 403 to a bare
     // User-Agent (balls.poi.place did, in the Gainesville pilot).
+    const res = await fetchWithDnsRetry(url, ctrl.signal);
+    return await handleResponse(res);
+  } catch (e) {
+    lastFetchError = e instanceof Error && e.name === "AbortError" ? `timeout after ${ms / 1000}s` : `${e instanceof Error ? e.cause instanceof Error ? e.cause.message : e.message : e}`;
+    return null;
+  } finally { clearTimeout(t); }
+}
+
+/** Un ENOTFOUND aislado casi siempre es el resolver, no el dominio: se
+ *  reintenta una vez después de un respiro antes de darlo por caído. */
+async function fetchWithDnsRetry(url: string, signal: AbortSignal): Promise<Response> {
+  try {
+    return await rawFetch(url, signal);
+  } catch (e) {
+    const msg = e instanceof Error ? (e.cause instanceof Error ? e.cause.message : e.message) : String(e);
+    if (!/ENOTFOUND|EAI_AGAIN/i.test(msg)) throw e;
+    await sleep(1200);
+    return await rawFetch(url, signal);
+  }
+}
+
+async function rawFetch(url: string, signal: AbortSignal): Promise<Response> {
     const res = await fetch(url, { headers: {
       "User-Agent": UA,
       Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       "Accept-Language": "en-US,en;q=0.9",
       "Sec-Fetch-Dest": "document", "Sec-Fetch-Mode": "navigate", "Sec-Fetch-Site": "none",
       "Upgrade-Insecure-Requests": "1",
-    }, signal: ctrl.signal, redirect: "follow" });
-    if (!res.ok) { lastFetchError = `HTTP ${res.status}`; return null; }
-    const ct = res.headers.get("content-type") ?? "";
-    if (!ct.includes("html")) { lastFetchError = `not HTML (${ct.split(";")[0] || "no content-type"})`; return null; }
-    return { html: await res.text(), finalUrl: res.url };
-  } catch (e) {
-    lastFetchError = e instanceof Error && e.name === "AbortError" ? `timeout after ${ms / 1000}s` : `${e instanceof Error ? e.cause instanceof Error ? e.cause.message : e.message : e}`;
-    return null;
-  } finally { clearTimeout(t); }
+    }, signal, redirect: "follow" });
+  return res;
+}
+
+function handleResponse(res: Response): Promise<{ html: string; finalUrl: string } | null> {
+  if (!res.ok) { lastFetchError = `HTTP ${res.status}`; return Promise.resolve(null); }
+  const ct = res.headers.get("content-type") ?? "";
+  if (!ct.includes("html")) { lastFetchError = `not HTML (${ct.split(";")[0] || "no content-type"})`; return Promise.resolve(null); }
+  return res.text().then((html) => ({ html, finalUrl: res.url }));
 }
 
 /** The vision pass: read the menu a venue published as a picture.
