@@ -9,7 +9,12 @@ struct EventFlyerCard: View {
     var width: CGFloat = 220
     var height: CGFloat = 290
 
-    @EnvironmentObject private var appState: AppState
+    /// Optional on purpose. This card is rendered inside VenueDetailView,
+    /// which is deliberately environment-free because it opens from covers
+    /// and pushes that drop the ambient environment — and a missing
+    /// @EnvironmentObject is a SIGTRAP, not a nil. Same family as the
+    /// crashes in builds 71, 75 and 76.
+    @Environment(\.appStateIfPresent) private var appState
     @ObservedObject private var l10n = L10n.shared
 
     private static let day: DateFormatter = {
@@ -40,6 +45,11 @@ struct EventFlyerCard: View {
     var body: some View {
         Button {
             BPHaptics.light()
+            // No AppState in this context means the ticket sheet lives on a
+            // screen this card can't reach. Doing nothing is wrong too, but
+            // it is not a crash — and every caller that can sell a ticket
+            // does pass one.
+            guard let appState else { return }
             appState.priorityVenueId = venue.id
             appState.priorityVenueName = venue.name
             appState.priorityEvent = event

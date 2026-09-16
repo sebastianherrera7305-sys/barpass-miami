@@ -7,7 +7,15 @@ struct HostEventVenuePicker: View {
     @Binding var selection: BarPassVenue?
 
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var venueStore: VenueStore
+    /// Its OWN store, not an @EnvironmentObject. This screen is a sheet
+    /// presented from a sheet presented from a pushed view, and every one of
+    /// those boundaries can drop the ambient environment — reading a missing
+    /// @EnvironmentObject is not an optional that comes back nil, it is an
+    /// immediate SIGTRAP. Build 71 crashed this way on the university
+    /// screen, build 75 on Remy, and build 76 right here (crash log
+    /// 2026-09-16, HostEventCreateView.swift:63). The store costs one
+    /// catalogue read and cannot be absent.
+    @StateObject private var venueStore = VenueStore()
     @ObservedObject private var l10n = L10n.shared
     @State private var query = ""
 
@@ -64,6 +72,7 @@ struct HostEventVenuePicker: View {
                         .foregroundStyle(Color.bpTextSecondary)
                 }
             }
+            .task { await venueStore.loadVenues() }
         }
     }
 

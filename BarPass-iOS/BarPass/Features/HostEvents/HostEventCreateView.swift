@@ -10,7 +10,6 @@ struct HostEventCreateView: View {
     var onCreated: () async -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var venueStore: VenueStore
     @ObservedObject private var l10n = L10n.shared
 
     @State private var venue: BarPassVenue?
@@ -56,11 +55,13 @@ struct HostEventCreateView: View {
             }
         }
         .sheet(isPresented: $showVenuePicker) {
-            // Handed over explicitly: the picker reads VenueStore, and a sheet
-            // is where the ambient environment is least reliable. Same class of
-            // crash as Remy and the university screen.
+            // Nothing handed over, and nothing read from the environment.
+            // The previous version injected `venueStore` here — but this
+            // screen is itself a sheet presented from a pushed list, so it
+            // never received one, and merely READING it to pass it along
+            // trapped: build 76's crash log points at exactly this line.
+            // The picker now owns its own store.
             HostEventVenuePicker(selection: $venue)
-                .environmentObject(venueStore)
         }
         .sheet(item: $editingTier) { draft in
             NavigationStack {

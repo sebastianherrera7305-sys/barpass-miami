@@ -905,6 +905,13 @@ struct NightPlanView: View {
     /// venue page has. TestFlight 2026-09-08: "en el chat… la dirección, que
     /// nada más estemos a un solo botón, como cuando está dentro del card".
     @EnvironmentObject private var venueStore: VenueStore
+    /// Optional (see AppStateEnvironment): this card opens the venue page in
+    /// a full-screen cover, and that page needs the state to be able to sell
+    /// a ticket — optional so a context without one degrades instead of
+    /// trapping. Named `ambientAppState` because inside a View the bare name
+    /// `appState` resolves to View.appState(_:), the injection modifier
+    /// itself.
+    @Environment(\.appStateIfPresent) private var ambientAppState
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
 
     /// Venue page opened from a stop — a full-screen cover so the plan (and
@@ -1168,7 +1175,17 @@ struct NightPlanView: View {
         .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(Color.bpInk.opacity(0.08)))
         .fullScreenCover(item: $openVenue) { venue in
-            NavigationStack { VenueDetailView(venue: venue) }
+            // `.appState` (the optional key), not `.environmentObject` — see
+            // AppStateEnvironment. Without it the venue page opens with no
+            // way to sell a ticket; the other cover in this file already
+            // passed it and this one did not.
+            NavigationStack {
+                if let ambientAppState {
+                    VenueDetailView(venue: venue).appState(ambientAppState)
+                } else {
+                    VenueDetailView(venue: venue)
+                }
+            }
         }
     }
 }
