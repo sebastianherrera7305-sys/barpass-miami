@@ -123,17 +123,20 @@ private struct HistoryEntry: Identifiable {
     let createdAt: Date
     let statusLabel: (text: String, color: Color)?
 
-    init(order: OrderHistoryService.OrderRow) {
+    // @MainActor because the labels and the date format both come from
+    // L10n, which is main-actor state. Built inside the view's own load(),
+    // which already runs there.
+    @MainActor init(order: OrderHistoryService.OrderRow) {
         id = order.id
         emoji = "🛒"
-        title = "Orden en \(order.vendor_id)"
+        title = String(format: L10n.tSync("history.order.title"), order.vendor_id)
         subtitle = order.payment_method + " · " + DateFormatter.bpShort.string(from: order.created_at)
         amount = order.total
         createdAt = order.created_at
-        statusLabel = order.status == "refunded" ? ("Reembolsado", .orange) : nil
+        statusLabel = order.status == "refunded" ? (L10n.tSync("history.status.refunded"), .orange) : nil
     }
 
-    init(pass: OrderHistoryService.PassRow) {
+    @MainActor init(pass: OrderHistoryService.PassRow) {
         id = pass.id
         emoji = pass.kind == "table" ? "🍾" : (pass.kind == "event_ticket" ? "🎫" : "⚡️")
         title = pass.venue_name
@@ -141,22 +144,19 @@ private struct HistoryEntry: Identifiable {
         amount = pass.amount
         createdAt = pass.created_at
         if pass.redeemed_at != nil {
-            statusLabel = ("Usado", Color(red: 0.2, green: 0.9, blue: 0.4))
+            statusLabel = (L10n.tSync("history.status.used"), Color(red: 0.2, green: 0.9, blue: 0.4))
         } else if pass.valid_until < Date() {
-            statusLabel = ("Expirado", .red)
+            statusLabel = (L10n.tSync("history.status.expired"), .red)
         } else {
-            statusLabel = ("Activo", Color.bpAmber)
+            statusLabel = (L10n.tSync("history.status.active"), Color.bpAmber)
         }
     }
 }
 
 private extension DateFormatter {
-    static let bpShort: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "d MMM · HH:mm"
-        f.locale = Locale(identifier: "es_MX")
-        return f
-    }()
+    /// Was pinned to es_MX, so a receipt read its month in Spanish to a user
+    /// running the app in English.
+    @MainActor static var bpShort: DateFormatter { L10n.dateFormatter("d MMM · HH:mm") }
 }
 
 #Preview {

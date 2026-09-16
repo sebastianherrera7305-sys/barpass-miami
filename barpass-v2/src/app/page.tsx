@@ -77,9 +77,11 @@ export default async function DiscoverPage() {
                     <p className="text-sm font-bold leading-tight">
                       {event.title}
                     </p>
-                    <p className="line-clamp-2 text-xs leading-relaxed text-text-secondary">
-                      {event.description}
-                    </p>
+                    {event.description && (
+                      <p className="line-clamp-2 text-xs leading-relaxed text-text-secondary">
+                        {event.description}
+                      </p>
+                    )}
                     <div className="flex items-center justify-between pt-1 text-xs text-text-tertiary">
                       <span>at {venueName}</span>
                       {event.coverPrice !== null && (

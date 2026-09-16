@@ -63,7 +63,31 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
         registerBackgroundTask()
         PassRegistrationOutbox.shared.start()
+        MainActor.assumeIsolated { HomeShortcuts.install() }
+
+        // Cold start FROM the menu: iOS hands the item here and does NOT call
+        // performActionFor afterwards. Posting it now would be too early —
+        // nothing is listening yet — so it goes out on the next runloop turn,
+        // by which point AppState's subscriber exists.
+        if let item = launchOptions?[.shortcutItem] as? UIApplicationShortcutItem,
+           let url = HomeShortcuts.url(for: item) {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .deepLinkReceived, object: url)
+            }
+        }
         return true
+    }
+
+    /// Warm start: the app was already running when they picked an item.
+    func application(_ application: UIApplication,
+                     performActionFor shortcutItem: UIApplicationShortcutItem,
+                     completionHandler: @escaping (Bool) -> Void) {
+        guard let url = HomeShortcuts.url(for: shortcutItem) else {
+            completionHandler(false)
+            return
+        }
+        NotificationCenter.default.post(name: .deepLinkReceived, object: url)
+        completionHandler(true)
     }
 
     private func registerBackgroundTask() {

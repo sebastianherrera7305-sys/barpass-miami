@@ -231,9 +231,11 @@ export default async function VenuePage({
                 <span className="mt-0.5 text-2xl">📅</span>
                 <div className="min-w-0 flex-1">
                   <p className="font-bold">{event.title}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-                    {event.description}
-                  </p>
+                  {event.description && (
+                    <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+                      {event.description}
+                    </p>
+                  )}
                   <div className="mt-2 flex items-center gap-3 text-xs text-text-tertiary">
                     <span>
                       {new Date(event.date).toLocaleDateString("en-US", {

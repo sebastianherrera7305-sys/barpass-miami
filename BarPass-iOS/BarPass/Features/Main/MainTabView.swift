@@ -295,6 +295,19 @@ struct MainTabView: View {
             selectedTab = 0
             appState.focusPromptRequested = true
             appState.consumeRoute()
+        // Home Screen quick actions. Each is a tab this app already has —
+        // the menu just removes the two taps it used to cost from a cold
+        // start.
+        case .explore:
+            selectedTab = 1
+            appState.consumeRoute()
+        case .social:
+            selectedTab = 2
+            appState.consumeRoute()
+        case .passes:
+            selectedTab = 4
+            appState.openPassesRequested = true
+            appState.consumeRoute()
         }
     }
 
@@ -403,9 +416,14 @@ struct MainTabView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // Hardcoded Spanish, in the tab order from before the restructure:
+        // VoiceOver called the Social tab "Viajes" and announced a
+        // "Planificar" tab that no longer exists, in Spanish, to a user
+        // running the app in English. The visible label is already
+        // localized and already correct — use it.
         .bpAccessibility(
-            label: ["Esta noche", "Explorar", "Viajes", "Planificar", "Perfil"][index],
-            hint: ["Eventos de esta noche", "Explorar lugares", "Tus viajes", "Planificar tu noche", "Tu perfil"][index],
+            label: item.label,
+            hint: l10n.t("tab.\(["tonight", "explore", "social", "trips", "me"][index]).hint"),
             isButton: true
         )
     }

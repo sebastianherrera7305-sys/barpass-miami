@@ -31,7 +31,12 @@ final class L10n: ObservableObject {
     nonisolated private static let key = "bp_language"
 
     @Published var language: AppLanguage {
-        didSet { UserDefaults.standard.set(language.rawValue, forKey: Self.key) }
+        didSet {
+            UserDefaults.standard.set(language.rawValue, forKey: Self.key)
+            // The Home Screen menu is built from these strings and lives
+            // outside the app, so it doesn't re-render on its own.
+            HomeShortcuts.install()
+        }
     }
 
     private init() {
@@ -404,6 +409,10 @@ final class L10n: ObservableObject {
             "tab.tonight": "Tonight", "tab.explore": "Explorar", "tab.trips": "Trips",
             "tab.plan": "Plan", "tab.me": "Yo",
             "tab.social": "Social",
+            "history.order.title": "Orden en %@", "history.status.refunded": "Reembolsado",
+            "history.status.used": "Usado", "history.status.expired": "Expirado", "history.status.active": "Activo",
+            "tab.tonight.hint": "Lo que pasa esta noche", "tab.explore.hint": "Explorar lugares en el mapa",
+            "tab.social.hint": "Tu gente y las historias de esta noche", "tab.trips.hint": "Tus viajes", "tab.me.hint": "Tu perfil",
             "tonight.remy.title": "Preguntale a Remy",
             "tonight.remy.hint": "Armá tu noche hablando, no scrolleando",
             "social.outTonight": "Afuera ahora",
@@ -411,6 +420,10 @@ final class L10n: ObservableObject {
             "social.outTonight.emptyNobody": "Cuando alguien haga check-in esta noche, aparece acá.",
             "social.outTonight.emptyNotSharing": "Activá compartir ubicación para ver a tus amigos, y que ellos te vean a vos.",
             "social.people": "Tu gente", "social.feed.isAt": "está en",
+            "shortcut.prompt": "¿Qué hago esta noche?", "shortcut.prompt.sub": "Decile a Remy tu plan",
+            "shortcut.explore": "Mapa", "shortcut.explore.sub": "Lo que está abierto cerca",
+            "shortcut.social": "Quién está afuera", "shortcut.social.sub": "Tu gente, esta noche",
+            "shortcut.passes": "Mis pases", "shortcut.passes.sub": "Entradas y reservas",
             "social.friends": "Amigos",
             "social.friends.sub": "Agregá gente, chateá, mirá quién sale",
             "social.rooms": "Tus grupos",
@@ -1518,6 +1531,10 @@ final class L10n: ObservableObject {
             "tab.tonight": "Tonight", "tab.explore": "Explore", "tab.trips": "Trips",
             "tab.plan": "Plan", "tab.me": "Me",
             "tab.social": "Social",
+            "history.order.title": "Order at %@", "history.status.refunded": "Refunded",
+            "history.status.used": "Used", "history.status.expired": "Expired", "history.status.active": "Active",
+            "tab.tonight.hint": "What's happening tonight", "tab.explore.hint": "Explore places on the map",
+            "tab.social.hint": "Your people and tonight's stories", "tab.trips.hint": "Your trips", "tab.me.hint": "Your profile",
             "tonight.remy.title": "Ask Remy",
             "tonight.remy.hint": "Plan your night by talking, not scrolling",
             "social.outTonight": "Out right now",
@@ -1525,6 +1542,10 @@ final class L10n: ObservableObject {
             "social.outTonight.emptyNobody": "When someone checks in tonight, they show up here.",
             "social.outTonight.emptyNotSharing": "Turn on location sharing to see your friends, and let them see you.",
             "social.people": "Your people", "social.feed.isAt": "is at",
+            "shortcut.prompt": "What should I do tonight?", "shortcut.prompt.sub": "Tell Remy your plan",
+            "shortcut.explore": "Map", "shortcut.explore.sub": "What's open near you",
+            "shortcut.social": "Who's out", "shortcut.social.sub": "Your people, tonight",
+            "shortcut.passes": "My passes", "shortcut.passes.sub": "Tickets and reservations",
             "social.friends": "Friends",
             "social.friends.sub": "Add people, chat, see who is out",
             "social.rooms": "Your groups",
@@ -2632,6 +2653,10 @@ final class L10n: ObservableObject {
             "tab.tonight": "Tonight", "tab.explore": "Explorar", "tab.trips": "Trips",
             "tab.plan": "Plano", "tab.me": "Eu",
             "tab.social": "Social",
+            "history.order.title": "Pedido em %@", "history.status.refunded": "Reembolsado",
+            "history.status.used": "Usado", "history.status.expired": "Expirado", "history.status.active": "Ativo",
+            "tab.tonight.hint": "O que acontece hoje à noite", "tab.explore.hint": "Explorar lugares no mapa",
+            "tab.social.hint": "Sua turma e as histórias de hoje", "tab.trips.hint": "Suas viagens", "tab.me.hint": "Seu perfil",
             "tonight.remy.title": "Pergunte ao Remy",
             "tonight.remy.hint": "Monte sua noite conversando, não rolando",
             "social.outTonight": "Na rua agora",
@@ -2639,6 +2664,10 @@ final class L10n: ObservableObject {
             "social.outTonight.emptyNobody": "Quando alguém fizer check-in hoje, aparece aqui.",
             "social.outTonight.emptyNotSharing": "Ative o compartilhamento de localização para ver seus amigos, e eles verem você.",
             "social.people": "Sua turma", "social.feed.isAt": "está em",
+            "shortcut.prompt": "O que faço hoje à noite?", "shortcut.prompt.sub": "Conte seu plano ao Remy",
+            "shortcut.explore": "Mapa", "shortcut.explore.sub": "O que está aberto perto",
+            "shortcut.social": "Quem está na rua", "shortcut.social.sub": "Sua turma, hoje à noite",
+            "shortcut.passes": "Meus passes", "shortcut.passes.sub": "Ingressos e reservas",
             "social.friends": "Amigos",
             "social.friends.sub": "Adicione pessoas, converse, veja quem saiu",
             "social.rooms": "Seus grupos",
@@ -3426,3 +3455,32 @@ final class L10n: ObservableObject {
         ],
     ]
 }
+
+// MARK: - Dates in the user's language
+
+@MainActor
+extension L10n {
+    /// A DateFormatter for `format` in the language the USER picked in the
+    /// app, not the one the phone is set to.
+    ///
+    /// Four screens hardcoded `es_MX`/`es` here, so an event flyer printed
+    /// "SEP"/"DIC" in Spanish, and a pass receipt a Spanish month, to someone
+    /// running the app in English — reported 2026-09-16 as "los eventos están
+    /// en español".
+    ///
+    /// Cached per (format, language): allocating a DateFormatter per call is
+    /// what once made the Tonight feed freeze (see VenueTimeStatus), and a
+    /// flyer rail formats one date per card.
+    static func dateFormatter(_ format: String) -> DateFormatter {
+        let key = "\(format)|\(shared.language.rawValue)"
+        if let cached = formatterCache[key] { return cached }
+        let f = DateFormatter()
+        f.locale = Locale(identifier: shared.language.rawValue)
+        f.dateFormat = format
+        formatterCache[key] = f
+        return f
+    }
+}
+
+@MainActor private var formatterCache: [String: DateFormatter] = [:]
+

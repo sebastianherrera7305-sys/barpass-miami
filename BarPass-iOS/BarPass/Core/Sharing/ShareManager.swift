@@ -118,9 +118,7 @@ enum ShareManager {
     }
 
     private static func formattedRange(_ start: Date, _ end: Date) -> String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "es_MX")
-        f.dateFormat = "d MMM"
+        let f = L10n.dateFormatter("d MMM")
         return "\(f.string(from: start)) – \(f.string(from: end))"
     }
 

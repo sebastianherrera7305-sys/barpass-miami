@@ -122,10 +122,7 @@ struct EventTicketsView: View {
     }
 
     private var formattedEventDate: String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "es_MX")
-        f.dateFormat = "d MMM · h:mm a"
-        return f.string(from: eventDate)
+        L10n.dateFormatter("d MMM · h:mm a").string(from: eventDate)
     }
 
     // MARK: - Student price

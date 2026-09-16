@@ -10,6 +10,7 @@ struct ProfileView: View {
     @State private var animateStats = false
     @State private var showToast = false
     @State private var showGames = false
+    @State private var showPasses = false
     @State private var showTopUp = false
     @State private var showDeleteAccount = false
     @State private var currentCity: String? = SelectedCityStore.selectedCity
@@ -40,6 +41,12 @@ struct ProfileView: View {
     private var nextPoints: Int { engine.xpForNextLevel ?? engine.totalXP }
 
     var body: some View {
+        // ProfileView had no NavigationStack of its own, and MainTabView gives
+        // the tabs none, so its one NavigationLink — "Mis pases" — pushed
+        // nothing: the row highlighted and the screen stayed put. The stack
+        // lives here now, with the bar hidden because this screen draws its
+        // own header; pushed destinations keep their own.
+        NavigationStack {
         ZStack {
             BPBackgroundView()
 
@@ -558,6 +565,15 @@ struct ProfileView: View {
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationDestination(isPresented: $showPasses) { OrderHistoryView() }
+        // The "Mis pases" Home Screen quick action lands on this tab and asks
+        // for the history, so the shortcut ends where its label promises.
+        .onChange(of: appState.openPassesRequested) { _, requested in
+            guard requested else { return }
+            showPasses = true
+            appState.openPassesRequested = false
+        }
         .sheet(isPresented: $showGames) {
             GamificationView()
                 .presentationBackground(.black)
@@ -588,6 +604,7 @@ struct ProfileView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                 withAnimation(.easeOut(duration: 0.4)) { showToast = false; engine.lastAward = nil }
             }
+        }
         }
     }
 

@@ -36,3 +36,9 @@ BarPass-iOS/build-archive/
 # `git rm --cached` que acompaña a esta línea.
 *.xcuserstate
 xcuserdata/
+
+# Build output from the archive/export pipeline — never committed.
+BarPass-iOS/build-clean/
+BarPass-iOS/build-archive/
+BarPass-iOS/build-device/
+BarPass-iOS/build-sim/

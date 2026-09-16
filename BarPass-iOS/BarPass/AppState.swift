@@ -60,6 +60,10 @@ final class AppState: ObservableObject {
     /// TonightView passes this down to PromptYourNightHomeSection, which
     /// focuses its text field on `true` and flips it back to `false`.
     @Published var focusPromptRequested    = false
+    /// Set by the "Mis pases" Home Screen quick action: Profile opens the
+    /// pass history itself, so the shortcut lands where it says it lands
+    /// instead of one tap short of it.
+    @Published var openPassesRequested     = false
     @Published var walletBalance:          Double = 0
     @Published var lastOrderConfirmation:  OrderConfirmation?
     @Published var showPriorityEntry       = false

@@ -17,12 +17,12 @@ struct EventFlyerCard: View {
     @Environment(\.appStateIfPresent) private var appState
     @ObservedObject private var l10n = L10n.shared
 
-    private static let day: DateFormatter = {
-        let f = DateFormatter(); f.dateFormat = "d"; return f
-    }()
-    private static let month: DateFormatter = {
-        let f = DateFormatter(); f.locale = Locale(identifier: "es"); f.dateFormat = "MMM"; return f
-    }()
+    // The month used to be formatted with a hardcoded Spanish locale, so
+    // every flyer read "SEP"/"DIC"/"ENE" no matter what language the app was
+    // in — "los eventos están en español" (2026-09-16). Both now follow the
+    // language the user picked.
+    private static var day: DateFormatter { L10n.dateFormatter("d") }
+    private static var month: DateFormatter { L10n.dateFormatter("MMM") }
 
     /// (label, background color) for the top-right status badge, or nil to
     /// hide it (far-out upcoming events don't need one — the date block
