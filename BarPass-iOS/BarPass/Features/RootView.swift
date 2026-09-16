@@ -182,6 +182,11 @@ struct RootView: View {
                 .environmentObject(cart)
                 .environmentObject(appState)
         }
+        // "¿Qué podemos hacer mejor?" — global, because it's opened from the
+        // Home Screen menu, which can arrive on any screen.
+        .sheet(isPresented: $appState.showFeedback) {
+            FeedbackView()
+        }
         // Priority Entry hub sheet
         .sheet(isPresented: $appState.showPriorityEntry) {
             PriorityEntryHubView(

@@ -17,6 +17,8 @@
 		12112D525D2022D09E1B0063 /* AgeReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB3A0A6692571B0F695D65E /* AgeReportRepository.swift */; };
 		1381C66FFDBA49BF7D938D04 /* HelpRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */; };
 		A11B19AC0FF1240000000031 /* AppStateEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000032 /* AppStateEnvironment.swift */; };
+		A11B19AC0FF1240000000063 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000064 /* FeedbackView.swift */; };
+		A11B19AC0FF1240000000061 /* FeedbackRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000062 /* FeedbackRepository.swift */; };
 		A11B19AC0FF1240000000051 /* HomeShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000052 /* HomeShortcuts.swift */; };
 		19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */; };
 		1E6D56BE3ACE427DB3D6D36B /* CityMascotIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */; };
@@ -314,6 +316,8 @@
 		93B241CAA60BB6EFC53D26A1 /* DeleteAccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DeleteAccountView.swift; sourceTree = "<group>"; };
 		97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HelpRegistry.swift; path = BarPass/Core/Help/HelpRegistry.swift; sourceTree = SOURCE_ROOT; };
 		A11B19AC0FF1240000000032 /* AppStateEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppStateEnvironment.swift; path = BarPass/Core/Services/AppStateEnvironment.swift; sourceTree = SOURCE_ROOT; };
+		A11B19AC0FF1240000000064 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FeedbackView.swift; path = BarPass/Features/Feedback/FeedbackView.swift; sourceTree = SOURCE_ROOT; };
+		A11B19AC0FF1240000000062 /* FeedbackRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FeedbackRepository.swift; path = BarPass/Repositories/FeedbackRepository.swift; sourceTree = SOURCE_ROOT; };
 		A11B19AC0FF1240000000052 /* HomeShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HomeShortcuts.swift; path = BarPass/Core/Services/HomeShortcuts.swift; sourceTree = SOURCE_ROOT; };
 		981C73E1C26EF3207D31A9F2 /* RemyLocalChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemyLocalChat.swift; sourceTree = "<group>"; };
 		9944A65EAC0560419D02323C /* Stadium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Stadium.swift; path = BarPass/Models/Stadium.swift; sourceTree = SOURCE_ROOT; };
@@ -564,6 +568,8 @@
 				9EC72D4050837ED089C03C05 /* UserLocationProvider.swift */,
 				97E6C0EA2018A9066F24D55D /* HelpRegistry.swift */,
 				A11B19AC0FF1240000000032 /* AppStateEnvironment.swift */,
+				A11B19AC0FF1240000000064 /* FeedbackView.swift */,
+				A11B19AC0FF1240000000062 /* FeedbackRepository.swift */,
 				A11B19AC0FF1240000000052 /* HomeShortcuts.swift */,
 				AD594030C69C33F1DB823472 /* HelpGuideStore.swift */,
 				B255F26D4A13547562CDF99B /* HelpTargetAnchor.swift */,
@@ -1193,6 +1199,8 @@
 				5088325E9E6E36AB9FB16A81 /* UserLocationProvider.swift in Sources */,
 				1381C66FFDBA49BF7D938D04 /* HelpRegistry.swift in Sources */,
 				A11B19AC0FF1240000000031 /* AppStateEnvironment.swift in Sources */,
+				A11B19AC0FF1240000000063 /* FeedbackView.swift in Sources */,
+				A11B19AC0FF1240000000061 /* FeedbackRepository.swift in Sources */,
 				A11B19AC0FF1240000000051 /* HomeShortcuts.swift in Sources */,
 				A2CF02FBB442045B9D9084FF /* HelpGuideStore.swift in Sources */,
 				EE01BC57203A630FF06E9694 /* HelpTargetAnchor.swift in Sources */,
@@ -1296,7 +1304,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 80;
+				CURRENT_PROJECT_VERSION = 81;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1324,7 +1332,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 80;
+				CURRENT_PROJECT_VERSION = 81;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1454,7 +1462,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 80;
+				CURRENT_PROJECT_VERSION = 81;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1477,7 +1485,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 80;
+				CURRENT_PROJECT_VERSION = 81;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;

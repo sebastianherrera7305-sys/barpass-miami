@@ -21,6 +21,8 @@ enum DeepLinkRoute: Equatable {
     case explore
     case social
     case passes
+    case feedback
+    case me
 }
 
 /// Turns an incoming URL into a `DeepLinkRoute`. Pure and side-effect free so
@@ -49,6 +51,8 @@ enum DeepLinkRouter {
             case "map", "explore": return .explore
             case "social": return .social
             case "passes": return .passes
+            case "feedback": return .feedback
+            case "me", "profile": return .me
             default: break
             }
             rawValue = url.pathComponents.first(where: { $0 != "/" }) ?? ""

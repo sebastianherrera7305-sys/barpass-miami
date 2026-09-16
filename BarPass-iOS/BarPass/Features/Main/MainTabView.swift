@@ -308,6 +308,12 @@ struct MainTabView: View {
             selectedTab = 4
             appState.openPassesRequested = true
             appState.consumeRoute()
+        case .me:
+            selectedTab = 4
+            appState.consumeRoute()
+        case .feedback:
+            appState.showFeedback = true
+            appState.consumeRoute()
         }
     }
 

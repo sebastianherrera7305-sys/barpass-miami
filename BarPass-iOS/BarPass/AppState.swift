@@ -64,7 +64,22 @@ final class AppState: ObservableObject {
     /// pass history itself, so the shortcut lands where it says it lands
     /// instead of one tap short of it.
     @Published var openPassesRequested     = false
-    @Published var walletBalance:          Double = 0
+    /// The Home Screen menu's feedback item, and anything else that wants to
+    /// ask what we could do better.
+    @Published var showFeedback            = false
+    @Published var walletBalance:          Double = 0 {
+        // Mirrored to disk so the Home Screen menu — which is built outside
+        // any live AppState, sometimes before the app has a session — can
+        // say the user's real balance instead of a guess.
+        didSet { UserDefaults.standard.set(walletBalance, forKey: Self.walletMirrorKey) }
+    }
+
+    private static let walletMirrorKey = "bp.wallet.lastKnownBalance"
+    /// Last balance this device actually saw. Zero until the first fetch,
+    /// and zero again after sign-out.
+    static var lastKnownWalletBalance: Double {
+        UserDefaults.standard.double(forKey: Self.walletMirrorKey)
+    }
     @Published var lastOrderConfirmation:  OrderConfirmation?
     @Published var showPriorityEntry       = false
     @Published var priorityVenueId:        String = ""

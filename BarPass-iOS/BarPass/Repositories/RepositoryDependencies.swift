@@ -47,4 +47,7 @@ enum RepositoryDependencies {
     /// through barpass-v2's /api/host-events routes, not PostgREST — the RPCs
     /// behind them hold the locks and rate limits.
     nonisolated(unsafe) static var hostEvent: HostEventRepository = BarPassHostEventRepository()
+
+    /// "¿Qué podemos hacer mejor?" — write-only (supabase/app_feedback.sql).
+    nonisolated(unsafe) static var feedback: FeedbackRepository = SupabaseFeedbackRepository()
 }

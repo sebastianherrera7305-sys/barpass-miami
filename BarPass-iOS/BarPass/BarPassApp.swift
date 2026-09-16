@@ -78,6 +78,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         return true
     }
 
+    /// The numbers in the menu (points, wallet) were last true right here,
+    /// and this is also the moment right before someone long-presses the
+    /// icon — so this is when to rebuild it.
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        MainActor.assumeIsolated { HomeShortcuts.install() }
+    }
+
     /// Warm start: the app was already running when they picked an item.
     func application(_ application: UIApplication,
                      performActionFor shortcutItem: UIApplicationShortcutItem,
