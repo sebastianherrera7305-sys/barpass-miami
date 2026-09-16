@@ -279,7 +279,14 @@ struct PlanView: View {
             // keyboard up and asked for a plain Claude/ChatGPT-style chat
             // instead; a full-bleed illustration also doesn't leave the
             // message thread the vertical room a real conversation needs.
-            Color(red: 0.04, green: 0.04, blue: 0.045).ignoresSafeArea()
+            // Tapping anywhere off the composer puts the keyboard away.
+            // This lives on the background rather than only on the message
+            // list because an empty chat has almost no list to tap, which
+            // is exactly the case the user hit.
+            Color(red: 0.04, green: 0.04, blue: 0.045)
+                .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture { isInputFocused = false }
 
             VStack(spacing: 0) {
                 topBar
@@ -343,7 +350,21 @@ struct PlanView: View {
             // truth, never both added together.
             .padding(.bottom, keyboard.value > 0 ? keyboard.value : chromeMetrics.height)
         }
-        .ignoresSafeArea(.container, edges: .bottom)
+        // `.keyboard` too, and this is NOT redundant with MainTabView's
+        // `.ignoresSafeArea(.all, edges: .bottom)`. That modifier only
+        // governs the tab ROOTS. Remy is now PUSHED (TonightView's card →
+        // NavigationLink), and a pushed destination is hosted by UIKit's
+        // navigation controller, which applies its OWN keyboard safe-area
+        // inset regardless of what any SwiftUI ancestor outside the stack
+        // ignored. The screen then shrank by the keyboard once
+        // automatically and once more from `keyboard.value` below, which
+        // squeezed the message list to zero height: TestFlight 2026-09-16
+        // showed the composer stranded under the header with a dead black
+        // band down to the keyboard, and — because the only tap-to-dismiss
+        // target was that now-zero-height list — no way to put the
+        // keyboard away at all ("el teclado se queda pegado"). Opting out
+        // here restores ONE source of truth: the measured height below.
+        .ignoresSafeArea([.container, .keyboard], edges: .bottom)
         .onAppear { BPAnalytics.track(.viewPlan) }
         .fullScreenCover(item: $chatVenue) { venue in
             NavigationStack { VenueDetailView(venue: venue).appState(appState) }
