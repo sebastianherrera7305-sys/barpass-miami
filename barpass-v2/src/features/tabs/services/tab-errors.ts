@@ -70,3 +70,33 @@ export function mapChargeError(error: RpcErrorLike): MappedError {
 export function mapTabError(error: RpcErrorLike): MappedError {
   return match(TAB_ERRORS, error) ?? { error: "tab_operation_failed", status: 500 };
 }
+
+/**
+ * Fallas al anular (supabase/venue_tab_void.sql § 2).
+ *
+ * `already_voided` NO está acá: el RPC no lo levanta como excepción, lo
+ * devuelve como resultado exitoso. Anular dos veces es un final feliz, no un
+ * error, y tratarlo como error llevaría a un bartender a "reintentar" algo que
+ * ya está hecho.
+ */
+const VOID_ERRORS: Record<string, number> = {
+  charge_not_found: 404,
+  // Es de otro local: misma respuesta que en el cobro, y por la misma razón —
+  // el secreto de un bar no opera sobre la caja de otro.
+  wrong_venue: 403,
+  // 410 Gone: el cobro existe, la posibilidad de anularlo desde la barra no.
+  void_window_expired: 410,
+  invalid_idempotency_key: 422,
+  // Levantado por adjust_wallet_balance. No puede pasar devolviendo plata
+  // (el saldo sólo sube), pero si la definición del wallet cambiara, el
+  // bartender merece un código y no un 500 mudo.
+  insufficient_funds: 402,
+};
+
+/**
+ * Maps a `void_venue_tab_charge` failure. Falls back to `void_failed` / 500 so
+ * an unmapped Postgres error can never leak through as prose.
+ */
+export function mapVoidError(error: RpcErrorLike): MappedError {
+  return match(VOID_ERRORS, error) ?? { error: "void_failed", status: 500 };
+}

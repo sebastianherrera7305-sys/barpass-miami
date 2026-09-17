@@ -6,6 +6,7 @@ import { OrderPanel } from "@/features/tabs/components/order-panel";
 import { ChargeScanner } from "@/features/tabs/components/charge-scanner";
 import { ChargeResult } from "@/features/tabs/components/charge-result";
 import { VenueSetup } from "@/features/tabs/components/venue-setup";
+import { RecentCharges } from "@/features/tabs/components/recent-charges";
 import { fetchVenueMenu, type MenuItem } from "@/features/tabs/services/menu-client";
 import {
   addLine,
@@ -60,6 +61,10 @@ export function BarScreen() {
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [phase, setPhase] = useState<Phase>("building");
   const [errorCode, setErrorCode] = useState<string>("charge_failed");
+  // La lista de anulación es una pantalla aparte y no se puede abrir con un
+  // cobro a medio camino: anular lo que todavía se está cobrando es la manera
+  // más rápida de dejar la noche descuadrada.
+  const [showRecent, setShowRecent] = useState(false);
 
   useEffect(() => {
     if (!venueId) return;
@@ -186,6 +191,13 @@ export function BarScreen() {
               </button>
             )}
             <button
+              onClick={() => setShowRecent(true)}
+              disabled={phase !== "building"}
+              className="text-sm text-text-secondary underline disabled:opacity-40"
+            >
+              Últimos cobros
+            </button>
+            <button
               onClick={() => {
                 window.localStorage.removeItem(VENUE_KEY);
                 window.localStorage.removeItem(SECRET_KEY);
@@ -235,6 +247,9 @@ export function BarScreen() {
         busy={phase !== "building"}
       />
 
+      {showRecent && (
+        <RecentCharges venueId={venueId} secret={secret} onClose={() => setShowRecent(false)} />
+      )}
       {phase === "scanning" && attempt && (
         <ChargeScanner amount={attempt.amount} onToken={onScanned} onCancel={abandonCharge} />
       )}

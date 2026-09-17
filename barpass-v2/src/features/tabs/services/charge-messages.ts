@@ -132,3 +132,61 @@ export function chargeErrorMessage(code: string, amount?: number): ChargeMessage
 export function isRetriable(code: string): boolean {
   return chargeErrorMessage(code).action === "retry";
 }
+
+/**
+ * Lo mismo para anular. Las acciones son sólo dos: reintentar (final ambiguo,
+ * la MISMA clave devuelve la misma anulación) o cerrar (el servidor ya
+ * contestó y no se movió nada).
+ */
+export type VoidAction = "retry" | "close";
+export type VoidMessage = { title: string; detail: string; action: VoidAction };
+
+export function voidErrorMessage(code: string, amount?: number): VoidMessage {
+  switch (code) {
+    case "void_window_expired":
+      return {
+        title: "Pasó la ventana para anular",
+        detail:
+          "Se puede anular hasta 8 horas después del cobro. Escribile a BarPass con el cobro y lo devolvemos nosotros.",
+        action: "close",
+      };
+    case "charge_not_found":
+      return {
+        title: "Ese cobro ya no está en la lista",
+        detail: "Volvé a abrir los últimos cobros y buscalo de nuevo.",
+        action: "close",
+      };
+    case "wrong_venue":
+      return {
+        title: "Ese cobro es de otro local",
+        detail: "Sólo se pueden anular los cobros hechos en este local.",
+        action: "close",
+      };
+    case "not_authorized":
+    case "venue_not_found":
+      return {
+        title: "El código del local no sirve",
+        detail: "Tocá “Cambiar local” y cargá de nuevo el ID y el código que te dio BarPass.",
+        action: "close",
+      };
+    case "rate_limited":
+      return {
+        title: "Demasiadas anulaciones seguidas",
+        detail: "Esperá unos segundos y tocá Reintentar. No se devuelve dos veces.",
+        action: "retry",
+      };
+    case "network_error":
+      return {
+        title: "Se cortó la conexión",
+        detail: `Puede que la anulación haya entrado igual. Tocá Reintentar: si ya entró, ${money(amount)} no se devuelve dos veces.`,
+        action: "retry",
+      };
+    case "void_failed":
+    default:
+      return {
+        title: "No se pudo anular",
+        detail: "Tocá Reintentar. Si vuelve a fallar, avisá a BarPass con el detalle del cobro.",
+        action: "retry",
+      };
+  }
+}

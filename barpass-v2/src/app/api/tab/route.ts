@@ -93,7 +93,7 @@ export async function GET(request: Request) {
       .order("joined_at", { ascending: true }),
     supabase
       .from("venue_tab_charges")
-      .select("id, member_id, description, items, amount, created_at")
+      .select("id, member_id, description, items, amount, created_at, voided_at, void_reason")
       .eq("tab_id", tabId)
       .order("created_at", { ascending: false }),
   ]);
@@ -128,6 +128,12 @@ export async function GET(request: Request) {
       items: c.items,
       amount: c.amount,
       createdAt: c.created_at,
+      // Un consumo anulado NO desaparece de la cuenta: se muestra tachado, con
+      // la plata ya devuelta. Que un cargo se esfume es indistinguible, para
+      // quien mira su cuenta, de que nunca haya existido — y la persona que
+      // vio el cobro en el momento merece ver también su anulación.
+      voidedAt: c.voided_at,
+      voidReason: c.void_reason,
     })),
   });
 }
