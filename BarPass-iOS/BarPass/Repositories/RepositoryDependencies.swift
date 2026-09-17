@@ -48,6 +48,10 @@ enum RepositoryDependencies {
     /// behind them hold the locks and rate limits.
     nonisolated(unsafe) static var hostEvent: HostEventRepository = BarPassHostEventRepository()
 
+    /// La carta del local (venue_menu_items): pública, de sólo lectura, con
+    /// la procedencia de cada precio adentro de cada fila.
+    nonisolated(unsafe) static var venueMenu: VenueMenuRepository = SupabaseVenueMenuRepository()
+
     /// "¿Qué podemos hacer mejor?" — write-only (supabase/app_feedback.sql).
     nonisolated(unsafe) static var feedback: FeedbackRepository = SupabaseFeedbackRepository()
 }

@@ -20,6 +20,12 @@ struct VenueDetailView: View {
     @ObservedObject private var points = PointsEngine.shared
     @State private var communityHeroUrl: String?
     @State private var showTab = false
+    @State private var showMenu = false
+    /// La carta completa del local (venue_menu_items). Se carga una vez con
+    /// la pantalla: la entrada a la carta tiene que decir CUÁNTOS ítems hay,
+    /// y un local sin carta no dibuja la entrada en absoluto — no hay estado
+    /// vacío que mostrar porque no hay nada que prometer.
+    @State private var menuItems: [VenueMenuItem] = []
     @State private var showReviewComposer = false
     @State private var reviewMessage: String?
 
@@ -41,7 +47,9 @@ struct VenueDetailView: View {
         }
             .onAppear { BPAnalytics.track(.viewVenue(venue.id)) }
             .task { await loadCommunityHero() }
+            .task { await loadMenu() }
             .sheet(isPresented: $showTab) { VenueTabView(venue: venue) }
+            .sheet(isPresented: $showMenu) { VenueMenuView(venue: venue, items: menuItems) }
             .navigationBarHidden(true)
         .overlay(alignment: .topLeading) { navBar }
         .sheet(isPresented: $showReviewComposer) {
@@ -295,6 +303,12 @@ struct VenueDetailView: View {
             if !venue.popularDrinks.isEmpty {
                 divider
                 drinksSection
+                    .padding(.horizontal, BPSpacing.lg)
+            }
+
+            if !menuItems.isEmpty {
+                if venue.popularDrinks.isEmpty { divider }
+                fullMenuEntry
                     .padding(.horizontal, BPSpacing.lg)
             }
 
@@ -600,6 +614,54 @@ struct VenueDetailView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Carta completa
+
+    /// Lo que la app mostraba eran seis tragos "populares". La tabla tiene
+    /// la carta entera — 45 ítems en Boxcar. Esta entrada dice el número
+    /// justamente para que se note la diferencia: "Ver carta completa · 45"
+    /// promete algo verificable. Si el local no tiene carta cargada, esta
+    /// vista no se construye (ver `contentSection`).
+    private var fullMenuEntry: some View {
+        Button {
+            BPHaptics.light()
+            showMenu = true
+        } label: {
+            HStack(spacing: BPSpacing.md) {
+                Image(systemName: "list.bullet.rectangle.portrait.fill")
+                    .font(.bpScaled(15, weight: .bold))
+                    .foregroundStyle(Color.bpAmber)
+                Text(String(format: l10n.t("menu.full.count"), menuItems.count))
+                    .font(.bpScaled(14, weight: .semibold))
+                    .foregroundStyle(Color.bpInk.opacity(0.85))
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.bpScaled(12, weight: .bold))
+                    .foregroundStyle(Color.bpTextTertiary)
+            }
+            .padding(.horizontal, BPSpacing.md)
+            .padding(.vertical, 14)
+            .background(Color.bpSurfaceRaised, in: RoundedRectangle(cornerRadius: BPRadius.lg, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: BPRadius.lg, style: .continuous)
+                    .stroke(Color.bpBorder, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .bpAccessibility(
+            label: String(format: l10n.t("menu.full.count"), menuItems.count),
+            hint: l10n.t("menu.full.hint"),
+            isButton: true
+        )
+    }
+
+    /// Falla en silencio: sin carta, la entrada no existe y la pantalla es
+    /// exactamente la de antes.
+    private func loadMenu() async {
+        guard menuItems.isEmpty else { return }
+        let rows = (try? await RepositoryDependencies.venueMenu.items(for: venue.id)) ?? []
+        await MainActor.run { menuItems = rows }
     }
 
     // MARK: - Events

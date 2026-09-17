@@ -125,6 +125,7 @@
 		CC000001000000000000ME01 /* venue_media.json in Resources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000ME01 /* venue_media.json */; };
 		CD0446CD2FE22E4C96DB1EC9 /* VenueMediaRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */; };
 		BB01STORYREPOBUILD000001 /* VenueStoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01STORYREPOFILEREF0001 /* VenueStoryRepository.swift */; };
+		BB02MENUREPOBUILD0000001 /* VenueMenuRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB02MENUREPOFILEREF00001 /* VenueMenuRepository.swift */; };
 		FRND00000000000000000002 /* Friend.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000001 /* Friend.swift */; };
 		FRND00000000000000000004 /* FriendsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000003 /* FriendsRepository.swift */; };
 		FRND00000000000000000006 /* FriendChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = FRND00000000000000000005 /* FriendChatRepository.swift */; };
@@ -162,6 +163,7 @@
 		FF000002000000000000AA01 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA01 /* MainTabView.swift */; };
 		FF000002000000000000AA02 /* TonightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA02 /* TonightView.swift */; };
 		FF000002000000000000AA03 /* VenueDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA03 /* VenueDetailView.swift */; };
+		BB02MENUVIEWBUILD0000001 /* VenueMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB02MENUVIEWFILEREF00001 /* VenueMenuView.swift */; };
 		FF000002000000000000AA04 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA04 /* ExploreView.swift */; };
 		FF000002000000000000AA05 /* PlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA05 /* PlanView.swift */; };
 		FF000002000000000000AA06 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA06 /* ProfileView.swift */; };
@@ -271,6 +273,7 @@
 		2ACCCBF0A93A18BFF314E986 /* BarPassWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BarPassWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaRepository.swift; path = BarPass/Repositories/VenueMediaRepository.swift; sourceTree = SOURCE_ROOT; };
 		BB01STORYREPOFILEREF0001 /* VenueStoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueStoryRepository.swift; path = BarPass/Repositories/VenueStoryRepository.swift; sourceTree = SOURCE_ROOT; };
+		BB02MENUREPOFILEREF00001 /* VenueMenuRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMenuRepository.swift; path = BarPass/Repositories/VenueMenuRepository.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000001 /* Friend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Friend.swift; path = BarPass/Models/Friend.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000003 /* FriendsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendsRepository.swift; path = BarPass/Repositories/FriendsRepository.swift; sourceTree = SOURCE_ROOT; };
 		FRND00000000000000000005 /* FriendChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FriendChatRepository.swift; path = BarPass/Repositories/FriendChatRepository.swift; sourceTree = SOURCE_ROOT; };
@@ -411,6 +414,7 @@
 		FF000001000000000000AA01 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA02 /* TonightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA03 /* VenueDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueDetailView.swift; sourceTree = "<group>"; };
+		BB02MENUVIEWFILEREF00001 /* VenueMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueMenuView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA04 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA05 /* PlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA06 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -701,6 +705,7 @@
 				C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */,
 				3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */,
 				BB01STORYREPOFILEREF0001 /* VenueStoryRepository.swift */,
+				BB02MENUREPOFILEREF00001 /* VenueMenuRepository.swift */,
 				FRND00000000000000000001 /* Friend.swift */,
 				FRND00000000000000000003 /* FriendsRepository.swift */,
 				FRND00000000000000000005 /* FriendChatRepository.swift */,
@@ -872,6 +877,7 @@
 			children = (
 				FF000001000000000000AA02 /* TonightView.swift */,
 				FF000001000000000000AA03 /* VenueDetailView.swift */,
+				BB02MENUVIEWFILEREF00001 /* VenueMenuView.swift */,
 			);
 			path = Tonight;
 			sourceTree = "<group>";
@@ -1097,6 +1103,7 @@
 				EF000002000000000000RP01 /* EventFlyerCard.swift in Sources */,
 				PYH002000000000000RP99 /* PromptYourNightHomeSection.swift in Sources */,
 				FF000002000000000000AA03 /* VenueDetailView.swift in Sources */,
+				BB02MENUVIEWBUILD0000001 /* VenueMenuView.swift in Sources */,
 				FF000002000000000000AA04 /* ExploreView.swift in Sources */,
 				FF000002000000000000AA05 /* PlanView.swift in Sources */,
 				EF2D822B1ED09EAD1CF53366 /* RemyLocalChat.swift in Sources */,
@@ -1226,6 +1233,7 @@
 				19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */,
 				CD0446CD2FE22E4C96DB1EC9 /* VenueMediaRepository.swift in Sources */,
 				BB01STORYREPOBUILD000001 /* VenueStoryRepository.swift in Sources */,
+				BB02MENUREPOBUILD0000001 /* VenueMenuRepository.swift in Sources */,
 				FRND00000000000000000002 /* Friend.swift in Sources */,
 				FRND00000000000000000004 /* FriendsRepository.swift in Sources */,
 				FRND00000000000000000006 /* FriendChatRepository.swift in Sources */,
