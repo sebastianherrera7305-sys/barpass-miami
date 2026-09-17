@@ -19,6 +19,7 @@ struct VenueDetailView: View {
     @ObservedObject private var favorites = FavoritesStore.shared
     @ObservedObject private var points = PointsEngine.shared
     @State private var communityHeroUrl: String?
+    @State private var showTab = false
     @State private var showReviewComposer = false
     @State private var reviewMessage: String?
 
@@ -40,6 +41,7 @@ struct VenueDetailView: View {
         }
             .onAppear { BPAnalytics.track(.viewVenue(venue.id)) }
             .task { await loadCommunityHero() }
+            .sheet(isPresented: $showTab) { VenueTabView(venue: venue) }
             .navigationBarHidden(true)
         .overlay(alignment: .topLeading) { navBar }
         .sheet(isPresented: $showReviewComposer) {
@@ -218,6 +220,38 @@ struct VenueDetailView: View {
             CheckInButton(venueId: venue.id, venueName: venue.name, venueLat: venue.latitude, venueLng: venue.longitude)
                 .padding(.horizontal, BPSpacing.lg)
                 .helpTarget("venueDetail.checkIn")
+
+            // La cuenta, justo debajo del check-in: es el mismo momento —
+            // acabás de entrar y lo próximo que hacés es pedir algo. Construí
+            // toda la pantalla y me olvidé de poner por dónde se llega, así
+            // que existía sin ser alcanzable.
+            Button {
+                BPHaptics.medium()
+                showTab = true
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "creditcard.fill")
+                        .font(.bpScaled(15, weight: .semibold))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(l10n.t("tab.open"))
+                            .font(.bpScaled(15, weight: .bold))
+                        Text(l10n.t("tab.entry.hint"))
+                            .font(.bpSmall())
+                            .foregroundStyle(Color.bpTextSecondary)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.bpScaled(13, weight: .semibold))
+                        .foregroundStyle(Color.bpAmber)
+                }
+                .foregroundStyle(Color.bpInk)
+                .padding(14)
+                .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
+                .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpAmber.opacity(0.25)))
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, BPSpacing.lg)
+            .bpAccessibility(label: l10n.t("tab.open"), hint: l10n.t("tab.entry.hint"), isButton: true)
 
             // Directly under the check-in, and far above the photo grid at
             // the bottom of this page. Tonight is perishable — it is worth
