@@ -32,16 +32,18 @@ enum NightPlanner {
     /// only called for `.high` confidence, so every string here states
     /// something the tag's source (a direct Google attribute) actually
     /// confirms, never a guess.
-    static func reasonLabel(for tagId: String) -> String {
-        switch tagId {
-        case "live_music":           return "Música en vivo confirmada"
-        case "group_night":          return "Ideal para ir en grupo"
-        case "outdoor_experience":   return "Tiene espacio al aire libre"
-        case "sports_viewing":       return "Bueno para ver el partido"
-        case "accessible":           return "Accesible en silla de ruedas"
-        case "vegetarian_friendly":  return "Opciones vegetarianas"
-        default:                     return tagId.replacingOccurrences(of: "_", with: " ")
-        }
+    /// Estaba en español escrito a mano, así que en un teléfono en inglés
+    /// convivía "Ideal para ir en grupo" con "Popular night out" —que sí
+    /// está traducida— en la misma lista de paradas (TestFlight 2026-09-17).
+    /// Y el caso por defecto imprimía el id crudo del tag con guiones bajos.
+    /// Los nueve ids son los que realmente existen en venue_experience_tags.
+    static func reasonLabel(for tagId: String) -> String? {
+        let known = ["live_music", "group_night", "outdoor_experience", "sports_viewing",
+                     "accessible", "vegetarian_friendly", "social", "high_energy", "date_friendly"]
+        // Un tag que no conocemos no se muestra: un id con guiones bajos en
+        // pantalla es peor que no decir nada.
+        guard known.contains(tagId) else { return nil }
+        return L10n.tSync("reasonTag.\(tagId)")
     }
 
     static func phase(of v: BarPassVenue) -> Int {

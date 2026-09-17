@@ -197,8 +197,9 @@ enum ExperienceScorer {
         if let passport, HypeEngine.musicMatch(passport: passport, venue: v) >= 0.6 {
             return L10n.tSync("reason.musicMatch")
         }
-        if let tag = matchedExperienceTags(v).first(where: { $0.confidence == .high }) {
-            return "✨ " + NightPlanner.reasonLabel(for: tag.id)
+        if let tag = matchedExperienceTags(v).first(where: { $0.confidence == .high }),
+           let label = NightPlanner.reasonLabel(for: tag.id) {
+            return "✨ " + label
         }
         if v.hasHappyHour, let until = v.happyHourUntil { return String(format: L10n.tSync("reason.happyHour"), until) }
         if v.isTrending { return L10n.tSync("reason.trending") }

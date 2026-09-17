@@ -61,6 +61,17 @@ struct SocialView: View {
         NavigationStack {
             ZStack {
                 BPBackgroundView()
+                // Velo sobre el arte. Sin esto el texto del estado vacío
+                // queda ilegible encima de la ilustración y hasta los
+                // botones de la barra superior la dejan pasar
+                // (TestFlight 2026-09-17: "el background le hace falta
+                // hacerle algo"). El arte tiene que estar detrás del
+                // contenido, no compitiendo con él.
+                LinearGradient(
+                    colors: [Color.black.opacity(0.35), Color.black.opacity(0.82), Color.black],
+                    startPoint: .top, endPoint: .bottom
+                )
+                .ignoresSafeArea()
                 ScrollView(showsIndicators: false) {
                     LazyVStack(alignment: .leading, spacing: 18) {
                         if !rooms.isEmpty { storyRail }
@@ -335,16 +346,38 @@ struct SocialView: View {
                  : l10n.t("social.outTonight.emptyNobody"))
                 .font(.bpBody())
                 .foregroundStyle(Color.bpTextSecondary)
-            Button {
-                BPHaptics.medium(); showFriends = true
-            } label: {
-                Text(l10n.t("social.friends"))
-                    .font(.bpScaled(14, weight: .bold))
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 18).padding(.vertical, 10)
-                    .background(Color.bpAmber, in: Capsule())
+            // Dos acciones, las dos con nombre. Antes los chats vivían sólo
+            // detrás de un icono sin etiqueta arriba a la derecha, y el
+            // reporte fue exactamente ese: "no me aparecen mis chats".
+            // Un icono de dos personitas no dice "acá están tus
+            // conversaciones".
+            HStack(spacing: 10) {
+                Button {
+                    BPHaptics.medium(); showFriends = true
+                } label: {
+                    Text(l10n.t("social.friends"))
+                        .font(.bpScaled(14, weight: .bold))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 18).padding(.vertical, 10)
+                        .background(Color.bpAmber, in: Capsule())
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    BPHaptics.light(); showFriends = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "bubble.left.and.bubble.right.fill")
+                            .font(.bpScaled(12, weight: .semibold))
+                        Text(l10n.t("social.chats"))
+                            .font(.bpScaled(14, weight: .bold))
+                    }
+                    .foregroundStyle(Color.bpAmber)
+                    .padding(.horizontal, 16).padding(.vertical, 10)
+                    .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.5)))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
             .padding(.top, 4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
