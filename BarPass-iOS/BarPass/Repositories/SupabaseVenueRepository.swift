@@ -298,6 +298,12 @@ final actor SupabaseVenueRepository: VenueRepository {
                     // 171 venues Google enrichment never reached. Missing data
                     // must never read as "closed".
                     URLQueryItem(name: "or", value: "(business_status.is.null,business_status.neq.CLOSED_PERMANENTLY)"),
+                    // Paginar sin ORDER BY es pedirle a Postgres un orden que
+                    // no promete: entre dos páginas puede devolver la misma
+                    // fila dos veces y saltearse otra, sin error y sin que
+                    // nada parezca roto. `id` es único, así que la ventana es
+                    // estable aunque el catálogo cambie entre páginas.
+                    URLQueryItem(name: "order", value: "id"),
                 ] + (city.map { [URLQueryItem(name: "city", value: "eq.\($0)")] } ?? []),
                 accessToken: SupabaseRESTClient.anonKey,
                 extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"],
@@ -392,7 +398,10 @@ final actor SupabaseVenueRepository: VenueRepository {
         while true {
             let request = try SupabaseRESTClient.request(
                 "GET", path: path,
-                queryItems: [URLQueryItem(name: "select", value: columns)] + (filter.map { [$0] } ?? []),
+                // Mismo motivo que en fetchVenueRows: sin `order` la
+                // paginación puede repetir una fila y perder otra en silencio.
+                queryItems: [URLQueryItem(name: "select", value: columns),
+                             URLQueryItem(name: "order", value: "venue_id")] + (filter.map { [$0] } ?? []),
                 accessToken: SupabaseRESTClient.anonKey,
                 extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"],
                 timeout: Self.requestTimeout

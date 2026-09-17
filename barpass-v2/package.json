@@ -30,7 +30,8 @@
     "backfill:hours": "node --env-file=.env.local --import tsx scripts/backfill-venue-hours.ts",
     "refresh:core": "node --env-file=.env.local --import tsx scripts/refresh-venue-core-data.ts",
     "apply:researched": "node --env-file=.env.local --import tsx scripts/apply-researched-venue-fields.ts",
-    "backfill:menus": "node --env-file=.env.local --import tsx scripts/backfill-menu-items.ts"
+    "backfill:menus": "node --env-file=.env.local --import tsx scripts/backfill-menu-items.ts",
+    "find:duplicates": "node --env-file=.env.local --import tsx scripts/find-duplicate-venues.ts"
   },
   "dependencies": {
     "@google/genai": "^2.11.0",
