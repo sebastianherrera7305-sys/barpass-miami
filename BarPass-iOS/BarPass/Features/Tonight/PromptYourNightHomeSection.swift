@@ -20,6 +20,9 @@ struct PromptYourNightHomeSection: View {
     /// to the field that actually owns it.
     @Binding var focusRequested: Bool
 
+    @StateObject private var tripStore = TripStore(repository: RepositoryDependencies.trip)
+    @State private var savedNight = false
+
     /// Deliberately NOT the `zoomNS` TonightView's own Trending/Recommended
     /// sections use. TestFlight feedback: a result card lost its name and
     /// photo — root cause was this section sharing that namespace, so a
@@ -223,6 +226,27 @@ struct PromptYourNightHomeSection: View {
         .bpAccessibility(label: g.rawValue, isButton: true)
     }
 
+    /// La ciudad sale del propio plan, no de una constante: TripsListView
+    /// guardaba `destinationCity: "Miami"` para las 23 ciudades del catálogo.
+    private func saveNight(_ venues: [BarPassVenue]) {
+        let now = Date()
+        let trip = Trip(
+            creatorId: TripStore.currentUserId,
+            title: String(format: L10n.tSync("night.savedTitle"), venues.first?.city ?? ""),
+            destinationCity: venues.first?.city ?? "",
+            startDate: now,
+            endDate: now,
+            visibility: .privateTrip,
+            stops: Stop.sequence(for: venues, tripId: "", date: now)
+        )
+        savedNight = true
+        Task {
+            await tripStore.create(trip)
+            PointsEngine.shared.award(.createTrip)
+            BPAnalytics.track(.createTrip)
+        }
+    }
+
     private func resultsView(_ results: [BarPassVenue]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -230,9 +254,32 @@ struct PromptYourNightHomeSection: View {
                     .font(.bpScaled(13, weight: .semibold))
                     .foregroundStyle(Color.bpTextSecondary)
                 Spacer()
+                // Guardar la noche generada. No existía: se armaba el plan
+                // acá y no había forma de conservarlo — "no deja guardar y si
+                // me salgo no se ve" (TestFlight 2026-09-17). La versión de
+                // Trips sí tiene este botón; esta pantalla, que es la que más
+                // se usa porque está en la home, no lo tenía.
+                if !results.isEmpty {
+                    Button {
+                        BPHaptics.medium()
+                        saveNight(results)
+                    } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: savedNight ? "checkmark" : "bookmark.fill")
+                                .font(.bpScaled(11, weight: .bold))
+                            Text(l10n.t(savedNight ? "night.saved" : "night.save"))
+                                .font(.bpScaled(12, weight: .bold))
+                        }
+                        .foregroundStyle(savedNight ? Color.bpGreen : Color.bpAmber)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(savedNight)
+                    .bpAccessibility(label: l10n.t("night.save"), hint: l10n.t("night.save.hint"), isButton: true)
+                }
                 Button {
                     BPHaptics.light()
                     self.results = nil
+                    self.savedNight = false
                 } label: {
                     Text(l10n.t("plan.askAgain"))
                         .font(.bpScaled(12, weight: .semibold))

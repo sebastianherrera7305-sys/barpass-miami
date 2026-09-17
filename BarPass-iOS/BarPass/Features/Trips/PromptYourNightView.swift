@@ -179,11 +179,21 @@ struct PromptYourNightView: View {
                 let v = stop.venue
                 let revealed = i < revealedCount
                 HStack(spacing: 12) {
+                    // Logo propio si lo hay; si no, LA FOTO DEL VENUE, que
+                    // existe para el 99% del catálogo. Antes se caía directo
+                    // al emoji y una ruta entera se veía como cuatro copas y
+                    // pelotitas genéricas — "tampoco los iconos o logos de el
+                    // club" (TestFlight 2026-09-17). El emoji queda sólo para
+                    // el puñado de venues sin foto ninguna.
                     ZStack {
                         Circle().fill(.white)
                         if let logo = VenueLogos.url(for: v.id) {
                             CachedImage(url: logo, targetSize: CGSize(width: 60, height: 60), priority: .hot) { img in
                                 img.resizable().scaledToFit().padding(6)
+                            } placeholder: { Text(v.emoji).font(.bpScaled(18)) }
+                        } else if let photo = v.photoUrls.first, let url = URL(string: photo) {
+                            CachedImage(url: url, targetSize: CGSize(width: 80, height: 80), priority: .hot) { img in
+                                img.resizable().scaledToFill()
                             } placeholder: { Text(v.emoji).font(.bpScaled(18)) }
                         } else { Text(v.emoji).font(.bpScaled(18)) }
                     }

@@ -757,8 +757,14 @@ struct VenueDetailView: View {
 
     // MARK: - CTA Bar
 
+    /// Cuando no hay AppState, "Skip the Line" no se dibuja (un botón que no
+    /// hace nada es peor que ninguno) y la fila quedaba con dos circulitos a
+    /// la izquierda dentro de una caja oscura a lo ancho: parecía rota, y así
+    /// se reportó — "arregla esto ya se ve horrible" (TestFlight 2026-09-17).
+    /// Sin el botón del medio, los dos que quedan se reparten la fila.
     private var ctaBar: some View {
-        HStack(spacing: 10) {
+        let hasSkipLine = appStateOptional != nil
+        return HStack(spacing: 10) {
             Button {
                 BPHaptics.light()
                 withAnimation(.spring(response: 0.3)) { favorites.toggle(venue.id) }
@@ -766,9 +772,12 @@ struct VenueDetailView: View {
                 Image(systemName: favorites.isFavorite(venue.id) ? "heart.fill" : "heart")
                     .font(.bpScaled(18))
                     .foregroundStyle(favorites.isFavorite(venue.id) ? Color.bpDanger : Color.bpInk)
-                    .frame(width: 48, height: 48)
-                    .background(Color.bpInk.opacity(0.08), in: Circle())
-                    .overlay(Circle().strokeBorder(Color.bpInk.opacity(0.1)))
+                    .frame(maxWidth: hasSkipLine ? 48 : .infinity)
+                    .frame(height: 48)
+                    .background(Color.bpInk.opacity(0.08),
+                                in: RoundedRectangle(cornerRadius: hasSkipLine ? 24 : BPRadius.md))
+                    .overlay(RoundedRectangle(cornerRadius: hasSkipLine ? 24 : BPRadius.md)
+                        .strokeBorder(Color.bpInk.opacity(0.1)))
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("venueDetail.save"), hint: l10n.t("venueDetail.save.hint"), isButton: true)
@@ -811,11 +820,20 @@ struct VenueDetailView: View {
                 guard let url = URL(string: "https://maps.apple.com/?ll=\(coords)&q=\(venue.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")") else { return }
                 UIApplication.shared.open(url)
             } label: {
-                Image(systemName: "mappin.circle.fill")
-                    .font(.bpScaled(18))
-                    .foregroundStyle(Color.bpAmber)
-                    .frame(width: 48, height: 48)
-                    .background(Color.bpAmber.opacity(0.12), in: Circle())
+                HStack(spacing: 6) {
+                    Image(systemName: "mappin.circle.fill").font(.bpScaled(18))
+                    // Sin el botón del medio hay lugar de sobra, y un ícono
+                    // solo no dice qué hace.
+                    if !hasSkipLine {
+                        Text(l10n.t("venueDetail.directions"))
+                            .font(.bpScaled(14, weight: .bold))
+                    }
+                }
+                .foregroundStyle(Color.bpAmber)
+                .frame(maxWidth: hasSkipLine ? 48 : .infinity)
+                .frame(height: 48)
+                .background(Color.bpAmber.opacity(0.12),
+                            in: RoundedRectangle(cornerRadius: hasSkipLine ? 24 : BPRadius.md))
             }
             .buttonStyle(.plain)
             .bpAccessibility(label: l10n.t("venueDetail.directions"), hint: l10n.t("venueDetail.directions.hint"), isButton: true)

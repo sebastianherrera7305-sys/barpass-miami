@@ -50,8 +50,19 @@ struct SocialView: View {
     /// One stream, newest first. An upcoming night carries its start time, so
     /// tonight's plans naturally rise above what already happened — which is
     /// the order you want at 9pm and still the right one at 2am.
+    /// Sólo lo de la ciudad que el usuario está mirando. `venueStore.venues`
+    /// ya viene acotado a esa ciudad, así que cruzar contra él es el filtro:
+    /// un evento cuyo venue no está en el catálogo cargado es de otra ciudad.
+    /// TestFlight 2026-09-17: alguien en Nueva York vio la noche de
+    /// MacDinton's, que es en Gainesville — el feed pedía los eventos de
+    /// todas las ciudades y los mostraba sin mirar dónde estaban.
+    private var cityEvents: [HostEvent] {
+        let known = Set(venueStore.venues.map(\.id))
+        return events.filter { known.contains($0.venue.id) }
+    }
+
     private var feed: [FeedItem] {
-        var items: [FeedItem] = events.map { .night($0) }
+        var items: [FeedItem] = cityEvents.map { .night($0) }
         items += tonight.friends.map { .arrival($0) }
         items += rooms.filter { $0.pulse.posterCount > 1 }.map { .room($0.venue, $0.pulse) }
         return items.sorted { $0.sortDate > $1.sortDate }
@@ -204,7 +215,12 @@ struct SocialView: View {
     private func nightCard(_ event: HostEvent) -> some View {
         NavigationLink(destination: HostEventDetailView(eventId: event.id)) {
             ZStack(alignment: .bottomLeading) {
-                thumb(url: event.coverImageUrl, fallback: "🎟️", side: nil)
+                // Sin flyer propio, la foto del venue. Antes quedaba un
+                // rectángulo negro con un emoji de entrada en el medio, que
+                // parece un error de carga — y la foto la tenemos para el 99%
+                // del catálogo.
+                thumb(url: event.coverImageUrl ?? venueStore.venues.first { $0.id == event.venue.id }?.photoUrls.first,
+                      fallback: "🎟️", side: nil)
                     .frame(height: 210)
                     .frame(maxWidth: .infinity)
                 LinearGradient(colors: [.clear, .black.opacity(0.85)],
