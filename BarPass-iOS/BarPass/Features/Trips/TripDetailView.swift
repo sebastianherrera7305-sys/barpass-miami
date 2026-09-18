@@ -15,6 +15,11 @@ struct TripDetailView: View {
     @State private var ratingTarget: RatingTarget? = nil
     @State private var selectedStop: Stop? = nil
     @State private var showEditTrip = false
+    /// `profiles` sólo deja leer la fila propia, así que el nombre de otro
+    /// miembro sale del RPC list_trip_members y de ningún otro lado. Hasta
+    /// que llegue, la fila muestra el id — que es lo que mostraba SIEMPRE
+    /// antes de esto.
+    @State private var memberNames: [String: String] = [:]
 
     private let amber = Color.bpAmber
 
@@ -63,6 +68,7 @@ struct TripDetailView: View {
                 }
             }
             .task { await loadVotes() }
+            .task { await loadMemberNames() }
             .navigationTitle(currentTrip.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -334,6 +340,11 @@ struct TripDetailView: View {
         }
     }
 
+    private func loadMemberNames() async {
+        guard let names = try? await RepositoryDependencies.tripMembers.names(tripId: currentTrip.id) else { return }
+        memberNames = Dictionary(uniqueKeysWithValues: names.map { ($0.id, $0.displayName) })
+    }
+
     private func loadVotes() async {
         votesByStop = (try? await RepositoryDependencies.tripStopVote.votes(tripId: currentTrip.id)) ?? [:]
     }
@@ -382,13 +393,13 @@ struct TripDetailView: View {
                 .fill(amber.opacity(0.2))
                 .frame(width: 40, height: 40)
                 .overlay(
-                    Text(String(memberId.prefix(1)).uppercased())
+                    Text(String((memberNames[memberId] ?? memberId).prefix(1)).uppercased())
                         .font(.bpHeadline())
                         .foregroundStyle(amber)
                 )
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(isSelf ? l10n.t("tripDetail.you") : memberId)
+                Text(isSelf ? l10n.t("tripDetail.you") : (memberNames[memberId] ?? memberId))
                     .font(.bpHeadline())
                     .foregroundStyle(Color.bpInk)
                 ReputationBadgeView(rep: rep)

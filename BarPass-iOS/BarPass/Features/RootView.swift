@@ -121,6 +121,11 @@ struct RootView: View {
                 if checkInStore.activeCheckin != nil {
                     GoHomeButton()
                 }
+                // El faro. Aparece con check-in abierto, y TAMBIÉN cuando
+                // alguien de tu gente ya levantó la mano — si no, quien te
+                // está buscando dependería de que vos hubieras tocado un
+                // botón antes de perderte.
+                FindMyGroupButton(isCheckedIn: checkInStore.activeCheckin != nil)
                 if appState.showActionBar && cart.itemCount > 0 {
                     Button {
                         appState.showCart = true

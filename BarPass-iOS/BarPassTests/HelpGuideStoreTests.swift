@@ -14,8 +14,8 @@ final class HelpGuideStoreTests: XCTestCase {
         try await super.tearDown()
     }
 
-    private let tipV1 = HelpTip(id: "test.tip", route: .tonight, title: "T", description: "D", version: 1)
-    private let tipV2 = HelpTip(id: "test.tip", route: .tonight, title: "T", description: "D updated", version: 2)
+    private let tipV1 = HelpTip(id: "test.tip", route: .tonight, titleKey: "T", descriptionKey: "D", version: 1)
+    private let tipV2 = HelpTip(id: "test.tip", route: .tonight, titleKey: "T", descriptionKey: "D updated", version: 2)
 
     func test_hasSeen_falseBeforeMarking() {
         XCTAssertFalse(HelpGuideStore.shared.hasSeen(tipV1))

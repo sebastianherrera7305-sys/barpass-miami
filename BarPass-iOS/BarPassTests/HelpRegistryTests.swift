@@ -41,10 +41,28 @@ final class HelpRegistryTests: XCTestCase {
 
     /// Copy convention from the design brief: short, never empty, never
     /// obviously a placeholder.
-    func test_allTips_haveNonEmptyTitleAndDescription() {
+    ///
+    /// `title`/`description` pasaron a ser `titleKey`/`descriptionKey` cuando
+    /// la ayuda se localizó (HelpRegistry.swift). Así que ahora la pregunta
+    /// útil no es si la clave está vacía — es si RESUELVE. Una clave que no
+    /// está en la tabla vuelve como la clave misma, y "venueDetail.save.title"
+    /// en pantalla es exactamente el bug que este test tiene que atrapar, en
+    /// los tres idiomas.
+    func test_allTips_resolveInEveryLanguage() {
         for tip in HelpRegistry.tips {
-            XCTAssertFalse(tip.title.trimmingCharacters(in: .whitespaces).isEmpty, "\(tip.id) has an empty title")
-            XCTAssertFalse(tip.description.trimmingCharacters(in: .whitespaces).isEmpty, "\(tip.id) has an empty description")
+            for language in AppLanguage.allCases {
+                for key in [tip.titleKey, tip.descriptionKey] {
+                    let text = L10n.t(key, language: language)
+                    XCTAssertFalse(
+                        text.trimmingCharacters(in: .whitespaces).isEmpty,
+                        "\(tip.id): \(key) está vacía en \(language.rawValue)"
+                    )
+                    XCTAssertNotEqual(
+                        text, key,
+                        "\(tip.id): \(key) no existe en \(language.rawValue) — se mostraría la clave cruda"
+                    )
+                }
+            }
         }
     }
 

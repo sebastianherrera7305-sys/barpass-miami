@@ -58,6 +58,8 @@
 	<string>Use Face ID for quick and secure sign-in to BarPass.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>BarPass uses your location to show nearby venues and calculate distances.</string>
+	<key>NSNearbyInteractionUsageDescription</key>
+	<string>BarPass usa la antena de precisión de tu iPhone para mostrarte a qué distancia y en qué dirección está la persona de tu grupo que te está buscando. Sólo mientras los dos tienen la app abierta, y sólo entre ustedes.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>BarPass saves QR codes and venue passes to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
