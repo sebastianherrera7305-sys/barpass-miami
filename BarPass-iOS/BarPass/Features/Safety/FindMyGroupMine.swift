@@ -11,6 +11,32 @@ struct MyBeaconCard: View {
     let onResolve: () -> Void
 
     @ObservedObject private var l10n = L10n.shared
+    /// La tarjeta miraba sólo la fila del servidor, así que decía "tu mano
+    /// está levantada" con el punto de color latiendo aunque la linterna
+    /// estuviera apagada por batería baja, por calor, o porque otra app tiene
+    /// la cámara. La persona levantaba sobre la cabeza un teléfono que no
+    /// estaba emitiendo, y creía que sí.
+    @ObservedObject private var flares = BeaconFlares.shared
+
+    /// La verdad del hardware, sólo cuando NO es la esperada. Si todo está
+    /// emitiendo no se dice nada: un cartel verde permanente enseña a
+    /// ignorarlo, y entonces el día que diga algo tampoco se lee.
+    private var hardwareWarning: BeaconStatusLine? {
+        switch flares.state {
+        case .active(let torch, _, _, _):
+            if case .pulsing = torch { return nil }
+            return BeaconFlareCopy.torch(torch, l10n)
+        case .pausedOutsideForeground:
+            return .init("pause.circle.fill", l10n.t("beacon.paused.body"), .bpAmber)
+        case .expired:
+            return .init("exclamationmark.triangle.fill", l10n.t("beacon.expired.body"), .bpAmber)
+        case .idle:
+            // La fila vive pero el hardware no está tomado. Pasa entre que el
+            // beacon nace y el siguiente tick del store, y también si el
+            // teléfono no pudo con nada.
+            return .init("exclamationmark.triangle.fill", l10n.t("safety.mine.notEmitting"), .bpDanger)
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: BPSpacing.md) {
@@ -26,6 +52,15 @@ struct MyBeaconCard: View {
                     .monospacedDigit()
             }
             BeaconSignalChip(signal: signal, anchor: beacon.createdAt)
+            if let warning = hardwareWarning {
+                Label {
+                    Text(warning.text).font(.bpScaled(12, weight: .semibold))
+                } icon: {
+                    Image(systemName: warning.symbol)
+                }
+                .foregroundStyle(warning.tint)
+                .fixedSize(horizontal: false, vertical: true)
+            }
             answers
 
             NavigationLink { BeaconBroadcastView(beacon: beacon) } label: {

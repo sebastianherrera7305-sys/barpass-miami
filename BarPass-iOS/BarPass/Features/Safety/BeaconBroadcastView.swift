@@ -255,7 +255,7 @@ struct BeaconBroadcastView: View {
     private func renew() {
         BPHaptics.medium()
         if flares.state == .expired {
-            flares.start(pattern: signal.rhythm.flarePattern, anchoredAt: live.createdAt)
+            flares.start(pattern: signal.rhythm.flarePattern, anchoredAt: live.createdAt, renewing: true)
         } else {
             flares.renew()
         }

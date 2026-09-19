@@ -56,6 +56,16 @@ struct BeaconFeedEntry: Identifiable, Equatable {
     /// ritmo ahora mismo. No es un error del servidor: es el techo de cuatro
     /// colores, dicho a tiempo.
     let signalIsAmbiguous: Bool
+    /// Mismo COLOR que otro faro vivo, distinto ritmo. Es un aviso más débil
+    /// que el de arriba y aun así hace falta: en un salón oscuro el color es
+    /// lo primero que se ve y el ritmo es el desempate. Y hay un par donde
+    /// el desempate llega tarde — `fastFlicker` y `doubleBlink` son la MISMA
+    /// onda durante sus primeros 720 ms, así que un vistazo entre dos
+    /// cuerpos que cruzan no los separa. Ese par convive de verdad: el
+    /// servidor reparte gold/fastFlicker en su primer slot y gold/doubleBlink
+    /// en el quinto (safety_beacon.sql, tabla de preferencia), o sea que con
+    /// cinco manos levantadas en el mismo bar hay dos personas en dorado.
+    let colorIsShared: Bool
     /// Falso NO significa "no tiene ritmo": el ritmo sigue escrito al lado
     /// del punto. Significa que este punto no late para ahorrar cuadros.
     let animatesSwatch: Bool
@@ -87,10 +97,15 @@ enum BeaconFeed {
         // si mi señal coincide con la de alguien que estoy viendo, las dos
         // están prendidas en el mismo salón y la ambigüedad es real.
         var census: [BeaconSignal: Int] = [:]
+        var colorCensus: [BeaconIdentity: Int] = [:]
         for beacon in ordered where !beacon.isResolved {
             census[signal(beacon), default: 0] += 1
+            colorCensus[signal(beacon).identity, default: 0] += 1
         }
-        if let mine, !mine.isResolved { census[signal(mine), default: 0] += 1 }
+        if let mine, !mine.isResolved {
+            census[signal(mine), default: 0] += 1
+            colorCensus[signal(mine).identity, default: 0] += 1
+        }
 
         var liveSoFar = 0
         return ordered.map { beacon in
@@ -103,6 +118,12 @@ enum BeaconFeed {
                 // Una fila resuelta ya no tiene a nadie parpadeando del otro
                 // lado del salón, así que no puede confundirse con nada.
                 signalIsAmbiguous: isLive && (census[value] ?? 0) > 1,
+                // Sólo cuando el ritmo NO coincide: si coincide también, el
+                // aviso fuerte de arriba ya lo dice y dos carteles seguidos
+                // diciendo casi lo mismo se leen como ninguno.
+                colorIsShared: isLive
+                    && (colorCensus[value.identity] ?? 0) > 1
+                    && (census[value] ?? 0) <= 1,
                 animatesSwatch: isLive && liveSoFar <= animatedSwatchLimit,
                 iAmOnMyWay: beacon.iAcked || locallyAcked.contains(beacon.id)
             )

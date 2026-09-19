@@ -68,10 +68,24 @@ final class BeaconFlares: ObservableObject {
     /// an overheating phone are things the user must be TOLD, not errors that
     /// take the screen beacon down too. Calling it twice re-applies the pattern
     /// without taking a second hold.
-    func start(pattern: FlarePattern, anchoredAt anchor: Date = Date()) {
+    /// `renewing` es la diferencia entre "encendé esto" y "el usuario pidió
+    /// otros diez minutos", y tiene que ser explícita.
+    ///
+    /// Antes `start()` reseteaba el tope solo con ver `.expired`, y el poll
+    /// del store llama `start()` cada 4 s mientras tu faro siga sin
+    /// resolver: a los diez minutos `expire()` apagaba, y cuatro segundos
+    /// después el poll lo resucitaba. El tope NUNCA se cumplía — la linterna
+    /// corría los veinte minutos enteros del beacon — y la renovación
+    /// explícita, que era toda la razón de ser del tope, no existía. Un
+    /// teléfono olvidado en un bolsillo no puede producir un toque; ése era
+    /// justamente el punto.
+    func start(pattern: FlarePattern, anchoredAt anchor: Date = Date(), renewing: Bool = false) {
         self.pattern = pattern
         self.anchor = anchor
-        if endsAt == nil || state == .expired { endsAt = Date().addingTimeInterval(FlarePolicy.maxSessionSeconds) }
+        // Una sesión vencida sólo la revive el usuario. Sin eso, quedate
+        // apagado y decilo.
+        if state == .expired && !renewing { return }
+        if endsAt == nil || renewing { endsAt = Date().addingTimeInterval(FlarePolicy.maxSessionSeconds) }
         installObservers()
         UIDevice.current.isBatteryMonitoringEnabled = true
         // Fuera de primer plano se acepta la sesión (el reloj de `endsAt`

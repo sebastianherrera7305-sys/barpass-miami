@@ -64,6 +64,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         registerBackgroundTask()
         PassRegistrationOutbox.shared.start()
         MainActor.assumeIsolated { HomeShortcuts.install() }
+        // Si la corrida anterior murió con la baliza encendida — un crash, o
+        // el usuario matándola desde el switcher — el brillo guardado sigue
+        // en UserDefaults y nadie se lo devolvió. Sin esto el teléfono queda
+        // al 100% de brillo y sin auto-bloqueo hasta que la persona se dé
+        // cuenta y lo baje a mano. La función estaba escrita y documentada
+        // como "llamar una vez al arrancar"; no la llamaba nadie.
+        MainActor.assumeIsolated { BeaconFlares.restoreOrphanedBrightness() }
 
         // Cold start FROM the menu: iOS hands the item here and does NOT call
         // performActionFor afterwards. Posting it now would be too early —

@@ -191,6 +191,16 @@ struct IncomingBeaconRow: View {
     /// El techo de cuatro colores, dicho en la fila donde importa. Sin esto
     /// el color miente con total seguridad y alguien cruza el salón al pedo.
     @ViewBuilder private var ambiguityNote: some View {
+        if entry.colorIsShared {
+            Label(
+                String(format: l10n.t("safety.incoming.sameColor"),
+                       l10n.t(entry.signal.colorNameKey), l10n.t(entry.signal.rhythmNameKey)),
+                systemImage: "exclamationmark.circle"
+            )
+            .font(.bpScaled(11, weight: .semibold))
+            .foregroundStyle(Color.bpAmber)
+            .fixedSize(horizontal: false, vertical: true)
+        }
         if entry.signalIsAmbiguous {
             Label(l10n.t("safety.incoming.ambiguous"), systemImage: "exclamationmark.2")
                 .font(.bpScaled(11, weight: .semibold))

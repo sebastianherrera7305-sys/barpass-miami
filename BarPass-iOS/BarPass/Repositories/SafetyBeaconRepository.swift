@@ -230,8 +230,20 @@ final actor SupabaseSafetyBeaconRepository: SafetyBeaconRepository {
     }
 
     func publishToken(_ token: String?, canRange: Bool, beaconId: String) async throws {
-        var body: [String: Any] = ["p_beacon_id": beaconId, "p_can_range": canRange]
-        if let token { body["p_token"] = token }
+        // `p_token` va SIEMPRE, y null explícito cuando no hay token.
+        // PostgREST resuelve la función por el conjunto de claves que le
+        // mandás: `p_token text` no tiene default, así que omitirla daba
+        // 404 PGRST202 (verificado contra la base). Justo el caso de un
+        // teléfono sin UWB, que es el único que manda token nil — o sea que
+        // el aviso "no puedo medir distancia" no llegaba nunca, y el que
+        // venía caminando se quedaba esperando un token que no existía.
+        // Ese silencio es exactamente la ambigüedad que `can_range` existe
+        // para eliminar.
+        let body: [String: Any] = [
+            "p_beacon_id": beaconId,
+            "p_token": token ?? NSNull(),
+            "p_can_range": canRange,
+        ]
         _ = try await call("publish_beacon_token", body: body)
     }
 

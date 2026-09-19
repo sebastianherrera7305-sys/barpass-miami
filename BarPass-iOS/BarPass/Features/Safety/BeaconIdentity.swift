@@ -192,6 +192,25 @@ struct BeaconVariant: Sendable, Hashable {
 
 // MARK: - Assignment
 
+// ⚠️ ESTO NO ES EL CAMINO VIVO. Nada de la app llama `assign(...)`: sus
+// únicos llamadores son los tests. Lo dejo escrito acá arriba porque 26
+// tests en verde alrededor de un mecanismo muerto se leen, seis meses
+// después, como "así funciona la feature" — y no.
+//
+// Cómo se reparte de verdad una señal hoy: por BEACON, no por grupo. Al
+// levantar la mano, el servidor elige el slot menos usado entre los faros
+// vivos DEL MISMO LUGAR (safety_beacon.sql) y lo devuelve en la fila; si no
+// hay lugar conocido contra el cual desempatar, el cliente cae a
+// `BeaconSignal.derived(fromBeaconId:)`. Las dos vías son mejores que
+// repartir por grupo, porque el problema real no es "distinguirte de tus
+// cuatro amigos" sino "distinguirte de las otras manos levantadas en el
+// bar", y el grupo no ve esa sala.
+//
+// Lo de abajo sobrevive por si alguna vez hace falta repartir sin red —
+// es puro, determinístico y no depende de nadie. Si eso no va a pasar,
+// esto y sus tests se borran.
+
+
 /// `noSignalAvailable` and `notInGroup` are different facts that must not both
 /// collapse to `nil`: "we know, there is none" vs "we were never told about
 /// this person". Neither may be drawn as a beacon.
