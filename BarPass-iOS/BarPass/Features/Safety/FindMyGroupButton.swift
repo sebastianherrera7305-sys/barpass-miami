@@ -65,7 +65,12 @@ struct FindMyGroupButton: View {
             }
         }
         .sheet(isPresented: $isPresented) {
-            FindMyGroupView()
+            // El NavigationStack NO es decoración: FindMyGroupView empuja
+            // la pantalla de la baliza con un NavigationLink, y un
+            // NavigationLink sin contenedor de navegación es inerte —
+            // presentada pelada, el botón "Mostrar mi señal" no hacía nada
+            // y la persona perdida nunca llegaba a ver su color.
+            NavigationStack { FindMyGroupView() }
         }
         // El store sigue corriendo aunque esta pantalla no esté: el botón
         // sólo puede saber que alguien lo busca si alguien está preguntando.

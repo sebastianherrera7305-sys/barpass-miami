@@ -47,6 +47,21 @@ final class BeaconFlares: ObservableObject {
 
     private var torchDevice: AVCaptureDevice? { AVCaptureDevice.default(for: .video) }
 
+    /// LA COMPUERTA. Nada enciende la pantalla ni la linterna mientras la
+    /// app no esté en primer plano, y no alcanza con que `suspend()` apague:
+    /// el poll del store llama `start()` cada 4s mientras hay un faro vivo,
+    /// así que un segundo después de que iOS nos saca el foco volvíamos a
+    /// prender todo con la app fuera de la vista. Si desde ahí el usuario se
+    /// iba al home, el proceso quedaba suspendido con el haz fijo y el
+    /// brillo al 100% hasta que reabriera la app — justo el daño que toda la
+    /// política térmica existe para evitar, y hecho sobre la batería de la
+    /// persona que está perdida.
+    ///
+    /// `.inactive` cuenta como NO activo a propósito: es el estado del
+    /// Centro de Control abierto y del banner de llamada entrante, que es
+    /// exactamente la ventana donde esto ocurría.
+    private var isForeground: Bool { UIApplication.shared.applicationState == .active }
+
     // MARK: Public API
 
     /// Starts or restarts a session. Never throws: no torch, a busy camera and
@@ -59,6 +74,14 @@ final class BeaconFlares: ObservableObject {
         if endsAt == nil || state == .expired { endsAt = Date().addingTimeInterval(FlarePolicy.maxSessionSeconds) }
         installObservers()
         UIDevice.current.isBatteryMonitoringEnabled = true
+        // Fuera de primer plano se acepta la sesión (el reloj de `endsAt`
+        // corre igual, porque es absoluto) pero NO se toma el hardware.
+        // `resume()` lo enciende cuando el usuario vuelve.
+        guard isForeground else {
+            if let endsAt { state = .pausedOutsideForeground(endsAt: endsAt) }
+            scheduleExpiry()
+            return
+        }
         acquireHold()
         evaluate()
         scheduleExpiry()
@@ -136,6 +159,9 @@ final class BeaconFlares: ObservableObject {
 
     private func evaluate() {
         guard isHolding, let endsAt else { return }
+        // Una notificación térmica o de batería que llega con la app fuera
+        // de foco no puede re-encender lo que suspend() apagó.
+        guard isForeground else { suspend(); return }
         let battery = BatteryReading.read()
         let mitigation = FlarePolicy.mitigation(thermal: ProcessInfo.processInfo.thermalState, battery: battery)
         let torch = FlarePolicy.torchStatus(mitigation, hardware: hardwareLimit())
@@ -280,7 +306,10 @@ final class BeaconFlares: ObservableObject {
     // MARK: Foreground handoff
 
     private func suspend() {
-        guard case .active = state, let endsAt else { return }
+        // Suelta el hardware desde CUALQUIER estado que lo tenga tomado, no
+        // sólo desde `.active`: si un tick del poll alcanzó a re-encender
+        // entre dos notificaciones, el hold existe y hay que devolverlo.
+        guard isHolding || state != .idle, let endsAt else { return }
         pulseTask?.cancel(); pulseTask = nil
         torchAllowed = false
         // Our loop stops running once we lose the foreground; leaving the torch
@@ -311,6 +340,11 @@ final class BeaconFlares: ObservableObject {
             })
         }
         observe(UIApplication.willResignActiveNotification) { $0.suspend() }
+        // Hacía falta además de willResignActive: yendo al home DESDE
+        // `.inactive` (con el Centro de Control ya abierto), UIKit no vuelve
+        // a postear willResignActive — postea sólo éste, y sin él el proceso
+        // se suspendía con la linterna prendida.
+        observe(UIApplication.didEnterBackgroundNotification) { $0.suspend() }
         observe(UIApplication.didBecomeActiveNotification) { $0.resume() }
         observe(ProcessInfo.thermalStateDidChangeNotification) { $0.evaluate() }
         observe(UIDevice.batteryLevelDidChangeNotification) { $0.evaluate() }
