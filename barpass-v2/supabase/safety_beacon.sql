@@ -627,12 +627,31 @@ begin
 
   -- One live beacon per person. Re-raising supersedes rather than stacks,
   -- so nobody's screen ever shows the same person lost twice.
-  update public.safety_beacons b set resolved_at = now()
+  --
+  -- `expires_at = now()` ADEMAS de resolved_at, y no es cosmetico.
+  -- resolved_at significaba dos cosas opuestas: "me encontraron" y "esta
+  -- fila la reemplazo otra". El feed muestra las resueltas dos minutos mas
+  -- (linea ~795) para que la ultima palabra que ve el grupo sea "la
+  -- encontraron" — asi que un re-raise dejaba la fila vieja anunciando
+  -- "ENCONTRADA" durante dos minutos, en pantalla, justo cuando la persona
+  -- acababa de volver a levantar la mano porque seguia perdida. La gente
+  -- deja de buscar. Vencerla en el acto la saca del filtro `expires_at >
+  -- now()` sin tocar el esquema ni la gracia de los dos minutos, que sigue
+  -- valiendo para el unico caso que la merece: un resolve de verdad.
+  update public.safety_beacons b set resolved_at = now(), expires_at = now()
    where b.user_id = v_me and b.resolved_at is null and b.expires_at > now();
 
   if v_note is not null then
     select s.decrypted_secret into v_key
       from vault.decrypted_secrets s where s.name = 'safety_beacon_key';
+    -- pgp_sym_encrypt es STRICT: con la llave NULL devuelve NULL, el
+    -- insert sale bien y la RPC contesta 200. O sea que si el secreto del
+    -- vault falta — borrado del dashboard, renombrado, una corrida parcial
+    -- de este archivo — la persona escribe "bano del fondo, al lado de la
+    -- barra", toca el boton, ve que el faro se levanta, y esa frase no
+    -- existe en ningun lado. Nadie se entera nunca. Un faro puede fallar;
+    -- fallar callado es lo unico que no puede hacer.
+    if v_key is null then raise exception 'note_key_unavailable'; end if;
   end if;
 
   -- ── ELEGIR LA SEÑAL CONTRA LA SALA ──────────────────────────────────

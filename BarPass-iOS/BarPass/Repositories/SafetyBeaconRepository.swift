@@ -168,13 +168,18 @@ enum SafetyBeaconError: String, LocalizedError, Sendable, Equatable {
     /// The server refused to create a beacon nobody can see. The fix is
     /// concrete: check in, pick the trip, or add the people you are with.
     case noAudience, notInTrip, noteTooLong, rateLimited, notFound, network
+    /// El servidor no pudo encriptar la nota. El faro NO se creo: se
+    /// prefiere que la persona lo sepa y vuelva a tocar sin nota, antes
+    /// que levantar un faro al que le falta lo unico que decia donde esta.
+    case noteKeyUnavailable
     case unknown = "generic"
 
     static func from(responseBody: String) -> SafetyBeaconError {
         let named: [(String, SafetyBeaconError)] = [
             ("not_authenticated", .notAuthenticated), ("no_audience", .noAudience),
             ("not_in_trip", .notInTrip), ("note_too_long", .noteTooLong),
-            ("rate_limit_exceeded", .rateLimited), ("beacon_not_found", .notFound)]
+            ("rate_limit_exceeded", .rateLimited), ("beacon_not_found", .notFound),
+            ("note_key_unavailable", .noteKeyUnavailable)]
         return named.first { responseBody.contains($0.0) }?.1 ?? .unknown
     }
 

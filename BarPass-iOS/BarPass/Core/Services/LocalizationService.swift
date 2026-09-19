@@ -86,6 +86,7 @@ final class L10n: ObservableObject {
 
     nonisolated private static let tables: [AppLanguage: [String: String]] = [
         .es: [
+            "safety.error.noteKeyUnavailable": "No pudimos guardar tu nota, así que no levantamos el faro. Tocá de nuevo sin la nota y avisá por chat dónde estás.",
             "safety.incoming.sameColor": "Hay otra persona en %1$@ ahora mismo. Buscá el ritmo: el de esta persona es «%2$@».",
             "safety.mine.notEmitting": "Tu teléfono todavía no está emitiendo la señal. Abrí «Mostrar mi señal».",
             "safety.entry.hint": "Levantá la mano o mirá quién te busca",
@@ -1421,6 +1422,7 @@ final class L10n: ObservableObject {
             "menu.empty.subtitle": "Cuando consigamos la carta del local, la vas a ver acá con el precio de cada trago.",
         ],
         .en: [
+            "safety.error.noteKeyUnavailable": "We couldn't save your note, so we didn't raise the beacon. Tap again without the note and say where you are in the chat.",
             "safety.incoming.sameColor": "Someone else is in %1$@ right now. Go by the rhythm — this person's is “%2$@”.",
             "safety.mine.notEmitting": "Your phone isn't signalling yet. Open “Show my signal”.",
             "safety.entry.hint": "Raise your hand or see who's looking for you",
@@ -2754,6 +2756,7 @@ final class L10n: ObservableObject {
             "menu.empty.subtitle": "Once we get this venue's menu, you'll see it here with the price of every drink.",
         ],
         .pt: [
+            "safety.error.noteKeyUnavailable": "Não conseguimos salvar sua nota, então não levantamos o farol. Toque de novo sem a nota e diga no chat onde você está.",
             "safety.incoming.sameColor": "Tem outra pessoa em %1$@ agora. Vá pelo ritmo: o desta pessoa é “%2$@”.",
             "safety.mine.notEmitting": "Seu telefone ainda não está emitindo o sinal. Abra “Mostrar meu sinal”.",
             "safety.entry.hint": "Levante a mão ou veja quem procura você",
