@@ -52,7 +52,12 @@ enum DeepLinkRouter {
             case "social": return .social
             case "passes": return .passes
             case "feedback": return .feedback
-            case "me", "profile": return .me
+            case "me": return .me
+            // "profile" SIN id es tu propio perfil; con id es el de otra
+            // persona. El atajo tiene que mirar el path antes de contestar —
+            // si no, barpass://profile/u1 abre tu perfil en vez del de u1,
+            // y el que mandó el link nunca se entera de que no funcionó.
+            case "profile" where url.pathComponents.allSatisfy({ $0 == "/" }): return .me
             default: break
             }
             rawValue = url.pathComponents.first(where: { $0 != "/" }) ?? ""

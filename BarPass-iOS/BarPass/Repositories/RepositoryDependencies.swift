@@ -26,6 +26,15 @@ enum RepositoryDependencies {
     nonisolated(unsafe) static var homeAddress: HomeAddressRepository = SupabaseHomeAddressRepository()
     nonisolated(unsafe) static var displayName: DisplayNameRepository = SupabaseDisplayNameRepository()
     nonisolated(unsafe) static var chapterMembers: ChapterMembersRepository = SupabaseChapterMembersRepository()
+    nonisolated(unsafe) static var tripMembers: TripMembersRepository = SupabaseTripMembersRepository()
+
+    /// El beacon de seguridad (supabase/safety_beacon.sql). La audiencia NO
+    /// es el roster del trip: es la intersección entre tus amigos aceptados y
+    /// ese roster. Razón dura — la policy de UPDATE de `trips` deja que
+    /// cualquier miembro reescriba `member_ids`, y el código de invitación se
+    /// reenvía y se postea. Una audiencia definida por ese array es una
+    /// audiencia a la que cualquiera se suma solo.
+    nonisolated(unsafe) static var safetyBeacon: SafetyBeaconRepository = SupabaseSafetyBeaconRepository()
     nonisolated(unsafe) static var venueMedia: VenueMediaRepository = SupabaseVenueMediaRepository()
 
     /// Stories — the same venue_media rows, read inside the night they were
