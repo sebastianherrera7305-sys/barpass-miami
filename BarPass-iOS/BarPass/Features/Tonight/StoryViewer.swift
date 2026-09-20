@@ -66,6 +66,10 @@ struct StoryViewer: View {
             tapTargets
         }
         .statusBarHidden()
+        // El aviso de fallo va en la raíz del visor, no adentro del menú:
+        // si la acción se deshace, la persona tiene que enterarse aunque el
+        // menú ya se haya cerrado.
+        .storyModerationFailureAlert()
         .onAppear {
             index = min(max(startIndex, 0), max(stories.count - 1, 0))
             start()
@@ -125,6 +129,20 @@ struct StoryViewer: View {
                 }
             }
             Spacer()
+            // La salida de una historia, sobre la historia misma. Sin esto,
+            // el menú de moderación existía completo y no se llegaba desde
+            // ninguna pantalla — que es lo mismo que no existir, y es la
+            // causa de rechazo 1.2 de Apple.
+            if let story = current {
+                StoryModerationMenu(
+                    mediaId: story.id,
+                    isMine: story.isMine,
+                    isPaused: $isPaused,
+                    // La foto ya desapareció del store; avanzar evita que el
+                    // visor se quede mirando un cuadro que ya no está.
+                    onSuppressed: { advance(by: 1) }
+                )
+            }
             Button {
                 BPHaptics.light()
                 onClose()

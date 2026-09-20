@@ -89,7 +89,13 @@ actor SupabaseVenueStoryRepository: VenueStoryRepository {
             timeout: 12
         )
         let data = try await SupabaseRESTClient.send(req)
-        return try SupabaseRESTClient.decoder.decode([VenueStory].self, from: data)
+        let rows = try SupabaseRESTClient.decoder.decode([VenueStory].self, from: data)
+        // El filtro va ACÁ y no en cada pantalla. La misma foto se dibuja en
+        // tres lugares (el visor, la tira del venue, el rail de Social), y
+        // "una línea en cada sitio de render" es una instrucción que alguien
+        // se va a olvidar en el cuarto — y un ocultar que funciona en dos de
+        // tres se lee como "no anduvo".
+        return HiddenStories.filtered(rows) { $0.id }
     }
 
     func pulse() async throws -> [VenueStoryPulse] {

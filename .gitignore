@@ -45,4 +45,4 @@ BarPass-iOS/build-sim/
 
 # Copia suelta del repo dentro del repo (9 MB de un checkout viejo).
 # Aparece en cada `git status` y ya provoco confusion mas de una vez.
-barpass/
+/barpass/

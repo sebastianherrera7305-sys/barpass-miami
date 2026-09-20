@@ -28,6 +28,13 @@ enum RepositoryDependencies {
     nonisolated(unsafe) static var chapterMembers: ChapterMembersRepository = SupabaseChapterMembersRepository()
     nonisolated(unsafe) static var tripMembers: TripMembersRepository = SupabaseTripMembersRepository()
 
+    /// Reportar y silenciar sobre las historias públicas
+    /// (supabase/media_moderation.sql). Todo se direcciona por id de MEDIA y
+    /// nunca por autor: el cliente no puede leer `venue_media.user_id` — esa
+    /// invariante es la que hace que una foto pública no delate a quien la
+    /// subió, y la moderación se construyó para no romperla.
+    nonisolated(unsafe) static var mediaReport: MediaReportRepository = SupabaseMediaReportRepository()
+
     /// El beacon de seguridad (supabase/safety_beacon.sql). La audiencia NO
     /// es el roster del trip: es la intersección entre tus amigos aceptados y
     /// ese roster. Razón dura — la policy de UPDATE de `trips` deja que
