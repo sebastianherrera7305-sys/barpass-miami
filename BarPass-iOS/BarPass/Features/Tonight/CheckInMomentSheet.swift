@@ -79,7 +79,11 @@ struct CheckInMomentSheet: View {
                 .buttonStyle(.plain)
                 .padding(.horizontal, 24)
             } else {
-                PhotosPicker(selection: $pickerItem, matching: .any(of: [.images, .videos])) {
+                // Antes era un PhotosPicker directo. Este es el camino por
+                // el que entra la mayoría de las fotos —el botón del venue
+                // vive al fondo de una página larga—, así que unas reglas
+                // que no estén en ESTE botón, para casi nadie existen.
+                PostingPickerButton(selection: $pickerItem, isDisabled: isBusy) {
                     HStack(spacing: 8) {
                         if isBusy {
                             ProgressView().tint(.black).controlSize(.small)
@@ -92,9 +96,11 @@ struct CheckInMomentSheet: View {
                     .frame(maxWidth: .infinity).padding(.vertical, 14)
                     .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: BPRadius.md))
                 }
-                .disabled(isBusy)
                 .padding(.horizontal, 24)
                 .bpAccessibility(label: addTitle, hint: l10n.t("venueMedia.add.hint"), isButton: true)
+
+                PublicPostNotice()
+                    .padding(.horizontal, 24)
 
                 Button {
                     BPHaptics.light()
@@ -112,7 +118,10 @@ struct CheckInMomentSheet: View {
         }
         .padding(.bottom, 16)
         .background(Color.bpSurface.ignoresSafeArea())
-        .presentationDetents([.medium])
+        // `.large` agregado junto con el aviso de "esto es público": a
+        // tamaños de texto accesibles el contenido ya no entra en el detent
+        // medio, y un aviso recortado es exactamente el que no se lee.
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
         .interactiveDismissDisabled(isBusy)
         .onChange(of: pickerItem) { _, newItem in

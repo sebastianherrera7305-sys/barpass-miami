@@ -1,80 +1,301 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	Privacy manifest. Every constant below is copied verbatim from the
+	"Possible Values" lists of NSPrivacyCollectedDataType,
+	NSPrivacyCollectedDataTypePurposes, NSPrivacyAccessedAPIType and
+	NSPrivacyAccessedAPITypeReasons — not written from memory.
+
+	WHY that matters: Apple states Xcode "won't generate a privacy report
+	correctly if you define your own collected data types ... or provide your
+	own reasons". An invented constant does not error — the entry is silently
+	skipped, so the file looks fine and the declaration does not exist. The only
+	proof it parsed is Product > Archive > Generate Privacy Report: an entry
+	missing from that report does not exist for Apple.
+
+	The previous version used NSPrivacyCollectedDataTypePurpose (singular) with
+	English prose as its value, omitted the required ...TypeTracking key, and
+	used three data-type spellings absent from Apple's list. None of those five
+	entries could have parsed.
+-->
 <plist version="1.0">
 <dict>
+	<!--
+		No tracking: nothing here is shared with a data broker or used to link
+		this user to third-party data. Every entry below therefore carries
+		...TypeTracking = false, and the domains array stays empty.
+	-->
 	<key>NSPrivacyTracking</key>
 	<false/>
 	<key>NSPrivacyTrackingDomains</key>
 	<array/>
+
 	<key>NSPrivacyCollectedDataTypes</key>
 	<array>
+		<!--
+			Email — Supabase Auth sign-up/sign-in (Models/AuthService.swift).
+			Keyed to the account, so Linked = true.
+			Was spelled ...TypeEmail, which is not an Apple constant.
+		-->
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
-			<string>NSPrivacyCollectedDataTypeEmail</string>
+			<string>NSPrivacyCollectedDataTypeEmailAddress</string>
 			<key>NSPrivacyCollectedDataTypeLinked</key>
 			<true/>
-			<key>NSPrivacyCollectedDataTypePurpose</key>
-			<string>Account authentication and communication</string>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
 		</dict>
+		<!--
+			Name — the profile display name (Repositories/DisplayNameRepository.swift,
+			stored on profiles.id) and the .fullName scope requested by Sign in
+			with Apple (Features/Auth/NativeAuthView.swift:459).
+		-->
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
 			<string>NSPrivacyCollectedDataTypeName</string>
 			<key>NSPrivacyCollectedDataTypeLinked</key>
 			<true/>
-			<key>NSPrivacyCollectedDataTypePurpose</key>
-			<string>Profile display</string>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
 		</dict>
+		<!--
+			Physical address — the "Go home" feature stores the user's HOME
+			address plus its coordinates on their own profile row
+			(Repositories/HomeAddressRepository.swift writes home_address,
+			home_lat, home_lng over an authenticated session). Apple's
+			definition of this type names "home address" explicitly.
+			This was missing entirely from the previous manifest.
+		-->
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
-			<string>NSPrivacyCollectedDataTypeLocation</string>
+			<string>NSPrivacyCollectedDataTypePhysicalAddress</string>
 			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
 			<false/>
-			<key>NSPrivacyCollectedDataTypePurpose</key>
-			<string>Show nearby venues</string>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
 		</dict>
+		<!--
+			Precise location. There is no bare ...TypeLocation constant; the
+			choice is Precise vs Coarse, and Apple's line is "three or more
+			decimal places" (~111 m).
+			WHY precise: check-in asks for a fix accepted at <= 100 m
+			(LocationPolicy.checkIn, Core/Services/LocationService.swift:71,
+			desiredAccuracy = kCLLocationAccuracyHundredMeters) and the app never
+			rounds the CLLocationCoordinate2D it receives. Full-resolution lat/lng
+			also leaves the device — PlanView.swift:657 puts it in the concierge
+			body — and that same request carries the chat history, whose greeting
+			includes the display name (PlanView.swift:470), hence Linked = true.
+			ProductPersonalization is declared alongside AppFunctionality because
+			the coordinates rank the venues the user is shown.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypePreciseLocation</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+				<string>NSPrivacyCollectedDataTypePurposeProductPersonalization</string>
+			</array>
+		</dict>
+		<!--
+			Payment info. Apple exempts this ONLY when the payment details are
+			entered outside the app AND the developer never has access. BarPass
+			fails the first half: CardPaymentView collects the card inside the
+			app and tokenizes it client-side, so the exemption does not apply
+			and the type stays declared.
+		-->
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
 			<string>NSPrivacyCollectedDataTypePaymentInfo</string>
 			<key>NSPrivacyCollectedDataTypeLinked</key>
 			<true/>
-			<key>NSPrivacyCollectedDataTypePurpose</key>
-			<string>Process purchases</string>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
 		</dict>
+		<!--
+			Purchase history — orders and passes are stored per account and read
+			back in Profile (Core/Services/OrderHistoryService.swift,
+			Features/Profile/OrderHistoryView.swift). Missing before.
+		-->
 		<dict>
 			<key>NSPrivacyCollectedDataType</key>
-			<string>NSPrivacyCollectedDataTypePhotos</string>
+			<string>NSPrivacyCollectedDataTypePurchaseHistory</string>
 			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
 			<false/>
-			<key>NSPrivacyCollectedDataTypePurpose</key>
-			<string>Profile pictures and QR code saving</string>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+			User ID — the Supabase account id (session.user.id) is the key every
+			repository writes and filters by. Missing before.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeUserID</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+			Photos or videos. Note the spelling: "PhotosorVideos", with a
+			lowercase "or" — that is how Apple lists it.
+			Covers the profile photo AND the stories people post from inside a
+			venue (Features/Tonight/VenueMediaUploader.swift → venue_media).
+			Linked = TRUE, and the tempting mistake is to argue "not linked,
+			the client cannot read venue_media.user_id". The label describes
+			what we COLLECT and store, not what clients may query: user_id is a
+			foreign key to profiles(id), so the media is linked to the person —
+			and that link is the only reason we can act on a report and remove
+			the poster. Declaring it not-linked would be a false declaration.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypePhotosorVideos</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+			Other user content — free text the user writes that is stored with
+			their id: the reason attached to a content report
+			(Repositories/MediaReportRepository.swift). Same reasoning as above
+			for Linked = true; the reporter's identity is what makes
+			unique(media_id, reporter_id) and rate-limiting possible.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeOtherUserContent</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
+		</dict>
+		<!--
+			Date of birth for the 21+ age gate
+			(Repositories/BirthdateRepository.swift). Apple's list has no
+			"date of birth" type, and DOB is not in their definition of
+			Sensitive Info (that one is race, sexual orientation, pregnancy,
+			disability, religion, union membership, politics, genetics,
+			biometrics), so OtherDataTypes — "any other data types not
+			mentioned" — is where it belongs.
+		-->
+		<dict>
+			<key>NSPrivacyCollectedDataType</key>
+			<string>NSPrivacyCollectedDataTypeOtherDataTypes</string>
+			<key>NSPrivacyCollectedDataTypeLinked</key>
+			<true/>
+			<key>NSPrivacyCollectedDataTypeTracking</key>
+			<false/>
+			<key>NSPrivacyCollectedDataTypePurposes</key>
+			<array>
+				<string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+			</array>
 		</dict>
 	</array>
+
+	<!--
+		Required reason APIs. The value is a CATEGORY (NSPrivacyAccessedAPICategory…),
+		not a Type — the old file said ...APITypeFileTimestamp / ...APITypeUserDefaults,
+		neither of which is a real constant. Apple lists exactly five categories:
+		FileTimestamp, SystemBootTime, DiskSpace, ActiveKeyboards, UserDefaults.
+
+		Checked against the code before deciding what stays (grep over *.swift),
+		all 0 hits, so none of the three is declared: SystemBootTime
+		(systemUptime, mach_absolute_time); DiskSpace (volumeAvailableCapacity*,
+		systemFreeSize, systemSize, statfs/statvfs/fstatfs/fstatvfs);
+		ActiveKeyboards (activeInputModes).
+	-->
 	<key>NSPrivacyAccessedAPITypes</key>
 	<array>
+		<!--
+			FileTimestamp. Repositories/VenueMediaRepository.swift:107 calls
+			FileManager.attributesOfItem(atPath:) to read the byte size of the
+			upload before starting the resumable PUT.
+			C617.1 is the right reason and not a guess: it covers "the timestamps,
+			size, or other metadata of files inside the app container", and the
+			file is one the app itself just wrote into
+			FileManager.default.temporaryDirectory (VenueMediaUploader.swift:83,
+			:147, :166). Specifically NOT 3B52.1 — nothing here comes through a
+			document picker; PhotosPicker hands over data the app copies into its
+			own container first.
+		-->
 		<dict>
 			<key>NSPrivacyAccessedAPIType</key>
-			<string>NSPrivacyAccessedAPITypeFileTimestamp</string>
+			<string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
 			<key>NSPrivacyAccessedAPITypeReasons</key>
 			<array>
 				<string>C617.1</string>
 			</array>
 		</dict>
+		<!--
+			UserDefaults — two reasons, because the app genuinely does two things:
+			  CA92.1 → UserDefaults.standard, read/written only by this app
+			           (24 files: AgeGateService, ThemeService, FavoritesStore,
+			           LocalizationService, PointsEngine, …).
+			  1C8F.1 → UserDefaults(suiteName: "group.com.sebastian.barpass")
+			           in Features/GoHome/GoHomeButton.swift:19, shared with the
+			           BarPassWidget extension. The App Group is real: it is in
+			           both Resources/BarPass.entitlements and
+			           BarPassWidget/BarPassWidget.entitlements.
+			CA92.1 alone would not describe the App Group write — that is exactly
+			what 1C8F.1 exists for.
+		-->
 		<dict>
 			<key>NSPrivacyAccessedAPIType</key>
-			<string>NSPrivacyAccessedAPITypeBundle</string>
-			<key>NSPrivacyAccessedAPITypeReasons</key>
-			<array>
-				<string>85F4.1</string>
-			</array>
-		</dict>
-		<dict>
-			<key>NSPrivacyAccessedAPIType</key>
-			<string>NSPrivacyAccessedAPITypeUserDefaults</string>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
 			<key>NSPrivacyAccessedAPITypeReasons</key>
 			<array>
 				<string>CA92.1</string>
+				<string>1C8F.1</string>
 			</array>
 		</dict>
 	</array>
+
+	<!--
+		DELETED: the old NSPrivacyAccessedAPITypeBundle / 85F4.1 entry. The code
+		was checked before removing it, not just the schema: (1) there is no
+		"Bundle" category among Apple's five; (2) 85F4.1 is a DISK SPACE reason,
+		and the app calls no disk-space API (grep above, 0 hits) and shows no
+		disk figure to anyone — so there is nothing to re-file it under. Deleted,
+		not moved.
+	-->
 </dict>
 </plist>

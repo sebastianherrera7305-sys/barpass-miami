@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	El widget necesita SU PROPIO manifest, aparte del de la app.
+
+	Apple lo dice textual en "Describing use of required reason API": cada
+	ejecutable o librería dinámica que usa una API de razón requerida necesita
+	que SU bundle incluya un manifest que la declare. Una extensión de widget
+	es un bundle con ejecutable propio, así que el manifest de la app no la
+	cubre. Omitirlo es lo que dispara el correo ITMS-91053 de App Store
+	Connect, que llega DESPUÉS de subir la build y frena el envío.
+
+	Qué usa este widget: GoHomeWidget.swift:8 abre
+	UserDefaults(suiteName: "group.com.sebastian.barpass") para leer la
+	dirección de casa que le deja la app. No usa nada más de razón requerida:
+	no lee marcas de tiempo de archivos, ni espacio en disco, ni el tiempo de
+	arranque, ni los teclados activos.
+
+	La razón es 1C8F.1 y NO CA92.1. Las dos son de UserDefaults, pero CA92.1
+	cubre el acceso al dominio propio del bundle; 1C8F.1 es la que cubre leer
+	o escribir el UserDefaults de un App Group compartido con otras
+	aplicaciones del mismo grupo — que es exactamente lo que pasa acá, y por
+	eso existe el App Group en BarPassWidget.entitlements.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>1C8F.1</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

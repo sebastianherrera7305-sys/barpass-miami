@@ -48,6 +48,15 @@
 		BEACBFCA98F447FA5534181A /* ProximityRadarFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC50B2BDA1262588C8B4F9 /* ProximityRadarFallback.swift */; };
 		BEAC2D342E13B145CC90342C /* ProximityRadarSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACDD7EBA4A0CC4052860B9 /* ProximityRadarSession.swift */; };
 		BEACC779D946AC0908077A1B /* FindMyGroupButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACC6C19FF40A3066D53F3D /* FindMyGroupButton.swift */; };
+		BEAC6206D22882305E46F070 /* MediaReportRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACA683979EEB3379E41B29 /* MediaReportRepository.swift */; };
+		BEAC4068C93B999C08C1120B /* StoryModerationMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACECD0D6327EE380FD8E25 /* StoryModerationMenu.swift */; };
+		BEAC6D3726FD063B131C5508 /* ReportSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC19B09A0B11545BF66365 /* ReportSheet.swift */; };
+		BEACDF5F8EF817A48AE7121F /* HiddenStories.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACA0AD7094C39D97E0C3CA /* HiddenStories.swift */; };
+		BEAC64582C2FB47D56C1DD1E /* LegalAndHelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC3EB3465D4941C6E71117 /* LegalAndHelpView.swift */; };
+		BEACDD09E225841140E4C02F /* MutedAuthorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC0F4933E57D83D2D2E044 /* MutedAuthorsView.swift */; };
+		BEAC856794A3D6DA47B0A19D /* PostingGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACC8C06F27313BE6DE1E0C /* PostingGate.swift */; };
+		BEAC41095560A1914FE87B2D /* PostingRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC94271FE524D93CD20534 /* PostingRules.swift */; };
+		BEAC6FF53C6BD3CFAEDA0485 /* PostingRulesSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACFD75658A228E9D8C654B /* PostingRulesSheet.swift */; };
 		A11B19AC0FF1240000000051 /* HomeShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000052 /* HomeShortcuts.swift */; };
 		19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */; };
 		1E6D56BE3ACE427DB3D6D36B /* CityMascotIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */; };
@@ -65,6 +74,7 @@
 		35863ABBF504D7CB2BA28C8E /* VenueRanking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CF9FD7EDEB52D4CD9AF7497 /* VenueRanking.swift */; };
 		35C0EF5692CBE8A6227C1745 /* ShareManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 721FC3825B9184C905EB3EF0 /* ShareManager.swift */; };
 		39E22AF8EE155DF7FC352FBA /* BirthdateRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C400AEEB6DDDE94D0CB3B6A /* BirthdateRepository.swift */; };
+		BEACWIDGETPRIVACY0001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BEACWIDGETPRIVACY0002 /* PrivacyInfo.xcprivacy */; };
 		3B7C8E2A419DF605B8A61C90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6A2E4C1F8B9D7016C3E5F420 /* Assets.xcassets */; };
 		3B997A737FD4B9BDABFA9D2B /* ModelCodableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF31AC3E1809B2072DE6CA9C /* ModelCodableTests.swift */; };
 		40CD7131F382690E2735FB1C /* ShareCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EB6374016627134BFCC83D6 /* ShareCardView.swift */; };
@@ -336,6 +346,7 @@
 		61DF8A751C604670B6F54B5F /* SupabaseGreekLifeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SupabaseGreekLifeRepository.swift; path = BarPass/Repositories/SupabaseGreekLifeRepository.swift; sourceTree = SOURCE_ROOT; };
 		6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueMediaUploader.swift; path = BarPass/Features/Tonight/VenueMediaUploader.swift; sourceTree = SOURCE_ROOT; };
 		656968298CED42FFBA49231A /* CityIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CityIdentity.swift; path = BarPass/Resources/CityIdentity.swift; sourceTree = SOURCE_ROOT; };
+		BEACWIDGETPRIVACY0002 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = BarPassWidget/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 		6A2E4C1F8B9D7016C3E5F420 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = BarPassWidget/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		6EB6374016627134BFCC83D6 /* ShareCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareCardView.swift; sourceTree = "<group>"; };
 		7025BEC6A2E4D77DE5757388 /* VenueInsideGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenueInsideGuide.swift; path = BarPass/Features/Tonight/VenueInsideGuide.swift; sourceTree = SOURCE_ROOT; };
@@ -389,6 +400,15 @@
 		BEAC50B2BDA1262588C8B4F9 /* ProximityRadarFallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProximityRadarFallback.swift; path = BarPass/Features/Safety/ProximityRadarFallback.swift; sourceTree = SOURCE_ROOT; };
 		BEACDD7EBA4A0CC4052860B9 /* ProximityRadarSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProximityRadarSession.swift; path = BarPass/Features/Safety/ProximityRadarSession.swift; sourceTree = SOURCE_ROOT; };
 		BEACC6C19FF40A3066D53F3D /* FindMyGroupButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FindMyGroupButton.swift; path = BarPass/Features/Safety/FindMyGroupButton.swift; sourceTree = SOURCE_ROOT; };
+		BEACA683979EEB3379E41B29 /* MediaReportRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MediaReportRepository.swift; path = BarPass/Repositories/MediaReportRepository.swift; sourceTree = SOURCE_ROOT; };
+		BEACECD0D6327EE380FD8E25 /* StoryModerationMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StoryModerationMenu.swift; path = BarPass/Features/Moderation/StoryModerationMenu.swift; sourceTree = SOURCE_ROOT; };
+		BEAC19B09A0B11545BF66365 /* ReportSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ReportSheet.swift; path = BarPass/Features/Moderation/ReportSheet.swift; sourceTree = SOURCE_ROOT; };
+		BEACA0AD7094C39D97E0C3CA /* HiddenStories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HiddenStories.swift; path = BarPass/Features/Moderation/HiddenStories.swift; sourceTree = SOURCE_ROOT; };
+		BEAC3EB3465D4941C6E71117 /* LegalAndHelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LegalAndHelpView.swift; path = BarPass/Features/Legal/LegalAndHelpView.swift; sourceTree = SOURCE_ROOT; };
+		BEAC0F4933E57D83D2D2E044 /* MutedAuthorsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MutedAuthorsView.swift; path = BarPass/Features/Legal/MutedAuthorsView.swift; sourceTree = SOURCE_ROOT; };
+		BEACC8C06F27313BE6DE1E0C /* PostingGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PostingGate.swift; path = BarPass/Features/Posting/PostingGate.swift; sourceTree = SOURCE_ROOT; };
+		BEAC94271FE524D93CD20534 /* PostingRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PostingRules.swift; path = BarPass/Features/Posting/PostingRules.swift; sourceTree = SOURCE_ROOT; };
+		BEACFD75658A228E9D8C654B /* PostingRulesSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PostingRulesSheet.swift; path = BarPass/Features/Posting/PostingRulesSheet.swift; sourceTree = SOURCE_ROOT; };
 		A11B19AC0FF1240000000052 /* HomeShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HomeShortcuts.swift; path = BarPass/Core/Services/HomeShortcuts.swift; sourceTree = SOURCE_ROOT; };
 		981C73E1C26EF3207D31A9F2 /* RemyLocalChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemyLocalChat.swift; sourceTree = "<group>"; };
 		9944A65EAC0560419D02323C /* Stadium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Stadium.swift; path = BarPass/Models/Stadium.swift; sourceTree = SOURCE_ROOT; };
@@ -580,6 +600,7 @@
 				457BF8CA0B0C5084EECB9173 /* GoHomeWidget.swift */,
 				829CF36B09B1ECDF96A87195 /* Info.plist */,
 				D0A7686268D5679874C25E39 /* BarPassWidget.entitlements */,
+				BEACWIDGETPRIVACY0002 /* PrivacyInfo.xcprivacy */,
 				6A2E4C1F8B9D7016C3E5F420 /* Assets.xcassets */,
 			);
 			path = BarPassWidget;
@@ -676,6 +697,15 @@
 				BEAC50B2BDA1262588C8B4F9 /* ProximityRadarFallback.swift */,
 				BEACDD7EBA4A0CC4052860B9 /* ProximityRadarSession.swift */,
 				BEACC6C19FF40A3066D53F3D /* FindMyGroupButton.swift */,
+				BEACA683979EEB3379E41B29 /* MediaReportRepository.swift */,
+				BEACECD0D6327EE380FD8E25 /* StoryModerationMenu.swift */,
+				BEAC19B09A0B11545BF66365 /* ReportSheet.swift */,
+				BEACA0AD7094C39D97E0C3CA /* HiddenStories.swift */,
+				BEAC3EB3465D4941C6E71117 /* LegalAndHelpView.swift */,
+				BEAC0F4933E57D83D2D2E044 /* MutedAuthorsView.swift */,
+				BEACC8C06F27313BE6DE1E0C /* PostingGate.swift */,
+				BEAC94271FE524D93CD20534 /* PostingRules.swift */,
+				BEACFD75658A228E9D8C654B /* PostingRulesSheet.swift */,
 				A11B19AC0FF1240000000052 /* HomeShortcuts.swift */,
 				AD594030C69C33F1DB823472 /* HelpGuideStore.swift */,
 				B255F26D4A13547562CDF99B /* HelpTargetAnchor.swift */,
@@ -1160,6 +1190,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BEACWIDGETPRIVACY0001 /* PrivacyInfo.xcprivacy in Resources */,
 				3B7C8E2A419DF605B8A61C90 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1344,6 +1375,15 @@
 				BEACBFCA98F447FA5534181A /* ProximityRadarFallback.swift in Sources */,
 				BEAC2D342E13B145CC90342C /* ProximityRadarSession.swift in Sources */,
 				BEACC779D946AC0908077A1B /* FindMyGroupButton.swift in Sources */,
+				BEAC6206D22882305E46F070 /* MediaReportRepository.swift in Sources */,
+				BEAC4068C93B999C08C1120B /* StoryModerationMenu.swift in Sources */,
+				BEAC6D3726FD063B131C5508 /* ReportSheet.swift in Sources */,
+				BEACDF5F8EF817A48AE7121F /* HiddenStories.swift in Sources */,
+				BEAC64582C2FB47D56C1DD1E /* LegalAndHelpView.swift in Sources */,
+				BEACDD09E225841140E4C02F /* MutedAuthorsView.swift in Sources */,
+				BEAC856794A3D6DA47B0A19D /* PostingGate.swift in Sources */,
+				BEAC41095560A1914FE87B2D /* PostingRules.swift in Sources */,
+				BEAC6FF53C6BD3CFAEDA0485 /* PostingRulesSheet.swift in Sources */,
 				A11B19AC0FF1240000000051 /* HomeShortcuts.swift in Sources */,
 				A2CF02FBB442045B9D9084FF /* HelpGuideStore.swift in Sources */,
 				EE01BC57203A630FF06E9694 /* HelpTargetAnchor.swift in Sources */,

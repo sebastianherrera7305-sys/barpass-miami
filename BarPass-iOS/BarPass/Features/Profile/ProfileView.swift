@@ -203,7 +203,17 @@ struct ProfileView: View {
                     .padding(.horizontal, BPSpacing.lg)
                     .helpTarget("profile.passes")
 
-
+                    // Legal y ayuda — contacto, reglas de contenido, términos,
+                    // privacidad y cuentas bloqueadas.
+                    //
+                    // Va ARRIBA y no al pie junto a "Cerrar sesión", que es
+                    // donde la costumbre la pondría: es la sección que el
+                    // revisor de Apple entra a buscar (directriz 1.2 pide el
+                    // contacto publicado y alcanzable desde la app), este
+                    // Perfil scrollea mucho, y algo que hay que buscar 30
+                    // segundos se reporta como "we were unable to locate".
+                    // La fila entera vive en LegalAndHelpView.swift.
+                    LegalAndHelpProfileRow()
 
                     // Dirección de casa (botón "Ir a casa")
                     Button {

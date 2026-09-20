@@ -35,7 +35,9 @@ struct VenueMediaSection: View {
                 Text(l10n.t("venueMedia.title"))
                     .font(.bpTitle2()).foregroundStyle(Color.bpInk)
                 Spacer()
-                PhotosPicker(selection: $selectedPickerItem, matching: .any(of: [.images, .videos])) {
+                // Ya no es un PhotosPicker directo: la primera vez de cada
+                // cuenta pasa por las reglas de contenido (PostingGate).
+                PostingPickerButton(selection: $selectedPickerItem, isDisabled: isBusy) {
                     HStack(spacing: 5) {
                         if isBusy {
                             ProgressView().tint(.black).scaleEffect(0.7)
@@ -48,9 +50,13 @@ struct VenueMediaSection: View {
                     .padding(.horizontal, 12).padding(.vertical, 8)
                     .background(Color.bpAmber, in: Capsule())
                 }
-                .disabled(isBusy)
                 .bpAccessibility(label: l10n.t("venueMedia.add"), hint: l10n.t("venueMedia.add.hint"), isButton: true)
             }
+
+            // En cada subida, no sólo la primera: lo que cambia de una vez
+            // a la otra no son las reglas, es la foto — y quién la va a ver
+            // es lo que hay que tener presente al elegirla.
+            PublicPostNotice()
 
             if let label = uploader.stageLabel(l10n) {
                 VStack(alignment: .leading, spacing: 6) {
