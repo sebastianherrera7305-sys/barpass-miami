@@ -9,21 +9,30 @@
  *                        [--anchor="Little Havana, Miami"]   (repetible)
  *
  * Requiere en .env.local: GOOGLE_PLACES_API_KEY, NEXT_PUBLIC_SUPABASE_URL,
- * SUPABASE_SERVICE_ROLE_KEY.
+ * SUPABASE_SERVICE_ROLE_KEY. Y, para gastar de verdad, PLACES_SPEND=1: sin eso
+ * el cliente de Places corre en seco e imprime cuánto costaría el barrido.
+ *
+ * ESTE SCRIPT NO LO REEMPLAZA LA PASADA ÚNICA. Descubrir venues nuevos
+ * (searchText + searchNearby) es un trabajo distinto de refrescar los que ya
+ * están. Pero es el más caro del repo por corrida: cada ancla del barrido
+ * geográfico es un request de Nearby Search, que se cobra aparte y más caro
+ * que Details. Mirá el informe del medidor al final antes de repetirlo.
  */
 import { createClient } from "@supabase/supabase-js";
 // @ts-expect-error — 'ws' no trae tipos propios, ver enrich-venues.ts.
 import ws from "ws";
 import { classify } from "./venue-type-rules";
+import { photoUri, placesClient, unwrap } from "./lib/places-calls";
 
-const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!PLACES_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("Faltan env vars: GOOGLE_PLACES_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error("Faltan env vars: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
+
+const places = placesClient("add-venues");
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   realtime: { transport: ws as unknown as typeof WebSocket },
@@ -239,48 +248,28 @@ function buildQueries(city: string, collegeQuery: string | null, areas: string[]
   ];
 }
 
+/** Los campos de descubrimiento: id, nombre, dirección y types. Se piden los
+ *  mismos en Text Search y en Nearby Search para que el merge sea uniforme. */
+const DISCOVERY_FIELDS = [
+  "places.id",
+  "places.displayName",
+  "places.formattedAddress",
+  "places.types",
+];
+
 /**
- * Reintenta solo fallos de red/timeout (p.ej. UND_ERR_BODY_TIMEOUT en
- * ciudades grandes con muchas llamadas seguidas) — nunca reintenta una
- * respuesta HTTP real de Google, esa se maneja donde ya se maneja (!res.ok).
+ * El reintento de red que este script llevaba —un solo UND_ERR_BODY_TIMEOUT
+ * mató un barrido de Miami a los ~90 requests— vive ahora en
+ * lib/places-calls.ts, con el cuerpo leído dentro del try, igual que acá.
  */
-async function fetchWithRetry(url: string, init: RequestInit, retries = 3): Promise<Response> {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      const res = await fetch(url, init);
-      // Buffer the body HERE, inside the try. Returning the un-read Response
-      // left the body read at the call site, outside any retry: a Miami run on
-      // 2026-09-13 died mid-sweep with UND_ERR_BODY_TIMEOUT ("TypeError:
-      // terminated") after ~90 Google calls, losing the whole run. Re-wrapping
-      // keeps every caller's `res.ok` / `res.json()` working unchanged.
-      const body = await res.text();
-      return new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
-    } catch (err) {
-      if (attempt >= retries) throw err;
-      const delay = 500 * 2 ** attempt;
-      console.error(`  fetch falló (${(err as Error).message}), reintentando en ${delay}ms...`);
-      await new Promise((r) => setTimeout(r, delay));
-    }
-  }
-}
 
 /** Una sola query de Text Search — 20 resultados máx por llamada (límite de Google). */
 async function searchOnce(query: string): Promise<PlaceSummary[]> {
-  const res = await fetchWithRetry("https://places.googleapis.com/v1/places:searchText", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Goog-Api-Key": PLACES_API_KEY!,
-      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.types",
-    },
-    body: JSON.stringify({ textQuery: query, maxResultCount: 20 }),
-  });
-  if (!res.ok) {
-    console.error(`  searchText falló para "${query}" (${res.status}): ${await res.text()}`);
-    return [];
-  }
-  const data = (await res.json()) as SearchResponse;
-  return data.places ?? [];
+  const data = await unwrap<SearchResponse>(
+    () => places.searchText(query, DISCOVERY_FIELDS),
+    `searchText "${query}"`,
+  );
+  return data?.places ?? [];
 }
 
 /** Corre todas las variantes y fusiona resultados, deduplicando por place_id. */
@@ -290,24 +279,19 @@ async function searchOnce(query: string): Promise<PlaceSummary[]> {
  *  on 2026-09-12 found 25 operational bars/clubs that no text query surfaced.
  *  A circle sweep has no such blind spot. */
 async function searchNearbyOnce(lat: number, lng: number, radius: number): Promise<PlaceSummary[]> {
-  const res = await fetchWithRetry("https://places.googleapis.com/v1/places:searchNearby", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Goog-Api-Key": PLACES_API_KEY!,
-      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.types",
-    },
-    body: JSON.stringify({
-      includedTypes: ["bar", "night_club", "pub", "wine_bar", "bar_and_grill"],
-      maxResultCount: 20,
-      locationRestriction: { circle: { center: { latitude: lat, longitude: lng }, radius } },
-    }),
-  });
-  if (!res.ok) {
-    console.error(`  searchNearby failed at ${lat},${lng} (${res.status}): ${await res.text()}`);
-    return [];
-  }
-  return ((await res.json()) as SearchResponse).places ?? [];
+  const data = await unwrap<SearchResponse>(
+    () =>
+      places.searchNearby(
+        {
+          includedTypes: ["bar", "night_club", "pub", "wine_bar", "bar_and_grill"],
+          maxResultCount: 20,
+          locationRestriction: { circle: { center: { latitude: lat, longitude: lng }, radius } },
+        },
+        DISCOVERY_FIELDS,
+      ),
+    `searchNearby ${lat},${lng}`,
+  );
+  return data?.places ?? [];
 }
 
 /** Real coordinates for a place name via Google — null if unresolvable, never invented. */
@@ -429,15 +413,13 @@ async function fetchDetails(placeId: string): Promise<PlaceDetails | null> {
     "servesBeer", "servesWine", "servesCocktails",
     "accessibilityOptions", "outdoorSeating", "goodForGroups",
     "goodForWatchingSports", "liveMusic", "reservable", "servesVegetarianFood", "restroom",
-  ].join(",");
-  const res = await fetchWithRetry(`https://places.googleapis.com/v1/places/${placeId}`, {
-    headers: { "X-Goog-Api-Key": PLACES_API_KEY!, "X-Goog-FieldMask": fields },
-  });
-  if (!res.ok) {
-    console.error(`  details falló (${res.status}): ${await res.text()}`);
-    return null;
-  }
-  return (await res.json()) as PlaceDetails;
+  ];
+  // Un solo request con TODO lo que hace falta. Éste es el patrón correcto y
+  // el que el resto del repo tuvo que adoptar después del 14 de septiembre.
+  return unwrap<PlaceDetails>(
+    () => places.placeDetails(placeId, fields),
+    `details ${placeId}`,
+  );
 }
 
 /** Resolves a Places photo to the keyless CDN URL, because the media URL is
@@ -450,14 +432,7 @@ async function fetchDetails(placeId: string): Promise<PlaceDetails | null> {
 async function firstPhotoUrl(details: PlaceDetails): Promise<string | null> {
   const photoName = details.photos?.[0]?.name;
   if (!photoName) return null;
-  const res = await fetchWithRetry(
-    `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=1200&skipHttpRedirect=true`,
-    { headers: { "X-Goog-Api-Key": PLACES_API_KEY! } },
-  );
-  if (!res.ok) return null;
-  const uri = ((await res.json()) as { photoUri?: string }).photoUri ?? null;
-  // Belt and braces: never persist anything still carrying a key.
-  return uri && !uri.includes("key=") && !uri.includes("AIza") ? uri : null;
+  return photoUri(places, photoName);
 }
 
 /** Haversine — km entre dos puntos. Solo para mostrar distancia al campus en el reporte. */

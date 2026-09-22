@@ -1,4 +1,16 @@
 /**
+ * ⚠ REEMPLAZADO POR `refresh-venue-from-google.ts` (2026-09-14).
+ *
+ * Este script ya tuvo la idea correcta —una sola llamada por venue— pero con
+ * un field mask más angosto: no trae priceLevel ni las señales de tipo, así
+ * que después había que correr `fix-price-tiers.ts` y `fix-venue-types.ts`
+ * encima, y cada uno pagaba su propio request. La pasada única cierra eso.
+ *
+ * No se borra: su manejo de `field_sources` (nunca pisar una procedencia
+ * `manual_research`) es la referencia de cómo se escribe provenance.
+ *
+ * ---
+ *
  * Re-pulls the core columns a venue card needs from Google Place Details, in
  * ONE request per venue, and records where each value came from.
  *
@@ -37,14 +49,24 @@
 import { createClient } from "@supabase/supabase-js";
 // @ts-expect-error — 'ws' ships no types, same as the other scripts.
 import ws from "ws";
+import { photoUri, placeDetailsUrl, placesClient, unwrap } from "./lib/places-calls";
+import { warnSuperseded } from "./lib/superseded";
 
-const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!PLACES_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("Faltan env vars: GOOGLE_PLACES_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error("Faltan env vars: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
+
+warnSuperseded({
+  script: "refresh-venue-core-data.ts",
+  replacement: "refresh-venue-from-google.ts",
+  why: "Su field mask no trae priceLevel ni el tipo, así que obliga a una segunda pasada.",
+});
+
+// Sin PLACES_SPEND=1 no se toca la red: informa el costo estimado y sale.
+const places = placesClient("refresh-venue-core-data");
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   realtime: { transport: ws as unknown as typeof WebSocket },
 });
@@ -66,7 +88,7 @@ const FIELD_MASK = [
   "nationalPhoneNumber",
   "regularOpeningHours.periods",
   "photos.name",
-].join(",");
+];
 
 interface Period {
   open?: { day: number; hour: number; minute: number };
@@ -117,41 +139,16 @@ export function toWeeklyHours(periods: Period[] | undefined): DayHours[] | null 
   return out.length ? out : null;
 }
 
-/** Retries the network and 429/5xx, never a real 4xx — one thrown fetch must
- *  not end a run of thousands. */
-async function googleJson<T>(url: string, retries = 3): Promise<T | null> {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      const res = await fetch(url, { headers: { "X-Goog-Api-Key": PLACES_API_KEY!, "X-Goog-FieldMask": FIELD_MASK } });
-      if (res.status === 429 || res.status >= 500) {
-        if (attempt >= retries) return null;
-        await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
-        continue;
-      }
-      if (!res.ok) return null;
-      return (await res.json()) as T;
-    } catch {
-      if (attempt >= retries) return null;
-      await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
-    }
-  }
+/** El reintento de red y 429/5xx —un fetch que revienta no puede terminar un
+ *  run de miles— vive ahora en lib/places-calls.ts, junto con el medidor. */
+async function googleJson<T>(placeId: string): Promise<T | null> {
+  return unwrap<T>(() => places.placeDetails(placeId, FIELD_MASK), `core ${placeId}`);
 }
 
 /** Resolve a photo resource name to the keyless, pre-sized CDN URL. Anything
  *  still carrying `key=` is rejected rather than stored. */
 async function resolvePhotoUri(photoName: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=1200&skipHttpRedirect=true`,
-      { headers: { "X-Goog-Api-Key": PLACES_API_KEY! } },
-    );
-    if (!res.ok) return null;
-    const data = (await res.json()) as { photoUri?: string };
-    const uri = data.photoUri ?? null;
-    return uri && !uri.includes("key=") ? uri : null;
-  } catch {
-    return null;
-  }
+  return photoUri(places, photoName);
 }
 
 function isMissingCore(r: Row): boolean {
@@ -190,8 +187,10 @@ async function main() {
     if (processed >= limit) break;
     processed++;
 
-    const url = `https://places.googleapis.com/v1/places/${v.google_place_id}`;
-    const g = await googleJson<PlaceDetails>(url);
+    // El URL se arma con el helper del cliente: acá sólo se guarda como
+    // procedencia en field_sources, no se le pega.
+    const url = placeDetailsUrl(v.google_place_id as string);
+    const g = await googleJson<PlaceDetails>(v.google_place_id as string);
     if (!g) { console.warn(`  [places falló] ${v.name}`); failed++; continue; }
 
     const patch: Record<string, unknown> = {};

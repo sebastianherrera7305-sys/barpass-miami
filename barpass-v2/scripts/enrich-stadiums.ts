@@ -13,15 +13,19 @@
 import { createClient } from "@supabase/supabase-js";
 // @ts-expect-error — mismo fallback de transporte que enrich-venues.ts
 import ws from "ws";
+import { photoUri, placesClient, unwrap } from "./lib/places-calls";
 
-const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!PLACES_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("Faltan env vars: GOOGLE_PLACES_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error("Faltan env vars: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
+
+// Este script NO lo reemplaza la pasada única: trabaja sobre `stadiums`, otra
+// tabla, con 22 filas. Sin PLACES_SPEND=1 no toca la red.
+const places = placesClient("enrich-stadiums");
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   realtime: { transport: ws as unknown as typeof WebSocket },
@@ -36,33 +40,21 @@ interface StadiumRow {
 }
 
 async function findPlaceId(name: string, address: string): Promise<string | null> {
-  const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Goog-Api-Key": PLACES_API_KEY!,
-      "X-Goog-FieldMask": "places.id",
-    },
-    body: JSON.stringify({ textQuery: `${name}, ${address}`, maxResultCount: 1 }),
-  });
-  if (!res.ok) {
-    console.error(`  searchText falló (${res.status}): ${await res.text()}`);
-    return null;
-  }
-  const data = (await res.json()) as { places?: { id: string }[] };
-  return data.places?.[0]?.id ?? null;
+  const data = await unwrap<{ places?: { id: string }[] }>(
+    () => places.searchText(`${name}, ${address}`, ["places.id"]),
+    `buscar ${name}`,
+  );
+  return data?.places?.[0]?.id ?? null;
 }
 
 async function fetchPlaceDetails(placeId: string) {
-  const fields = ["id", "editorialSummary", "photos"].join(",");
-  const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-    headers: { "X-Goog-Api-Key": PLACES_API_KEY!, "X-Goog-FieldMask": fields },
-  });
-  if (!res.ok) {
-    console.error(`  details falló (${res.status}): ${await res.text()}`);
-    return null;
-  }
-  return (await res.json()) as { editorialSummary?: { text?: string }; photos?: { name: string }[] };
+  // editorialSummary es nivel Atmosphere, el más caro del catálogo. Son 22
+  // stadiums, así que se paga una vez y ya — pero vale saberlo antes de
+  // ponerle un --all a esto.
+  return unwrap<{ editorialSummary?: { text?: string }; photos?: { name: string }[] }>(
+    () => places.placeDetails(placeId, ["id", "editorialSummary", "photos"]),
+    `details ${placeId}`,
+  );
 }
 
 async function main() {
@@ -86,9 +78,16 @@ async function main() {
 
     const update: Record<string, unknown> = {};
     if (details.editorialSummary?.text) update.description = details.editorialSummary.text;
+    // ÚNICO cambio de comportamiento de esta migración, y es a propósito:
+    // antes se guardaba el URL con `&key=${GOOGLE_PLACES_API_KEY}` adentro, y
+    // `stadiums` se lee con la anon key — o sea, la clave facturable quedaba
+    // publicada. Es el mismo bug que `fix-venue-photos.ts` arregló en `venues`
+    // el 2026-09-13; acá había quedado. Ahora se guarda el URL de CDN
+    // resuelto, sin clave y dimensionado, que es la forma que ya usa el resto.
     const photoName = details.photos?.[0]?.name;
     if (photoName) {
-      update.image_url = `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=1200&key=${PLACES_API_KEY}`;
+      const uri = await photoUri(places, photoName);
+      if (uri) update.image_url = uri;
     }
 
     if (Object.keys(update).length === 0) {

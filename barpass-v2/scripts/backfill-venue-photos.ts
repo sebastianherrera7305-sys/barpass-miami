@@ -1,4 +1,16 @@
 /**
+ * ⚠ REEMPLAZADO POR `refresh-venue-from-google.ts` (2026-09-14) para el caso
+ * normal: foto + horarios + precio por venue, que ahora salen de UNA llamada.
+ * Acá cuestan hasta tres (búsqueda + details + foto).
+ *
+ * Lo único que todavía no cubre la pasada única es `--resize`, que re-emite
+ * una foto ya guardada en la forma vieja sin tocar ningún otro campo.
+ *
+ * No se borra por eso, y porque su cabecera es la explicación de por qué sólo
+ * una de las tres formas de URL de foto es aceptable.
+ *
+ * ---
+ *
  * Gives every venue a real photo, and a photo that is light enough to load.
  *
  * TWO PROBLEMS, ONE CAUSE
@@ -33,12 +45,22 @@
  *   npx tsx scripts/backfill-venue-photos.ts
  */
 
+import { photoUri, placesClient, unwrap } from "./lib/places-calls";
+import { warnSuperseded } from "./lib/superseded";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
 if (!SUPABASE_URL || !SERVICE_KEY) throw new Error("Missing Supabase env vars");
-if (!PLACES_KEY) throw new Error("Missing GOOGLE_PLACES_API_KEY");
+
+warnSuperseded({
+  script: "backfill-venue-photos.ts",
+  replacement: "refresh-venue-from-google.ts",
+  why: "Gasta hasta tres llamadas por venue (búsqueda + details + foto) para lo que ahora sale de una.",
+});
+
+// Sin PLACES_SPEND=1 no se toca la red: informa el costo estimado y sale.
+const places = placesClient("backfill-venue-photos");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 /**
@@ -124,28 +146,11 @@ function hoursAreParseable(value: string | null): boolean {
   return Number.isFinite(Number(h)) && Number.isFinite(Number(m));
 }
 
-async function places<T>(url: string, init?: RequestInit): Promise<T | null> {
-  const res = await fetch(url, init);
-  if (!res.ok) {
-    console.warn(`   places ${res.status}: ${(await res.text()).slice(0, 120)}`);
-    return null;
-  }
-  return (await res.json()) as T;
-}
-
 async function findPlaceId(v: Venue): Promise<string | null> {
   const query = [v.name, v.address, v.city].filter(Boolean).join(", ");
-  const data = await places<{ places?: { id: string }[] }>(
-    "https://places.googleapis.com/v1/places:searchText",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": PLACES_KEY!,
-        "X-Goog-FieldMask": "places.id",
-      },
-      body: JSON.stringify({ textQuery: query, maxResultCount: 1 }),
-    },
+  const data = await unwrap<{ places?: { id: string }[] }>(
+    () => places.searchText(query, ["places.id"]),
+    `buscar ${v.name}`,
   );
   return data?.places?.[0]?.id ?? null;
 }
@@ -158,12 +163,16 @@ interface Details {
 }
 
 async function getDetails(placeId: string): Promise<Details | null> {
-  return places<Details>(`https://places.googleapis.com/v1/places/${placeId}`, {
-    headers: {
-      "X-Goog-Api-Key": PLACES_KEY!,
-      "X-Goog-FieldMask": "photos,regularOpeningHours,priceLevel,businessStatus",
-    },
-  });
+  return unwrap<Details>(
+    () =>
+      places.placeDetails(placeId, [
+        "photos",
+        "regularOpeningHours",
+        "priceLevel",
+        "businessStatus",
+      ]),
+    `details ${placeId}`,
+  );
 }
 
 /**
@@ -171,17 +180,10 @@ async function getDetails(placeId: string): Promise<Details | null> {
  * call shape is the only acceptable one.
  */
 async function sizedPhotoUrl(photoName: string): Promise<string | null> {
-  const data = await places<{ photoUri?: string }>(
-    `https://places.googleapis.com/v1/${photoName}/media` +
-      `?maxWidthPx=${PHOTO_WIDTH}&skipHttpRedirect=true&key=${PLACES_KEY}`,
-  );
-  const uri = data?.photoUri ?? null;
-  // Belt and braces: never persist a URL carrying the key, whatever Google returns.
-  if (uri && (uri.includes("key=") || uri.includes("AIza"))) {
-    console.warn("   refusing to store a photoUri containing an API key");
-    return null;
-  }
-  return uri;
+  // La clave viaja en el header, no en la query: el cliente la pone. Antes se
+  // pegaba `&key=…` al URL, que es la forma más fácil de que termine escrita
+  // en una columna que cualquiera puede leer.
+  return photoUri(places, photoName, PHOTO_WIDTH);
 }
 
 const PRICE_LEVELS: Record<string, number> = {

@@ -1,4 +1,22 @@
 /**
+ * ⚠ SU LLAMADA A GOOGLE QUEDÓ REEMPLAZADA POR `refresh-venue-from-google.ts`.
+ *
+ * Lo que este script pide (primaryType, types, servesBeer/Wine/Cocktails) son
+ * campos Enterprise: de los más caros del catálogo de Places. La pasada única
+ * los trae junto con horarios, rating, foto y precio en UN request por venue.
+ * Pedirlos otra vez acá es pagar el nivel caro dos veces por el mismo venue.
+ *
+ * La clasificación tampoco es única ya: `venue-google-patch.ts` corre el mismo
+ * `classify()` y el mismo manejo de `excluded_reason` (excluir, y deshacer una
+ * exclusión anterior), con una guarda que este script NO tiene — si Google no
+ * devuelve ni primaryType ni types, no toca la fila, en vez de dejar que
+ * `classify({})` la excluya por una respuesta vacía.
+ *
+ * O sea: no hay razón para correr éste. Se conserva sólo como referencia de
+ * dónde salió la regla.
+ *
+ * ---
+ *
  * Re-classifies venue `type` from Google's primaryType + alcohol signals, and
  * excludes rows that are not nightlife at all.
  *
@@ -8,14 +26,24 @@ import { createClient } from "@supabase/supabase-js";
 // @ts-expect-error — 'ws' ships no types, same as the other scripts.
 import ws from "ws";
 import { classify, type TypeSignals } from "./venue-type-rules";
+import { placesClient, unwrap } from "./lib/places-calls";
+import { warnSuperseded } from "./lib/superseded";
 
-const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!PLACES_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("Faltan env vars: GOOGLE_PLACES_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error("Faltan env vars: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
+
+warnSuperseded({
+  script: "fix-venue-types.ts",
+  replacement: "refresh-venue-from-google.ts",
+  why: "Esa pasada ya clasifica con las mismas señales, y con una guarda más contra excluir por respuesta vacía.",
+});
+
+// Sin PLACES_SPEND=1 no se toca la red: informa el costo estimado y sale.
+const places = placesClient("fix-venue-types");
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   realtime: { transport: ws as unknown as typeof WebSocket },
 });
@@ -30,34 +58,21 @@ if (!city && !all) {
   process.exit(1);
 }
 
-/** One transient network error used to kill the whole run: 3,900 sequential
- *  fetches and no catch, so a single blip threw and the process exited. Retry
- *  the network, never an actual HTTP answer from Google — a 404 means the place
- *  is gone and retrying it is just burning quota. */
-async function signals(placeId: string, retries = 3): Promise<TypeSignals | null> {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-        headers: {
-          "X-Goog-Api-Key": PLACES_API_KEY!,
-          "X-Goog-FieldMask": "primaryType,types,servesBeer,servesWine,servesCocktails",
-        },
-      });
-      if (res.status === 429 || res.status >= 500) {
-        if (attempt >= retries) return null;
-        await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
-        continue;
-      }
-      if (!res.ok) return null;
-      return (await res.json()) as TypeSignals;
-    } catch (err) {
-      if (attempt >= retries) {
-        console.error(`  red falló para ${placeId}: ${(err as Error).message}`);
-        return null;
-      }
-      await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
-    }
-  }
+/** Un solo error de red mataba el run entero: 3.900 fetches seguidos sin
+ *  catch. Ese endurecimiento —reintentar la red y 429/5xx, nunca un 4xx real—
+ *  vive ahora en lib/places-calls.ts, donde además se cuenta lo que cuesta. */
+async function signals(placeId: string): Promise<TypeSignals | null> {
+  return unwrap<TypeSignals>(
+    () =>
+      places.placeDetails(placeId, [
+        "primaryType",
+        "types",
+        "servesBeer",
+        "servesWine",
+        "servesCocktails",
+      ]),
+    `types ${placeId}`,
+  );
 }
 
 async function main() {

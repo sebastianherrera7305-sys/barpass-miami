@@ -1,4 +1,18 @@
 /**
+ * ⚠ REEMPLAZADO POR `refresh-venue-from-google.ts` (2026-09-14).
+ *
+ * Este script pide UN SOLO campo por venue (`regularOpeningHours.periods`) y
+ * paga por ese request el nivel de campo completo. `refresh-venue-from-google.ts`
+ * trae horarios, rating, foto, precio y tipo en una sola llamada por venue, al
+ * mismo costo que esta pasada sola. Correr éste después de aquél es pagar dos
+ * veces por el mismo dato: así el barrido del 14 de septiembre llegó a USD 655.
+ *
+ * NO se borra porque la lógica de `toWeeklyHours` es la referencia del formato
+ * `hours` y está usada como tal. Si necesitás refrescar horarios, corré la
+ * pasada única.
+ *
+ * ---
+ *
  * Backfills `venues.hours` with the REAL weekly schedule from Google Places.
  *
  * Until now a venue carried one `open_time` / `close_time` pair with no concept
@@ -22,14 +36,25 @@
 import { createClient } from "@supabase/supabase-js";
 // @ts-expect-error — 'ws' ships no types, same as the other scripts.
 import ws from "ws";
+import { placesClient, unwrap } from "./lib/places-calls";
+import { warnSuperseded } from "./lib/superseded";
 
-const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!PLACES_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("Faltan env vars: GOOGLE_PLACES_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error("Faltan env vars: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
+
+warnSuperseded({
+  script: "backfill-venue-hours.ts",
+  replacement: "refresh-venue-from-google.ts",
+  why: "Pide un solo campo (regularOpeningHours) y paga el request entero por él.",
+});
+
+// La clave de Google la lee el cliente, no este script. Sin PLACES_SPEND=1 no
+// se toca la red: se imprime el costo estimado del barrido y no se gasta nada.
+const places = placesClient("backfill-venue-hours");
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   realtime: { transport: ws as unknown as typeof WebSocket },
 });
@@ -58,27 +83,14 @@ export function toWeeklyHours(periods: Period[] | undefined): DayHours[] | null 
   return out.length ? out : null;
 }
 
-/** Same hardening as fix-venue-types.ts: a thrown fetch must not end a run of
- *  thousands. Retries the network and 429/5xx, never a real 4xx. */
-async function fetchPeriods(placeId: string, retries = 3): Promise<Period[] | undefined> {
-  for (let attempt = 0; ; attempt++) {
-    try {
-      const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-        headers: { "X-Goog-Api-Key": PLACES_API_KEY!, "X-Goog-FieldMask": "regularOpeningHours.periods" },
-      });
-      if (res.status === 429 || res.status >= 500) {
-        if (attempt >= retries) return undefined;
-        await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
-        continue;
-      }
-      if (!res.ok) return undefined;
-      const d = (await res.json()) as { regularOpeningHours?: { periods?: Period[] } };
-      return d.regularOpeningHours?.periods;
-    } catch {
-      if (attempt >= retries) return undefined;
-      await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
-    }
-  }
+/** El endurecimiento contra un fetch que revienta a mitad de un barrido de
+ *  miles vive ahora en lib/places-calls.ts, junto con el medidor de costo. */
+async function fetchPeriods(placeId: string): Promise<Period[] | undefined> {
+  const d = await unwrap<{ regularOpeningHours?: { periods?: Period[] } }>(
+    () => places.placeDetails(placeId, ["regularOpeningHours.periods"]),
+    `hours ${placeId}`,
+  );
+  return d?.regularOpeningHours?.periods;
 }
 
 async function main() {

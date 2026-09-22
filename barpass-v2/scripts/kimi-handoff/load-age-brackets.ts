@@ -21,14 +21,17 @@ import { createClient } from "@supabase/supabase-js";
 // @ts-expect-error - ws no trae tipos propios
 import ws from "ws";
 import fs from "fs";
+import { placesClient, unwrap } from "../lib/places-calls";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
-if (!SUPABASE_URL || !SERVICE_ROLE_KEY || !PLACES_API_KEY) {
-  console.error("Faltan env vars (Supabase o Google Places)");
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error("Faltan env vars (Supabase)");
   process.exit(1);
 }
+
+// Sin PLACES_SPEND=1 no se toca la red: informa el costo estimado y sale.
+const places = placesClient("load-age-brackets");
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   realtime: { transport: ws as unknown as typeof WebSocket },
 });
@@ -38,18 +41,25 @@ type KimiCity = Record<string, KimiEntry[]>; // bracket -> entries
 
 async function findPlace(name: string, address: string | undefined, city: string) {
   const query = address ? `${name}, ${address}` : `${name}, ${city}`;
-  const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Goog-Api-Key": PLACES_API_KEY!,
-      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.addressComponents,places.regularOpeningHours",
-    },
-    body: JSON.stringify({ textQuery: query, maxResultCount: 1 }),
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.places?.[0] ?? null;
+  // `any` a propósito: el resto de este archivo ya trata la respuesta de
+  // Google como any (neighborhoodFrom, hoursFrom). Tiparla acá y no allá sólo
+  // movería el problema de lugar.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = await unwrap<{ places?: any[] }>(
+    () =>
+      places.searchText(query, [
+        "places.id",
+        "places.displayName",
+        "places.formattedAddress",
+        "places.location",
+        "places.rating",
+        "places.userRatingCount",
+        "places.addressComponents",
+        "places.regularOpeningHours",
+      ]),
+    `buscar ${name}`,
+  );
+  return data?.places?.[0] ?? null;
 }
 
 function neighborhoodFrom(place: any): string {

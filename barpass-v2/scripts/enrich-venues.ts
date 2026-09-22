@@ -1,4 +1,22 @@
 /**
+ * ⚠ REEMPLAZADO POR `refresh-venue-from-google.ts` (2026-09-14).
+ *
+ * Verificado contra `REFRESH_FIELD_MASK` en `venue-google-fields.ts`: la
+ * pasada única pide TODO lo que pide este script —teléfono, web, rating,
+ * review_count, business_status, foto y las amenities completas
+ * (outdoorSeating, goodForGroups, liveMusic, reservable, restroom,
+ * accessibilityOptions)— en un solo request. Las amenities son nivel
+ * Atmosphere, el más caro de Places: correr los dos lo paga dos veces por
+ * venue.
+ *
+ * Lo único que este script todavía hace y el otro no: buscar el place_id por
+ * nombre y dirección cuando la fila no tiene ninguno. La pasada única sólo
+ * mira filas con `google_place_id` ya cargado. Para eso, y sólo para eso,
+ * sigue teniendo sentido — con `--only=slug` sobre las filas que lo necesitan,
+ * nunca sobre el catálogo entero.
+ *
+ * ---
+ *
 // REQUIRES supabase/venue_field_provenance.sql to have been run: this script
 // selects `field_sources` so it can avoid overwriting a photo that was written
 // deliberately. Without the column the select fails with 42703.
@@ -16,15 +34,25 @@ import { createClient } from "@supabase/supabase-js";
 // @ts-expect-error — 'ws' no trae tipos propios y no vale la pena instalar
 // @types/ws solo para este transporte de fallback en Node 20.
 import ws from "ws";
+import { photoUri, placesClient, unwrap } from "./lib/places-calls";
+import { warnSuperseded } from "./lib/superseded";
 
-const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!PLACES_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("Faltan env vars: GOOGLE_PLACES_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error("Faltan env vars: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
+
+warnSuperseded({
+  script: "enrich-venues.ts",
+  replacement: "refresh-venue-from-google.ts",
+  why: "Pide las mismas amenities (nivel Atmosphere, el más caro) que la pasada única ya trae.",
+});
+
+// Sin PLACES_SPEND=1 no se toca la red: informa el costo estimado y sale.
+const places = placesClient("enrich-venues");
 
 // Node 20 no trae WebSocket nativo — el cliente de Supabase lo necesita
 // para inicializar el canal de realtime aunque este script no lo use.
@@ -78,21 +106,11 @@ interface PlaceDetails {
 
 /** Encuentra el place_id real en Google buscando por nombre + dirección. */
 async function findPlaceId(name: string, address: string): Promise<string | null> {
-  const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Goog-Api-Key": PLACES_API_KEY!,
-      "X-Goog-FieldMask": "places.id",
-    },
-    body: JSON.stringify({ textQuery: `${name}, ${address}`, maxResultCount: 1 }),
-  });
-  if (!res.ok) {
-    console.error(`  searchText falló (${res.status}): ${await res.text()}`);
-    return null;
-  }
-  const data = (await res.json()) as PlaceSearchResult;
-  return data.places?.[0]?.id ?? null;
+  const data = await unwrap<PlaceSearchResult>(
+    () => places.searchText(`${name}, ${address}`, ["places.id"]),
+    `buscar ${name}`,
+  );
+  return data?.places?.[0]?.id ?? null;
 }
 
 /** Trae los detalles reales — solo los campos que existen en la respuesta. */
@@ -103,15 +121,11 @@ async function fetchPlaceDetails(placeId: string): Promise<PlaceDetails | null> 
     "accessibilityOptions", "outdoorSeating", "goodForGroups",
     "goodForWatchingSports", "liveMusic", "reservable",
     "servesVegetarianFood", "restroom",
-  ].join(",");
-  const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-    headers: { "X-Goog-Api-Key": PLACES_API_KEY!, "X-Goog-FieldMask": fields },
-  });
-  if (!res.ok) {
-    console.error(`  details falló (${res.status}): ${await res.text()}`);
-    return null;
-  }
-  return (await res.json()) as PlaceDetails;
+  ];
+  return unwrap<PlaceDetails>(
+    () => places.placeDetails(placeId, fields),
+    `details ${placeId}`,
+  );
 }
 
 /** URL directa de la primera foto real del venue — null si Google no tiene ninguna. */
@@ -125,14 +139,7 @@ async function fetchPlaceDetails(placeId: string): Promise<PlaceDetails | null> 
 async function firstPhotoUrl(details: PlaceDetails): Promise<string | null> {
   const photoName = details.photos?.[0]?.name;
   if (!photoName) return null;
-  const res = await fetch(
-    `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=1200&skipHttpRedirect=true`,
-    { headers: { "X-Goog-Api-Key": PLACES_API_KEY! } },
-  );
-  if (!res.ok) return null;
-  const uri = ((await res.json()) as { photoUri?: string }).photoUri ?? null;
-  // Belt and braces: never persist anything still carrying a key.
-  return uri && !uri.includes("key=") && !uri.includes("AIza") ? uri : null;
+  return photoUri(places, photoName);
 }
 
 async function enrichVenue(venue: VenueRow): Promise<void> {

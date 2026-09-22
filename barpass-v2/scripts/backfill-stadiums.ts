@@ -20,14 +20,18 @@
  *   npx tsx scripts/backfill-stadiums.ts
  */
 
+import { placesClient, unwrap } from "./lib/places-calls";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const TM_KEY = process.env.TICKETMASTER_API_KEY;
-const PLACES_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
 if (!SUPABASE_URL || !SERVICE_KEY) throw new Error("Missing Supabase env vars");
 if (!TM_KEY) throw new Error("Missing TICKETMASTER_API_KEY");
-if (!PLACES_KEY) throw new Error("Missing GOOGLE_PLACES_API_KEY");
+
+// Ticketmaster no pasa por acá: es otra API y no es la que se desbordó. Sólo
+// las llamadas a Google están medidas. Sin PLACES_SPEND=1 no se toca la red.
+const places = placesClient("backfill-stadiums");
 
 const DRY_RUN = process.argv.includes("--dry-run");
 
@@ -92,24 +96,17 @@ async function seatmapFor(stadium: Stadium): Promise<string | null> {
 }
 
 async function descriptionFor(stadium: Stadium): Promise<string | null> {
-  const search = await json<{ places?: { id: string }[] }>(
-    "https://places.googleapis.com/v1/places:searchText",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": PLACES_KEY!,
-        "X-Goog-FieldMask": "places.id",
-      },
-      body: JSON.stringify({ textQuery: `${stadium.name}, ${stadium.address}`, maxResultCount: 1 }),
-    },
+  const search = await unwrap<{ places?: { id: string }[] }>(
+    () => places.searchText(`${stadium.name}, ${stadium.address}`, ["places.id"]),
+    `buscar ${stadium.name}`,
   );
   const placeId = search?.places?.[0]?.id;
   if (!placeId) return null;
 
-  const details = await json<{ editorialSummary?: { text?: string } }>(
-    `https://places.googleapis.com/v1/places/${placeId}`,
-    { headers: { "X-Goog-Api-Key": PLACES_KEY!, "X-Goog-FieldMask": "editorialSummary" } },
+  // editorialSummary es nivel Atmosphere: el campo más caro que pide este repo.
+  const details = await unwrap<{ editorialSummary?: { text?: string } }>(
+    () => places.placeDetails(placeId, ["editorialSummary"]),
+    `details ${stadium.name}`,
   );
   return details?.editorialSummary?.text ?? null;
 }

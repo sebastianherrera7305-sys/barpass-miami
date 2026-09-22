@@ -1,4 +1,16 @@
 /**
+ * ⚠ REEMPLAZADO POR `refresh-venue-from-google.ts` (2026-09-14).
+ *
+ * Éste es el caso más caro de todos: pide UN campo, `priceLevel`, que Google
+ * cobra en el nivel Enterprise — y paga ese nivel entero por cada venue, para
+ * traer un número del 1 al 4. La pasada única trae priceLevel junto con
+ * horarios, rating, tipo y foto por el mismo precio.
+ *
+ * No se borra porque PRICE_LEVEL_MAP y la regla "si Google no lo dice, va
+ * NULL, nunca el 2 inventado" son la referencia de cómo se escribe ese campo.
+ *
+ * ---
+ *
  * Corrige price_tier con datos reales de Google Places (API New — Place
  * Details, campo priceLevel). Antes, price_tier era `not null default 2`,
  * así que la mayoría de venues (Miami 87%, Austin 66%) tenían un "2" que
@@ -29,15 +41,25 @@ import { createClient } from "@supabase/supabase-js";
 import ws from "ws";
 import fs from "node:fs";
 import path from "node:path";
+import { placesClient, unwrap } from "./lib/places-calls";
+import { warnSuperseded } from "./lib/superseded";
 
-const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!PLACES_API_KEY || !SUPABASE_URL || !SERVICE_ROLE_KEY) {
-  console.error("Faltan env vars: GOOGLE_PLACES_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error("Faltan env vars: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
+
+warnSuperseded({
+  script: "fix-price-tiers.ts",
+  replacement: "refresh-venue-from-google.ts",
+  why: "Paga un request Enterprise completo por venue para traer un número del 1 al 4.",
+});
+
+// Sin PLACES_SPEND=1 no se toca la red: informa el costo estimado y sale.
+const places = placesClient("fix-price-tiers");
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   realtime: { transport: ws as unknown as typeof WebSocket },
@@ -87,14 +109,10 @@ function saveProgress(done: Set<string>) {
 }
 
 async function fetchPriceLevel(placeId: string): Promise<{ priceLevel?: string } | null> {
-  const res = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
-    headers: { "X-Goog-Api-Key": PLACES_API_KEY!, "X-Goog-FieldMask": "id,priceLevel" },
-  });
-  if (!res.ok) {
-    console.error(`  details falló (${res.status}): ${await res.text()}`);
-    return null;
-  }
-  return (await res.json()) as PlaceDetails;
+  return unwrap<PlaceDetails>(
+    () => places.placeDetails(placeId, ["id", "priceLevel"]),
+    `price ${placeId}`,
+  );
 }
 
 async function fixVenue(venue: VenueRow): Promise<"ok" | "error"> {
