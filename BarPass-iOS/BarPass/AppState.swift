@@ -30,6 +30,8 @@ final class AppState: ObservableObject {
     /// deep-link navigation.
     @Published var pendingRoute:           DeepLinkRoute?
     @Published var showCart               = false
+    /// Lo prende el enlace mágico de un grupo efímero (barpass://group?id=...).
+    @Published var showSafetyGroup        = false
     /// Set by a nested screen (e.g. a university's "nightlife nearby" row)
     /// that wants to jump to a top-level tab. MainTabView observes this and
     /// clears it after switching — never push a tab-root view (ExploreView,
@@ -226,6 +228,7 @@ final class AppState: ObservableObject {
         lastOrderConfirmation = nil
         showPriorityEntry = false
         showCart = false
+        showSafetyGroup = false
     }
 
     /// Pulls the real balance from Supabase — walletBalance always starts at

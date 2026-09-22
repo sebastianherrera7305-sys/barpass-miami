@@ -57,6 +57,21 @@
 		BEAC856794A3D6DA47B0A19D /* PostingGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACC8C06F27313BE6DE1E0C /* PostingGate.swift */; };
 		BEAC41095560A1914FE87B2D /* PostingRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC94271FE524D93CD20534 /* PostingRules.swift */; };
 		BEAC6FF53C6BD3CFAEDA0485 /* PostingRulesSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACFD75658A228E9D8C654B /* PostingRulesSheet.swift */; };
+		BEAC7B790B51704DBC2F0B55 /* ProximityRadarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC18C232A6AFF6A86A5DAD /* ProximityRadarManager.swift */; };
+		BEAC4E4AE36068C4945718A3 /* PushRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACD7C3738FA72785A5F07C /* PushRegistration.swift */; };
+		BEACD902EE37558F6DD18A98 /* SafetyCoverPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC96F29EDE9769FBFC0B11 /* SafetyCoverPresenter.swift */; };
+		BEACBDC7EF271701823DE5A3 /* SafetyPushPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACDE14DCB461B4B8746A91 /* SafetyPushPayload.swift */; };
+		BEAC506DD40A32F9113B8CD3 /* SafetyPushRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC5C14715C7AA888DECFF6 /* SafetyPushRouter.swift */; };
+		BEACE2E203A00F69F3AECD78 /* GroupRadarScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACAB65EB1E7F83D9A2819F /* GroupRadarScreen.swift */; };
+		BEACE832D1274F297CA0F8D4 /* RallyPointIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACA95CD1F34AF1F1488DE9 /* RallyPointIdentity.swift */; };
+		BEACD51C952ADC143C2FDACD /* RallyPointScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACBFF4F8D40A8AD844E011 /* RallyPointScreen.swift */; };
+		BEACCE2BC71447990ECFF47F /* SafetyGroupChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACBFA6E7EEE21CB5603F9E /* SafetyGroupChatView.swift */; };
+		BEAC36690ED742B77CB74FC1 /* SafetyGroupEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC3CA21F712540E453F169 /* SafetyGroupEntry.swift */; };
+		BEACF8D777F679EB9D7BA66F /* SafetyGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC4CDCDA390135FE2B6DE2 /* SafetyGroupStore.swift */; };
+		BEAC886DAADD429306BAC05F /* SafetyGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACAC348BBC304CB731C7EA /* SafetyGroupView.swift */; };
+		BEACFE3645C5600B9A4DFB8D /* SafetyGroupRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC64A2582A44D2832B8018 /* SafetyGroupRepository.swift */; };
+		BEAC008478BF22E9D6574FBC /* SafetyPushClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACB2F3EBDAA3C21E321E95 /* SafetyPushClient.swift */; };
+		BEAC57734BD6712ECC220A6C /* SafetySeekTokenChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACC0A1CB8C8DBD9C6247B8 /* SafetySeekTokenChannel.swift */; };
 		A11B19AC0FF1240000000051 /* HomeShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000052 /* HomeShortcuts.swift */; };
 		19100B146F5FAEB03E2CC33B /* DisplayNameRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C3F541DF838FB639CCF66E /* DisplayNameRepository.swift */; };
 		1E6D56BE3ACE427DB3D6D36B /* CityMascotIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD17F3FC0F64AE68500850D /* CityMascotIcon.swift */; };
@@ -110,6 +125,7 @@
 		BEAC01F96CB894C70EA1CDC7 /* ProximityRadarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC47C88C18DFD146BC7AF7 /* ProximityRadarTests.swift */; };
 		BEAC366DE7296FD9EECF19A1 /* ProximityRadarChannelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC5A092F220A7A1B215B3A /* ProximityRadarChannelTests.swift */; };
 		BEACC9351C0970431B53D1D3 /* BeaconVariantTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACE7CFF07E23624F3DF7EE /* BeaconVariantTests.swift */; };
+		BEAC67C19D58470668B6C784 /* SafetyGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC728F989CF1FE5E7D55A4 /* SafetyGroupTests.swift */; };
 		6DB2BBFD9C2F38D3220A684A /* HypeEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3963062AE9823148A85E40 /* HypeEngineTests.swift */; };
 		75652242527C4F55B1D4A669 /* FraternityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1A059688C549A88BABFEBB /* FraternityListView.swift */; };
 		7A79EB5E27ED4C56B9B794AF /* CityPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C5D564990D482ABF8A0AE5 /* CityPickerView.swift */; };
@@ -338,6 +354,7 @@
 		BEAC47C88C18DFD146BC7AF7 /* ProximityRadarTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ProximityRadarTests.swift; path = BarPassTests/ProximityRadarTests.swift; sourceTree = "<group>"; };
 		BEAC5A092F220A7A1B215B3A /* ProximityRadarChannelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ProximityRadarChannelTests.swift; path = BarPassTests/ProximityRadarChannelTests.swift; sourceTree = "<group>"; };
 		BEACE7CFF07E23624F3DF7EE /* BeaconVariantTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BeaconVariantTests.swift; path = BarPassTests/BeaconVariantTests.swift; sourceTree = "<group>"; };
+		BEAC728F989CF1FE5E7D55A4 /* SafetyGroupTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SafetyGroupTests.swift; path = BarPassTests/SafetyGroupTests.swift; sourceTree = "<group>"; };
 		4C3963062AE9823148A85E40 /* HypeEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HypeEngineTests.swift; path = BarPassTests/HypeEngineTests.swift; sourceTree = "<group>"; };
 		4FD0B5F38D3B8989882A4A65 /* StadiumsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StadiumsListView.swift; path = BarPass/Features/Stadiums/StadiumsListView.swift; sourceTree = SOURCE_ROOT; };
 		54C778D8EC6D60879605EA40 /* CheckInButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CheckInButton.swift; path = BarPass/Features/Tonight/CheckInButton.swift; sourceTree = SOURCE_ROOT; };
@@ -409,6 +426,21 @@
 		BEACC8C06F27313BE6DE1E0C /* PostingGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PostingGate.swift; path = BarPass/Features/Posting/PostingGate.swift; sourceTree = SOURCE_ROOT; };
 		BEAC94271FE524D93CD20534 /* PostingRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PostingRules.swift; path = BarPass/Features/Posting/PostingRules.swift; sourceTree = SOURCE_ROOT; };
 		BEACFD75658A228E9D8C654B /* PostingRulesSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PostingRulesSheet.swift; path = BarPass/Features/Posting/PostingRulesSheet.swift; sourceTree = SOURCE_ROOT; };
+		BEAC18C232A6AFF6A86A5DAD /* ProximityRadarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProximityRadarManager.swift; path = BarPass/Core/Services/ProximityRadarManager.swift; sourceTree = SOURCE_ROOT; };
+		BEACD7C3738FA72785A5F07C /* PushRegistration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PushRegistration.swift; path = BarPass/Core/Services/PushRegistration.swift; sourceTree = SOURCE_ROOT; };
+		BEAC96F29EDE9769FBFC0B11 /* SafetyCoverPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyCoverPresenter.swift; path = BarPass/Core/Services/SafetyCoverPresenter.swift; sourceTree = SOURCE_ROOT; };
+		BEACDE14DCB461B4B8746A91 /* SafetyPushPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyPushPayload.swift; path = BarPass/Core/Services/SafetyPushPayload.swift; sourceTree = SOURCE_ROOT; };
+		BEAC5C14715C7AA888DECFF6 /* SafetyPushRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyPushRouter.swift; path = BarPass/Core/Services/SafetyPushRouter.swift; sourceTree = SOURCE_ROOT; };
+		BEACAB65EB1E7F83D9A2819F /* GroupRadarScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GroupRadarScreen.swift; path = BarPass/Features/Safety/GroupRadarScreen.swift; sourceTree = SOURCE_ROOT; };
+		BEACA95CD1F34AF1F1488DE9 /* RallyPointIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RallyPointIdentity.swift; path = BarPass/Features/Safety/RallyPointIdentity.swift; sourceTree = SOURCE_ROOT; };
+		BEACBFF4F8D40A8AD844E011 /* RallyPointScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RallyPointScreen.swift; path = BarPass/Features/Safety/RallyPointScreen.swift; sourceTree = SOURCE_ROOT; };
+		BEACBFA6E7EEE21CB5603F9E /* SafetyGroupChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupChatView.swift; path = BarPass/Features/Safety/SafetyGroupChatView.swift; sourceTree = SOURCE_ROOT; };
+		BEAC3CA21F712540E453F169 /* SafetyGroupEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupEntry.swift; path = BarPass/Features/Safety/SafetyGroupEntry.swift; sourceTree = SOURCE_ROOT; };
+		BEAC4CDCDA390135FE2B6DE2 /* SafetyGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupStore.swift; path = BarPass/Features/Safety/SafetyGroupStore.swift; sourceTree = SOURCE_ROOT; };
+		BEACAC348BBC304CB731C7EA /* SafetyGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupView.swift; path = BarPass/Features/Safety/SafetyGroupView.swift; sourceTree = SOURCE_ROOT; };
+		BEAC64A2582A44D2832B8018 /* SafetyGroupRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupRepository.swift; path = BarPass/Repositories/SafetyGroupRepository.swift; sourceTree = SOURCE_ROOT; };
+		BEACB2F3EBDAA3C21E321E95 /* SafetyPushClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyPushClient.swift; path = BarPass/Repositories/SafetyPushClient.swift; sourceTree = SOURCE_ROOT; };
+		BEACC0A1CB8C8DBD9C6247B8 /* SafetySeekTokenChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetySeekTokenChannel.swift; path = BarPass/Repositories/SafetySeekTokenChannel.swift; sourceTree = SOURCE_ROOT; };
 		A11B19AC0FF1240000000052 /* HomeShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HomeShortcuts.swift; path = BarPass/Core/Services/HomeShortcuts.swift; sourceTree = SOURCE_ROOT; };
 		981C73E1C26EF3207D31A9F2 /* RemyLocalChat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemyLocalChat.swift; sourceTree = "<group>"; };
 		9944A65EAC0560419D02323C /* Stadium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Stadium.swift; path = BarPass/Models/Stadium.swift; sourceTree = SOURCE_ROOT; };
@@ -623,6 +655,7 @@
 				BEAC47C88C18DFD146BC7AF7 /* ProximityRadarTests.swift */,
 				BEAC5A092F220A7A1B215B3A /* ProximityRadarChannelTests.swift */,
 				BEACE7CFF07E23624F3DF7EE /* BeaconVariantTests.swift */,
+				BEAC728F989CF1FE5E7D55A4 /* SafetyGroupTests.swift */,
 				4C3963062AE9823148A85E40 /* HypeEngineTests.swift */,
 				856638E27CF7A56A57535A80 /* KeychainServiceTests.swift */,
 				BF31AC3E1809B2072DE6CA9C /* ModelCodableTests.swift */,
@@ -706,6 +739,21 @@
 				BEACC8C06F27313BE6DE1E0C /* PostingGate.swift */,
 				BEAC94271FE524D93CD20534 /* PostingRules.swift */,
 				BEACFD75658A228E9D8C654B /* PostingRulesSheet.swift */,
+				BEAC18C232A6AFF6A86A5DAD /* ProximityRadarManager.swift */,
+				BEACD7C3738FA72785A5F07C /* PushRegistration.swift */,
+				BEAC96F29EDE9769FBFC0B11 /* SafetyCoverPresenter.swift */,
+				BEACDE14DCB461B4B8746A91 /* SafetyPushPayload.swift */,
+				BEAC5C14715C7AA888DECFF6 /* SafetyPushRouter.swift */,
+				BEACAB65EB1E7F83D9A2819F /* GroupRadarScreen.swift */,
+				BEACA95CD1F34AF1F1488DE9 /* RallyPointIdentity.swift */,
+				BEACBFF4F8D40A8AD844E011 /* RallyPointScreen.swift */,
+				BEACBFA6E7EEE21CB5603F9E /* SafetyGroupChatView.swift */,
+				BEAC3CA21F712540E453F169 /* SafetyGroupEntry.swift */,
+				BEAC4CDCDA390135FE2B6DE2 /* SafetyGroupStore.swift */,
+				BEACAC348BBC304CB731C7EA /* SafetyGroupView.swift */,
+				BEAC64A2582A44D2832B8018 /* SafetyGroupRepository.swift */,
+				BEACB2F3EBDAA3C21E321E95 /* SafetyPushClient.swift */,
+				BEACC0A1CB8C8DBD9C6247B8 /* SafetySeekTokenChannel.swift */,
 				A11B19AC0FF1240000000052 /* HomeShortcuts.swift */,
 				AD594030C69C33F1DB823472 /* HelpGuideStore.swift */,
 				B255F26D4A13547562CDF99B /* HelpTargetAnchor.swift */,
@@ -1208,6 +1256,7 @@
 				BEAC01F96CB894C70EA1CDC7 /* ProximityRadarTests.swift in Sources */,
 				BEAC366DE7296FD9EECF19A1 /* ProximityRadarChannelTests.swift in Sources */,
 				BEACC9351C0970431B53D1D3 /* BeaconVariantTests.swift in Sources */,
+				BEAC67C19D58470668B6C784 /* SafetyGroupTests.swift in Sources */,
 				6DB2BBFD9C2F38D3220A684A /* HypeEngineTests.swift in Sources */,
 				045900B0B0374875CD4DF42D /* KeychainServiceTests.swift in Sources */,
 				3B997A737FD4B9BDABFA9D2B /* ModelCodableTests.swift in Sources */,
@@ -1384,6 +1433,21 @@
 				BEAC856794A3D6DA47B0A19D /* PostingGate.swift in Sources */,
 				BEAC41095560A1914FE87B2D /* PostingRules.swift in Sources */,
 				BEAC6FF53C6BD3CFAEDA0485 /* PostingRulesSheet.swift in Sources */,
+				BEAC7B790B51704DBC2F0B55 /* ProximityRadarManager.swift in Sources */,
+				BEAC4E4AE36068C4945718A3 /* PushRegistration.swift in Sources */,
+				BEACD902EE37558F6DD18A98 /* SafetyCoverPresenter.swift in Sources */,
+				BEACBDC7EF271701823DE5A3 /* SafetyPushPayload.swift in Sources */,
+				BEAC506DD40A32F9113B8CD3 /* SafetyPushRouter.swift in Sources */,
+				BEACE2E203A00F69F3AECD78 /* GroupRadarScreen.swift in Sources */,
+				BEACE832D1274F297CA0F8D4 /* RallyPointIdentity.swift in Sources */,
+				BEACD51C952ADC143C2FDACD /* RallyPointScreen.swift in Sources */,
+				BEACCE2BC71447990ECFF47F /* SafetyGroupChatView.swift in Sources */,
+				BEAC36690ED742B77CB74FC1 /* SafetyGroupEntry.swift in Sources */,
+				BEACF8D777F679EB9D7BA66F /* SafetyGroupStore.swift in Sources */,
+				BEAC886DAADD429306BAC05F /* SafetyGroupView.swift in Sources */,
+				BEACFE3645C5600B9A4DFB8D /* SafetyGroupRepository.swift in Sources */,
+				BEAC008478BF22E9D6574FBC /* SafetyPushClient.swift in Sources */,
+				BEAC57734BD6712ECC220A6C /* SafetySeekTokenChannel.swift in Sources */,
 				A11B19AC0FF1240000000051 /* HomeShortcuts.swift in Sources */,
 				A2CF02FBB442045B9D9084FF /* HelpGuideStore.swift in Sources */,
 				EE01BC57203A630FF06E9694 /* HelpTargetAnchor.swift in Sources */,

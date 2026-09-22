@@ -232,7 +232,7 @@ struct BeaconBroadcastView: View {
                 try await RepositoryDependencies.safetyBeacon.resolve(beaconId: beacon.id)
                 // Sin esperar al poll: el store llega a lo mismo, hasta 30 s
                 // después, y para entonces esta pantalla ya no existe.
-                flares.stop()
+                flares.stop(by: .mine)
                 store.refreshNow()
                 dismiss()
             } catch {

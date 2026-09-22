@@ -10,6 +10,9 @@ enum DeepLinkRoute: Equatable {
     case venue(id: String)
     case pass(id: String)       // future
     case invite(code: String)   // future
+    /// Enlace mágico de un grupo efímero: `barpass://group?id={groupId}`.
+    /// Entra sin pedir el código de 6 caracteres.
+    case group(id: String)
     case profile(id: String)    // future
     /// Opens Tonight with the Prompt Your Night text field already focused —
     /// the Home Screen widget's "prompt" button target. No id: unlike the
@@ -36,6 +39,16 @@ enum DeepLinkRoute: Equatable {
 /// an unsupported scheme — so the caller can no-op instead of dead-ending or
 /// crashing.
 enum DeepLinkRouter {
+    /// `barpass://group?id={uuid}`. Sólo el id, y sólo si es un UUID: cualquier
+    /// otra cosa (sin id, id vacío, id que no es un UUID, otro parámetro) es un
+    /// enlace que no se puede accionar y devuelve nil, nunca una ruta a medias.
+    private static func groupRoute(from url: URL) -> DeepLinkRoute? {
+        guard let id = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+            .queryItems?.first(where: { $0.name == "id" })?.value,
+              UUID(uuidString: id) != nil else { return nil }
+        return .group(id: id)
+    }
+
     static func parse(_ url: URL) -> DeepLinkRoute? {
         let type: String
         let rawValue: String
@@ -52,6 +65,7 @@ enum DeepLinkRouter {
             case "social": return .social
             case "passes": return .passes
             case "feedback": return .feedback
+            case "group": return groupRoute(from: url)
             case "me": return .me
             // "profile" SIN id es tu propio perfil; con id es el de otra
             // persona. El atajo tiene que mirar el path antes de contestar —

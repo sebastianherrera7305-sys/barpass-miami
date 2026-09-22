@@ -169,6 +169,11 @@ struct RootView: View {
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: cart.itemCount)
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: checkInStore.activeCheckin?.checkinId)
         .task { await checkInStore.load() }
+        .task { SafetyGroupStore.shared.start() }
+        // Enlace mágico (barpass://group?id=...): muestra el grupo al que se entró. El
+        // radar y el faro los presenta SafetyCoverPresenter desde UIKit, encima de
+        // cualquier sheet abierto, así que RootView no declara ningún cover.
+        .sheet(isPresented: $appState.showSafetyGroup) { SafetyGroupView() }
         // Retries AgeGateView's fire-and-forget birthdate write — every
         // profile in the DB showed a null birthdate despite the local gate
         // having been passed, because that write has no retry today. Cheap

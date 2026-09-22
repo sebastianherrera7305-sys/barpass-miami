@@ -201,6 +201,10 @@ final class AuthService: @unchecked Sendable {
                 applyHeaders(&request)
                 request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
                 _ = try? await Self.customSession.data(for: request)
+                // Antes de que la sesión desaparezca: sin ella no hay con qué
+                // autorizar el borrado del token, y el teléfono seguiría recibiendo
+                // los avisos de la cuenta anterior.
+                await PushRegistration.unregisterStoredToken(accessToken: token)
             }
         }
 
@@ -211,6 +215,12 @@ final class AuthService: @unchecked Sendable {
         // sheet doesn't lose it (see CardDraft). It must not survive into the
         // next person's session on a shared device.
         Task { @MainActor in CardDraft.shared.clear() }
+        // El grupo efímero, su chat, el radar y el faro son de la cuenta que cerró
+        // sesión, no de la siguiente en este teléfono.
+        Task { @MainActor in
+            SafetyGroupStore.shared.reset()
+            PushRegistration.shared.didSignOut()
+        }
         // Same shared-device leak, different data: Remy's Plan chat history
         // (including the opening greeting, which has the previous account's
         // display name baked into its text) was plain UserDefaults with no

@@ -44,6 +44,10 @@ enum RepositoryDependencies {
     nonisolated(unsafe) static var safetyBeacon: SafetyBeaconRepository = SupabaseSafetyBeaconRepository()
     nonisolated(unsafe) static var venueMedia: VenueMediaRepository = SupabaseVenueMediaRepository()
 
+    /// Grupo efímero + chat efímero + "buscar al líder" con push
+    /// (supabase/safety_groups.sql). A diferencia del beacon, esto SÍ tiene push.
+    nonisolated(unsafe) static var safetyGroup: SafetyGroupRepository = SupabaseSafetyGroupRepository()
+
     /// Stories — the same venue_media rows, read inside the night they were
     /// posted in (supabase/venue_stories.sql). No new table, no new upload
     /// path; posting a photo after a check-in already creates one.

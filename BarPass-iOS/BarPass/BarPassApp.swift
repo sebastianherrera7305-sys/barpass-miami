@@ -48,6 +48,9 @@ struct BarPassApp: App {
                 // own NWPathMonitor covers reconnects while the app is open;
                 // this covers the far more common "phone was in a pocket".
                 .onChange(of: scenePhase) { _, phase in
+                    // El grupo efímero pregunta sólo con la app activa; lo que
+                    // llega con la app cerrada llega por push.
+                    if phase == .active { SafetyGroupStore.shared.start() } else { SafetyGroupStore.shared.stop() }
                     guard phase == .active else { return }
                     Task { await OfflineQueue.shared.flush() }
                 }
@@ -71,6 +74,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         // cuenta y lo baje a mano. La función estaba escrita y documentada
         // como "llamar una vez al arrancar"; no la llamaba nadie.
         MainActor.assumeIsolated { BeaconFlares.restoreOrphanedBrightness() }
+        // Escucha el token de APNs (y lo re-registra si ya hubo permiso). El
+        // permiso en sí se pide al crear o entrar a un grupo, no acá.
+        MainActor.assumeIsolated { PushRegistration.shared.start() }
 
         // Cold start FROM the menu: iOS hands the item here and does NOT call
         // performActionFor afterwards. Posting it now would be too early —
@@ -152,6 +158,19 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         #endif
     }
 
+    /// Push silencioso (`content-available`): sólo refresca datos del grupo.
+    /// Nunca enciende pantalla ni linterna.
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        nonisolated(unsafe) let handler = completionHandler
+        let info = SafetyPushBox(userInfo)
+        Task {
+            let handled = await SafetyPushRouter.handleSilentPush(userInfo: info.value)
+            handler(handled ? .newData : .noData)
+        }
+    }
+
     // MARK: - Deep links
 
     private static let allowedCustomPaths: Set<String> = [
@@ -226,6 +245,12 @@ extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
+        // "Alguien te busca": abre el RADAR (en primer plano, con verificación de
+        // servidor). No navega a ningún otro lado y NO enciende el faro.
+        if SafetyPushRouter.handleTap(userInfo: userInfo) {
+            completionHandler()
+            return
+        }
         if let deepLink = userInfo["deep_link"] as? String,
            let url = URL(string: deepLink),
            isValidDeepLink(url) {
@@ -233,6 +258,13 @@ extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
         }
         completionHandler()
     }
+}
+
+/// `[AnyHashable: Any]` no es `Sendable`; el payload de un push es JSON de
+/// sólo lectura y se lee una vez, así que se envuelve para cruzar al `Task`.
+private struct SafetyPushBox: @unchecked Sendable {
+    let value: [AnyHashable: Any]
+    init(_ value: [AnyHashable: Any]) { self.value = value }
 }
 
 extension Notification.Name {

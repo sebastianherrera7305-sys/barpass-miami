@@ -19,6 +19,24 @@ final class BeaconFlares: ObservableObject {
 
     @Published private(set) var state: BeaconFlareState = .idle
 
+    /// De QUIÉN es la luz que está prendida. Hay dos dueños y no se pisan:
+    /// `.mine` es el faro propio, el AUXILIO ("estoy acá, vengan": `SafetyBeaconStore` y
+    /// `BeaconBroadcastView`) y `.rally` es el punto de encuentro del
+    /// líder de un grupo efímero (`RallyPointScreen`). Cada uno apaga SÓLO la suya (`stop(by:)`), así
+    /// ninguno tiene que mirar el estado del otro para saber si le toca apagar.
+    /// La garantía de "se apaga aunque nadie esté mirando" queda intacta para
+    /// los dos.
+    enum Owner: Sendable, Equatable { case mine, rally }
+    private(set) var owner: Owner?
+
+    /// Pura, para probarla. `requester == nil` es un apagado FORZADO (cierre de
+    /// sesión, `deinit`): apaga sea de quien sea. Si nadie tiene la luz, apagar
+    /// es inofensivo e idempotente.
+    nonisolated static func shouldStop(holder: Owner?, requester: Owner?) -> Bool {
+        guard let requester, let holder else { return true }
+        return holder == requester
+    }
+
     private var pattern: FlarePattern = .steady
     /// El instante del que derivan TANTO la pantalla como la linterna. Sin
     /// esto cada capa corría su propio reloj: `Task.sleep` garantiza "al
@@ -79,7 +97,11 @@ final class BeaconFlares: ObservableObject {
     /// explícita, que era toda la razón de ser del tope, no existía. Un
     /// teléfono olvidado en un bolsillo no puede producir un toque; ése era
     /// justamente el punto.
-    func start(pattern: FlarePattern, anchoredAt anchor: Date = Date(), renewing: Bool = false) {
+    func start(pattern: FlarePattern, anchoredAt anchor: Date = Date(), renewing: Bool = false,
+               owner: Owner = .mine) {
+        // Quien ARRANCA es el dueño: el faro propio de una persona en
+        // problemas manda sobre el punto de encuentro (`.mine` puede tomar la luz).
+        self.owner = owner
         self.pattern = pattern
         self.anchor = anchor
         // Una sesión vencida sólo la revive el usuario. Sin eso, quedate
@@ -110,7 +132,10 @@ final class BeaconFlares: ObservableObject {
         scheduleExpiry()
     }
 
-    func stop() {
+    /// `by == nil` apaga sea de quien sea; con un dueño, sólo si la luz es suya.
+    func stop(by requester: Owner? = nil) {
+        guard Self.shouldStop(holder: owner, requester: requester) else { return }
+        owner = nil
         pulseTask?.cancel(); pulseTask = nil
         expiryTask?.cancel(); expiryTask = nil
         endsAt = nil
@@ -310,6 +335,7 @@ final class BeaconFlares: ObservableObject {
     }
 
     private func expire() {
+        owner = nil
         pulseTask?.cancel(); pulseTask = nil
         torchAllowed = false
         Self.setTorch(on: false, level: torchLevel)

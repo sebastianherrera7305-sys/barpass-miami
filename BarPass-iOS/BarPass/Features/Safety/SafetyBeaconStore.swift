@@ -128,7 +128,9 @@ final class SafetyBeaconStore: ObservableObject {
     /// se resuelve o vence, tiene que apagarse aunque nadie esté mirando.
     private func syncFlares() {
         guard let beacon = mine, !beacon.isResolved else {
-            if BeaconFlares.shared.state != .idle { BeaconFlares.shared.stop() }
+            // Sólo la luz PROPIA: el punto de encuentro tiene otro dueño y su propia
+            // garantía de apagado, así que este poll no lo toca ni lo consulta.
+            if BeaconFlares.shared.state != .idle { BeaconFlares.shared.stop(by: .mine) }
             return
         }
         // El ancla es cuándo NACIÓ el beacon, no cuándo se montó la vista:

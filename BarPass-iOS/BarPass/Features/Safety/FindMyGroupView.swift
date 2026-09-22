@@ -43,8 +43,6 @@ struct FindMyGroupView: View {
     @State private var showAddFriends = false
     @State private var showRaiseConfirm = false
     @State private var raisedAudienceCount: Int?
-    /// El radar se presenta en sheet porque trae su propio `NavigationStack`.
-    @State private var radarTarget: SafetyBeacon?
     /// Los contadores se muestran en minutos, así que 5 s alcanza y evita
     /// redibujar la lista entera una vez por segundo en un salón lleno.
     @State private var now = Date()
@@ -118,11 +116,6 @@ struct FindMyGroupView: View {
         }
         .sheet(isPresented: $showAddFriends, onDismiss: { reloadAudience() }) {
             NavigationStack { AddFriendView() }
-        }
-        // Una sesión de NearbyInteraction es 1 a 1: el par es quien levantó
-        // la mano, que es exactamente a quien vamos a buscar.
-        .sheet(item: $radarTarget) { target in
-            ProximityRadarView(beacon: target, peerUserId: target.userId, peerName: target.name)
         }
         .confirmationDialog(l10n.t("safety.raise.confirm.title"), isPresented: $showRaiseConfirm) {
             Button(l10n.t("safety.beacon.raise")) { raise() }
@@ -198,7 +191,11 @@ struct FindMyGroupView: View {
                             now: now,
                             isAcking: pendingAcks.contains(entry.id),
                             onAcknowledge: { acknowledge(entry.beacon) },
-                            onFind: { radarTarget = entry.beacon }
+                            // Una sesión de NearbyInteraction es 1 a 1: el par es quien
+                            // levantó la mano, que es exactamente a quien vamos a buscar.
+                            // El radar lo presenta el router: UNA presentación de radar
+                            // para todo, y sobre cualquier sheet abierto.
+                            onFind: { SafetyPushRouter.shared.presentBeaconRadar(entry.beacon) }
                         )
                     }
                 }

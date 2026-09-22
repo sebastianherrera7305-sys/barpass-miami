@@ -29,6 +29,12 @@
 	<!-- Shared with BarPassWidget (Widget Extension target) — lets
 	     GoHomeStore write the saved home coordinates somewhere the widget
 	     process can read without hitting Supabase/Keychain itself. -->
+	<!-- Push "Buscar al líder" (time-sensitive). Sin esta clave iOS entrega el
+	     aviso como uno normal: la feature sigue funcionando, pero no atraviesa un
+	     Focus. Requiere también activar "Time Sensitive Notifications" en el App ID
+	     (Xcode: Signing & Capabilities -> + Capability). -->
+	<key>com.apple.developer.usernotifications.time-sensitive</key>
+	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
 		<string>group.com.sebastian.barpass</string>

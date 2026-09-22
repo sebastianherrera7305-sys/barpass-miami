@@ -291,6 +291,14 @@ struct MainTabView: View {
             appState.consumeRoute()
         case .pass, .profile:
             appState.consumeRoute()
+        case .group(let id):
+            // Enlace mágico: entra al grupo sin pedir el código y muestra a
+            // dónde entró. Si ya hay otro grupo vivo, el error se ve en pantalla.
+            appState.consumeRoute()
+            Task {
+                await SafetyGroupStore.shared.joinFromLink(groupId: id)
+                appState.showSafetyGroup = true
+            }
         case .tonightPrompt:
             selectedTab = 0
             appState.focusPromptRequested = true

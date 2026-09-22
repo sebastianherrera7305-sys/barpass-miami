@@ -37,6 +37,7 @@ struct TripsListView: View {
         }
         .onAppear { BPAnalytics.track(.viewScreen("Trips")) }
         .navigationTitle(l10n.t("trips.yourTrips"))
+        .toolbar { ToolbarItem(placement: .topBarTrailing) { SafetyGroupEntryButton() } }
         .task { await tripStore.loadTrips() }
         // Deep link `barpass://trip/{id}` — MainTabView has already switched to
         // this tab; load trips if needed, then open the existing detail sheet.
