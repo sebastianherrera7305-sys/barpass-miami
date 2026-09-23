@@ -83,6 +83,19 @@ const ONLY = flag("--only");
  * spending ~2 min each on startup + a full catalog query, for a 3.5h run). */
 const IDS_FILE = flag("--ids-file");
 const APPLY = args.includes("--apply");
+
+// LA COMPUERTA DE GASTO, agregada 2026-09-23.
+//
+// `--apply` controla si se ESCRIBE en Supabase, no si se GASTA: hasta hoy un
+// "dry run" igual llamaba a Gemini y a NVIDIA por cada venue. Es la misma
+// trampa que costó USD 655 en Places el 14 de septiembre — creer que estás
+// simulando mientras la tarjeta corre.
+//
+// Sin `--spend`, las partes gratis (buscar la carta, bajar el HTML) corren
+// igual y el script te dice cuántas llamadas al modelo HARÍA. Con eso sabés
+// el tamaño antes de pagarlo.
+const SPEND = args.includes("--spend") || process.env.AI_SPEND === "1";
+const wouldSpend = { vision: 0, text: 0 };
 const FORCE = args.includes("--force");
 const RECHECK_DAYS = Number(flag("--recheck-days") ?? 90);
 
@@ -237,6 +250,7 @@ async function visionExtract(venue: DbVenue, assetUrl: string): Promise<{ drinks
   // A 503 here is transient and expensive to ignore: the first Gainesville
   // run lost Boxcar's 24-item menu to one, fell through to a smaller image,
   // and recorded 6 drinks as if that were the whole card.
+  if (!SPEND) { wouldSpend.vision++; return null; }
   for (let attempt = 1; attempt <= 4; attempt++) {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 180000);
@@ -279,6 +293,7 @@ const MODEL_RETRIES = 4;
 async function extract(venue: DbVenue, text: string): Promise<Extracted | null> {
   const prompt = extractionPrompt(venue, text);
   let json: { choices?: Array<{ message?: { content?: string } }> } | null = null;
+  if (!SPEND) { wouldSpend.text++; return null; }
   for (let attempt = 1; attempt <= MODEL_RETRIES && !json; attempt++) {
     // Bounded: one hung NIM call (undici headers timeout at 5 min) took the
     // whole run down on the first dry run. 120s is generous for a 1.2K-token reply.
@@ -431,7 +446,7 @@ async function main() {
     const fs = { ...(v.field_sources ?? {}) } as Record<string, FieldSource | undefined>;
 
     const ex = hasPricedText(text) ? await extract(v, text) : { drinks: [], happy_hour: null };
-    if (!ex) { console.log(`- ${v.name}: model call failed (nothing recorded)`); continue; }
+    if (!ex) { console.log(SPEND ? `- ${v.name}: model call failed (nothing recorded)` : `- ${v.name}: se saltea la llamada al modelo (simulación)`); continue; }
 
     // The text path found nothing. Before writing this venue off, look for a
     // menu published as an image or PDF — which is what most bars actually do.
@@ -503,6 +518,11 @@ async function main() {
     patch.field_sources = fs;
     const upErr = await updateVenue(v.id, patch);
     if (upErr) console.error(`  write failed for ${v.name}: ${upErr}`); else written++;
+  }
+  if (!SPEND) {
+    console.log(`\n[SIMULACIÓN] No se llamó a ningún modelo y no se gastó nada.`);
+    console.log(`  llamadas que HARÍA: ${wouldSpend.vision} de visión (Gemini) + ${wouldSpend.text} de texto (NVIDIA)`);
+    console.log(`  para ejecutarlo de verdad: agregá --spend (y --apply para guardar)`);
   }
   console.log(`\nDone: ${withMenu}/${venues.length} venues had priced drink menus (${viaVision} readable only as an image)${APPLY ? `, ${written} written, ${noneRecorded} recorded as none_published` : ""}.`);
 }

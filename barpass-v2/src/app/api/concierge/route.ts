@@ -163,10 +163,36 @@ export async function POST(request: Request) {
   // APIClient.streamConciergeChat), so the per-minute window alone lets one
   // IP run ~28K model calls a day. 400/day is far above any real user's
   // chatting and bounds what an abuser can cost. Both checks fail-open.
-  const [withinMinute, withinDay] = await Promise.all([
+  // EL TECHO GLOBAL, agregado 2026-09-23. Los dos límites de arriba son POR
+  // IP: acotan lo que puede costar UNA persona, no lo que puede costar el
+  // producto. Mil usuarios legítimos son mil veces el gasto y ninguno de los
+  // dos se entera. Este tercero cuenta todas las llamadas juntas.
+  //
+  // Existe por una razón concreta: el 14 de septiembre de 2026 un gasto sin
+  // techo en otra API se llevó USD 655 en un día y el fundador se enteró por
+  // el resumen de la tarjeta. Un número acá es la diferencia entre "Remy no
+  // anduvo una noche" y "no sé cómo pago la renta".
+  //
+  // 8.000/día: muy por encima del uso real de hoy y de un crecimiento
+  // razonable (400 usuarios haciendo 20 turnos cada uno). Si se toca, no es
+  // tráfico normal: es un pico que hay que mirar antes de subir el número.
+  // Se puede cambiar sin deploy de código con CONCIERGE_DAILY_CALL_CAP.
+  const globalCap = Number(process.env.CONCIERGE_DAILY_CALL_CAP ?? 8_000);
+  const [withinMinute, withinDay, withinGlobalDay] = await Promise.all([
     checkRateLimit(`concierge:${ip}`, { maxRequests: 20, windowSeconds: 60 }),
     checkRateLimit(`concierge-day:${ip}`, { maxRequests: 400, windowSeconds: 86_400 }),
+    checkRateLimit("concierge-day:GLOBAL", { maxRequests: globalCap, windowSeconds: 86_400 }),
   ]);
+  if (!withinGlobalDay) {
+    // Se avisa fuerte en el log: llegar acá no es un usuario molesto, es una
+    // señal de que algo cambió — o creciste de golpe, o alguien está abusando.
+    console.error("[concierge] TECHO GLOBAL DIARIO ALCANZADO", { cap: globalCap });
+    return aiError(
+      "rate_limited", 429,
+      "Remy alcanzó su límite de hoy. Vuelve mañana.",
+      { retryAfterSeconds: 3600 },
+    );
+  }
   if (!withinMinute) {
     return aiError("rate_limited", 429, "Remy is busy — give it a minute and try again.", { retryable: true, retryAfterSeconds: 60 });
   }

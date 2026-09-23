@@ -66,6 +66,12 @@ const CITY = flag("--city") ?? "Miami";
 const LIMIT = Number(flag("--limit") ?? 9999);
 const ONLY = flag("--only");
 const APPLY = args.includes("--apply");
+
+// Misma compuerta que extract-drink-menus.ts: `--apply` decide si se ESCRIBE,
+// no si se GASTA. Sin `--spend`, el script recorre y cuenta las llamadas al
+// modelo que haría, sin hacer ninguna.
+const SPEND = args.includes("--spend") || process.env.AI_SPEND === "1";
+let wouldSpendCalls = 0;
 const FORCE = args.includes("--force");
 const RECHECK_DAYS = Number(flag("--recheck-days") ?? 90);
 
@@ -131,6 +137,7 @@ interface ModelAnswer {
 async function askModel(venue: DbVenue, text: string): Promise<ModelAnswer | null> {
   const prompt = doorFactsPrompt(venue, text);
   let json: { choices?: Array<{ message?: { content?: string } }> } | null = null;
+  if (!SPEND) { wouldSpendCalls++; return null; }
   for (let attempt = 1; attempt <= MODEL_RETRIES && !json; attempt++) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 120_000);
@@ -302,7 +309,7 @@ async function main() {
     const today = fetchedAt.slice(0, 10);
     const fs = { ...(v.field_sources ?? {}) } as Record<string, FieldSource | undefined>;
     const ans = used.length > 0 ? await askModel(v, text) : {};
-    if (!ans) { console.log(`- ${v.name}: model call failed (nothing recorded)`); continue; }
+    if (!ans) { console.log(SPEND ? `- ${v.name}: model call failed (nothing recorded)` : `- ${v.name}: se saltea la llamada al modelo (simulación)`); continue; }
 
     const cover = used.length > 0 ? verifyCover(ans, text) : null;
     const dress = used.length > 0 ? verifyDress(ans, text) : null;
@@ -359,6 +366,12 @@ async function main() {
     const upErr = await updateVenue(v.id, patch);
     if (upErr) console.error(`  write failed for ${v.name}: ${upErr}`); else written++;
   }
+  if (!SPEND) {
+    console.log(`\n[SIMULACIÓN] No se llamó a ningún modelo y no se gastó nada.`);
+    console.log(`  llamadas que HARÍA: ${wouldSpendCalls}`);
+    console.log(`  para ejecutarlo de verdad: agregá --spend (y --apply para guardar)`);
+  }
+
   console.log(`\nDone: ${withFacts}/${venues.length} venues published a verifiable door fact (${conditionalOnly} stated a conditional cover, deliberately not written)${APPLY ? `, ${written} written, ${noneRecorded} recorded as none_published` : ""}.`);
 }
 
