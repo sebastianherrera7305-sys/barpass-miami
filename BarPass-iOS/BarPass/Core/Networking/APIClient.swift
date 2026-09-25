@@ -490,14 +490,31 @@ enum APIClient {
         var currentVenueId: String? = nil
         var favoriteVenueIds: [String] = []
         var userLocation: (lat: Double, lng: Double)? = nil
+        /// "free" | "premium" — lets the system prompt build a longer,
+        /// multi-stop night for Premium and a shorter one for Free (server
+        /// also enforces the Free cap after the model replies, in case it
+        /// doesn't follow the instruction — see reply-stream.ts). Free
+        /// omits this rather than sending "free" explicitly so a request
+        /// with no context at all stays exactly as small as before this
+        /// existed.
+        var tier: String? = nil
+        /// Premium-only cross-conversation memory — a short line distilled
+        /// from the user's last plan (see `PlanPreferencesService`). Never
+        /// set for Free.
+        var rememberedVibe: String? = nil
 
-        var isEmpty: Bool { currentVenueId == nil && favoriteVenueIds.isEmpty && userLocation == nil }
+        var isEmpty: Bool {
+            currentVenueId == nil && favoriteVenueIds.isEmpty && userLocation == nil
+                && tier == nil && rememberedVibe == nil
+        }
 
         var json: [String: Any] {
             var out: [String: Any] = [:]
             if let currentVenueId { out["currentVenueId"] = currentVenueId }
             if !favoriteVenueIds.isEmpty { out["favoriteVenueIds"] = Array(favoriteVenueIds.prefix(30)) }
             if let userLocation { out["userLocation"] = ["lat": userLocation.lat, "lng": userLocation.lng] }
+            if let tier { out["tier"] = tier }
+            if let rememberedVibe, !rememberedVibe.isEmpty { out["rememberedVibe"] = rememberedVibe }
             return out
         }
     }

@@ -267,7 +267,13 @@ export async function POST(request: Request) {
     favoriteIds: new Set(ctx?.favoriteVenueIds ?? []),
     excludeId: currentVenue?.id,
   });
-  const systemInstruction = buildConciergeSystemPrompt(shortlist, { currentVenue, favorites, origin, timeZone });
+  // Premium vs Free (2026-09-16): absent/anything-but-"premium" behaves
+  // exactly as before this existed — a request with no context at all is
+  // still "free" and still gets the pre-existing prompt behavior.
+  const tier = ctx?.tier === "premium" ? "premium" : "free";
+  const systemInstruction = buildConciergeSystemPrompt(shortlist, {
+    currentVenue, favorites, origin, timeZone, tier, rememberedVibe: ctx?.rememberedVibe,
+  });
   // The last message decides; if it's too short to tell (a venue name, "ok"),
   // fall back to the whole conversation rather than defaulting to English.
   const lastUserMessage = [...history].reverse().find((m) => m.role === "user")?.content ?? "";
@@ -389,6 +395,7 @@ export async function POST(request: Request) {
   // wrote inline as `Options: ["a","b"]`. Unit-tested in reply-stream.test.ts.
   const transform = createReplyTransform({
     shortlist,
+    tier,
     onDrop: (reason) => console.error(`Concierge ${servedBy?.name}: ${reason}`),
   });
   const upstreamAbort = upstreamController;

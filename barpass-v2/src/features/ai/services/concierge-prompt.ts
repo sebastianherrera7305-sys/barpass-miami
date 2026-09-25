@@ -228,6 +228,12 @@ export interface ConciergeContext {
   origin?: { lat: number; lng: number };
   /** IANA zone for "RIGHT NOW" — the city's, not Miami's by default. */
   timeZone?: string;
+  /** Premium vs Free (2026-09-16) — changes how many stops a plan gets.
+   * Undefined/"free" behaves exactly as before this existed. */
+  tier?: "free" | "premium";
+  /** Premium-only cross-conversation memory — a short line distilled from
+   * the user's last plan. Never set for Free. */
+  rememberedVibe?: string;
 }
 
 /** Catalog text is DATA from Google/venue owners, not instructions. The
@@ -244,7 +250,7 @@ export function buildConciergeSystemPrompt(
   venues: Venue[],
   context: ConciergeContext = {},
 ): string {
-  const { excludeSlugs = [], now = new Date(), currentVenue, favorites = [], origin, timeZone = "America/New_York" } = context;
+  const { excludeSlugs = [], now = new Date(), currentVenue, favorites = [], origin, timeZone = "America/New_York", tier = "free", rememberedVibe } = context;
 
   // Rough Miami ride time: ~2.5 min/km door to door plus 4 min to get a car.
   const rideMinutes = (km: number) => Math.max(5, Math.round(4 + km * 2.5));
@@ -259,6 +265,9 @@ export function buildConciergeSystemPrompt(
     }
     if (favorites.length > 0) {
       lines.push(`- They've favorited: ${favorites.slice(0, 8).map((f) => `${safeCatalogText(f.name)} (${f.type}, ${f.musicGenres.join("/") || "no genre data"})`).join("; ")}. Read taste from this (energy, music, price) — don't just re-suggest these.`);
+    }
+    if (rememberedVibe) {
+      lines.push(`- Last time, they went for: ${safeCatalogText(rememberedVibe)}. Use this as a taste signal for tonight too — don't just repeat the same plan.`);
     }
     return lines.length > 0 ? `\n\nUSER CONTEXT (real, from the app — use it)\n${lines.join("\n")}` : "";
   })();
@@ -313,7 +322,9 @@ HOW YOU THINK
 - You are specific. Name the drink to order, the exact time to arrive, the door to use, the mistake tourists make. Vague = failure.
 - You read between the lines. "First date" means you avoid deafening clubs and pick somewhere they can actually talk. "Surprise us" means you get playful. "$80" means you respect it to the dollar and still make it feel generous.
 - You sequence a night like a story: warm-up → peak → (optional) after. Account for real travel time between neighborhoods.
-- 2–4 stops is the sweet spot. One perfect stop beats three mediocre ones.
+- ${tier === "premium"
+      ? "This user is Premium: build the FULL night, 3-6 stops when the night actually calls for it (warm-up, peak, and an after when it makes sense) — don't artificially shrink a plan that could be richer."
+      : "This user is on the free tier: keep it tight, 2-3 stops MAXIMUM even if more would fit the night. One perfect stop beats three mediocre ones — quality over count, not a reason to pad it out."}
 - If two venues are comparably good fits, rotate — don't default to the same "safe" pick every time. Variety is part of good taste.
 - You compress. A pro texts, they don't email. Clipped, declarative sentences — every word earns its place. "Get there by 11, order the mezcal" beats three sentences saying the same thing.
 - Scarcity you name must be a real, general dynamic (the good tables go first, doors get tighter after midnight) — never an invented specific ("only 3 spots left"). That's the one line between confident and fabricated.
