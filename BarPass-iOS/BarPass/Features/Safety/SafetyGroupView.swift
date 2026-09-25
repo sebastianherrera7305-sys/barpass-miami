@@ -46,7 +46,7 @@ struct SafetyGroupView: View {
                         if let error = store.lastError {
                             Text(error.errorDescription ?? "")
                                 .font(.bpScaled(13))
-                                .foregroundStyle(.red)
+                                .foregroundStyle(Color.bpDanger)
                         }
                     }
                     .padding(BPSpacing.lg)
@@ -87,6 +87,7 @@ struct SafetyGroupView: View {
                 .foregroundStyle(Color.bpTextSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .bpEntrance(offset: CGSize(width: 0, height: 10))
     }
 
     // MARK: Sin grupo
@@ -105,6 +106,7 @@ struct SafetyGroupView: View {
                     await run { await store.create(hours: hours) }
                 }
             }
+            .bpEntrance(offset: CGSize(width: 0, height: 16), delay: 0.05)
             card {
                 Text(l10n.t("safetyGroup.join.title")).font(.bpHeadline()).foregroundStyle(Color.bpInk)
                 TextField(l10n.t("safetyGroup.join.placeholder"), text: $code)
@@ -112,12 +114,13 @@ struct SafetyGroupView: View {
                     .autocorrectionDisabled()
                     .font(.system(.title3, design: .monospaced).weight(.bold))
                     .padding(12)
-                    .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: 12))
+                    .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.sm))
                     .onChange(of: code) { _, value in code = SafetyGroupFormat.normalizedCode(value) }
                 primaryButton(l10n.t("safetyGroup.join.button"), enabled: SafetyGroupFormat.isCompleteCode(code)) {
                     await run { await store.join(code: code) }
                 }
             }
+            .bpEntrance(offset: CGSize(width: 0, height: 16), delay: 0.1)
         }
     }
 
@@ -228,7 +231,7 @@ struct SafetyGroupView: View {
         VStack(alignment: .leading, spacing: BPSpacing.sm) {
             Text(String(format: l10n.t("safetyGroup.members"), store.members.count))
                 .font(.bpHeadline()).foregroundStyle(Color.bpInk)
-            ForEach(store.members) { member in
+            ForEach(Array(store.members.enumerated()), id: \.element.id) { index, member in
                 HStack {
                     Text(member.name).font(.bpBody()).foregroundStyle(Color.bpInk)
                     if member.isLeader {
@@ -239,10 +242,13 @@ struct SafetyGroupView: View {
                     if group.isLeader, !member.isLeader {
                         Button(l10n.t("safetyGroup.remove")) { Task { await run { await store.remove(member) } } }
                             .font(.bpScaled(12, weight: .semibold))
-                            .foregroundStyle(.red)
+                            .foregroundStyle(Color.bpDanger)
                     }
                 }
                 .padding(.vertical, 4)
+                // Escalonado, con tope: un grupo de 12 no debe tardar
+                // más de medio segundo en terminar de aparecer.
+                .bpEntrance(offset: CGSize(width: 0, height: 8), delay: Double(min(index, 8)) * 0.04)
             }
         }
     }
@@ -275,7 +281,7 @@ struct SafetyGroupView: View {
         VStack(alignment: .leading, spacing: BPSpacing.sm, content: content)
             .padding(BPSpacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: 16))
+            .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
     }
 
     private func notice(_ text: String) -> some View {
@@ -284,7 +290,7 @@ struct SafetyGroupView: View {
             .foregroundStyle(Color.bpTextSecondary)
             .padding(BPSpacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: 12))
+            .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
     }
 
     private func rowLabel(icon: String, text: String) -> some View {
@@ -295,7 +301,7 @@ struct SafetyGroupView: View {
             Image(systemName: "chevron.right").foregroundStyle(Color.bpTextSecondary)
         }
         .padding(BPSpacing.md)
-        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: 16))
+        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
     }
 
     private func primaryButton(_ title: String, enabled: Bool = true, action: @escaping () async -> Void) -> some View {
@@ -308,7 +314,7 @@ struct SafetyGroupView: View {
                 .foregroundStyle(Color.black)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(enabled ? Color.bpAmber : Color.bpAmber.opacity(0.35), in: RoundedRectangle(cornerRadius: 14))
+                .background(enabled ? Color.bpAmber : Color.bpAmber.opacity(0.35), in: RoundedRectangle(cornerRadius: BPRadius.lg))
         }
         .disabled(!enabled || isBusy)
     }

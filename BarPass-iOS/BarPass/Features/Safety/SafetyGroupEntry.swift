@@ -22,7 +22,7 @@ struct SafetyGroupEntryButton: View {
                 .foregroundStyle(store.incomingSeek == nil ? Color.bpInk : Color.bpAmber)
                 .overlay(alignment: .topTrailing) {
                     if store.incomingSeek != nil {
-                        Circle().fill(Color.red).frame(width: 8, height: 8).offset(x: 4, y: -3)
+                        Circle().fill(Color.bpDanger).frame(width: 8, height: 8).offset(x: 4, y: -3)
                     }
                 }
         }

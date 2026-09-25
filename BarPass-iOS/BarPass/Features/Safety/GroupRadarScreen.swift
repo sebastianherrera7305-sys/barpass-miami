@@ -137,6 +137,7 @@ struct GroupRadarScreen: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .bpEntrance(offset: CGSize(width: 0, height: 10))
     }
 
     /// La distancia, formateada para el idioma y la región (pies en EE. UU.,
@@ -177,7 +178,7 @@ struct GroupRadarScreen: View {
             .multilineTextAlignment(.center)
             .padding(BPSpacing.md)
             .frame(maxWidth: .infinity)
-            .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: 14))
+            .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
     }
 
     /// Un teléfono sin UWB nunca cruza los 9 m. Sigue siendo del líder, sigue
@@ -192,7 +193,7 @@ struct GroupRadarScreen: View {
                     .foregroundStyle(Color.black)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: 14))
+                    .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: BPRadius.lg))
             }
             .disabled(isLighting)
         }
@@ -202,7 +203,7 @@ struct GroupRadarScreen: View {
         if let error = router.rallyRefusal {
             Text(error.errorDescription ?? "")
                 .font(.bpScaled(12))
-                .foregroundStyle(.red)
+                .foregroundStyle(Color.bpDanger)
                 .multilineTextAlignment(.center)
         }
     }
@@ -224,7 +225,7 @@ struct GroupRadarScreen: View {
             .foregroundStyle(Color.black)
             .padding(BPSpacing.md)
             .frame(maxWidth: .infinity)
-            .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: 18))
+            .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: BPRadius.lg))
             .shadow(color: .black.opacity(0.4), radius: 14, y: 6)
         }
         .disabled(isLighting)

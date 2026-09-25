@@ -47,7 +47,7 @@ struct SafetyGroupChatView: View {
             if let error = store.lastError {
                 Text(error.errorDescription ?? "")
                     .font(.bpScaled(12))
-                    .foregroundStyle(.red)
+                    .foregroundStyle(Color.bpDanger)
                     .padding(.horizontal, BPSpacing.lg)
                     .padding(.bottom, BPSpacing.xs)
             }
@@ -76,7 +76,7 @@ struct SafetyGroupChatView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(mine ? Color.bpAmber : Color.bpCardBackground,
-                            in: RoundedRectangle(cornerRadius: 14))
+                            in: RoundedRectangle(cornerRadius: BPRadius.sm))
         }
         .frame(maxWidth: .infinity, alignment: mine ? .trailing : .leading)
         .accessibilityElement(children: .combine)
@@ -89,7 +89,7 @@ struct SafetyGroupChatView: View {
                 .focused($isFocused)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
-                .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: 18))
+                .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
                 .onChange(of: draft) { _, value in
                     // El servidor rechaza más de 500; se corta acá para que
                     // el usuario no escriba de más y pierda el mensaje.
