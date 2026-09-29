@@ -794,7 +794,11 @@ end;
 $$;
 
 create or replace function public.send_friend_message(p_user_id uuid, p_text text) returns uuid
-language plpgsql security definer set search_path = public as $$
+-- `public, extensions`: esta función llama pgp_sym_encrypt. Mismo
+-- defecto latente que get_friend_messages tenía en este archivo —
+-- corregido junto con ella el 2026-09-29 para que re-correr este
+-- archivo entero no vuelva a romper el chat en silencio.
+language plpgsql security definer set search_path = public, extensions as $$
 declare
   v_me uuid := auth.uid();
   v_thread_id uuid;
@@ -841,7 +845,15 @@ returns table (
   text text,
   created_at timestamptz
 )
-language plpgsql security definer set search_path = public as $$
+-- `public, extensions`, NO sólo `public`: pgp_sym_decrypt vive en
+-- `extensions` en este proyecto. fix_pgcrypto_search_path.sql ya lo había
+-- corregido en la base viva alguna vez; el CREATE OR REPLACE del fix de
+-- 2026-09-29 (el de #variable_conflict) reemplazó la función ENTERA y con
+-- ella se llevó puesto ese search_path, volviendo a dejarla en sólo
+-- `public` — reintrodujo en silencio un bug que ya estaba arreglado. Toda
+-- vez que se reemplace esta función de punta a punta, el search_path tiene
+-- que venir con las dos líneas, no copiarse a ciegas del archivo fuente.
+language plpgsql security definer set search_path = public, extensions as $$
 #variable_conflict use_column
 -- Esta función declara `thread_id` como columna de salida (RETURNS TABLE),
 -- así que PL/pgSQL la convierte en una variable en su propio alcance. Sin
