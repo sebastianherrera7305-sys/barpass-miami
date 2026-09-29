@@ -36,12 +36,41 @@ final class GoHomeStore: ObservableObject {
 
     /// Geocodes on-device (CLGeocoder) — never sends the typed address to
     /// any BarPass backend for resolution, only the resulting coordinates.
-    func save(addressText: String) async throws {
+    ///
+    /// SPLIT FROM PERSISTING ON PURPOSE (2026-09-29, TestFlight report: a
+    /// tester typed their home address, and the ride Uber later requested
+    /// under "Go home" landed somewhere else entirely). `geocodeAddressString`
+    /// resolves free text with no confirmation step: a typo, a missing city,
+    /// or an address that matches a business more precisely than a street
+    /// silently saves the WRONG coordinate, and nothing in the app ever
+    /// showed what was actually resolved — not here, not later in Settings.
+    /// This returns the placemark's own formatted name so the caller can
+    /// show it and ask "is this right?" before anything is written.
+    func resolve(addressText: String) async throws -> (address: HomeAddress, resolvedLabel: String) {
         let placemarks = try await CLGeocoder().geocodeAddressString(addressText)
-        guard let coordinate = placemarks.first?.location?.coordinate else {
+        guard let placemark = placemarks.first, let coordinate = placemark.location?.coordinate else {
             throw HomeAddressError.notFound
         }
         let address = HomeAddress(address: addressText, lat: coordinate.latitude, lng: coordinate.longitude)
+        return (address, Self.formattedLabel(for: placemark, fallback: addressText))
+    }
+
+    /// A CLPlacemark's pieces in the order a person actually reads a
+    /// mailing address, so the confirmation step shows what iOS resolved,
+    /// not our own guess at re-formatting it. `name` is included because
+    /// it is where a business name — the classic mis-resolve, "123 Main
+    /// St" landing on a bar sharing that block — would show up first.
+    nonisolated private static func formattedLabel(for placemark: CLPlacemark, fallback: String) -> String {
+        let parts = [placemark.name, placemark.locality, placemark.administrativeArea]
+            .compactMap { $0 }
+        let unique = parts.reduce(into: [String]()) { acc, part in if acc.last != part { acc.append(part) } }
+        return unique.isEmpty ? fallback : unique.joined(separator: ", ")
+    }
+
+    /// Persists an already-resolved address. Separate from `resolve` so the
+    /// caller can put a confirmation step in between — never geocode and
+    /// save in the same breath for something this consequential.
+    func persist(_ address: HomeAddress) async throws {
         try await repository.setHomeAddress(address)
         homeAddress = address
         writeToWidget()

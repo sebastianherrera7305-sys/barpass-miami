@@ -842,6 +842,16 @@ returns table (
   created_at timestamptz
 )
 language plpgsql security definer set search_path = public as $$
+#variable_conflict use_column
+-- Esta función declara `thread_id` como columna de salida (RETURNS TABLE),
+-- así que PL/pgSQL la convierte en una variable en su propio alcance. Sin
+-- esta directiva, el `on conflict (thread_id, user_id)` de más abajo —cuyo
+-- target de conflicto SÍ es un contexto de expresión, a diferencia de la
+-- lista de columnas de un INSERT— queda ambiguo entre esa variable y la
+-- columna real de friend_thread_reads, y la función revienta con 42702 en
+-- CADA lectura. Mismo defecto, mismo arreglo, que get_chapter_messages()
+-- documenta arriba en chapter_chat_encryption.sql — verificado en vivo
+-- 2026-09-29 con una cuenta de prueba real: enviar funcionaba, leer no.
 declare
   v_me uuid := auth.uid();
   v_thread_id uuid;

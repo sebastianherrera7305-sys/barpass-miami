@@ -145,8 +145,16 @@ struct ExploreView: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
-                    .glass(radius: BPRadius.xl)
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.06)))
+                    // Antes .glass() — vidrio ultra-fino sobre un mapa cuyo
+                    // color cambia todo el tiempo (agua, parques, calles,
+                    // modo satélite). Un tester lo reportó textual: "se
+                    // pierde en la transparencia". El resto de esta MISMA
+                    // pantalla (el pin de venue, la tarjeta de detalle,
+                    // líneas 504/578) ya resuelve el mismo problema con un
+                    // fondo casi sólido; el buscador era el único que no
+                    // seguía esa convención propia.
+                    .background(Color.bpCardBackground.opacity(0.97), in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpBorder))
 
                     Button {
                         showList = false

@@ -10,6 +10,9 @@ struct HomeAddressSettingsView: View {
     @State private var addressText = ""
     @State private var isSaving = false
     @State private var errorMsg: String?
+    /// Nil hasta que geocodificar salió bien. Su sola presencia dispara la
+    /// hoja de confirmación — no se persiste nada mientras esté vacío.
+    @State private var pending: (address: HomeAddress, resolvedLabel: String)?
 
     var body: some View {
         NavigationStack {
@@ -39,7 +42,7 @@ struct HomeAddressSettingsView: View {
                     }
 
                     Button {
-                        save()
+                        resolve()
                     } label: {
                         Group {
                             if isSaving { ProgressView().tint(.black) }
@@ -70,21 +73,52 @@ struct HomeAddressSettingsView: View {
                 if let existing = store.homeAddress { addressText = existing.address }
                 else { await store.load(); if let existing = store.homeAddress { addressText = existing.address } }
             }
+            // "¿Es acá?" — el paso que faltaba. Un tester escribió su
+            // dirección, y el viaje que Uber armó después bajo "Ir a casa"
+            // lo llevó a otro lado. Nada en la app mostraba nunca lo que
+            // realmente se había resuelto — ni acá, ni después en Ajustes.
+            .confirmationDialog(
+                l10n.t("goHome.confirm.title"),
+                isPresented: Binding(get: { pending != nil }, set: { if !$0 { pending = nil } }),
+                presenting: pending
+            ) { resolved in
+                Button(l10n.t("goHome.confirm.yes")) { confirmAndPersist() }
+                Button(l10n.t("goHome.confirm.no"), role: .cancel) { pending = nil }
+            } message: { resolved in
+                Text(resolved.resolvedLabel)
+            }
         }
     }
 
-    private func save() {
+    /// Sólo geocodifica. Guardar de verdad pasa por `confirmAndPersist()`,
+    /// una vez que la persona vio lo que se resolvió y dijo que sí.
+    private func resolve() {
         isSaving = true
         errorMsg = nil
         Task {
             do {
-                try await store.save(addressText: addressText.trimmingCharacters(in: .whitespaces))
+                pending = try await store.resolve(addressText: addressText.trimmingCharacters(in: .whitespaces))
+                isSaving = false
+            } catch {
+                errorMsg = l10n.t("goHome.settings.error")
+                isSaving = false
+            }
+        }
+    }
+
+    private func confirmAndPersist() {
+        guard let pending else { return }
+        isSaving = true
+        Task {
+            do {
+                try await store.persist(pending.address)
                 BPHaptics.success()
                 isSaving = false
                 dismiss()
             } catch {
                 errorMsg = l10n.t("goHome.settings.error")
                 isSaving = false
+                self.pending = nil
             }
         }
     }

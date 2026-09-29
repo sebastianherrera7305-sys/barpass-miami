@@ -86,6 +86,9 @@ final class L10n: ObservableObject {
 
     nonisolated private static let tables: [AppLanguage: [String: String]] = [
         .es: [
+            "goHome.confirm.title": "¿Es esta tu casa?",
+            "goHome.confirm.yes": "Sí, es acá",
+            "goHome.confirm.no": "No, corregir",
             // MARK: Safety group - grupo efimero, chat y radar al lider (es)
             "safetyGroup.title": "Grupo efímero",
             "safetyGroup.subtitle": "Un grupo para esta noche: chat y radar para encontrar al líder. Se borra solo cuando se acaba el tiempo.",
@@ -1645,6 +1648,9 @@ final class L10n: ObservableObject {
             "menu.empty.subtitle": "Cuando consigamos la carta del local, la vas a ver acá con el precio de cada trago.",
         ],
         .en: [
+            "goHome.confirm.title": "Is this your home?",
+            "goHome.confirm.yes": "Yes, that's it",
+            "goHome.confirm.no": "No, fix it",
             // MARK: Safety group - grupo efimero, chat y radar al lider (en)
             "safetyGroup.title": "Ephemeral group",
             "safetyGroup.subtitle": "A group for tonight: chat and a radar to find the leader. It deletes itself when the time runs out.",
@@ -3202,6 +3208,9 @@ final class L10n: ObservableObject {
             "menu.empty.subtitle": "Once we get this venue's menu, you'll see it here with the price of every drink.",
         ],
         .pt: [
+            "goHome.confirm.title": "É esta a sua casa?",
+            "goHome.confirm.yes": "Sim, é aqui",
+            "goHome.confirm.no": "Não, corrigir",
             // MARK: Safety group - grupo efimero, chat y radar al lider (pt)
             "safetyGroup.title": "Grupo efêmero",
             "safetyGroup.subtitle": "Um grupo para esta noite: chat e radar para encontrar o líder. Ele se apaga sozinho quando o tempo acaba.",
