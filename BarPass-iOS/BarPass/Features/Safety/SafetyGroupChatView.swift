@@ -87,9 +87,10 @@ struct SafetyGroupChatView: View {
             TextField(l10n.t("safetyGroup.chat.placeholder"), text: $draft, axis: .vertical)
                 .lineLimit(1...4)
                 .focused($isFocused)
+                .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
-                .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
+                .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.md))
                 .onChange(of: draft) { _, value in
                     // El servidor rechaza más de 500; se corta acá para que
                     // el usuario no escriba de más y pierda el mensaje.
@@ -101,14 +102,19 @@ struct SafetyGroupChatView: View {
                 send()
             } label: {
                 Image(systemName: "arrow.up.circle.fill")
-                    .font(.system(size: 34))
+                    .font(.system(size: 28))
                     .foregroundStyle(canSend ? Color.bpAmber : Color.bpTextSecondary)
             }
             .disabled(!canSend)
             .bpAccessibility(label: l10n.t("safetyGroup.chat.send"), isButton: true)
         }
+        // Antes .background(.ultraThinMaterial): un panel de vidrio propio
+        // que ni FriendChatView ni ChapterChatView tienen — sus composers no
+        // llevan ningún fondo en la fila, sólo el campo de texto lo tiene.
+        // Con los mensajes deslizando por detrás todo el tiempo, ese vidrio
+        // extra es la misma variante del problema que ya se vio en la barra
+        // de búsqueda de Explore: una capa que no está en ningún lado más.
         .padding(BPSpacing.md)
-        .background(.ultraThinMaterial)
     }
 
     private var canSend: Bool { SafetyGroupChatRules.canSend(draft) && !isSending }

@@ -213,6 +213,7 @@ struct SafetyGroupView: View {
                     Task { await run { await store.endSeek(outgoing.seekId) } }
                 }
                 .font(.bpScaled(13, weight: .semibold))
+                .foregroundStyle(Color.bpTextSecondary)
             }
         } else {
             primaryButton(l10n.t("safetyGroup.seek.button")) {
@@ -257,10 +258,15 @@ struct SafetyGroupView: View {
         VStack(spacing: BPSpacing.sm) {
             Button(l10n.t("safetyGroup.leave")) { Task { await run { await store.leave() } } }
                 .font(.bpHeadline())
-            // TERMINAR EVENTO: el interruptor del líder.
+                .foregroundStyle(Color.bpInk)
+            // TERMINAR EVENTO: el interruptor del líder. bpDanger explícito,
+            // no `role: .destructive` — ese role pinta el rojo DE SISTEMA de
+            // Apple, no el bpDanger propio de la app (mismo motivo por el
+            // que "quitar miembro", arriba, tampoco usa el role).
             if group.isLeader {
-                Button(l10n.t("safetyGroup.end"), role: .destructive) { showEndConfirm = true }
+                Button(l10n.t("safetyGroup.end")) { showEndConfirm = true }
                     .font(.bpHeadline())
+                    .foregroundStyle(Color.bpDanger)
             }
         }
         .frame(maxWidth: .infinity)
