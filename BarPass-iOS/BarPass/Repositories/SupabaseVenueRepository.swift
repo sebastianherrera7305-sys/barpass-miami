@@ -489,6 +489,16 @@ final actor SupabaseVenueRepository: VenueRepository {
                     // count as covered.
                     URLQueryItem(name: "excluded_reason", value: "is.null"),
                     URLQueryItem(name: "or", value: "(business_status.is.null,business_status.neq.CLOSED_PERMANENTLY)"),
+                    // SIN ESTO, página a página no hay orden garantizado:
+                    // Postgres puede devolver la fila 1000 distinta en cada
+                    // request, así que una paginación de a 1000 sin ORDER BY
+                    // puede repetir una fila y saltarse otra en silencio —
+                    // ya documentado en este mismo repo. Las ciudades chicas
+                    // (Oxford, 42 filas; Boulder, 70) son las que más chance
+                    // tienen de caer justo en el hueco entre dos páginas y
+                    // desaparecer enteras del selector — reportado 2026-10-08:
+                    // "no se ven varios de los estados o ciudades".
+                    URLQueryItem(name: "order", value: "id"),
                 ],
                 accessToken: SupabaseRESTClient.anonKey,
                 extraHeaders: ["Range": "\(offset)-\(offset + pageSize - 1)"],
