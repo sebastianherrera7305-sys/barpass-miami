@@ -125,7 +125,10 @@ struct SocialView: View {
                     openStories = nil
                 }
             }
-            .task { await load(force: false) }
+            .task {
+                BPAnalytics.track(.socialGraphViewed)
+                await load(force: false)
+            }
             .refreshable { await load(force: true) }
         }
     }

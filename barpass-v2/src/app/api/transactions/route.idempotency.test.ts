@@ -68,6 +68,10 @@ vi.mock("@/lib/with-retry", () => ({
   withRetry: async (fn: () => Promise<unknown>) => fn(),
 }));
 
+vi.mock("@/lib/analytics/server", () => ({
+  captureServerEvent: () => {},
+}));
+
 // Hook the stubs onto globalThis after vi.mock has hoisted the factories.
 (globalThis as unknown as { __createPIM: unknown }).__createPIM = createPaymentIntentMock;
 (globalThis as unknown as { __maybeSingle: unknown }).__maybeSingle = maybeSingleMock;

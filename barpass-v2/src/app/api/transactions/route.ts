@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { captureServerEvent } from "@/lib/analytics/server";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requireUser } from "@/lib/supabase/require-user";
@@ -195,6 +196,23 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  // Server-side analytics event — trustworthy because this point is only
+  // reached after Stripe reported `succeeded` AND the order row persisted.
+  // Client-side analytics for the same event would miss the (rare but
+  // real) case where the client crashes between tokenize and the server's
+  // response. Properties kept narrow: no card, no PI id, no email.
+  captureServerEvent({
+    event: "pass_purchased",
+    distinctId: user.id,
+    properties: {
+      vendor_id: vendorId,
+      amount_cents: Math.round(total * 100),
+      currency: "usd",
+      method: paymentMethod,
+      item_count: items.length,
+    },
+  });
 
   return NextResponse.json({ success: true, transaction: order }, { status: 201 });
 }

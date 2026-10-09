@@ -138,6 +138,7 @@ struct AvatarEditorView: View {
             do {
                 try await repository.setAvatarConfig(draft)
                 BPHaptics.success()
+                BPAnalytics.track(.avatarSaved(isFirstTime: original == nil))
                 onSaved(draft)
                 isSaving = false
                 dismiss()

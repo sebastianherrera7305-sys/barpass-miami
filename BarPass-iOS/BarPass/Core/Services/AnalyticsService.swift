@@ -37,6 +37,28 @@ enum AnalyticsEvent {
 
     case error(name: String, details: String?)
     case warning(name: String, details: String?)
+
+    // M4 — minimum set the master directive asked for. Properties kept
+    // narrow deliberately — no lat/lng, no raw friend ids, no PII. See
+    // docs/analytics-events.md for the shipping contract.
+    /// Cold vs warm start, time since the previous foreground.
+    case appOpened(coldStart: Bool, secondsSinceLastOpen: Int?)
+    /// User saved their illustrated avatar for the first (or Nth) time.
+    case avatarSaved(isFirstTime: Bool)
+    /// Opened the Friends / Social Graph surface.
+    case socialGraphViewed
+    /// Opened a friend's profile from the graph.
+    case friendProfileOpened(friendIdHash: String)
+    /// Accepted or completed a friend relationship. source = search / qr / contacts / suggestion.
+    case friendAdded(source: String)
+    /// A trip created from the AI prompt vs the manual wizard, with its initial member count.
+    case tripCreatedDetailed(method: String, memberCount: Int)
+    /// User joined an existing trip; source = invite_link / code / request_accepted.
+    case tripJoined(tripId: String, source: String)
+    /// Trip was closed server-side (complete_trip RPC succeeded).
+    case tripCompleted(tripId: String, stopCount: Int, durationHours: Double?)
+    /// A user physically checked into a venue (venue_id only — never GPS).
+    case venueCheckin(venueId: String, tripId: String?)
 }
 
 // MARK: - AnalyticsService Protocol
@@ -82,6 +104,15 @@ final class ConsoleAnalyticsService: AnalyticsService {
         case .earnXP:              (emoji, label) = ("🏆", "earnXP")
         case .error:               (emoji, label) = ("🚨", "error")
         case .warning:             (emoji, label) = ("⚠️", "warning")
+        case .appOpened:           (emoji, label) = ("🚀", "appOpened")
+        case .avatarSaved:         (emoji, label) = ("🎭", "avatarSaved")
+        case .socialGraphViewed:   (emoji, label) = ("👥", "socialGraphViewed")
+        case .friendProfileOpened: (emoji, label) = ("👤", "friendProfileOpened")
+        case .friendAdded:         (emoji, label) = ("🤝", "friendAdded")
+        case .tripCreatedDetailed: (emoji, label) = ("✨", "tripCreated")
+        case .tripJoined:          (emoji, label) = ("🧳", "tripJoined")
+        case .tripCompleted:       (emoji, label) = ("🏁", "tripCompleted")
+        case .venueCheckin:        (emoji, label) = ("📍", "venueCheckin")
         }
         os_log("[Analytics] %@ %@", log: log, type: .debug, emoji, label)
         #endif

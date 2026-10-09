@@ -140,6 +140,7 @@ final class CheckInStore: ObservableObject {
         case .succeeded:
             await load()
             BPHaptics.success()
+            BPAnalytics.track(.venueCheckin(venueId: venueId, tripId: tripId))
             justCheckedIn = true
         case .queue:
             OfflineQueue.shared.enqueue(.checkIn, tripId.map { ["venueId": venueId, "tripId": $0] } ?? ["venueId": venueId])
@@ -148,6 +149,10 @@ final class CheckInStore: ObservableObject {
             // way. Showing a red failure here is what made the app feel
             // broken inside a club.
             BPHaptics.success()
+            // Fire the event even on queue — the person really is at the
+            // venue; whether the network accepted it live or 10 minutes
+            // later outside is a delivery detail, not a product signal.
+            BPAnalytics.track(.venueCheckin(venueId: venueId, tripId: tripId))
             justCheckedIn = true
         case .permanentFailure(let message):
             errorMessage = message

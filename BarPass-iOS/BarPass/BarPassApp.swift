@@ -10,6 +10,10 @@ struct BarPassApp: App {
     @StateObject private var cart     = CartStore()
     @ObservedObject private var appearanceStore = AppearanceStore.shared
     @Environment(\.scenePhase) private var scenePhase
+    /// Flipped on the first `.active` transition so the first open is
+    /// tagged cold_start=true and subsequent returns-from-background are
+    /// warm. Lives as a view state so it dies with the process.
+    @State private var hasReportedOpen = false
 
     init() {
         ImageCache.configure()
@@ -20,6 +24,24 @@ struct BarPassApp: App {
         // it how to perform each kind — and it must happen before any view
         // can enqueue, hence init and not a .task.
         OfflineQueue.shared.installPerformHandlers()
+
+        // Analytics: swap in the real PostHog service IF a project key is
+        // present in Info.plist AND the user hasn't opted out. Otherwise
+        // the default ConsoleAnalyticsService stays and nothing leaves
+        // the device. This is the three-layer kill switch:
+        //   1. Build: no POSTHOG_API_KEY in Info.plist → inert here.
+        //   2. User: analyticsOptOut UserDefault → PostHogAnalyticsService
+        //      itself short-circuits every track() call.
+        //   3. Remote: a future PostHog feature flag can also disable it
+        //      without a release.
+        let posthogKey = (Bundle.main.infoDictionary?["POSTHOG_API_KEY"] as? String) ?? ""
+        let posthogHost = (Bundle.main.infoDictionary?["POSTHOG_HOST"] as? String) ?? "https://us.i.posthog.com"
+        if !posthogKey.isEmpty && !UserDefaults.standard.bool(forKey: "analyticsOptOut") {
+            BPAnalytics.service = PostHogAnalyticsService(apiKey: posthogKey, host: posthogHost)
+        }
+        if let userId = AuthService.shared.restoreSession()?.user.id {
+            BPAnalytics.setUserID(userId)
+        }
     }
 
     var body: some Scene {
@@ -47,11 +69,28 @@ struct BarPassApp: App {
                 // app is in the user's hand at that exact moment. The queue's
                 // own NWPathMonitor covers reconnects while the app is open;
                 // this covers the far more common "phone was in a pocket".
-                .onChange(of: scenePhase) { _, phase in
+                .onChange(of: scenePhase) { oldPhase, phase in
                     // El grupo efímero pregunta sólo con la app activa; lo que
                     // llega con la app cerrada llega por push.
                     if phase == .active { SafetyGroupStore.shared.start() } else { SafetyGroupStore.shared.stop() }
-                    guard phase == .active else { return }
+                    guard phase == .active else {
+                        if phase == .background {
+                            UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "bp_last_background_at")
+                        }
+                        return
+                    }
+                    // One `app_opened` event per foreground transition.
+                    // cold_start = first time this process reaches active;
+                    // otherwise warm. seconds_since_last_open comes from
+                    // the backgrounded-at timestamp set above.
+                    let coldStart = (oldPhase == .inactive && !hasReportedOpen)
+                    let since: Int? = {
+                        let last = UserDefaults.standard.double(forKey: "bp_last_background_at")
+                        guard last > 0 else { return nil }
+                        return Int(Date().timeIntervalSince1970 - last)
+                    }()
+                    BPAnalytics.track(.appOpened(coldStart: coldStart, secondsSinceLastOpen: since))
+                    hasReportedOpen = true
                     Task { await OfflineQueue.shared.flush() }
                 }
         }
