@@ -67,6 +67,10 @@
 		BEACD51C952ADC143C2FDACD /* RallyPointScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACBFF4F8D40A8AD844E011 /* RallyPointScreen.swift */; };
 		BEACCE2BC71447990ECFF47F /* SafetyGroupChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACBFA6E7EEE21CB5603F9E /* SafetyGroupChatView.swift */; };
 		BEAC36690ED742B77CB74FC1 /* SafetyGroupEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC3CA21F712540E453F169 /* SafetyGroupEntry.swift */; };
+		BEAC5D2C74AF69391325A339 /* AvatarConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC13AB2401F3FF7F069133 /* AvatarConfig.swift */; };
+		BEACFF011F1A7C32F9B4FBDC /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC2B1CF958F0EAE1424ADF /* AvatarView.swift */; };
+		BEAC9E0918EBA53C903AAFE5 /* AvatarEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACE40A14BD4B0BF46A80E5 /* AvatarEditorView.swift */; };
+		BEAC499330766704A5B9060F /* AvatarRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC613ED7B6457B57243364 /* AvatarRepository.swift */; };
 		BEACF8D777F679EB9D7BA66F /* SafetyGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC4CDCDA390135FE2B6DE2 /* SafetyGroupStore.swift */; };
 		BEAC886DAADD429306BAC05F /* SafetyGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACAC348BBC304CB731C7EA /* SafetyGroupView.swift */; };
 		BEACFE3645C5600B9A4DFB8D /* SafetyGroupRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC64A2582A44D2832B8018 /* SafetyGroupRepository.swift */; };
@@ -141,6 +145,7 @@
 		93528C23589A20AC5002B931 /* VenueMediaUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6519A4256828F114395C8BC0 /* VenueMediaUploader.swift */; };
 		94D790F5FBEEF3EA89E25DAB /* ChapterMembersRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F34A3B502C8F3F2C59513E5C /* ChapterMembersRepository.swift */; };
 		98E6980599177FA54192F939 /* BarPassTests/ShareManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66E768A00F7416F3E940CCD /* BarPassTests/ShareManagerTests.swift */; };
+		BEAC6F7522A5747768E7E984 /* BarPassTests/AvatarConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACE16A299228F6DC16542D /* BarPassTests/AvatarConfigTests.swift */; };
 		A104DAB76A550EF94AC67A29 /* VenueInsideGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7025BEC6A2E4D77DE5757388 /* VenueInsideGuide.swift */; };
 		A11B19AC0FF1240000000001 /* OfflineQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11B19AC0FF1240000000002 /* OfflineQueue.swift */; };
 		A2CF02FBB442045B9D9084FF /* HelpGuideStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD594030C69C33F1DB823472 /* HelpGuideStore.swift */; };
@@ -436,6 +441,10 @@
 		BEACBFF4F8D40A8AD844E011 /* RallyPointScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RallyPointScreen.swift; path = BarPass/Features/Safety/RallyPointScreen.swift; sourceTree = SOURCE_ROOT; };
 		BEACBFA6E7EEE21CB5603F9E /* SafetyGroupChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupChatView.swift; path = BarPass/Features/Safety/SafetyGroupChatView.swift; sourceTree = SOURCE_ROOT; };
 		BEAC3CA21F712540E453F169 /* SafetyGroupEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupEntry.swift; path = BarPass/Features/Safety/SafetyGroupEntry.swift; sourceTree = SOURCE_ROOT; };
+		BEAC13AB2401F3FF7F069133 /* AvatarConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AvatarConfig.swift; path = BarPass/Models/AvatarConfig.swift; sourceTree = SOURCE_ROOT; };
+		BEAC2B1CF958F0EAE1424ADF /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AvatarView.swift; path = BarPass/Features/Avatar/AvatarView.swift; sourceTree = SOURCE_ROOT; };
+		BEACE40A14BD4B0BF46A80E5 /* AvatarEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AvatarEditorView.swift; path = BarPass/Features/Avatar/AvatarEditorView.swift; sourceTree = SOURCE_ROOT; };
+		BEAC613ED7B6457B57243364 /* AvatarRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AvatarRepository.swift; path = BarPass/Repositories/AvatarRepository.swift; sourceTree = SOURCE_ROOT; };
 		BEAC4CDCDA390135FE2B6DE2 /* SafetyGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupStore.swift; path = BarPass/Features/Safety/SafetyGroupStore.swift; sourceTree = SOURCE_ROOT; };
 		BEACAC348BBC304CB731C7EA /* SafetyGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupView.swift; path = BarPass/Features/Safety/SafetyGroupView.swift; sourceTree = SOURCE_ROOT; };
 		BEAC64A2582A44D2832B8018 /* SafetyGroupRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupRepository.swift; path = BarPass/Repositories/SafetyGroupRepository.swift; sourceTree = SOURCE_ROOT; };
@@ -506,6 +515,7 @@
 		DC8BF3CAAE71351BE1BD33DA /* HomeAddressSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HomeAddressSettingsView.swift; path = BarPass/Features/GoHome/HomeAddressSettingsView.swift; sourceTree = SOURCE_ROOT; };
 		DEF2C8BAFE3D48CC85B36E9B /* TicketReceivedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TicketReceivedView.swift; path = BarPass/Features/PriorityEntry/TicketReceivedView.swift; sourceTree = SOURCE_ROOT; };
 		E66E768A00F7416F3E940CCD /* BarPassTests/ShareManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/ShareManagerTests.swift; sourceTree = "<group>"; };
+		BEACE16A299228F6DC16542D /* BarPassTests/AvatarConfigTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarPassTests/AvatarConfigTests.swift; sourceTree = "<group>"; };
 		EA727DF04AFC4355197DDF95 /* ReservationConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservationConfirmView.swift; sourceTree = "<group>"; };
 		ECEA1F54438283EF27ED535E /* CartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartView.swift; sourceTree = "<group>"; };
 		ED4BB265491D4A7E864C255E /* University.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = University.swift; path = BarPass/Models/University.swift; sourceTree = SOURCE_ROOT; };
@@ -661,6 +671,7 @@
 				BF31AC3E1809B2072DE6CA9C /* ModelCodableTests.swift */,
 				83F14D299B6CF077F28A63D3 /* BarPassTests/DeepLinkRouterTests.swift */,
 				E66E768A00F7416F3E940CCD /* BarPassTests/ShareManagerTests.swift */,
+				BEACE16A299228F6DC16542D /* BarPassTests/AvatarConfigTests.swift */,
 				0FE939BD56D206ED35B073C2 /* BarPassTests/AuthTokenRefreshTests.swift */,
 				EDD5A631300729CFF9A2CCDB /* VenueFreshnessTests.swift */,
 				8C3DFC6C83DA2445542EDA60 /* PriceTierTests.swift */,
@@ -749,6 +760,10 @@
 				BEACBFF4F8D40A8AD844E011 /* RallyPointScreen.swift */,
 				BEACBFA6E7EEE21CB5603F9E /* SafetyGroupChatView.swift */,
 				BEAC3CA21F712540E453F169 /* SafetyGroupEntry.swift */,
+				BEAC13AB2401F3FF7F069133 /* AvatarConfig.swift */,
+				BEAC2B1CF958F0EAE1424ADF /* AvatarView.swift */,
+				BEACE40A14BD4B0BF46A80E5 /* AvatarEditorView.swift */,
+				BEAC613ED7B6457B57243364 /* AvatarRepository.swift */,
 				BEAC4CDCDA390135FE2B6DE2 /* SafetyGroupStore.swift */,
 				BEACAC348BBC304CB731C7EA /* SafetyGroupView.swift */,
 				BEAC64A2582A44D2832B8018 /* SafetyGroupRepository.swift */,
@@ -1262,6 +1277,7 @@
 				3B997A737FD4B9BDABFA9D2B /* ModelCodableTests.swift in Sources */,
 				2FD00D94265BF1B464B7C912 /* BarPassTests/DeepLinkRouterTests.swift in Sources */,
 				98E6980599177FA54192F939 /* BarPassTests/ShareManagerTests.swift in Sources */,
+				BEAC6F7522A5747768E7E984 /* BarPassTests/AvatarConfigTests.swift in Sources */,
 				58B304D6CCCBB61826E1F150 /* BarPassTests/AuthTokenRefreshTests.swift in Sources */,
 				A98A51CDBD980DB16CF2CDC6 /* VenueFreshnessTests.swift in Sources */,
 				25E4AAF65D8C63C40C3FD6BA /* PriceTierTests.swift in Sources */,
@@ -1443,6 +1459,10 @@
 				BEACD51C952ADC143C2FDACD /* RallyPointScreen.swift in Sources */,
 				BEACCE2BC71447990ECFF47F /* SafetyGroupChatView.swift in Sources */,
 				BEAC36690ED742B77CB74FC1 /* SafetyGroupEntry.swift in Sources */,
+				BEAC5D2C74AF69391325A339 /* AvatarConfig.swift in Sources */,
+				BEACFF011F1A7C32F9B4FBDC /* AvatarView.swift in Sources */,
+				BEAC9E0918EBA53C903AAFE5 /* AvatarEditorView.swift in Sources */,
+				BEAC499330766704A5B9060F /* AvatarRepository.swift in Sources */,
 				BEACF8D777F679EB9D7BA66F /* SafetyGroupStore.swift in Sources */,
 				BEAC886DAADD429306BAC05F /* SafetyGroupView.swift in Sources */,
 				BEACFE3645C5600B9A4DFB8D /* SafetyGroupRepository.swift in Sources */,

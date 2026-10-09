@@ -105,7 +105,7 @@ struct AddFriendView: View {
 
     private func resultRow(_ result: FriendSearchResult) -> some View {
         HStack(spacing: 12) {
-            FriendAvatar(name: result.name, url: result.avatarUrl)
+            FriendAvatar(name: result.name, url: result.avatarUrl, config: result.avatarConfig)
             Text(result.name)
                 .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
             Spacer()

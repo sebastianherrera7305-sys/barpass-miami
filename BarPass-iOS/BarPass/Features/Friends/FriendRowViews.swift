@@ -14,7 +14,7 @@ struct FriendRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            FriendAvatar(name: edge.name, url: edge.avatarUrl)
+            FriendAvatar(name: edge.name, url: edge.avatarUrl, config: edge.avatarConfig)
             VStack(alignment: .leading, spacing: 2) {
                 Text(edge.name)
                     .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
@@ -79,39 +79,16 @@ struct FriendRow: View {
     }
 }
 
-/// Initials on an amber ring, or the avatar if the profile has one.
+/// Thin wrapper kept so every existing call site didn't need renaming —
+/// the real rendering (photo → illustrated avatar → initials, in that
+/// order) lives in `AvatarView`.
 struct FriendAvatar: View {
     let name: String
     let url: String?
+    var config: AvatarConfig? = nil
     var size: CGFloat = 40
 
     var body: some View {
-        Group {
-            if let url, let parsed = URL(string: url) {
-                CachedImage(url: parsed, targetSize: CGSize(width: size * 2, height: size * 2)) { image in
-                    image.resizable().scaledToFill()
-                } placeholder: {
-                    initialsLabel
-                }
-            } else {
-                initialsLabel
-            }
-        }
-        .frame(width: size, height: size)
-        .background(Color.bpSurface, in: Circle())
-        .overlay(Circle().strokeBorder(Color.bpAmber.opacity(0.35)))
-        .clipShape(Circle())
-    }
-
-    private var initialsLabel: some View {
-        Text(initials)
-            .font(.system(size: size * 0.38, weight: .heavy, design: .rounded))
-            .foregroundStyle(Color.bpAmber)
-    }
-
-    private var initials: String {
-        let parts = name.split(separator: " ").prefix(2)
-        let letters = parts.compactMap { $0.first }.map(String.init).joined()
-        return letters.isEmpty ? "?" : letters.uppercased()
+        AvatarView(name: name, avatarUrl: url, avatarConfig: config, size: size)
     }
 }

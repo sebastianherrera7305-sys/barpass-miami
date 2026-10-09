@@ -25,6 +25,7 @@ struct FriendEdge: Codable, Identifiable, Sendable, Hashable {
     let userId: String
     let displayName: String?
     let avatarUrl: String?
+    let avatarConfig: AvatarConfig?
     /// 'friend' | 'incoming' | 'outgoing'
     let direction: String
     let since: Date
@@ -43,6 +44,7 @@ struct FriendSearchResult: Codable, Identifiable, Sendable, Hashable {
     let userId: String
     let displayName: String?
     let avatarUrl: String?
+    let avatarConfig: AvatarConfig?
     /// 'friend' | 'incoming' | 'outgoing' | 'none'
     let relation: String
 
@@ -62,6 +64,7 @@ struct FriendPresence: Codable, Identifiable, Sendable, Hashable {
     let userId: String
     let displayName: String?
     let avatarUrl: String?
+    let avatarConfig: AvatarConfig?
     let venueId: String
     let venueName: String
     let venueLat: Double

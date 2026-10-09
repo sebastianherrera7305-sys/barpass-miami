@@ -25,6 +25,11 @@ enum RepositoryDependencies {
     nonisolated(unsafe) static var stadium: StadiumRepository = SupabaseStadiumRepository()
     nonisolated(unsafe) static var homeAddress: HomeAddressRepository = SupabaseHomeAddressRepository()
     nonisolated(unsafe) static var displayName: DisplayNameRepository = SupabaseDisplayNameRepository()
+
+    /// The illustrated avatar (`profiles.avatar_config`) — same ownership
+    /// model as displayName. Threaded through the Friends RPCs in
+    /// friend_graph_schema.sql / avatar_system.sql.
+    nonisolated(unsafe) static var avatar: AvatarRepository = SupabaseAvatarRepository()
     nonisolated(unsafe) static var chapterMembers: ChapterMembersRepository = SupabaseChapterMembersRepository()
     nonisolated(unsafe) static var tripMembers: TripMembersRepository = SupabaseTripMembersRepository()
 

@@ -24,7 +24,9 @@ struct ProfileView: View {
     /// had nothing real to display per member either. nil while loading, so
     /// the placeholder text still shows briefly rather than "" flashing.
     @State private var displayName: String?
+    @State private var avatarConfig: AvatarConfig?
     @State private var showEditDisplayName = false
+    @State private var showAvatarEditor = false
     @State private var displayNameDraft = ""
     @State private var isSavingDisplayName = false
 
@@ -55,17 +57,23 @@ struct ProfileView: View {
 
                     // Header
                     VStack(spacing: 14) {
-                        ZStack {
-                            Circle()
-                                .fill(LinearGradient(colors: [Color.bpAmber.opacity(0.3), Color.bpAmber.opacity(0.1)],
-                                                     startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .frame(width: 80, height: 80)
-                                .overlay(Circle().strokeBorder(Color.bpAmber.opacity(0.3), lineWidth: 1.5))
-
-                            Text("🎉")
-                                .font(.bpScaled(34))
+                        Button {
+                            BPHaptics.light()
+                            showAvatarEditor = true
+                        } label: {
+                            ZStack(alignment: .bottomTrailing) {
+                                AvatarView(
+                                    name: displayName ?? "?", avatarUrl: nil,
+                                    avatarConfig: avatarConfig, size: 80, animated: true
+                                )
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundStyle(Color.bpAmber, Color.bpSurface)
+                                    .offset(x: 2, y: 2)
+                            }
                         }
-                        .bpAccessibility(label: l10n.t("profile.avatar"), hint: l10n.t("profile.avatar.hint"))
+                        .buttonStyle(.plain)
+                        .bpAccessibility(label: l10n.t("profile.avatar"), hint: l10n.t("profile.avatar.hint"), isButton: true)
 
                         VStack(spacing: 4) {
                             Button {
@@ -605,8 +613,14 @@ struct ProfileView: View {
         }
         .task { await loadAffiliation() }
         .task { displayName = (try? await RepositoryDependencies.displayName.getDisplayName()) ?? nil }
+        .task { avatarConfig = (try? await RepositoryDependencies.avatar.getAvatarConfig()) ?? nil }
         .sheet(isPresented: $showEditDisplayName) {
             editDisplayNameSheet
+        }
+        .sheet(isPresented: $showAvatarEditor) {
+            AvatarEditorView(current: avatarConfig, repository: RepositoryDependencies.avatar) { saved in
+                avatarConfig = saved
+            }
         }
         .onChange(of: engine.lastAward?.xp) { _, newValue in
             guard newValue != nil else { return }

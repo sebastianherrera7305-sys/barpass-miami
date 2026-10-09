@@ -263,7 +263,7 @@ struct SocialView: View {
     private func arrivalCard(_ friend: FriendPresence) -> some View {
         let venue = venueStore.venues.first { $0.id == friend.venueId }
         return HStack(spacing: 12) {
-            FriendAvatar(name: friend.name, url: friend.avatarUrl, size: 50)
+            FriendAvatar(name: friend.name, url: friend.avatarUrl, config: friend.avatarConfig, size: 50)
             VStack(alignment: .leading, spacing: 3) {
                 (Text(friend.name).font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
                  + Text("  ") 

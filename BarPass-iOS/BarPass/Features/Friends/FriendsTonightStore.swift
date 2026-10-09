@@ -77,7 +77,7 @@ struct FriendsAtVenueMarker: View {
     var body: some View {
         HStack(spacing: -10) {
             ForEach(group.people.prefix(3)) { person in
-                FriendAvatar(name: person.name, url: person.avatarUrl, size: 30)
+                FriendAvatar(name: person.name, url: person.avatarUrl, config: person.avatarConfig, size: 30)
             }
             if group.people.count > 3 {
                 Text("+\(group.people.count - 3)")
@@ -137,7 +137,7 @@ struct FriendsTonightStrip: View {
                                 onSelect(person)
                             } label: {
                                 VStack(spacing: 4) {
-                                    FriendAvatar(name: person.name, url: person.avatarUrl, size: 44)
+                                    FriendAvatar(name: person.name, url: person.avatarUrl, config: person.avatarConfig, size: 44)
                                     Text(person.name)
                                         .font(.bpScaled(10, weight: .semibold))
                                         .foregroundStyle(Color.bpInk)
