@@ -3,32 +3,29 @@ import Foundation
 @MainActor
 final class TripStore: ObservableObject {
     @Published var trips: [Trip] = []
-    @Published var ratings: [TripRating] = []
+    /// Session-only cache of reputations fetched from the server. NOT
+    /// persisted — a persisted cache would re-introduce the exact bug
+    /// this entire rewrite exists to fix (local data posing as the
+    /// authoritative trust signal). Absent entries render as `.new`;
+    /// callers call `refreshReputation(for:)` from a `.task` to fill in.
+    @Published private(set) var reputations: [String: UserReputation] = [:]
     @Published var isLoading = false
     @Published var loadError: String?
 
     private let repository: TripRepository
 
-    /// Blind ratings persist to disk — they were memory-only and vanished
-    /// on every app restart (defeating the whole reputation system).
-    private static let ratingsURL: URL = {
-        let base = (FileManager.default
-            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory)
-            .appendingPathComponent("BarPassTrips", isDirectory: true)
-        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
-        return base.appendingPathComponent("ratings.json")
-    }()
-
     init(repository: TripRepository) {
         self.repository = repository
-        ratings = (try? Data(contentsOf: Self.ratingsURL))
-            .flatMap { try? JSONDecoder().decode([TripRating].self, from: $0) } ?? []
-    }
-
-    private func persistRatings() {
-        if let data = try? JSONEncoder().encode(ratings) {
-            try? data.write(to: Self.ratingsURL, options: .atomic)
-        }
+        // One-shot cleanup of the pre-migration local ratings file.
+        // Was per-device JSON — the agent-trust badges it fed were
+        // actively misleading because they only reflected ratings held
+        // on the viewer's own device. Keeping this deletion forever
+        // means a resurrected old build can't re-populate the file.
+        let legacy = (FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory)
+            .appendingPathComponent("BarPassTrips", isDirectory: true)
+            .appendingPathComponent("ratings.json")
+        try? FileManager.default.removeItem(at: legacy)
     }
 
     static var currentUserId: String {
@@ -164,8 +161,48 @@ final class TripStore: ObservableObject {
         mutate(tripId) { t in if !t.memberIds.contains(user) { t.memberIds.append(user) } }
     }
 
-    func completeTrip(_ tripId: String) {
-        mutate(tripId) { $0.status = .completed }
+    /// Server-authoritative completion. Returns the updated trip from
+    /// the RPC (which also takes the member snapshot) so the local list
+    /// stays in sync without a second round trip. Throws so callers can
+    /// surface the specific error (not_organizer, need_two_members,
+    /// etc.) instead of silently reverting.
+    func completeTrip(_ tripId: String) async throws {
+        let updated = try await repository.completeTrip(tripId)
+        if let i = trips.firstIndex(where: { $0.id == tripId }) {
+            trips[i] = updated
+        }
+    }
+
+    /// Submit a rating via the server RPC. Caller handles the error.
+    func submitRating(
+        tripId: String, scopeKind: String, scopeId: String,
+        rateeId: String, score: Int, tags: [String]
+    ) async throws {
+        try await repository.submitRating(
+            tripId: tripId, scopeKind: scopeKind, scopeId: scopeId,
+            rateeId: rateeId, score: score, tags: tags
+        )
+        // Invalidate any cached reputation for the ratee — if the
+        // counter-rating already exists, the ratings_count/avg_score they
+        // see should update right away.
+        reputations.removeValue(forKey: rateeId)
+    }
+
+    /// Fire-and-forget cache fill. UI calls this from `.task` on row
+    /// appear. Errors are swallowed intentionally — a missing reputation
+    /// renders as `.new`, same as a brand-new user, which is the correct
+    /// fallback. (The server's own `not_visible` error for strangers also
+    /// lands here as a null cache entry — rendering .new is the right
+    /// outcome in that case too, since the organizer shouldn't be told
+    /// "this person has a reputation you can't see" either.)
+    func refreshReputation(for userId: String) async {
+        if reputations[userId] != nil { return }   // simple de-dup
+        do {
+            let rep = try await repository.getUserReputation(userId)
+            reputations[userId] = rep
+        } catch {
+            // Leave absent. UI defaults to .new.
+        }
     }
 
     /// Basic edit — title/city/dates/visibility/cover. Doesn't touch stops;
@@ -279,26 +316,13 @@ final class TripStore: ObservableObject {
         }
     }
 
-    func submitRating(scopeId: String, rateeId: String, score: Int, tags: [String]) {
-        let rater = Self.currentUserId
-        guard !ratings.contains(where: { $0.scopeId == scopeId && $0.raterId == rater && $0.rateeId == rateeId }) else { return }
-        ratings.append(TripRating(scopeId: scopeId, raterId: rater, rateeId: rateeId, score: score, tags: tags))
-        let reciprocal = ratings.contains { $0.scopeId == scopeId && $0.raterId == rateeId && $0.rateeId == rater }
-        if reciprocal {
-            for idx in ratings.indices where ratings[idx].scopeId == scopeId
-                && ((ratings[idx].raterId == rater && ratings[idx].rateeId == rateeId)
-                    || (ratings[idx].raterId == rateeId && ratings[idx].rateeId == rater)) {
-                ratings[idx].visible = true
-            }
-        }
-        persistRatings()
-    }
-
+    /// Synchronous read of the cached reputation. Returns `.new` if the
+    /// server hasn't been asked yet — UI should pair this with
+    /// `.task { await refreshReputation(for: userId) }` on row appear.
+    /// Not a fallback to local computation anymore: the server is the
+    /// only source of truth.
     func reputation(for userId: String) -> UserReputation {
-        let completed = trips.filter { $0.status == .completed && $0.memberIds.contains(userId) }.count
-        let visibleScores = ratings.filter { $0.rateeId == userId && $0.visible }.map { Double($0.score) }
-        let avg = visibleScores.isEmpty ? 0 : visibleScores.reduce(0, +) / Double(visibleScores.count)
-        let badge: ReputationBadge = completed >= 10 ? .verified : (completed >= 3 ? .trustedPlanner : .new)
-        return UserReputation(userId: userId, badge: badge, completedTripsCount: completed, avgScore: avg)
+        reputations[userId]
+            ?? UserReputation(userId: userId, badge: .new, completedTripsCount: 0, avgScore: 0)
     }
 }

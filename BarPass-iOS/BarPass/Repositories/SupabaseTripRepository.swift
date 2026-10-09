@@ -121,4 +121,71 @@ actor SupabaseTripRepository: TripRepository {
         }
         return try SupabaseRESTClient.decoder.decode(Trip.self, from: data)
     }
+
+    /// Posts to the `complete_trip` RPC and returns the updated trip.
+    /// Server-authoritative lifecycle: see trip_reputation.sql.
+    func completeTrip(_ tripId: String) async throws -> Trip {
+        let body = try JSONSerialization.data(withJSONObject: ["p_trip_id": tripId])
+        let req = try request("POST", path: "rpc/complete_trip", body: body)
+        let (data, response) = try await URLSession.shared.data(for: req)
+        guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard 200..<300 ~= http.statusCode else {
+            throw TripRatingError.from(responseBody: String(data: data, encoding: .utf8) ?? "")
+        }
+        return try SupabaseRESTClient.decoder.decode(Trip.self, from: data)
+    }
+
+    func submitRating(
+        tripId: String, scopeKind: String, scopeId: String,
+        rateeId: String, score: Int, tags: [String]
+    ) async throws {
+        let body = try JSONSerialization.data(withJSONObject: [
+            "p_trip_id": tripId,
+            "p_scope_kind": scopeKind,
+            "p_scope_id": scopeId,
+            "p_ratee_id": rateeId,
+            "p_score": score,
+            "p_tags": tags,
+        ])
+        let req = try request("POST", path: "rpc/submit_trip_rating", body: body)
+        let (data, response) = try await URLSession.shared.data(for: req)
+        guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard 200..<300 ~= http.statusCode else {
+            throw TripRatingError.from(responseBody: String(data: data, encoding: .utf8) ?? "")
+        }
+    }
+
+    func getUserReputation(_ userId: String) async throws -> UserReputation {
+        let body = try JSONSerialization.data(withJSONObject: ["p_user_id": userId])
+        let req = try request("POST", path: "rpc/get_user_reputation", body: body)
+        let (data, response) = try await URLSession.shared.data(for: req)
+        guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard 200..<300 ~= http.statusCode else {
+            throw TripRatingError.from(responseBody: String(data: data, encoding: .utf8) ?? "")
+        }
+        // The RPC returns an array of one row; take the first and project
+        // onto the client-side UserReputation struct.
+        struct Row: Decodable {
+            let userId: String
+            let completedTrips: Int
+            let avgScore: Double?
+            let ratingsCount: Int
+            let badge: String
+        }
+        let rows = try SupabaseRESTClient.decoder.decode([Row].self, from: data)
+        guard let r = rows.first else {
+            // Server guarantees a row even when counts are zero, so an
+            // empty response is a real error, not an empty-but-successful
+            // state.
+            throw URLError(.badServerResponse)
+        }
+        let badge: ReputationBadge = ReputationBadge(rawValue: r.badge) ?? .new
+        return UserReputation(
+            userId: r.userId,
+            badge: badge,
+            completedTripsCount: r.completedTrips,
+            avgScore: r.avgScore ?? 0,
+            minThreshold: 3
+        )
+    }
 }

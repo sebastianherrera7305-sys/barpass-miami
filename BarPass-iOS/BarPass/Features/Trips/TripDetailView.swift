@@ -80,7 +80,14 @@ struct TripDetailView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     if myRole == .organizer && currentTrip.status != .completed {
                         Button {
-                            store.completeTrip(currentTrip.id); PointsEngine.shared.award(.completeTrip)
+                            Task {
+                                do {
+                                    try await store.completeTrip(currentTrip.id)
+                                    PointsEngine.shared.award(.completeTrip)
+                                } catch {
+                                    store.loadError = error.localizedDescription
+                                }
+                            }
                         } label: {
                             Text(l10n.t("tripDetail.complete"))
                                 .font(.bpCaption())
@@ -96,6 +103,7 @@ struct TripDetailView: View {
             }
             .sheet(item: $selectedStop) { stop in
                 RatingPrompt(
+                    tripId: currentTrip.id,
                     scopeId: stop.id,
                     rateeId: currentTrip.creatorId,
                     rateeName: currentTrip.title
@@ -103,8 +111,13 @@ struct TripDetailView: View {
                 .environmentObject(store)
             }
             .sheet(item: $ratingTarget) { target in
-                RatingPrompt(scopeId: currentTrip.id, rateeId: target.id, rateeName: target.name)
-                    .environmentObject(store)
+                RatingPrompt(
+                    tripId: currentTrip.id,
+                    scopeId: currentTrip.id,
+                    rateeId: target.id,
+                    rateeName: target.name
+                )
+                .environmentObject(store)
             }
             .sheet(isPresented: $showEditTrip) {
                 EditTripView(trip: currentTrip)
@@ -463,6 +476,7 @@ struct TripDetailView: View {
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
         .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpBorder))
         .bpAccessibility(label: isSelf ? l10n.t("tripDetail.you") : memberId, hint: l10n.t("tripDetail.member.hint"))
+        .task { if !isSelf { await store.refreshReputation(for: memberId) } }
     }
 
     // MARK: - Invite

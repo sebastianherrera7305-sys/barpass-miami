@@ -39,6 +39,11 @@ struct JoinRequestModal: View {
     }
 
     private func requestRow(_ user: String) -> some View {
+        // Reputation is cached in TripStore. The .task below fills it
+        // when this row first appears; absent cache renders as .new,
+        // which is the same fallback used for brand-new users and for
+        // users whose reputation the server refuses to share (e.g. no
+        // trip or friendship link). That's correct in both cases.
         let rep = store.reputation(for: user)
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
@@ -67,6 +72,7 @@ struct JoinRequestModal: View {
         }
         .padding(14)
         .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.md))
+        .task { await store.refreshReputation(for: user) }
     }
 
     private func signal(_ v: String, _ l: String) -> some View {
@@ -113,6 +119,7 @@ struct ReputationBadgeView: View {
 // MARK: - Rating prompt (blind, max 3 tags)
 
 struct RatingPrompt: View {
+    let tripId: String
     let scopeId: String
     let rateeId: String
     let rateeName: String
@@ -122,6 +129,7 @@ struct RatingPrompt: View {
 
     @State private var score = 0
     @State private var tags: Set<String> = []
+    @State private var errorMsg: String?
 
     private let options = ["good_vibe", "punctual", "meshed_well", "great_host", "fun", "chill"]
 
@@ -149,14 +157,36 @@ struct RatingPrompt: View {
                     Spacer()
 
                     Button {
-                        store.submitRating(scopeId: scopeId, rateeId: rateeId, score: score, tags: Array(tags))
-                        dismiss()
+                        Task {
+                            do {
+                                // scopeKind is 'trip' when scopeId equals the trip id, else 'stop'.
+                                let scopeKind = scopeId == tripId ? "trip" : "stop"
+                                try await store.submitRating(
+                                    tripId: tripId,
+                                    scopeKind: scopeKind,
+                                    scopeId: scopeId,
+                                    rateeId: rateeId,
+                                    score: score,
+                                    tags: Array(tags)
+                                )
+                                dismiss()
+                            } catch {
+                                errorMsg = error.localizedDescription
+                            }
+                        }
                     } label: {
                         Text(l10n.t("tripSocial.send")).font(.bpScaled(16, weight: .bold)).foregroundStyle(.black)
                             .frame(maxWidth: .infinity).padding(.vertical, 15)
                             .background(score > 0 ? Color.bpAmber : Color.bpAmber.opacity(0.4), in: Capsule())
                     }
                     .buttonStyle(.plain).bpAccessibility(label: l10n.t("tripSocial.send"), hint: l10n.t("tripSocial.send.hint"), isButton: true).disabled(score == 0)
+
+                    if let errorMsg {
+                        Text(errorMsg)
+                            .font(.bpScaled(12))
+                            .foregroundStyle(Color.bpDanger)
+                            .multilineTextAlignment(.center)
+                    }
 
                     Text(l10n.t("tripSocial.rating.hiddenNote"))
                         .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)

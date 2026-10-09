@@ -140,18 +140,13 @@ struct Trip: Identifiable, Codable, Hashable {
     }
 }
 
-// MARK: - Ratings & reputation
-
-struct TripRating: Identifiable, Codable {
-    var id: String = UUID().uuidString
-    var scopeId: String          // trip_id or stop_id
-    var raterId: String
-    var rateeId: String
-    var score: Int               // 1–5
-    var tags: [String] = []
-    var visible: Bool = false    // hidden until both sides rate
-    var createdAt: Date = .now
-}
+// MARK: - Reputation
+//
+// `TripRating` used to live here as a client-side struct persisted to a
+// per-device JSON file. It was removed — ratings now live on the server
+// only (public.trip_ratings) and are append-only. The client receives
+// pre-aggregated `UserReputation` from the get_user_reputation RPC and
+// never sees individual rating rows.
 
 enum ReputationBadge: String, Codable {
     case new, trustedPlanner = "trusted_planner", verified
@@ -164,7 +159,9 @@ struct UserReputation: Codable {
     var avgScore: Double = 0
     var minThreshold: Int = 3
 
-    /// avg_score is only public once enough trips are completed.
+    /// avg_score is only public once enough trips are completed. The
+    /// threshold is enforced client-side as a UI null-out; the server
+    /// returns the raw numbers so other surfaces can decide differently.
     var publicScore: Double? {
         completedTripsCount >= minThreshold ? avgScore : nil
     }
