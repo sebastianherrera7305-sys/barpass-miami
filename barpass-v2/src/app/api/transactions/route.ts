@@ -101,21 +101,48 @@ export async function POST(request: Request) {
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+  // Request-level dedup at Stripe itself — closes the concurrent-request
+  // race that the DB pre-check above cannot: two simultaneous requests
+  // with the same idempotency-key BOTH pass the `.maybeSingle()` check
+  // (neither row exists yet when they both look), both would reach this
+  // point, and without this option both would charge the card. With it,
+  // Stripe serializes requests sharing the same key and returns the same
+  // PaymentIntent to both callers.
+  //
+  // Namespaced by user.id because Stripe idempotency keys are scoped per
+  // ACCOUNT (not per customer): without the namespace, if two different
+  // BarPass users ever submitted identical raw keys, user B would get
+  // user A's PaymentIntent returned. The 8-random-char + ms-timestamp
+  // format in APIClient.generateIdempotencyKey makes collisions
+  // overwhelmingly unlikely, but the namespace makes it structurally
+  // impossible rather than probabilistically rare.
+  //
+  // When no header is sent (older clients, direct curl), we still mint a
+  // per-request key so a lost response can't double-charge via Stripe-side
+  // retry — the request itself is still non-idempotent (no DB pre-check
+  // to short-circuit), but at least the Stripe side is safe.
+  const stripeIdempotencyKey = idempotencyKey
+    ? `bp:${user.id}:${idempotencyKey}`
+    : `bp:${user.id}:${crypto.randomUUID()}`;
+
   let paymentIntentId: string;
   try {
-    const intent = await stripe.paymentIntents.create({
-      amount: Math.round(total * 100),
-      currency: "usd",
-      payment_method: stripePaymentMethodId,
-      confirm: true,
-      automatic_payment_methods: { enabled: true, allow_redirects: "never" },
-      metadata: {
-        vendor_id: vendorId,
-        staff_id: staffId,
-        customer_id: user.id,
-        idempotency_key: idempotencyKey ?? "",
+    const intent = await stripe.paymentIntents.create(
+      {
+        amount: Math.round(total * 100),
+        currency: "usd",
+        payment_method: stripePaymentMethodId,
+        confirm: true,
+        automatic_payment_methods: { enabled: true, allow_redirects: "never" },
+        metadata: {
+          vendor_id: vendorId,
+          staff_id: staffId,
+          customer_id: user.id,
+          idempotency_key: idempotencyKey ?? "",
+        },
       },
-    });
+      { idempotencyKey: stripeIdempotencyKey },
+    );
     if (intent.status !== "succeeded") {
       return NextResponse.json(
         { error: "payment_not_succeeded", status: intent.status },

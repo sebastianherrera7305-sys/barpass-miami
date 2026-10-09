@@ -368,11 +368,26 @@ enum APIClient {
     /// Charges a card and credits the amount to BarPass Wallet via
     /// POST /wallet/topup. Returns the new balance from the server —
     /// the source of truth, never computed locally.
-    static func topUpWallet(idToken: String, amount: Double, stripePaymentMethodId: String) async throws -> Double {
+    ///
+    /// `idempotencyKey`: same discipline as `createCardTransaction` —
+    /// pass the SAME key for every retry of ONE top-up attempt. The
+    /// server threads it through to Stripe's own idempotencyKey option
+    /// and uses the resulting PaymentIntent id as a UNIQUE natural key
+    /// on `wallet_transactions`, so a double-tap or a lost-response
+    /// retry never credits the wallet twice. Omit → a fresh key per
+    /// call, i.e. no replay protection (acceptable for a fresh buy,
+    /// unsafe for a retry).
+    static func topUpWallet(
+        idToken: String,
+        amount: Double,
+        stripePaymentMethodId: String,
+        idempotencyKey: String? = nil
+    ) async throws -> Double {
         try await postJSON(
             path: "wallet/topup",
             idToken: idToken,
-            body: ["amount": amount, "stripePaymentMethodId": stripePaymentMethodId]
+            body: ["amount": amount, "stripePaymentMethodId": stripePaymentMethodId],
+            idempotencyKey: idempotencyKey
         ).balance
     }
 
@@ -607,13 +622,16 @@ enum APIClient {
 
     /// POSTs JSON, expects `{ success: true, balance: <number>, transactionId?: <string> }`.
     private static func postJSON(
-        path: String, idToken: String, body: [String: Any]
+        path: String, idToken: String, body: [String: Any], idempotencyKey: String? = nil
     ) async throws -> (balance: Double, transactionId: String?) {
         let token = try await freshToken(idToken)
         var request = URLRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        if let idempotencyKey {
+            request.setValue(idempotencyKey, forHTTPHeaderField: "Idempotency-Key")
+        }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response): (Data, URLResponse)

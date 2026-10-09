@@ -12,6 +12,15 @@ struct WalletTopUpView: View {
     @EnvironmentObject private var appState: AppState
 
     @State private var amount: Double = 25
+    /// One idempotency key per screen instance. Reused on retry so a lost
+    /// response (dropped LTE, user re-taps "Add funds") can't credit the
+    /// wallet or charge the card twice — the server-side chain is:
+    /// Stripe idempotencyKey → same PaymentIntent back → RPC sees prior
+    /// stripe_payment_intent_id in wallet_transactions → no-op credit.
+    /// See /api/wallet/topup/route.ts and wallet_topup_idempotency.sql.
+    @State private var idempotencyKey: String = APIClient.generateIdempotencyKey(
+        vendorId: "wallet", staffId: "topup"
+    )
     @ObservedObject private var draft = CardDraft.shared
     @State private var loading = false
     @State private var errorMsg = ""
@@ -112,7 +121,10 @@ struct WalletTopUpView: View {
                 let paymentMethod = try await STPAPIClient.shared.createPaymentMethod(with: params, additionalPaymentUserAgentValues: [])
 
                 let newBalance = try await APIClient.topUpWallet(
-                    idToken: session.accessToken, amount: amount, stripePaymentMethodId: paymentMethod.stripeId
+                    idToken: session.accessToken,
+                    amount: amount,
+                    stripePaymentMethodId: paymentMethod.stripeId,
+                    idempotencyKey: idempotencyKey
                 )
                 await MainActor.run {
                     loading = false
