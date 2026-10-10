@@ -67,6 +67,8 @@
 		BEACD51C952ADC143C2FDACD /* RallyPointScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACBFF4F8D40A8AD844E011 /* RallyPointScreen.swift */; };
 		BEACCE2BC71447990ECFF47F /* SafetyGroupChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACBFA6E7EEE21CB5603F9E /* SafetyGroupChatView.swift */; };
 		BEAC36690ED742B77CB74FC1 /* SafetyGroupEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC3CA21F712540E453F169 /* SafetyGroupEntry.swift */; };
+		BEAC37FCACB3E59436914C19 /* OnboardingV2State.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC38C3AD8DC79EC356045E /* OnboardingV2State.swift */; };
+		BEACF82A9C6956AE73B8066C /* OnboardingV2Flow.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC6B6F478BD7669397C680 /* OnboardingV2Flow.swift */; };
 		BEAC0B6831FDCD25D7041B3D /* PostHogAnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC04EE60FA453A96C964BF /* PostHogAnalyticsService.swift */; };
 		BEAC5D2C74AF69391325A339 /* AvatarConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC13AB2401F3FF7F069133 /* AvatarConfig.swift */; };
 		BEACFF011F1A7C32F9B4FBDC /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC2B1CF958F0EAE1424ADF /* AvatarView.swift */; };
@@ -443,6 +445,8 @@
 		BEACBFF4F8D40A8AD844E011 /* RallyPointScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RallyPointScreen.swift; path = BarPass/Features/Safety/RallyPointScreen.swift; sourceTree = SOURCE_ROOT; };
 		BEACBFA6E7EEE21CB5603F9E /* SafetyGroupChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupChatView.swift; path = BarPass/Features/Safety/SafetyGroupChatView.swift; sourceTree = SOURCE_ROOT; };
 		BEAC3CA21F712540E453F169 /* SafetyGroupEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SafetyGroupEntry.swift; path = BarPass/Features/Safety/SafetyGroupEntry.swift; sourceTree = SOURCE_ROOT; };
+		BEAC38C3AD8DC79EC356045E /* OnboardingV2State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OnboardingV2State.swift; path = BarPass/Features/Onboarding/OnboardingV2State.swift; sourceTree = SOURCE_ROOT; };
+		BEAC6B6F478BD7669397C680 /* OnboardingV2Flow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OnboardingV2Flow.swift; path = BarPass/Features/Onboarding/OnboardingV2Flow.swift; sourceTree = SOURCE_ROOT; };
 		BEAC04EE60FA453A96C964BF /* PostHogAnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PostHogAnalyticsService.swift; path = BarPass/Core/Services/PostHogAnalyticsService.swift; sourceTree = SOURCE_ROOT; };
 		BEAC13AB2401F3FF7F069133 /* AvatarConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AvatarConfig.swift; path = BarPass/Models/AvatarConfig.swift; sourceTree = SOURCE_ROOT; };
 		BEAC2B1CF958F0EAE1424ADF /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AvatarView.swift; path = BarPass/Features/Avatar/AvatarView.swift; sourceTree = SOURCE_ROOT; };
@@ -765,6 +769,8 @@
 				BEACBFF4F8D40A8AD844E011 /* RallyPointScreen.swift */,
 				BEACBFA6E7EEE21CB5603F9E /* SafetyGroupChatView.swift */,
 				BEAC3CA21F712540E453F169 /* SafetyGroupEntry.swift */,
+				BEAC38C3AD8DC79EC356045E /* OnboardingV2State.swift */,
+				BEAC6B6F478BD7669397C680 /* OnboardingV2Flow.swift */,
 				BEAC04EE60FA453A96C964BF /* PostHogAnalyticsService.swift */,
 				BEAC13AB2401F3FF7F069133 /* AvatarConfig.swift */,
 				BEAC2B1CF958F0EAE1424ADF /* AvatarView.swift */,
@@ -1466,6 +1472,8 @@
 				BEACD51C952ADC143C2FDACD /* RallyPointScreen.swift in Sources */,
 				BEACCE2BC71447990ECFF47F /* SafetyGroupChatView.swift in Sources */,
 				BEAC36690ED742B77CB74FC1 /* SafetyGroupEntry.swift in Sources */,
+				BEAC37FCACB3E59436914C19 /* OnboardingV2State.swift in Sources */,
+				BEACF82A9C6956AE73B8066C /* OnboardingV2Flow.swift in Sources */,
 				BEAC0B6831FDCD25D7041B3D /* PostHogAnalyticsService.swift in Sources */,
 				BEAC5D2C74AF69391325A339 /* AvatarConfig.swift in Sources */,
 				BEACFF011F1A7C32F9B4FBDC /* AvatarView.swift in Sources */,
@@ -1580,7 +1588,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 85;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1608,7 +1616,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 85;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1738,7 +1746,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 85;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1761,7 +1769,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 85;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;

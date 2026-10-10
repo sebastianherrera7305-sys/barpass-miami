@@ -20,7 +20,7 @@ struct RootView: View {
             // salía FLOTANDO sobre la app ya corriendo — con las 181 cards
             // renderizando detrás y `playTopSongs()` arrancando la música
             // bajo una pantalla que todavía pide atención.
-            if !appState.showSplash && !appState.showNativeAuth && !appState.showTasteQuiz {
+            if !appState.showSplash && !appState.showNativeAuth && !appState.showTasteQuiz && !appState.showOnboardingV2 {
                 NavigationStack {
                     MainTabView()
                 }
@@ -60,13 +60,23 @@ struct RootView: View {
                     .zIndex(4)
             }
 
-            if appState.showTasteQuiz && !appState.showOnboarding && !appState.showSplash {
+            // OnboardingV2 — las 7 pantallas convergidas 2026-10-09. Toma
+            // el slot del taste quiz + el video de onboarding viejo cuando
+            // está activo. El propio flujo decide cuándo invocar
+            // appState.completeOnboardingV2().
+            if appState.showOnboardingV2 && !appState.showOnboarding && !appState.showSplash {
+                OnboardingV2Flow()
+                    .transition(.opacity)
+                    .zIndex(4)
+            }
+
+            if appState.showTasteQuiz && !appState.showOnboarding && !appState.showOnboardingV2 && !appState.showSplash {
                 TasteQuizView { appState.completeTasteQuiz() }
                     .transition(.opacity)
                     .zIndex(4)
             }
 
-            if appState.showNativeAuth && !appState.showOnboarding && !appState.showTasteQuiz {
+            if appState.showNativeAuth && !appState.showOnboarding && !appState.showTasteQuiz && !appState.showOnboardingV2 {
                 NativeAuthView()
                     .environmentObject(appState)
                     .transition(.asymmetric(

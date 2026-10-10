@@ -13,10 +13,16 @@ struct OrderConfirmation: Equatable {
 final class AppState: ObservableObject {
     @Published var showSplash             = true
     @Published var showOnboarding         = false
+    /// OnboardingV2 — las 7 pantallas de "primera apertura" convergidas
+    /// 2026-10-09. Reemplaza TasteQuizView + OnboardingVideoView cuando
+    /// está activo. Flag detrás de UserDefault por si rollback inmediato.
+    @Published var showOnboardingV2       = !OnboardingV2State.isCompleted && OnboardingV2State.useV2
     /// Quiz de gustos, entre el video de onboarding y el login. Va antes del
     /// auth a propósito (ver TasteQuizView), así que se resuelve contra
     /// UserDefaults y no contra el usuario, que todavía no existe.
-    @Published var showTasteQuiz          = !TasteProfileService.isCompleted
+    /// Si useOnboardingV2 está activo, el quiz vive dentro del flujo nuevo
+    /// (pantalla 3 "Gusto por swipe") y este flag queda en false.
+    @Published var showTasteQuiz          = !TasteProfileService.isCompleted && !OnboardingV2State.useV2
     @Published var showActionBar          = false
     @Published var showNativeAuth         = true
     @Published var showAgeGate            = false
@@ -128,6 +134,14 @@ final class AppState: ObservableObject {
     /// y RootView lo muestra en cuanto este flag baja.
     func completeTasteQuiz() {
         withAnimation(.easeOut(duration: 0.15)) { showTasteQuiz = false }
+    }
+
+    /// Se llama cuando el usuario termina las 7 pantallas de OnboardingV2.
+    /// Baja el flag y persiste "ya lo vi" en UserDefaults para que el
+    /// próximo arranque frío vaya directo al auth.
+    func completeOnboardingV2() {
+        OnboardingV2State.markCompleted()
+        withAnimation(.easeOut(duration: 0.15)) { showOnboardingV2 = false }
     }
 
     /// Called after successful auth (sign in, sign up, or session restore).
