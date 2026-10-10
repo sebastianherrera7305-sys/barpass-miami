@@ -34,6 +34,19 @@ struct ProfileView: View {
     @State private var showGroupNightPreview = false
     @State private var showVenuePulsePreview = false
     @State private var showNightRecapPreview = false
+    // Gallery v17.1 previews — 12 pantallas más (artifact fc6e12c7).
+    @State private var showExploreV2 = false
+    @State private var showSocialV2 = false
+    @State private var showTripsListV2 = false
+    @State private var showPriorityEntryV2 = false
+    @State private var showSkipTheLineV2 = false
+    @State private var showActivePassV2 = false
+    @State private var showCartV2 = false
+    @State private var showOpenTabV2 = false
+    @State private var showAuthLoginV2 = false
+    @State private var showGamesMissionsV2 = false
+    @State private var showFindMyPeopleV2 = false
+    @State private var showYourSignalV2 = false
     @State private var displayNameDraft = ""
     @State private var isSavingDisplayName = false
 
@@ -555,6 +568,18 @@ struct ProfileView: View {
                                 debugButton("La noche del grupo") { showGroupNightPreview = true }
                                 debugButton("Venue con pulso") { showVenuePulsePreview = true }
                                 debugButton("Recap y racha") { showNightRecapPreview = true }
+                                debugButton("Explore") { showExploreV2 = true }
+                                debugButton("Social") { showSocialV2 = true }
+                                debugButton("Trips (lista)") { showTripsListV2 = true }
+                                debugButton("Priority Entry") { showPriorityEntryV2 = true }
+                                debugButton("Skip the Line") { showSkipTheLineV2 = true }
+                                debugButton("Pase activo") { showActivePassV2 = true }
+                                debugButton("Carrito") { showCartV2 = true }
+                                debugButton("Cuenta abierta") { showOpenTabV2 = true }
+                                debugButton("Entrar (auth)") { showAuthLoginV2 = true }
+                                debugButton("Juegos y misiones") { showGamesMissionsV2 = true }
+                                debugButton("Encontrar a mi gente") { showFindMyPeopleV2 = true }
+                                debugButton("Tu señal") { showYourSignalV2 = true }
                             }
                         } else {
                             HStack(spacing: 10) {
@@ -641,6 +666,18 @@ struct ProfileView: View {
             ).environmentObject(appState)
         }
         .sheet(isPresented: $showNightRecapPreview) { NightRecapView().environmentObject(appState) }
+        .sheet(isPresented: $showExploreV2) { ExploreV2View().environmentObject(appState) }
+        .sheet(isPresented: $showSocialV2) { SocialV2View(embeddedInTabBar: false).environmentObject(appState) }
+        .sheet(isPresented: $showTripsListV2) { TripsListV2View().environmentObject(appState) }
+        .sheet(isPresented: $showPriorityEntryV2) { PriorityEntryV2View().environmentObject(appState) }
+        .sheet(isPresented: $showSkipTheLineV2) { SkipTheLineV2View().environmentObject(appState) }
+        .sheet(isPresented: $showActivePassV2) { ActivePassV2View().environmentObject(appState) }
+        .sheet(isPresented: $showCartV2) { CartV2View().environmentObject(appState) }
+        .sheet(isPresented: $showOpenTabV2) { OpenTabV2View().environmentObject(appState) }
+        .sheet(isPresented: $showAuthLoginV2) { AuthLoginV2View().environmentObject(appState) }
+        .sheet(isPresented: $showGamesMissionsV2) { GamesMissionsV2View().environmentObject(appState) }
+        .sheet(isPresented: $showFindMyPeopleV2) { FindMyPeopleV2View().environmentObject(appState) }
+        .sheet(isPresented: $showYourSignalV2) { YourSignalV2View().environmentObject(appState) }
         .sheet(isPresented: $showAffiliationPicker) {
             AffiliationPickerView { uni, chapter in
                 affiliatedUniversity = uni
