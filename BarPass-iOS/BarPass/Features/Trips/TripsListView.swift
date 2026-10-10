@@ -391,7 +391,7 @@ struct TripsListView: View {
 /// Was a plain `.alert` with a bare TextField — replaced with a real sheet
 /// matching the app's design language, with a visible loading/error state
 /// instead of silently doing nothing on failure.
-private struct JoinByCodeView: View {
+struct JoinByCodeView: View {
     @Binding var joinCode: String
     @Binding var error: String?
     @Binding var isJoining: Bool

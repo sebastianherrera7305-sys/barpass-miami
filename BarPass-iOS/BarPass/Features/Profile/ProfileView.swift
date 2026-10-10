@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var venueStore: VenueStore
     @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var themeService = ThemeService.shared
     @ObservedObject private var appearanceStore = AppearanceStore.shared
@@ -668,7 +669,11 @@ struct ProfileView: View {
         .sheet(isPresented: $showNightRecapPreview) { NightRecapView().environmentObject(appState) }
         .sheet(isPresented: $showExploreV2) { ExploreV2View().environmentObject(appState) }
         .sheet(isPresented: $showSocialV2) { SocialV2View(embeddedInTabBar: false).environmentObject(appState) }
-        .sheet(isPresented: $showTripsListV2) { TripsListV2View().environmentObject(appState) }
+        .sheet(isPresented: $showTripsListV2) {
+            TripsListV2View()
+                .environmentObject(appState)
+                .environmentObject(venueStore)
+        }
         .sheet(isPresented: $showPriorityEntryV2) { PriorityEntryV2View().environmentObject(appState) }
         .sheet(isPresented: $showSkipTheLineV2) { SkipTheLineV2View().environmentObject(appState) }
         .sheet(isPresented: $showActivePassV2) { ActivePassV2View().environmentObject(appState) }
