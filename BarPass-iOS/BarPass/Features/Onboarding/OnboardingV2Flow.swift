@@ -690,116 +690,142 @@ private struct FlowRow: Layout {
     }
 }
 
-// MARK: - Screens 4-7 · Stubs (copy real, visual placeholder)
-// Each has the mockup's exact title + description, a reproduction of the
-// section rhythm, and a "Continuar" button. They are honest stubs — the
-// real screens come in the next passes.
+// MARK: - Screen 4 · Tu cara, tu avatar
+// Vision analysis on-device, three Remy variants to pick from, 14-trait fine
+// tune link. The Vision selfie flow isn't wired yet (requires AVCaptureSession
+// + VNFaceObservation + a dedicated SelfieCapture view); for now the screen
+// opens showing a "Sin foto" placeholder, and tapping "Tomar selfie" simulates
+// the three variants. Hooking the real camera is a one-file follow-up.
 
 @MainActor
 private struct OB4_FaceAvatar: View {
     @ObservedObject var model: OnboardingV2Model
-    var body: some View {
-        StubScreen(
-            number: 4, title: "Tu avatar", italic: "desde tu cara",
-            message: "Selfie → análisis en el teléfono (tono, pelo, lentes) → avatar propio. Es tuyo: cuesta dejarlo.",
-            cta: "Tomar selfie",
-            secondaryCTA: "Más tarde",
-            onPrimary: { model.advance() },
-            onSecondary: { model.advance() }
-        )
-    }
-}
-
-@MainActor
-private struct OB5_FirstNight: View {
-    @ObservedObject var model: OnboardingV2Model
-    var body: some View {
-        StubScreen(
-            number: 5, title: "Esta noche", italic: "ya está armada",
-            message: "Remy armó una noche de 3 paradas para esta noche. Guardarla la hace tuya.",
-            cta: "Ver mi noche",
-            secondaryCTA: nil,
-            onPrimary: { model.advance() },
-            onSecondary: nil
-        )
-    }
-}
-
-@MainActor
-private struct OB6_SaveAccount: View {
-    @ObservedObject var model: OnboardingV2Model
-    let onComplete: () -> Void
-    var body: some View {
-        StubScreen(
-            number: 6, title: "Guarda", italic: "tu noche",
-            message: "Lo que ya ganaste se pierde si salís. Es la noche 1 de tu racha.",
-            cta: "Crear cuenta",
-            secondaryCTA: "Ya tengo",
-            onPrimary: { model.advance() },
-            onSecondary: { model.advance() }
-        )
-    }
-}
-
-@MainActor
-private struct OB7_Notifications: View {
-    @ObservedObject var model: OnboardingV2Model
-    let onComplete: () -> Void
-    var body: some View {
-        StubScreen(
-            number: 7, title: "Avisos", italic: "con motivo",
-            message: "La fila bajó. Tu grupo llegó. Mejor hora para entrar. Nada que no te sirva.",
-            cta: "Avisarme",
-            secondaryCTA: "Después",
-            onPrimary: onComplete,
-            onSecondary: onComplete
-        )
-    }
-}
-
-@MainActor
-private struct StubScreen: View {
-    let number: Int
-    let title: String
-    let italic: String
-    let message: String
-    let cta: String
-    let secondaryCTA: String?
-    let onPrimary: () -> Void
-    let onSecondary: (() -> Void)?
+    @State private var hasPhoto = false
+    @State private var selectedVariant = 0
+    private let variantLabels = ["Esta", "Más rizo", "Más barba"]
+    private let readings = ["pelo corto negro", "ovalada", "barba", "sin lentes"]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer().frame(height: 70)
 
-            Text("1 · Primera apertura · \(number) de 7")
-                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                .tracking(2.4)
-                .foregroundStyle(Color.bpAmber)
-                .padding(.horizontal, 24)
+            HStack {
+                Text("4 / 7")
+                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                    .tracking(2.4)
+                    .foregroundStyle(Color.bpAmber)
+                Spacer()
+                Button("Saltar") { model.advance() }
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.white.opacity(0.6))
+            }
+            .padding(.horizontal, 24)
 
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text(title)
-                    .font(.system(size: 44, weight: .black, design: .rounded))
-                    .tracking(-1.2)
+                Text("Tu cara,")
+                    .font(.system(size: 38, weight: .black, design: .rounded))
+                    .tracking(-1)
                     .foregroundStyle(.white)
-                Text(italic)
-                    .font(.system(size: 40, design: .serif).italic())
+                Text("tu avatar")
+                    .font(.system(size: 34, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
             }
             .padding(.horizontal, 24).padding(.top, 8)
 
-            Text(message)
-                .font(.system(size: 15))
+            Text("Una selfie. Se analiza en tu teléfono y no se guarda: solo sale tu avatar.")
+                .font(.system(size: 14))
                 .foregroundStyle(Color.white.opacity(0.72))
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 24).padding(.top, 18)
+                .padding(.horizontal, 24).padding(.top, 12)
+
+            Spacer()
+
+            if !hasPhoto {
+                // "Sin foto" placeholder — big dashed circle, tap to simulate.
+                VStack(spacing: 14) {
+                    Circle()
+                        .strokeBorder(Color.white.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
+                        .frame(width: 160, height: 160)
+                        .overlay(
+                            Image(systemName: "person.crop.circle.badge.plus")
+                                .font(.system(size: 48, weight: .light))
+                                .foregroundStyle(Color.white.opacity(0.4))
+                        )
+                    Text("Sin foto")
+                        .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                        .tracking(2)
+                        .foregroundStyle(Color.white.opacity(0.5))
+                }
+                .frame(maxWidth: .infinity)
+            } else {
+                // Three Remy variants in a row — pick one.
+                VStack(spacing: 14) {
+                    Text("3 lecturas de tu cara")
+                        .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                        .tracking(2)
+                        .foregroundStyle(Color.white.opacity(0.55))
+
+                    HStack(spacing: 14) {
+                        ForEach(0..<3, id: \.self) { i in
+                            VStack(spacing: 8) {
+                                Circle()
+                                    .fill(variantGradient(i))
+                                    .frame(width: 86, height: 86)
+                                    .overlay(
+                                        Circle().strokeBorder(
+                                            selectedVariant == i ? Color.bpAmber : Color.white.opacity(0.15),
+                                            lineWidth: selectedVariant == i ? 3 : 1
+                                        )
+                                    )
+                                    .overlay(
+                                        Text("👤")
+                                            .font(.system(size: 42))
+                                    )
+                                Text(variantLabels[i])
+                                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(selectedVariant == i ? Color.bpAmber : Color.white.opacity(0.65))
+                            }
+                            .onTapGesture {
+                                withAnimation(.easeOut(duration: 0.15)) { selectedVariant = i }
+                            }
+                        }
+                    }
+
+                    // Readings — tags Remy extracted
+                    HStack(spacing: 6) {
+                        ForEach(readings, id: \.self) { r in
+                            Text(r)
+                                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                .foregroundStyle(Color.white.opacity(0.65))
+                                .padding(.horizontal, 7).padding(.vertical, 3)
+                                .background(Color.white.opacity(0.07), in: Capsule())
+                                .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
+                        }
+                    }
+                    .padding(.top, 6)
+
+                    Button("Afinar 14 rasgos") { }
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color.bpAmber)
+                        .padding(.top, 4)
+                }
+                .frame(maxWidth: .infinity)
+            }
 
             Spacer()
 
             VStack(spacing: 10) {
-                Button(action: onPrimary) {
-                    Text(cta)
+                Button {
+                    if hasPhoto {
+                        model.advance()
+                    } else {
+                        // TODO: open real SelfieCapture (AVCapture + Vision).
+                        // Flipping the flag until that's built keeps the
+                        // onboarding flow coherent instead of stuck.
+                        withAnimation(.easeOut(duration: 0.3)) { hasPhoto = true }
+                    }
+                } label: {
+                    Text(hasPhoto ? "Soy yo" : "Tomar selfie")
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
@@ -808,18 +834,441 @@ private struct StubScreen: View {
                 }
                 .buttonStyle(.plain)
 
-                if let secondaryCTA, let onSecondary {
-                    Button(action: onSecondary) {
-                        Text(secondaryCTA)
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Color.white.opacity(0.7))
-                            .padding(.vertical, 10)
-                    }
-                    .buttonStyle(.plain)
-                }
+                Text("Así te ven tus amigos en el mapa esta noche")
+                    .font(.system(size: 11, design: .monospaced))
+                    .tracking(0.6)
+                    .foregroundStyle(Color.white.opacity(0.5))
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 36)
         }
+    }
+
+    private func variantGradient(_ i: Int) -> LinearGradient {
+        let starts = [
+            Color(red: 0.42, green: 0.18, blue: 0.08),
+            Color(red: 0.5,  green: 0.22, blue: 0.1),
+            Color(red: 0.35, green: 0.15, blue: 0.07),
+        ]
+        return LinearGradient(
+            colors: [starts[i], starts[i].opacity(0.5)],
+            startPoint: .topLeading, endPoint: .bottomTrailing
+        )
+    }
+}
+
+// MARK: - Screen 5 · El ajá: tu primera noche
+
+@MainActor
+private struct OB5_FirstNight: View {
+    @ObservedObject var model: OnboardingV2Model
+
+    private struct Stop {
+        let time: String
+        let note: String
+        let venue: String
+        let detail: String
+    }
+    private let stops: [Stop] = [
+        .init(time: "22:00", note: "sin cover antes de las 23",
+              venue: "Sugar Rooftop", detail: "Brickell · house · ≈$16 por trago"),
+        .init(time: "23:30", note: "6 min caminando",
+              venue: "Blackbird Ordinary", detail: "Brickell · hip hop + house · ≈$12"),
+        .init(time: "01:30", note: "afterhours",
+              venue: "Club Space", detail: "Downtown · techno · Skip the Line $25"),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Spacer().frame(height: 70)
+
+            Text("Listo en 48 segundos")
+                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                .tracking(2.4)
+                .foregroundStyle(Color.bpAmber)
+                .padding(.horizontal, 24)
+
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text("Tu primera")
+                    .font(.system(size: 38, weight: .black, design: .rounded))
+                    .tracking(-1)
+                    .foregroundStyle(.white)
+                Text("noche")
+                    .font(.system(size: 36, design: .serif).italic())
+                    .foregroundStyle(Color.bpAmberBright)
+            }
+            .padding(.horizontal, 24).padding(.top, 8)
+
+            HStack(spacing: 6) {
+                Text("Hoy")
+                Text("·").foregroundStyle(Color.white.opacity(0.3))
+                Text("$50")
+                Text("·").foregroundStyle(Color.white.opacity(0.3))
+                Text("tu gusto")
+                Spacer()
+                Text("3 PARADAS")
+                    .padding(.horizontal, 7).padding(.vertical, 3)
+                    .background(Color.bpAmber.opacity(0.18), in: Capsule())
+                    .foregroundStyle(Color.bpAmber)
+                    .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.35)))
+            }
+            .font(.system(size: 11, weight: .heavy, design: .monospaced))
+            .tracking(1.4)
+            .foregroundStyle(Color.white.opacity(0.65))
+            .padding(.horizontal, 24).padding(.top, 10)
+
+            // The 3 stops — ticket-style timeline. Each is a row with the
+            // time + note at left, venue block at right.
+            VStack(spacing: 10) {
+                ForEach(Array(stops.enumerated()), id: \.offset) { idx, s in
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(s.time)
+                                .font(.system(size: 15, weight: .black, design: .monospaced))
+                                .foregroundStyle(Color.bpAmber)
+                            Text(s.note)
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundStyle(Color.white.opacity(0.55))
+                                .lineLimit(2)
+                        }
+                        .frame(width: 76, alignment: .leading)
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(s.venue)
+                                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                            Text(s.detail)
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color.white.opacity(0.65))
+                                .lineLimit(2)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.vertical, 10).padding(.horizontal, 14)
+                    .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.white.opacity(0.08)))
+                }
+            }
+            .padding(.horizontal, 24).padding(.top, 18)
+
+            // Social proof — contacts already here, going out tonight.
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    HStack(spacing: -6) {
+                        ForEach(0..<3, id: \.self) { i in
+                            Circle()
+                                .fill(LinearGradient(colors: [
+                                    Color(red: 0.4, green: 0.18, blue: 0.08),
+                                    Color(red: 0.2, green: 0.08, blue: 0.05),
+                                ], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .frame(width: 22, height: 22)
+                                .overlay(Circle().strokeBorder(Color.black, lineWidth: 2))
+                                .zIndex(Double(3 - i))
+                        }
+                    }
+                    Text("Mía, Jules y ")
+                        .foregroundStyle(.white) +
+                    Text("4 de tus contactos")
+                        .foregroundStyle(Color.bpAmber) +
+                    Text(" ya están en BarPass")
+                        .foregroundStyle(.white)
+                }
+                .font(.system(size: 12, weight: .semibold))
+                Text("2 salen esta noche en Brickell")
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(Color.bpAmberBright)
+            }
+            .padding(.horizontal, 24).padding(.top, 14)
+
+            Spacer()
+
+            VStack(spacing: 8) {
+                Button { model.advance() } label: {
+                    HStack {
+                        Text("Guardar mi noche")
+                            .font(.system(size: 16, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.black)
+                        Spacer()
+                        Image(systemName: "arrow.right").foregroundStyle(.black)
+                    }
+                    .padding(.vertical, 18).padding(.horizontal, 22)
+                    .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: 18))
+                }
+                .buttonStyle(.plain)
+
+                Text("Si sales ahora, la noche y tu avatar se pierden")
+                    .font(.system(size: 10.5, design: .monospaced))
+                    .foregroundStyle(Color.bpDanger.opacity(0.85))
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .padding(.horizontal, 24).padding(.bottom, 36)
+        }
+    }
+}
+
+// MARK: - Screen 6 · Guarda tu noche (registro post-valor)
+
+@MainActor
+private struct OB6_SaveAccount: View {
+    @ObservedObject var model: OnboardingV2Model
+    let onComplete: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Spacer().frame(height: 70)
+
+            Text("NOCHE 1 DE TU RACHA")
+                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                .tracking(2.4)
+                .foregroundStyle(Color.bpAmber)
+                .padding(.horizontal, 24)
+
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text("Guarda")
+                    .font(.system(size: 44, weight: .black, design: .rounded))
+                    .tracking(-1.2)
+                    .foregroundStyle(.white)
+                Text("tu noche")
+                    .font(.system(size: 40, design: .serif).italic())
+                    .foregroundStyle(Color.bpAmberBright)
+            }
+            .padding(.horizontal, 24).padding(.top, 8)
+
+            Text("Tu racha de noches empieza hoy. Lo que armaste queda contigo:")
+                .font(.system(size: 14))
+                .foregroundStyle(Color.white.opacity(0.72))
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 24).padding(.top, 12)
+
+            VStack(spacing: 10) {
+                saveItem(
+                    title: "Tu noche de hoy",
+                    detail: "Sugar Rooftop → Blackbird → Space",
+                    icon: "moon.stars.fill"
+                )
+                saveItem(
+                    title: "Tu avatar",
+                    detail: "Hecho de tu cara",
+                    icon: "person.crop.circle.fill"
+                )
+                saveItem(
+                    title: "Lo que Remy aprendió",
+                    detail: "rooftops · house · Brickell · $50–100",
+                    icon: "sparkles"
+                )
+            }
+            .padding(.horizontal, 24).padding(.top, 20)
+
+            Spacer()
+
+            VStack(spacing: 10) {
+                Button { model.advance() } label: {
+                    HStack {
+                        Image(systemName: "applelogo")
+                        Text("Continuar con Apple")
+                    }
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 17)
+                    .background(.white, in: RoundedRectangle(cornerRadius: 18))
+                }
+                .buttonStyle(.plain)
+
+                Button { model.advance() } label: {
+                    HStack {
+                        Image(systemName: "phone.fill")
+                        Text("Continuar con mi número")
+                    }
+                    .font(.system(size: 15, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 18))
+                    .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Color.white.opacity(0.18)))
+                }
+                .buttonStyle(.plain)
+
+                Text("Sin contraseña · 1 toque · Términos y Privacidad")
+                    .font(.system(size: 10.5, design: .monospaced))
+                    .foregroundStyle(Color.white.opacity(0.4))
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 4)
+            }
+            .padding(.horizontal, 24).padding(.bottom, 36)
+        }
+    }
+
+    private func saveItem(title: String, detail: String, icon: String) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Color.bpAmber)
+                .frame(width: 32, height: 32)
+                .background(Color.bpAmber.opacity(0.12), in: Circle())
+                .overlay(Circle().strokeBorder(Color.bpAmber.opacity(0.3)))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text(detail)
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.white.opacity(0.6))
+                    .lineLimit(1)
+            }
+            Spacer()
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 16))
+                .foregroundStyle(Color.bpGreen)
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
+    }
+}
+
+// MARK: - Screen 7 · Avisos con motivo
+
+@MainActor
+private struct OB7_Notifications: View {
+    @ObservedObject var model: OnboardingV2Model
+    let onComplete: () -> Void
+
+    private struct Reason {
+        let title: String
+        let quote: String
+        let icon: String
+    }
+    private let reasons: [Reason] = [
+        .init(title: "Fila en Club Space",
+              quote: "\"Salgan 00:45 — la fila ya va 45 min\"",
+              icon: "person.3.fill"),
+        .init(title: "Tu gente llega",
+              quote: "\"Mía acaba de entrar a Blackbird\"",
+              icon: "person.2.wave.2.fill"),
+        .init(title: "Mejor hora para entrar",
+              quote: "\"Space está al 60% — es ahora\"",
+              icon: "clock.fill"),
+        .init(title: "Eventos y promos",
+              quote: "Como mucho 1 por semana",
+              icon: "sparkles"),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Spacer().frame(height: 70)
+
+            Text("Último paso")
+                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                .tracking(2.4)
+                .foregroundStyle(Color.bpAmber)
+                .padding(.horizontal, 24)
+
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("¿Te aviso cuando")
+                    .font(.system(size: 30, weight: .black, design: .rounded))
+                    .tracking(-0.8)
+                    .foregroundStyle(.white)
+                Text("importe")
+                    .font(.system(size: 32, design: .serif).italic())
+                    .foregroundStyle(Color.bpAmberBright)
+                Text("?")
+                    .font(.system(size: 30, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 24).padding(.top, 8)
+
+            Text("Solo esto. Nada de \"¡Volvé a la app!\".")
+                .font(.system(size: 13, design: .serif).italic())
+                .foregroundStyle(Color.white.opacity(0.72))
+                .padding(.horizontal, 24).padding(.top, 10)
+
+            VStack(spacing: 8) {
+                ForEach(Array(reasons.enumerated()), id: \.offset) { _, r in
+                    HStack(alignment: .top, spacing: 11) {
+                        Image(systemName: r.icon)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Color.bpAmber)
+                            .frame(width: 28, height: 28)
+                            .background(Color.bpAmber.opacity(0.14), in: Circle())
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(r.title)
+                                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                            Text(r.quote)
+                                .font(.system(size: 11, design: .serif).italic())
+                                .foregroundStyle(Color.white.opacity(0.65))
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer()
+                    }
+                    .padding(10)
+                    .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.white.opacity(0.07)))
+                }
+            }
+            .padding(.horizontal, 24).padding(.top, 16)
+
+            // Preview card — what it will actually look like tonight
+            VStack(alignment: .leading, spacing: 6) {
+                Text("ASÍ SE VE · ESTA NOCHE A LAS 00:40")
+                    .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
+                    .tracking(2)
+                    .foregroundStyle(Color.white.opacity(0.5))
+                HStack(alignment: .top, spacing: 10) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color.bpAmber)
+                            .frame(width: 28, height: 28)
+                        Text("R").font(.system(size: 15, weight: .black, design: .rounded)).foregroundStyle(.black)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Remy").font(.system(size: 11, weight: .heavy, design: .rounded))
+                        Text("Space va al 78%. Si salen ahora de Blackbird entran sin fila. ¿Pido el Uber?")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.white)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .padding(10)
+                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.bpAmber.opacity(0.25)))
+            }
+            .padding(.horizontal, 24).padding(.top, 14)
+
+            Spacer()
+
+            VStack(spacing: 8) {
+                Button { requestAndFinish() } label: {
+                    Text("Permitir avisos")
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: 18))
+                }
+                .buttonStyle(.plain)
+
+                Button { onComplete() } label: {
+                    Text("Ahora no")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.white.opacity(0.7))
+                        .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 24).padding(.bottom, 36)
+        }
+    }
+
+    private func requestAndFinish() {
+        // Request real notification permission. The user's response is their
+        // call — we complete onboarding either way so they don't get stuck
+        // here if iOS prompts and they ignore it.
+        Task { _ = await PushRegistration.shared.requestAuthorizationIfNeeded() }
+        onComplete()
     }
 }
