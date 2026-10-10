@@ -27,6 +27,13 @@ struct ProfileView: View {
     @State private var avatarConfig: AvatarConfig?
     @State private var showEditDisplayName = false
     @State private var showAvatarEditor = false
+    // Debug previews — Tonight v17.1 companion screens 8-11, still unwired
+    // to the main flow. Lets the owner see them in TestFlight 88+ without
+    // replacing the existing TripDetail / PlanView / VenueDetail yet.
+    @State private var showRemyLivePreview = false
+    @State private var showGroupNightPreview = false
+    @State private var showVenuePulsePreview = false
+    @State private var showNightRecapPreview = false
     @State private var displayNameDraft = ""
     @State private var isSavingDisplayName = false
 
@@ -532,6 +539,23 @@ struct ProfileView: View {
                             }
                             .buttonStyle(.plain)
                             .bpAccessibility(label: l10n.t("profile.account.deleteAccount"), hint: l10n.t("deleteAccount.hint"), isButton: true)
+
+                            // Debug previews — Tonight v17.1 screens 8-11, not yet
+                            // wired to the main nav. Lets the owner see them in
+                            // TestFlight without replacing TripDetail / PlanView
+                            // / VenueDetail yet.
+                            VStack(spacing: 8) {
+                                Text("VISTAS PREVIAS v17.1")
+                                    .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
+                                    .tracking(2)
+                                    .foregroundStyle(Color.bpAmber)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.top, 14)
+                                debugButton("Remy en vivo") { showRemyLivePreview = true }
+                                debugButton("La noche del grupo") { showGroupNightPreview = true }
+                                debugButton("Venue con pulso") { showVenuePulsePreview = true }
+                                debugButton("Recap y racha") { showNightRecapPreview = true }
+                            }
                         } else {
                             HStack(spacing: 10) {
                                 Image(systemName: "person.crop.circle.badge.questionmark")
@@ -605,6 +629,18 @@ struct ProfileView: View {
                 appState.showNativeAuth = true
             }
         }
+        // Debug previews — see @State block above
+        .sheet(isPresented: $showRemyLivePreview) { RemyLiveView().environmentObject(appState) }
+        .sheet(isPresented: $showGroupNightPreview) { GroupNightView().environmentObject(appState) }
+        .sheet(isPresented: $showVenuePulsePreview) {
+            VenuePulseView(
+                venueName: "Club Space",
+                subtitleAccent: "ahora mismo",
+                openUntil: "cierra a las 06:00",
+                fillPercent: 78
+            ).environmentObject(appState)
+        }
+        .sheet(isPresented: $showNightRecapPreview) { NightRecapView().environmentObject(appState) }
         .sheet(isPresented: $showAffiliationPicker) {
             AffiliationPickerView { uni, chapter in
                 affiliatedUniversity = uni
@@ -630,6 +666,27 @@ struct ProfileView: View {
             }
         }
         }
+    }
+
+    private func debugButton(_ title: String, action: @escaping () -> Void) -> some View {
+        Button {
+            BPHaptics.light()
+            action()
+        } label: {
+            HStack {
+                Text(title)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color.bpInk)
+                Spacer()
+                Image(systemName: "arrow.up.right.square")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.bpAmber)
+            }
+            .padding(.horizontal, 14).padding(.vertical, 11)
+            .background(Color.bpAmber.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.bpAmber.opacity(0.25)))
+        }
+        .buttonStyle(.plain)
     }
 
     private func statCard(value: String, label: String, icon: String) -> some View {
