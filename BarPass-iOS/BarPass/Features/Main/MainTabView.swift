@@ -57,9 +57,13 @@ struct MainTabView: View {
             Group {
                 switch selectedTab {
                 case 0:  TonightView()
-                case 1:  ExploreView()
-                case 2:  SocialView(venueStore: venueStore)
-                case 3:  TripsListView()
+                case 1:
+                    if V2Flags.exploreV2 { ExploreV2View() } else { ExploreView() }
+                case 2:
+                    if V2Flags.socialV2 { SocialV2View(embeddedInTabBar: true) }
+                    else { SocialView(venueStore: venueStore) }
+                case 3:
+                    if V2Flags.tripsListV2 { TripsListV2View() } else { TripsListView() }
                 default: ProfileView()
                 }
             }
@@ -262,7 +266,23 @@ struct MainTabView: View {
             // invisible e intocable. Y como el botón flotante se oculta
             // mientras `isActive` es true, no quedaba forma de apagarlo — la
             // app se sentía trabada. Reportado desde TestFlight.
-            NavigationStack { VenueDetailView(venue: venue).appState(appState) }
+            NavigationStack {
+                if V2Flags.venuePulseV2 {
+                    // Venue con pulso (artifact v17.1). Pure-visual swap: takes
+                    // the venue's name/city/time; the live crowd signal and
+                    // "friends inside" row are literals from the mockup until
+                    // a real signal lands (there is no live crowd data today).
+                    VenuePulseView(
+                        venueName: venue.name,
+                        subtitleAccent: venue.neighborhood ?? "",
+                        openUntil: "",
+                        fillPercent: 50
+                    )
+                    .appState(appState)
+                } else {
+                    VenueDetailView(venue: venue).appState(appState)
+                }
+            }
                 .overlayPreferenceValue(HelpAnchorPreferenceKey.self) { anchors in
                     if helpStore.isActive {
                         HelpOverlayView(anchors: anchors)
