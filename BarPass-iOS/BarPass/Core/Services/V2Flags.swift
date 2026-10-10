@@ -16,13 +16,25 @@ enum V2Flags {
     }
 
     /// Tab 1 → ExploreV2View in place of ExploreView.
-    static var exploreV2: Bool   { read("bp_v2_explore_enabled",   default: true) }
+    /// Default OFF: V2 ships the designer's stylized map (fake pins at
+    /// hardcoded positions) and does not render MapKit or query VenueStore.
+    /// A user that taps a pin finds a mockup venue, not their real options.
+    /// Flip to true only once the mockup "map" is backed by real venues.
+    static var exploreV2: Bool   { read("bp_v2_explore_enabled",   default: false) }
     /// Tab 2 → SocialV2View in place of SocialView.
-    static var socialV2: Bool    { read("bp_v2_social_enabled",    default: true) }
+    /// Default OFF: V2 renders four fake friends (Mía/Jules/Dani/Val) and
+    /// six fake stories as mockup literals; the real feed (FriendsTonightStore,
+    /// stories, HostEvent) is not wired yet. V1 keeps real friends visible.
+    static var socialV2: Bool    { read("bp_v2_social_enabled",    default: false) }
     /// Tab 3 → TripsListV2View in place of TripsListView.
+    /// Default ON: V2 is wired to the real TripStore (my trips + discoverable
+    /// + create + join by code + deep links). Safe to ship.
     static var tripsListV2: Bool { read("bp_v2_trips_enabled",     default: true) }
     /// Tap on a venue → VenuePulseView in place of VenueDetailView.
-    static var venuePulseV2: Bool { read("bp_v2_venue_enabled",    default: true) }
+    /// Default OFF: V2 shows the real venue name/neighborhood but every
+    /// dynamic detail (drinks, friends-inside, events, pulse %) is mockup.
+    /// V1 renders the real menu, events, pass CTAs and media.
+    static var venuePulseV2: Bool { read("bp_v2_venue_enabled",    default: false) }
     /// Login → AuthLoginV2View in place of NativeAuthView.
     /// NOT enabled by default — AuthV2 is pure visual, needs its real
     /// email/password/Apple handlers wired before it goes live.
