@@ -179,16 +179,13 @@ public struct SkipTheLineV2View: View {
 
     private var passPicker: some View {
         VStack(alignment: .leading, spacing: 7) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("Elige tu pase")
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                Spacer()
-                Text("Hoy · 22:00–04:00")
-                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                    .tracking(1.4)
-                    .foregroundStyle(Color.white.opacity(0.55))
-            }
+            // The mockup labeled this slot "Hoy · 22:00–04:00" literally;
+            // without a real hours source for the venue the honest version
+            // is just "Elige tu pase". If the container ever passes real
+            // hours, revive the second Text — guided by venueHours instead.
+            Text("Elige tu pase")
+                .font(.system(size: 15, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
 
             VStack(spacing: 1) {
                 ForEach(SkipTheLineV2Model.PassOption.allCases) { option in
@@ -326,7 +323,11 @@ public struct SkipTheLineV2View: View {
                 .transition(.opacity)
             }
 
-            Text("Pago seguro · Cancelación gratis hasta 2 h antes")
+            // Keep this line honest: V1 does not implement refunds for
+             // skip-the-line passes, so the mockup's "Cancelación gratis"
+             // promise was dropped. "Pago seguro · Stripe" matches what
+             // the real transaction flow does.
+            Text("Pago seguro · Stripe")
                 .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
                 .tracking(0.6)
                 .foregroundStyle(Color.white.opacity(0.5))

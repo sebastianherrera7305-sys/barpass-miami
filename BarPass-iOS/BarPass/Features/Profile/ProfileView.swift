@@ -578,7 +578,14 @@ struct ProfileView: View {
                                 debugButton("Explore") { showExploreV2 = true }
                                 debugButton("Social") { showSocialV2 = true }
                                 debugButton("Trips (lista)") { showTripsListV2 = true }
+                                // The V2 Priority hub takes callbacks that
+                                // only the real presenter (RootView) wires;
+                                // calling it bare from the debug tray would
+                                // render fabricated "CLUB SPACE" defaults
+                                // and three dead cards. DEBUG-only.
+                                #if DEBUG
                                 debugButton("Priority Entry") { showPriorityEntryV2 = true }
+                                #endif
                                 debugButton("Skip the Line") { showSkipTheLineV2 = true }
                                 #if DEBUG
                                 debugButton("Pase activo") { showActivePassV2 = true }
@@ -727,7 +734,15 @@ struct ProfileView: View {
                 .environmentObject(appState)
                 .environmentObject(venueStore)
         }
-        .sheet(isPresented: $showPriorityEntryV2) { PriorityEntryV2View().environmentObject(appState) }
+        .sheet(isPresented: $showPriorityEntryV2) {
+            // Bare V2 view (DEBUG-only button above): defaults render "CLUB
+            // SPACE" + no-op cards, so the sheet body is itself DEBUG-only.
+            #if DEBUG
+            PriorityEntryV2View().environmentObject(appState)
+            #else
+            EmptyView()
+            #endif
+        }
         .sheet(isPresented: $showSkipTheLineV2) { SkipTheLineV2View().environmentObject(appState) }
         .sheet(isPresented: $showActivePassV2) {
             // Sample-pass init is #if DEBUG in ActivePassV2View.

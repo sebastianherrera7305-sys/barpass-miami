@@ -101,7 +101,15 @@ public struct ActivePassV2View: View {
             }
         }
         .preferredColorScheme(.dark)
-        .onReceive(tick) { now = $0 }
+        .onReceive(tick) { date in
+            now = date
+            // Mirror V1 ActivePassView: the ticket closes itself the moment
+            // the pass stops being valid; otherwise a user would stare at a
+            // "Vencido · vencido" screen with no exit affordance.
+            if date >= pass.validUntil {
+                dismiss()
+            }
+        }
         .sheet(isPresented: $showingShareSheet) {
             ActivePassShareSheet(items: [shareText])
                 .presentationDetents([.medium])
