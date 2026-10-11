@@ -6,9 +6,12 @@ import Foundation
 ///
 ///   defaults write com.sebastian.barpass bp_v2_<name>_enabled -bool NO
 ///
-/// Default per flag is `true` once the V2 screen passes TestFlight review.
-/// Setting a flag to `false` falls back to the original V1 screen without
-/// a code change.
+/// All V2 screens were cabled to real data (commit 685bcb25), fixed per a
+/// read-only review (9ca76fde), and verified by a second adversarial
+/// review as flag-safe. Defaults flipped to true for Build 90: Build 89
+/// shipped them OFF and the owner reported "same old desing" because every
+/// screen fell through to V1. Any screen can still be force-disabled
+/// per-device with the `defaults write` incantation above.
 enum V2Flags {
     private static func read(_ key: String, default defaultValue: Bool) -> Bool {
         if UserDefaults.standard.object(forKey: key) == nil { return defaultValue }
@@ -16,41 +19,50 @@ enum V2Flags {
     }
 
     /// Tab 1 → ExploreV2View in place of ExploreView.
-    /// Default OFF: V2 ships the designer's stylized map (fake pins at
-    /// hardcoded positions) and does not render MapKit or query VenueStore.
-    /// A user that taps a pin finds a mockup venue, not their real options.
-    /// Flip to true only once the mockup "map" is backed by real venues.
-    static var exploreV2: Bool   { read("bp_v2_explore_enabled",   default: false) }
+    /// Cabled to real VenueStore (pins projected into city bbox from
+    /// lat/lng), real search (name/neighborhood/type, diacritic-insensitive),
+    /// list mode, FriendsTonightStore strip tapping to Social, real location
+    /// dot via UserLocationProvider. Capability gaps vs V1 (stadiums,
+    /// full search engine) are owner-level, not safety.
+    static var exploreV2: Bool   { read("bp_v2_explore_enabled",   default: true) }
     /// Tab 2 → SocialV2View in place of SocialView.
-    /// Default OFF: V2 renders four fake friends (Mía/Jules/Dani/Val) and
-    /// six fake stories as mockup literals; the real feed (FriendsTonightStore,
-    /// stories, HostEvent) is not wired yet. V1 keeps real friends visible.
-    static var socialV2: Bool    { read("bp_v2_social_enabled",    default: false) }
+    /// Real feed: FriendsTonightStore + VenueStoryPulseStore +
+    /// HostEventRepository. "Acaba de llegar" only when <30min. Pills to
+    /// FriendsListView / HostEventsListView. Lost UniversityListView door
+    /// (owner-level).
+    static var socialV2: Bool    { read("bp_v2_social_enabled",    default: true) }
     /// Tab 3 → TripsListV2View in place of TripsListView.
-    /// Default ON: V2 is wired to the real TripStore (my trips + discoverable
-    /// + create + join by code + deep links). Safe to ship.
+    /// Real TripStore (my trips + discoverable + create + join by code +
+    /// deep links). First V2 that shipped ON.
     static var tripsListV2: Bool { read("bp_v2_trips_enabled",     default: true) }
     /// Tap on a venue → VenuePulseView in place of VenueDetailView.
-    /// Default OFF: V2 shows the real venue name/neighborhood but every
-    /// dynamic detail (drinks, friends-inside, events, pulse %) is mockup.
-    /// V1 renders the real menu, events, pass CTAs and media.
-    static var venuePulseV2: Bool { read("bp_v2_venue_enabled",    default: false) }
-    /// Login → AuthLoginV2View in place of NativeAuthView.
-    /// NOT enabled by default — AuthV2 is pure visual, needs its real
-    /// email/password/Apple handlers wired before it goes live.
-    static var authV2: Bool      { read("bp_v2_auth_enabled",      default: false) }
-    /// Priority Entry hub → PriorityEntryV2Container in place of PriorityEntryHubView.
-    /// Default OFF: wired (real SkipLine / Table / Tickets destinations, outbox
-    /// strip, model-derived prices) but V2 copy is Spanish-only while V1 is
-    /// es/en/pt — owner decision pending.
-    static var priorityV2: Bool  { read("bp_v2_priority_enabled",  default: false) }
-    /// Skip the Line purchase → SkipTheLineV2Container (V2 skin over the V1
-    /// payment machine: Apple Pay w/ idempotency keys, wallet, card via
-    /// CardPaymentView, PassRegistrationOutbox) in place of SkipLinePassView.
-    /// Default OFF until it has been exercised against Stripe test mode.
-    static var skipLineV2: Bool  { read("bp_v2_skipline_enabled",  default: false) }
-    /// Cart sheet → CartV2View (wired to CartStore + the same CardPaymentView /
-    /// wallet / Apple Pay paths as CartView) in place of CartView.
-    /// Default OFF until exercised against Stripe test mode.
-    static var cartV2: Bool      { read("bp_v2_cart_enabled",      default: false) }
+    /// init(venue:) renders from BarPassVenue (name/neighborhood/closeTime/
+    /// timezone/drinks). Real "friends inside" via FriendsTonightStore.
+    /// Share wired to ShareManager + analytics + XP. Mockup sections
+    /// (occupancy curve, voices, Remy take) hidden in Release.
+    static var venuePulseV2: Bool { read("bp_v2_venue_enabled",    default: true) }
+    /// Login → AuthLoginV2Container in place of NativeAuthView.
+    /// AuthService.signIn/signUp/signInWithApple with SHA-256 nonce in the
+    /// request. Session restore on launch. Guest mode preserved. Copy is
+    /// Spanish-only until L10n keys land (owner-level).
+    static var authV2: Bool      { read("bp_v2_auth_enabled",      default: true) }
+    /// Priority Entry hub → PriorityEntryV2Container in place of
+    /// PriorityEntryHubView. Routes to the real SkipLine/Table/Tickets
+    /// destinations with analytics + priorityEvent branch + PassOutboxStrip.
+    /// "Desde $" prices derived from the live models, not literals.
+    static var priorityV2: Bool  { read("bp_v2_priority_enabled",  default: true) }
+    /// Skip the Line purchase → SkipTheLineV2Container.
+    /// V2 skin over the V1 payment machine, verbatim: Apple Pay with one
+    /// idempotency key per (option, attempt-series), wallet via
+    /// spendWallet, card via CardPaymentView + onOrderId bridge,
+    /// PassRegistrationOutbox.register BEFORE presenting the pass, expiry
+    /// reminder scheduled. Prices always from the model.
+    static var skipLineV2: Bool  { read("bp_v2_skipline_enabled",  default: true) }
+    /// Cart sheet → CartV2View.
+    /// CartStore-driven items/totals. Same three pay paths as CartView
+    /// line-for-line (wallet when balance >= total, otherwise top-up
+    /// prompt; CardPaymentView; ApplePayService). handleOrderSuccess
+    /// captures venueName BEFORE clear() so order confirmations keep the
+    /// venue.
+    static var cartV2: Bool      { read("bp_v2_cart_enabled",      default: true) }
 }
