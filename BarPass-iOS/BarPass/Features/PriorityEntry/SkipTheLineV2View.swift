@@ -80,7 +80,15 @@ public struct SkipTheLineV2View: View {
     private let waitMinutes: Int
     private let walletBalanceCents: Int
     private let onDismiss: () -> Void
-    private let onPurchase: (String, Int) -> Void
+    /// (method, optionId, priceCents). `method` ∈ "apple_pay" | "wallet" |
+    /// "card"; `optionId` ∈ "solo" | "pair" | "group" so the presenter can
+    /// map to the real pass tier instead of inferring it from the price.
+    private let onPurchase: (String, String, Int) -> Void
+    /// External busy flag — the presenter sets it while a charge is in
+    /// flight so no second tap can fire a duplicate request.
+    private let isProcessing: Bool
+    /// External error line rendered under the pay stack.
+    private let errorMessage: String?
 
     @StateObject private var model = SkipTheLineV2Model()
 
@@ -88,12 +96,16 @@ public struct SkipTheLineV2View: View {
         venueName: String = "Club Space",
         waitMinutes: Int = 45,
         walletBalanceCents: Int = 4250,
+        isProcessing: Bool = false,
+        errorMessage: String? = nil,
         onDismiss: @escaping () -> Void = {},
-        onPurchase: @escaping (String, Int) -> Void = { _, _ in }
+        onPurchase: @escaping (String, String, Int) -> Void = { _, _, _ in }
     ) {
         self.venueName = venueName
         self.waitMinutes = waitMinutes
         self.walletBalanceCents = walletBalanceCents
+        self.isProcessing = isProcessing
+        self.errorMessage = errorMessage
         self.onDismiss = onDismiss
         self.onPurchase = onPurchase
     }
@@ -227,7 +239,8 @@ public struct SkipTheLineV2View: View {
         VStack(spacing: 8) {
             // Apple Pay — dark CTA with the Apple glyph before "Pay"
             Button {
-                onPurchase("apple_pay", model.selected.priceCents)
+                guard !isProcessing else { return }
+                onPurchase("apple_pay", model.selected.rawValue, model.selected.priceCents)
             } label: {
                 HStack(spacing: 4) {
                     Text("Pagar con")
@@ -250,7 +263,8 @@ public struct SkipTheLineV2View: View {
 
             // Wallet — ghost CTA that also acts as a balance pill
             Button {
-                onPurchase("wallet", model.selected.priceCents)
+                guard !isProcessing else { return }
+                onPurchase("wallet", model.selected.rawValue, model.selected.priceCents)
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "wallet.pass.fill")
@@ -277,20 +291,40 @@ public struct SkipTheLineV2View: View {
 
             // Card — primary brand CTA (amber)
             Button {
-                onPurchase("card", model.selected.priceCents)
+                guard !isProcessing else { return }
+                onPurchase("card", model.selected.rawValue, model.selected.priceCents)
             } label: {
-                Text("Pagar con tarjeta")
-                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 17)
-                    .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: 16))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .strokeBorder(Color.bpAmberBright, lineWidth: 1)
-                    )
+                HStack(spacing: 8) {
+                    if isProcessing {
+                        ProgressView().tint(.black)
+                    }
+                    Text(isProcessing ? "Procesando…" : "Pagar con tarjeta")
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.black)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 17)
+                .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: 16))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .strokeBorder(Color.bpAmberBright, lineWidth: 1)
+                )
             }
             .buttonStyle(.plain)
+
+            if let errorMessage, !errorMessage.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11, weight: .heavy))
+                    Text(errorMessage)
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .foregroundStyle(Color.bpDanger)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 2)
+                .transition(.opacity)
+            }
 
             Text("Pago seguro · Cancelación gratis hasta 2 h antes")
                 .font(.system(size: 10.5, weight: .semibold, design: .monospaced))

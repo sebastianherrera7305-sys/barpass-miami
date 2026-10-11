@@ -40,25 +40,62 @@ import SwiftUI
 @MainActor
 public struct PriorityEntryV2View: View {
     public let venueName: String
-    public let estimatedLineMinutes: Int
+    /// Nil hides the "fila estimada" row — no venue field provides a real
+    /// wait estimate today, so production passes nil.
+    public let estimatedLineMinutes: Int?
+    /// Renders `PassOutboxStrip` (paid passes pending issue / refused) above
+    /// the options, matching V1's hub. Off in pure-visual previews.
+    public let showsOutbox: Bool
+    /// "Desde $X" per option. Defaults come from the app's own price models,
+    /// never from the mockup — the design's "$150" / "$15" contradicted
+    /// TablePackage (min deposit $100) and TicketPackage (general $20).
+    public let skipLinePriceFrom: String
+    public let tablePriceFrom: String
+    public let ticketsPriceFrom: String
     public let onSkipLine: (() -> Void)?
     public let onTable: (() -> Void)?
     public let onTickets: (() -> Void)?
+    public let onClose: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
 
     public init(
         venueName: String = "CLUB SPACE",
-        estimatedLineMinutes: Int = 45,
+        estimatedLineMinutes: Int? = nil,
+        showsOutbox: Bool = false,
+        skipLinePriceFrom: String = PriorityEntryV2View.defaultSkipLinePriceFrom,
+        tablePriceFrom: String = PriorityEntryV2View.defaultTablePriceFrom,
+        ticketsPriceFrom: String = PriorityEntryV2View.defaultTicketsPriceFrom,
         onSkipLine: (() -> Void)? = nil,
         onTable: (() -> Void)? = nil,
-        onTickets: (() -> Void)? = nil
+        onTickets: (() -> Void)? = nil,
+        onClose: (() -> Void)? = nil
     ) {
         self.venueName = venueName
         self.estimatedLineMinutes = estimatedLineMinutes
+        self.showsOutbox = showsOutbox
+        self.skipLinePriceFrom = skipLinePriceFrom
+        self.tablePriceFrom = tablePriceFrom
+        self.ticketsPriceFrom = ticketsPriceFrom
         self.onSkipLine = onSkipLine
         self.onTable = onTable
         self.onTickets = onTickets
+        self.onClose = onClose
+    }
+
+    // MARK: - Real "desde" prices (single source of truth: the models V1 sells from)
+
+    public static var defaultSkipLinePriceFrom: String {
+        Self.wholeDollars(SkipLinePassView.PassOption.solo.price)
+    }
+    public static var defaultTablePriceFrom: String {
+        Self.wholeDollars(TablePackage.all.map(\.deposit).min() ?? 0)
+    }
+    public static var defaultTicketsPriceFrom: String {
+        Self.wholeDollars(TicketPackage.all.map(\.price).min() ?? 0)
+    }
+    private static func wholeDollars(_ value: Double) -> String {
+        value == value.rounded() ? "$\(Int(value))" : String(format: "$%.2f", value)
     }
 
     public var body: some View {
@@ -66,7 +103,7 @@ public struct PriorityEntryV2View: View {
             PriorityEntryV2Background()
 
             VStack(spacing: 0) {
-                fakeStatusBar
+                Spacer().frame(height: 14)
                 navBar
 
                 ScrollView(showsIndicators: false) {
@@ -75,13 +112,21 @@ public struct PriorityEntryV2View: View {
                             .padding(.horizontal, 20)
                             .padding(.top, 18)
 
+                        // Paid passes still waiting to be issued (or refused)
+                        // stay visible here, exactly like V1's hub — money
+                        // paid is never silently pending.
+                        if showsOutbox {
+                            PassOutboxStrip()
+                                .padding(.horizontal, 20)
+                        }
+
                         VStack(spacing: 12) {
                             PriorityEntryV2OptionCard(
                                 icon: "bolt.fill",
                                 title: "Skip the Line",
                                 subtitle: "Entra sin esperar en la fila",
-                                priceFrom: "$25",
-                                tag: "Más elegido",
+                                priceFrom: skipLinePriceFrom,
+                                tag: nil,
                                 featured: true
                             ) {
                                 BPHaptics.selection()
@@ -92,7 +137,7 @@ public struct PriorityEntryV2View: View {
                                 icon: "wineglass.fill",
                                 title: "Mesa VIP",
                                 subtitle: "Reserva tu mesa con servicio de botella",
-                                priceFrom: "$150",
+                                priceFrom: tablePriceFrom,
                                 tag: nil,
                                 featured: false
                             ) {
@@ -104,7 +149,7 @@ public struct PriorityEntryV2View: View {
                                 icon: "ticket.fill",
                                 title: "Tickets de evento",
                                 subtitle: "Asegura tu lugar en el evento",
-                                priceFrom: "$15",
+                                priceFrom: ticketsPriceFrom,
                                 tag: nil,
                                 featured: false
                             ) {
@@ -129,32 +174,6 @@ public struct PriorityEntryV2View: View {
             }
         }
         .preferredColorScheme(.dark)
-    }
-
-    // MARK: - Fake status bar
-
-    private var fakeStatusBar: some View {
-        HStack {
-            Text("23:41")
-                .font(.system(size: 13, weight: .heavy, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.9))
-            Spacer()
-            HStack(spacing: 8) {
-                Text("SOS")
-                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                    .tracking(1.6)
-                    .foregroundStyle(Color.bpAmber)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(Color.black.opacity(0.5), in: RoundedRectangle(cornerRadius: 4))
-                    .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Color.bpAmber.opacity(0.3)))
-                Text("63%")
-                    .font(.system(size: 12, weight: .heavy, design: .monospaced))
-                    .foregroundStyle(Color.white.opacity(0.85))
-            }
-        }
-        .padding(.horizontal, 22)
-        .padding(.top, 14)
     }
 
     // MARK: - Nav bar
@@ -204,15 +223,19 @@ public struct PriorityEntryV2View: View {
             .lineSpacing(2)
             .fixedSize(horizontal: false, vertical: true)
 
-            HStack(spacing: 5) {
-                Text("Hoy · fila estimada")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color.white.opacity(0.6))
-                Text("\(estimatedLineMinutes) min")
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
+            // Only when a real wait estimate exists — no venue field feeds
+            // one today, so production passes nil and the row is absent.
+            if let estimatedLineMinutes {
+                HStack(spacing: 5) {
+                    Text("Hoy · fila estimada")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color.white.opacity(0.6))
+                    Text("\(estimatedLineMinutes) min")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+                .padding(.top, 2)
             }
-            .padding(.top, 2)
         }
     }
 
@@ -230,7 +253,7 @@ public struct PriorityEntryV2View: View {
     private var closeButton: some View {
         Button {
             BPHaptics.light()
-            dismiss()
+            if let onClose { onClose() } else { dismiss() }
         } label: {
             Text("Cerrar")
                 .font(.system(size: 15, weight: .heavy, design: .rounded))

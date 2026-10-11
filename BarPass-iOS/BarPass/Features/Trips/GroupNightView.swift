@@ -2,30 +2,147 @@ import SwiftUI
 
 // GroupNightView — "La noche del grupo" (artifact 294356f9, pantalla 9).
 //
-// Objeto vivo que se usa durante un trip en curso: mapa con tu gente y ETA,
-// hype del grupo, cuenta compartida, poll de la próxima parada, chat corto
-// con reactions, momentos (fotos) y SOS. Es la pantalla 9 del mockup
-// (líneas 737-894), traducida al mismo lenguaje visual que OnboardingV2Flow:
-// fondo con el ojo de Miami ("CityArtMiami") + vignette cálido + grain,
-// tipografías de sistema aproximando los displays del zine, cards sobre
-// Color.white.opacity(0.04) con stroke 0.08.
+// Vista en vivo de un trip en curso: header con la ciudad y el título real,
+// mapa simbólico con las paradas reales del itinerario, miembros reales
+// cargados vía list_trip_members, y una serie de secciones (hype del grupo,
+// cuenta compartida, poll de la próxima parada, momentos) que se MANTIENEN
+// EN BLANCO hasta que el backend las sostenga. El idioma visual se conserva
+// (fondo "CityArtMiami" + vignette cálido + grain + cards sobre
+// Color.white.opacity(0.04)), pero cada dato que la pantalla afirma viene
+// de `Trip`, `TripStore` o un endpoint real — nada se fabrica.
 //
-// Estado: todas las secciones usan DATOS LITERALES del mockup (owner las
-// convergió, así que no inventamos nada). No está cableada al Trip real —
-// la pantalla se puede presentar como sheet/push y mostrar el estado-ideal
-// de un trip en Wynwood. Wire-up al TripRepository + mapa real (MapLibre o
-// MapKit) + chat/poll server-side + Stripe split pay se hace en pases
-// siguientes. Lo listado en `limitations` indica qué sigue stub.
+// Reglas (hace falta leer el CLAUDE.md antes de pensarlo distinto):
+//   1. Nunca escribir un campo que ninguna fuente afirma. Un valor vacío es
+//      un hecho; uno adivinado es una mentira que sobrevive meses.
+//   2. Diseño sagrado. Si una sección hoy no tiene backend, se oculta o
+//      muestra su estado-vacío — nunca se re-llena con un sample mentiroso.
+//   3. Spanish-neutral en toda la UI (sin voseo adentro de la app).
+//
+// Secciones:
+//   • Header + eyebrow + títulos display  → `trip.title`, `trip.destinationCity`
+//   • Live row                             → `trip.status` + stop actual real
+//   • Members strip                        → `trip.memberIds` + nombres RPC
+//   • Map card (pins de las paradas)       → `trip.stops` ordenadas por
+//                                            `date` + `startTime` (ver
+//                                            `StopTimeline`)
+//   • Confirm card                         → `joinedUserIds` (semántica V1:
+//                                            "confirmados", no llegada física)
+//   • Chat card                            → empty state (sin TripChat backend)
+//   • Rate night (post-completed)          → abre RatingPrompt real
+//
+// Secciones ocultas (hasta tener backend):
+//   • Poll ("próxima parada")              → sin trip_polls en Supabase
+//   • Hype del grupo (score 84)            → sin métrica real
+//   • Cuenta del grupo + "Pagar mi parte"  → sin Stripe split pay
+//   • Momentos (grid de fotos)             → sin trip_moments / Storage bucket
+//   • SOS grupo                            → sin SafetyService que avise al
+//                                            grupo ni a seguridad del venue;
+//                                            el SOS real vive en Safety/
+//
+// Orden y "parada actual": `Stop.date` es el día de la noche y es IDÉNTICO
+// para todas las paradas de un trip (`Stop.sequence` recibe una sola fecha y
+// `TripCreateFlow` usa un picker sólo-día). Lo que ordena es `startTime` /
+// `endTime` ("h:mm a" o "HH:mm"); las horas antes de las 6 AM pertenecen al
+// día siguiente, misma convención que `Stop.sequence` aplica a los opens de
+// after-hours. Si alguna parada no tiene hora, no hay "actual": la noche se
+// trata como planeación.
 
 @MainActor
 struct GroupNightView: View {
-    @EnvironmentObject private var appState: AppState
-    @Environment(\.dismiss) private var dismiss
+    let trip: Trip
 
-    // Poll state is local so el usuario puede ver que su voto cambia la UI
-    // aunque no persistamos nada todavía. Los conteos del mockup (3 vs 2)
-    // ya cuentan el voto del user por "La Otra".
-    @State private var pollChoice: Int = 0
+    @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var store: TripStore
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
+
+    /// `profiles` sólo deja leer la propia; los nombres de otros vienen del
+    /// RPC `list_trip_members`. Mismo patrón que `TripDetailView`.
+    @State private var memberNames: [String: String] = [:]
+    @State private var showJoinRequest: Stop? = nil
+    @State private var ratingTarget: RatingTarget? = nil
+    @State private var showRatePicker = false
+
+    private struct RatingTarget: Identifiable { let id: String; let name: String }
+
+    /// Pulled fresh from the store on every render — the init `trip` is a
+    /// snapshot. Idéntico al patrón de `TripDetailView.currentTrip`.
+    private var currentTrip: Trip {
+        store.trips.first(where: { $0.id == trip.id }) ?? trip
+    }
+
+    /// Stops in itinerary order: by resolved start instant (`date` +
+    /// `startTime`), falling back to the bare `date` for untimed stops, and
+    /// to the original position for exact ties — stable, so two untimed
+    /// stops keep the order the organizer gave them.
+    private var sortedStops: [Stop] {
+        currentTrip.stops.enumerated().sorted { a, b in
+            let sa = StopTimeline.window(for: a.element)?.start
+                ?? Calendar.current.startOfDay(for: a.element.date)
+            let sb = StopTimeline.window(for: b.element)?.start
+                ?? Calendar.current.startOfDay(for: b.element.date)
+            if sa != sb { return sa < sb }
+            return a.offset < b.offset
+        }.map(\.element)
+    }
+
+    /// Every stop with a resolvable start, in `sortedStops` order. Nil as
+    /// soon as one stop lacks a parseable `startTime`: with a hole in the
+    /// timeline nothing can honestly be called "current".
+    private var timeline: [StopTimeline.Entry]? {
+        var entries: [StopTimeline.Entry] = []
+        for stop in sortedStops {
+            guard let w = StopTimeline.window(for: stop) else { return nil }
+            entries.append(StopTimeline.Entry(stop: stop, start: w.start, end: w.end))
+        }
+        return entries.isEmpty ? nil : entries
+    }
+
+    /// Index (into `sortedStops`) of the stop the group is on right now.
+    /// Only an active trip has one. The last stop that has already started
+    /// is current while its window is open, or — once it closed — while a
+    /// later stop has not started yet (the gap between stops is transit and
+    /// still counts as "parada i de N"). After the last stop's end: nil.
+    private var currentStopIndex: Int? {
+        guard currentTrip.status == .active, let timeline else { return nil }
+        let now = Date()
+        guard let i = timeline.lastIndex(where: { $0.start <= now }) else { return nil }
+        if let end = timeline[i].end, now >= end {
+            return timeline.indices.contains(i + 1) ? i : nil
+        }
+        return i
+    }
+
+    private var currentStop: Stop? {
+        guard let i = currentStopIndex, sortedStops.indices.contains(i) else { return nil }
+        return sortedStops[i]
+    }
+
+    /// First stop whose start is still ahead of now. Nil for a completed
+    /// trip and whenever the timeline has a hole.
+    private var nextStop: Stop? {
+        guard currentTrip.status != .completed, let timeline else { return nil }
+        let now = Date()
+        return timeline.first(where: { $0.start > now })?.stop
+    }
+
+    private var allMemberIds: [String] {
+        var ids = [currentTrip.creatorId]
+        ids.append(contentsOf: currentTrip.memberIds.filter { $0 != currentTrip.creatorId })
+        return ids
+    }
+
+    /// Everyone in the trip except me — the only people I can rate.
+    private var otherMemberIds: [String] {
+        allMemberIds.filter { $0 != TripStore.currentUserId }
+    }
+
+    private var pendingRequestStops: [Stop] {
+        currentTrip.stops.filter { !$0.pendingStopRequests.isEmpty }
+    }
+
+    private var myRole: MemberRole { currentTrip.role(of: TripStore.currentUserId) }
+    private var canManageMembers: Bool { myRole == .organizer || myRole == .coOrganizer }
 
     var body: some View {
         ZStack {
@@ -33,46 +150,164 @@ struct GroupNightView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    GroupNightHeader(onBack: { dismiss() })
-                        .padding(.top, 20)
+                    GroupNightHeader(
+                        trip: currentTrip,
+                        onBack: { dismiss() },
+                        onShareInvite: shareInvite
+                    )
+                    .padding(.top, 20)
 
-                    GroupNightLiveRow()
-                    GroupNightMapCard()
+                    GroupNightLiveRow(
+                        status: currentTrip.status,
+                        currentStopIndex: currentStopIndex,
+                        totalStops: sortedStops.count,
+                        memberCount: allMemberIds.count
+                    )
 
-                    HStack(spacing: 10) {
-                        GroupNightHypeCard()
-                        GroupNightTabCard()
+                    if !allMemberIds.isEmpty {
+                        GroupNightMembersStrip(
+                            memberIds: allMemberIds,
+                            names: memberNames
+                        )
                     }
 
-                    GroupNightPollCard(choice: $pollChoice)
+                    GroupNightMapCard(
+                        stops: sortedStops,
+                        currentStopIndex: currentStopIndex,
+                        nextStop: nextStop,
+                        isCompleted: currentTrip.status == .completed
+                    )
+
+                    if canManageMembers, !pendingRequestStops.isEmpty {
+                        GroupNightJoinRequestsCard(
+                            stops: pendingRequestStops,
+                            onTap: { showJoinRequest = $0 }
+                        )
+                    }
+
+                    // `currentStop` is non-nil only while the trip is active
+                    // (see `currentStopIndex`), so no extra status check.
+                    if let stop = currentStop {
+                        GroupNightConfirmStopCard(
+                            stop: stop,
+                            userId: TripStore.currentUserId,
+                            onConfirm: { confirmCurrentStop() }
+                        )
+                    }
+
+                    // ChatCard siempre visible — el objetivo del artifact es
+                    // que el grupo tenga un canal. Hasta que exista
+                    // `TripChatRepository`, muestra el empty state.
                     GroupNightChatCard()
-                    GroupNightMomentsCard()
-                    GroupNightSOSButton()
-                        .padding(.top, 4)
+
+                    // Sólo con alguien a quien calificar: con cero "otros" el
+                    // botón sería un no-op silencioso.
+                    if currentTrip.status == .completed, !otherMemberIds.isEmpty {
+                        GroupNightRateNightCard(onRate: openRatePrompt)
+                            .padding(.top, 4)
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 48)
             }
             .scrollIndicators(.hidden)
-
-            // Overlay SOS pin arriba a la derecha, mismo patrón que OnboardingV2
-            VStack {
-                HStack {
-                    Spacer()
-                    Text("SOS")
-                        .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                        .tracking(1.6)
-                        .foregroundStyle(Color.bpAmber)
-                        .padding(.horizontal, 7).padding(.vertical, 3)
-                        .background(Color.black.opacity(0.5), in: RoundedRectangle(cornerRadius: 4))
-                        .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Color.bpAmber.opacity(0.3)))
-                }
-                .padding(.top, 18).padding(.horizontal, 28)
-                Spacer()
-            }
-            .allowsHitTesting(false)
         }
         .preferredColorScheme(.dark)
+        .task { await loadMemberNames() }
+        .sheet(item: $showJoinRequest) { stop in
+            JoinRequestModal(tripId: currentTrip.id, stop: stop)
+                .environmentObject(store)
+        }
+        .confirmationDialog(
+            "¿A quién quieres calificar?",
+            isPresented: $showRatePicker,
+            titleVisibility: .visible
+        ) {
+            ForEach(otherMemberIds, id: \.self) { id in
+                Button(memberNames[id] ?? id) {
+                    ratingTarget = RatingTarget(id: id, name: memberNames[id] ?? id)
+                }
+            }
+            Button("Cancelar", role: .cancel) {}
+        }
+        .sheet(item: $ratingTarget) { target in
+            RatingPrompt(
+                tripId: currentTrip.id,
+                scopeId: currentTrip.id,
+                rateeId: target.id,
+                rateeName: target.name
+            )
+            .environmentObject(store)
+        }
+    }
+
+    private func loadMemberNames() async {
+        guard let names = try? await RepositoryDependencies.tripMembers.names(tripId: currentTrip.id) else { return }
+        memberNames = Dictionary(uniqueKeysWithValues: names.map { ($0.id, $0.displayName) })
+    }
+
+    private func shareInvite() {
+        BPHaptics.light()
+        if currentTrip.inviteCode == nil {
+            _ = store.ensureInviteCode(for: currentTrip.id)
+        }
+        ShareManager.present(ShareManager.shareTrip(currentTrip))
+    }
+
+    /// Same mutation V1 uses to populate `Stop.joinedUserIds` ("confirmados"
+    /// on the stop row in `TripDetailView`; `JoinRequestModal` calls it on
+    /// approve). This is a planning-time confirmation, not a physical
+    /// arrival — the copy on the card says exactly that.
+    private func confirmCurrentStop() {
+        guard let stop = currentStop else { return }
+        BPHaptics.success()
+        store.joinStop(stop.id, in: currentTrip.id)
+    }
+
+    /// One other member → straight to their `RatingPrompt`. Several → a
+    /// native picker first. Zero → the card is not rendered (see `body`).
+    private func openRatePrompt() {
+        BPHaptics.light()
+        let others = otherMemberIds
+        guard !others.isEmpty else { return }
+        if others.count == 1, let only = others.first {
+            ratingTarget = RatingTarget(id: only, name: memberNames[only] ?? only)
+        } else {
+            showRatePicker = true
+        }
+    }
+}
+
+// MARK: - Stop timeline (date + "h:mm a" → instants)
+
+/// Resolves a stop's clock strings against its `date`. Not a view, no actor
+/// isolation needed: pure functions over `Foundation` values.
+private enum StopTimeline {
+    struct Entry {
+        let stop: Stop
+        let start: Date
+        let end: Date?
+    }
+
+    /// Hours before this are "later tonight", not "earlier today" — the same
+    /// 6 AM baseline `Stop.sequence` applies to after-hours opens.
+    private static let nextDayCutoff = 6 * 60
+
+    /// `start` is required (nil if `startTime` is empty or unparseable);
+    /// `end` is best-effort and always after `start`.
+    static func window(for stop: Stop, calendar: Calendar = .current) -> (start: Date, end: Date?)? {
+        guard var startMin = VenueTimeStatus.minutesSinceMidnight(stop.startTime) else { return nil }
+        if startMin < nextDayCutoff { startMin += 24 * 60 }
+        let day = calendar.startOfDay(for: stop.date)
+        guard let start = calendar.date(byAdding: .minute, value: startMin, to: day) else { return nil }
+
+        var end: Date? = nil
+        if var endMin = VenueTimeStatus.minutesSinceMidnight(stop.endTime) {
+            if endMin < nextDayCutoff { endMin += 24 * 60 }
+            if endMin <= startMin { endMin += 24 * 60 }
+            end = calendar.date(byAdding: .minute, value: endMin, to: day)
+        }
+        return (start, end)
     }
 }
 
@@ -116,27 +351,35 @@ private struct GroupNightBackground: View {
     }
 }
 
-// MARK: - Header (eyebrow + headline mix + back + SOS warning chip)
+// MARK: - Header (eyebrow + headline + back + share)
+//
+// La chip SOS de la esquina derecha del mockup era puramente decorativa (el
+// botón real vive al pie). Lo reemplazamos por un botón funcional que
+// comparte el `inviteCode` real del trip — la acción con más tracción en V1.
 
 @MainActor
 private struct GroupNightHeader: View {
+    let trip: Trip
     let onBack: () -> Void
+    let onShareInvite: () -> Void
+
+    /// Partimos el título en "todo menos la última palabra" + "última
+    /// palabra" para preservar el remate serif-italic del mockup. Si solo
+    /// hay una palabra, el bloque sans-serif queda vacío y el serif muestra
+    /// el título completo.
+    private var titleHead: String {
+        let parts = trip.title.split(separator: " ")
+        guard parts.count > 1 else { return "" }
+        return parts.dropLast().joined(separator: " ")
+    }
+
+    private var titleTail: String {
+        let parts = trip.title.split(separator: " ")
+        return String(parts.last ?? Substring(trip.title))
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Status strip (reloj + batería) — pequeño detalle del mockup
-            HStack {
-                Text("23:41")
-                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                    .tracking(0.6)
-                    .foregroundStyle(Color.white.opacity(0.55))
-                Spacer()
-                Text("63%")
-                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                    .tracking(0.6)
-                    .foregroundStyle(Color.white.opacity(0.45))
-            }
-
             HStack(alignment: .center, spacing: 10) {
                 Button {
                     onBack()
@@ -152,116 +395,249 @@ private struct GroupNightHeader: View {
 
                 Spacer()
 
-                Text("Noche en Wynwood")
+                Text(trip.destinationCity.uppercased())
                     .font(.system(size: 11, weight: .heavy, design: .monospaced))
                     .tracking(1.4)
                     .foregroundStyle(Color.white.opacity(0.7))
 
                 Spacer()
 
-                HStack(spacing: 4) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 10, weight: .heavy))
-                    Text("SOS")
-                        .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                        .tracking(1.4)
+                Button(action: onShareInvite) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 10, weight: .heavy))
+                        Text("INVITAR")
+                            .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                            .tracking(1.4)
+                    }
+                    .foregroundStyle(Color.bpAmber)
+                    .padding(.horizontal, 9).padding(.vertical, 5)
+                    .background(Color.bpAmber.opacity(0.14), in: Capsule())
+                    .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.35)))
                 }
-                .foregroundStyle(Color.bpDanger)
-                .padding(.horizontal, 9).padding(.vertical, 5)
-                .background(Color.bpDanger.opacity(0.14), in: Capsule())
-                .overlay(Capsule().strokeBorder(Color.bpDanger.opacity(0.35)))
+                .buttonStyle(.plain)
             }
 
-            // Caption-style eyebrow + display headline, idioma OnboardingV2
             VStack(alignment: .leading, spacing: 4) {
-                Text("2 · La noche en vivo")
+                Text(statusEyebrow)
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(2.6)
                     .foregroundStyle(Color.bpAmber)
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text("Noche en")
-                        .font(.system(size: 36, weight: .black, design: .rounded))
-                        .tracking(-1)
-                        .foregroundStyle(.white)
-                    Text("Wynwood")
+                if titleHead.isEmpty {
+                    Text(titleTail)
                         .font(.system(size: 34, design: .serif).italic())
                         .foregroundStyle(Color.bpAmberBright)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.6)
+                } else {
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Text(titleHead)
+                            .font(.system(size: 36, weight: .black, design: .rounded))
+                            .tracking(-1)
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                        Text(titleTail)
+                            .font(.system(size: 34, design: .serif).italic())
+                            .foregroundStyle(Color.bpAmberBright)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
+                    }
                 }
             }
             .padding(.top, 2)
         }
     }
+
+    private var statusEyebrow: String {
+        switch trip.status {
+        case .active:    return "LA NOCHE EN VIVO"
+        case .planning:  return "ANTES DE SALIR"
+        case .completed: return "LA NOCHE QUE FUE"
+        }
+    }
 }
 
-// MARK: - Live status row (en curso · 4 de 5 juntos)
+// MARK: - Live status row — status real + stop actual + miembros reales
 
 @MainActor
 private struct GroupNightLiveRow: View {
+    let status: TripStatus
+    let currentStopIndex: Int?
+    let totalStops: Int
+    let memberCount: Int
+
     var body: some View {
         HStack {
             HStack(spacing: 6) {
                 Circle()
-                    .fill(Color.bpGreen)
+                    .fill(dotColor)
                     .frame(width: 6, height: 6)
-                    .overlay(Circle().stroke(Color.bpGreen.opacity(0.4), lineWidth: 4).scaleEffect(1.6).opacity(0.4))
-                Text("En curso · parada 2 de 3")
+                    .overlay(
+                        Circle()
+                            .stroke(dotColor.opacity(0.4), lineWidth: 4)
+                            .scaleEffect(1.6)
+                            .opacity(status == .active ? 0.4 : 0.0)
+                    )
+                Text(statusText)
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(2.0)
-                    .foregroundStyle(Color.bpGreen)
+                    .foregroundStyle(dotColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
             Spacer()
-            Text("4 de 5 juntos")
+            Text("\(memberCount) \(memberCount == 1 ? "miembro" : "miembros")")
                 .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                 .tracking(1.4)
                 .foregroundStyle(Color.white.opacity(0.6))
         }
     }
+
+    private var dotColor: Color {
+        switch status {
+        case .active:    return Color.bpGreen
+        case .planning:  return Color.bpAmber
+        case .completed: return Color.white.opacity(0.5)
+        }
+    }
+
+    private var statusText: String {
+        switch status {
+        case .active:
+            if let i = currentStopIndex, totalStops > 0 {
+                return "En curso · parada \(i + 1) de \(totalStops)"
+            }
+            return "En curso · \(totalStops) paradas"
+        case .planning:
+            return totalStops == 0 ? "En planeación" : "En planeación · \(totalStops) paradas"
+        case .completed:
+            return "Terminado · \(totalStops) paradas"
+        }
+    }
+}
+
+// MARK: - Members strip (avatares reales con color por hash estable)
+
+@MainActor
+private struct GroupNightMembersStrip: View {
+    let memberIds: [String]
+    let names: [String: String]
+
+    private static let palette: [Color] = [
+        Color(red: 0.92, green: 0.72, blue: 0.28),
+        Color(red: 0.55, green: 0.40, blue: 0.95),
+        Color(red: 0.20, green: 0.90, blue: 0.40),
+        Color(red: 0.93, green: 0.93, blue: 0.95),
+        Color(red: 1.00, green: 0.45, blue: 0.45),
+        Color(red: 0.18, green: 0.33, blue: 0.79),
+    ]
+
+    private static func color(forSeed seed: String) -> Color {
+        var hash = 0
+        for scalar in seed.unicodeScalars { hash = (hash &* 31) &+ Int(scalar.value) }
+        // `abs(Int.min)` traps; masking the sign bit never does.
+        return palette[(hash & Int.max) % palette.count]
+    }
+
+    var body: some View {
+        let shown = Array(memberIds.prefix(5))
+        let extra = max(0, memberIds.count - shown.count)
+        return HStack(spacing: -8) {
+            ForEach(shown, id: \.self) { id in
+                let name = names[id] ?? id
+                let initial = String(name.prefix(1)).uppercased()
+                let color = Self.color(forSeed: id)
+                ZStack {
+                    Circle()
+                        .fill(LinearGradient(
+                            colors: [color, color.opacity(0.65)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: 30, height: 30)
+                        .overlay(Circle().strokeBorder(Color.black.opacity(0.5), lineWidth: 1.5))
+                    Text(initial)
+                        .font(.system(size: 12, weight: .black, design: .rounded))
+                        .foregroundStyle(.black)
+                }
+            }
+            if extra > 0 {
+                Text("+\(extra)")
+                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .frame(width: 30, height: 30)
+                    .background(Color.white.opacity(0.12), in: Circle())
+                    .overlay(Circle().strokeBorder(Color.black.opacity(0.5), lineWidth: 1.5))
+                    .padding(.leading, 4)
+            }
+            Spacer()
+        }
+    }
 }
 
 // MARK: - Map card
+//
+// La versión del mockup pintaba 3 pins hard-coded y 5 avatares con texto
+// como "Val · Uber 12 min" — datos de presencia fabricados. Esta versión:
+//   • Pins: una entrada por cada stop real del trip, posicionados
+//     deterministamente a lo largo de una diagonal.
+//   • Estado del pin: `.done` para paradas anteriores a la actual,
+//     `.current` para la parada en curso, `.next` para las que quedan.
+//     Trip terminado → todas `.done`; sin parada actual → todas `.next`.
+//   • NO hay avatares flotantes sobre el mapa: sin un backend de presencia
+//     scoped al trip, cada posición sería mentira. Los miembros reales
+//     están en `GroupNightMembersStrip`.
+//   • La ribbon inferior muestra la próxima parada real (si existe).
 
-/// Representación simbólica del mapa: 3 pins con estado (actual / completado /
-/// próximo) + 5 avatares con color (4 juntos sobre la parada actual, 1 "Val"
-/// atrás viniendo en Uber). Aproximación del mapa SVG del mockup — iteramos
-/// en pase futuro con MapKit o MapLibre y datos reales.
 @MainActor
 private struct GroupNightMapCard: View {
-    private struct MapPin: Identifiable {
-        let id = UUID()
-        let x: CGFloat   // 0...1
-        let y: CGFloat   // 0...1
+    let stops: [Stop]
+    let currentStopIndex: Int?
+    let nextStop: Stop?
+    let isCompleted: Bool
+
+    private struct PinLayout: Identifiable {
+        let id: String
+        let x: CGFloat
+        let y: CGFloat
         let label: String
         let state: GroupNightMapCard_PinState
     }
 
-    private struct MapAvatar: Identifiable {
-        let id = UUID()
-        let x: CGFloat
-        let y: CGFloat
-        let color: Color
-        let initials: String
-        let note: String?
-        let late: Bool
+    /// Positions pins along a gentle S-curve so a 2-stop trip reads as two
+    /// clearly separated points and a 5-stop one still has visual rhythm.
+    private var layouts: [PinLayout] {
+        guard !stops.isEmpty else { return [] }
+        let count = CGFloat(stops.count)
+        return stops.enumerated().map { idx, stop in
+            let t = count == 1 ? 0.5 : CGFloat(idx) / (count - 1)
+            // Alternates below/above the diagonal to spread evenly.
+            let wave = sin(t * .pi * 1.4) * 0.18
+            let x = 0.18 + t * 0.64
+            let y = 0.30 + t * 0.40 - wave
+            let state: GroupNightMapCard_PinState
+            if isCompleted {
+                state = .done
+            } else if let i = currentStopIndex {
+                if idx < i { state = .done }
+                else if idx == i { state = .current }
+                else { state = .next }
+            } else {
+                // No "current" (todos futuros, planning o sin horas) — todos .next.
+                state = .next
+            }
+            let labelTime = stop.startTime.isEmpty ? "" : " · \(stop.startTime)"
+            return PinLayout(
+                id: stop.id,
+                x: x, y: y,
+                label: "\(stop.venueName)\(labelTime)",
+                state: state
+            )
+        }
     }
-
-    private let pins: [MapPin] = [
-        .init(x: 0.52, y: 0.46, label: "Amor Miami", state: .current),
-        .init(x: 0.28, y: 0.28, label: "El Patio",   state: .done),
-        .init(x: 0.74, y: 0.70, label: "La Otra · 01:00", state: .next),
-    ]
-
-    private let avatars: [MapAvatar] = [
-        .init(x: 0.49, y: 0.40, color: Color(red: 0.92, green: 0.72, blue: 0.28), initials: "S",   note: nil, late: false),
-        .init(x: 0.56, y: 0.50, color: Color(red: 0.55, green: 0.40, blue: 0.95), initials: "M",   note: nil, late: false),
-        .init(x: 0.45, y: 0.52, color: Color(red: 0.20, green: 0.90, blue: 0.40), initials: "J",   note: nil, late: false),
-        .init(x: 0.36, y: 0.62, color: Color(red: 0.92, green: 0.92, blue: 0.98), initials: "D",   note: "Dani · 4 min", late: false),
-        .init(x: 0.20, y: 0.80, color: Color(red: 1.00, green: 0.45, blue: 0.45), initials: "V",   note: "Val · Uber 12 min", late: true),
-    ]
 
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                // "Agua" + fondo
                 LinearGradient(
                     colors: [
                         Color(red: 0.11, green: 0.06, blue: 0.18),
@@ -270,7 +646,7 @@ private struct GroupNightMapCard: View {
                     startPoint: .topLeading, endPoint: .bottomTrailing
                 )
 
-                // Agua simulada: diagonal fría
+                // "Agua" simbólica — diagonal fría a la derecha.
                 Path { p in
                     p.move(to: CGPoint(x: proxy.size.width * 0.72, y: 0))
                     p.addLine(to: CGPoint(x: proxy.size.width, y: 0))
@@ -280,7 +656,7 @@ private struct GroupNightMapCard: View {
                 }
                 .fill(Color(red: 0.08, green: 0.18, blue: 0.26).opacity(0.6))
 
-                // Streets (líneas finas cruzando)
+                // Grid de calles simuladas.
                 Path { p in
                     for i in stride(from: 0, through: 1, by: 0.2) {
                         p.move(to: CGPoint(x: 0, y: proxy.size.height * CGFloat(i)))
@@ -293,37 +669,75 @@ private struct GroupNightMapCard: View {
                 }
                 .stroke(Color.white.opacity(0.05), lineWidth: 0.6)
 
-                // Pins
-                ForEach(pins) { pin in
-                    MapPinView(label: pin.label, state: pin.state)
-                        .position(x: proxy.size.width * pin.x, y: proxy.size.height * pin.y)
+                // Línea punteada uniendo los pins — el "recorrido" visible.
+                if layouts.count >= 2 {
+                    Path { p in
+                        for (idx, l) in layouts.enumerated() {
+                            let pt = CGPoint(x: proxy.size.width * l.x, y: proxy.size.height * l.y)
+                            if idx == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
+                        }
+                    }
+                    .stroke(
+                        Color.bpAmber.opacity(0.35),
+                        style: StrokeStyle(lineWidth: 1.2, dash: [4, 4])
+                    )
                 }
 
-                // Avatars
-                ForEach(avatars) { av in
-                    MapAvatarView(color: av.color, initials: av.initials, note: av.note, late: av.late)
-                        .position(x: proxy.size.width * av.x, y: proxy.size.height * av.y)
+                if layouts.isEmpty {
+                    VStack(spacing: 6) {
+                        Image(systemName: "mappin.slash")
+                            .font(.system(size: 20, weight: .heavy))
+                            .foregroundStyle(Color.white.opacity(0.4))
+                        Text("Sin paradas todavía")
+                            .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                            .tracking(1.2)
+                            .foregroundStyle(Color.white.opacity(0.5))
+                    }
+                } else {
+                    ForEach(layouts) { pin in
+                        MapPinView(label: pin.label, state: pin.state)
+                            .position(x: proxy.size.width * pin.x, y: proxy.size.height * pin.y)
+                    }
                 }
 
-                // ETA ribbon abajo
+                // Ribbon inferior — hoy sólo tenemos "próxima parada" real;
+                // la frase "6 min caminando" del mockup pedía routing en
+                // vivo que todavía no hay.
                 VStack {
                     Spacer()
-                    HStack(spacing: 6) {
-                        Image(systemName: "figure.walk")
-                            .font(.system(size: 10, weight: .heavy))
-                        Text("6 min caminando a La Otra · todos juntos salvo Val")
-                            .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
-                            .tracking(0.4)
+                    if let next = nextStop {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.turn.up.right")
+                                .font(.system(size: 10, weight: .heavy))
+                            Text("Próxima parada: \(next.venueName)\(next.startTime.isEmpty ? "" : " · \(next.startTime)")")
+                                .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
+                                .tracking(0.4)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        }
+                        .foregroundStyle(Color.white.opacity(0.78))
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                        .background(Color.black.opacity(0.55), in: Capsule())
+                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
+                        .padding(10)
+                    } else if !layouts.isEmpty {
+                        HStack(spacing: 6) {
+                            Image(systemName: "location.slash")
+                                .font(.system(size: 10, weight: .heavy))
+                            Text("Encender ubicación en vivo próximamente")
+                                .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
+                                .tracking(0.4)
+                        }
+                        .foregroundStyle(Color.white.opacity(0.5))
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                        .background(Color.black.opacity(0.55), in: Capsule())
+                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
+                        .padding(10)
                     }
-                    .foregroundStyle(Color.white.opacity(0.78))
-                    .padding(.horizontal, 10).padding(.vertical, 6)
-                    .background(Color.black.opacity(0.55), in: Capsule())
-                    .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
-                    .padding(10)
                 }
             }
         }
-        .frame(height: 190)
+        .frame(height: 220)
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Color.white.opacity(0.08)))
     }
@@ -358,7 +772,10 @@ private struct MapPinView: View {
                 .padding(.horizontal, 5).padding(.vertical, 2)
                 .background(Color.black.opacity(0.6), in: Capsule())
                 .overlay(Capsule().strokeBorder(stroke, lineWidth: 0.6))
-                .fixedSize()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(maxWidth: 140)
+                .fixedSize(horizontal: true, vertical: false)
         }
     }
 
@@ -386,259 +803,117 @@ private struct MapPinView: View {
     }
 }
 
-// Enum re-exportado como alias de scope — Swift no permite nested enum en
-// un @MainActor private struct a referenciar desde fuera, así que lo
-// elevamos a top-level private con un nombre con prefijo del dueño.
 private enum GroupNightMapCard_PinState { case current, done, next }
 
-// Re-escribimos el MapPin para usar el enum top-level
-extension GroupNightMapCard {
-    fileprivate static func _dummy_() {} // force module membership for extension
-}
-
-// Puente para el ForEach anterior (compilador necesita que ambos tipos coincidan)
-// Tomamos el camino simple: redefinimos localmente.
+// MARK: - Join requests card (solo organizer / co-organizer, si hay pendientes)
 
 @MainActor
-private struct MapAvatarView: View {
-    let color: Color
-    let initials: String
-    let note: String?
-    let late: Bool
+private struct GroupNightJoinRequestsCard: View {
+    let stops: [Stop]
+    let onTap: (Stop) -> Void
 
-    var body: some View {
-        VStack(spacing: 3) {
-            ZStack {
-                Circle()
-                    .fill(LinearGradient(
-                        colors: [color, color.opacity(0.65)],
-                        startPoint: .topLeading, endPoint: .bottomTrailing
-                    ))
-                    .frame(width: 26, height: 26)
-                    .overlay(
-                        Circle().strokeBorder(late ? Color.bpDanger.opacity(0.9) : Color.white.opacity(0.8), lineWidth: 1.5)
-                    )
-                Text(initials)
-                    .font(.system(size: 11, weight: .black, design: .rounded))
-                    .foregroundStyle(.black)
-            }
-            if let note {
-                Text(note)
-                    .font(.system(size: 9, weight: .heavy, design: .monospaced))
-                    .tracking(0.4)
-                    .foregroundStyle(late ? Color.bpDanger : Color.white.opacity(0.8))
-                    .padding(.horizontal, 5).padding(.vertical, 2)
-                    .background(Color.black.opacity(0.6), in: Capsule())
-                    .overlay(Capsule().strokeBorder(late ? Color.bpDanger.opacity(0.35) : Color.white.opacity(0.1), lineWidth: 0.6))
-                    .fixedSize()
-            }
-        }
-    }
-}
-
-// MARK: - Hype del grupo (eq bars + score 84)
-
-@MainActor
-private struct GroupNightHypeCard: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Hype del grupo")
-                .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
-                .tracking(2)
-                .foregroundStyle(Color(red: 0.95, green: 0.55, blue: 0.85))
-
-            HStack(alignment: .bottom, spacing: 8) {
-                EqualizerBars()
-                Text("84")
-                    .font(.system(size: 30, weight: .black, design: .rounded))
-                    .foregroundStyle(Color.bpAmberBright)
-            }
-
-            // barra
-            GeometryReader { proxy in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.08))
-                    Capsule()
-                        .fill(LinearGradient(
-                            colors: [Color.bpAmber, Color.bpAmberBright],
-                            startPoint: .leading, endPoint: .trailing))
-                        .frame(width: proxy.size.width * 0.84)
-                }
-            }
-            .frame(height: 4)
-
-            Text("3 check-ins · 12 fotos · 2 rondas")
-                .font(.system(size: 10, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.55))
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
-    }
-}
-
-/// 5 barritas estilo equalizer, con alturas distintas y animación sutil.
-@MainActor
-private struct EqualizerBars: View {
-    @State private var pulse = false
-    private let heights: [CGFloat] = [8, 14, 18, 11, 15]
-
-    var body: some View {
-        HStack(alignment: .bottom, spacing: 3) {
-            ForEach(Array(heights.enumerated()), id: \.offset) { i, h in
-                RoundedRectangle(cornerRadius: 1.5)
-                    .fill(Color.bpAmber)
-                    .frame(width: 3, height: h * (pulse ? 1.0 : 0.65))
-                    .animation(
-                        .easeInOut(duration: 0.9)
-                        .repeatForever(autoreverses: true)
-                        .delay(Double(i) * 0.12),
-                        value: pulse
-                    )
-            }
-        }
-        .onAppear { pulse = true }
-    }
-}
-
-// MARK: - Cuenta del grupo
-
-@MainActor
-private struct GroupNightTabCard: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("Cuenta del grupo")
-                .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
-                .tracking(2)
-                .foregroundStyle(Color.white.opacity(0.65))
-
-            Text("$118")
-                .font(.system(size: 26, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
-
-            HStack(spacing: 4) {
-                Text("Lo tuyo:")
-                Text("$31").foregroundStyle(Color.bpAmberBright).fontWeight(.heavy)
-                Text("· 4 personas").foregroundStyle(Color.white.opacity(0.5))
-            }
-            .font(.system(size: 10.5, design: .monospaced))
-            .foregroundStyle(Color.white.opacity(0.72))
-            .lineLimit(1)
-            .minimumScaleFactor(0.75)
-
-            Button { } label: {
-                Text("Pagar mi parte")
-                    .font(.system(size: 12, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(Color.bpAmber, in: RoundedRectangle(cornerRadius: 10))
-            }
-            .buttonStyle(.plain)
-            .padding(.top, 4)
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
-    }
-}
-
-// MARK: - Poll (próxima parada · votación · cierra 00:30)
-
-@MainActor
-private struct GroupNightPollCard: View {
-    @Binding var choice: Int
-
-        // Mockup: La Otra 60%/3, Floyd 40%/2 — el usuario ya votó por La Otra.
-    private var options: [GroupNightPollCard_Option] {
-        [
-            .init(name: "La Otra at Mad Wynwood", votes: choice == 0 ? 3 : 2, percentage: choice == 0 ? 0.60 : 0.40),
-            .init(name: "Floyd (Downtown, Uber 15 min)", votes: choice == 1 ? 3 : 2, percentage: choice == 1 ? 0.60 : 0.40),
-        ]
+    private var totalPending: Int {
+        stops.reduce(0) { $0 + $1.pendingStopRequests.count }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Próxima parada · votación")
+                Text("Pedidos de unirse")
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(2.0)
                     .foregroundStyle(Color.bpAmber)
                 Spacer()
-                HStack(spacing: 4) {
-                    Image(systemName: "clock")
-                        .font(.system(size: 9, weight: .heavy))
-                    Text("cierra 00:30")
-                        .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                        .tracking(0.8)
-                }
-                .foregroundStyle(Color.white.opacity(0.6))
+                Text("\(totalPending) \(totalPending == 1 ? "pedido" : "pedidos")")
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(Color.white.opacity(0.5))
             }
 
-            ForEach(Array(options.enumerated()), id: \.offset) { idx, opt in
-                PollOptionRow(
-                    option: opt,
-                    isWinner: idx == choice,
-                    onTap: { choice = idx }
-                )
+            VStack(spacing: 8) {
+                ForEach(stops) { stop in
+                    Button(action: { onTap(stop) }) {
+                        HStack(spacing: 10) {
+                            Image(systemName: "person.fill.questionmark")
+                                .font(.system(size: 13, weight: .heavy))
+                                .foregroundStyle(Color.bpAmber)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(stop.venueName)
+                                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(.white)
+                                Text("\(stop.pendingStopRequests.count) \(stop.pendingStopRequests.count == 1 ? "persona" : "personas") esperando")
+                                    .font(.system(size: 10.5, design: .monospaced))
+                                    .foregroundStyle(Color.white.opacity(0.55))
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 11, weight: .heavy))
+                                .foregroundStyle(Color.bpAmber)
+                        }
+                        .padding(.horizontal, 12).padding(.vertical, 10)
+                        .background(Color.white.opacity(0.03), in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.white.opacity(0.08)))
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
         .padding(12)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpAmber.opacity(0.25)))
+    }
+}
+
+// MARK: - Confirm card — "Confirmar que voy" en la parada actual
+//
+// `Stop.joinedUserIds` es la lista de CONFIRMADOS de V1 (lo que
+// `TripDetailView` muestra como "%d confirmados" y `JoinRequestModal` llena
+// al aprobar). No es una señal de llegada física — no existe ninguna — así
+// que la card dice exactamente eso y nada más.
+
+@MainActor
+private struct GroupNightConfirmStopCard: View {
+    let stop: Stop
+    let userId: String
+    let onConfirm: () -> Void
+
+    private var alreadyConfirmed: Bool { stop.joinedUserIds.contains(userId) }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: alreadyConfirmed ? "checkmark.seal.fill" : "person.fill.checkmark")
+                .font(.system(size: 18, weight: .heavy))
+                .foregroundStyle(alreadyConfirmed ? Color.bpGreen : Color.bpAmber)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(alreadyConfirmed ? "Confirmado para esta parada" : "¿Vas a \(stop.venueName)?")
+                    .font(.system(size: 13.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text(alreadyConfirmed
+                     ? "El grupo te cuenta entre los confirmados"
+                     : "Confirma que vas para que el grupo lo sepa")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.white.opacity(0.6))
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
+            }
+            Spacer()
+            if !alreadyConfirmed {
+                Button(action: onConfirm) {
+                    Text("Confirmar que voy")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 14).padding(.vertical, 8)
+                        .background(Color.bpAmber, in: Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(14)
         .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
     }
 }
 
-@MainActor
-private struct PollOptionRow: View {
-    let option: GroupNightPollCard_Option
-    let isWinner: Bool
-    let onTap: () -> Void
-
-    var body: some View {
-        Button(action: onTap) {
-            ZStack(alignment: .leading) {
-                // barra de fondo
-                GeometryReader { proxy in
-                    Capsule()
-                        .fill(isWinner ? Color.bpAmber.opacity(0.18) : Color.white.opacity(0.05))
-                        .frame(width: proxy.size.width * option.percentage)
-                }
-                HStack {
-                    Text(option.name)
-                        .font(.system(size: 13, weight: isWinner ? .heavy : .semibold, design: .rounded))
-                        .foregroundStyle(isWinner ? Color.bpAmberBright : Color.white.opacity(0.85))
-                    Spacer()
-                    Text("\(option.votes)")
-                        .font(.system(size: 13, weight: .black, design: .monospaced))
-                        .foregroundStyle(isWinner ? Color.bpAmber : Color.white.opacity(0.5))
-                }
-                .padding(.horizontal, 12)
-            }
-            .frame(height: 36)
-            .background(Color.white.opacity(0.03), in: Capsule())
-            .overlay(Capsule().strokeBorder(isWinner ? Color.bpAmber.opacity(0.35) : Color.white.opacity(0.06)))
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-// Puente al tipo privado del padre (los tipos nested de un struct @MainActor
-// private no son visibles al PollOptionRow a pesar del `fileprivate` por un
-// quirk del compilador — usamos un typealias/wrapper top-level).
-private struct GroupNightPollCard_Option {
-    let name: String
-    let votes: Int
-    let percentage: CGFloat
-}
-// (removed dead _migrate helper — the Option/GroupNightPollCard_Option split
-// was a leftover from an earlier draft; the Card uses Option directly now)
-
-// MARK: - Chat corto con reactions
+// MARK: - Chat card — empty state hasta que exista TripChatRepository
 
 @MainActor
 private struct GroupNightChatCard: View {
@@ -650,149 +925,26 @@ private struct GroupNightChatCard: View {
                     .tracking(2.0)
                     .foregroundStyle(Color.white.opacity(0.6))
                 Spacer()
-                Text("5 participantes")
+                Text("próximamente")
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(Color.white.opacity(0.4))
             }
 
-            HStack(alignment: .top, spacing: 10) {
-                ZStack {
-                    Circle()
-                        .fill(LinearGradient(
-                            colors: [Color(red: 1.0, green: 0.42, blue: 0.42), Color(red: 0.6, green: 0.18, blue: 0.18)],
-                            startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: 34, height: 34)
-                    Text("S")
-                        .font(.system(size: 15, weight: .black, design: .rounded))
-                        .foregroundStyle(.black)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text("Santi")
-                            .font(.system(size: 12, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                        Text("23:38")
-                            .font(.system(size: 9.5, design: .monospaced))
-                            .foregroundStyle(Color.white.opacity(0.4))
-                    }
-                    Text("la terraza está vacía, vengan 🔥")
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color.white.opacity(0.85))
-                        .fixedSize(horizontal: false, vertical: true)
-                    HStack(spacing: 6) {
-                        reactionChip("🔥", count: 4)
-                        reactionChip("👀", count: 2)
-                    }
-                    .padding(.top, 2)
-                }
-                Spacer(minLength: 0)
-            }
-
-            // input simulado
-            HStack(spacing: 8) {
-                Text("Escribí al grupo…")
-                    .font(.system(size: 12))
+            VStack(spacing: 8) {
+                Image(systemName: "bubble.left.and.bubble.right")
+                    .font(.system(size: 22, weight: .heavy))
                     .foregroundStyle(Color.white.opacity(0.35))
-                Spacer()
-                Image(systemName: "paperplane.fill")
-                    .font(.system(size: 12, weight: .heavy))
-                    .foregroundStyle(Color.bpAmber)
+                Text("El chat del trip llega pronto")
+                    .font(.system(size: 12.5, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color.white.opacity(0.7))
+                Text("Mientras tanto, comparte el código de invitación por tu app de mensajes.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.white.opacity(0.5))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.horizontal, 12).padding(.vertical, 10)
-            .background(Color.black.opacity(0.4), in: RoundedRectangle(cornerRadius: 10))
-            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.white.opacity(0.08)))
-        }
-        .padding(12)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
-    }
-
-    private func reactionChip(_ emoji: String, count: Int) -> some View {
-        HStack(spacing: 4) {
-            Text(emoji).font(.system(size: 11))
-            Text("\(count)")
-                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.75))
-        }
-        .padding(.horizontal, 7).padding(.vertical, 3)
-        .background(Color.white.opacity(0.08), in: Capsule())
-        .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
-    }
-}
-
-// MARK: - Momentos (fotos)
-
-@MainActor
-private struct GroupNightMomentsCard: View {
-    private let moments: [(gradientA: Color, gradientB: Color, caption: String)] = [
-        (Color(red: 0.55, green: 0.14, blue: 0.42), Color(red: 0.15, green: 0.03, blue: 0.1), "Amor · 23:12"),
-        (Color(red: 0.22, green: 0.14, blue: 0.42), Color(red: 0.05, green: 0.03, blue: 0.15), "Amor · 23:21"),
-        (Color(red: 0.70, green: 0.42, blue: 0.12), Color(red: 0.20, green: 0.08, blue: 0.03), "El Patio · 22:48"),
-        (Color(red: 0.12, green: 0.42, blue: 0.42), Color(red: 0.03, green: 0.1, blue: 0.1), "El Patio · 22:30"),
-    ]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Momentos del grupo")
-                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                    .tracking(2.0)
-                    .foregroundStyle(Color.white.opacity(0.6))
-                Spacer()
-                Text("12 fotos")
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(Color.white.opacity(0.4))
-            }
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(Array(moments.enumerated()), id: \.offset) { _, m in
-                        VStack(alignment: .leading, spacing: 6) {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(LinearGradient(
-                                    colors: [m.gradientA, m.gradientB],
-                                    startPoint: .topLeading, endPoint: .bottomTrailing))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .strokeBorder(Color.white.opacity(0.1))
-                                )
-                                .frame(width: 102, height: 128)
-                            Text(m.caption)
-                                .font(.system(size: 9.5, design: .monospaced))
-                                .tracking(0.4)
-                                .foregroundStyle(Color.white.opacity(0.55))
-                        }
-                    }
-
-                    // CTA: añadir foto
-                    VStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color.bpAmber.opacity(0.1))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .strokeBorder(Color.bpAmber.opacity(0.35), style: StrokeStyle(lineWidth: 1.4, dash: [6, 4]))
-                            )
-                            .overlay(
-                                VStack(spacing: 4) {
-                                    Image(systemName: "camera.fill")
-                                        .font(.system(size: 20, weight: .heavy))
-                                        .foregroundStyle(Color.bpAmber)
-                                    Text("añadir")
-                                        .font(.system(size: 9, weight: .heavy, design: .monospaced))
-                                        .tracking(1.2)
-                                        .foregroundStyle(Color.bpAmber)
-                                }
-                            )
-                            .frame(width: 102, height: 128)
-                        Text("compartí al grupo")
-                            .font(.system(size: 9.5, design: .monospaced))
-                            .tracking(0.4)
-                            .foregroundStyle(Color.bpAmber.opacity(0.75))
-                    }
-                }
-                .padding(.horizontal, 2)
-            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
         }
         .padding(12)
         .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
@@ -800,67 +952,109 @@ private struct GroupNightMomentsCard: View {
     }
 }
 
-// MARK: - SOS button (ancho, al fondo — nunca enterrado en un menú)
+// MARK: - Rate night card (solo cuando el trip ya terminó)
 
 @MainActor
-private struct GroupNightSOSButton: View {
-    @State private var holdProgress: CGFloat = 0
+private struct GroupNightRateNightCard: View {
+    let onRate: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Si algo se puso raro")
+            Text("La noche que fue")
                 .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                 .tracking(2.0)
-                .foregroundStyle(Color.bpDanger.opacity(0.9))
+                .foregroundStyle(Color.bpAmber)
 
             HStack(spacing: 10) {
-                Image(systemName: "exclamationmark.octagon.fill")
+                Image(systemName: "star.circle.fill")
                     .font(.system(size: 20, weight: .heavy))
-                    .foregroundStyle(Color.bpDanger)
+                    .foregroundStyle(Color.bpAmber)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("SOS grupo")
+                    Text("Calificar a tu grupo")
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text("Mantené para avisar al grupo y a seguridad del venue")
+                    Text("Las calificaciones son ciegas y solo cuentan tras varias noches.")
                         .font(.system(size: 11))
                         .foregroundStyle(Color.white.opacity(0.6))
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
-                Image(systemName: "hand.raised.fill")
-                    .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(Color.bpDanger.opacity(0.85))
+                Button(action: onRate) {
+                    Text("Calificar")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 14).padding(.vertical, 8)
+                        .background(Color.bpAmber, in: Capsule())
+                }
+                .buttonStyle(.plain)
             }
             .padding(14)
-            .background(
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.bpDanger.opacity(0.08))
-                    GeometryReader { proxy in
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.bpDanger.opacity(0.25))
-                            .frame(width: proxy.size.width * holdProgress)
-                    }
-                }
-            )
-            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpDanger.opacity(0.4)))
-            .gesture(
-                LongPressGesture(minimumDuration: 1.4)
-                    .onChanged { _ in
-                        withAnimation(.linear(duration: 1.4)) { holdProgress = 1 }
-                    }
-                    .onEnded { _ in
-                        // Stub: en producción esto llamaría a SafetyService
-                        // (notificación al trip + ping a security del venue).
-                        withAnimation(.easeOut(duration: 0.3)) { holdProgress = 0 }
-                    }
-            )
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onEnded { _ in
-                        withAnimation(.easeOut(duration: 0.3)) { holdProgress = 0 }
-                    }
-            )
+            .background(Color.bpAmber.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpAmber.opacity(0.3)))
         }
     }
 }
+
+// MARK: - DEBUG preview helpers
+
+#if DEBUG
+extension Trip {
+    /// Sample used by the ProfileView debug button so the owner can still
+    /// open the screen without a real signed-in trip. Lives behind `#if
+    /// DEBUG` so it never ships to TestFlight / App Store.
+    static let groupNightSample: Trip = {
+        let tripId = "preview-group-night"
+        let now = Date()
+        let cal = Calendar.current
+
+        // Mirrors the real data shape: ONE `date` for the whole night (the
+        // calendar day the night started on) and "h:mm a" clock strings.
+        // Times are derived from instants around `now` so the preview lands
+        // on "parada 2 de 3" whenever it is opened. Hours before 6 AM read
+        // as "next day" (see `StopTimeline`), hence the -6h night anchor.
+        let clock = DateFormatter()
+        clock.locale = Locale(identifier: "en_US_POSIX")
+        clock.dateFormat = "h:mm a"
+        let nightDate = cal.date(byAdding: .hour, value: -6, to: now) ?? now
+        func at(_ minutes: Int) -> String {
+            clock.string(from: cal.date(byAdding: .minute, value: minutes, to: now) ?? now)
+        }
+
+        let stops = [
+            Stop(
+                id: "preview-stop-1", tripId: tripId, type: .venue, refId: "v1",
+                venueName: "El Patio Wynwood", emoji: "🌴",
+                date: nightDate,
+                startTime: at(-180), endTime: at(-60),
+                joinedUserIds: ["me", "member-a", "member-b", "member-c"]
+            ),
+            Stop(
+                id: "preview-stop-2", tripId: tripId, type: .venue, refId: "v2",
+                venueName: "Amor Miami", emoji: "💛",
+                date: nightDate,
+                startTime: at(-30), endTime: at(60),
+                joinedUserIds: ["member-a", "member-b"]
+            ),
+            Stop(
+                id: "preview-stop-3", tripId: tripId, type: .venue, refId: "v3",
+                venueName: "La Otra Mad Club", emoji: "🪩",
+                date: nightDate,
+                startTime: at(90), endTime: at(240)
+            ),
+        ]
+        return Trip(
+            id: tripId,
+            creatorId: "me",
+            title: "Noche en Wynwood",
+            destinationCity: "Miami",
+            startDate: cal.date(byAdding: .hour, value: -4, to: now) ?? now,
+            endDate: cal.date(byAdding: .hour, value: 4, to: now) ?? now,
+            visibility: .privateTrip,
+            status: .active,
+            memberIds: ["me", "member-a", "member-b", "member-c", "member-d"],
+            stops: stops,
+            inviteCode: "W7NX42"
+        )
+    }()
+}
+#endif

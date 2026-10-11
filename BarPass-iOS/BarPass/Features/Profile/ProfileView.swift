@@ -566,15 +566,23 @@ struct ProfileView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.top, 14)
                                 debugButton("Remy en vivo") { showRemyLivePreview = true }
+                                // These three only have mockup initializers
+                                // (sample Trip / mockup venue / .mockup recap),
+                                // all fenced under #if DEBUG in their files —
+                                // so the buttons exist only in Debug builds.
+                                #if DEBUG
                                 debugButton("La noche del grupo") { showGroupNightPreview = true }
                                 debugButton("Venue con pulso") { showVenuePulsePreview = true }
                                 debugButton("Recap y racha") { showNightRecapPreview = true }
+                                #endif
                                 debugButton("Explore") { showExploreV2 = true }
                                 debugButton("Social") { showSocialV2 = true }
                                 debugButton("Trips (lista)") { showTripsListV2 = true }
                                 debugButton("Priority Entry") { showPriorityEntryV2 = true }
                                 debugButton("Skip the Line") { showSkipTheLineV2 = true }
+                                #if DEBUG
                                 debugButton("Pase activo") { showActivePassV2 = true }
+                                #endif
                                 debugButton("Carrito") { showCartV2 = true }
                                 debugButton("Cuenta abierta") { showOpenTabV2 = true }
                                 debugButton("Entrar (auth)") { showAuthLoginV2 = true }
@@ -656,19 +664,64 @@ struct ProfileView: View {
             }
         }
         // Debug previews — see @State block above
-        .sheet(isPresented: $showRemyLivePreview) { RemyLiveView().environmentObject(appState) }
-        .sheet(isPresented: $showGroupNightPreview) { GroupNightView().environmentObject(appState) }
+        .sheet(isPresented: $showRemyLivePreview) {
+            RemyLiveView()
+                .environmentObject(appState)
+                .environmentObject(venueStore)
+        }
+        .sheet(isPresented: $showGroupNightPreview) {
+            // GroupNightView ahora exige un `Trip` real. Para el debug
+            // preview usamos el sample `Trip.groupNightSample` (sólo DEBUG)
+            // dentro de un `TripStore` aislado para que `currentTrip` lo
+            // encuentre y la UI pueda ejercer los mutate paths (joinStop,
+            // ensureInviteCode) sin tocar la red.
+            #if DEBUG
+            GroupNightView(trip: Trip.groupNightSample)
+                .environmentObject(appState)
+                .environmentObject({
+                    let store = TripStore(repository: RepositoryDependencies.trip)
+                    store.trips = [Trip.groupNightSample]
+                    return store
+                }())
+            #else
+            EmptyView()
+            #endif
+        }
         .sheet(isPresented: $showVenuePulsePreview) {
+            // Mockup init is #if DEBUG in VenuePulseView; Release gets nothing.
+            #if DEBUG
             VenuePulseView(
                 venueName: "Club Space",
                 subtitleAccent: "ahora mismo",
                 openUntil: "cierra a las 06:00",
                 fillPercent: 78
             ).environmentObject(appState)
+            #else
+            EmptyView()
+            #endif
         }
-        .sheet(isPresented: $showNightRecapPreview) { NightRecapView().environmentObject(appState) }
-        .sheet(isPresented: $showExploreV2) { ExploreV2View().environmentObject(appState) }
-        .sheet(isPresented: $showSocialV2) { SocialV2View(embeddedInTabBar: false).environmentObject(appState) }
+        .sheet(isPresented: $showNightRecapPreview) {
+            // Debug tray preview: inyecta el mockup para visualizar el diseño
+            // sin depender de check-ins reales del día anterior. `.mockup`
+            // vive bajo `#if DEBUG`, así que la rama Release cae en EmptyView.
+            #if DEBUG
+            NightRecapView(data: .mockup)
+                .environmentObject(appState)
+                .environmentObject(venueStore)
+            #else
+            EmptyView()
+            #endif
+        }
+        .sheet(isPresented: $showExploreV2) {
+            ExploreV2View()
+                .environmentObject(appState)
+                .environmentObject(venueStore)
+        }
+        .sheet(isPresented: $showSocialV2) {
+            SocialV2View(embeddedInTabBar: false)
+                .environmentObject(appState)
+                .environmentObject(venueStore)
+        }
         .sheet(isPresented: $showTripsListV2) {
             TripsListV2View()
                 .environmentObject(appState)
@@ -676,10 +729,21 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showPriorityEntryV2) { PriorityEntryV2View().environmentObject(appState) }
         .sheet(isPresented: $showSkipTheLineV2) { SkipTheLineV2View().environmentObject(appState) }
-        .sheet(isPresented: $showActivePassV2) { ActivePassV2View().environmentObject(appState) }
+        .sheet(isPresented: $showActivePassV2) {
+            // Sample-pass init is #if DEBUG in ActivePassV2View.
+            #if DEBUG
+            ActivePassV2View().environmentObject(appState)
+            #else
+            EmptyView()
+            #endif
+        }
         .sheet(isPresented: $showCartV2) { CartV2View().environmentObject(appState) }
-        .sheet(isPresented: $showOpenTabV2) { OpenTabV2View().environmentObject(appState) }
-        .sheet(isPresented: $showAuthLoginV2) { AuthLoginV2View().environmentObject(appState) }
+        .sheet(isPresented: $showOpenTabV2) {
+            OpenTabV2View()
+                .environmentObject(appState)
+                .environmentObject(venueStore)
+        }
+        .sheet(isPresented: $showAuthLoginV2) { AuthLoginV2Container().environmentObject(appState) }
         .sheet(isPresented: $showGamesMissionsV2) { GamesMissionsV2View().environmentObject(appState) }
         .sheet(isPresented: $showFindMyPeopleV2) { FindMyPeopleV2View().environmentObject(appState) }
         .sheet(isPresented: $showYourSignalV2) { YourSignalV2View().environmentObject(appState) }

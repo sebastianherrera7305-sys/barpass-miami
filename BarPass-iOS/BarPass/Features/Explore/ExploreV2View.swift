@@ -1,7 +1,7 @@
 import SwiftUI
 
 // ExploreV2View — Pantalla "Explore" del artifact v17.1 (sección "Tabs",
-// líneas 611-740 del HTML). Mapa estilizado de Miami con pines en vivo,
+// líneas 611-740 del HTML). Mapa estilizado de la ciudad con pines en vivo,
 // búsqueda, capas (Trending / Happy Hour / Rooftops / Música en vivo) y la
 // tarjeta del venue tocado.
 //
@@ -10,38 +10,64 @@ import SwiftUI
 // + serif italic + mono tracked, cards Color.white.opacity(0.04) con stroke
 // 0.08, acento Color.bpAmber / bpAmberBright.
 //
-// Esta vista es standalone: tiene su propio status bar fake porque el
-// mockup lo pide, y la data (venues, friends, counts) es literal del
-// artifact. El wiring real a VenueStore / mapa nativo / backend es un pase
-// siguiente — este pase sólo clona la pantalla.
+// Data wiring (2026-10-10): los pines, el contador y el callout salen de
+// `VenueStore` — ya no son literales del mockup. Tap en un pin o en "Ver
+// venue" abre `VenueDetailView` (V1), mismo wiring que usa el deep-link y
+// la V1 de Explore. El `selectedLayer` filtra la lista de pines con el
+// mismo criterio que `ExploreView.filteredVenues` (isTrending, hasHappyHour,
+// type==.rooftop, musicGenres.contains(.live)).
 //
-// Limitaciones conocidas:
-// - El mapa no es MapKit ni MapLibre: es un canvas estilizado (bloques tipo
-//   calles + línea de agua + pines absolutos) que calca el mockup. Un mapa
-//   nativo con tiles custom entra después.
-// - Los pines, la posición "me", el cluster y el estado "cold" vs "hot" son
-//   literales del artifact (left/top en %). No reaccionan a geolocalización.
-// - Los pills (Mapa/Lista, Todos/Trending/…) y el callout de CLUB SPACE
-//   tienen estado local pero no filtran nada; sólo hacen haptic al tocar.
-// - El contador "1.814" junto al buscador es hardcoded; en producción sale
-//   del repo de venues.
-// - El status bar fake (23:41 · SOS · 63%) se dibuja porque la vista es una
-//   captura "en vivo" del mockup; en producción iOS pinta el suyo.
+// Segundo pase (2026-10-11): nada del canvas es literal ya.
+// - Buscador real (`searchText`) que filtra pines, callout y lista por
+//   nombre / barrio / tipo, sin distinguir mayúsculas ni acentos — mismos
+//   campos que `ExploreView.filteredVenues` (V1).
+// - El toggle Mapa / Lista funciona: Lista renderiza las filas del callout
+//   para todos los venues filtrados.
+// - Las etiquetas de barrio salen de los `neighborhood` más frecuentes de la
+//   ciudad (centroide de sus venues en el mismo bbox que los pines); el
+//   chip "N abiertos ahora" cuenta `isOpenNow` del set filtrado; el punto
+//   "me" sólo se dibuja si `UserLocationProvider` tiene una coordenada y cae
+//   dentro del bbox; el cluster "+N" se ubica en el centroide de los venues
+//   que esconde.
+//
+// Limitaciones conocidas (fuera de este pase):
+// - El mapa sigue siendo un canvas estilizado (grid de calles + wedge de
+//   agua + pines absolutos), no MapKit. Un mapa nativo con tiles custom
+//   entra en un pase siguiente. El botón "scope" resetea filtros, búsqueda y
+//   selección (no hay pan/zoom que recentrar).
+// - Topamos los pines a 15 por pantalla porque el canvas de 300pt se
+//   satura rápido pasado ese número; el resto se agrega al cluster "+N".
 
 @MainActor
 struct ExploreV2View: View {
+    @EnvironmentObject private var venueStore: VenueStore
+    @EnvironmentObject private var appState: AppState
+    /// Same feed SocialV2 renders (RPC `get_friends_out_tonight`). Drives the
+    /// friends strip; the mockup's "Mía, Jules y Dani" were literals.
+    @ObservedObject private var tonight = FriendsTonightStore.shared
+    /// Ubicación real del usuario (una sola fix por sesión, compartida con
+    /// Tonight). `coordinate == nil` si nunca dio permiso → no hay punto "me".
+    @ObservedObject private var location = UserLocationProvider.shared
+
     @State private var viewMode: ExploreV2ViewMode = .map
     @State private var selectedLayer: ExploreV2Layer = .all
-    @State private var selectedPinID: String? = "space"
+    @State private var selectedPinID: String? = nil
+    @State private var searchText: String = ""
+    /// El venue abierto en el sheet (`VenueDetailView` de V1). Mismo patrón
+    /// que `TripsListV2View.selectedTrip` → `TripDetailView` sheet.
+    @State private var selectedVenue: BarPassVenue? = nil
+
+    /// Más de 15 pines sobre 300pt de alto empieza a verse como ruido. El
+    /// resto va al chip "+N" del cluster.
+    private static let maxVisiblePins = 15
 
     var body: some View {
         ZStack {
             ExploreV2Background()
 
             VStack(spacing: 0) {
-                ExploreV2FakeStatusBar()
-                    .padding(.top, 14)
-
+                // iOS pinta el status bar real; el header conserva el aire
+                // superior que el mockup tenía debajo del suyo.
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 14) {
                         header
@@ -57,13 +83,19 @@ struct ExploreV2View: View {
                         friendsStrip
                             .padding(.horizontal, 20)
 
-                        mapCanvas
-                            .padding(.horizontal, 20)
-                            .padding(.top, 2)
+                        if viewMode == .map {
+                            mapCanvas
+                                .padding(.horizontal, 20)
+                                .padding(.top, 2)
 
-                        tappedCallout
-                            .padding(.horizontal, 20)
-                            .padding(.top, 2)
+                            tappedCallout
+                                .padding(.horizontal, 20)
+                                .padding(.top, 2)
+                        } else {
+                            venueList
+                                .padding(.horizontal, 20)
+                                .padding(.top, 2)
+                        }
 
                         Spacer(minLength: 20)
                     }
@@ -72,15 +104,232 @@ struct ExploreV2View: View {
             }
         }
         .preferredColorScheme(.dark)
+        .task {
+            location.refreshOnce()
+            await tonight.refresh(force: false)
+        }
+        .sheet(item: $selectedVenue) { venue in
+            NavigationStack {
+                VenueDetailView(venue: venue).appState(appState)
+            }
+            .presentationDetents([.large])
+            .presentationBackground(.black)
+        }
+    }
+
+    // MARK: - Data derivation
+
+    /// La ciudad entera (sin filtro de capa) — se usa para anclar los pines
+    /// a un bbox estable: cambiar entre capas NO debe mover los que ya están
+    /// en pantalla, sólo ocultar los que ya no entran.
+    private var cityVenues: [BarPassVenue] { venueStore.venues }
+
+    /// Match 1-a-1 con `ExploreView.filteredVenues` (V1), para que las dos
+    /// capas de la app contesten lo mismo si alguien toca el mismo chip.
+    private var layerFilteredVenues: [BarPassVenue] {
+        switch selectedLayer {
+        case .all:       return cityVenues
+        case .trending:  return cityVenues.filter { $0.isTrending }
+        case .happyHour: return cityVenues.filter { $0.hasHappyHour }
+        case .rooftops:  return cityVenues.filter { $0.type == .rooftop }
+        case .liveMusic: return cityVenues.filter { $0.musicGenres.contains(.live) }
+        }
+    }
+
+    /// Capa + buscador. Mismos campos que `ExploreView.filteredVenues` (V1):
+    /// nombre, barrio, `type.rawValue` y `type.displayName`, sin distinguir
+    /// mayúsculas ni acentos ("cafe" encuentra "Café").
+    private var filteredVenues: [BarPassVenue] {
+        let q = Self.searchKey(searchText)
+        guard !q.isEmpty else { return layerFilteredVenues }
+        return layerFilteredVenues.filter { v in
+            Self.searchKey(v.name).contains(q) ||
+            Self.searchKey(v.neighborhood).contains(q) ||
+            Self.searchKey(v.type.rawValue).contains(q) ||
+            Self.searchKey(v.type.displayName).contains(q)
+        }
+    }
+
+    private static func searchKey(_ s: String) -> String {
+        s.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Trending primero, después por rating. "Mostrar los más interesantes
+    /// antes" se nota mucho en Trending (pocos venues) y en All (muchos
+    /// venues → el top-15 del canvas debe ser el que vale la pena ver).
+    private var rankedVenues: [BarPassVenue] {
+        filteredVenues.sorted { lhs, rhs in
+            if lhs.isTrending != rhs.isTrending { return lhs.isTrending }
+            return lhs.rating > rhs.rating
+        }
+    }
+
+    /// Hasta 15 pines en el canvas.
+    private var visibleVenues: [BarPassVenue] {
+        Array(rankedVenues.prefix(Self.maxVisiblePins))
+    }
+
+    /// Los que NO entran al canvas — alimentan el chip "+N" del cluster, que
+    /// se dibuja en su centroide.
+    private var hiddenVenues: [BarPassVenue] {
+        Array(rankedVenues.dropFirst(Self.maxVisiblePins))
+    }
+
+    private var hiddenPinCount: Int { hiddenVenues.count }
+
+    /// Cuántos de los venues filtrados están abiertos ahora — chip verde del
+    /// canvas. Es un conteo sobre el set filtrado, no sobre un radio GPS.
+    private var openNowCount: Int {
+        filteredVenues.filter(\.isOpenNow).count
+    }
+
+    /// Qué venue va en el callout de abajo: el pin tocado si sigue visible;
+    /// si no, el primero (el "mejor" por el orden de arriba).
+    private var calloutVenue: BarPassVenue? {
+        if let id = selectedPinID,
+           let hit = visibleVenues.first(where: { $0.id == id }) {
+            return hit
+        }
+        return visibleVenues.first
+    }
+
+    /// Bounding box de la CIUDAD, no de la capa filtrada. Padding del 12%
+    /// para que ningún pin se pegue al borde del canvas (y para que una
+    /// ciudad con un solo venue — e.g. el preview — no reviente la
+    /// división por 0).
+    private var cityBbox: (latMin: Double, latMax: Double, lngMin: Double, lngMax: Double)? {
+        let lats = cityVenues.map(\.latitude)
+        let lngs = cityVenues.map(\.longitude)
+        guard let minLat = lats.min(), let maxLat = lats.max(),
+              let minLng = lngs.min(), let maxLng = lngs.max() else { return nil }
+        let latPad = max((maxLat - minLat) * 0.12, 0.002)
+        let lngPad = max((maxLng - minLng) * 0.12, 0.002)
+        return (minLat - latPad, maxLat + latPad, minLng - lngPad, maxLng + lngPad)
+    }
+
+    /// Proyección lat/lng → canvas 0..1 contra `cityBbox`. Lat ↑ = canvas ↑,
+    /// por eso el eje Y va invertido. La misma función la usan pines,
+    /// cluster, etiquetas de barrio y el punto "me", así todos coinciden.
+    private func normalized(lat: Double, lng: Double) -> CGPoint? {
+        guard let bbox = cityBbox else { return nil }
+        let latSpan = max(bbox.latMax - bbox.latMin, 0.0001)
+        let lngSpan = max(bbox.lngMax - bbox.lngMin, 0.0001)
+        let nx = (lng - bbox.lngMin) / lngSpan
+        let ny = 1.0 - (lat - bbox.latMin) / latSpan
+        return CGPoint(x: nx, y: ny)
+    }
+
+    /// Centroide (en coordenadas de canvas) de un grupo de venues.
+    private func centroid(of venues: [BarPassVenue]) -> CGPoint? {
+        guard !venues.isEmpty else { return nil }
+        let lat = venues.map(\.latitude).reduce(0, +) / Double(venues.count)
+        let lng = venues.map(\.longitude).reduce(0, +) / Double(venues.count)
+        return normalized(lat: lat, lng: lng)
+    }
+
+    private var mapPins: [ExploreV2MapPin] {
+        visibleVenues.compactMap { venue -> ExploreV2MapPin? in
+            guard let p = normalized(lat: venue.latitude, lng: venue.longitude) else { return nil }
+            let kind: ExploreV2MapPin.Kind = {
+                if venue.id == selectedPinID { return .big }
+                if venue.isTrending { return .standard }
+                return .cold
+            }()
+            // Inicial del nombre — en 15 pines sobre 300pt no entra el
+            // nombre completo. La identidad real se lee en el callout de
+            // abajo y en el sheet.
+            let initial = venue.name.first.map { String($0).uppercased() } ?? "·"
+            return ExploreV2MapPin(
+                id: venue.id,
+                name: initial,
+                x: p.x,
+                y: p.y,
+                kind: kind,
+                clusterCount: nil
+            )
+        }
+    }
+
+    /// El chip "+N" del cluster, en el centroide real de los venues que
+    /// esconde — sólo si hay alguno. El disco muestra "+N"; la cápsula de
+    /// abajo muestra "N VENUES".
+    private var clusterPin: ExploreV2MapPin? {
+        guard hiddenPinCount > 0, let p = centroid(of: hiddenVenues) else { return nil }
+        return ExploreV2MapPin(
+            id: "cluster-overflow",
+            name: "\(hiddenPinCount) venues",
+            x: p.x, y: p.y,
+            kind: .cluster,
+            clusterCount: hiddenPinCount
+        )
+    }
+
+    private var allPinsForCanvas: [ExploreV2MapPin] {
+        if let clusterPin { return [clusterPin] + mapPins }
+        return mapPins
+    }
+
+    /// Etiquetas de barrio: los hasta 3 `neighborhood` más frecuentes de la
+    /// ciudad (mínimo 2 venues cada uno), en el centroide de sus venues.
+    /// Si ningún barrio llega a 2 venues, no se dibuja ninguna — nunca un
+    /// nombre inventado.
+    private var districtMarks: [ExploreV2DistrictMark] {
+        var groups: [String: [BarPassVenue]] = [:]
+        for v in cityVenues {
+            let hood = v.neighborhood.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !hood.isEmpty else { continue }
+            groups[hood, default: []].append(v)
+        }
+        return groups
+            .filter { $0.value.count >= 2 }
+            .sorted { $0.value.count != $1.value.count ? $0.value.count > $1.value.count : $0.key < $1.key }
+            .prefix(3)
+            .compactMap { hood, venues in
+                centroid(of: venues).map { ExploreV2DistrictMark(text: hood.uppercased(), x: $0.x, y: $0.y) }
+            }
+    }
+
+    /// Punto "me": la coordenada real del usuario proyectada al bbox, sólo si
+    /// cae dentro del canvas. Sin permiso o en otra ciudad → nil → no se dibuja.
+    private var mePoint: CGPoint? {
+        guard let c = location.coordinate,
+              let p = normalized(lat: c.latitude, lng: c.longitude),
+              (0.0...1.0).contains(p.x), (0.0...1.0).contains(p.y)
+        else { return nil }
+        return p
+    }
+
+    /// Lo que se escribe al lado del buscador: el conteo real del set
+    /// filtrado (con "Todos" y sin búsqueda es la ciudad entera, "1.814").
+    private var venueCountLabel: String {
+        filteredVenues.count.formatted(.number)
+    }
+
+    /// El botón "scope" del canvas: vuelve al estado por defecto de la ciudad
+    /// (sin capa, sin búsqueda, sin selección). El bbox ya es siempre el de
+    /// la ciudad, así que esto es lo único que hay que "recentrar".
+    private func resetToCityDefault() {
+        tap()
+        withAnimation(.easeInOut(duration: 0.2)) {
+            selectedLayer = .all
+            searchText = ""
+            selectedPinID = nil
+        }
     }
 
     // MARK: - Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        // Ciudad real: si VenueStore nos dio una, va en mayúscula ("MIAMI",
+        // "ATLANTA"); si no (primer launch antes del city picker), queda
+        // "EXPLORAR" solo.
+        let cityUpper = (venueStore.selectedCity ?? "").uppercased()
+        let cityDisplay = venueStore.selectedCity ?? "la ciudad"
+        return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 ExploreV2LiveDot()
-                Text("EXPLORAR · MIAMI")
+                Text(cityUpper.isEmpty ? "EXPLORAR" : "EXPLORAR · \(cityUpper)")
                     .font(.system(size: 10, weight: .heavy, design: .monospaced))
                     .tracking(2.4)
                     .foregroundStyle(Color.bpAmberBright)
@@ -91,7 +340,7 @@ struct ExploreV2View: View {
                     Text("Explora ")
                         .font(.system(size: 30, weight: .black, design: .rounded))
                         .foregroundStyle(.white)
-                    + Text("Miami")
+                    + Text(cityDisplay)
                         .font(.system(size: 30, design: .serif).italic())
                         .foregroundStyle(Color.bpAmberBright)
                 )
@@ -112,13 +361,35 @@ struct ExploreV2View: View {
                 .font(.system(size: 13, weight: .heavy))
                 .foregroundStyle(Color.white.opacity(0.6))
 
-            Text("Buscar venues…")
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundStyle(Color.white.opacity(0.5))
+            TextField(
+                "",
+                text: $searchText,
+                prompt: Text("Buscar venues…")
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color.white.opacity(0.5))
+            )
+            .font(.system(size: 14, weight: .semibold, design: .rounded))
+            .foregroundStyle(.white)
+            .tint(Color.bpAmber)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .submitLabel(.search)
+            .accessibilityLabel("Buscar venues")
 
-            Spacer()
+            if !searchText.isEmpty {
+                Button {
+                    tap()
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.white.opacity(0.45))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Borrar búsqueda")
+            }
 
-            Text("1.814")
+            Text(venueCountLabel)
                 .font(.system(size: 11, weight: .heavy, design: .monospaced))
                 .tracking(1.2)
                 .foregroundStyle(Color.bpAmber.opacity(0.75))
@@ -156,53 +427,148 @@ struct ExploreV2View: View {
 
     // MARK: - Friends strip
 
+    /// Real friends-out-tonight feed. Three states, none fabricated:
+    /// opt-in prompt when location sharing is off, the strip when at least
+    /// one friend is checked in, nothing at all otherwise (the card has no
+    /// header of its own, so hiding it leaves no gap).
+    @ViewBuilder
     private var friendsStrip: some View {
-        HStack(spacing: 12) {
-            HStack(spacing: -10) {
-                ForEach(ExploreV2Friend.sample) { friend in
-                    ExploreV2AvatarBadge(friend: friend)
-                }
-            }
+        if tonight.needsSharingOptIn {
+            friendsStripCard(
+                avatars: [],
+                headline: friendsHeadline(bold: "Comparte tu ubicación", rest: " para ver a tu gente afuera"),
+                sub: nil
+            )
+        } else if !tonight.friends.isEmpty {
+            let friends = tonight.friends
+            friendsStripCard(
+                avatars: friends.prefix(3).map {
+                    ExploreV2Friend(
+                        initial: String($0.name.trimmingCharacters(in: .whitespaces).prefix(1)).uppercased(),
+                        tint: ExploreV2Friend.tint(forSeed: $0.userId)
+                    )
+                },
+                headline: friendsHeadline(
+                    bold: friendNames(friends),
+                    rest: friends.count == 1 ? " está afuera" : " están afuera"
+                ),
+                sub: friendsNeighborhoodDigest(friends)
+            )
+        }
+    }
 
-            VStack(alignment: .leading, spacing: 2) {
-                (
-                    Text("Mía, Jules y Dani")
-                        .font(.system(size: 13, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    + Text(" están afuera")
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Color.white.opacity(0.72))
-                )
-                Text("2 EN WYNWOOD · 1 EN BRICKELL")
-                    .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
-                    .tracking(1.4)
+    private func friendsStripCard(avatars: [ExploreV2Friend], headline: Text, sub: String?) -> some View {
+        Button {
+            tap()
+            // Tab 2 is Social — the full feed lives there.
+            appState.switchTabPoppingToRoot(2)
+        } label: {
+            HStack(spacing: 12) {
+                if !avatars.isEmpty {
+                    HStack(spacing: -10) {
+                        ForEach(avatars) { friend in
+                            ExploreV2AvatarBadge(friend: friend)
+                        }
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    headline
+                    if let sub {
+                        Text(sub)
+                            .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
+                            .tracking(1.4)
+                            .foregroundStyle(Color.white.opacity(0.5))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                }
+
+                Spacer(minLength: 0)
+
+                Text("›")
+                    .font(.system(size: 22, weight: .light))
                     .foregroundStyle(Color.white.opacity(0.5))
             }
-
-            Spacer(minLength: 0)
-
-            Text("›")
-                .font(.system(size: 22, weight: .light))
-                .foregroundStyle(Color.white.opacity(0.5))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Color.white.opacity(0.04))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+            )
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white.opacity(0.04))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
-        )
+        .buttonStyle(.plain)
+        .accessibilityHint("Abre la tab Social")
+    }
+
+    private func friendsHeadline(bold: String, rest: String) -> Text {
+        let b: Text = Text(bold)
+            .font(.system(size: 13, weight: .heavy, design: .rounded))
+            .foregroundColor(.white)
+        let r: Text = Text(rest)
+            .font(.system(size: 13, weight: .semibold, design: .rounded))
+            .foregroundColor(Color.white.opacity(0.72))
+        return b + r
+    }
+
+    /// "Mía" · "Mía y Jules" · "Mía, Jules y Dani" · "Mía, Jules y 4 más".
+    private func friendNames(_ friends: [FriendPresence]) -> String {
+        let first = friends.map { f -> String in
+            let n = f.name.trimmingCharacters(in: .whitespaces)
+            return n.split(separator: " ").first.map(String.init) ?? n
+        }
+        switch first.count {
+        case 0: return ""
+        case 1: return first[0]
+        case 2: return "\(first[0]) y \(first[1])"
+        case 3: return "\(first[0]), \(first[1]) y \(first[2])"
+        default: return "\(first[0]), \(first[1]) y \(first.count - 2) más"
+        }
+    }
+
+    /// "2 EN WYNWOOD · 1 EN BRICKELL" from real check-ins, resolving each
+    /// friend's venue to its neighborhood via the venue catalogue. Venues
+    /// without a neighborhood are counted but not labelled; if none resolve,
+    /// fall back to the plain count rather than inventing a district.
+    private func friendsNeighborhoodDigest(_ friends: [FriendPresence]) -> String {
+        var counts: [String: Int] = [:]
+        for f in friends {
+            if let hood = venueStore.venues.first(where: { $0.id == f.venueId })?.neighborhood,
+               !hood.isEmpty {
+                counts[hood, default: 0] += 1
+            }
+        }
+        let ranked = counts.sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
+        if ranked.isEmpty {
+            return friends.count == 1 ? "1 AFUERA AHORA" : "\(friends.count) AFUERA AHORA"
+        }
+        return ranked.prefix(3)
+            .map { "\($0.value) EN \($0.key.uppercased())" }
+            .joined(separator: " · ")
     }
 
     // MARK: - Map
 
     private var mapCanvas: some View {
         ExploreV2MapCanvas(
-            pins: ExploreV2MapPin.sample,
-            selectedID: $selectedPinID
+            pins: allPinsForCanvas,
+            districts: districtMarks,
+            openNowCount: openNowCount,
+            mePoint: mePoint,
+            selectedID: $selectedPinID,
+            onSelectPin: { pinID in
+                // El cluster "+N" no abre venue (no es un venue solo); los
+                // demás ids son UUID del catálogo real.
+                guard pinID != "cluster-overflow",
+                      let venue = visibleVenues.first(where: { $0.id == pinID })
+                else { return }
+                selectedVenue = venue
+            },
+            onRecenter: { resetToCityDefault() }
         )
         .frame(height: 300)
         .clipShape(RoundedRectangle(cornerRadius: 18))
@@ -214,8 +580,54 @@ struct ExploreV2View: View {
 
     // MARK: - Callout
 
+    @ViewBuilder
     private var tappedCallout: some View {
-        HStack(spacing: 12) {
+        if let venue = calloutVenue {
+            calloutRow(for: venue)
+        } else {
+            calloutEmpty
+        }
+    }
+
+    /// Pieza de la línea meta del callout: texto + color (nil = gris base).
+    private struct CalloutMeta: Identifiable {
+        let id: Int
+        let text: String
+        let color: Color?
+    }
+
+    /// Sólo lo que el venue realmente tiene: rating si > 0, precio si está
+    /// cargado, "Abierto" / "Trending" si aplica. Sin rating no hay "★ 0.0"
+    /// ni separador colgando.
+    private func calloutMeta(for venue: BarPassVenue) -> [CalloutMeta] {
+        var out: [(String, Color?)] = []
+        if venue.rating > 0 {
+            out.append(("★ " + String(format: "%.1f", venue.rating), nil))
+        }
+        if let priceSymbol = venue.priceTier.symbol {
+            out.append((priceSymbol, nil))
+        }
+        if venue.isOpenNow {
+            out.append(("Abierto", Color.bpGreen))
+        }
+        if venue.isTrending {
+            out.append(("🔥 Trending", Color.bpAmberBright))
+        }
+        return out.enumerated().map { CalloutMeta(id: $0.offset, text: $0.element.0, color: $0.element.1) }
+    }
+
+    /// "Barrio · Tipo" — o sólo el tipo si el barrio está vacío. Nunca un
+    /// separador delante de nada.
+    private func calloutSubtitle(for venue: BarPassVenue) -> String {
+        [venue.neighborhood.trimmingCharacters(in: .whitespacesAndNewlines), venue.type.displayName]
+            .filter { !$0.isEmpty }
+            .joined(separator: " · ")
+    }
+
+    private func calloutRow(for venue: BarPassVenue) -> some View {
+        let initial = venue.name.first.map { String($0).uppercased() } ?? "·"
+        let meta = calloutMeta(for: venue)
+        return HStack(spacing: 12) {
             ZStack {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(
@@ -228,7 +640,7 @@ struct ExploreV2View: View {
                         )
                     )
                     .frame(width: 46, height: 46)
-                Text("S")
+                Text(initial)
                     .font(.system(size: 22, design: .serif).italic())
                     .foregroundStyle(.white)
             }
@@ -238,32 +650,36 @@ struct ExploreV2View: View {
             )
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("CLUB SPACE")
+                Text(venue.name.uppercased())
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("Downtown · Club")
+                    .lineLimit(1)
+                Text(calloutSubtitle(for: venue))
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.white.opacity(0.6))
-                HStack(spacing: 6) {
-                    Text("★ 3.8")
-                    Text("·")
-                    Text("$$$$")
-                    Text("·")
-                    Text("Abierto")
-                        .foregroundStyle(Color.bpGreen)
-                    Text("·")
-                    Text("🔥 Trending")
-                        .foregroundStyle(Color.bpAmberBright)
+                    .lineLimit(1)
+                if !meta.isEmpty {
+                    HStack(spacing: 6) {
+                        ForEach(meta) { item in
+                            if item.id > 0 {
+                                Text("·")
+                            }
+                            Text(item.text)
+                                .foregroundStyle(item.color ?? Color.white.opacity(0.65))
+                        }
+                    }
+                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                    .tracking(1.0)
+                    .foregroundStyle(Color.white.opacity(0.65))
+                    .lineLimit(1)
                 }
-                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                .tracking(1.0)
-                .foregroundStyle(Color.white.opacity(0.65))
             }
 
             Spacer(minLength: 4)
 
             Button {
                 tap()
+                selectedVenue = venue
             } label: {
                 Text("Ver venue")
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
@@ -284,6 +700,57 @@ struct ExploreV2View: View {
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
         )
+        .contentShape(Rectangle())
+        .onTapGesture {
+            tap()
+            selectedVenue = venue
+        }
+    }
+
+    /// La capa activa (o la búsqueda) no devolvió venues — p. ej. "Rooftops"
+    /// en una ciudad sin rooftops, o la primera carga antes de que
+    /// `venueStore` responda. Mantiene el frame del callout para que la
+    /// pantalla no "salte".
+    private var calloutEmpty: some View {
+        let searching = !searchText.trimmingCharacters(in: .whitespaces).isEmpty
+        return HStack(spacing: 12) {
+            Text(searching ? "Sin venues para esta búsqueda" : "Sin venues para esta capa")
+                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color.white.opacity(0.7))
+            Spacer(minLength: 0)
+            Text(searching ? "Prueba otra búsqueda" : "Toca otra capa")
+                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                .tracking(1.0)
+                .foregroundStyle(Color.bpAmber.opacity(0.75))
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.black.opacity(0.55))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
+        )
+    }
+
+    // MARK: - List mode
+
+    /// Modo "Lista": las mismas filas del callout, una por venue filtrado,
+    /// en el mismo orden que el canvas (trending primero, después rating).
+    /// Tap en la fila o en "Ver venue" abre el sheet igual que un pin.
+    @ViewBuilder
+    private var venueList: some View {
+        if rankedVenues.isEmpty {
+            calloutEmpty
+        } else {
+            LazyVStack(spacing: 10) {
+                ForEach(rankedVenues) { venue in
+                    calloutRow(for: venue)
+                }
+            }
+        }
     }
 
     // MARK: - Helpers
@@ -322,11 +789,30 @@ private struct ExploreV2Friend: Identifiable {
     let initial: String
     let tint: Color
 
+    /// Stable, legible avatar color from a user id — same palette the Trips
+    /// avatar stack uses, so one friend keeps one color across screens.
+    static func tint(forSeed seed: String) -> Color {
+        let palette: [Color] = [
+            Color(red: 0.92, green: 0.72, blue: 0.28),
+            Color(red: 0.55, green: 0.40, blue: 0.95),
+            Color(red: 0.20, green: 0.90, blue: 0.40),
+            Color(red: 0.93, green: 0.93, blue: 0.95),
+            Color(red: 0.11, green: 0.11, blue: 0.13),
+            Color(red: 0.91, green: 0.28, blue: 0.37),
+            Color(red: 0.18, green: 0.33, blue: 0.79),
+        ]
+        var hash = 0
+        for scalar in seed.unicodeScalars { hash = (hash &* 31) &+ Int(scalar.value) }
+        return palette[abs(hash) % palette.count]
+    }
+
+    #if DEBUG
     static let sample: [ExploreV2Friend] = [
         .init(initial: "M", tint: Color(red: 0.55, green: 0.40, blue: 0.95)),
         .init(initial: "J", tint: Color(red: 0.20, green: 0.90, blue: 0.40)),
         .init(initial: "D", tint: Color(red: 0.92, green: 0.92, blue: 0.95)),
     ]
+    #endif
 }
 
 private struct ExploreV2MapPin: Identifiable {
@@ -336,45 +822,32 @@ private struct ExploreV2MapPin: Identifiable {
     let x: CGFloat // 0..1
     let y: CGFloat // 0..1
     let kind: Kind
+    /// Sólo para `.cluster` — el número que se dibuja dentro del disco.
+    /// Antes era "12" literal; ahora cada cluster trae su conteo real.
+    let clusterCount: Int?
 
+    #if DEBUG
+    /// Fixtures del artifact v17.1 — se mantienen para que la vista
+    /// `#Preview` y el menú de debug sigan dibujando el mockup estático
+    /// cuando el store todavía no cargó la ciudad.
     static let sample: [ExploreV2MapPin] = [
-        .init(id: "cluster", name: "12 venues", x: 0.30, y: 0.26, kind: .cluster),
-        .init(id: "floyd",   name: "Floyd",     x: 0.64, y: 0.27, kind: .cold),
-        .init(id: "e11even", name: "E11EVEN",   x: 0.69, y: 0.37, kind: .standard),
-        .init(id: "space",   name: "CLUB SPACE", x: 0.62, y: 0.46, kind: .big),
-        .init(id: "blackbird", name: "Blackbird Ordinary", x: 0.40, y: 0.68, kind: .standard),
-        .init(id: "sugar",   name: "Sugar Rooftop", x: 0.34, y: 0.78, kind: .standard),
+        .init(id: "cluster", name: "12 venues", x: 0.30, y: 0.26, kind: .cluster, clusterCount: 12),
+        .init(id: "floyd",   name: "Floyd",     x: 0.64, y: 0.27, kind: .cold, clusterCount: nil),
+        .init(id: "e11even", name: "E11EVEN",   x: 0.69, y: 0.37, kind: .standard, clusterCount: nil),
+        .init(id: "space",   name: "CLUB SPACE", x: 0.62, y: 0.46, kind: .big, clusterCount: nil),
+        .init(id: "blackbird", name: "Blackbird Ordinary", x: 0.40, y: 0.68, kind: .standard, clusterCount: nil),
+        .init(id: "sugar",   name: "Sugar Rooftop", x: 0.34, y: 0.78, kind: .standard, clusterCount: nil),
     ]
+    #endif
 }
 
-// MARK: - Fake status bar
-
-@MainActor
-private struct ExploreV2FakeStatusBar: View {
-    var body: some View {
-        HStack {
-            Text("23:41")
-                .font(.system(size: 13, weight: .heavy, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.9))
-            Spacer()
-            HStack(spacing: 8) {
-                Text("SOS")
-                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                    .tracking(1.6)
-                    .foregroundStyle(Color.bpAmber)
-                    .padding(.horizontal, 7).padding(.vertical, 3)
-                    .background(Color.black.opacity(0.5), in: RoundedRectangle(cornerRadius: 4))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .strokeBorder(Color.bpAmber.opacity(0.3))
-                    )
-                Text("63%")
-                    .font(.system(size: 12, weight: .heavy, design: .monospaced))
-                    .foregroundStyle(Color.white.opacity(0.85))
-            }
-        }
-        .padding(.horizontal, 22)
-    }
+/// Etiqueta de barrio sobre el canvas, en coordenadas 0..1 (mismo bbox que
+/// los pines). Derivada de los `neighborhood` reales de la ciudad.
+private struct ExploreV2DistrictMark: Identifiable {
+    var id: String { text }
+    let text: String
+    let x: CGFloat
+    let y: CGFloat
 }
 
 // MARK: - Live dot
@@ -495,7 +968,19 @@ private struct ExploreV2AvatarBadge: View {
 @MainActor
 private struct ExploreV2MapCanvas: View {
     let pins: [ExploreV2MapPin]
+    /// Etiquetas de barrio reales (hasta 3). Vacío → no se dibuja ninguna.
+    var districts: [ExploreV2DistrictMark] = []
+    /// Venues abiertos ahora en el set filtrado. 0 → el chip no se dibuja.
+    var openNowCount: Int = 0
+    /// Ubicación del usuario proyectada al canvas. nil → sin punto "me".
+    var mePoint: CGPoint? = nil
     @Binding var selectedID: String?
+    /// Qué hacer cuando el usuario toca un pin — además de marcarlo como
+    /// seleccionado. Para pines de venue real, abre el sheet. Para el
+    /// cluster "+N", el padre lo ignora.
+    var onSelectPin: ((String) -> Void)? = nil
+    /// Botón "scope": el padre resetea capa / búsqueda / selección.
+    var onRecenter: (() -> Void)? = nil
 
     var body: some View {
         GeometryReader { geo in
@@ -540,29 +1025,45 @@ private struct ExploreV2MapCanvas: View {
                 }
                 .stroke(Color.bpAmber.opacity(0.08), lineWidth: 1.5)
 
-                // Scattered neighborhood labels
-                ExploreV2DistrictLabel("WYNWOOD", at: CGPoint(x: geo.size.width * 0.3, y: geo.size.height * 0.18))
-                ExploreV2DistrictLabel("DOWNTOWN", at: CGPoint(x: geo.size.width * 0.65, y: geo.size.height * 0.42))
-                ExploreV2DistrictLabel("BRICKELL", at: CGPoint(x: geo.size.width * 0.42, y: geo.size.height * 0.62))
-
-                // Overlay chips
-                ExploreV2OverlayChip()
-                    .position(x: 72, y: 24)
-
-                Image(systemName: "scope")
-                    .font(.system(size: 14, weight: .heavy))
-                    .foregroundStyle(Color.white.opacity(0.75))
-                    .padding(8)
-                    .background(Circle().fill(Color.black.opacity(0.55)))
-                    .overlay(Circle().strokeBorder(Color.white.opacity(0.15)))
-                    .position(x: geo.size.width - 28, y: 24)
-
-                // "Me" dot
-                ExploreV2MeDot()
-                    .position(
-                        x: geo.size.width * 0.44,
-                        y: geo.size.height * 0.60
+                // Neighborhood labels — real `neighborhood` values, at the
+                // centroid of their venues (same bbox as the pins).
+                ForEach(districts) { mark in
+                    ExploreV2DistrictLabel(
+                        mark.text,
+                        at: CGPoint(x: geo.size.width * mark.x, y: geo.size.height * mark.y)
                     )
+                }
+
+                // Overlay chips (top-left anchored so a longer count never
+                // pushes the capsule off the edge; hidden when nothing is open)
+                if openNowCount > 0 {
+                    ExploreV2OverlayChip(openNowCount: openNowCount)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .padding(12)
+                }
+
+                Button {
+                    onRecenter?()
+                } label: {
+                    Image(systemName: "scope")
+                        .font(.system(size: 14, weight: .heavy))
+                        .foregroundStyle(Color.white.opacity(0.75))
+                        .padding(8)
+                        .background(Circle().fill(Color.black.opacity(0.55)))
+                        .overlay(Circle().strokeBorder(Color.white.opacity(0.15)))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Restablecer mapa")
+                .position(x: geo.size.width - 28, y: 24)
+
+                // "Me" dot — only when a real fix exists and lands in this city
+                if let mePoint {
+                    ExploreV2MeDot()
+                        .position(
+                            x: geo.size.width * mePoint.x,
+                            y: geo.size.height * mePoint.y
+                        )
+                }
 
                 // Pins
                 ForEach(pins) { pin in
@@ -576,6 +1077,7 @@ private struct ExploreV2MapCanvas: View {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             #endif
                             selectedID = pin.id
+                            onSelectPin?(pin.id)
                         }
                 }
             }
@@ -625,17 +1127,21 @@ private struct ExploreV2DistrictLabel: View {
     }
 }
 
-// MARK: - Overlay chip (6 abiertos cerca)
+// MARK: - Overlay chip (N abiertos ahora)
 
 @MainActor
 private struct ExploreV2OverlayChip: View {
+    /// Conteo real de `isOpenNow` en el set filtrado. El padre no dibuja el
+    /// chip cuando es 0.
+    let openNowCount: Int
+
     var body: some View {
         HStack(spacing: 6) {
             Circle()
                 .fill(Color.bpGreen)
                 .frame(width: 6, height: 6)
                 .overlay(Circle().fill(Color.bpGreen).blur(radius: 3).opacity(0.6))
-            Text("6 abiertos cerca")
+            Text(openNowCount == 1 ? "1 abierto ahora" : "\(openNowCount) abiertos ahora")
                 .font(.system(size: 11, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
         }
@@ -690,14 +1196,19 @@ private struct ExploreV2PinView: View {
     private var dot: some View {
         switch pin.kind {
         case .cluster:
+            // Antes "12" fijo. Ahora: si el pin trae `clusterCount` lo
+            // usamos (+N venues ocultos); si no — caso del fixture viejo —
+            // caemos a lo que diga `pin.name` (preserva el preview).
             ZStack {
                 Circle()
                     .fill(Color.bpAmber.opacity(0.9))
                     .frame(width: 28, height: 28)
                     .overlay(Circle().strokeBorder(Color.bpAmberBright, lineWidth: 1.5))
-                Text("12")
+                Text(pin.clusterCount.map { "+\($0)" } ?? pin.name)
                     .font(.system(size: 11, weight: .black, design: .rounded))
                     .foregroundStyle(.black)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
         case .cold:
             Circle()
@@ -806,4 +1317,7 @@ private struct ExploreV2Background: View {
 
 #Preview {
     ExploreV2View()
+        .environmentObject(VenueStore(repository: LocalVenueRepository()))
+        .environmentObject(AppState())
+        .preferredColorScheme(.dark)
 }

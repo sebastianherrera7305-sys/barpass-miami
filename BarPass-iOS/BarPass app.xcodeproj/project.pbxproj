@@ -72,11 +72,14 @@
 		BEAC159C41C174B6759A2D4D /* FindMyPeopleV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACAB7146D31C13E6050C06 /* FindMyPeopleV2View.swift */; };
 		BEACA201969DAFD14BD17B77 /* GamesMissionsV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACA7392D7B72C26FF93A24 /* GamesMissionsV2View.swift */; };
 		BEAC076707036E7463474898 /* AuthLoginV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACD038C24BA87BB3F28FD4 /* AuthLoginV2View.swift */; };
+		BEAC62BA2365EAB37AC22AB4 /* AuthLoginV2Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACA8A6669DEB9797677B1F /* AuthLoginV2Container.swift */; };
 		BEAC2BF744CBC0F90716C23B /* OpenTabV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC5CE6270133F8067F54BC /* OpenTabV2View.swift */; };
 		BEACA19F373A9599F600DCF6 /* CartV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACADCAF42FA23E71847538 /* CartV2View.swift */; };
 		BEAC58FF3D2829714C6752A5 /* ActivePassV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC4DEB0780371D99978B96 /* ActivePassV2View.swift */; };
 		BEAC99AD2C9816DB4CF506AF /* SkipTheLineV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACBE927C5200B9890A138A /* SkipTheLineV2View.swift */; };
 		BEAC48516E1908E43FEEC3B6 /* PriorityEntryV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC8B2B115CBB48A17B5CED /* PriorityEntryV2View.swift */; };
+		BEAC8058CE27AEA5961125C1 /* PriorityEntryV2Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACE7D1A6D3368A4877F2AB /* PriorityEntryV2Container.swift */; };
+		BEACE874440ECC8C5B1A6C8F /* SkipTheLineV2Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC7AF5F6BB2AC582B042C7 /* SkipTheLineV2Container.swift */; };
 		BEAC2CB367B2C22A0F89EA9F /* TripsListV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC6820EB8201D18522AC10 /* TripsListV2View.swift */; };
 		BEAC782F42D01BC15E3A429B /* SocialV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC0CE3B5A6D52C8A63F4EE /* SocialV2View.swift */; };
 		BEAC6060455583632B7A814F /* ExploreV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC2A847466EDACCE557623 /* ExploreV2View.swift */; };
@@ -467,11 +470,14 @@
 		BEACAB7146D31C13E6050C06 /* FindMyPeopleV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FindMyPeopleV2View.swift; path = BarPass/Features/Safety/FindMyPeopleV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEACA7392D7B72C26FF93A24 /* GamesMissionsV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = GamesMissionsV2View.swift; path = BarPass/Features/Games/GamesMissionsV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEACD038C24BA87BB3F28FD4 /* AuthLoginV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AuthLoginV2View.swift; path = BarPass/Features/Auth/AuthLoginV2View.swift; sourceTree = SOURCE_ROOT; };
+		BEACA8A6669DEB9797677B1F /* AuthLoginV2Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AuthLoginV2Container.swift; path = BarPass/Features/Auth/AuthLoginV2Container.swift; sourceTree = SOURCE_ROOT; };
 		BEAC5CE6270133F8067F54BC /* OpenTabV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OpenTabV2View.swift; path = BarPass/Features/Tab/OpenTabV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEACADCAF42FA23E71847538 /* CartV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CartV2View.swift; path = BarPass/Features/Cart/CartV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEAC4DEB0780371D99978B96 /* ActivePassV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ActivePassV2View.swift; path = BarPass/Features/PriorityEntry/ActivePassV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEACBE927C5200B9890A138A /* SkipTheLineV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkipTheLineV2View.swift; path = BarPass/Features/PriorityEntry/SkipTheLineV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEAC8B2B115CBB48A17B5CED /* PriorityEntryV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PriorityEntryV2View.swift; path = BarPass/Features/PriorityEntry/PriorityEntryV2View.swift; sourceTree = SOURCE_ROOT; };
+		BEACE7D1A6D3368A4877F2AB /* PriorityEntryV2Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PriorityEntryV2Container.swift; path = BarPass/Features/PriorityEntry/PriorityEntryV2Container.swift; sourceTree = SOURCE_ROOT; };
+		BEAC7AF5F6BB2AC582B042C7 /* SkipTheLineV2Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkipTheLineV2Container.swift; path = BarPass/Features/PriorityEntry/SkipTheLineV2Container.swift; sourceTree = SOURCE_ROOT; };
 		BEAC6820EB8201D18522AC10 /* TripsListV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripsListV2View.swift; path = BarPass/Features/Trips/TripsListV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEAC0CE3B5A6D52C8A63F4EE /* SocialV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SocialV2View.swift; path = BarPass/Features/Social/SocialV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEAC2A847466EDACCE557623 /* ExploreV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExploreV2View.swift; path = BarPass/Features/Explore/ExploreV2View.swift; sourceTree = SOURCE_ROOT; };
@@ -808,11 +814,14 @@
 				BEACAB7146D31C13E6050C06 /* FindMyPeopleV2View.swift */,
 				BEACA7392D7B72C26FF93A24 /* GamesMissionsV2View.swift */,
 				BEACD038C24BA87BB3F28FD4 /* AuthLoginV2View.swift */,
+				BEACA8A6669DEB9797677B1F /* AuthLoginV2Container.swift */,
 				BEAC5CE6270133F8067F54BC /* OpenTabV2View.swift */,
 				BEACADCAF42FA23E71847538 /* CartV2View.swift */,
 				BEAC4DEB0780371D99978B96 /* ActivePassV2View.swift */,
 				BEACBE927C5200B9890A138A /* SkipTheLineV2View.swift */,
 				BEAC8B2B115CBB48A17B5CED /* PriorityEntryV2View.swift */,
+				BEACE7D1A6D3368A4877F2AB /* PriorityEntryV2Container.swift */,
+				BEAC7AF5F6BB2AC582B042C7 /* SkipTheLineV2Container.swift */,
 				BEAC6820EB8201D18522AC10 /* TripsListV2View.swift */,
 				BEAC0CE3B5A6D52C8A63F4EE /* SocialV2View.swift */,
 				BEAC2A847466EDACCE557623 /* ExploreV2View.swift */,
@@ -1528,11 +1537,14 @@
 				BEAC159C41C174B6759A2D4D /* FindMyPeopleV2View.swift in Sources */,
 				BEACA201969DAFD14BD17B77 /* GamesMissionsV2View.swift in Sources */,
 				BEAC076707036E7463474898 /* AuthLoginV2View.swift in Sources */,
+				BEAC62BA2365EAB37AC22AB4 /* AuthLoginV2Container.swift in Sources */,
 				BEAC2BF744CBC0F90716C23B /* OpenTabV2View.swift in Sources */,
 				BEACA19F373A9599F600DCF6 /* CartV2View.swift in Sources */,
 				BEAC58FF3D2829714C6752A5 /* ActivePassV2View.swift in Sources */,
 				BEAC99AD2C9816DB4CF506AF /* SkipTheLineV2View.swift in Sources */,
 				BEAC48516E1908E43FEEC3B6 /* PriorityEntryV2View.swift in Sources */,
+				BEAC8058CE27AEA5961125C1 /* PriorityEntryV2Container.swift in Sources */,
+				BEACE874440ECC8C5B1A6C8F /* SkipTheLineV2Container.swift in Sources */,
 				BEAC2CB367B2C22A0F89EA9F /* TripsListV2View.swift in Sources */,
 				BEAC782F42D01BC15E3A429B /* SocialV2View.swift in Sources */,
 				BEAC6060455583632B7A814F /* ExploreV2View.swift in Sources */,

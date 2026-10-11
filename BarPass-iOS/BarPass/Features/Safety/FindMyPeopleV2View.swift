@@ -8,20 +8,42 @@ import SwiftUI
 // escribís dónde estás (input libre), mantenés apretado "Levantar la mano"
 // para disparar la señal, y abajo ves quiénes ya te están buscando.
 //
-// La segunda pantalla del flow (Tu señal — pantalla dorada parpadeando con
-// anillos de ping) es #s-beacon y vive en otro archivo (BeaconLiveV2View).
-// Esta vista llama onRaiseHand() al soltar un press-and-hold completo; el
-// coordinador que la presente es el que decide empujar la pantalla dorada.
+// 2026-10-10 — datos reales conectados contra el stack de seguridad V1:
+//
+//  · Las audiencias salen de TripStore.myTrips (trips activos hoy o futuros)
+//    más la opción "aquí" (nil tripId) — mismo criterio que FindMyGroupView
+//    usa en V1. Nunca se fabrican opciones.
+//  · "Te están buscando" es SafetyBeaconStore.shared.incoming — los beacons
+//    de amigos que ya levantaron la mano buscándote. Cada fila mapea el
+//    SafetyBeacon a un Seeker usando BeaconSignal.identity/rhythm, misma
+//    paleta y los mismos nombres que v1 (DORADO/CELESTE/VERDE/FUCSIA +
+//    doble parpadeo/parpadeo rápido/parpadeo lento/pulso largo/fijo).
+//  · "Levantar la mano" llama RepositoryDependencies.safetyBeacon.raise con
+//    el tripId de la audiencia elegida (nil para "aquí") y la nota libre.
+//    Devuelve el beacon_id al cerrar.
+//  · "Ir a buscar" dispara SafetyPushRouter.shared.presentBeaconRadar() con
+//    el SafetyBeacon real — la misma pantalla a la que lleva V1 desde
+//    FindMyGroupView.
 //
 // Limitaciones conocidas:
 //  · El sol zine SVG del mockup se aproxima con el fondo estándar
 //    (CityArtMiami + viñeta cálida + grain) para no fabricar otro asset.
-//  · "Te están buscando" muestra data literal del mockup — se cablea a la
-//    tabla beacons de Supabase en un pase siguiente (no bloquea esta pantalla).
-//  · El avatar FUCSIA del mockup es un SVG pintado a mano; acá lo represento
-//    con un círculo degradé + inicial, consistente con el resto del kit.
-//  · "Ir a buscar" sólo dispara onFindPerson(id) — abrir la navegación
-//    (indoor/mapa) es trabajo de la vista que la presente.
+//  · Si YA tenés un beacon tuyo encendido, el círculo "Levantar la mano"
+//    queda en estado "ya está encendida" y el hold queda desactivado — no
+//    inventamos un segundo faro. Debajo aparece "Me encontraron", que llama
+//    a `RepositoryDependencies.safetyBeacon.resolve(beaconId:)`: es el
+//    único apagado que existe en el repo (mismo que MyBeaconCard en V1).
+//  · El contador "X te pueden ver" sale del preflight REAL
+//    (`safetyBeacon.preflight(tripId:)`), igual que
+//    FindMyGroupView.reloadAudience en V1: la audiencia es la intersección
+//    entre tus amigos aceptados y el roster, no el roster. Se consulta la
+//    audiencia seleccionada y se cachea por fila; mientras no se sabe, la
+//    fila dice "Viendo quién te puede ver…" sin número.
+//  · Cada fila de "Te están buscando" tiene "Voy para allá" → rpc
+//    acknowledge_safety_beacon, con acuse optimista por fila (igual que
+//    IncomingBeaconRow / FindMyGroupView.acknowledge en V1).
+//  · Con VoiceOver, el hold se reemplaza por una acción de accesibilidad que
+//    abre el mismo confirmationDialog de V1 (RaiseHandComposer.onVoiceOverRaise).
 
 @MainActor
 struct FindMyPeopleV2View: View {
@@ -31,6 +53,8 @@ struct FindMyPeopleV2View: View {
         let id: String
         let title: String
         let subtitle: String
+        /// nil = "aquí" (friends-at-venue). Un trip real tiene su UUID.
+        let tripId: String?
     }
 
     /// Alguien que ya levantó la mano buscándote.
@@ -42,24 +66,131 @@ struct FindMyPeopleV2View: View {
         let whereNote: String          // "cerca del baño del fondo"
         let ago: String                // "hace 2 min"
         let avatarTint: Color
+        /// Ya le contesté "voy para allá" (servidor o acuse optimista local).
+        var iAcked: Bool = false
     }
 
-    // Inputs — todo configurable para que la coordinadora decida el estado.
-    var audiences: [AudienceOption] = FindMyPeopleV2View.defaultAudiences
-    var seekers: [Seeker] = FindMyPeopleV2View.defaultSeekers
+    /// Lo que el preflight real dijo de una audiencia. Se guarda por
+    /// `AudienceOption.id` para que la fila ya consultada conserve su número
+    /// al cambiar de grupo en vez de volver a "viendo…".
+    private enum AudienceReading: Equatable {
+        case loading
+        case failed
+        case loaded(count: Int, rosterTotal: Int?)
+    }
+
+    // Inputs opcionales. En producción salen del stack real; para previews
+    // se pueden inyectar literales (ver #Preview al pie).
+    var audiencesOverride: [AudienceOption]? = nil
+    var seekersOverride: [Seeker]? = nil
     var onClose: () -> Void = {}
+    /// Llamado DESPUÉS de que el raise contra el repo salió bien. El
+    /// coordinador que presentó esta vista decide empujar la pantalla dorada
+    /// (YourSignalV2View / BeaconBroadcastView).
     var onRaiseHand: (_ audienceId: String, _ whereNote: String) -> Void = { _, _ in }
     var onFindPerson: (_ seekerId: String) -> Void = { _ in }
 
-    @State private var selectedAudience: String = FindMyPeopleV2View.defaultAudiences.first?.id ?? ""
+    // Stack real.
+    @ObservedObject private var l10n = L10n.shared
+    @ObservedObject private var beaconStore = SafetyBeaconStore.shared
+    @StateObject private var tripStore = TripStore(repository: RepositoryDependencies.trip)
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var selectedAudience: String = ""
     @State private var whereNote: String = ""
     @State private var holdProgress: CGFloat = 0
     @State private var holdActive: Bool = false
     @State private var holdFired: Bool = false
     @State private var holdTask: Task<Void, Never>? = nil
+    @State private var isRaising = false
+    @State private var isResolving = false
+    @State private var showRaiseConfirm = false
+    /// Error de la última acción (levantar, apagar, acusar). Una sola franja.
+    @State private var actionError: String? = nil
+    @State private var audienceReadings: [String: AudienceReading] = [:]
+    @State private var audienceTask: Task<Void, Never>? = nil
+    /// Un acuse en vuelo POR FILA (ver FindMyGroupView.pendingAcks).
+    @State private var pendingAcks: Set<String> = []
+    /// Acuse ya confirmado por el servidor que el poll todavía no trajo.
+    @State private var locallyAcked: Set<String> = []
+    @State private var now = Date()
     @FocusState private var noteFocused: Bool
 
     private let holdDuration: Double = 1.1  // segundos para "disparar"
+    private let tick = Timer.publish(every: 15, on: .main, in: .common).autoconnect()
+
+    // MARK: - Datos reales derivados
+
+    /// Audiencias reales: "aquí" + mis trips activos hoy o a futuro. Si el
+    /// caller inyectó override (previews), se usa ese.
+    private var audiences: [AudienceOption] {
+        if let audiencesOverride { return audiencesOverride }
+        let today = Calendar.current.startOfDay(for: now)
+        let active = tripStore.myTrips.filter { $0.endDate >= today && $0.status != .completed }
+        let tripOptions: [AudienceOption] = active.map { trip in
+            AudienceOption(
+                id: "trip-\(trip.id)",
+                title: trip.title,
+                subtitle: audienceSubtitle(for: "trip-\(trip.id)"),
+                tripId: trip.id
+            )
+        }
+        let here = AudienceOption(
+            id: "here",
+            title: l10n.t("safety.raise.audience.here"),
+            subtitle: audienceSubtitle(for: "here"),
+            tripId: nil
+        )
+        return [here] + tripOptions
+    }
+
+    /// Lo que la fila puede AFIRMAR sobre quién vería la señal. Sin lectura
+    /// no hay texto; con lectura en vuelo, copy neutro sin número; con
+    /// respuesta, el número real del preflight (y el hueco contra el roster
+    /// cuando lo hay, como AudiencePreflightCard en V1).
+    private func audienceSubtitle(for optionId: String) -> String {
+        switch audienceReadings[optionId] {
+        case nil:
+            return ""
+        case .loading:
+            return l10n.t("safety.preflight.checking")
+        case .failed:
+            return "No pudimos ver quién te puede ver"
+        case .loaded(let count, let rosterTotal):
+            if count == 0 { return l10n.t("safety.preflight.empty.title") }
+            if let rosterTotal, rosterTotal > count {
+                return String(format: l10n.t("safety.preflight.visibleCount"), count, rosterTotal)
+            }
+            return String(format: l10n.t("safety.preflight.audienceCount"), count)
+        }
+    }
+
+    /// Buscadores reales: `incoming` beacons del store, mapeados a filas del
+    /// mockup. Siempre determinístico — mismo color/ritmo que lee la vista v1.
+    private var seekers: [Seeker] {
+        if let seekersOverride { return seekersOverride }
+        return beaconStore.incoming
+            .filter { !$0.isResolved }
+            .map { beacon in
+                let signal = beaconStore.signal(for: beacon)
+                return Seeker(
+                    id: beacon.id,
+                    name: beacon.name,
+                    colorName: l10n.t(signal.colorNameKey),
+                    signature: l10n.t(signal.rhythmNameKey),
+                    whereNote: Self.formatNote(beacon.note),
+                    ago: BeaconClock.age(beacon.createdAt, now: now, l10n),
+                    avatarTint: signal.color.color,
+                    iAcked: beacon.iAcked || locallyAcked.contains(beacon.id)
+                )
+            }
+    }
+
+    /// Si ya tengo un beacon mío sin resolver, el hold queda bloqueado.
+    private var mineBeacon: SafetyBeacon? {
+        beaconStore.mine.flatMap { $0.isResolved ? nil : $0 }
+    }
 
     var body: some View {
         ZStack {
@@ -78,6 +209,9 @@ struct FindMyPeopleV2View: View {
                         audienceCard
                         whereField
                         holdButton
+                        if let actionError {
+                            errorStrip(actionError)
+                        }
                         seekersBlock
                     }
                     .padding(.horizontal, 24)
@@ -88,6 +222,48 @@ struct FindMyPeopleV2View: View {
         }
         .preferredColorScheme(.dark)
         .onTapGesture { noteFocused = false }
+        .task {
+            // El poll del faro vive atado al ciclo de la app; esta vista
+            // sólo lo prende cuando se muestra. Es el mismo patrón de
+            // FindMyGroupView / SafetyGroupView.
+            beaconStore.start()
+            if tripStore.trips.isEmpty { await tripStore.loadTrips() }
+            if selectedAudience.isEmpty { selectedAudience = audiences.first?.id ?? "here" }
+        }
+        .onReceive(tick) { now = $0 }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { beaconStore.start() } else { beaconStore.stop() }
+        }
+        // Si cambian las audiencias (p.ej. llegó un trip nuevo) y la
+        // seleccionada ya no está, caemos a la primera.
+        .onChange(of: audiences) { _, new in
+            if !new.contains(where: { $0.id == selectedAudience }) {
+                selectedAudience = new.first?.id ?? "here"
+            }
+        }
+        // Cada grupo elegido se consulta contra el preflight real — igual
+        // que FindMyGroupView.onChange(of: selection).
+        .onChange(of: selectedAudience) { _, _ in reloadAudience() }
+        // El acuse optimista se poda contra lo que el servidor sigue
+        // mandando, para que no sobreviva a beacons que ya vencieron.
+        .onChange(of: beaconStore.beacons) { _, rows in
+            locallyAcked.formIntersection(rows.map(\.id))
+        }
+        // Camino VoiceOver: sostener un dedo quieto es exactamente lo que
+        // VoiceOver interpreta como otra cosa, así que el gesto se cambia por
+        // una acción + confirmación (mismo diálogo que V1).
+        .confirmationDialog(
+            l10n.t("safety.raise.confirm.title"),
+            isPresented: $showRaiseConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(l10n.t("safety.beacon.raise")) {
+                if canRaise { raiseHand() }
+            }
+            Button(l10n.t("friends.cancel"), role: .cancel) {}
+        } message: {
+            Text(l10n.t("safety.raise.confirm.body"))
+        }
     }
 
     // MARK: - Header
@@ -99,7 +275,7 @@ struct FindMyPeopleV2View: View {
                 .tracking(-0.5)
                 .foregroundStyle(.white)
             Spacer()
-            Button(action: onClose) {
+            Button(action: closeTapped) {
                 Text("Cerrar")
                     .font(.system(size: 12, weight: .heavy, design: .monospaced))
                     .tracking(1.6)
@@ -110,6 +286,11 @@ struct FindMyPeopleV2View: View {
             }
             .buttonStyle(.plain)
         }
+    }
+
+    private func closeTapped() {
+        onClose()
+        dismiss()
     }
 
     // MARK: - Lead
@@ -175,6 +356,10 @@ struct FindMyPeopleV2View: View {
                     .focused($noteFocused)
                     .submitLabel(.done)
                     .onSubmit { noteFocused = false }
+                    .onChange(of: whereNote) { _, new in
+                        // Tope exacto del servidor (safety_beacons: nota de 140).
+                        if new.count > 140 { whereNote = String(new.prefix(140)) }
+                    }
             }
         }
         .padding(.horizontal, 14).padding(.vertical, 13)
@@ -214,10 +399,22 @@ struct FindMyPeopleV2View: View {
                     .animation(.linear(duration: 0.08), value: holdProgress)
 
                 VStack(spacing: 2) {
-                    Text("Levantar")
-                        .font(.system(size: 18, weight: .black, design: .rounded))
-                    Text("la mano")
-                        .font(.system(size: 18, weight: .black, design: .rounded))
+                    if isRaising {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .tint(.black)
+                            .scaleEffect(1.2)
+                    } else if mineBeacon != nil {
+                        Text("Señal")
+                            .font(.system(size: 18, weight: .black, design: .rounded))
+                        Text("encendida")
+                            .font(.system(size: 18, weight: .black, design: .rounded))
+                    } else {
+                        Text("Levantar")
+                            .font(.system(size: 18, weight: .black, design: .rounded))
+                        Text("la mano")
+                            .font(.system(size: 18, weight: .black, design: .rounded))
+                    }
                 }
                 .tracking(-0.3)
                 .foregroundStyle(.black)
@@ -229,23 +426,91 @@ struct FindMyPeopleV2View: View {
                 // down, so we can start the fill ring immediately. LongPress
                 // alone doesn't — it only reports once the duration is met.
                 DragGesture(minimumDistance: 0)
-                    .onChanged { _ in beginHold() }
+                    .onChanged { _ in if canRaise { beginHold() } }
                     .onEnded { _ in releaseHold() }
             )
+            .allowsHitTesting(canRaise)
+            .opacity(canRaise ? 1 : 0.6)
+            // VoiceOver no puede sostener el disco: expone el mismo camino
+            // como acción (doble toque y acción con nombre) que abre el
+            // confirmationDialog, como HoldToRaiseButton.onVoiceOverActivate.
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(l10n.t("safety.beacon.raise"))
+            .accessibilityHint(holdCaption)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction { requestVoiceOverRaise() }
+            .accessibilityAction(named: l10n.t("safety.beacon.raise")) { requestVoiceOverRaise() }
 
-            Text("Mantén apretado")
+            Text(holdCaption)
                 .font(.system(size: 11, weight: .heavy, design: .monospaced))
                 .tracking(2.2)
                 .foregroundStyle(Color.white.opacity(0.55))
+
+            // El apagado. Mientras la fila siga viva el store vuelve a
+            // encender la linterna en el próximo tick, así que el único off
+            // real es resolver el beacon — lo mismo que MyBeaconCard en V1.
+            if mineBeacon != nil {
+                Button(action: resolveMine) {
+                    Group {
+                        if isResolving {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .tint(Color.bpGreen)
+                        } else {
+                            Text(l10n.t("safety.beacon.resolve"))
+                        }
+                    }
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color.bpGreen)
+                    .padding(.horizontal, 16).padding(.vertical, 9)
+                    .background(Color.bpGreen.opacity(0.12), in: Capsule())
+                    .overlay(Capsule().strokeBorder(Color.bpGreen.opacity(0.4), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .disabled(isResolving)
+                .accessibilityLabel(l10n.t("safety.beacon.resolve"))
+                .padding(.top, 4)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
+    }
+
+    private var canRaise: Bool {
+        !isRaising && !isResolving && mineBeacon == nil
+    }
+
+    private func requestVoiceOverRaise() {
+        guard canRaise else { return }
+        showRaiseConfirm = true
+    }
+
+    private var holdCaption: String {
+        if isRaising { return "Levantando…" }
+        if mineBeacon != nil { return "Ya tienes señal activa" }
+        return "Mantén apretado"
+    }
+
+    private func errorStrip(_ message: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 12, weight: .semibold))
+            Text(message)
+                .font(.system(size: 12))
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
+        }
+        .foregroundStyle(Color.bpDanger)
+        .padding(12)
+        .background(Color.bpDanger.opacity(0.10), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.bpDanger.opacity(0.35)))
     }
 
     private func beginHold() {
         guard !holdActive else { return }
         holdActive = true
         holdFired = false
+        actionError = nil
         BPHaptics.medium()
         withAnimation(.linear(duration: holdDuration)) {
             holdProgress = 1.0
@@ -261,10 +526,10 @@ struct FindMyPeopleV2View: View {
     }
 
     private func fireIfStillHolding() {
-        guard holdActive, !holdFired else { return }
+        guard holdActive, !holdFired, canRaise else { return }
         holdFired = true
         BPHaptics.success()
-        onRaiseHand(selectedAudience, whereNote.trimmingCharacters(in: .whitespacesAndNewlines))
+        raiseHand()
     }
 
     private func releaseHold() {
@@ -273,6 +538,107 @@ struct FindMyPeopleV2View: View {
         holdActive = false
         withAnimation(.easeOut(duration: 0.3)) { holdProgress = 0 }
         holdFired = false
+    }
+
+    /// Llama el repo real. El audienceId de la UI se traduce a un tripId
+    /// (nil para "aquí"). Mismo flujo que FindMyGroupView.raise().
+    private func raiseHand() {
+        guard let option = audiences.first(where: { $0.id == selectedAudience }) else { return }
+        let trimmedNote = whereNote.trimmingCharacters(in: .whitespacesAndNewlines)
+        let noteParam = trimmedNote.isEmpty ? nil : trimmedNote
+        isRaising = true
+        actionError = nil
+        Task {
+            do {
+                _ = try await RepositoryDependencies.safetyBeacon.raise(
+                    tripId: option.tripId,
+                    note: noteParam
+                )
+                BPHaptics.success()
+                whereNote = ""
+                beaconStore.refreshNow()
+                onRaiseHand(option.id, trimmedNote)
+            } catch {
+                BPHaptics.error()
+                actionError = (error as? SafetyBeaconError)?.errorDescription
+                    ?? l10n.t("safety.error.generic")
+            }
+            isRaising = false
+        }
+    }
+
+    /// Apaga mi beacon contra el repo real. Igual que `MyBeaconCard.onResolve`
+    /// en V1: el store deja de reencender la linterna cuando la fila vuelve
+    /// con `resolvedAt`.
+    private func resolveMine() {
+        guard let beacon = mineBeacon, !isResolving else { return }
+        isResolving = true
+        actionError = nil
+        Task {
+            do {
+                try await RepositoryDependencies.safetyBeacon.resolve(beaconId: beacon.id)
+                BPHaptics.success()
+                beaconStore.refreshNow()
+            } catch {
+                BPHaptics.error()
+                actionError = (error as? SafetyBeaconError)?.errorDescription
+                    ?? l10n.t("safety.error.generic")
+            }
+            isResolving = false
+        }
+    }
+
+    /// Preflight real de la audiencia seleccionada. Cancela la consulta
+    /// anterior: cambiar de grupo tres veces seguidas no puede dejar que la
+    /// respuesta más lenta pise a la más nueva (FindMyGroupView.reloadAudience).
+    private func reloadAudience() {
+        audienceTask?.cancel()
+        // Con audiencias inyectadas (previews) no hay nada real que consultar.
+        guard audiencesOverride == nil,
+              let option = audiences.first(where: { $0.id == selectedAudience }) else { return }
+        // Una consulta cancelada a mitad de camino no puede dejar su fila en
+        // "viendo…" para siempre.
+        for (id, reading) in audienceReadings where reading == .loading && id != option.id {
+            audienceReadings[id] = nil
+        }
+        let rosterTotal = option.tripId.flatMap { id in
+            tripStore.trips.first { $0.id == id }?.memberIds.count
+        }
+        audienceReadings[option.id] = .loading
+        audienceTask = Task {
+            do {
+                let members = try await RepositoryDependencies.safetyBeacon.preflight(tripId: option.tripId)
+                guard !Task.isCancelled else { return }
+                audienceReadings[option.id] = .loaded(count: members.count, rosterTotal: rosterTotal)
+            } catch {
+                guard !Task.isCancelled else { return }
+                // "No pudimos preguntar" ≠ "no hay nadie". Se dice así y se
+                // deja levantar la mano igual.
+                audienceReadings[option.id] = .failed
+            }
+        }
+    }
+
+    /// "Voy para allá" — una fila a la vez, sin bloquear las otras. Sin
+    /// `refreshNow()`: con un beacon vivo el store ya pregunta cada 4 s.
+    private func acknowledge(id: String) {
+        guard let beacon = beaconStore.incoming.first(where: { $0.id == id }),
+              !pendingAcks.contains(id), !beacon.iAcked,
+              !locallyAcked.contains(id) else { return }
+        pendingAcks.insert(id)
+        actionError = nil
+        Task {
+            do {
+                try await RepositoryDependencies.safetyBeacon.acknowledge(beaconId: id)
+                BPHaptics.success()
+                locallyAcked.insert(id)
+            } catch {
+                BPHaptics.error()
+                actionError = (error as? SafetyBeaconError)?.errorDescription
+                    ?? l10n.t("safety.error.generic")
+            }
+            pendingAcks.remove(id)
+        }
     }
 
     // MARK: - Seekers
@@ -284,12 +650,16 @@ struct FindMyPeopleV2View: View {
                     .font(.system(size: 15, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                 Spacer()
-                Text("\(seekers.count)")
-                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                    .tracking(1.4)
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 8).padding(.vertical, 3)
-                    .background(Color.bpAmber, in: Capsule())
+                // Un "0" en ámbar al lado de "Te están buscando" se lee como
+                // un dato; la ausencia se dice con la frase de abajo.
+                if !seekers.isEmpty {
+                    Text("\(seekers.count)")
+                        .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                        .tracking(1.4)
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(Color.bpAmber, in: Capsule())
+                }
             }
 
             if seekers.isEmpty {
@@ -304,36 +674,38 @@ struct FindMyPeopleV2View: View {
             } else {
                 VStack(spacing: 10) {
                     ForEach(seekers) { seeker in
-                        SeekerRow(seeker: seeker) {
-                            BPHaptics.light()
-                            onFindPerson(seeker.id)
-                        }
+                        SeekerRow(
+                            seeker: seeker,
+                            isAcking: pendingAcks.contains(seeker.id),
+                            onAcknowledge: { acknowledge(id: seeker.id) },
+                            onFind: {
+                                BPHaptics.light()
+                                findSeeker(id: seeker.id)
+                            }
+                        )
                     }
                 }
             }
         }
     }
 
-    // MARK: - Default data (literal del mockup)
+    /// Abre el radar real para el beacon correspondiente. Si el id no está
+    /// en el store (p.ej. preview con datos override), sólo llama al closure.
+    private func findSeeker(id: String) {
+        if let beacon = beaconStore.incoming.first(where: { $0.id == id }) {
+            SafetyPushRouter.shared.presentBeaconRadar(beacon)
+        }
+        onFindPerson(id)
+    }
 
-    static let defaultAudiences: [AudienceOption] = [
-        .init(id: "here",
-              title: "Los amigos que están en este lugar",
-              subtitle: "3 te pueden ver"),
-        .init(id: "wynwood",
-              title: "Noche en Wynwood",
-              subtitle: "4 te pueden ver"),
-    ]
+    // MARK: - Helpers
 
-    static let defaultSeekers: [Seeker] = [
-        .init(id: "jules",
-              name: "Jules",
-              colorName: "FUCSIA",
-              signature: "doble parpadeo",
-              whereNote: "\"cerca del baño del fondo\"",
-              ago: "hace 2 min",
-              avatarTint: Color(red: 0.79, green: 0.12, blue: 0.42)),
-    ]
+    /// La nota del beacon viene en texto libre; en el mockup aparece entre
+    /// comillas. Vacío = frase genérica para no mostrar una comilla rota.
+    static func formatNote(_ note: String?) -> String {
+        guard let note, !note.isEmpty else { return "sin referencia" }
+        return "\"\(note)\""
+    }
 }
 
 // MARK: - Audience row
@@ -352,10 +724,12 @@ private struct AudienceRow: View {
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
-                    Text(option.subtitle)
-                        .font(.system(size: 11, design: .monospaced))
-                        .tracking(0.4)
-                        .foregroundStyle(Color.white.opacity(0.55))
+                    if !option.subtitle.isEmpty {
+                        Text(option.subtitle)
+                            .font(.system(size: 11, design: .monospaced))
+                            .tracking(0.4)
+                            .foregroundStyle(Color.white.opacity(0.55))
+                    }
                 }
                 Spacer(minLength: 8)
                 ZStack {
@@ -384,7 +758,12 @@ private struct AudienceRow: View {
 @MainActor
 private struct SeekerRow: View {
     let seeker: FindMyPeopleV2View.Seeker
+    /// El acuse de ESTA fila está en vuelo (por fila, no global).
+    let isAcking: Bool
+    let onAcknowledge: () -> Void
     let onFind: () -> Void
+
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
@@ -424,15 +803,55 @@ private struct SeekerRow: View {
 
             Spacer(minLength: 6)
 
-            Button(action: onFind) {
-                Text("Ir a buscar")
+            VStack(alignment: .trailing, spacing: 6) {
+                Button(action: onFind) {
+                    Text("Ir a buscar")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 11).padding(.vertical, 7)
+                        .background(Color.bpAmber, in: Capsule())
+                        .overlay(Capsule().strokeBorder(Color.bpAmberBright, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+
+                // "Voy para allá": el acuse que le llega a quien levantó la
+                // mano (rpc acknowledge_safety_beacon). Con doce amigos
+                // adentro es lo que evita que los doce crucen el salón.
+                Button(action: onAcknowledge) {
+                    Group {
+                        if isAcking {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .tint(.white)
+                                .scaleEffect(0.7)
+                        } else {
+                            HStack(spacing: 4) {
+                                Image(systemName: seeker.iAcked ? "checkmark.circle.fill" : "figure.walk")
+                                    .font(.system(size: 10, weight: .black))
+                                Text(l10n.t("safety.ack.onMyWay"))
+                                    .lineLimit(1)
+                            }
+                        }
+                    }
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.black)
+                    .foregroundStyle(seeker.iAcked ? Color.bpGreen : .white)
                     .padding(.horizontal, 11).padding(.vertical, 7)
-                    .background(Color.bpAmber, in: Capsule())
-                    .overlay(Capsule().strokeBorder(Color.bpAmberBright, lineWidth: 1))
+                    .background(
+                        seeker.iAcked ? Color.bpGreen.opacity(0.14) : Color.white.opacity(0.08),
+                        in: Capsule()
+                    )
+                    .overlay(
+                        Capsule().strokeBorder(
+                            seeker.iAcked ? Color.bpGreen.opacity(0.45) : Color.white.opacity(0.16),
+                            lineWidth: 1
+                        )
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(seeker.iAcked || isAcking)
+                .accessibilityLabel(l10n.t("safety.ack.onMyWay"))
             }
-            .buttonStyle(.plain)
+            .fixedSize(horizontal: true, vertical: false)
         }
         .padding(12)
         .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 12))
@@ -518,10 +937,38 @@ private struct FindMyPeopleBackground: View {
 
 #if DEBUG
 #Preview("Find My People — con buscadores") {
-    FindMyPeopleV2View()
+    FindMyPeopleV2View(
+        audiencesOverride: [
+            .init(id: "here",
+                  title: "Los amigos que están en este lugar",
+                  subtitle: "3 te pueden ver",
+                  tripId: nil),
+            .init(id: "trip-wynwood",
+                  title: "Noche en Wynwood",
+                  subtitle: "4 te pueden ver",
+                  tripId: "wynwood-sample"),
+        ],
+        seekersOverride: [
+            .init(id: "jules",
+                  name: "Jules",
+                  colorName: "FUCSIA",
+                  signature: "doble parpadeo",
+                  whereNote: "\"cerca del baño del fondo\"",
+                  ago: "hace 2 min",
+                  avatarTint: Color(red: 0.79, green: 0.12, blue: 0.42)),
+        ]
+    )
 }
 
 #Preview("Find My People — nadie buscando") {
-    FindMyPeopleV2View(seekers: [])
+    FindMyPeopleV2View(
+        audiencesOverride: [
+            .init(id: "here",
+                  title: "Los amigos que están en este lugar",
+                  subtitle: "",
+                  tripId: nil),
+        ],
+        seekersOverride: []
+    )
 }
 #endif

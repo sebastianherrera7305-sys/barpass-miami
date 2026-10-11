@@ -77,13 +77,19 @@ struct RootView: View {
             }
 
             if appState.showNativeAuth && !appState.showOnboarding && !appState.showTasteQuiz && !appState.showOnboardingV2 {
-                NativeAuthView()
-                    .environmentObject(appState)
-                    .transition(.asymmetric(
-                        insertion: .opacity,
-                        removal: .move(edge: .bottom).combined(with: .opacity)
-                    ))
-                    .zIndex(5)
+                Group {
+                    if V2Flags.authV2 {
+                        AuthLoginV2Container()
+                    } else {
+                        NativeAuthView()
+                    }
+                }
+                .environmentObject(appState)
+                .transition(.asymmetric(
+                    insertion: .opacity,
+                    removal: .move(edge: .bottom).combined(with: .opacity)
+                ))
+                .zIndex(5)
             }
 
             if appState.showEmailVerification {
@@ -198,9 +204,15 @@ struct RootView: View {
         }
         // Native cart sheet
         .sheet(isPresented: $appState.showCart) {
-            CartView()
-                .environmentObject(cart)
-                .environmentObject(appState)
+            Group {
+                if V2Flags.cartV2 {
+                    CartV2View()
+                } else {
+                    CartView()
+                }
+            }
+            .environmentObject(cart)
+            .environmentObject(appState)
         }
         // "¿Qué podemos hacer mejor?" — global, because it's opened from the
         // Home Screen menu, which can arrive on any screen.
@@ -209,10 +221,19 @@ struct RootView: View {
         }
         // Priority Entry hub sheet
         .sheet(isPresented: $appState.showPriorityEntry) {
-            PriorityEntryHubView(
-                venueId:   appState.priorityVenueId,
-                venueName: appState.priorityVenueName
-            )
+            Group {
+                if V2Flags.priorityV2 {
+                    PriorityEntryV2Container(
+                        venueId:   appState.priorityVenueId,
+                        venueName: appState.priorityVenueName
+                    )
+                } else {
+                    PriorityEntryHubView(
+                        venueId:   appState.priorityVenueId,
+                        venueName: appState.priorityVenueName
+                    )
+                }
+            }
             .environmentObject(appState)
         }
         // Order confirmation toast

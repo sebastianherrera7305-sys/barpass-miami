@@ -8,61 +8,66 @@ import SwiftUI
 //
 // Lo que lee del mockup:
 // - Nav de sheet ("Tu cuenta" · "Cerrar", sin flecha de back).
-// - Eyebrow live con punto pulsante: "Cuenta abierta · Bodega Taqueria
-//   y Tequila".
-// - Card amber "Lo tuyo" con el gran total propio ($34.00), total del grupo
-//   ($118.00 · 4 personas), y una stack de 4 avatars pastel.
-// - CTA primaria "Mostrar código" + línea mono con el código corto "4F7Q".
-// - Section header "Consumos" y 4 filas de glass con emoji/texto/precio;
-//   el 3er row va dimmed porque es un trago que invitó Dani.
-// - Fine print mono: "Tope aprobado: $60 · el bartender escanea tu código".
+// - Eyebrow live con punto pulsante: "Cuenta abierta · {venue}". El
+//   segmento del venue sólo se pinta si VenueStore conoce el `venueId`;
+//   nunca un placeholder. Con la cuenta cerrada el punto deja de pulsar y
+//   el eyebrow dice "Cuenta cerrada" (mismo gating que V1 VenueTabView).
+// - Card amber "Lo tuyo" con el gran total propio, total del grupo
+//   y una stack de avatars pastel.
+// - CTA primaria "Mostrar código" + línea mono con el `joinCode` corto.
+//   Sólo con `tab.isOpen`; una cuenta cerrada no emite tokens ni suma gente.
+// - Section header "Consumos" y filas de glass con texto/precio;
+//   los consumos de otros miembros van dimmed porque son tragos
+//   que no paga el usuario. Sin glifo por fila: el backend no clasifica
+//   el consumo, así que no hay de dónde derivarlo.
+// - Fine print mono describiendo cómo cobra el bartender (sólo abierta).
+//
+// Backend: VenueTabRepository (/api/tab/*). El QR real lo arma
+// TabScanCodeSheet usando issueScanToken(tabId, maxAmount) — el tope lo
+// elige el usuario ahí, no se hardcodea acá. "Mostrar código" NO pasa por
+// Stripe directo: cada charge se liquida cuando el bartender escanea el
+// token y el server lo valida.
 //
 // Estilo: fondo Miami eye `bd-dim` (eye casi plano, scale 2.4, opacity 0.35)
 // + warm RadialGradient vignette + fade mask + GrainTexture 0.13. Tipografía
 // black rounded para números, serif italic para el acento del gran total,
 // mono tracked para eyebrows / códigos / tiempos. Cards blancas 0.04 con
 // strokeBorder 0.08 (y la mine-card amber 0.10 con stroke 0.35).
-//
-// Limitaciones conocidas:
-// - Data hard-coded del mockup; no se wirea aún a VenueStore ni a un
-//   `openTabs` endpoint — ese es un pass siguiente cuando exista el schema.
-// - "Mostrar código" es visualmente un CTA pero no abre todavía el QR
-//   fullscreen (reusará QRConfirmView del PriorityEntry hub). Haptic + log.
-// - Los 4 avatars son placeholders de círculos de color pastel; cuando
-//   haya `FriendPresence` real conectado, se reemplazan por el avatar de
-//   cada miembro del trip.
-// - El punto "live" pulsa con un .repeatForever simple; no es tan sutil
-//   como la animación del artifact pero cumple el rol de señal activa.
 
 @MainActor
 public struct OpenTabV2View: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var venueStore: VenueStore
 
-    // --- Mockup data (ver limitaciones) ---
-    private let venueName = "Bodega Taqueria y Tequila"
-    private let myTotal = "$34.00"
-    private let groupTotal = "$118.00"
-    private let groupSize = 4
-    private let joinCode = "4F7Q"
-    private let cap = "$60"
+    // Si `tabId == nil` no hay cuenta que cargar: en Release cae al
+    // emptyState; en DEBUG `load()` inyecta `VenueTabDetail.debugSample`
+    // para que el debug tray de Profile y los #Preview muestren el diseño.
+    private let tabId: String?
+    private let repository: VenueTabRepository
 
-    private let consumos: [OpenTabV2Item] = [
-        .init(emoji: "🍸", title: "Select Cocktails ×2", subtitle: "hace 20 min", amount: "$20.00", dimmed: false),
-        .init(emoji: "🍺", title: "Well Drinks",         subtitle: "hace 35 min", amount: "$8.00",  dimmed: false),
-        .init(emoji: "🥃", title: "Patron Shots",        subtitle: "hace 50 min · de Dani", amount: "$7.00", dimmed: true),
-        .init(emoji: "🍸", title: "Draft Beer & Margarita", subtitle: "hace 1 h", amount: "$6.00", dimmed: false),
-    ]
-
-    private let avatars: [Color] = [
-        Color(red: 0.92, green: 0.72, blue: 0.28),   // amber (yo)
-        Color(red: 0.55, green: 0.40, blue: 0.95),   // morado
-        Color(red: 0.20, green: 0.90, blue: 0.40),   // verde
-        Color(red: 0.92, green: 0.92, blue: 0.95),   // bone/white
-    ]
-
+    @State private var detail: VenueTabDetail?
+    @State private var myUserId: String?
+    @State private var isLoading: Bool
+    @State private var errorMessage: String?
+    @State private var showScanCode = false
     @State private var pulse = false
 
-    public init() {}
+    public init(tabId: String? = nil) {
+        self.tabId = tabId
+        self.repository = BarPassVenueTabRepository()
+        _isLoading = State(initialValue: tabId != nil)
+    }
+
+    #if DEBUG
+    /// Sólo previews: arranca con un detalle ya resuelto y sin red.
+    init(previewDetail: VenueTabDetail, previewUserId: String) {
+        self.tabId = nil
+        self.repository = BarPassVenueTabRepository()
+        _detail = State(initialValue: previewDetail)
+        _myUserId = State(initialValue: previewUserId)
+        _isLoading = State(initialValue: false)
+    }
+    #endif
 
     public var body: some View {
         ZStack {
@@ -77,47 +82,130 @@ public struct OpenTabV2View: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 2)
 
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 16) {
-                        liveEyebrow
-                            .padding(.horizontal, 16)
-                            .padding(.top, 14)
-
-                        mineCard
-                            .padding(.horizontal, 16)
-
-                        codeBlock
-                            .padding(.horizontal, 16)
-                            .padding(.top, 2)
-
-                        Text("Consumos")
-                            .font(.system(size: 17, weight: .heavy, design: .rounded))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.top, 4)
-
-                        consumosCard
-                            .padding(.horizontal, 16)
-
-                        Text("Tope aprobado: \(cap) · el bartender escanea tu código")
-                            .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
-                            .tracking(0.6)
-                            .foregroundStyle(Color.white.opacity(0.42))
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.horizontal, 16)
-                            .padding(.top, 6)
-
-                        Spacer(minLength: 24)
-                    }
-                    .padding(.bottom, 24)
+                if let detail {
+                    content(detail)
+                } else if let errorMessage {
+                    errorState(errorMessage)
+                } else if isLoading {
+                    loadingState
+                } else {
+                    emptyState
                 }
             }
         }
         .preferredColorScheme(.dark)
+        .task { await load() }
         .onAppear {
             withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
                 pulse = true
             }
+        }
+        .sheet(isPresented: $showScanCode) {
+            if let tabId {
+                TabScanCodeSheet(tabId: tabId, repository: repository)
+            }
+        }
+    }
+
+    // MARK: - Contenido con datos reales
+
+    private func content(_ d: VenueTabDetail) -> some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 16) {
+                liveEyebrow(venueName: resolvedVenueName(d), isOpen: d.tab.isOpen)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 14)
+
+                mineCard(detail: d)
+                    .padding(.horizontal, 16)
+
+                // Igual que V1 (`if d.tab.isOpen { payButton }`): una cuenta
+                // cerrada no emite tokens de escaneo ni acepta gente nueva.
+                if d.tab.isOpen {
+                    codeBlock(joinCode: d.tab.joinCode)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 2)
+                }
+
+                Text("Consumos")
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 4)
+
+                consumosCard(items: items(from: d), isOpen: d.tab.isOpen)
+                    .padding(.horizontal, 16)
+
+                if d.tab.isOpen {
+                    Text("Decides el tope cuando muestras el código · el bartender lo escanea para sumar consumos")
+                        .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
+                        .tracking(0.6)
+                        .foregroundStyle(Color.white.opacity(0.42))
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 6)
+                }
+
+                Spacer(minLength: 24)
+            }
+            .padding(.bottom, 24)
+        }
+        .refreshable { await load() }
+    }
+
+    // MARK: - Estados (loading / error / empty)
+
+    private var loadingState: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Spacer().frame(height: 14)
+            ShimmerSkeleton(height: 14).frame(width: 180).padding(.horizontal, 16)
+            ShimmerSkeleton(height: 118).padding(.horizontal, 16)
+            ShimmerSkeleton(height: 48).padding(.horizontal, 16)
+            ShimmerSkeleton(height: 180).padding(.horizontal, 16)
+            Spacer()
+        }
+    }
+
+    private func errorState(_ msg: String) -> some View {
+        VStack(spacing: 14) {
+            Spacer()
+            Text("No pudimos cargar la cuenta")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            Text(msg)
+                .font(.system(size: 13))
+                .foregroundStyle(Color.white.opacity(0.65))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+            Button {
+                tapHaptic()
+                Task { await load() }
+            } label: {
+                Text("Reintentar")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 18).padding(.vertical, 10)
+                    .background(Color.bpAmber, in: Capsule())
+            }
+            .buttonStyle(.plain)
+            Spacer()
+        }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 10) {
+            Spacer()
+            Text("🍸").font(.system(size: 40))
+            Text("Todavía no hay cuenta abierta")
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+            Text("Abre una cuenta desde el venue para ver tus consumos en tiempo real.")
+                .font(.system(size: 13))
+                .foregroundStyle(Color.white.opacity(0.65))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+            Spacer()
         }
     }
 
@@ -148,23 +236,35 @@ public struct OpenTabV2View: View {
 
     // MARK: - Live eyebrow
 
-    private var liveEyebrow: some View {
-        HStack(spacing: 7) {
-            Circle()
-                .fill(Color.bpAmber)
-                .frame(width: 7, height: 7)
-                .overlay(
-                    Circle()
-                        .fill(Color.bpAmber)
-                        .blur(radius: 4)
-                        .opacity(pulse ? 0.85 : 0.3)
-                )
-                .scaleEffect(pulse ? 1.1 : 0.9)
+    /// `venueName == nil` → sólo el estado, sin segmento de venue. Cerrada:
+    /// punto quieto y apagado, texto en gris; nada pulsa sobre algo que ya
+    /// no está vivo.
+    private func liveEyebrow(venueName: String?, isOpen: Bool) -> some View {
+        let status = isOpen ? "Cuenta abierta" : "Cuenta cerrada"
+        let label = venueName.map { "\(status) · \($0)" } ?? status
 
-            Text("Cuenta abierta · \(venueName)")
+        return HStack(spacing: 7) {
+            if isOpen {
+                Circle()
+                    .fill(Color.bpAmber)
+                    .frame(width: 7, height: 7)
+                    .overlay(
+                        Circle()
+                            .fill(Color.bpAmber)
+                            .blur(radius: 4)
+                            .opacity(pulse ? 0.85 : 0.3)
+                    )
+                    .scaleEffect(pulse ? 1.1 : 0.9)
+            } else {
+                Circle()
+                    .fill(Color.white.opacity(0.35))
+                    .frame(width: 7, height: 7)
+            }
+
+            Text(label)
                 .font(.system(size: 10, weight: .heavy, design: .monospaced))
                 .tracking(1.8)
-                .foregroundStyle(Color.bpAmberBright)
+                .foregroundStyle(isOpen ? Color.bpAmberBright : Color.white.opacity(0.55))
                 .lineLimit(1)
                 .minimumScaleFactor(0.85)
         }
@@ -172,38 +272,49 @@ public struct OpenTabV2View: View {
 
     // MARK: - Mine card ("Lo tuyo" + avatars)
 
-    private var mineCard: some View {
-        HStack(alignment: .top, spacing: 14) {
+    private func mineCard(detail d: VenueTabDetail) -> some View {
+        let myTotalString = Self.money(d.total(for: myUserId ?? ""))
+        let groupTotalString = Self.money(d.groupTotal)
+        let groupSize = max(d.members.count, 1)
+
+        return HStack(alignment: .top, spacing: 14) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Lo tuyo")
                     .font(.system(size: 10, weight: .heavy, design: .monospaced))
                     .tracking(2.0)
                     .foregroundStyle(Color.bpAmberBright.opacity(0.85))
 
-                Text(myTotal)
+                Text(myTotalString)
                     .font(.system(size: 40, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
                     .shadow(color: Color.bpAmber.opacity(0.25), radius: 10, y: 2)
 
-                (
-                    Text("El grupo va ")
-                        .foregroundStyle(Color.white.opacity(0.75))
-                    + Text(groupTotal)
-                        .font(.system(size: 12.5, weight: .black, design: .rounded))
-                        .foregroundStyle(Color.bpAmberBright)
-                    + Text(" · ")
-                        .foregroundStyle(Color.white.opacity(0.55))
-                    + Text("\(groupSize) personas")
-                        .font(.system(size: 12, design: .serif).italic())
-                        .foregroundStyle(Color.white.opacity(0.85))
-                )
-                .font(.system(size: 12))
-                .fixedSize(horizontal: false, vertical: true)
+                if groupSize > 1 {
+                    (
+                        Text("El grupo va ")
+                            .foregroundStyle(Color.white.opacity(0.75))
+                        + Text(groupTotalString)
+                            .font(.system(size: 12.5, weight: .black, design: .rounded))
+                            .foregroundStyle(Color.bpAmberBright)
+                        + Text(" · ")
+                            .foregroundStyle(Color.white.opacity(0.55))
+                        + Text(groupSize == 1 ? "1 persona" : "\(groupSize) personas")
+                            .font(.system(size: 12, design: .serif).italic())
+                            .foregroundStyle(Color.white.opacity(0.85))
+                    )
+                    .font(.system(size: 12))
+                    .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Text("Solo tú por ahora · comparte el código para sumar gente")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.white.opacity(0.65))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
 
             Spacer(minLength: 4)
 
-            OpenTabV2AvatarStack(colors: avatars)
+            OpenTabV2AvatarStack(colors: avatarColors(for: d))
                 .padding(.top, 4)
         }
         .padding(.horizontal, 16)
@@ -220,10 +331,11 @@ public struct OpenTabV2View: View {
 
     // MARK: - Code block (CTA + mono string)
 
-    private var codeBlock: some View {
+    private func codeBlock(joinCode: String) -> some View {
         VStack(spacing: 10) {
             Button {
                 tapHaptic()
+                showScanCode = true
             } label: {
                 Text("Mostrar código")
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
@@ -261,31 +373,130 @@ public struct OpenTabV2View: View {
 
     // MARK: - Consumos card
 
-    private var consumosCard: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(consumos.enumerated()), id: \.offset) { idx, item in
-                OpenTabV2Row(item: item)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 11)
-                if idx < consumos.count - 1 {
-                    Rectangle()
-                        .fill(Color.white.opacity(0.06))
-                        .frame(height: 1)
-                        .padding(.leading, 14 + 32 + 10)
+    private func consumosCard(items: [OpenTabV2Item], isOpen: Bool) -> some View {
+        Group {
+            if items.isEmpty {
+                VStack(spacing: 6) {
+                    Text(isOpen ? "Todavía no cargaron consumos" : "Esta cuenta cerró sin consumos")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    if isOpen {
+                        Text("Muéstrale el código al bartender para abrir el primero.")
+                            .font(.system(size: 11, design: .rounded))
+                            .foregroundStyle(Color.white.opacity(0.55))
+                            .multilineTextAlignment(.center)
+                    }
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .background(
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(Color.white.opacity(0.04))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+                )
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(items.enumerated()), id: \.offset) { idx, item in
+                        OpenTabV2Row(item: item)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 11)
+                        if idx < items.count - 1 {
+                            Rectangle()
+                                .fill(Color.white.opacity(0.06))
+                                .frame(height: 1)
+                                .padding(.leading, 14)
+                        }
+                    }
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(Color.white.opacity(0.04))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+                )
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white.opacity(0.04))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
-        )
+    }
+
+    // MARK: - Datos reales
+
+    private func load() async {
+        guard let tabId else {
+            #if DEBUG
+            // Debug tray / previews sin tabId: mockup para revisar el diseño.
+            // En Release este camino cae al emptyState, nunca a datos inventados.
+            if detail == nil {
+                detail = .debugSample
+                myUserId = VenueTabDetail.debugSampleUserId
+            }
+            #endif
+            isLoading = false
+            return
+        }
+        isLoading = true
+        errorMessage = nil
+        myUserId = try? await SupabaseRESTClient.freshSession().user.id
+        do {
+            detail = try await repository.detail(tabId: tabId)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        isLoading = false
+    }
+
+    /// `nil` cuando VenueStore no conoce el venue: el eyebrow omite el
+    /// segmento en vez de pintar un placeholder como si fuera el local.
+    private func resolvedVenueName(_ d: VenueTabDetail) -> String? {
+        venueStore.venues.first(where: { $0.id == d.tab.venueId })?.name
+    }
+
+    private func items(from d: VenueTabDetail) -> [OpenTabV2Item] {
+        // Un formatter local evita static-let shared y los warnings de
+        // Sendable en Swift 6 (RelativeDateTimeFormatter no es Sendable).
+        let fmt = RelativeDateTimeFormatter()
+        fmt.locale = Locale(identifier: "es")
+        fmt.unitsStyle = .abbreviated
+        let now = Date()
+        return d.charges
+            .sorted { $0.createdAt > $1.createdAt }
+            .map { charge in
+                let isMine = charge.memberId == myUserId
+                let rel = fmt.localizedString(for: charge.createdAt, relativeTo: now)
+                let subtitle = isMine ? rel : "\(rel) · de alguien del grupo"
+                return OpenTabV2Item(
+                    title: charge.description,
+                    subtitle: subtitle,
+                    amount: Self.money(charge.amount),
+                    dimmed: !isMine
+                )
+            }
+    }
+
+    private func avatarColors(for d: VenueTabDetail) -> [Color] {
+        let palette: [Color] = [
+            Color(red: 0.92, green: 0.72, blue: 0.28),   // amber (yo)
+            Color(red: 0.55, green: 0.40, blue: 0.95),   // morado
+            Color(red: 0.20, green: 0.90, blue: 0.40),   // verde
+            Color(red: 0.92, green: 0.92, blue: 0.95),   // bone/white
+            Color(red: 0.98, green: 0.55, blue: 0.70),   // rosa
+            Color(red: 0.45, green: 0.75, blue: 0.95),   // celeste
+        ]
+        let ordered = d.members.sorted { a, b in
+            if a.userId == myUserId { return true }
+            if b.userId == myUserId { return false }
+            return a.joinedAt < b.joinedAt
+        }
+        return ordered.prefix(4).enumerated().map { idx, _ in palette[idx % palette.count] }
     }
 
     // MARK: - Helpers
+
+    private static func money(_ v: Double) -> String { String(format: "$%.2f", v) }
 
     private func tapHaptic() {
         #if canImport(UIKit)
@@ -298,31 +509,21 @@ public struct OpenTabV2View: View {
 // MARK: - Row data + view
 
 private struct OpenTabV2Item {
-    let emoji: String
     let title: String
     let subtitle: String
     let amount: String
     let dimmed: Bool
 }
 
+/// Sin glifo: `VenueTabCharge.description` es texto libre que escribe el
+/// local, no una categoría — un emoji fijo decía "cóctel" sobre una
+/// cerveza. Cuando el backend clasifique el consumo, el slot vuelve.
 @MainActor
 private struct OpenTabV2Row: View {
     let item: OpenTabV2Item
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
-            ZStack {
-                Circle()
-                    .fill(Color.white.opacity(item.dimmed ? 0.03 : 0.06))
-                    .frame(width: 32, height: 32)
-                Text(item.emoji)
-                    .font(.system(size: 16))
-                    .opacity(item.dimmed ? 0.55 : 1)
-            }
-            .overlay(
-                Circle().strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
-            )
-
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.title)
                     .font(.system(size: 13.5, weight: .heavy, design: .rounded))
@@ -419,6 +620,85 @@ private struct OpenTabV2Background: View {
     }
 }
 
-#Preview {
-    OpenTabV2View()
+// MARK: - Sample (sólo DEBUG, para previews y el debug tray de Profile)
+
+#if DEBUG
+extension VenueTabDetail {
+    /// El usuario "yo" del sample: dueño de la cuenta y de los consumos
+    /// que no van dimmed.
+    static let debugSampleUserId = "debug-user-me"
+
+    /// Cuenta abierta en el venue `.preview` (LIV Miami, id "liv-miami") con
+    /// 4 miembros y 4 consumos — el 3º es de otra persona para ver el row
+    /// dimmed. Construido con los inits sintetizados de los modelos reales.
+    static let debugSample: VenueTabDetail = {
+        let now = Date()
+        let me = debugSampleUserId
+        let dani = "debug-user-dani"
+        let sam = "debug-user-sam"
+        let lu = "debug-user-lu"
+        return VenueTabDetail(
+            tab: VenueTab(
+                id: "debug-tab-1",
+                venueId: BarPassVenue.preview.id,
+                ownerId: me,
+                joinCode: "4F7Q",
+                status: "open",
+                openedAt: now.addingTimeInterval(-75 * 60),
+                closedAt: nil
+            ),
+            members: [
+                VenueTabMember(userId: me,   joinedAt: now.addingTimeInterval(-75 * 60), leftAt: nil),
+                VenueTabMember(userId: dani, joinedAt: now.addingTimeInterval(-70 * 60), leftAt: nil),
+                VenueTabMember(userId: sam,  joinedAt: now.addingTimeInterval(-62 * 60), leftAt: nil),
+                VenueTabMember(userId: lu,   joinedAt: now.addingTimeInterval(-40 * 60), leftAt: nil),
+            ],
+            charges: [
+                VenueTabCharge(id: "c1", memberId: me,   description: "Select Cocktails ×2",    amount: 20, createdAt: now.addingTimeInterval(-20 * 60)),
+                VenueTabCharge(id: "c2", memberId: me,   description: "Well Drinks",            amount: 8,  createdAt: now.addingTimeInterval(-35 * 60)),
+                VenueTabCharge(id: "c3", memberId: dani, description: "Patron Shots",           amount: 7,  createdAt: now.addingTimeInterval(-50 * 60)),
+                VenueTabCharge(id: "c4", memberId: me,   description: "Draft Beer & Margarita", amount: 6,  createdAt: now.addingTimeInterval(-60 * 60)),
+            ]
+        )
+    }()
+
+    /// La misma cuenta, ya cerrada: eyebrow gris, sin CTA ni fine print.
+    static let debugSampleClosed: VenueTabDetail = {
+        let open = debugSample
+        return VenueTabDetail(
+            tab: VenueTab(
+                id: open.tab.id,
+                venueId: open.tab.venueId,
+                ownerId: open.tab.ownerId,
+                joinCode: open.tab.joinCode,
+                status: "closed",
+                openedAt: open.tab.openedAt,
+                closedAt: Date().addingTimeInterval(-5 * 60)
+            ),
+            members: open.members,
+            charges: open.charges
+        )
+    }()
 }
+
+#Preview("Cuenta abierta") {
+    let store = VenueStore(repository: LocalVenueRepository())
+    return OpenTabV2View(previewDetail: .debugSample, previewUserId: VenueTabDetail.debugSampleUserId)
+        .environmentObject(store)
+        .task { await store.loadVenues() }
+}
+
+#Preview("Cuenta cerrada") {
+    let store = VenueStore(repository: LocalVenueRepository())
+    return OpenTabV2View(previewDetail: .debugSampleClosed, previewUserId: VenueTabDetail.debugSampleUserId)
+        .environmentObject(store)
+        .task { await store.loadVenues() }
+}
+
+// Mismo camino que el debug tray de Profile (`OpenTabV2View()` sin tabId):
+// en DEBUG `load()` inyecta `.debugSample`; en Release sería el emptyState.
+#Preview("Debug tray (sin tabId)") {
+    OpenTabV2View()
+        .environmentObject(VenueStore(repository: LocalVenueRepository()))
+}
+#endif

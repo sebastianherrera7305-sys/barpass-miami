@@ -268,17 +268,14 @@ struct MainTabView: View {
             // app se sentía trabada. Reportado desde TestFlight.
             NavigationStack {
                 if V2Flags.venuePulseV2 {
-                    // Venue con pulso (artifact v17.1). Pure-visual swap: takes
-                    // the venue's name/city/time; the live crowd signal and
-                    // "friends inside" row are literals from the mockup until
-                    // a real signal lands (there is no live crowd data today).
-                    VenuePulseView(
-                        venueName: venue.name,
-                        subtitleAccent: venue.neighborhood ?? "",
-                        openUntil: "",
-                        fillPercent: 50
-                    )
-                    .appState(appState)
+                    // Venue con pulso (artifact v17.1). Datos reales desde
+                    // `BarPassVenue` (`init(venue:)`): nombre, barrio y hora
+                    // de cierre salen del modelo; "amigos adentro" sale de
+                    // FriendsTonightStore. Las secciones sin backend
+                    // (ocupación por hora, voces, take de Remy) no se
+                    // dibujan hoy — mejor callarse que inventar números.
+                    VenuePulseView(venue: venue)
+                        .appState(appState)
                 } else {
                     VenueDetailView(venue: venue).appState(appState)
                 }

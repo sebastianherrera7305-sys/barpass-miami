@@ -39,8 +39,18 @@ enum V2Flags {
     /// NOT enabled by default — AuthV2 is pure visual, needs its real
     /// email/password/Apple handlers wired before it goes live.
     static var authV2: Bool      { read("bp_v2_auth_enabled",      default: false) }
-    /// Priority Entry hub → PriorityEntryV2View in place of PriorityEntryHubView.
-    /// NOT enabled by default — V2 is pure visual, callbacks need to be wired
-    /// to the existing SkipLine / Table / Tickets flows first.
+    /// Priority Entry hub → PriorityEntryV2Container in place of PriorityEntryHubView.
+    /// Default OFF: wired (real SkipLine / Table / Tickets destinations, outbox
+    /// strip, model-derived prices) but V2 copy is Spanish-only while V1 is
+    /// es/en/pt — owner decision pending.
     static var priorityV2: Bool  { read("bp_v2_priority_enabled",  default: false) }
+    /// Skip the Line purchase → SkipTheLineV2Container (V2 skin over the V1
+    /// payment machine: Apple Pay w/ idempotency keys, wallet, card via
+    /// CardPaymentView, PassRegistrationOutbox) in place of SkipLinePassView.
+    /// Default OFF until it has been exercised against Stripe test mode.
+    static var skipLineV2: Bool  { read("bp_v2_skipline_enabled",  default: false) }
+    /// Cart sheet → CartV2View (wired to CartStore + the same CardPaymentView /
+    /// wallet / Apple Pay paths as CartView) in place of CartView.
+    /// Default OFF until exercised against Stripe test mode.
+    static var cartV2: Bool      { read("bp_v2_cart_enabled",      default: false) }
 }

@@ -8,75 +8,108 @@ import SwiftUI
 // El propósito es que te encuentren en una multitud: el teléfono se vuelve
 // una antorcha visible y la pantalla te dice quién viene en camino.
 //
-// Elementos del mockup:
-// - Status bar oscuro (23:41 · SOS · 63%) sobre fondo dorado.
-// - HUD superior (vidrio oscuro): "Tu señal · DORADO · parpadeo lento" + timer
-//   circular de 9:40 restantes.
-// - Core: ▲ latiendo, avatar grande amarillo, "Levántalo por encima de la cabeza".
-// - Radar card (vidrio oscuro): "Vienen a buscarte · 2 / linterna encendida"
-//   con dos filas (Mía 40m izquierda, Jules 120m desde la barra) + flechas.
-// - Hold-to-slide "Desliza · me encontraron" + nota "Salir de esta pantalla ·
-//   la señal sigue encendida".
+// 2026-10-10 — datos reales conectados contra el stack de seguridad V1:
+//
+//  · `SafetyBeaconStore.shared.mine` manda. Color, ritmo, tiempo que falta,
+//    cantidad de respuestas y nombres de quien contestó salen de ese
+//    SafetyBeacon — nunca inventados. Si NO hay beacon mío encendido, la
+//    pantalla se muestra como un empty state con botón de dismiss (no se
+//    renderiza el faro — es exactamente lo que la vista promete y no hay).
+//  · "DORADO · parpadeo lento" se compone de los l10n keys reales de
+//    BeaconSignal (`colorNameKey` / `rhythmNameKey`), así que un dicrómata
+//    o alguien con pantalla saturada por el bar lee el nombre escrito y no
+//    sólo el color.
+//  · "Vienen a buscarte · N" muestra `beacon.ackCount`. Cuando es 0 decimos
+//    "nadie contestó todavía" en vez de poner "0" (ver BeaconAckRow V1).
+//  · Las filas listan quienes CONTESTARON (`beacon.ackNames`) con el avatar
+//    tintado al color del propio beacon. NO hay distancias ni flechas de
+//    dirección: eso lo da NearbyInteraction en ProximityRadar, y es sesión
+//    1 a 1, no se puede fabricar para un grupo entero.
+//  · "Linterna encendida" en el HUD del radar sólo aparece cuando
+//    `BeaconFlares.shared.state` reporta la torch como `.pulsing`. Si está
+//    atenuada o apagada por batería/calor, el badge cambia (misma data que
+//    BeaconFlareStatusList de V1).
+//  · El slide-to-confirm "me encontraron" llama al repo real
+//    (`RepositoryDependencies.safetyBeacon.resolve(beaconId:)`) + dismiss.
+//    Es lo único que apaga la baliza: mientras la fila siga viva el store
+//    la vuelve a encender en el próximo tick (mismo contrato que
+//    BeaconBroadcastView).
 //
 // Limitaciones conocidas:
-// - La data (contactos que vienen, tiempo restante, ángulos de las flechas)
-//   es literal del mockup. No se conecta a FriendPresence / LocationService /
-//   un canal de "beacon activo" todavía — ese wiring es un pase siguiente.
-// - El slide-to-confirm es un gesto completo (drag + threshold) pero su
-//   acción al confirmarse sólo apaga el beacon localmente y hace dismiss.
-//   No notifica a los contactos ni corta el broadcast del backend.
-// - La linterna real (AVCaptureDevice torchMode) no se activa aquí para no
-//   requerir permisos ni cambios de Info.plist; la pantalla sola ya es
-//   visible desde lejos. La fila "linterna encendida" del HUD describe la
-//   intención del flujo, no un side-effect activo.
-// - Los avatares son SF Symbols a color — no se replican los SVG estilizados
-//   del mockup para no inflar el archivo. Los avatares reales deben venir
-//   del usuario y sus contactos de confianza.
+//  · Los avatares son SF Symbols a color — no se replican los SVG
+//    estilizados del mockup. Siguen la paleta real de BeaconIdentity.
+//  · La linterna real (AVCaptureDevice torchMode) la enciende el servicio
+//    `BeaconFlares` cuando el beacon se levanta; esta pantalla sólo
+//    REFLEJA ese estado, no lo prende por su cuenta.
+//  · Como el beacon tiene su propia fuente de verdad del tiempo que falta,
+//    el badge del timer se refresca cada 5 s con un TimelineView en vez de
+//    con un `Timer.publish` separado — misma técnica que BeaconSessionFooter.
 
 @MainActor
 struct YourSignalV2View: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
 
-    // Mockup data — ver comentario de limitaciones.
-    private let timeRemaining: TimeInterval = 9 * 60 + 40
-    private let batteryLabel = "63%"
-    private let clockLabel = "23:41"
+    // Override para previews — si viene, se usa en vez del store real.
+    var beaconOverride: SafetyBeacon? = nil
+    var flareStateOverride: BeaconFlareState? = nil
+
+    @ObservedObject private var l10n = L10n.shared
+    @ObservedObject private var beaconStore = SafetyBeaconStore.shared
+    @ObservedObject private var flares = BeaconFlares.shared
 
     @State private var pulse: Double = 0
     @State private var arrowBounce: Double = 0
     @State private var ripplePhase: Double = 0
     @State private var slideOffset: CGFloat = 0
     @State private var confirmed = false
+    @State private var isResolving = false
+    @State private var resolveError: String?
+
+    // MARK: - Datos reales derivados
+
+    /// Si viene un override (preview), lo usa; si no, el beacon mío vivo.
+    private var mine: SafetyBeacon? {
+        if let beaconOverride { return beaconOverride }
+        return beaconStore.mine.flatMap { $0.isResolved ? nil : $0 }
+    }
+
+    private var flareState: BeaconFlareState {
+        flareStateOverride ?? flares.state
+    }
+
+    /// "DORADO" / "CELESTE" / "VERDE" / "FUCSIA" vía l10n real.
+    private var colorName: String {
+        guard let mine else { return "" }
+        return l10n.t(mine.signal.colorNameKey)
+    }
+
+    /// "parpadeo lento" / "doble parpadeo" / etc.
+    private var rhythmName: String {
+        guard let mine else { return "" }
+        return l10n.t(mine.signal.rhythmNameKey)
+    }
+
+    /// true cuando la linterna está pulsando y aportando luz real.
+    private var torchIsOn: Bool {
+        if case .active(let torch, _, _, _) = flareState {
+            if case .pulsing = torch { return true }
+        }
+        return false
+    }
 
     var body: some View {
         ZStack {
-            // Fondo dorado a full con parpadeo lento (radial gradient animado).
+            // Fondo dorado a full con parpadeo lento.
             YourSignalV2Background(pulse: pulse)
 
             // Tres anillos que se expanden desde el centro del avatar.
             YourSignalV2Rings(phase: ripplePhase)
 
-            VStack(spacing: 0) {
-                fakeStatusBar
-                    .padding(.horizontal, 22)
-                    .padding(.top, 14)
-
-                Spacer(minLength: 10)
-
-                topHUD
-                    .padding(.horizontal, 18)
-                    .padding(.top, 46)
-
-                Spacer(minLength: 12)
-
-                core
-                    .padding(.horizontal, 20)
-
-                Spacer(minLength: 12)
-
-                radar
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 26)
+            if let mine {
+                content(for: mine)
+            } else {
+                emptyState
             }
         }
         .preferredColorScheme(.dark)
@@ -91,49 +124,102 @@ struct YourSignalV2View: View {
             withAnimation(.linear(duration: 2.4).repeatForever(autoreverses: false)) {
                 ripplePhase = 1
             }
+            beaconStore.start()
+        }
+        // El poll sigue el ciclo de la app, igual que FindMyGroupView /
+        // SafetyGroupView en V1: en background no hay a quién mostrarle nada
+        // y cada consulta extra pega contra la red saturada del lugar.
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { beaconStore.start() } else { beaconStore.stop() }
         }
     }
 
-    // MARK: - Fake status bar (dark text sobre dorado)
+    @ViewBuilder
+    private func content(for beacon: SafetyBeacon) -> some View {
+        VStack(spacing: 0) {
+            // Antes acá iba una barra de estado falsa (reloj + "SOS" + batería)
+            // copiada del mockup. En el dispositivo esa fila era un segundo
+            // reloj congelado, así que se quitó; el alto se conserva para que
+            // el HUD no suba.
+            Spacer().frame(height: 34)
 
-    private var fakeStatusBar: some View {
-        HStack {
-            Text(clockLabel)
-                .font(.system(size: 13, weight: .heavy, design: .monospaced))
-                .foregroundStyle(Color.black.opacity(0.78))
+            Spacer(minLength: 10)
+
+            topHUD(for: beacon)
+                .padding(.horizontal, 18)
+                .padding(.top, 46)
+
+            Spacer(minLength: 12)
+
+            core
+                .padding(.horizontal, 20)
+
+            Spacer(minLength: 12)
+
+            radar(for: beacon)
+                .padding(.horizontal, 18)
+                .padding(.bottom, 26)
+        }
+    }
+
+    /// Lo que mostramos cuando el store NO tiene beacon mío vivo. No es un
+    /// error — es que esta pantalla sólo existe mientras haya una señal; si
+    /// no la hay, se dice así y hay salida.
+    private var emptyState: some View {
+        VStack(spacing: 18) {
             Spacer()
-            HStack(spacing: 8) {
-                Text("SOS")
-                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                    .tracking(1.6)
-                    .foregroundStyle(Color.black.opacity(0.9))
-                    .padding(.horizontal, 7).padding(.vertical, 3)
-                    .background(Color.black.opacity(0.14), in: RoundedRectangle(cornerRadius: 4))
-                    .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Color.black.opacity(0.35)))
-                Text(batteryLabel)
-                    .font(.system(size: 12, weight: .heavy, design: .monospaced))
-                    .foregroundStyle(Color.black.opacity(0.78))
+            Image(systemName: "flashlight.off.fill")
+                .font(.system(size: 48, weight: .black))
+                .foregroundStyle(Color.black.opacity(0.65))
+            Text("No tienes una señal activa")
+                .font(.system(size: 22, weight: .black, design: .rounded))
+                .foregroundStyle(Color.black.opacity(0.85))
+                .multilineTextAlignment(.center)
+            Text("Levanta la mano desde la pantalla anterior para encender tu faro.")
+                .font(.system(size: 13))
+                .foregroundStyle(Color.black.opacity(0.65))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 32)
+            Spacer()
+            Button {
+                BPHaptics.light()
+                dismiss()
+            } label: {
+                Text("Cerrar")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 24).padding(.vertical, 12)
+                    .background(Color.white.opacity(0.4), in: Capsule())
+                    .overlay(Capsule().strokeBorder(Color.black.opacity(0.3), lineWidth: 1))
             }
+            .buttonStyle(.plain)
+            .padding(.bottom, 36)
         }
     }
 
     // MARK: - Top HUD (dark glass + timer)
 
-    private var topHUD: some View {
+    private func topHUD(for beacon: SafetyBeacon) -> some View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Tu señal")
                     .font(.system(size: 10, weight: .heavy, design: .monospaced))
                     .tracking(1.6)
                     .foregroundStyle(Color.white.opacity(0.65))
-                Text("DORADO · parpadeo lento")
+                Text("\(colorName) · \(rhythmName)")
                     .font(.system(size: 15, weight: .black, design: .rounded))
                     .foregroundStyle(Color.bpAmberBright)
             }
 
             Spacer(minLength: 10)
 
-            timerBadge
+            // Refresca cada 15 s — misma cadencia que BeaconSessionFooter V1,
+            // porque el display está en minutos y medir más seguido no agrega
+            // dato y despierta la pantalla al pedo.
+            TimelineView(.periodic(from: Date(), by: 15)) { _ in
+                timerBadge(for: beacon)
+            }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
@@ -147,17 +233,20 @@ struct YourSignalV2View: View {
         )
     }
 
-    private var timerBadge: some View {
-        ZStack {
+    private func timerBadge(for beacon: SafetyBeacon) -> some View {
+        let total = max(0, beacon.secondsRemaining)
+        let totalWindow = max(1, beacon.expiresAt.timeIntervalSince(beacon.createdAt))
+        let progress = min(1.0, max(0.02, total / totalWindow))
+        return ZStack {
             Circle()
                 .stroke(Color.black.opacity(0.28), lineWidth: 4)
                 .frame(width: 44, height: 44)
             Circle()
-                .trim(from: 0, to: 0.96)
+                .trim(from: 0, to: progress)
                 .stroke(Color.bpAmberBright, style: StrokeStyle(lineWidth: 4, lineCap: .round))
                 .frame(width: 44, height: 44)
                 .rotationEffect(.degrees(-90))
-            Text(formattedTime(timeRemaining))
+            Text(formattedTime(total))
                 .font(.system(size: 10, weight: .heavy, design: .monospaced))
                 .foregroundStyle(.white)
         }
@@ -256,44 +345,44 @@ struct YourSignalV2View: View {
                 radius: 20, x: 0, y: 14)
     }
 
-    // MARK: - Radar card (quién viene en camino + slide)
+    // MARK: - Radar card (quién contestó + slide)
 
-    private var radar: some View {
+    private func radar(for beacon: SafetyBeacon) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Vienen a buscarte · 2")
+                Text(ackHeaderText(for: beacon))
                     .font(.system(size: 10, weight: .heavy, design: .monospaced))
                     .tracking(1.6)
                     .foregroundStyle(Color.white.opacity(0.78))
                 Spacer()
-                HStack(spacing: 5) {
-                    Image(systemName: "flashlight.on.fill")
-                        .font(.system(size: 10, weight: .heavy))
-                        .foregroundStyle(Color.bpAmberBright)
-                    Text("linterna encendida")
-                        .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                        .tracking(1.4)
-                        .foregroundStyle(Color.white.opacity(0.72))
+                if torchIsOn {
+                    HStack(spacing: 5) {
+                        Image(systemName: "flashlight.on.fill")
+                            .font(.system(size: 10, weight: .heavy))
+                            .foregroundStyle(Color.bpAmberBright)
+                        Text("linterna encendida")
+                            .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                            .tracking(1.4)
+                            .foregroundStyle(Color.white.opacity(0.72))
+                    }
                 }
             }
 
-            YourSignalRow(
-                name: "Mía",
-                distance: "40 m",
-                detail: "a tu izquierda · llega en 1 min",
-                tint: Color(red: 0.55, green: 0.4, blue: 0.95),
-                arrowAngle: -70
-            )
+            if beacon.ackCount == 0 {
+                noAckYet
+            } else {
+                ackList(for: beacon)
+            }
 
-            YourSignalRow(
-                name: "Jules",
-                distance: "120 m",
-                detail: "viene desde la barra",
-                tint: Color.bpGreen,
-                arrowAngle: 30
-            )
+            slidePill(for: beacon)
 
-            slidePill
+            if let resolveError {
+                Text(resolveError)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(Color.bpDanger)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
 
             Text("Salir de esta pantalla · la señal sigue encendida")
                 .font(.system(size: 10, weight: .heavy, design: .monospaced))
@@ -312,9 +401,44 @@ struct YourSignalV2View: View {
         )
     }
 
+    private func ackHeaderText(for beacon: SafetyBeacon) -> String {
+        beacon.ackCount == 0
+            ? "Nadie contestó todavía"
+            : "Vienen a buscarte · \(beacon.ackCount)"
+    }
+
+    private var noAckYet: some View {
+        Text("Sin acuse de entrega no podemos saber quién lo vio. Mantén el teléfono en alto hasta que alguien conteste.")
+            .font(.system(size: 11, design: .serif).italic())
+            .foregroundStyle(Color.white.opacity(0.6))
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.vertical, 2)
+    }
+
+    @ViewBuilder
+    private func ackList(for beacon: SafetyBeacon) -> some View {
+        let maxShown = 4
+        let signal = beacon.signal
+        let tint = signal.color.color
+        let shownNames = Array(beacon.ackNames.prefix(maxShown))
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(Array(shownNames.enumerated()), id: \.offset) { _, name in
+                YourSignalAckRow(name: name, tint: tint)
+            }
+            let shownCount = shownNames.count
+            let hidden = beacon.ackCount - shownCount
+            if hidden > 0 {
+                Text("+ \(hidden) más contestaron")
+                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                    .tracking(1.2)
+                    .foregroundStyle(Color.white.opacity(0.6))
+            }
+        }
+    }
+
     // MARK: - Slide to confirm "me encontraron"
 
-    private var slidePill: some View {
+    private func slidePill(for beacon: SafetyBeacon) -> some View {
         GeometryReader { geo in
             let w = geo.size.width
             let maxOffset = w - 50
@@ -334,21 +458,16 @@ struct YourSignalV2View: View {
                     .gesture(
                         DragGesture()
                             .onChanged { v in
-                                guard !confirmed else { return }
+                                guard !confirmed, !isResolving else { return }
                                 slideOffset = min(max(0, v.translation.width), maxOffset)
                             }
                             .onEnded { _ in
-                                guard !confirmed else { return }
+                                guard !confirmed, !isResolving else { return }
                                 if slideOffset > maxOffset * 0.75 {
                                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                                         slideOffset = maxOffset
-                                        confirmed = true
                                     }
-                                    hapticSuccess()
-                                    Task { @MainActor in
-                                        try? await Task.sleep(nanoseconds: 650_000_000)
-                                        dismiss()
-                                    }
+                                    resolveSignal(for: beacon)
                                 } else {
                                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                                         slideOffset = 0
@@ -366,33 +485,57 @@ struct YourSignalV2View: View {
             Circle()
                 .fill(Color.bpAmberBright)
                 .frame(width: 42, height: 42)
-            Image(systemName: confirmed ? "checkmark" : "chevron.right")
-                .font(.system(size: 15, weight: .black))
-                .foregroundStyle(.black)
+            Group {
+                if isResolving {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.black)
+                } else {
+                    Image(systemName: confirmed ? "checkmark" : "chevron.right")
+                        .font(.system(size: 15, weight: .black))
+                        .foregroundStyle(.black)
+                }
+            }
         }
     }
 
-    private func hapticSuccess() {
-        #if canImport(UIKit)
-        let gen = UINotificationFeedbackGenerator()
-        gen.notificationOccurred(.success)
-        #endif
+    /// Resuelve el beacon contra el repo real. El store apaga la baliza en
+    /// cuanto `beacon.isResolved` es `true`, igual que BeaconBroadcastView.
+    private func resolveSignal(for beacon: SafetyBeacon) {
+        guard !isResolving, !confirmed else { return }
+        isResolving = true
+        resolveError = nil
+        BPHaptics.success()
+        Task {
+            do {
+                try await RepositoryDependencies.safetyBeacon.resolve(beaconId: beacon.id)
+                beaconStore.refreshNow()
+                confirmed = true
+                try? await Task.sleep(nanoseconds: 650_000_000)
+                dismiss()
+            } catch {
+                resolveError = (error as? SafetyBeaconError)?.errorDescription
+                    ?? l10n.t("safety.error.generic")
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    slideOffset = 0
+                }
+                BPHaptics.error()
+            }
+            isResolving = false
+        }
     }
 }
 
-// MARK: - Row (contacto que viene en camino)
+// MARK: - Row (una respuesta al faro)
 
 @MainActor
-private struct YourSignalRow: View {
+private struct YourSignalAckRow: View {
     let name: String
-    let distance: String
-    let detail: String
     let tint: Color
-    let arrowAngle: Double
 
     var body: some View {
         HStack(spacing: 12) {
-            // Avatar en bloque de color — approximation de los SVG del mockup.
+            // Avatar en bloque de color — el del color del propio faro.
             ZStack {
                 Circle()
                     .fill(tint)
@@ -406,15 +549,10 @@ private struct YourSignalRow: View {
             )
 
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
-                    Text(name)
-                        .font(.system(size: 14, weight: .black, design: .rounded))
-                        .foregroundStyle(.white)
-                    Text("· \(distance)")
-                        .font(.system(size: 12, weight: .heavy, design: .monospaced))
-                        .foregroundStyle(Color.white.opacity(0.6))
-                }
-                Text(detail)
+                Text(name)
+                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("viene en camino")
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.white.opacity(0.6))
                     .lineLimit(1)
@@ -422,10 +560,9 @@ private struct YourSignalRow: View {
 
             Spacer(minLength: 4)
 
-            Text("➤")
-                .font(.system(size: 17, weight: .heavy))
+            Image(systemName: "figure.walk.motion")
+                .font(.system(size: 15, weight: .heavy))
                 .foregroundStyle(Color.bpAmberBright)
-                .rotationEffect(.degrees(arrowAngle))
         }
         .padding(.vertical, 2)
     }
@@ -495,6 +632,33 @@ private struct YourSignalV2Rings: View {
     }
 }
 
-#Preview {
+// MARK: - Preview
+
+#if DEBUG
+#Preview("Your Signal — sin beacon activo") {
     YourSignalV2View()
 }
+
+#Preview("Your Signal — con respuestas (mock)") {
+    YourSignalV2View(
+        beaconOverride: SafetyBeacon(
+            id: "preview-1",
+            userId: "me",
+            displayName: "Yo",
+            avatarUrl: nil,
+            venueId: nil,
+            venueName: nil,
+            note: "cerca de la barra",
+            createdAt: Date().addingTimeInterval(-120),
+            expiresAt: Date().addingTimeInterval(9 * 60 + 40),
+            resolvedAt: nil,
+            isMine: true,
+            iAcked: false,
+            ackCount: 2,
+            ackNames: ["Mía", "Jules"],
+            signalIndex: 0,
+            signalVariant: 0
+        )
+    )
+}
+#endif

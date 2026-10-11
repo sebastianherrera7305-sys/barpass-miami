@@ -333,10 +333,10 @@ private extension TripsListV2Avatar {
 private struct TripsListV2EmptyMyTrips: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Todavía no tenés trips.")
+            Text("Todavía no tienes trips.")
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("Creá uno o unite con el código de un amigo.")
+            Text("Crea uno o únete con el código de un amigo.")
                 .font(.system(size: 12.5))
                 .foregroundStyle(Color.white.opacity(0.55))
         }

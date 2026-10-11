@@ -1,5 +1,6 @@
 import SwiftUI
 import AuthenticationServices
+import CryptoKit
 
 // AuthLoginV2View — pantalla "Entrar" del artifact v17.1
 // (sección #s-auth, grupo "Cuenta y seguridad"). Reemplaza visualmente a
@@ -64,15 +65,35 @@ struct AuthLoginV2View: View {
     // Previews y en el bootstrap sin forzar wiring todavía.
     var onSignIn: ((_ email: String, _ password: String) -> Void)? = nil
     var onSignUp: ((_ email: String, _ password: String) -> Void)? = nil
-    var onAppleCredential: ((ASAuthorizationAppleIDCredential) -> Void)? = nil
+    /// Receives the Apple id-token and the RAW nonce that was hashed into
+    /// the request. The caller passes both to `AuthService.signInWithApple`.
+    /// Owning the nonce here (instead of asking the caller to inject it)
+    /// keeps the Apple handshake correct even when the view is dropped
+    /// straight into a container with no auth plumbing.
+    var onAppleIdToken: ((_ idToken: String, _ rawNonce: String) -> Void)? = nil
+    var onAppleError: ((Error) -> Void)? = nil
     var onForgotPassword: (() -> Void)? = nil
     var onTerms: (() -> Void)? = nil
     var onPrivacy: (() -> Void)? = nil
+    /// Guest mode — V1 NativeAuthView offers "continuar como invitado" and
+    /// ProfileView keeps a full guest branch; dropping it would lock
+    /// guests out of the app. Nil hides the link (pure-visual previews).
+    var onGuest: (() -> Void)? = nil
+
+    @ObservedObject private var l10n = L10n.shared
+    /// External "busy" state — set by the container while an auth call is
+    /// in flight. Disables inputs so the user can't fire a second request
+    /// mid-flight.
+    var isLoading: Bool = false
+    /// External error line rendered under the CTA. Container clears it on
+    /// a successful attempt.
+    var errorMessage: String? = nil
 
     @State private var mode: Mode = .signIn
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var showPassword: Bool = false
+    @State private var appleRawNonce: String = ""
     @FocusState private var focused: Field?
 
     private enum Field {
@@ -84,10 +105,10 @@ struct AuthLoginV2View: View {
             AuthLoginV2Background()
 
             VStack(spacing: 0) {
-                // 70pt top spacer below status bar, as per style reference.
+                // 70pt top spacer below the (real) iOS status bar, as per
+                // style reference. The mockup's fake "23:41 · SOS · 63%" bar
+                // is not drawn: on device it rendered as a second frozen clock.
                 Spacer().frame(height: 70)
-
-                fakeStatusBar
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 20) {
@@ -102,10 +123,23 @@ struct AuthLoginV2View: View {
 
                         primaryCTA
 
+                        if let errorMessage, !errorMessage.isEmpty {
+                            Text(errorMessage)
+                                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                .foregroundStyle(Color.bpDanger)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
+
                         appleCTA
 
                         legalLine
                             .padding(.top, 2)
+
+                        if onGuest != nil {
+                            guestLink
+                                .padding(.top, 10)
+                        }
 
                         Spacer(minLength: 24)
                     }
@@ -117,31 +151,6 @@ struct AuthLoginV2View: View {
         }
         .preferredColorScheme(.dark)
         .onTapGesture { focused = nil }
-    }
-
-    // MARK: - Fake status bar (visual nod to the mockup)
-
-    private var fakeStatusBar: some View {
-        HStack {
-            Text("23:41")
-                .font(.system(size: 13, weight: .heavy, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.9))
-            Spacer()
-            HStack(spacing: 8) {
-                Text("SOS")
-                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                    .tracking(1.6)
-                    .foregroundStyle(Color.bpAmber)
-                    .padding(.horizontal, 7).padding(.vertical, 3)
-                    .background(Color.black.opacity(0.5), in: RoundedRectangle(cornerRadius: 4))
-                    .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Color.bpAmber.opacity(0.3)))
-                Text("63%")
-                    .font(.system(size: 12, weight: .heavy, design: .monospaced))
-                    .foregroundStyle(Color.white.opacity(0.85))
-            }
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 8)
     }
 
     // MARK: - Brand lockup (mascot + BAR PASS + tagline)
@@ -330,11 +339,17 @@ struct AuthLoginV2View: View {
             submit()
         } label: {
             HStack(spacing: 9) {
-                Text(mode.cta)
-                    .font(.system(size: 15, weight: .black, design: .rounded))
-                    .tracking(-0.2)
-                Text("→")
-                    .font(.system(size: 15, weight: .black, design: .rounded))
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.black)
+                } else {
+                    Text(mode.cta)
+                        .font(.system(size: 15, weight: .black, design: .rounded))
+                        .tracking(-0.2)
+                    Text("→")
+                        .font(.system(size: 15, weight: .black, design: .rounded))
+                }
             }
             .foregroundStyle(.black)
             .frame(maxWidth: .infinity)
@@ -347,8 +362,10 @@ struct AuthLoginV2View: View {
                     ))
             )
             .shadow(color: Color.bpAmber.opacity(0.3), radius: 14, y: 4)
+            .opacity(isLoading ? 0.75 : 1)
         }
         .buttonStyle(.plain)
+        .disabled(isLoading)
     }
 
     // MARK: - Apple CTA (uses real SignInWithAppleButton for correctness)
@@ -356,16 +373,29 @@ struct AuthLoginV2View: View {
     private var appleCTA: some View {
         SignInWithAppleButton(.continue) { request in
             request.requestedScopes = [.email, .fullName]
+            // Supabase's Apple provider rejects a tokenised login without
+            // a bound nonce; the request receives its SHA-256 and the
+            // raw copy stays on the view for the completion handler.
+            let raw = Self.randomNonce()
+            appleRawNonce = raw
+            request.nonce = Self.sha256(raw)
         } onCompletion: { result in
             switch result {
             case .success(let auth):
-                if let cred = auth.credential as? ASAuthorizationAppleIDCredential {
-                    onAppleCredential?(cred)
+                guard
+                    let cred = auth.credential as? ASAuthorizationAppleIDCredential,
+                    let tokenData = cred.identityToken,
+                    let idToken = String(data: tokenData, encoding: .utf8)
+                else {
+                    onAppleError?(AuthLoginV2AppleError.missingToken)
+                    return
                 }
-            case .failure:
-                // Silencio deliberado — el flow real logeará desde el
-                // sitio que monta la vista. Aquí sólo pintamos el botón.
-                break
+                onAppleIdToken?(idToken, appleRawNonce)
+            case .failure(let error):
+                let ns = error as NSError
+                // User cancelled the sheet — not a real error, don't toast.
+                if ns.code == ASAuthorizationError.canceled.rawValue { return }
+                onAppleError?(error)
             }
         }
         .signInWithAppleButtonStyle(.white)
@@ -375,6 +405,28 @@ struct AuthLoginV2View: View {
             RoundedRectangle(cornerRadius: 13)
                 .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
         )
+        .disabled(isLoading)
+    }
+
+    private static func randomNonce(length: Int = 32) -> String {
+        let chars = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        var result = ""
+        var remaining = length
+        while remaining > 0 {
+            var random: UInt8 = 0
+            _ = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
+            if random < chars.count {
+                result.append(chars[Int(random)])
+                remaining -= 1
+            }
+        }
+        return result
+    }
+
+    private static func sha256(_ input: String) -> String {
+        SHA256.hash(data: Data(input.utf8))
+            .map { String(format: "%02x", $0) }
+            .joined()
     }
 
     // MARK: - Legal line (mono, Términos / Política in amber)
@@ -408,6 +460,25 @@ struct AuthLoginV2View: View {
         .tracking(1.4)
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Guest link (same l10n key as V1, so it stays es/en/pt)
+
+    private var guestLink: some View {
+        Button {
+            tap()
+            onGuest?()
+        } label: {
+            Text(l10n.t("auth.continueAsGuest"))
+                .font(.system(size: 12, weight: .semibold, design: .rounded))
+                .foregroundStyle(Color.white.opacity(0.45))
+                .underline(color: Color.white.opacity(0.18))
+        }
+        .buttonStyle(.plain)
+        .disabled(isLoading)
+        .frame(maxWidth: .infinity)
+        .accessibilityLabel(l10n.t("auth.continueAsGuest"))
+        .accessibilityHint(l10n.t("auth.continueAsGuest.hint"))
     }
 
     // MARK: - Helpers
@@ -521,6 +592,15 @@ private struct AuthLoginV2Mascot: View {
     }
 }
 
+enum AuthLoginV2AppleError: Error, LocalizedError {
+    case missingToken
+    var errorDescription: String? {
+        switch self {
+        case .missingToken: return "Apple no devolvió un token. Intenta otra vez."
+        }
+    }
+}
+
 #if DEBUG
 #Preview("AuthLoginV2 — standalone") {
     AuthLoginV2View()
@@ -530,7 +610,8 @@ private struct AuthLoginV2Mascot: View {
     AuthLoginV2View(
         onSignIn: { email, _ in print("sign in", email) },
         onSignUp: { email, _ in print("sign up", email) },
-        onAppleCredential: { _ in print("apple") },
+        onAppleIdToken: { _, _ in print("apple") },
+        onAppleError: { print("apple error:", $0) },
         onForgotPassword: { print("forgot") },
         onTerms: { print("terms") },
         onPrivacy: { print("privacy") }
