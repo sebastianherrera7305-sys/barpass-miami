@@ -446,17 +446,18 @@ struct ExploreV2View: View {
 
     private var searchField: some View {
         // Comment (Build 83): "este buscador no sirve y tampoco se ve bien,
-        // se pierde en la transparencia". El campo vivía sobre
-        // `CityArtMiami` + viñeta cálida con fill 0.04 / stroke 0.08 /
-        // placeholder 0.5 — contra el arte queda invisible. Subo el fill a
-        // 0.14, agrego una base negra 0.35 por debajo (para que no se pierda
-        // sobre zonas claras del arte), stroke a 0.18, placeholder a 0.75,
-        // y el ícono/clear button a 0.85 — mismos tokens del kit, sólo con
-        // más opacidad. El filtrado ya está cableado (filteredVenues).
+        // se pierde en la transparencia". El campo vive sobre `CityArtMiami`
+        // + viñeta cálida; con los valores que probé antes (fill 0.14 / stroke
+        // 0.18 / ícono 0.85) seguía fundiéndose contra zonas amarillas del
+        // arte. Esta pasada sube la base negra a 0.55, el fill blanco a 0.18,
+        // el stroke a 0.22, y el ícono/clear se van a `bpAmberBright` para
+        // que lean como una chip con identidad. Placeholder 0.75 (ya estaba
+        // bien), texto siempre `.white`. El filtrado ya está cableado
+        // (filteredVenues).
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 13, weight: .heavy))
-                .foregroundStyle(Color.white.opacity(0.85))
+                .foregroundStyle(Color.bpAmberBright)
 
             TextField(
                 "",
@@ -466,7 +467,7 @@ struct ExploreV2View: View {
                     .foregroundStyle(Color.white.opacity(0.75))
             )
             .font(.system(size: 14, weight: .semibold, design: .rounded))
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.white)
             .tint(Color.bpAmber)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
@@ -479,8 +480,8 @@ struct ExploreV2View: View {
                     searchText = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.white.opacity(0.75))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.bpAmberBright)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Borrar búsqueda")
@@ -489,21 +490,21 @@ struct ExploreV2View: View {
             Text(venueCountLabel)
                 .font(.system(size: 11, weight: .heavy, design: .monospaced))
                 .tracking(1.2)
-                .foregroundStyle(Color.bpAmber)
+                .foregroundStyle(Color.bpAmberBright)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.black.opacity(0.35))
+                .fill(Color.white.opacity(0.18))
         )
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(Color.white.opacity(0.14))
+                .fill(Color.black.opacity(0.55))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .strokeBorder(Color.white.opacity(0.18), lineWidth: 1)
+                .strokeBorder(Color.white.opacity(0.22), lineWidth: 1)
         )
     }
 

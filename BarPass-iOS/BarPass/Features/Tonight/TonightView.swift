@@ -725,6 +725,11 @@ struct TonightView: View {
 /// in a corner of a dark gradient) did read as a failed image load.
 struct VenuePhotoFallback: View {
     let emoji: String
+    /// Owner-curated logo from `venue_logos.json`, if present. When set,
+    /// the card shows the logo on glass instead of a lonely emoji — the
+    /// "tampoco los iconos o logos" complaint from Build 81 lands here.
+    /// Default nil keeps every existing caller working unchanged.
+    var logoURL: URL? = nil
 
     var body: some View {
         ZStack {
@@ -736,9 +741,25 @@ struct VenuePhotoFallback: View {
                 .fill(Color.bpAmber.opacity(0.10))
                 .blur(radius: 34)
                 .frame(width: 150, height: 150)
-            Text(emoji)
-                .font(.system(size: 46))
-                .opacity(0.85)
+
+            if let logoURL {
+                CachedImage(url: logoURL, targetSize: CGSize(width: 160, height: 160), priority: .standard) { img in
+                    img.resizable().scaledToFit()
+                } placeholder: {
+                    Text(emoji).font(.system(size: 46)).opacity(0.85)
+                }
+                .frame(width: 96, height: 96)
+                .padding(14)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: BPRadius.lg))
+                .overlay(
+                    RoundedRectangle(cornerRadius: BPRadius.lg)
+                        .strokeBorder(Color.white.opacity(0.14), lineWidth: 1)
+                )
+            } else {
+                Text(emoji)
+                    .font(.system(size: 46))
+                    .opacity(0.85)
+            }
         }
     }
 }
@@ -796,7 +817,7 @@ struct HeroVenueCard: View {
                 .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
 
             if venue.photoUrls.isEmpty {
-                VenuePhotoFallback(emoji: venue.emoji)
+                VenuePhotoFallback(emoji: venue.emoji, logoURL: VenueLogos.url(for: venue.id))
                     .frame(width: Self.cardWidth, height: Self.cardHeight)
                     .clipShape(RoundedRectangle(cornerRadius: BPRadius.xl))
             }
@@ -948,7 +969,7 @@ struct SmallVenueCard: View {
                     .frame(maxWidth: .infinity)
                     .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
                 } else {
-                    VenuePhotoFallback(emoji: venue.emoji)
+                    VenuePhotoFallback(emoji: venue.emoji, logoURL: VenueLogos.url(for: venue.id))
                         .frame(height: 100)
                         .frame(maxWidth: .infinity)
                         .clipShape(RoundedRectangle(cornerRadius: BPRadius.lg))
@@ -1048,11 +1069,20 @@ private struct LiveEventCard: View {
             .frame(width: 220, height: 130)
             .clipShape(RoundedRectangle(cornerRadius: BPRadius.md))
 
+            // TestFlight comment (Build 87): "Card se pone más grande de lo
+            // normal." In the "This Week" rail an event with a long title
+            // wrapped to two lines while its siblings fit on one, so that
+            // single card rode visibly taller than the rest of the row —
+            // same shape of bug `SmallVenueCard` fixed with a fixed-height
+            // name box. Pin the title to two lines' worth of height so every
+            // card in the rail aligns at the same bottom edge, long name or
+            // short.
             Text(event.name)
                 .font(.bpScaled(13, weight: .bold))
                 .foregroundStyle(Color.bpInk)
                 .lineLimit(2)
-                .frame(width: 220, alignment: .leading)
+                .multilineTextAlignment(.leading)
+                .frame(width: 220, height: 34, alignment: .topLeading)
 
             HStack(spacing: 4) {
                 Text([dateLabel, event.venueName].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))

@@ -328,7 +328,7 @@ extension Color {
         AppearanceStore.isDark ? Color(white: 0.08) : Color(white: 0.93)
     }
     static var bpCardBackground: Color {
-        AppearanceStore.isDark ? Color(red: 0.06, green: 0.04, blue: 0.10) : .white
+        AppearanceStore.isDark ? Color(white: 0.06) : .white
     }
     static var bpBorder: Color { bpInk.opacity(0.07) }
     static var bpTextSecondary: Color { bpInk.opacity(AppearanceStore.isDark ? 0.4 : 0.55) }

@@ -50,6 +50,7 @@ struct ProfileView: View {
     @State private var showYourSignalV2 = false
     @State private var displayNameDraft = ""
     @State private var isSavingDisplayName = false
+    @State private var displayNameSaveError: String?
 
     private var affiliationSubtitle: String {
         guard let uni = affiliatedUniversity else { return l10n.t("greek.profile.noneHint") }
@@ -867,14 +868,29 @@ struct ProfileView: View {
     private var editDisplayNameSheet: some View {
         NavigationStack {
             Form {
-                TextField(l10n.t("profile.displayName.hint"), text: $displayNameDraft)
-                    .textInputAutocapitalization(.words)
+                Section {
+                    TextField(l10n.t("profile.displayName.hint"), text: $displayNameDraft)
+                        .textInputAutocapitalization(.words)
+                        .onChange(of: displayNameDraft) { _, _ in
+                            if displayNameSaveError != nil { displayNameSaveError = nil }
+                        }
+                }
+                if let displayNameSaveError {
+                    Section {
+                        Text(displayNameSaveError)
+                            .font(.bpCaption())
+                            .foregroundStyle(Color.bpDanger)
+                    }
+                }
             }
             .navigationTitle(l10n.t("profile.displayName"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(l10n.t("greek.chat.cancel")) { showEditDisplayName = false }
+                    Button(l10n.t("greek.chat.cancel")) {
+                        displayNameSaveError = nil
+                        showEditDisplayName = false
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSavingDisplayName {
@@ -886,13 +902,21 @@ struct ProfileView: View {
                 }
             }
         }
-        .presentationDetents([.height(160)])
+        .presentationDetents([displayNameSaveError == nil ? .height(160) : .height(230)])
     }
 
     private func saveDisplayName() {
         let trimmed = displayNameDraft.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
         isSavingDisplayName = true
+        displayNameSaveError = nil
+        // "No deja guardar y si me salgo no se ve" (Build 81 comment): the
+        // write was `try? await` with the error path only resetting the spinner
+        // — a Supabase/network failure looked identical to tapping an inert
+        // button, and dismissing the sheet left the old name on screen because
+        // we only wrote `displayName = trimmed` on success. Surface the error
+        // inline, keep the sheet open so the draft isn't lost, and let the user
+        // retry or cancel out knowingly.
         Task {
             do {
                 try await RepositoryDependencies.displayName.setDisplayName(trimmed)
@@ -900,9 +924,14 @@ struct ProfileView: View {
                     displayName = trimmed
                     isSavingDisplayName = false
                     showEditDisplayName = false
+                    BPHaptics.success()
                 }
             } catch {
-                await MainActor.run { isSavingDisplayName = false }
+                await MainActor.run {
+                    isSavingDisplayName = false
+                    displayNameSaveError = l10n.t("api.error.operationFailed")
+                    BPHaptics.error()
+                }
             }
         }
     }

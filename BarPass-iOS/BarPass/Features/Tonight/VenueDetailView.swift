@@ -156,17 +156,27 @@ struct VenueDetailView: View {
         .frame(height: 300)
     }
 
-    /// Real Google photo when available, then a photo somebody actually
-    /// posted from inside the place, then the emoji gradient.
+    /// Hero image fallback chain. In order:
+    ///   1. `venue.photoUrls.first` — Google Places `image_url`.
+    ///   2. `VenueMedia.cover(for: venue.id)` — owner-curated bundled cover
+    ///      from `venue_media.json`. Lets the owner override an ugly Google
+    ///      shot (or fill one in for the 38 catalogue rows Google never
+    ///      returned any image for) without an app update.
+    ///   3. `communityHeroUrl` — the newest photo somebody posted while
+    ///      actually inside the place.
+    ///   4. `VenueLogos.url(for: venue.id)` — bundled logo centered on a
+    ///      tinted glass card. Honest about "no photo" without the empty-
+    ///      card look the TestFlight comments called "cards rotas".
+    ///   5. `heroLetterFallback` — tinted-letter block (same visual family
+    ///      as the trips cover fallback). Never the dark gradient + 12%-
+    ///      opacity emoji that users read as "no cargó la imagen".
     ///
-    /// TestFlight 2026-09-13, "No muestro ninguna foto en el venue" (Rush
-    /// Nightclub, Gainesville): Google has no photo for that place — asked
-    /// again on 2026-09-16 for all 38 catalogue rows with an empty
-    /// `image_url`, and it has none for any of them. There is nothing to
-    /// fetch and nothing honest to invent, so the only real picture of a
-    /// room like that is the one a person standing in it posted. This
-    /// promotes it to the hero instead of leaving it buried at the bottom
-    /// of the page while the top of the screen says "no photo".
+    /// TestFlight 2026-09-13 "No muestro ninguna foto en el venue"
+    /// (Gainesville) and 2026-09-xx "I'm here and there no picture" both
+    /// land here: Google has no photo for ~38 catalogue rows, so the
+    /// honest answer is a cover we add by hand to `venue_media.json`, the
+    /// logo on glass, or a tinted letter — nothing fabricated, nothing
+    /// that reads as a failed network request.
     @ViewBuilder private var heroBackground: some View {
         if let first = venue.photoUrls.first, let url = URL(string: first) {
             CachedImage(url: url, targetSize: CGSize(width: 420, height: 420), priority: .hot) { image in
@@ -179,9 +189,17 @@ struct VenueDetailView: View {
                     .clipped()
             } placeholder: {
                 ZStack {
-                    heroEmojiFallback
+                    heroLetterFallback
                     BarPassLoadingView(size: 48)
                 }
+            }
+        } else if let curated = VenueMedia.cover(for: venue.id) {
+            CachedImage(url: curated, targetSize: CGSize(width: 420, height: 420), priority: .hot) { image in
+                Color.clear
+                    .overlay(image.resizable().scaledToFill())
+                    .clipped()
+            } placeholder: {
+                heroLetterFallback
             }
         } else if let posted = communityHeroUrl, let url = URL(string: posted) {
             CachedImage(url: url, targetSize: CGSize(width: 420, height: 420), priority: .hot) { image in
@@ -189,17 +207,43 @@ struct VenueDetailView: View {
                     .overlay(image.resizable().scaledToFill())
                     .clipped()
             } placeholder: {
-                heroEmojiFallback
+                heroLetterFallback
+            }
+        } else if let logo = VenueLogos.url(for: venue.id) {
+            // No photo of the room anywhere, but we have the venue's logo:
+            // put it on glass, centered, instead of leaving the whole hero
+            // blank. Reads as a deliberate branded empty state, not a
+            // broken image.
+            ZStack {
+                heroLetterFallback
+                CachedImage(url: logo, targetSize: CGSize(width: 240, height: 240), priority: .standard) { image in
+                    image.resizable().scaledToFit()
+                } placeholder: {
+                    Color.clear
+                }
+                .frame(width: 160, height: 160)
+                .padding(20)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                .overlay(
+                    RoundedRectangle(cornerRadius: BPRadius.xl)
+                        .strokeBorder(Color.white.opacity(0.14), lineWidth: 1)
+                )
             }
         } else {
-            heroEmojiFallback
+            heroLetterFallback
         }
     }
 
     /// Newest photo posted from this venue, when the catalogue has none.
     /// Photos only — a video's `mediaUrl` is a file to play, not a still.
+    /// Skips loading when a bundled curated cover is already available —
+    /// no reason to hit the network for a fallback we won't render.
     private func loadCommunityHero() async {
-        guard venue.photoUrls.isEmpty, communityHeroUrl == nil else { return }
+        guard
+            venue.photoUrls.isEmpty,
+            VenueMedia.cover(for: venue.id) == nil,
+            communityHeroUrl == nil
+        else { return }
         let items = (try? await RepositoryDependencies.venueMedia.media(for: venue.id)) ?? []
         communityHeroUrl = items
             .filter { $0.mediaType == .photo }
@@ -207,14 +251,30 @@ struct VenueDetailView: View {
             .mediaUrl
     }
 
-    private var heroEmojiFallback: some View {
+    /// Tinted gradient + big initial of the venue name. Same visual family
+    /// as `TripsListV2Cover.fallback` — the user already sees this
+    /// treatment on the Trips tab, so an unphotographed venue reads as a
+    /// familiar empty state, not a broken card. Uses the amber brand tint;
+    /// no new palette.
+    private var heroLetterFallback: some View {
         ZStack {
             LinearGradient(
-                colors: [Color(white: 0.15), Color.bpSurface],
+                colors: [Color.bpAmber.opacity(0.38), Color.bpSurface],
                 startPoint: .topLeading, endPoint: .bottomTrailing
             )
-            Text(venue.emoji).font(.bpScaled(120)).opacity(0.12)
+            Text(VenueDetailView.heroLetter(from: venue.name))
+                .font(.system(size: 120, weight: .black, design: .rounded))
+                .foregroundStyle(Color.white.opacity(0.92))
+                .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
         }
+    }
+
+    /// First visible character of the name, uppercased. Falls back to "·"
+    /// so an empty name still renders a tinted block instead of a hole.
+    private static func heroLetter(from name: String) -> String {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let first = trimmed.first else { return "·" }
+        return String(first).uppercased()
     }
 
     // MARK: - Content
