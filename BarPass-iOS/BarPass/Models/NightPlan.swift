@@ -219,14 +219,24 @@ struct NightPlan: Identifiable, Codable, Hashable {
     /// tappable chips (2-4 short answers) for questions with a small,
     /// natural set of answers — "this is a tap-first mobile chat, not a
     /// typing test."
+    ///
+    /// Build 84 "writhing in code" (2026-10-08) was the model emitting a
+    /// bare ``` fence with no `json`/`options` tag, or dropping the fence
+    /// entirely — either shape silently fell through the loop below and
+    /// the raw object rendered in the chat bubble. The streaming helper
+    /// (`maskUnrenderableCodeBlock`) hides it mid-stream; here we re-tag
+    /// the final text so the actual plan/options still parses even when
+    /// the stream never saw the correct marker. reply-stream.ts documents
+    /// the same incident and does the same rewrite server-side.
     static func extractChatReplyParts(_ raw: String, venues: [BarPassVenue]) -> (text: String, plan: NightPlan?, options: [String]) {
+        let normalized = normalizeOpenFence(raw)
         for fenceTag in ["json", "options"] {
-            guard let openRange = raw.range(of: "```\(fenceTag)"),
-                  let closeRange = raw.range(of: "```", range: openRange.upperBound..<raw.endIndex) else {
+            guard let openRange = normalized.range(of: "```\(fenceTag)"),
+                  let closeRange = normalized.range(of: "```", range: openRange.upperBound..<normalized.endIndex) else {
                 continue
             }
-            let body = String(raw[openRange.upperBound..<closeRange.lowerBound])
-            let visibleText = String(raw[raw.startIndex..<openRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+            let body = String(normalized[openRange.upperBound..<closeRange.lowerBound])
+            let visibleText = String(normalized[normalized.startIndex..<openRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
             guard let data = body.data(using: .utf8) else { continue }
 
             if fenceTag == "json" {
@@ -237,6 +247,107 @@ struct NightPlan: Identifiable, Codable, Hashable {
                 return (visibleText, nil, Array(options.prefix(4)))
             }
         }
-        return (raw.trimmingCharacters(in: .whitespacesAndNewlines), nil, [])
+        // Nothing parsed. Mask any lingering code-looking block in the
+        // visible text so the bubble never falls back to raw JSON — the
+        // owner reports it as "pantalla virus" when it does. Belt and
+        // suspenders: `normalizeOpenFence` already rewrote a bare fence to
+        // tagged, but if JSONDecoder rejected the body (a malformed plan,
+        // a prose code block), the untagged fence is still here.
+        return (maskUnrenderableCodeBlock(normalized), nil, [])
+    }
+
+    /// If the model emitted a bare ``` fence with no `json`/`options` tag,
+    /// rewrite that first ``` in place to the tagged form so the loop in
+    /// `extractChatReplyParts` can still find it. Matches the classifier
+    /// in `barpass-v2/src/features/ai/services/reply-stream.ts`: look at
+    /// the first non-whitespace character after the fence — `{` → json,
+    /// `[` → options. Anything else is left alone; a code block around
+    /// prose is not something we touch.
+    private static func normalizeOpenFence(_ raw: String) -> String {
+        // Already tagged — nothing to rewrite.
+        guard raw.range(of: "```json") == nil,
+              raw.range(of: "```options") == nil,
+              let bare = raw.range(of: "```") else {
+            return raw
+        }
+        let after = raw[bare.upperBound...].drop(while: { $0.isWhitespace })
+        guard let first = after.first else { return raw }
+        let replacement: String
+        switch first {
+        case "{": replacement = "```json"
+        case "[": replacement = "```options"
+        default:  return raw
+        }
+        var copy = raw
+        copy.replaceSubrange(bare, with: replacement)
+        return copy
+    }
+
+    /// Mid-stream helper for `PlanView` / `RemyLiveView`: hides from the
+    /// bubble any text that belongs to a code block whose closing fence
+    /// hasn't arrived yet. Both views used to only match ```json/```options
+    /// — a bare ``` fence (Build 84 "writhing in code", 2026-10-08) or an
+    /// unfenced raw object (the model dropping the fence entirely) streamed
+    /// into the bubble character by character. Both are now caught here.
+    ///
+    /// Prose never contains a brace per the concierge prompt, so a `{` or
+    /// `[` at a line boundary (or at the start of the reply) is a block
+    /// opening and gets hidden until the plan card / options chips take
+    /// over. A lone brace at the very tail is held back the same way until
+    /// the next character arrives — a stream-safe default.
+    static func maskUnrenderableCodeBlock(_ text: String) -> String {
+        // 1. Tagged fences the prompt documents.
+        for tag in ["```json", "```options"] {
+            if let range = text.range(of: tag) {
+                return String(text[text.startIndex..<range.lowerBound])
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+        }
+        // 2. Bare ``` fence followed by `{` or `[` — the Build 84 shape.
+        if let range = text.range(of: "```") {
+            let after = text[range.upperBound...].drop(while: { $0.isWhitespace })
+            if let first = after.first, first == "{" || first == "[" {
+                return String(text[text.startIndex..<range.lowerBound])
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+        }
+        // 3. Unfenced object / array dropped straight into the reply.
+        if let cut = unfencedCodeStart(text) {
+            return String(text[text.startIndex..<cut])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return text
+    }
+
+    /// Narrow match for an unfenced code block: a brace/bracket at the
+    /// start of the reply or right after a newline, followed by either a
+    /// quoted key/string or the stream's trailing edge. Returning early at
+    /// the end-of-stream edge is deliberate — the next character hasn't
+    /// arrived yet, so we hold the brace back instead of leaking it.
+    private static func unfencedCodeStart(_ text: String) -> String.Index? {
+        var i = text.startIndex
+        while i < text.endIndex {
+            let c = text[i]
+            if c == "{" || c == "[" {
+                let afterBoundary: Bool
+                if i == text.startIndex {
+                    afterBoundary = true
+                } else {
+                    let prev = text[text.index(before: i)]
+                    afterBoundary = prev.isNewline || prev == "\r"
+                }
+                if afterBoundary {
+                    var j = text.index(after: i)
+                    while j < text.endIndex, text[j].isWhitespace {
+                        j = text.index(after: j)
+                    }
+                    if j == text.endIndex || text[j] == "\"" {
+                        return i
+                    }
+                }
+            }
+            i = text.index(after: i)
+        }
+        return nil
     }
 }

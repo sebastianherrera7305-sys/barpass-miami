@@ -725,13 +725,16 @@ struct PlanView: View {
     /// Cuts an in-progress, unterminated ```json/```options fence out of the
     /// live streaming text so a chat bubble never shows raw, half-typed
     /// JSON — the plan card or option chips take over once the fence closes.
+    ///
+    /// Build 84 (2026-10-08, "it's writhing in code") and Build 92 (owner
+    /// 2026-10-12, "sigue la pantalla virus") were the same bug: the model
+    /// opened its code block with a bare ``` fence (no `json`/`options`
+    /// tag) or no fence at all, so this tagged check missed and the raw
+    /// object streamed into the bubble. The real defense now lives in
+    /// `NightPlan.maskUnrenderableCodeBlock` (tagged + bare + unfenced,
+    /// shared by this view and `RemyLiveView` so they can't drift again).
     private static func hideOpenFence(_ text: String) -> String {
-        for tag in ["```json", "```options"] {
-            if let range = text.range(of: tag) {
-                return String(text[text.startIndex..<range.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
-            }
-        }
-        return text
+        NightPlan.maskUnrenderableCodeBlock(text)
     }
 
     @MainActor

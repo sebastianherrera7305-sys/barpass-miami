@@ -86,7 +86,7 @@ public struct TripsListV2View: View {
                             VStack(spacing: 14) {
                                 ForEach(tripStore.myTrips) { trip in
                                     TripsListV2Card(
-                                        trip: trip.asV2CardModel,
+                                        trip: trip.asV2CardModel(venues: venueStore.venues),
                                         onTap: { selectedTrip = trip }
                                     )
                                 }
@@ -222,7 +222,11 @@ public struct TripsListV2View: View {
 
 @MainActor
 private extension Trip {
-    var asV2CardModel: TripsListV2CardModel {
+    /// Builds the card model from real Trip data. Pass the shared venues
+    /// catalogue so the card can resolve the first stop's cover photo for
+    /// the header image fallback — nothing is fabricated when a venue
+    /// doesn't match or doesn't have a photo.
+    func asV2CardModel(venues: [BarPassVenue] = []) -> TripsListV2CardModel {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "es_ES")
         formatter.setLocalizedDateFormatFromTemplate("d MMM")
@@ -233,11 +237,17 @@ private extension Trip {
 
         let sub = "\(dateLabel) · \(stopCount) parada\(stopCount == 1 ? "" : "s") · \(memberCount) miembro\(memberCount == 1 ? "" : "s")"
 
-        let routeNames = stops.prefix(3).map { $0.venueName }
+        // Route with real start times when the stop has one. Absence is never
+        // rendered as a value — `time` stays nil if `startTime` is empty or
+        // doesn't parse as a clock time.
+        let visibleStops = Array(stops.prefix(3))
+        var routeStops: [TripsListV2RouteStop] = visibleStops.map { s in
+            TripsListV2RouteStop(name: s.venueName, time: Self.compactTime(from: s.startTime))
+        }
         let extraStops = max(0, stops.count - 3)
-        let route = extraStops > 0
-            ? routeNames + ["+\(extraStops)"]
-            : routeNames
+        if extraStops > 0 {
+            routeStops.append(TripsListV2RouteStop(name: "+\(extraStops)", time: nil))
+        }
 
         let allMemberIds = ([creatorId] + memberIds).prefix(5)
         let avatars = allMemberIds.map { id -> TripsListV2Avatar in
@@ -247,6 +257,23 @@ private extension Trip {
             )
         }
         let extraMembers = max(0, memberCount - 5)
+
+        // Cover image: prefer `trip.coverImage`; otherwise the first stop's
+        // venue photo if the catalogue has one. If neither exists, show the
+        // tinted letter fallback.
+        let firstStopVenue = stops.first.flatMap { s in
+            venues.first(where: { $0.id == s.refId })
+        }
+        let coverURL: URL? = {
+            if let raw = coverImage?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !raw.isEmpty, let u = URL(string: raw) {
+                return u
+            }
+            if let photo = firstStopVenue?.photoUrls.first, let u = URL(string: photo) {
+                return u
+            }
+            return nil
+        }()
 
         let v2Status: TripsListV2Status
         let footer: String
@@ -275,18 +302,139 @@ private extension Trip {
             dimmed = true
         }
 
+        // Progress bar for ACTIVE trips — only if we can genuinely place the
+        // user on the itinerary (≥2 stops with parseable times). Otherwise
+        // the field stays nil and the view skips it.
+        let progress: TripsListV2Progress? = {
+            guard status == .active else { return nil }
+            return Self.computeProgress(stops: stops, now: Date())
+        }()
+
+        // Countdown for PLANNING trips with a future start date. "hoy" / "mañana"
+        // / "en N días" — never a negative value.
+        let countdown: TripsListV2Countdown? = {
+            guard status == .planning else { return nil }
+            return Self.computeCountdown(from: startDate, now: Date())
+        }()
+
+        // Completion line for COMPLETED trips. No `rating` field exists on
+        // Trip today (ratings live server-side only), so we only ever show
+        // the completion date — fabricating a stars value would be a lie.
+        let completionLine: String? = {
+            guard status == .completed else { return nil }
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "es_ES")
+            f.setLocalizedDateFormatFromTemplate("d MMM")
+            return "Terminó el \(f.string(from: endDate))"
+        }()
+
+        // Pending-join chip is ONLY shown to the trip's creator — the only
+        // person who can act on the requests from this surface.
+        let pendingForCreator: Int = {
+            guard creatorId == TripStore.currentUserId else { return 0 }
+            return pendingRequests.count
+        }()
+
         return TripsListV2CardModel(
             tripId: id,
             title: title,
             status: v2Status,
             sub: sub,
-            route: route,
+            routeStops: routeStops,
             avatars: avatars,
             extraMembers: extraMembers,
             footer: footer,
             footerTint: footerTint,
-            dimmed: dimmed
+            dimmed: dimmed,
+            coverImageURL: coverURL,
+            coverLetter: Self.letter(from: title),
+            coverTint: TripsListV2Avatar.color(forSeed: id),
+            progress: progress,
+            countdown: countdown,
+            completionLine: completionLine,
+            pendingJoinRequests: pendingForCreator
         )
+    }
+
+    /// Shortens a stop's clock-time string ("9:00 PM") into the HH:mm form
+    /// the card uses ("21:00"). Returns nil for empty / unparseable values
+    /// so the UI never renders a bogus "00:00".
+    static func compactTime(from startTime: String) -> String? {
+        guard let minutes = VenueTimeStatus.minutesSinceMidnight(startTime) else { return nil }
+        let normalized = ((minutes % (24 * 60)) + 24 * 60) % (24 * 60)
+        let h = normalized / 60
+        let m = normalized % 60
+        return String(format: "%02d:%02d", h, m)
+    }
+
+    /// First visible character of the title, uppercased. Falls back to "·"
+    /// so an empty title still renders a tinted square instead of a hole.
+    static func letter(from title: String) -> String {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let first = trimmed.first else { return "·" }
+        return String(first).uppercased()
+    }
+
+    /// Progress through the night based on `startTime` parsed with the same
+    /// "post-midnight is still tonight" rule as `Stop.sequence`. Needs ≥2
+    /// stops with parseable times — one stop alone can't define a range.
+    static func computeProgress(stops: [Stop], now: Date) -> TripsListV2Progress? {
+        let starts: [Int] = stops.compactMap { s in
+            guard let m = VenueTimeStatus.minutesSinceMidnight(s.startTime) else { return nil }
+            // Same wrap convention: a 4am after-hours slot means "tonight ≈ 28h", not 4h.
+            return m < 6 * 60 ? m + 24 * 60 : m
+        }
+        guard starts.count >= 2 else { return nil }
+        let ordered = starts.sorted()
+        guard let first = ordered.first, let last = ordered.last, last > first else { return nil }
+
+        let cal = Calendar.current
+        let comps = cal.dateComponents([.hour, .minute], from: now)
+        var current = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
+        if current < 6 * 60 { current += 24 * 60 }
+
+        // Current stop index in itinerary order (not sorted): find the last
+        // stop whose start is ≤ now; if nothing started yet, we're at parada 1.
+        let itinerary: [Int] = stops.compactMap { s in
+            guard let m = VenueTimeStatus.minutesSinceMidnight(s.startTime) else { return nil }
+            return m < 6 * 60 ? m + 24 * 60 : m
+        }
+        var currentIndex = 0
+        for (i, start) in itinerary.enumerated() where start <= current {
+            currentIndex = i
+        }
+        let n = currentIndex + 1
+        let m = itinerary.count
+
+        let raw = Double(current - first) / Double(last - first)
+        let fraction = min(max(raw, 0), 1)
+
+        let hh = (current % (24 * 60)) / 60
+        let mm = (current % (24 * 60)) % 60
+        let timeLabel = String(format: "%02d:%02d", hh, mm)
+
+        return TripsListV2Progress(
+            stopIndex: n,
+            total: m,
+            fraction: fraction,
+            timeLabel: timeLabel
+        )
+    }
+
+    /// Days until a planning trip starts, in plain-English Spanish.
+    static func computeCountdown(from start: Date, now: Date) -> TripsListV2Countdown? {
+        let cal = Calendar.current
+        let startDay = cal.startOfDay(for: start)
+        let today = cal.startOfDay(for: now)
+        guard let diff = cal.dateComponents([.day], from: today, to: startDay).day else { return nil }
+        guard diff >= 0 else { return nil }
+        let label: String
+        switch diff {
+        case 0:  label = "hoy"
+        case 1:  label = "mañana"
+        default: label = "en \(diff) días"
+        }
+        return TripsListV2Countdown(label: label)
     }
 
     var asV2PublicRow: TripsListV2PublicSection.Row {
@@ -593,6 +741,24 @@ private struct TripsListV2Avatar: Identifiable, Equatable {
     let initial: String
 }
 
+private struct TripsListV2RouteStop: Equatable {
+    let name: String
+    /// Clock time ("22:30") when the stop has a real start time; nil for
+    /// stops without one or for the trailing "+N" overflow marker.
+    let time: String?
+}
+
+private struct TripsListV2Progress: Equatable {
+    let stopIndex: Int   // 1-based "parada N"
+    let total: Int       // "/ M"
+    let fraction: Double // 0...1
+    let timeLabel: String // "HH:mm"
+}
+
+private struct TripsListV2Countdown: Equatable {
+    let label: String   // "hoy" · "mañana" · "en 4 días"
+}
+
 private struct TripsListV2CardModel: Identifiable {
     let id = UUID()
     /// Real backend id of the Trip this card represents.
@@ -601,12 +767,27 @@ private struct TripsListV2CardModel: Identifiable {
     let title: String
     let status: TripsListV2Status
     let sub: String
-    let route: [String]
+    let routeStops: [TripsListV2RouteStop]
     let avatars: [TripsListV2Avatar]
     let extraMembers: Int
     let footer: String
     let footerTint: Color
     let dimmed: Bool
+    /// Optional cover for the 72×72 header image. nil → letter fallback.
+    var coverImageURL: URL? = nil
+    /// Letter and tint shown when there's no cover photo. Always set so
+    /// the fallback never has to invent one.
+    var coverLetter: String = "·"
+    var coverTint: Color = Color.bpAmber
+    /// Non-nil only on ACTIVE trips with ≥2 real stop times.
+    var progress: TripsListV2Progress? = nil
+    /// Non-nil only on PLANNING trips with a non-past startDate.
+    var countdown: TripsListV2Countdown? = nil
+    /// Non-nil only on COMPLETED trips (Spanish "Terminó el 6 dic").
+    var completionLine: String? = nil
+    /// Count of `pendingRequests` — but only when the viewer IS the creator.
+    /// For anyone else, always 0; the card hides the chip then.
+    var pendingJoinRequests: Int = 0
 }
 
 @MainActor
@@ -628,32 +809,61 @@ private struct TripsListV2Card: View {
     }
 
     private var content: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(trip.title)
-                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                    .foregroundStyle(trip.dimmed ? Color.white.opacity(0.72) : .white)
-                Spacer()
-                TripsListV2StatusTag(status: trip.status)
+        HStack(alignment: .top, spacing: 12) {
+            TripsListV2Cover(
+                url: trip.coverImageURL,
+                letter: trip.coverLetter,
+                tint: trip.coverTint,
+                dimmed: trip.dimmed
+            )
+
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(trip.title)
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(trip.dimmed ? Color.white.opacity(0.72) : .white)
+                        .lineLimit(2)
+                    Spacer(minLength: 6)
+                    if let countdown = trip.countdown {
+                        TripsListV2CountdownChip(label: countdown.label)
+                    }
+                    TripsListV2StatusTag(status: trip.status)
+                }
+
+                Text(trip.sub)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.white.opacity(0.6))
+
+                // Status-specific line: progress bar (active), nothing extra
+                // (planning — the chip already lives in the title row), or a
+                // completion line (completed). All three are optional and
+                // skipped when the data isn't there.
+                if let progress = trip.progress {
+                    TripsListV2ProgressBar(progress: progress)
+                } else if let line = trip.completionLine {
+                    Text(line)
+                        .font(.system(size: 11.5, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color.white.opacity(0.55))
+                }
+
+                TripsListV2Route(stops: trip.routeStops, dimmed: trip.dimmed)
+
+                if trip.pendingJoinRequests > 0 {
+                    TripsListV2PendingChip(count: trip.pendingJoinRequests)
+                }
+
+                HStack(alignment: .center) {
+                    TripsListV2AvatarStack(avatars: trip.avatars, extra: trip.extraMembers)
+                    Spacer()
+                    Text(trip.footer)
+                        .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                        .tracking(1.4)
+                        .foregroundStyle(trip.footerTint)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .padding(.top, 2)
             }
-
-            Text(trip.sub)
-                .font(.system(size: 12))
-                .foregroundStyle(Color.white.opacity(0.6))
-
-            TripsListV2Route(stops: trip.route, dimmed: trip.dimmed)
-
-            HStack(alignment: .center) {
-                TripsListV2AvatarStack(avatars: trip.avatars, extra: trip.extraMembers)
-                Spacer()
-                Text(trip.footer)
-                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                    .tracking(1.4)
-                    .foregroundStyle(trip.footerTint)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .padding(.top, 2)
         }
         .padding(14)
         .background(
@@ -665,6 +875,149 @@ private struct TripsListV2Card: View {
                 .strokeBorder(Color.white.opacity(trip.dimmed ? 0.06 : 0.09), lineWidth: 1)
         )
         .opacity(trip.dimmed ? 0.86 : 1.0)
+    }
+}
+
+// MARK: - Cover block (72×72) — real photo when available, tinted letter fallback
+
+@MainActor
+private struct TripsListV2Cover: View {
+    let url: URL?
+    let letter: String
+    let tint: Color
+    let dimmed: Bool
+
+    private let side: CGFloat = 72
+
+    var body: some View {
+        ZStack {
+            if let url {
+                CachedImage(
+                    url: url,
+                    targetSize: CGSize(width: side, height: side),
+                    priority: .standard,
+                    content: { img in
+                        img
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: side, height: side)
+                            .clipped()
+                    },
+                    placeholder: { fallback }
+                )
+            } else {
+                fallback
+            }
+        }
+        .frame(width: side, height: side)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
+        )
+        .opacity(dimmed ? 0.75 : 1.0)
+    }
+
+    private var fallback: some View {
+        ZStack {
+            LinearGradient(
+                colors: [tint.opacity(0.75), tint.opacity(0.35)],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            )
+            Text(letter)
+                .font(.system(size: 28, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+                .shadow(color: .black.opacity(0.25), radius: 1, y: 1)
+        }
+    }
+}
+
+// MARK: - Countdown chip (planning trips)
+
+@MainActor
+private struct TripsListV2CountdownChip: View {
+    let label: String
+
+    var body: some View {
+        Text(label.uppercased())
+            .font(.system(size: 9, weight: .heavy, design: .monospaced))
+            .tracking(1.4)
+            .foregroundStyle(Color.bpAmberBright)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 4)
+            .background(Color.bpAmber.opacity(0.12), in: Capsule())
+            .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.28), lineWidth: 0.8))
+            .accessibilityLabel("Empieza \(label)")
+    }
+}
+
+// MARK: - Progress bar (active trips)
+
+@MainActor
+private struct TripsListV2ProgressBar: View {
+    let progress: TripsListV2Progress
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.white.opacity(0.08))
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.bpAmber, Color.bpAmberBright],
+                                startPoint: .leading, endPoint: .trailing
+                            )
+                        )
+                        .frame(width: max(2, geo.size.width * CGFloat(progress.fraction)))
+                }
+            }
+            .frame(height: 3)
+
+            HStack(spacing: 6) {
+                Text("parada \(progress.stopIndex)/\(progress.total)")
+                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                    .tracking(1.0)
+                    .foregroundStyle(Color.bpAmber)
+                Text("·")
+                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                    .foregroundStyle(Color.white.opacity(0.35))
+                Text(progress.timeLabel)
+                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                    .tracking(1.0)
+                    .foregroundStyle(Color.white.opacity(0.65))
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Parada \(progress.stopIndex) de \(progress.total), hora actual \(progress.timeLabel)")
+    }
+}
+
+// MARK: - Pending-join chip (creator only)
+
+@MainActor
+private struct TripsListV2PendingChip: View {
+    let count: Int
+
+    private var label: String {
+        count == 1 ? "1 solicitud por aprobar" : "\(count) solicitudes por aprobar"
+    }
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "person.badge.clock")
+                .font(.system(size: 10, weight: .heavy))
+                .foregroundStyle(Color.bpAmberBright)
+            Text(label)
+                .font(.system(size: 10.5, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color.bpAmberBright)
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 5)
+        .background(Color.bpAmber.opacity(0.12), in: Capsule())
+        .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.3), lineWidth: 0.8))
+        .accessibilityLabel(label)
     }
 }
 
@@ -713,15 +1066,24 @@ private struct TripsListV2LiveDot: View {
 
 @MainActor
 private struct TripsListV2Route: View {
-    let stops: [String]
+    let stops: [TripsListV2RouteStop]
     let dimmed: Bool
 
     var body: some View {
         HStack(spacing: 6) {
             ForEach(Array(stops.enumerated()), id: \.offset) { idx, s in
-                Text(s)
-                    .font(.system(size: 11.5, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(dimmed ? Color.white.opacity(0.55) : Color.white.opacity(0.8))
+                HStack(spacing: 4) {
+                    if let time = s.time {
+                        Text(time)
+                            .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                            .tracking(0.8)
+                            .foregroundStyle(dimmed ? Color.bpAmber.opacity(0.55) : Color.bpAmber.opacity(0.85))
+                    }
+                    Text(s.name)
+                        .font(.system(size: 11.5, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(dimmed ? Color.white.opacity(0.55) : Color.white.opacity(0.8))
+                        .lineLimit(1)
+                }
                 if idx < stops.count - 1 {
                     Text("→")
                         .font(.system(size: 13, design: .serif).italic())
@@ -868,14 +1230,19 @@ private struct TripsListV2PublicRow: View {
     }
 }
 
-// MARK: - Sample data (literals from mockup; TODO wire to TripStore)
+// MARK: - Sample data (DEBUG previews only — never shipped to users)
 
+#if DEBUG
 extension TripsListV2Card {
     static let sampleActive = TripsListV2CardModel(
         title: "Noche en Wynwood",
         status: .active,
         sub: "Hoy · 3 paradas · 5 miembros",
-        route: ["El Patio", "Amor Miami", "La Otra"],
+        routeStops: [
+            .init(name: "El Patio",     time: "22:30"),
+            .init(name: "Amor Miami",   time: "00:15"),
+            .init(name: "La Otra",      time: "02:00"),
+        ],
         avatars: [
             .init(color: Color(red: 0.92, green: 0.72, blue: 0.28), initial: "M"),
             .init(color: Color(red: 0.55, green: 0.4,  blue: 0.95), initial: "J"),
@@ -886,14 +1253,21 @@ extension TripsListV2Card {
         extraMembers: 0,
         footer: "PARADA 2 · AHORA",
         footerTint: Color.bpAmber,
-        dimmed: false
+        dimmed: false,
+        coverLetter: "W",
+        coverTint: Color.bpAmber,
+        progress: TripsListV2Progress(stopIndex: 2, total: 3, fraction: 0.55, timeLabel: "23:14"),
+        pendingJoinRequests: 2
     )
 
     static let samplePlanning = TripsListV2CardModel(
         title: "Cumple de Val",
         status: .planning,
         sub: "Sáb 17 oct · 2 paradas · 9 miembros",
-        route: ["Sugar Rooftop", "Blackbird Ordinary"],
+        routeStops: [
+            .init(name: "Sugar Rooftop",     time: "21:00"),
+            .init(name: "Blackbird Ordinary", time: "23:30"),
+        ],
         avatars: [
             .init(color: Color(red: 0.11, green: 0.11, blue: 0.13), initial: "V"),
             .init(color: Color(red: 0.92, green: 0.72, blue: 0.28), initial: "C"),
@@ -903,25 +1277,37 @@ extension TripsListV2Card {
         extraMembers: 5,
         footer: "FALTA ELEGIR HORA",
         footerTint: Color.white.opacity(0.55),
-        dimmed: false
+        dimmed: false,
+        coverLetter: "V",
+        coverTint: Color(red: 0.55, green: 0.4,  blue: 0.95),
+        countdown: TripsListV2Countdown(label: "en 4 días")
     )
 
     static let sampleCompleted = TripsListV2CardModel(
         title: "Art Basel weekend",
         status: .completed,
         sub: "6–8 dic · 5 paradas · 12 miembros",
-        route: ["Club Space", "E11EVEN", "Lagniappe", "+2"],
+        routeStops: [
+            .init(name: "Club Space",  time: "23:00"),
+            .init(name: "E11EVEN",     time: "02:00"),
+            .init(name: "Lagniappe",   time: "20:00"),
+            .init(name: "+2",          time: nil),
+        ],
         avatars: [
             .init(color: Color(red: 0.55, green: 0.4,  blue: 0.95), initial: "A"),
             .init(color: Color(red: 0.92, green: 0.72, blue: 0.28), initial: "B"),
             .init(color: Color(red: 0.11, green: 0.11, blue: 0.13), initial: "C"),
         ],
         extraMembers: 9,
-        footer: "★ 4.8 · 12 RESEÑAS",
+        footer: "COMPLETADO",
         footerTint: Color.white.opacity(0.5),
-        dimmed: true
+        dimmed: true,
+        coverLetter: "A",
+        coverTint: Color(red: 0.92, green: 0.72, blue: 0.28),
+        completionLine: "Terminó el 8 dic"
     )
 }
+#endif
 
 #Preview {
     TripsListV2View()

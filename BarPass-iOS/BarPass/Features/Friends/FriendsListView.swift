@@ -16,6 +16,12 @@ struct FriendsListView: View {
     @State private var showAdd = false
     @State private var sharingLocation = false
     @State private var pendingBlock: FriendEdge?
+    /// Build 81 users reported "no me aparecen mis chats". The underlying
+    /// cause was a thread-list RPC that failed silently (wrapped in
+    /// `try?`), so the unread bubbles never rendered. The failure is now
+    /// surfaced via `errorMessage` + a retry banner instead of being
+    /// swallowed, and auth absence is detected up front.
+    @State private var needsAuth = false
     /// Asked once, here, because this is the screen where a name starts to
     /// matter. Until 2026-09-15 the signup trigger stored the literal
     /// placeholder 'Nightlifer', so 10 of 11 accounts shared one name and
@@ -32,16 +38,15 @@ struct FriendsListView: View {
             BPBackgroundView()
             if isLoading {
                 ProgressView().tint(Color.bpAmber)
+            } else if needsAuth {
+                signInState
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: BPSpacing.lg) {
                         addButton
                         sharingCard
                         if let errorMessage {
-                            Text(errorMessage)
-                                .font(.bpCaption())
-                                .foregroundStyle(Color.bpDanger)
-                                .padding(.horizontal, BPSpacing.lg)
+                            errorBanner(errorMessage)
                         }
                         if !incoming.isEmpty {
                             section(l10n.t("friends.section.incoming"), incoming)
@@ -52,10 +57,11 @@ struct FriendsListView: View {
                         if !outgoing.isEmpty {
                             section(l10n.t("friends.section.outgoing"), outgoing)
                         }
-                        if edges.isEmpty { emptyState }
+                        if edges.isEmpty, errorMessage == nil { emptyState }
                     }
                     .padding(.vertical, BPSpacing.lg)
                 }
+                .refreshable { await load() }
             }
         }
         .navigationTitle(l10n.t("friends.title"))
@@ -161,9 +167,68 @@ struct FriendsListView: View {
         .padding(.top, BPSpacing.xl)
     }
 
+    /// Error banner that is NOT just a line of red text at the top: it
+    /// comes with a retry button so a transient network failure stops
+    /// looking like "the app ate my chats".
+    private func errorBanner(_ text: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(text)
+                .font(.bpCaption())
+                .foregroundStyle(Color.bpDanger)
+            Button {
+                BPHaptics.light()
+                Task { await load() }
+            } label: {
+                Text(l10n.t("trips.retry"))
+                    .font(.bpScaled(12, weight: .heavy))
+                    .foregroundStyle(Color.black)
+                    .padding(.horizontal, 14).padding(.vertical, 7)
+                    .background(Color.bpAmber, in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .bpAccessibility(label: l10n.t("trips.retry"), isButton: true)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.08)))
+        .padding(.horizontal, BPSpacing.lg)
+    }
+
+    private var signInState: some View {
+        VStack(spacing: BPSpacing.md) {
+            Image(systemName: "lock.circle")
+                .font(.system(size: 40, weight: .light))
+                .foregroundStyle(Color.bpAmber)
+            Text(l10n.t("friends.error.signIn"))
+                .font(.bpScaled(14, weight: .semibold))
+                .foregroundStyle(Color.bpInk)
+                .multilineTextAlignment(.center)
+        }
+        .padding(BPSpacing.xl)
+        .frame(maxWidth: .infinity)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.08)))
+        .padding(.horizontal, BPSpacing.xl)
+    }
+
     // MARK: - Actions
 
     private func load() async {
+        // Build 81's "no me aparecen mis chats" lines up with a request
+        // that fired before the session had settled: `freshSession()`
+        // throws `URLError.userAuthenticationRequired`, which was being
+        // caught and mapped to the generic "something went wrong" with no
+        // path forward. Branch on the no-session case first so the user
+        // gets a clear sign-in prompt instead.
+        guard AuthService.shared.restoreSession() != nil else {
+            needsAuth = true
+            errorMessage = nil
+            threads = []
+            isLoading = false
+            return
+        }
+        needsAuth = false
         errorMessage = nil
         // Ask for a name only if there genuinely isn't one. Never nag someone
         // who already chose, and never stack on top of another sheet. A failed
@@ -178,10 +243,29 @@ struct FriendsListView: View {
             async let edgesTask = RepositoryDependencies.friends.list()
             async let threadsTask = RepositoryDependencies.friendChat.threads()
             edges = try await edgesTask
-            threads = (try? await threadsTask) ?? []
+            // `list_friend_threads` is a separate RPC and can fail even
+            // when the friend list loaded (a transient RLS flap, missing
+            // migration, auth token slice-of-time hiccup). Keep the
+            // friend list rendering — the unread bubbles are a bonus
+            // layer, not the point — but DO record the failure so the
+            // retry banner covers it instead of silently zeroing the
+            // badges, which is how Build 81 users ended up reporting
+            // "no me aparecen mis chats".
+            do {
+                threads = try await threadsTask
+            } catch {
+                threads = []
+                errorMessage = (error as? FriendError)?.errorDescription ?? l10n.t("friends.error.generic")
+            }
             sharingLocation = (try? await RepositoryDependencies.friends.locationSharingEnabled()) ?? false
+        } catch FriendError.notAuthenticated {
+            needsAuth = true
         } catch {
-            errorMessage = (error as? FriendError)?.errorDescription ?? l10n.t("friends.error.generic")
+            if let urlError = error as? URLError, urlError.code == .userAuthenticationRequired {
+                needsAuth = true
+            } else {
+                errorMessage = (error as? FriendError)?.errorDescription ?? l10n.t("friends.error.generic")
+            }
         }
         isLoading = false
     }

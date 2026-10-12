@@ -194,14 +194,17 @@ private final class RemyLiveChat: ObservableObject {
 
     /// Mismo helper que PlanView.hideOpenFence — recorta un ```json/```options
     /// abierto en pleno stream para que el bubble jamás muestre JSON crudo.
+    ///
+    /// Build 84 (2026-10-08, "it's writhing in code") y Build 92 (owner
+    /// 2026-10-12, "sigue la pantalla virus") fueron el mismo bug: el
+    /// modelo abrió el bloque con ``` pelado (sin `json`/`options`), o
+    /// directamente sin fence, así que este match tagged no agarraba
+    /// nada y el objeto se derramaba en la burbuja carácter por carácter.
+    /// La defensa real vive en `NightPlan.maskUnrenderableCodeBlock`:
+    /// cubre los tres casos (tagged, bare + llave, y unfenced), y ambas
+    /// vistas la comparten para que no vuelvan a divergir.
     private static func hideOpenFence(_ text: String) -> String {
-        for tag in ["```json", "```options"] {
-            if let range = text.range(of: tag) {
-                return String(text[text.startIndex..<range.lowerBound])
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-            }
-        }
-        return text
+        NightPlan.maskUnrenderableCodeBlock(text)
     }
 }
 
@@ -339,6 +342,16 @@ struct RemyLiveView: View {
                     }
                     .padding(.bottom, 90)
                 }
+                // El TextField del inputBar es `axis: .vertical` con
+                // lineLimit(1...3): el Return del teclado agrega una línea
+                // en vez de enviar, así que la ÚNICA forma de bajar el
+                // teclado era tocar el botón amber. Si el usuario tipeaba
+                // y después quería leer la respuesta anterior scrolleando
+                // arriba, el teclado se quedaba pegado tapando media
+                // pantalla — reporte Build 76. `.interactively` hace que
+                // arrastrar la lista hacia abajo lo guarde, que es lo que
+                // el usuario intenta sin saberlo.
+                .scrollDismissesKeyboard(.interactively)
 
                 inputBar
             }

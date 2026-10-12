@@ -19,6 +19,15 @@ struct FriendChatView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var reportingMessageId: String?
+    /// True when the RPC refused for lack of a session. Build 81 & 83
+    /// users reported "la sección de mensajes saca error y no me deja ver
+    /// el mensaje no leído" — the underlying error was almost certainly
+    /// `URLError(.userAuthenticationRequired)` from `freshSession()`, which
+    /// used to fall through to a generic "couldn't load the chat". It now
+    /// shows a dedicated sign-in state instead, and the composer is hidden
+    /// so the second half of that report ("no me deja mandar tampoco")
+    /// can't repeat.
+    @State private var needsAuth = false
 
     var body: some View {
         ZStack {
@@ -27,38 +36,32 @@ struct FriendChatView: View {
                 if isLoading {
                     ProgressView().tint(Color.bpAmber)
                     Spacer()
+                } else if needsAuth {
+                    Spacer()
+                    signInState
+                    Spacer()
+                } else if let errorMessage, messages.isEmpty {
+                    Spacer()
+                    errorState(errorMessage)
+                    Spacer()
                 } else if messages.isEmpty {
-                    Spacer()
-                    Text(l10n.t("friends.chat.empty"))
-                        .font(.bpScaled(13))
-                        .foregroundStyle(Color.bpTextSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, BPSpacing.xl)
-                    Spacer()
+                    emptyScroll
                 } else {
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            LazyVStack(alignment: .leading, spacing: 10) {
-                                ForEach(messages) { message in
-                                    messageRow(message)
-                                }
-                            }
-                            .padding(BPSpacing.md)
-                        }
-                        .onChange(of: messages.count) { _, _ in
-                            if let last = messages.last { proxy.scrollTo(last.id, anchor: .bottom) }
-                        }
-                    }
+                    threadScroll
                 }
 
-                if let errorMessage {
+                if !needsAuth, let errorMessage, !messages.isEmpty {
+                    // Inline banner when a reload or a send failed while
+                    // we still have history to show — never swallow it.
                     Text(errorMessage)
                         .font(.bpCaption())
                         .foregroundStyle(Color.bpDanger)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, BPSpacing.md)
+                        .padding(.vertical, 6)
                 }
 
-                composer
+                if !needsAuth { composer }
             }
         }
         .navigationTitle(friendName)
@@ -72,6 +75,90 @@ struct FriendChatView: View {
             Button(l10n.t("friends.chat.reportHarassment"), role: .destructive) { report(reason: "harassment") }
             Button(l10n.t("friends.cancel"), role: .cancel) { reportingMessageId = nil }
         }
+    }
+
+    // MARK: - States
+
+    /// Empty-but-ready: no messages yet. Pull-to-refresh so the user can
+    /// re-poll (the thread is not realtime; a message that landed between
+    /// the inbox tap and the view appearing was invisible before).
+    private var emptyScroll: some View {
+        ScrollView {
+            VStack {
+                Spacer(minLength: 120)
+                Text(l10n.t("friends.chat.empty"))
+                    .font(.bpScaled(13))
+                    .foregroundStyle(Color.bpTextSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, BPSpacing.xl)
+                Spacer(minLength: 120)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .refreshable { await load() }
+    }
+
+    private var threadScroll: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 10) {
+                    ForEach(messages) { message in
+                        messageRow(message)
+                    }
+                }
+                .padding(BPSpacing.md)
+            }
+            .refreshable { await load() }
+            .onChange(of: messages.count) { _, _ in
+                if let last = messages.last { proxy.scrollTo(last.id, anchor: .bottom) }
+            }
+        }
+    }
+
+    private var signInState: some View {
+        VStack(spacing: BPSpacing.md) {
+            Image(systemName: "lock.circle")
+                .font(.system(size: 40, weight: .light))
+                .foregroundStyle(Color.bpAmber)
+            Text(l10n.t("friends.error.signIn"))
+                .font(.bpScaled(14, weight: .semibold))
+                .foregroundStyle(Color.bpInk)
+                .multilineTextAlignment(.center)
+        }
+        .padding(BPSpacing.xl)
+        .frame(maxWidth: .infinity)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.08)))
+        .padding(.horizontal, BPSpacing.xl)
+    }
+
+    private func errorState(_ text: String) -> some View {
+        VStack(spacing: BPSpacing.md) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 32, weight: .light))
+                .foregroundStyle(Color.bpDanger)
+            Text(text)
+                .font(.bpBody())
+                .foregroundStyle(Color.bpInk)
+                .multilineTextAlignment(.center)
+            Button {
+                BPHaptics.light()
+                Task { await load() }
+            } label: {
+                Text(l10n.t("trips.retry"))
+                    .font(.bpScaled(13, weight: .heavy))
+                    .foregroundStyle(Color.black)
+                    .padding(.horizontal, 20).padding(.vertical, 10)
+                    .background(Color.bpAmber, in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .bpAccessibility(label: l10n.t("trips.retry"), isButton: true)
+        }
+        .padding(BPSpacing.xl)
+        .frame(maxWidth: .infinity)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.white.opacity(0.08)))
+        .padding(.horizontal, BPSpacing.xl)
     }
 
     private func messageRow(_ message: FriendMessage) -> some View {
@@ -125,13 +212,28 @@ struct FriendChatView: View {
         .padding(BPSpacing.md)
     }
 
+    // MARK: - Actions
+
     private func load() async {
+        // Pre-check the session synchronously. `freshSession()` throws
+        // `URLError.userAuthenticationRequired` when there is no session,
+        // which until Build 92 fell through to a generic "couldn't load
+        // the chat" with no path forward. Catch that case up front and
+        // render the dedicated sign-in state instead.
+        guard let session = AuthService.shared.restoreSession() else {
+            needsAuth = true
+            isLoading = false
+            errorMessage = nil
+            return
+        }
+        myUserId = session.user.id
+        needsAuth = false
+        isLoading = true
         errorMessage = nil
-        myUserId = AuthService.shared.restoreSession()?.user.id
         do {
             messages = try await RepositoryDependencies.friendChat.messages(with: friendId, limit: 200)
         } catch {
-            errorMessage = (error as? FriendError)?.errorDescription ?? l10n.t("friends.chat.loadError")
+            errorMessage = describe(error)
         }
         isLoading = false
     }
@@ -139,13 +241,19 @@ struct FriendChatView: View {
     private func send() {
         let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
+        let outgoing = text
         draft = ""
         Task {
             do {
-                try await RepositoryDependencies.friendChat.send(to: friendId, text: text)
+                try await RepositoryDependencies.friendChat.send(to: friendId, text: outgoing)
                 await load()
             } catch {
-                errorMessage = (error as? FriendError)?.errorDescription ?? l10n.t("friends.error.generic")
+                // Put the draft back so the user doesn't lose what they
+                // typed when a send fails (rate limit, lost friendship,
+                // network blip). Surface the real reason instead of a
+                // bare "something went wrong".
+                if draft.isEmpty { draft = outgoing }
+                errorMessage = describe(error)
             }
         }
     }
@@ -154,8 +262,26 @@ struct FriendChatView: View {
         guard let id = reportingMessageId else { return }
         reportingMessageId = nil
         Task {
-            try? await RepositoryDependencies.friendChat.report(messageId: id, reason: reason)
-            await load()
+            do {
+                try await RepositoryDependencies.friendChat.report(messageId: id, reason: reason)
+                await load()
+            } catch {
+                errorMessage = describe(error)
+            }
         }
+    }
+
+    /// Prefer `FriendError`'s localized text; map auth-shaped `URLError`s to
+    /// the sign-in copy; everything else falls to the chat-load fallback.
+    /// Build 83's silent "something went wrong" came from treating all
+    /// non-FriendError errors as unknown.
+    private func describe(_ error: Error) -> String {
+        if let friendError = error as? FriendError {
+            return friendError.errorDescription ?? l10n.t("friends.chat.loadError")
+        }
+        if let urlError = error as? URLError, urlError.code == .userAuthenticationRequired {
+            return l10n.t("friends.error.signIn")
+        }
+        return l10n.t("friends.chat.loadError")
     }
 }

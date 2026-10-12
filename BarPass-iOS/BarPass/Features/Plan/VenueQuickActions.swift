@@ -101,6 +101,23 @@ struct VenueActionButtons: View {
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
 
     var body: some View {
+        // TestFlight Build 84 (Sep-26): "I clicked on the uber side and it
+        // took me to perro negro". When this row sits under a parent that
+        // opens a venue (the plan-stop Button spans `frame(maxWidth:
+        // .infinity)` with `.contentShape(Rectangle())`, or the chat
+        // bubble's own gestures reach these children), a tap near the
+        // edge of the Uber square could register against the parent's
+        // hit area — opening the venue instead of launching Uber.
+        //
+        // Three defenses, all in this view, no behavior change elsewhere:
+        //   1. The venue-name Button's hit shape hugs the text, so the
+        //      gap between it and the squares is dead space, never a
+        //      bubble target.
+        //   2. Each square has an explicit `contentShape` matching its
+        //      visible rounded rect — no ambiguity for the hit tester.
+        //   3. Each square's action closure runs on the main actor via
+        //      Button, which iOS 17+ handles with priority over an
+        //      ancestor's `.onTapGesture`.
         HStack(spacing: 8) {
             if showVenueName {
                 Button {
@@ -116,6 +133,10 @@ struct VenueActionButtons: View {
                         }
                     }
                     .foregroundStyle(.white.opacity(0.9))
+                    // Tight hit area around the text + chevron only, so the
+                    // gap between the name and the Map/Uber squares is
+                    // dead space — it can't catch a tap meant for a square.
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .disabled(onOpenVenue == nil)
@@ -143,6 +164,10 @@ struct VenueActionButtons: View {
             .frame(width: 54, height: 46)
             .background(amber.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(amber.opacity(0.25)))
+            // Explicit hit shape matching the visible rounded rect — the
+            // Button's hit area is unambiguously these 54×46 pt, nothing
+            // more. Fix for Build 84 "clicked Uber, opened Perro Negro".
+            .contentShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
         .bpAccessibility(label: a11y, isButton: true)

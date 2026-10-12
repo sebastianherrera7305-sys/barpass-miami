@@ -765,17 +765,26 @@ private struct MapPinView: View {
                         .foregroundStyle(.black)
                 }
             }
+            // Pin labels used to carry `.fixedSize(horizontal: true, vertical: false)`
+            // after the frame cap, which told SwiftUI to use the Text's intrinsic
+            // width and silently ignore `.frame(maxWidth: 140)`. A long venue
+            // name ("Blackbird Ordinary · 23:00") then spilled past 140pt and
+            // the next pin's label on the S-curve collided with it — the
+            // "los dos botones chocan" report (Build 61) and the "card se
+            // pone más grande de lo normal" one (Build 87) are the same bug
+            // seen from either side. Capping with `.frame(maxWidth: 140)` and
+            // letting `.lineLimit(1)` + `.minimumScaleFactor(0.7)` do their job
+            // keeps each label inside its lane.
             Text(label)
                 .font(.system(size: 9, weight: .heavy, design: .monospaced))
                 .tracking(0.6)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .foregroundStyle(labelColor)
                 .padding(.horizontal, 5).padding(.vertical, 2)
                 .background(Color.black.opacity(0.6), in: Capsule())
                 .overlay(Capsule().strokeBorder(stroke, lineWidth: 0.6))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
                 .frame(maxWidth: 140)
-                .fixedSize(horizontal: true, vertical: false)
         }
     }
 

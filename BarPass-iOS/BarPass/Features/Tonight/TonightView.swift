@@ -489,8 +489,15 @@ struct TonightView: View {
                 .foregroundStyle(Color.bpTextTertiary)
         }
         .padding(BPSpacing.md)
-        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
+        // v17.1 glass kit — flat `bpCardBackground` was literally
+        // `Color(red: 0.06, green: 0.04, blue: 0.10)` (blue > green =
+        // purple cast), so every entry card on Tonight read "morado"
+        // against the black / CityArtMiami ground. Owner on build 92:
+        // "Los card de cada venue está roto se ve morado". Grayscale
+        // glass (ink @ 0.04 + stroke @ 0.08) matches the v17.1 kit
+        // and the capsule treatment already used on this screen.
+        .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpInk.opacity(0.08)))
         .bpAccessibility(label: l10n.t("greek.universityList.title"), hint: l10n.t("greek.universityList.hint"), isButton: true)
         .helpTarget("tonight.universities")
     }
@@ -518,8 +525,10 @@ struct TonightView: View {
                 .foregroundStyle(Color.bpTextTertiary)
         }
         .padding(BPSpacing.md)
-        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
+        // Glass kit (ver comentario arriba en `universitiesEntryCard`) —
+        // `bpCardBackground` tenía un cast morado hardcodeado.
+        .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpInk.opacity(0.08)))
         .bpAccessibility(label: l10n.t("tonight.remy.title"), hint: l10n.t("tonight.remy.hint"), isButton: true)
     }
 
@@ -543,8 +552,9 @@ struct TonightView: View {
                 .foregroundStyle(Color.bpTextTertiary)
         }
         .padding(BPSpacing.md)
-        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
-        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
+        // Glass kit (ver comentario arriba en `universitiesEntryCard`).
+        .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpInk.opacity(0.08)))
         .bpAccessibility(label: l10n.t("stadiums.entry.title"), hint: l10n.t("stadiums.entry.hint"), isButton: true)
         .helpTarget("tonight.stadiums")
     }
