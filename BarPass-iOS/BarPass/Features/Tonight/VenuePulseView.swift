@@ -219,7 +219,17 @@ struct VenuePulseView: View {
             await friendsStore.refresh()
         }
         .sheet(isPresented: $showTab) {
-            if let venue { VenueTabView(venue: venue) }
+            if let venue {
+                if V2Flags.openTabV2, let appState {
+                    // OpenTabV2View needs AppState via @EnvironmentObject;
+                    // if the caller didn't inject one (debug/preview path),
+                    // fall through to V1 which handles its own env.
+                    OpenTabV2View()
+                        .environmentObject(appState)
+                } else {
+                    VenueTabView(venue: venue)
+                }
+            }
         }
     }
 

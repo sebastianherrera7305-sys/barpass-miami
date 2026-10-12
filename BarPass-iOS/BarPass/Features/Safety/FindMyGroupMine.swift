@@ -63,7 +63,13 @@ struct MyBeaconCard: View {
             }
             answers
 
-            NavigationLink { BeaconBroadcastView(beacon: beacon) } label: {
+            NavigationLink {
+                if V2Flags.yourSignalV2 {
+                    YourSignalV2View()
+                } else {
+                    BeaconBroadcastView(beacon: beacon)
+                }
+            } label: {
                 Label(l10n.t("safety.action.showMySignal"), systemImage: "flashlight.on.fill")
                     .font(.bpScaled(16, weight: .black))
                     .frame(maxWidth: .infinity)

@@ -65,4 +65,30 @@ enum V2Flags {
     /// captures venueName BEFORE clear() so order confirmations keep the
     /// venue.
     static var cartV2: Bool      { read("bp_v2_cart_enabled",      default: true) }
+    /// Tap on a trip in TripsListV2View → GroupNightView in place of
+    /// TripDetailView. Real Trip/Stop/TripStore; ordering by startTime
+    /// (Stop.date is identical across stops in V1), SOS and arrival cards
+    /// hidden until a real signal exists.
+    static var groupNightV2: Bool { read("bp_v2_groupnight_enabled", default: true) }
+    /// Tonight → "Remy" entry → RemyLiveView in place of PlanView.
+    /// Real /api/concierge SSE streaming ported from PlanView+RemyLocalChat;
+    /// context (checked-in venue, favorites, location, timezone) injected
+    /// server-side. Fallback timeline sample is DEBUG-only.
+    static var remyLiveV2: Bool  { read("bp_v2_remylive_enabled",  default: true) }
+    /// Profile → "Juegos y misiones" → GamesMissionsV2View in place of
+    /// GamificationView. Real PointsEngine (totalXP, level, remaining XP);
+    /// fabricated leaderboard/predictions/trivia dropped (no backend).
+    static var gamesV2: Bool     { read("bp_v2_games_enabled",     default: true) }
+    /// Venue sheet → "Abrir cuenta" → OpenTabV2View in place of VenueTabView.
+    /// Real VenueTabRepository (/api/tab); eyebrow and CTA gated on
+    /// `tab.isOpen`. Open/join/close owner controls deliberately dropped
+    /// (owner decision).
+    static var openTabV2: Bool   { read("bp_v2_opentab_enabled",   default: true) }
+    /// FindMyGroupButton → FindMyPeopleV2View in place of FindMyGroupView.
+    /// Real SafetyBeaconStore + preflight audience count + acknowledge
+    /// action; VoiceOver alternative to hold gesture.
+    static var findMyPeopleV2: Bool { read("bp_v2_findmypeople_enabled", default: true) }
+    /// Raised beacon detail → YourSignalV2View in place of BeaconBroadcastView.
+    /// Real beacon rhythm + listener count; poll stops on background.
+    static var yourSignalV2: Bool { read("bp_v2_yoursignal_enabled", default: true) }
 }

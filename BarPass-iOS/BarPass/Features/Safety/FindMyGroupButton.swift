@@ -70,7 +70,13 @@ struct FindMyGroupButton: View {
             // NavigationLink sin contenedor de navegación es inerte —
             // presentada pelada, el botón "Mostrar mi señal" no hacía nada
             // y la persona perdida nunca llegaba a ver su color.
-            NavigationStack { FindMyGroupView() }
+            NavigationStack {
+                if V2Flags.findMyPeopleV2 {
+                    FindMyPeopleV2View()
+                } else {
+                    FindMyGroupView()
+                }
+            }
         }
         // El store sigue corriendo aunque esta pantalla no esté: el botón
         // sólo puede saber que alguien lo busca si alguien está preguntando.

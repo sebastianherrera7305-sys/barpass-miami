@@ -73,10 +73,17 @@ struct TripsListView: View {
             .presentationBackground(.black)
         }
         .sheet(item: $selectedTrip) { trip in
-            TripDetailView(trip: trip)
-                .environmentObject(tripStore)
-                .presentationDetents([.large])
-                .presentationBackground(.black)
+            Group {
+                if V2Flags.groupNightV2 {
+                    GroupNightView(trip: trip)
+                } else {
+                    TripDetailView(trip: trip)
+                }
+            }
+            .environmentObject(tripStore)
+            .environmentObject(appState)
+            .presentationDetents([.large])
+            .presentationBackground(.black)
         }
         .sheet(isPresented: $showJoinByCode) {
             JoinByCodeView(joinCode: $joinCode, error: $joinError, isJoining: $isJoiningByCode) {

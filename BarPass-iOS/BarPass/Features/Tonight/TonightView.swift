@@ -302,9 +302,17 @@ struct TonightView: View {
                     // crashed UniversityDetailView on build 71 and again here
                     // on 75. TonightView definitely holds both, so passing
                     // them at the destination removes the doubt entirely.
-                    NavigationLink(destination: PlanView()
+                    NavigationLink(destination:
+                        Group {
+                            if V2Flags.remyLiveV2 {
+                                RemyLiveView()
+                            } else {
+                                PlanView()
+                            }
+                        }
                         .environmentObject(venueStore)
-                        .environmentObject(appState)) {
+                        .environmentObject(appState)
+                    ) {
                         remyEntryCard
                     }
                     .buttonStyle(.plain)

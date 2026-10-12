@@ -658,8 +658,15 @@ struct ProfileView: View {
             appState.openPassesRequested = false
         }
         .sheet(isPresented: $showGames) {
-            GamificationView()
-                .presentationBackground(.black)
+            Group {
+                if V2Flags.gamesV2 {
+                    GamesMissionsV2View()
+                } else {
+                    GamificationView()
+                }
+            }
+            .environmentObject(appState)
+            .presentationBackground(.black)
         }
         .sheet(isPresented: $showTopUp) {
             WalletTopUpView(onSuccess: { _ in })
