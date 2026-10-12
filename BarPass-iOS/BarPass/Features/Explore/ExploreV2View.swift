@@ -101,11 +101,23 @@ struct ExploreV2View: View {
                     }
                     .padding(.bottom, 40)
                 }
+                // Pull-to-refresh: lets the user recover from the
+                // `FriendsTonightStore` 60s short-circuit and re-ask the
+                // catalogue in one gesture.
+                .refreshable {
+                    await venueStore.loadVenues()
+                    await tonight.refresh(force: true)
+                }
             }
         }
         .preferredColorScheme(.dark)
         .task {
             location.refreshOnce()
+            // `loadVenues()` is idempotent per its own doc: if MainTabView
+            // already fetched before the user hit this tab, this is a
+            // cheap no-op; if the user opened the app straight on Explore
+            // we still fill the screen instead of showing the empty shell.
+            await venueStore.loadVenues()
             await tonight.refresh(force: false)
         }
         .sheet(item: $selectedVenue) { venue in
@@ -123,6 +135,34 @@ struct ExploreV2View: View {
     /// a un bbox estable: cambiar entre capas NO debe mover los que ya están
     /// en pantalla, sólo ocultar los que ya no entran.
     private var cityVenues: [BarPassVenue] { venueStore.venues }
+
+    /// Separa "no hay nada que mostrar porque VenueStore todavía está
+    /// trayendo" / "falló la carga" / "la ciudad no tiene nada en esta capa".
+    /// Antes la pantalla contestaba igual los tres casos ("Sin venues para
+    /// esta capa · Toca otra capa") y escondía la causa real detrás de un
+    /// mensaje mentiroso.
+    private enum StoreState {
+        /// Primer frame del launch: el store está trayendo venues y
+        /// todavía no entregó ninguno.
+        case loading
+        /// La red o la query fallaron ANTES de que llegara el primer
+        /// venue (ya con venues en pantalla el error es un detalle, no
+        /// un bloqueo).
+        case error(String)
+        /// Hay venues cargados — el filtro de capa o la búsqueda es lo
+        /// que decide si el callout muestra algo o "Toca otra capa".
+        case ready
+    }
+
+    private var storeState: StoreState {
+        if !cityVenues.isEmpty { return .ready }
+        if venueStore.isLoading { return .loading }
+        if let err = venueStore.loadError { return .error(err) }
+        // Store terminó de cargar sin error pero sin resultados — tratarlo
+        // como ready con filtro vacío es honesto; "Sin venues para esta
+        // capa" ya dice lo correcto.
+        return .ready
+    }
 
     /// Match 1-a-1 con `ExploreView.filteredVenues` (V1), para que las dos
     /// capas de la app contesten lo mismo si alguien toca el mismo chip.
@@ -321,29 +361,41 @@ struct ExploreV2View: View {
     // MARK: - Header
 
     private var header: some View {
-        // Ciudad real: si VenueStore nos dio una, va en mayúscula ("MIAMI",
-        // "ATLANTA"); si no (primer launch antes del city picker), queda
-        // "EXPLORAR" solo.
-        let cityUpper = (venueStore.selectedCity ?? "").uppercased()
-        let cityDisplay = venueStore.selectedCity ?? "la ciudad"
+        // Ciudad real: si VenueStore nos dio una (VenueStore ya sincroniza
+        // su `selectedCity` con SelectedCityStore), va en mayúscula —
+        // "MIAMI", "ATLANTA" — en el eyebrow y en el gran título. Si no
+        // (primer launch antes del city picker), el eyebrow queda
+        // "EXPLORAR" solo y el gran título oculta la palabra italic
+        // (nada de "la ciudad" como literal — es una fabricación).
+        let city = venueStore.selectedCity?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasCity = !(city ?? "").isEmpty
+        let cityUpper = (city ?? "").uppercased()
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 ExploreV2LiveDot()
-                Text(cityUpper.isEmpty ? "EXPLORAR" : "EXPLORAR · \(cityUpper)")
+                Text(hasCity ? "EXPLORAR · \(cityUpper)" : "EXPLORAR")
                     .font(.system(size: 10, weight: .heavy, design: .monospaced))
                     .tracking(2.4)
                     .foregroundStyle(Color.bpAmberBright)
             }
 
             HStack(alignment: .firstTextBaseline) {
-                (
-                    Text("Explora ")
-                        .font(.system(size: 30, weight: .black, design: .rounded))
-                        .foregroundStyle(.white)
-                    + Text(cityDisplay)
-                        .font(.system(size: 30, design: .serif).italic())
-                        .foregroundStyle(Color.bpAmberBright)
-                )
+                Group {
+                    if hasCity, let city {
+                        (
+                            Text("Explora ")
+                                .font(.system(size: 30, weight: .black, design: .rounded))
+                                .foregroundStyle(.white)
+                            + Text(city)
+                                .font(.system(size: 30, design: .serif).italic())
+                                .foregroundStyle(Color.bpAmberBright)
+                        )
+                    } else {
+                        Text("Explora")
+                            .font(.system(size: 30, weight: .black, design: .rounded))
+                            .foregroundStyle(.white)
+                    }
+                }
                 .fixedSize(horizontal: false, vertical: true)
 
                 Spacer(minLength: 10)
@@ -454,6 +506,12 @@ struct ExploreV2View: View {
                 ),
                 sub: friendsNeighborhoodDigest(friends)
             )
+        } else {
+            // No friends, no opt-in prompt: explicitly return nothing. The
+            // parent VStack's spacing collapses around EmptyView, so the
+            // strip leaves no gap when hidden. Being explicit here keeps
+            // the @ViewBuilder honest for the compiler and the reader.
+            EmptyView()
         }
     }
 
@@ -571,11 +629,67 @@ struct ExploreV2View: View {
             onRecenter: { resetToCityDefault() }
         )
         .frame(height: 300)
+        .overlay {
+            // Honest first-frame: cuando no hay venues cargados, cubrimos
+            // la grilla stylized para que no se lea como "ciudad vacía".
+            switch storeState {
+            case .loading:
+                mapLoadingOverlay
+            case .error(let message):
+                mapErrorOverlay(message: message)
+            case .ready:
+                EmptyView()
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(
             RoundedRectangle(cornerRadius: 18)
                 .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
         )
+    }
+
+    private var mapLoadingOverlay: some View {
+        VStack(spacing: 10) {
+            ProgressView()
+                .progressViewStyle(.circular)
+                .tint(Color.bpAmber)
+            Text("CARGANDO VENUES…")
+                .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                .tracking(2.4)
+                .foregroundStyle(Color.bpAmberBright.opacity(0.9))
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black.opacity(0.35))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Cargando venues")
+    }
+
+    private func mapErrorOverlay(message: String) -> some View {
+        VStack(spacing: 10) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 22, weight: .heavy))
+                .foregroundStyle(Color.bpAmber)
+            Text("NO PUDIMOS CARGAR VENUES")
+                .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                .tracking(2.0)
+                .foregroundStyle(Color.white.opacity(0.75))
+            Button {
+                tap()
+                Task { await venueStore.loadVenues() }
+            } label: {
+                Text("Reintentar")
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 7)
+                    .background(Capsule().fill(Color.bpAmber))
+                    .overlay(Capsule().strokeBorder(Color.bpAmberBright, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(message)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black.opacity(0.45))
     }
 
     // MARK: - Callout
@@ -585,8 +699,92 @@ struct ExploreV2View: View {
         if let venue = calloutVenue {
             calloutRow(for: venue)
         } else {
+            calloutPlaceholder
+        }
+    }
+
+    /// Decide qué va en el callout cuando NO hay venue para mostrar. Antes
+    /// esto siempre contestaba "Sin venues para esta capa"; ahora distingue
+    /// loading / error / filtro vacío. Mantiene el mismo frame (16pt radius,
+    /// black.opacity(0.55)) para que la pantalla no "salte" al cambiar de
+    /// estado.
+    @ViewBuilder
+    private var calloutPlaceholder: some View {
+        switch storeState {
+        case .loading:
+            calloutLoading
+        case .error(let message):
+            calloutError(message: message)
+        case .ready:
             calloutEmpty
         }
+    }
+
+    private var calloutLoading: some View {
+        HStack(spacing: 12) {
+            ProgressView()
+                .progressViewStyle(.circular)
+                .tint(Color.bpAmber)
+            Text("Cargando venues…")
+                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                .foregroundStyle(Color.white.opacity(0.75))
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.black.opacity(0.55))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
+        )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Cargando venues")
+    }
+
+    private func calloutError(message: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 16, weight: .heavy))
+                .foregroundStyle(Color.bpAmber)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("No pudimos cargar venues")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                Text("Toca reintentar")
+                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                    .tracking(1.0)
+                    .foregroundStyle(Color.white.opacity(0.6))
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 4)
+            Button {
+                tap()
+                Task { await venueStore.loadVenues() }
+            } label: {
+                Text("Reintentar")
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Capsule().fill(Color.bpAmber))
+                    .overlay(Capsule().strokeBorder(Color.bpAmberBright, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(message)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.black.opacity(0.55))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
+        )
     }
 
     /// Pieza de la línea meta del callout: texto + color (nil = gris base).
@@ -743,7 +941,9 @@ struct ExploreV2View: View {
     @ViewBuilder
     private var venueList: some View {
         if rankedVenues.isEmpty {
-            calloutEmpty
+            // Mismo dispatcher que el callout del mapa — loading / error /
+            // filtro vacío, no un literal "Sin venues" ciego.
+            calloutPlaceholder
         } else {
             LazyVStack(spacing: 10) {
                 ForEach(rankedVenues) { venue in

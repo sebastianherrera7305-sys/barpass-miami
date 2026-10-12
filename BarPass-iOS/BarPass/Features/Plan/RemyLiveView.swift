@@ -226,6 +226,15 @@ struct RemyLiveView: View {
     @State private var userLocation: CLLocationCoordinate2D?
     @State private var openVenue: BarPassVenue?
     @State private var didKickoff = false
+    /// Flipa a true cuando el usuario envía algo manualmente (TextField o
+    /// chip de hint). El kickoff proactivo no cuenta: queremos saber si el
+    /// usuario ya se enganchó para esconder los chips de ejemplo.
+    @State private var hasUserSent = false
+    /// Último prompt enviado (kickoff, submit del input, o hint chip). Lo
+    /// guardamos para que el botón "Reintentar" del banner de error pueda
+    /// re-disparar la misma consulta sin pedirle al usuario que la vuelva
+    /// a tipear.
+    @State private var lastPrompt: String = ""
 
     private let locationService = LocationService()
 
@@ -288,6 +297,25 @@ struct RemyLiveView: View {
                         remyProposalCard
                             .padding(.horizontal, 20)
 
+                        // Banner de error con botón de reintento. Antes el
+                        // error se mostraba sólo adentro de la burbuja amber
+                        // y sin acción — el usuario quedaba trancado.
+                        if let err = chat.errorMessage {
+                            errorRetryBanner(err)
+                                .padding(.horizontal, 20)
+                        }
+
+                        // Chips semilla: 3 queries de ejemplo que SE ENVÍAN
+                        // al tocarlas (no sólo pre-rellenan el input), para
+                        // que el usuario vea una respuesta real al toque y
+                        // entienda qué puede pedir. Se esconden una vez que
+                        // el usuario ya mandó algo manualmente — a partir de
+                        // ahí es un hilo normal, no una pantalla de bienvenida.
+                        if !hasUserSent && chat.errorMessage == nil {
+                            hintChips
+                                .padding(.horizontal, 20)
+                        }
+
                         if !timelineStops.isEmpty {
                             sectionHeader(title: "Tu noche · en curso",
                                           actionTitle: "Cambiar")
@@ -329,15 +357,21 @@ struct RemyLiveView: View {
             await checkInStore.load()
             BPAnalytics.track(.viewScreen("RemyLive"))
 
-            // Kickoff proactivo: si el usuario está checked-in, lanzamos la
-            // primera pregunta a Remy para que el bubble no abra vacío
-            // (coherente con el mockup, donde Remy ya propone algo al abrir).
-            // Sin check-in esperamos a que el usuario escriba — no gastamos
-            // llamadas al modelo sin contexto.
-            if !didKickoff, checkInStore.activeCheckin != nil {
+            // Kickoff proactivo: Remy abre con una propuesta hecha, no con
+            // una burbuja italiana vacía. Si el usuario está checked-in,
+            // anclamos el prompt al venue real; si no, pedimos un plan
+            // abierto para la noche. Nunca mencionamos un venue inventado.
+            if !didKickoff {
                 didKickoff = true
+                let kickoffPrompt: String
+                if let v = checkedInVenue {
+                    kickoffPrompt = "Dame un plan desde \(v.name)."
+                } else {
+                    kickoffPrompt = "Arma un plan para esta noche."
+                }
+                lastPrompt = kickoffPrompt
                 chat.send(
-                    prompt: "¿Qué hago ahora?",
+                    prompt: kickoffPrompt,
                     city: venueStore.selectedCity,
                     context: buildContext(),
                     venues: venueStore.venues
@@ -463,12 +497,11 @@ struct RemyLiveView: View {
                             .foregroundStyle(.white)
                             .fixedSize(horizontal: false, vertical: true)
                             .lineSpacing(2)
-                    } else if let err = chat.errorMessage {
-                        Text(err)
-                            .font(.system(size: 13))
-                            .foregroundStyle(Color.bpDanger)
-                            .fixedSize(horizontal: false, vertical: true)
                     } else {
+                        // El error ya no se muestra adentro de la burbuja;
+                        // vive en errorRetryBanner, abajo, con un botón de
+                        // "Reintentar". Si no hay reply ni estamos pensando,
+                        // caemos al placeholder honesto.
                         Text("Escribe abajo lo que quieras armar — Remy te responde con un plan concreto.")
                             .font(.system(size: 14))
                             .foregroundStyle(Color.white.opacity(0.72))
@@ -754,6 +787,88 @@ struct RemyLiveView: View {
         }
     }
 
+    // MARK: - Hint chips (seed queries para arrancar la conversación)
+
+    /// Prompts de ejemplo cortos. No son "respuestas de IA", son queries que
+    /// el usuario podría tipear — con tocarlas se envían directo a Remy. La
+    /// honestidad acá es importante: el usuario entiende que es un atajo
+    /// para pedir, no una recomendación fabricada.
+    private var hintPrompts: [String] {
+        ["Rooftop cerca", "Un sitio tranquilo", "Música latina ahora"]
+    }
+
+    private var hintChips: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Pídele cosas como")
+                .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                .tracking(2)
+                .foregroundStyle(Color.white.opacity(0.5))
+
+            FlowChips(spacing: 8) {
+                ForEach(hintPrompts, id: \.self) { prompt in
+                    RemyChip(label: prompt, kind: .ghost) {
+                        submitHint(prompt)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Error retry banner
+
+    /// Se muestra cuando el stream falla. Antes el error se perdía adentro
+    /// de la burbuja amber sin acción; ahora vive abajo con un botón para
+    /// re-disparar el último prompt. Si no hay lastPrompt (edge case) el
+    /// botón se oculta en vez de mostrarse muerto.
+    @ViewBuilder
+    private func errorRetryBanner(_ message: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundStyle(Color.bpDanger)
+                .padding(.top, 2)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(message)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.white.opacity(0.8))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .lineSpacing(2)
+
+                if !lastPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Button {
+                        retryLastPrompt()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 10, weight: .heavy))
+                            Text("Reintentar")
+                                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        }
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 11)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Color.bpAmber))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(chat.isStreaming)
+                    .opacity(chat.isStreaming ? 0.4 : 1)
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.bpDanger.opacity(0.08))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Color.bpDanger.opacity(0.3), lineWidth: 1)
+        )
+    }
+
     // MARK: - Memory card — pure mockup, DEBUG-only
 
     #if DEBUG
@@ -864,8 +979,42 @@ struct RemyLiveView: View {
         let text = trimmedInput
         guard !text.isEmpty, !chat.isStreaming else { return }
         BPHaptics.selection()
+        hasUserSent = true
+        lastPrompt = text
         input = ""
         inputFocused = false
+        chat.send(
+            prompt: text,
+            city: venueStore.selectedCity,
+            context: buildContext(),
+            venues: venueStore.venues
+        )
+    }
+
+    /// Chip semilla tocado: dispara la query inmediatamente, no la escribe
+    /// en el input. Tratamos esto como un envío manual: hasUserSent flipa a
+    /// true y los chips desaparecen.
+    private func submitHint(_ prompt: String) {
+        guard !chat.isStreaming else { return }
+        BPHaptics.selection()
+        hasUserSent = true
+        lastPrompt = prompt
+        inputFocused = false
+        chat.send(
+            prompt: prompt,
+            city: venueStore.selectedCity,
+            context: buildContext(),
+            venues: venueStore.venues
+        )
+    }
+
+    /// Re-dispara el último prompt enviado tras un error del stream. Si por
+    /// alguna razón no hay lastPrompt (p. ej. error antes del kickoff), el
+    /// botón del banner se esconde en lugar de disparar vacío.
+    private func retryLastPrompt() {
+        let text = lastPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty, !chat.isStreaming else { return }
+        BPHaptics.selection()
         chat.send(
             prompt: text,
             city: venueStore.selectedCity,

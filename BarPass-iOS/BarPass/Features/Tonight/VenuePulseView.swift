@@ -178,6 +178,36 @@ struct VenuePulseView: View {
                                 .padding(.horizontal, 20)
                         }
 
+                        // Qué pedir aquí — tragos reales del catálogo. Hasta 6
+                        // filas; si no hay precios cargados, el header no se
+                        // dibuja (header sin contenido es un defecto). Los
+                        // tragos con `price == 0` se renderizan sin la columna
+                        // de precio en vez de mostrar "$0".
+                        if let venue, !venue.popularDrinks.isEmpty {
+                            VPulseDrinksSection(drinks: venue.popularDrinks)
+                                .padding(.horizontal, 20)
+                        }
+
+                        // Esta noche / próximos eventos — datos reales del
+                        // mismo campo que renderiza V1 (`upcomingEvents`). Si
+                        // no hay eventos, la sección no se dibuja.
+                        if let venue, !venue.upcomingEvents.isEmpty {
+                            VPulseEventsSection(events: venue.upcomingEvents)
+                                .padding(.horizontal, 20)
+                        }
+
+                        // Empty-state honesto: para un venue real sin menú ni
+                        // eventos cargados, una línea dignificada en vez de
+                        // 110pt de negro. No contamos "amigos" acá porque esa
+                        // card tiene su propio estado y vive arriba.
+                        if let venue,
+                           venue.popularDrinks.isEmpty,
+                           venue.upcomingEvents.isEmpty {
+                            VPulseEmptyLine()
+                                .padding(.horizontal, 20)
+                                .padding(.top, 4)
+                        }
+
                         #if DEBUG
                         if !isRealVenue {
                             VPulseVoicesSection()
@@ -220,12 +250,12 @@ struct VenuePulseView: View {
         }
         .sheet(isPresented: $showTab) {
             if let venue {
-                if V2Flags.openTabV2, let appState {
-                    // OpenTabV2View needs AppState via @EnvironmentObject;
-                    // if the caller didn't inject one (debug/preview path),
-                    // fall through to V1 which handles its own env.
-                    OpenTabV2View()
-                        .environmentObject(appState)
+                if V2Flags.openTabV2 {
+                    // V2 path: `OpenTabV2View(venueId:)` arranca en el
+                    // "open flow" — levanta la cuenta llamando a
+                    // `VenueTabRepository.open(venueId:)` desde adentro,
+                    // mismo patrón que la V1 `VenueTabView.emptyState`.
+                    OpenTabV2View(venueId: venue.id)
                 } else {
                     VenueTabView(venue: venue)
                 }
@@ -660,6 +690,134 @@ private struct VPulseFriendsCard: View {
         .padding(12)
         .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
+    }
+}
+
+// MARK: - Drinks section ("Qué pedir aquí") — real popularDrinks
+
+@MainActor
+private struct VPulseDrinksSection: View {
+    let drinks: [PopularDrink]
+
+    /// Hasta 6 tragos — V1 muestra la carta entera en un sheet aparte, acá
+    /// mostramos lo que entra sin empujar la CTA fuera de pantalla.
+    private var shown: [PopularDrink] { Array(drinks.prefix(6)) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Qué pedir aquí")
+                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                .tracking(2)
+                .foregroundStyle(Color.white.opacity(0.65))
+
+            VStack(spacing: 6) {
+                ForEach(Array(shown.enumerated()), id: \.element.id) { pair in
+                    HStack(spacing: 10) {
+                        if !pair.element.emoji.isEmpty {
+                            Text(pair.element.emoji)
+                                .font(.system(size: 18))
+                        }
+                        Text(pair.element.name)
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                        Spacer(minLength: 8)
+                        // `price == 0` quiere decir "no sabemos" en el
+                        // catálogo (igual que `avg_spend = 0` que se trata
+                        // como N/A en toda la app) — no renderizar "$0".
+                        if pair.element.price > 0 {
+                            Text(String(format: "$%.0f", pair.element.price))
+                                .font(.system(size: 13, weight: .heavy, design: .monospaced))
+                                .foregroundStyle(Color.bpAmber)
+                        }
+                    }
+                    .padding(.vertical, 4)
+
+                    if pair.offset < shown.count - 1 {
+                        Divider().background(Color.white.opacity(0.06))
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.08)))
+    }
+}
+
+// MARK: - Events section ("Esta noche y lo que viene") — real upcomingEvents
+
+@MainActor
+private struct VPulseEventsSection: View {
+    let events: [VenueEvent]
+
+    /// Hasta 4 eventos próximos, ordenados por fecha — mismo criterio que V1.
+    private var shown: [VenueEvent] {
+        Array(events.sorted { $0.date < $1.date }.prefix(4))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Esta noche y lo que viene")
+                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                .tracking(2)
+                .foregroundStyle(Color.white.opacity(0.65))
+
+            VStack(spacing: 6) {
+                ForEach(Array(shown.enumerated()), id: \.element.id) { pair in
+                    HStack(alignment: .top, spacing: 10) {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(pair.element.title)
+                                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                                .lineLimit(2)
+                            Text(Self.dateLabel(pair.element.date))
+                                .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                                .tracking(1.4)
+                                .foregroundStyle(Color.white.opacity(0.55))
+                        }
+                        Spacer(minLength: 8)
+                        // Cover `nil` o `0` = sin dato — no mentimos con "$0".
+                        if let cover = pair.element.coverPrice, cover > 0 {
+                            Text(String(format: "$%.0f", cover))
+                                .font(.system(size: 13, weight: .heavy, design: .monospaced))
+                                .foregroundStyle(Color.bpAmber)
+                        }
+                    }
+                    .padding(.vertical, 4)
+
+                    if pair.offset < shown.count - 1 {
+                        Divider().background(Color.white.opacity(0.06))
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.08)))
+    }
+
+    private static func dateLabel(_ date: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "es")
+        f.dateFormat = "EEE d MMM · HH:mm"
+        return f.string(from: date).uppercased()
+    }
+}
+
+// MARK: - Empty state line (venue sin menú ni eventos cargados)
+
+@MainActor
+private struct VPulseEmptyLine: View {
+    var body: some View {
+        Text("Sin menú ni eventos cargados · toca el QR para pedir en barra")
+            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .foregroundStyle(Color.white.opacity(0.5))
+            .multilineTextAlignment(.leading)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.white.opacity(0.03), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.06)))
     }
 }
 

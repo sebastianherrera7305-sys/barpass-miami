@@ -39,30 +39,50 @@ public struct OpenTabV2View: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var venueStore: VenueStore
 
-    // Si `tabId == nil` no hay cuenta que cargar: en Release cae al
-    // emptyState; en DEBUG `load()` inyecta `VenueTabDetail.debugSample`
-    // para que el debug tray de Profile y los #Preview muestren el diseño.
-    private let tabId: String?
+    // `venueId` activa el "open flow": aún no hay cuenta, pero sabemos a qué
+    // local le vamos a abrir una (lo pasa VenuePulseView con `venue.id`). Si
+    // además viene `tabId`, es porque el caller ya tiene una cuenta y sólo
+    // queremos cargarle el detalle. Si ambos son nil es el camino DEBUG
+    // (debug tray de Profile / `#Preview`): en Release cae al emptyState.
+    private let venueId: String?
     private let repository: VenueTabRepository
 
+    @State private var tabId: String?
     @State private var detail: VenueTabDetail?
     @State private var myUserId: String?
     @State private var isLoading: Bool
+    @State private var isOpening: Bool = false
     @State private var errorMessage: String?
     @State private var showScanCode = false
     @State private var pulse = false
 
+    /// Preview only; production callers must pass `venueId:` (open flow) or
+    /// a resolved `tabId:`. El default no-arg sólo lo usa el debug tray de
+    /// `ProfileView` y los `#Preview` — en Release cae al emptyState porque
+    /// `.debugSample` vive bajo `#if DEBUG`.
     public init(tabId: String? = nil) {
-        self.tabId = tabId
+        self.venueId = nil
         self.repository = BarPassVenueTabRepository()
+        _tabId = State(initialValue: tabId)
         _isLoading = State(initialValue: tabId != nil)
+    }
+
+    /// Open-flow init: abre una cuenta nueva (o reutiliza la existente —
+    /// `BarPassVenueTabRepository.open` es idempotente por (user, venue)).
+    /// Es el camino de producción desde `VenuePulseView`.
+    public init(venueId: String) {
+        self.venueId = venueId
+        self.repository = BarPassVenueTabRepository()
+        _tabId = State(initialValue: nil)
+        _isLoading = State(initialValue: false)
     }
 
     #if DEBUG
     /// Sólo previews: arranca con un detalle ya resuelto y sin red.
     init(previewDetail: VenueTabDetail, previewUserId: String) {
-        self.tabId = nil
+        self.venueId = nil
         self.repository = BarPassVenueTabRepository()
+        _tabId = State(initialValue: nil)
         _detail = State(initialValue: previewDetail)
         _myUserId = State(initialValue: previewUserId)
         _isLoading = State(initialValue: false)
@@ -86,8 +106,12 @@ public struct OpenTabV2View: View {
                     content(detail)
                 } else if let errorMessage {
                     errorState(errorMessage)
+                } else if isOpening {
+                    openingState
                 } else if isLoading {
                     loadingState
+                } else if venueId != nil {
+                    openFlowState
                 } else {
                     emptyState
                 }
@@ -168,29 +192,109 @@ public struct OpenTabV2View: View {
     }
 
     private func errorState(_ msg: String) -> some View {
-        VStack(spacing: 14) {
-            Spacer()
-            Text("No pudimos cargar la cuenta")
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
-            Text(msg)
-                .font(.system(size: 13))
-                .foregroundStyle(Color.white.opacity(0.65))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
-            Button {
-                tapHaptic()
-                Task { await load() }
-            } label: {
-                Text("Reintentar")
-                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 18).padding(.vertical, 10)
-                    .background(Color.bpAmber, in: Capsule())
+        // Envuelto en ScrollView para que `.refreshable` tenga área: el gesto
+        // pull-to-refresh en un VStack suelto no engancha. Reintentar hace lo
+        // mismo que el botón: open() si estamos en open-flow, load() si no.
+        ScrollView {
+            VStack(spacing: 14) {
+                Spacer().frame(height: 40)
+                Text(tabId == nil && venueId != nil
+                     ? "No pudimos abrir la cuenta"
+                     : "No pudimos cargar la cuenta")
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text(msg)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.white.opacity(0.65))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                Button {
+                    tapHaptic()
+                    Task { await retry() }
+                } label: {
+                    Text("Reintentar")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 18).padding(.vertical, 10)
+                        .background(Color.bpAmber, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                Spacer()
             }
-            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, minHeight: 320)
+        }
+        .refreshable { await retry() }
+    }
+
+    /// Open flow: aún no hay cuenta pero sí sabemos a qué venue le vamos a
+    /// abrir una. CTA directa (una tap) — el flujo V1 (`VenueTabView.emptyState`)
+    /// mostraba "Abrir cuenta" sin pedir monto, así que respetamos ese
+    /// defaulting; el tope se decide después en `TabScanCodeSheet`.
+    private var openFlowState: some View {
+        let venueName = venueId.flatMap { resolvedVenueName(forVenueId: $0) }
+        return ScrollView {
+            VStack(spacing: 14) {
+                Spacer().frame(height: 40)
+                Text("🍸").font(.system(size: 40))
+                Text("Abre tu cuenta aquí")
+                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("Comparte el código con el bartender para sumar consumos al toque, sin sacar la tarjeta cada vez.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.white.opacity(0.65))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                Button {
+                    tapHaptic()
+                    Task { await openTab() }
+                } label: {
+                    Text(venueName.map { "Abrir cuenta en \($0)" } ?? "Abrir cuenta")
+                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.black)
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.bpAmberBright, Color.bpAmber],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
+                        )
+                        .shadow(color: Color.bpAmber.opacity(0.35), radius: 14, y: 6)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 24)
+                .padding(.top, 4)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, minHeight: 320)
+        }
+        .refreshable { await retry() }
+    }
+
+    /// Loading explícito del open(): el shimmer general ("isLoading") es para
+    /// cargar el detalle de una cuenta ya existente, no para "estamos
+    /// abriéndola ahora". Un copy distinto evita que parezca que colgó.
+    private var openingState: some View {
+        VStack(spacing: 12) {
+            Spacer()
+            ProgressView()
+                .controlSize(.large)
+                .tint(Color.bpAmber)
+            Text("Abriendo cuenta…")
+                .font(.system(size: 13, weight: .heavy, design: .monospaced))
+                .tracking(1.4)
+                .foregroundStyle(Color.white.opacity(0.75))
             Spacer()
         }
+        .frame(maxWidth: .infinity)
+        .background(Color.black.opacity(0.35))
     }
 
     private var emptyState: some View {
@@ -428,9 +532,10 @@ public struct OpenTabV2View: View {
     private func load() async {
         guard let tabId else {
             #if DEBUG
-            // Debug tray / previews sin tabId: mockup para revisar el diseño.
-            // En Release este camino cae al emptyState, nunca a datos inventados.
-            if detail == nil {
+            // Debug tray / previews sin tabId NI venueId: mockup para revisar
+            // el diseño. En Release este camino cae al openFlow (con venueId)
+            // o al emptyState (sin ninguno) — nunca a datos inventados.
+            if venueId == nil, detail == nil {
                 detail = .debugSample
                 myUserId = VenueTabDetail.debugSampleUserId
             }
@@ -449,10 +554,44 @@ public struct OpenTabV2View: View {
         isLoading = false
     }
 
+    /// Abre una cuenta nueva en el venue del init y, si sale bien, encadena
+    /// el `load()` del detalle. Idempotente del lado del server
+    /// (`BarPassVenueTabRepository.open`): si ya había una abierta, la
+    /// reutiliza. Mismo patrón que `VenueTabView.open()`.
+    private func openTab() async {
+        guard let venueId else { return }
+        isOpening = true
+        errorMessage = nil
+        do {
+            let opened = try await repository.open(venueId: venueId)
+            tabId = opened.tabId
+            isOpening = false
+            await load()
+        } catch {
+            errorMessage = error.localizedDescription
+            isOpening = false
+        }
+    }
+
+    /// Reintenta la acción correcta según en qué parte del flujo murió: si
+    /// estamos en open-flow (venueId sin tabId), vuelve a abrir; si ya hay
+    /// tabId, reintenta cargar el detalle.
+    private func retry() async {
+        if tabId == nil, venueId != nil {
+            await openTab()
+        } else {
+            await load()
+        }
+    }
+
     /// `nil` cuando VenueStore no conoce el venue: el eyebrow omite el
     /// segmento en vez de pintar un placeholder como si fuera el local.
     private func resolvedVenueName(_ d: VenueTabDetail) -> String? {
-        venueStore.venues.first(where: { $0.id == d.tab.venueId })?.name
+        resolvedVenueName(forVenueId: d.tab.venueId)
+    }
+
+    private func resolvedVenueName(forVenueId id: String) -> String? {
+        venueStore.venues.first(where: { $0.id == id })?.name
     }
 
     private func items(from d: VenueTabDetail) -> [OpenTabV2Item] {
