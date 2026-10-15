@@ -102,7 +102,7 @@ struct AuthLoginV2View: View {
 
     var body: some View {
         ZStack {
-            AuthLoginV2Background()
+            MiamiEyeBackground(intensity: 0.6)
 
             VStack(spacing: 0) {
                 // 70pt top spacer below the (real) iOS status bar, as per
@@ -150,7 +150,15 @@ struct AuthLoginV2View: View {
             .ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .preferredColorScheme(.dark)
-        .onTapGesture { focused = nil }
+        // Build 126: era `.onTapGesture { focused = nil }` plano, que
+        // sobre el ScrollView entero se come los taps que caen sobre
+        // SignInWithAppleButton (UIViewRepresentable → UIKit). Owner
+        // reportó Build 125: "el botón de Sign in with Apple está pegado,
+        // hay que tocarlo 5 veces para que responda". Un
+        // `.simultaneousGesture` deja que el tap llegue al button Y al
+        // dismiss del teclado al mismo tiempo — el button responde al
+        // primer tap y el focus igual se limpia.
+        .simultaneousGesture(TapGesture().onEnded { focused = nil })
     }
 
     // MARK: - Brand lockup (mascot + BAR PASS + tagline)
@@ -190,8 +198,15 @@ struct AuthLoginV2View: View {
 
     // MARK: - Mode pills (Iniciar sesión / Crear cuenta)
 
+    /// Build 100 complaint ("los botones de inicio sesión y crear cuenta
+    /// van en el medio o diseñalo distinto, se ve feo"): the two pills
+    /// were nearly invisible when inactive (white opacity 0.07 fill +
+    /// 0.1 border on the dark background) and sat orphaned to the left
+    /// with a trailing Spacer. Switched to a full-width segmented pill
+    /// pair with a strong inactive fill so both affordances read
+    /// equally weighted, and both buttons share the row.
     private var modePills: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
             ForEach(Mode.allCases, id: \.self) { m in
                 Button {
                     tap()
@@ -200,23 +215,22 @@ struct AuthLoginV2View: View {
                     }
                 } label: {
                     Text(m.label)
-                        .font(.system(size: 12.5, weight: mode == m ? .black : .semibold, design: .rounded))
-                        .foregroundStyle(mode == m ? Color.black : Color.white.opacity(0.82))
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
+                        .font(.system(size: 14, weight: mode == m ? .black : .heavy, design: .rounded))
+                        .foregroundStyle(mode == m ? Color.black : Color.white.opacity(0.92))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
                         .background(
-                            Capsule().fill(mode == m ? Color.bpAmber : Color.white.opacity(0.07))
+                            Capsule().fill(mode == m ? Color.bpAmber : Color.white.opacity(0.1))
                         )
                         .overlay(
                             Capsule().strokeBorder(
-                                mode == m ? Color.bpAmber : Color.white.opacity(0.1),
+                                mode == m ? Color.bpAmber : Color.white.opacity(0.25),
                                 lineWidth: 1
                             )
                         )
                 }
                 .buttonStyle(.plain)
             }
-            Spacer(minLength: 0)
         }
     }
 
@@ -431,33 +445,37 @@ struct AuthLoginV2View: View {
 
     // MARK: - Legal line (mono, Términos / Política in amber)
 
+    /// Build 100 complaint ("la parte que dice al entrar no se ve
+    /// bien"): the 9.5pt monospaced + opacity 0.55 was borderline
+    /// unreadable on the dark background. Bumped to 11pt + opacity
+    /// 0.72, kept the amber on the linked words.
     private var legalLine: some View {
         HStack(spacing: 0) {
             Spacer(minLength: 0)
             Text("AL ENTRAR ACEPTAS LOS ")
-                .foregroundStyle(Color.white.opacity(0.55))
+                .foregroundStyle(Color.white.opacity(0.72))
             Button {
                 tap()
                 onTerms?()
             } label: {
                 Text("TÉRMINOS")
-                    .foregroundStyle(Color.bpAmber)
+                    .foregroundStyle(Color.bpAmberBright)
             }
             .buttonStyle(.plain)
             Text(" Y LA ")
-                .foregroundStyle(Color.white.opacity(0.55))
+                .foregroundStyle(Color.white.opacity(0.72))
             Button {
                 tap()
                 onPrivacy?()
             } label: {
                 Text("POLÍTICA DE PRIVACIDAD")
-                    .foregroundStyle(Color.bpAmber)
+                    .foregroundStyle(Color.bpAmberBright)
             }
             .buttonStyle(.plain)
             Spacer(minLength: 0)
         }
-        .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
-        .tracking(1.4)
+        .font(.system(size: 11, weight: .heavy, design: .monospaced))
+        .tracking(1.2)
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
     }

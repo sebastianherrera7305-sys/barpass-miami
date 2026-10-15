@@ -19,6 +19,17 @@ struct ProfileView: View {
     @State private var affiliatedChapter: GreekChapter?
     @State private var showAffiliationPicker = false
     @State private var showHomeAddress = false
+    /// Owner complaint Build 114 (2026-10-14): "nada aparece en otros
+    /// lugares que no son Miami". The CityPickerView only runs ONCE at
+    /// first launch — after that the user is locked into whichever city
+    /// they picked. Reset+re-open the picker from Profile.
+    @State private var showCityChange = false
+    /// Build 1 of the Profile Reorg (2026-10-14): a top-right gear toggles
+    /// a SettingsSheet with the consolidated settings menu. Ships
+    /// additively — the inline rows below the fold stay as a safety net
+    /// until the owner confirms the sheet behaves. Removing the inline
+    /// duplicates lands in a follow-up build.
+    @State private var showSettings = false
     /// This screen used to show the l10n placeholder string "Tu Nombre" /
     /// "Your Name" unconditionally — never the real value, never editable.
     /// Every profile looked identical and unnamed; a chapter member roster
@@ -51,6 +62,14 @@ struct ProfileView: View {
     @State private var displayNameDraft = ""
     @State private var isSavingDisplayName = false
     @State private var displayNameSaveError: String?
+
+    // Night Recap — entrada real (no DEBUG). Se consulta el mismo agregador
+    // que arma la pantalla (`NightRecapStore.load()`) sobre la ventana
+    // "anoche" (ayer 18:00 → hoy 06:00); si no hubo check-ins reales, la fila
+    // no se dibuja. La ausencia no se rinde como "0 paradas": sin noche, no
+    // hay fila. El debug tray sigue teniendo su propia entrada con `.mockup`.
+    @State private var nightRecapData: NightRecapData?
+    @State private var showNightRecap = false
 
     private var affiliationSubtitle: String {
         guard let uni = affiliatedUniversity else { return l10n.t("greek.profile.noneHint") }
@@ -273,6 +292,55 @@ struct ProfileView: View {
                     .helpTarget("profile.homeAddress")
                     .sheet(isPresented: $showHomeAddress) {
                         HomeAddressSettingsView()
+                    }
+
+                    // City switcher — restores access to the one-time
+                    // CityPickerView so the user can switch Miami ↔ NY ↔
+                    // Chicago at any time instead of being stuck on their
+                    // first-launch choice.
+                    Button {
+                        BPHaptics.light()
+                        showCityChange = true
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text("📍").font(.bpScaled(22))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Ciudad")
+                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
+                                Text(currentCity ?? "Elige tu ciudad")
+                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.bpScaled(13, weight: .semibold))
+                                .foregroundStyle(Color.bpAmber)
+                        }
+                        .padding(16)
+                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, BPSpacing.lg)
+                    .sheet(isPresented: $showCityChange) {
+                        NavigationStack {
+                            CityPickerView {
+                                currentCity = SelectedCityStore.selectedCity
+                                showCityChange = false
+                            }
+                        }
+                        .presentationBackground(.black)
+                    }
+
+                    // "Tu última noche" — Night Recap entry point
+                    //
+                    // Sólo aparece si el agregador real (`NightRecapStore.load()`)
+                    // encontró al menos un check-in dentro de la ventana "anoche"
+                    // (ayer 18:00 → hoy 06:00 en hora local). Noches sólo con
+                    // órdenes, sin salidas registradas, o estados `.empty` /
+                    // `.failed` / `.loading` → la fila no se dibuja. El debug tray
+                    // de más abajo sigue teniendo su propia entrada con `.mockup`.
+                    if let recap = nightRecapData, recap.stops > 0 {
+                        nightRecapRow(data: recap)
                     }
 
                     // Juegos y misiones
@@ -649,7 +717,65 @@ struct ProfileView: View {
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
+        // Build 126 — gear as FLOATING overlay button, NOT ToolbarItem.
+        //
+        // Build 123/124 had: `.toolbar(.visible, for: .navigationBar)` +
+        // `.navigationBarTitleDisplayMode(.inline)` +
+        // `.toolbarBackground(.hidden, for: .navigationBar)` + a
+        // `ToolbarItem(.topBarTrailing)` with the gear. That combination
+        // crashed deterministically on device the moment the user tapped
+        // the "Yo" tab (Build 124 TestFlight reports). The current working
+        // hypothesis — unverified without a stack trace — is a conflict
+        // between the ancestor NavigationStack in RootView (which lives
+        // under `.ignoresSafeArea(.container, edges: .all)`) and this
+        // view's INNER NavigationStack trying to materialize a visible
+        // nav bar through those stripped safe-area insets.
+        //
+        // A floating overlay button sidesteps every one of those modifiers:
+        // no `.toolbar(.visible)`, no `.toolbarBackground`, no
+        // `.navigationBarTitleDisplayMode`, no `ToolbarItem`. The gear
+        // lives in the same ZStack as the BPBackgroundView + ScrollView,
+        // anchored topTrailing with the top safe area reserved manually.
+        // Loses zero functionality — the gear still opens SettingsSheet —
+        // but the nav bar stays hidden (how every other tab renders).
+        .overlay(alignment: .topTrailing) {
+            Button {
+                BPHaptics.light()
+                showSettings = true
+            } label: {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Color.bpInk)
+                    .frame(width: 36, height: 36)
+                    .background(Color.bpCardBackground.opacity(0.6), in: Circle())
+                    .overlay(Circle().strokeBorder(Color.bpInk.opacity(0.08), lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 56)
+            .padding(.trailing, 18)
+            .bpAccessibility(label: l10n.t("profile.settings.title"), isButton: true)
+        }
+        .sheet(isPresented: $showSettings) {
+            NavigationStack {
+                SettingsSheet(
+                    currentCity: currentCity,
+                    autoplayEnabled: $autoplay.enabled,
+                    onDirecciónCasa: { showSettings = false; showHomeAddress = true },
+                    onCiudad: { showSettings = false; showCityChange = true },
+                    onUniversidad: { showSettings = false; showAffiliationPicker = true },
+                    onEliminarCuenta: { showSettings = false; showDeleteAccount = true },
+                    onCerrarSesion: {
+                        BPHaptics.medium()
+                        AuthService.shared.signOut()
+                        appState.resetUserState()
+                        appState.showNativeAuth = true
+                        showSettings = false
+                    }
+                )
+            }
+            .presentationBackground(.black)
+            .preferredColorScheme(.dark)
+        }
         .navigationDestination(isPresented: $showPasses) { OrderHistoryView() }
         // The "Mis pases" Home Screen quick action lands on this tab and asks
         // for the history, so the shortcut ends where its label promises.
@@ -779,6 +905,15 @@ struct ProfileView: View {
         .task { await loadAffiliation() }
         .task { displayName = (try? await RepositoryDependencies.displayName.getDisplayName()) ?? nil }
         .task { avatarConfig = (try? await RepositoryDependencies.avatar.getAvatarConfig()) ?? nil }
+        .task { await probeNightRecap() }
+        .sheet(isPresented: $showNightRecap) {
+            // Real-data entrada: `NightRecapView(data: ...)` rinde el payload
+            // ya cargado. El CTA del propio recap llama a `onDismiss`, que
+            // cierra la sheet; el swipe-down del sistema también la cierra.
+            NightRecapView(data: nightRecapData, onDismiss: { showNightRecap = false })
+                .environmentObject(appState)
+                .environmentObject(venueStore)
+        }
         .sheet(isPresented: $showEditDisplayName) {
             editDisplayNameSheet
         }
@@ -794,6 +929,82 @@ struct ProfileView: View {
                 withAnimation(.easeOut(duration: 0.4)) { showToast = false; engine.lastAward = nil }
             }
         }
+        }
+    }
+
+    /// Fila "Tu última noche" — eyebrow amber "ANOCHE", headline con cantidad
+    /// de paradas y rango horario real ("3 venues · 22:14 → 02:05"), chevron.
+    /// Mismo lenguaje visual que el resto de filas del Profile (bpSurface +
+    /// borde amber tenue + corner xl).
+    private func nightRecapRow(data: NightRecapData) -> some View {
+        Button {
+            BPHaptics.light()
+            showNightRecap = true
+        } label: {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkle")
+                            .font(.system(size: 9.5, weight: .heavy))
+                            .foregroundStyle(Color.bpAmber)
+                        Text("ANOCHE")
+                            .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                            .tracking(2.4)
+                            .foregroundStyle(Color.bpAmber)
+                    }
+                    Text(nightRecapHeadline(for: data))
+                        .font(.bpScaled(15, weight: .bold))
+                        .foregroundStyle(Color.bpInk)
+                        .lineLimit(1).minimumScaleFactor(0.75)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.bpScaled(13, weight: .semibold))
+                    .foregroundStyle(Color.bpAmber)
+            }
+            .padding(16)
+            .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+            .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.25)))
+        }
+        .buttonStyle(.plain)
+        .bpAccessibility(
+            label: "Tu última noche",
+            hint: nightRecapHeadline(for: data),
+            isButton: true
+        )
+        .padding(.horizontal, BPSpacing.lg)
+        .helpTarget("profile.nightRecap")
+    }
+
+    /// Construye "N venues · HH:mm → HH:mm" a partir del payload real. Con
+    /// una sola parada se cae a "1 venue · HH:mm" (no inventar llegada ni
+    /// cierre). Un moment sin tiempo no debería existir (vienen de check-ins
+    /// con `checked_in_at`), pero si pasara se omite el rango.
+    private func nightRecapHeadline(for data: NightRecapData) -> String {
+        let noun = data.stops == 1 ? "venue" : "venues"
+        let first = data.moments.first?.time
+        let last  = data.moments.last?.time
+        switch (first, last) {
+        case let (f?, l?) where data.stops > 1 && f != l:
+            return "\(data.stops) \(noun) · \(f) → \(l)"
+        case let (f?, _):
+            return "\(data.stops) \(noun) · \(f)"
+        default:
+            return "\(data.stops) \(noun)"
+        }
+    }
+
+    /// Consulta el mismo agregador que arma el recap. El resultado se guarda
+    /// localmente para rendir la fila sólo cuando hay noche real que mostrar
+    /// (≥ 1 check-in). Fallos de red o estado vacío → `nil` → fila oculta.
+    /// Sin side effects fuera de `nightRecapData`.
+    private func probeNightRecap() async {
+        let store = NightRecapStore(venueStore: venueStore)
+        await store.load()
+        if case .loaded(let data) = store.state, data.stops > 0 {
+            nightRecapData = data
+        } else {
+            nightRecapData = nil
         }
     }
 
@@ -934,5 +1145,175 @@ struct ProfileView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Settings sheet (Build 1 of Profile reorg, 2026-10-14)
+
+/// Consolidated settings menu reachable from the gear in Profile's toolbar.
+/// Ships ADDITIVELY: the inline rows below the fold in ProfileView stay as
+/// a safety net until the owner confirms the sheet behaves correctly on
+/// device, then they get removed. Every callback here routes BACK to the
+/// existing ProfileView state (`showHomeAddress`, `showCityChange`,
+/// `showAffiliationPicker`, `showDeleteAccount`, `AuthService.signOut`) —
+/// no new sheets, no duplicate state, no architectural change.
+///
+/// "Notificaciones" opens the iOS Settings app at the BarPass bundle so the
+/// user can toggle push/location/mic/photos exactly where the system owns
+/// those switches; there is no in-app notifications settings screen today
+/// and faking one would be worse than deep-linking honestly.
+///
+/// "Ayuda / Soporte" and "Legal" both land on the existing
+/// `LegalAndHelpView`, which already carries the real support contact,
+/// terms, and privacy policy.
+@MainActor
+private struct SettingsSheet: View {
+    let currentCity: String?
+    @Binding var autoplayEnabled: Bool
+    let onDirecciónCasa: () -> Void
+    let onCiudad: () -> Void
+    let onUniversidad: () -> Void
+    let onEliminarCuenta: () -> Void
+    let onCerrarSesion: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
+
+    var body: some View {
+        List {
+            Section("Cuenta y perfil") {
+                row("Dirección de casa", icon: "house.fill", onTap: onDirecciónCasa)
+                row("Ciudad", icon: "mappin.and.ellipse",
+                    subtitle: currentCity ?? "Elige tu ciudad", onTap: onCiudad)
+                row("Universidad / fraternidad", icon: "graduationcap.fill", onTap: onUniversidad)
+            }
+            Section("Apariencia y preferencias") {
+                languageRow
+                themeRow
+                autoplayRow
+            }
+            Section("Notificaciones y privacidad") {
+                row("Notificaciones del sistema", icon: "bell.fill", onTap: openSystemSettings)
+            }
+            Section("Ayuda y legal") {
+                NavigationLink {
+                    LegalAndHelpView()
+                } label: {
+                    settingsRowLabel("Ayuda y soporte", icon: "lifepreserver")
+                }
+                NavigationLink {
+                    LegalAndHelpView()
+                } label: {
+                    settingsRowLabel("Legal y políticas", icon: "doc.text.fill")
+                }
+            }
+            Section("Sesión") {
+                Button(role: .destructive) {
+                    onCerrarSesion()
+                } label: {
+                    settingsRowLabel("Cerrar sesión", icon: "arrow.backward.circle.fill")
+                        .foregroundStyle(Color.bpDanger)
+                }
+                Button(role: .destructive) {
+                    onEliminarCuenta()
+                } label: {
+                    settingsRowLabel("Eliminar cuenta", icon: "trash.fill")
+                        .foregroundStyle(Color.bpDanger)
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.black)
+        .navigationTitle("Ajustes")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Listo") { dismiss() }
+                    .foregroundStyle(Color.bpAmber)
+            }
+        }
+    }
+
+    // MARK: - Rows
+
+    private var languageRow: some View {
+        HStack {
+            settingsRowLabel("Idioma", icon: "character.bubble.fill")
+            Spacer()
+            Picker("", selection: $l10n.language) {
+                Text("Español").tag(AppLanguage.es)
+                Text("English").tag(AppLanguage.en)
+                Text("Português").tag(AppLanguage.pt)
+            }
+            .pickerStyle(.menu)
+            .tint(Color.bpAmber)
+        }
+    }
+
+    /// Tema: AppearanceStore now always resolves to dark (ThemeService 2026-08-28
+    /// decision — the non-dark branch was never finished). Shown here as
+    /// read-only so the owner can see the control exists without re-enabling
+    /// a broken toggle.
+    private var themeRow: some View {
+        HStack {
+            settingsRowLabel("Tema", icon: "paintbrush.fill")
+            Spacer()
+            Text("Oscuro")
+                .font(.system(size: 14))
+                .foregroundStyle(Color.bpTextSecondary)
+        }
+    }
+
+    private var autoplayRow: some View {
+        HStack {
+            settingsRowLabel("Autoplay", icon: "play.circle.fill")
+            Spacer()
+            Toggle("", isOn: $autoplayEnabled)
+                .labelsHidden()
+                .tint(Color.bpAmber)
+        }
+    }
+
+    private func row(_ title: String, icon: String,
+                     subtitle: String? = nil,
+                     onTap: @escaping () -> Void) -> some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.bpAmber)
+                    .frame(width: 24)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .foregroundStyle(Color.bpInk)
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.bpTextSecondary)
+                    }
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Color.bpTextTertiary)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func settingsRowLabel(_ title: String, icon: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Color.bpAmber)
+                .frame(width: 24)
+            Text(title).foregroundStyle(Color.bpInk)
+        }
+    }
+
+    private func openSystemSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 }
