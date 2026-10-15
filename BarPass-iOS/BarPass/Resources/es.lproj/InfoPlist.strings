@@ -1,0 +1,9 @@
+/* Spanish permission strings — mostradas por iOS cuando el idioma del
+   sistema del usuario es español. */
+
+"NSAppleMusicUsageDescription" = "BarPass usa tu música de Apple Music para recomendarte venues y eventos que van con tu vibra. Tu escucha nunca sale de tu teléfono.";
+"NSCameraUsageDescription" = "BarPass prende la linterna de la cámara para el Safety Beacon cuando un amigo te está buscando, y más adelante para fotos de perfil y posts que vos elijas subir.";
+"NSFaceIDUsageDescription" = "Usá Face ID para entrar a BarPass rápido y seguro.";
+"NSLocationWhenInUseUsageDescription" = "BarPass usa tu ubicación para mostrarte venues cerca y calcular distancias.";
+"NSNearbyInteractionUsageDescription" = "BarPass usa la antena de precisión de tu iPhone para mostrarte a qué distancia y en qué dirección está la persona de tu grupo que te está buscando. Sólo mientras los dos tienen la app abierta, y sólo entre ustedes.";
+"NSPhotoLibraryAddUsageDescription" = "BarPass guarda códigos QR y pases de venue en tu biblioteca de fotos.";

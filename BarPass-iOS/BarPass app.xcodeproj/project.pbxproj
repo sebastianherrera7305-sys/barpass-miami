@@ -83,6 +83,7 @@
 		BEAC2CB367B2C22A0F89EA9F /* TripsListV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC6820EB8201D18522AC10 /* TripsListV2View.swift */; };
 		BEAC782F42D01BC15E3A429B /* SocialV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC0CE3B5A6D52C8A63F4EE /* SocialV2View.swift */; };
 		BEAC55ED912C214B71032D44 /* PendingFriendRequestsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACC14C2FC4B76E0C223ACD /* PendingFriendRequestsStore.swift */; };
+		BEAC53FD4E259099323803CB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BEACD9C93A202FBF5D36F90B /* InfoPlist.strings */; };
 		BEAC6060455583632B7A814F /* ExploreV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC2A847466EDACCE557623 /* ExploreV2View.swift */; };
 		BEACF08D8071A8F9CD9E6E1C /* NightRecapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC6EE93615C0614A97FD42 /* NightRecapView.swift */; };
 		BEAC77F4E12A87625F419CCA /* VenuePulseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACD5F4410FD5B1CBD17E2C /* VenuePulseView.swift */; };
@@ -488,6 +489,9 @@
 		BEAC6820EB8201D18522AC10 /* TripsListV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripsListV2View.swift; path = BarPass/Features/Trips/TripsListV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEAC0CE3B5A6D52C8A63F4EE /* SocialV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SocialV2View.swift; path = BarPass/Features/Social/SocialV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEACC14C2FC4B76E0C223ACD /* PendingFriendRequestsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PendingFriendRequestsStore.swift; path = BarPass/Features/Social/PendingFriendRequestsStore.swift; sourceTree = SOURCE_ROOT; };
+		BEACF872DEFF4C289FB1D452 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = BarPass/Resources/en.lproj/InfoPlist.strings; sourceTree = SOURCE_ROOT; };
+		BEACFC148A839BCCA4B75742 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = BarPass/Resources/es.lproj/InfoPlist.strings; sourceTree = SOURCE_ROOT; };
+		BEAC5FDCA07161E82AC0123F /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = BarPass/Resources/pt.lproj/InfoPlist.strings; sourceTree = SOURCE_ROOT; };
 		BEAC2A847466EDACCE557623 /* ExploreV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExploreV2View.swift; path = BarPass/Features/Explore/ExploreV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEAC6EE93615C0614A97FD42 /* NightRecapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightRecapView.swift; path = BarPass/Features/Recap/NightRecapView.swift; sourceTree = SOURCE_ROOT; };
 		BEACD5F4410FD5B1CBD17E2C /* VenuePulseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenuePulseView.swift; path = BarPass/Features/Tonight/VenuePulseView.swift; sourceTree = SOURCE_ROOT; };
@@ -660,6 +664,19 @@
 		BEAC19711B3963EEFD3C4D34 /* TripChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripChatView.swift; path = BarPass/Features/Trips/TripChatView.swift; sourceTree = SOURCE_ROOT; };
 		BEAC31A7495BC8A4EF5B9D41 /* MiamiEyeBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MiamiEyeBackground.swift; path = BarPass/Resources/MiamiEyeBackground.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXVariantGroup section */
+		BEACD9C93A202FBF5D36F90B /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BEACF872DEFF4C289FB1D452 /* en */,
+				BEACFC148A839BCCA4B75742 /* es */,
+				BEAC5FDCA07161E82AC0123F /* pt */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		24BEACB8F9B5AAB070F1B0EF /* Frameworks */ = {
@@ -931,6 +948,7 @@
 				FF000001000000000000AA10 /* DesignSystem.swift */,
 				BEAC31A7495BC8A4EF5B9D41 /* MiamiEyeBackground.swift */,
 				PRIV00000000000000000001 /* PrivacyInfo.xcprivacy */,
+				BEACD9C93A202FBF5D36F90B /* InfoPlist.strings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -1304,6 +1322,8 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				es,
+				pt,
 				Base,
 			);
 			mainGroup = AA0000040000000000000000;
@@ -1331,6 +1351,7 @@
 				CC000001000000000000ME01 /* venue_media.json in Resources */,
 				CC000001000000000000LG01 /* venue_logos.json in Resources */,
 				PRIV00000000000000000002 /* PrivacyInfo.xcprivacy in Resources */,
+				BEAC53FD4E259099323803CB /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1695,7 +1716,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 126;
+				CURRENT_PROJECT_VERSION = 127;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1723,7 +1744,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 126;
+				CURRENT_PROJECT_VERSION = 127;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1853,7 +1874,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 126;
+				CURRENT_PROJECT_VERSION = 127;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1876,7 +1897,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 126;
+				CURRENT_PROJECT_VERSION = 127;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;

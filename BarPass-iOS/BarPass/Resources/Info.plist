@@ -10,6 +10,12 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
 	<string>BarPass</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>es</string>
+		<string>pt</string>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -51,19 +57,17 @@
 		<false/>
 	</dict>
 	<key>NSAppleMusicUsageDescription</key>
-	<string>BarPass usa tu música de Apple Music para recomendarte venues y eventos que van con tu vibra. Tu escucha nunca sale de tu teléfono.</string>
+	<string>BarPass uses your Apple Music to recommend venues and events that match your vibe. Your listening never leaves your phone.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>BarPass uses your camera to capture profile photos and enhance your venue experience.</string>
+	<string>BarPass turns on your camera's flashlight for the Safety Beacon when a friend is looking for you, and later for profile photos and posts you choose to add.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID for quick and secure sign-in to BarPass.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>BarPass uses your location to show nearby venues and calculate distances.</string>
 	<key>NSNearbyInteractionUsageDescription</key>
-	<string>BarPass usa la antena de precisión de tu iPhone para mostrarte a qué distancia y en qué dirección está la persona de tu grupo que te está buscando. Sólo mientras los dos tienen la app abierta, y sólo entre ustedes.</string>
+	<string>BarPass uses your iPhone's precision antenna to show you the distance and direction of the person in your group looking for you. Only while both of you have the app open, and only between you two.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>BarPass saves QR codes and venue passes to your photo library.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>BarPass accesses your photo library to set your profile picture.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

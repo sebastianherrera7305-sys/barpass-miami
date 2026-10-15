@@ -1,0 +1,8 @@
+/* English (base) permission strings — mirrors Info.plist defaults. */
+
+"NSAppleMusicUsageDescription" = "BarPass uses your Apple Music to recommend venues and events that match your vibe. Your listening never leaves your phone.";
+"NSCameraUsageDescription" = "BarPass turns on your camera's flashlight for the Safety Beacon when a friend is looking for you, and later for profile photos and posts you choose to add.";
+"NSFaceIDUsageDescription" = "Use Face ID for quick and secure sign-in to BarPass.";
+"NSLocationWhenInUseUsageDescription" = "BarPass uses your location to show nearby venues and calculate distances.";
+"NSNearbyInteractionUsageDescription" = "BarPass uses your iPhone's precision antenna to show you the distance and direction of the person in your group looking for you. Only while both of you have the app open, and only between you two.";
+"NSPhotoLibraryAddUsageDescription" = "BarPass saves QR codes and venue passes to your photo library.";

@@ -700,39 +700,46 @@ private struct FlowRow: Layout {
 @MainActor
 private struct OB4_FaceAvatar: View {
     @ObservedObject var model: OnboardingV2Model
-    @State private var hasPhoto = false
-    @State private var selectedVariant = 0
-    private let variantLabels = ["Esta", "Más rizo", "Más barba"]
-    private let readings = ["pelo corto negro", "ovalada", "barba", "sin lentes"]
+
+    // Build 127 — era "Tu cara, tu avatar" + CTA "Tomar selfie" grande
+    // + "Saltar" chiquito en gris. Owner reportó Build 124: "it's
+    // actually asking or getting the picture it never ask me for it".
+    // La pantalla LEÍA como una demanda de selfie durante el onboarding
+    // aunque el botón no accedía a la cámara (era un TODO que simulaba
+    // hasPhoto=true). Reemplazado: CTA primario abre el
+    // AvatarEditorView ilustrado que ya existe en Profile, "Saltar"
+    // igualmente visible como texto blanco, y la referencia a selfie
+    // queda OUT hasta que el pipeline AVCapture+Vision esté implementado.
+    //
+    // AvatarEditorView acepta todo por init (no toma @EnvironmentObject),
+    // así que es seguro presentarlo acá sin cablear ambiente nuevo.
+
+    @State private var showEditor = false
+    @State private var currentConfig: AvatarConfig?
+    @State private var savedConfig: AvatarConfig?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer().frame(height: 70)
 
-            HStack {
-                Text("4 / 7")
-                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                    .tracking(2.4)
-                    .foregroundStyle(Color.bpAmber)
-                Spacer()
-                Button("Saltar") { model.advance() }
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.white.opacity(0.6))
-            }
-            .padding(.horizontal, 24)
+            Text("4 / 7")
+                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                .tracking(2.4)
+                .foregroundStyle(Color.bpAmber)
+                .padding(.horizontal, 24)
 
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("Tu cara,")
+                Text("Crea tu")
                     .font(.system(size: 38, weight: .black, design: .rounded))
                     .tracking(-1)
                     .foregroundStyle(.white)
-                Text("tu avatar")
+                Text("avatar")
                     .font(.system(size: 34, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
             }
             .padding(.horizontal, 24).padding(.top, 8)
 
-            Text("Una selfie. Se analiza en tu teléfono y no se guarda: solo sale tu avatar.")
+            Text("Elegí piel, pelo, lentes y accesorio. Así te ven tus amigos en el mapa esta noche.")
                 .font(.system(size: 14))
                 .foregroundStyle(Color.white.opacity(0.72))
                 .fixedSize(horizontal: false, vertical: true)
@@ -740,92 +747,36 @@ private struct OB4_FaceAvatar: View {
 
             Spacer()
 
-            if !hasPhoto {
-                // "Sin foto" placeholder — big dashed circle, tap to simulate.
-                VStack(spacing: 14) {
+            VStack(spacing: 14) {
+                ZStack {
                     Circle()
-                        .strokeBorder(Color.white.opacity(0.3), style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
+                        .fill(Color.white.opacity(0.06))
                         .frame(width: 160, height: 160)
-                        .overlay(
-                            Image(systemName: "person.crop.circle.badge.plus")
-                                .font(.system(size: 48, weight: .light))
-                                .foregroundStyle(Color.white.opacity(0.4))
-                        )
-                    Text("Sin foto")
-                        .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                        .tracking(2)
-                        .foregroundStyle(Color.white.opacity(0.5))
-                }
-                .frame(maxWidth: .infinity)
-            } else {
-                // Three Remy variants in a row — pick one.
-                VStack(spacing: 14) {
-                    Text("3 lecturas de tu cara")
-                        .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                        .tracking(2)
-                        .foregroundStyle(Color.white.opacity(0.55))
+                        .overlay(Circle().strokeBorder(Color.bpAmber.opacity(savedConfig == nil ? 0.25 : 0.6), lineWidth: savedConfig == nil ? 2 : 3))
 
-                    HStack(spacing: 14) {
-                        ForEach(0..<3, id: \.self) { i in
-                            VStack(spacing: 8) {
-                                Circle()
-                                    .fill(variantGradient(i))
-                                    .frame(width: 86, height: 86)
-                                    .overlay(
-                                        Circle().strokeBorder(
-                                            selectedVariant == i ? Color.bpAmber : Color.white.opacity(0.15),
-                                            lineWidth: selectedVariant == i ? 3 : 1
-                                        )
-                                    )
-                                    .overlay(
-                                        Text("👤")
-                                            .font(.system(size: 42))
-                                    )
-                                Text(variantLabels[i])
-                                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                                    .foregroundStyle(selectedVariant == i ? Color.bpAmber : Color.white.opacity(0.65))
-                            }
-                            .onTapGesture {
-                                withAnimation(.easeOut(duration: 0.15)) { selectedVariant = i }
-                            }
-                        }
+                    if savedConfig != nil {
+                        AvatarView(name: "Tu avatar", avatarUrl: nil, avatarConfig: savedConfig, size: 140, animated: true)
+                    } else {
+                        Image(systemName: "face.smiling")
+                            .font(.system(size: 56, weight: .light))
+                            .foregroundStyle(Color.white.opacity(0.45))
                     }
-
-                    // Readings — tags Remy extracted
-                    HStack(spacing: 6) {
-                        ForEach(readings, id: \.self) { r in
-                            Text(r)
-                                .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                .foregroundStyle(Color.white.opacity(0.65))
-                                .padding(.horizontal, 7).padding(.vertical, 3)
-                                .background(Color.white.opacity(0.07), in: Capsule())
-                                .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
-                        }
-                    }
-                    .padding(.top, 6)
-
-                    Button("Afinar 14 rasgos") { }
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Color.bpAmber)
-                        .padding(.top, 4)
                 }
-                .frame(maxWidth: .infinity)
+
+                Text(savedConfig == nil ? "Sin avatar" : "Listo")
+                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                    .tracking(2)
+                    .foregroundStyle(savedConfig == nil ? Color.white.opacity(0.5) : Color.bpAmber)
             }
+            .frame(maxWidth: .infinity)
 
             Spacer()
 
-            VStack(spacing: 10) {
+            VStack(spacing: 12) {
                 Button {
-                    if hasPhoto {
-                        model.advance()
-                    } else {
-                        // TODO: open real SelfieCapture (AVCapture + Vision).
-                        // Flipping the flag until that's built keeps the
-                        // onboarding flow coherent instead of stuck.
-                        withAnimation(.easeOut(duration: 0.3)) { hasPhoto = true }
-                    }
+                    showEditor = true
                 } label: {
-                    Text(hasPhoto ? "Soy yo" : "Tomar selfie")
+                    Text(savedConfig == nil ? "Crear mi avatar" : "Editar avatar")
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
@@ -834,27 +785,44 @@ private struct OB4_FaceAvatar: View {
                 }
                 .buttonStyle(.plain)
 
-                Text("Así te ven tus amigos en el mapa esta noche")
-                    .font(.system(size: 11, design: .monospaced))
-                    .tracking(0.6)
-                    .foregroundStyle(Color.white.opacity(0.5))
-                    .frame(maxWidth: .infinity, alignment: .center)
+                Button {
+                    model.advance()
+                } label: {
+                    Text(savedConfig == nil ? "Saltar — lo creo después" : "Continuar")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(
+                            RoundedRectangle(cornerRadius: 18)
+                                .strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 36)
         }
-    }
-
-    private func variantGradient(_ i: Int) -> LinearGradient {
-        let starts = [
-            Color(red: 0.42, green: 0.18, blue: 0.08),
-            Color(red: 0.5,  green: 0.22, blue: 0.1),
-            Color(red: 0.35, green: 0.15, blue: 0.07),
-        ]
-        return LinearGradient(
-            colors: [starts[i], starts[i].opacity(0.5)],
-            startPoint: .topLeading, endPoint: .bottomTrailing
-        )
+        .task {
+            // Precarga el config actual (en caso de que el usuario ya
+            // tenga uno guardado — p.ej. volvió a onboarding).
+            currentConfig = (try? await RepositoryDependencies.avatar.getAvatarConfig()) ?? nil
+            savedConfig = currentConfig
+        }
+        .sheet(isPresented: $showEditor) {
+            AvatarEditorView(
+                current: currentConfig,
+                repository: RepositoryDependencies.avatar
+            ) { config in
+                savedConfig = config
+                currentConfig = config
+                if config != nil {
+                    // Auto-avanzar al próximo paso tras guardar, para que
+                    // el usuario no tenga que buscar "Continuar" aparte.
+                    model.advance()
+                }
+            }
+        }
     }
 }
 
