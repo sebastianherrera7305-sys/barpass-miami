@@ -8,6 +8,11 @@ struct MainTabView: View {
     @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var themeService = ThemeService.shared
     @ObservedObject private var appearanceStore = AppearanceStore.shared
+    /// Observa el conteo de solicitudes de amistad entrantes para dibujar
+    /// el badge sobre el ícono del tab Social. Fix 2026-10-15: antes el
+    /// badge no existía y el usuario receptor nunca se enteraba de que
+    /// tenía una solicitud pendiente — ver `PendingFriendRequestsStore`.
+    @ObservedObject private var pendingReqs = PendingFriendRequestsStore.shared
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var selectedTab = 0
@@ -56,7 +61,8 @@ struct MainTabView: View {
         ZStack(alignment: .bottom) {
             Group {
                 switch selectedTab {
-                case 0:  TonightView()
+                case 0:
+                    if V2Flags.tonightV2 { TonightV2View() } else { TonightView() }
                 case 1:
                     if V2Flags.exploreV2 { ExploreV2View() } else { ExploreView() }
                 case 2:
@@ -214,6 +220,11 @@ struct MainTabView: View {
         // MainTabView only renders once authenticated, so this is the natural
         // point to flush any referral code captured from a pre-auth deep link.
         .task { await ReferralService.shared.attributePendingIfNeeded() }
+        // Al abrir la app refrescamos el conteo de solicitudes pendientes
+        // ANTES de que el usuario abra el tab Social — así el badge ya
+        // aparece sobre el ícono apenas se ve la pantalla principal, no
+        // sólo después de entrar al tab. Fix 2026-10-15.
+        .task { await pendingReqs.refresh() }
         // Coming back from background is when venues are most likely stale
         // (user left the app open for a while). loadVenues() is cheap to call
         // here — it only hits the network if the repository's freshness
@@ -221,6 +232,10 @@ struct MainTabView: View {
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 Task { await venueStore.loadVenues() }
+                // También refrescamos solicitudes al volver del background
+                // — si alguien me mandó una mientras tenía la app cerrada,
+                // el badge aparece al reabrir.
+                Task { await pendingReqs.refresh() }
             }
         }
         // Reconnecting after being offline should recover on its own — the
@@ -436,6 +451,19 @@ struct MainTabView: View {
                     Image(systemName: item.icon)
                         .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
                         .foregroundStyle(isSelected ? Color.bpAmber : Color.bpInk.opacity(0.3))
+                    // Badge en el tab Social (index 2) con el conteo de
+                    // solicitudes entrantes. Sólo visible si count > 0.
+                    if index == 2, pendingReqs.incoming.count > 0 {
+                        Text("\(min(pendingReqs.incoming.count, 99))")
+                            .font(.system(size: 10, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 5)
+                            .frame(minWidth: 16, minHeight: 16)
+                            .background(Color.bpAmber, in: Capsule())
+                            .overlay(Capsule().strokeBorder(Color.bpCardBackground, lineWidth: 1.5))
+                            .offset(x: 10, y: -8)
+                            .accessibilityLabel("\(pendingReqs.incoming.count) solicitudes pendientes")
+                    }
                 }
                 .frame(height: 28)
 

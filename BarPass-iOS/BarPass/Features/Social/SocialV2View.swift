@@ -51,6 +51,12 @@ public struct SocialV2View: View {
     @EnvironmentObject private var venueStore: VenueStore
     @ObservedObject private var tonight = FriendsTonightStore.shared
     @ObservedObject private var pulse = VenueStoryPulseStore.shared
+    /// Solicitudes de amistad entrantes y salientes. Vive aparte de
+    /// `threads` porque los threads sólo existen DESPUÉS del accept.
+    /// Bug 2026-10-15: SocialV2View no fetcheaba el friend graph, por
+    /// eso Juan nunca veía la solicitud entrante aunque la fila existía
+    /// en Supabase. Ver `PendingFriendRequestsStore` para el fix.
+    @ObservedObject private var pendingReqs = PendingFriendRequestsStore.shared
 
     @State private var events: [HostEvent] = []
     @State private var openStories: SocialV2StoryTarget?
@@ -59,85 +65,107 @@ public struct SocialV2View: View {
     @State private var selectedHostEvent: HostEvent?
     @State private var showFriends = false
     @State private var showHosting = false
+    /// Owner report (Build 111, 2026-10-14): "In social the first thing
+    /// I want showing up is the chats and the stories". Previous builds
+    /// hid chats behind the "Chats" pill. Now rendered inline as the
+    /// FIRST section below the headline — top 5 threads with avatar +
+    /// name + last-message time + unread dot. Tap pushes FriendChatView.
+    @State private var threads: [FriendThreadSummary] = []
+    @State private var openThreadId: String?
+    /// Inline add-friend state (Build 121 fix: no more Friends sub-page).
+    @State private var friendQuery: String = ""
+    @State private var searchResults: [FriendSearchResult] = []
+    @State private var searchDebounceTask: Task<Void, Never>?
 
     private let storyRepository: VenueStoryRepository = RepositoryDependencies.venueStory
     private let hostRepository = RepositoryDependencies.hostEvent
 
     public var body: some View {
+        // Owner report Build 120 (2026-10-14): "cada vez que quiero entrar
+        // a los chats tengo que entrar a otra pantalla, me parece un gasto
+        // de tiempo muy grande para una persona que pueda estar borracha".
+        // Wrap in a NavigationStack and push the chat destination inline
+        // instead of presenting the modal sheet — a horizontal slide reads
+        // as "entering" the chat, not opening a separate screen; and the
+        // back-chevron takes one thumb-tap at the top edge instead of a
+        // full swipe-down.
+        NavigationStack {
+            socialBody
+                .navigationDestination(item: Binding(
+                    get: { openThreadId.map { ThreadTarget(id: $0) } },
+                    set: { openThreadId = $0?.id }
+                )) { target in
+                    FriendChatView(
+                        friendId: target.id,
+                        friendName: threads.first { $0.userId == target.id }?.name ?? ""
+                    )
+                }
+        }
+    }
+
+    private var socialBody: some View {
         ZStack {
-            SocialV2Background()
+            MiamiEyeBackground(intensity: 0.35)
 
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
                     Spacer().frame(height: 70)
 
-                    // Eyebrow — "Social · <ciudad> · HH:mm"
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(Color.bpAmber)
-                            .frame(width: 6, height: 6)
-                            .overlay(
-                                Circle()
-                                    .fill(Color.bpAmber.opacity(0.4))
-                                    .frame(width: 12, height: 12)
-                                    .blur(radius: 2)
-                            )
+                    // Owner report Build 118 (2026-10-14): "no se ve bien,
+                    // sigue siendo una página dentro de la otra". The big
+                    // "Tu gente está afuera" italic headline pushed stories
+                    // and chats down into a nested-looking block. Replaced
+                    // with a single compact row ("Social", small city/time
+                    // caption) so Social IS the stories+chats page, not a
+                    // container with them inside.
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Text("Social")
+                            .font(.system(size: 28, weight: .black, design: .rounded))
+                            .tracking(-0.6)
+                            .foregroundStyle(.white)
                         Text(eyebrowText)
                             .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                            .tracking(2.0)
+                            .tracking(1.6)
                             .foregroundStyle(Color.bpAmber)
+                        Spacer()
                     }
                     .padding(.horizontal, 24)
 
-                    // Headline — "Tu gente está afuera"
-                    HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        Text("Tu gente")
-                            .font(.system(size: 36, weight: .black, design: .rounded))
-                            .tracking(-1)
-                            .foregroundStyle(.white)
-                        Text("está afuera")
-                            .font(.system(size: 32, design: .serif).italic())
-                            .foregroundStyle(Color.bpAmberBright)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 6)
+                    // Owner report Build 119 (screenshot 2026-10-14):
+                    // "lo necesito en la pantalla completa, no una opción
+                    // nada más que diga Chats". Social is now EXCLUSIVELY
+                    // stories + chats, like Instagram DMs full screen.
+                    // Dropped: subDigest, pillsRow, nowFeedSection,
+                    // hostCard, bottomCTAs. Those "Ahora", "Noche
+                    // tranquila", "Levantar la mano / Armar algo" blocks
+                    // were pushing chats halfway down the screen and
+                    // reading as the real content; chats were a sidebar.
 
-                    // Sub-digest con contadores reales
-                    subDigest
-                        .padding(.horizontal, 24)
-                        .padding(.top, 10)
-
-                    // Pills — filtros del feed social
-                    pillsRow
-                        .padding(.horizontal, 24)
-                        .padding(.top, 14)
-
-                    // "Ahora" — feed de tu gente en este momento
-                    nowFeedSection
-                        .padding(.horizontal, 24)
-                        .padding(.top, 16)
-
-                    // Historias de esta noche — rail horizontal de venues
                     if !cityStories.isEmpty {
                         storiesSectionHeader
                             .padding(.horizontal, 24)
-                            .padding(.top, 24)
-
+                            .padding(.top, 16)
                         storiesRail
-                            .padding(.top, 12)
+                            .padding(.top, 10)
                     }
 
-                    // Host card — próximo evento organizado por un host
-                    if let event = nextHostEvent {
-                        hostCard(for: event)
+                    // Solicitudes de amistad entrantes. Sólo visible si
+                    // hay al menos una pending; cero intrusión cuando no.
+                    // Fix 2026-10-15: antes esta sección no existía y las
+                    // solicitudes se perdían en el servidor.
+                    if !pendingReqs.incoming.isEmpty {
+                        friendRequestsSection
                             .padding(.horizontal, 24)
-                            .padding(.top, 20)
+                            .padding(.top, cityStories.isEmpty ? 16 : 20)
                     }
 
-                    // CTAs — "Levantar la mano" / "Armar algo"
-                    bottomCTAs
+                    // Full-screen chat list — always visible, empty state
+                    // handled inside chatsInlineSection.
+                    chatsInlineSection
                         .padding(.horizontal, 24)
-                        .padding(.top, 14)
+                        .padding(.top, pendingReqs.incoming.isEmpty
+                                 ? (cityStories.isEmpty ? 16 : 20)
+                                 : 20)
 
                     Spacer().frame(height: embeddedInTabBar ? 40 : 100)
                 }
@@ -179,6 +207,10 @@ public struct SocialV2View: View {
             NavigationStack { HostEventsListView() }
                 .presentationBackground(.black)
         }
+        // Chat destination now opens inline via navigationDestination on
+        // the enclosing NavigationStack (see body). The old sheet(...)
+        // presented it as a modal that read as "another screen" and
+        // frustrated the owner on Build 120.
         .fullScreenCover(item: $openStories) { target in
             StoryViewer(venueName: target.venueName, stories: target.stories) {
                 openStories = nil
@@ -354,7 +386,7 @@ public struct SocialV2View: View {
             }
             .padding(14)
             .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.12)))
         }
     }
 
@@ -537,11 +569,335 @@ public struct SocialV2View: View {
         pulse.refresh(force: force)
         async let friendsRefresh: Void = tonight.refresh(force: force)
         async let fetchedEvents = (try? await hostRepository.events(venueId: nil, limit: 20)) ?? []
+        async let fetchedThreads = (try? await RepositoryDependencies.friendChat.threads()) ?? []
+        // 2026-10-15: antes esto solo cargaba threads (que existen después
+        // del accept) — por eso las solicitudes pending nunca llegaban al
+        // UI. Ahora leemos también el friend graph entero y filtramos
+        // incoming/outgoing en la tienda, para que la sección "Solicitudes"
+        // y el badge del tab Social estén en sync.
+        async let reqsRefresh: Void = pendingReqs.refresh()
         _ = await friendsRefresh
+        _ = await reqsRefresh
         let nights = await fetchedEvents
         events = nights.filter { !$0.isCancelled }
+        threads = await fetchedThreads
+    }
+
+    // MARK: - Solicitudes
+
+    /// Sección "Solicitudes" — una fila por cada solicitud entrante con
+    /// avatar, nombre y botones Aceptar / Rechazar. Se renderiza por
+    /// encima de "Chats" sólo cuando hay al menos una pending. Al
+    /// aceptar o rechazar la fila desaparece de inmediato (optimista) y
+    /// la tienda refresca contra el servidor para quedar en sync.
+    private var friendRequestsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Rectangle()
+                    .fill(Color.bpAmber)
+                    .frame(width: 3, height: 14)
+                Text(L10n.shared.t("friends.pendingRequests"))
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("· \(pendingReqs.incoming.count)")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color.bpAmber)
+                Spacer()
+            }
+            VStack(spacing: 8) {
+                ForEach(pendingReqs.incoming) { edge in
+                    friendRequestRow(edge)
+                }
+            }
+        }
+    }
+
+    private func friendRequestRow(_ edge: FriendEdge) -> some View {
+        HStack(spacing: 12) {
+            FriendAvatar(name: edge.name, url: edge.avatarUrl, config: edge.avatarConfig, size: 44)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(edge.name)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(Color.bpInk)
+                Text(L10n.shared.t("friends.relation.incoming"))
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(Color.bpTextSecondary)
+            }
+            Spacer()
+            HStack(spacing: 8) {
+                Button {
+                    BPHaptics.success()
+                    Task { await pendingReqs.accept(userId: edge.userId) }
+                } label: {
+                    Text(L10n.shared.t("friends.accept"))
+                        .font(.system(size: 12, weight: .heavy))
+                        .foregroundStyle(Color.black)
+                        .padding(.horizontal, 12).padding(.vertical, 7)
+                        .background(Color.bpAmber, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .bpAccessibility(label: L10n.shared.t("friends.accept"),
+                                 hint: edge.name, isButton: true)
+                Button {
+                    BPHaptics.light()
+                    Task { await pendingReqs.remove(userId: edge.userId) }
+                } label: {
+                    Text(L10n.shared.t("friends.decline"))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.bpTextSecondary)
+                }
+                .buttonStyle(.plain)
+                .bpAccessibility(label: L10n.shared.t("friends.decline"),
+                                 hint: edge.name, isButton: true)
+            }
+        }
+        .padding(14)
+        .background(Color.bpCardBackground, in: RoundedRectangle(cornerRadius: BPRadius.lg))
+        .overlay(RoundedRectangle(cornerRadius: BPRadius.lg).strokeBorder(Color.bpBorder))
+    }
+
+    /// Owner report Build 121 (screenshot 2026-10-14): "sigue siendo esta
+    /// pantalla encima de la otra y tampoco me gusta cómo se agregan a las
+    /// personas, se agrega muy feo. Necesito que sea como una red social
+    /// normal". Dropped the "Ver todos" shortcut to FriendsListView (that
+    /// was the stacked page he hated), and inlined the add-friend flow at
+    /// the top of the chat list: single search field that doubles as a
+    /// code-redeemer (6-char code → auto-redeem on return; longer text →
+    /// profile search). Results render as rows with a single-tap "Agregar"
+    /// matching the chat-row visual language. Zero sub-pages.
+    private var chatsInlineSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Rectangle()
+                    .fill(Color.bpAmber)
+                    .frame(width: 3, height: 14)
+                Text("Chats")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Spacer()
+            }
+            inlineAddFriendRow
+
+            if !searchResults.isEmpty {
+                VStack(spacing: 8) {
+                    ForEach(searchResults) { r in
+                        searchResultRow(r)
+                    }
+                }
+            }
+
+            if threads.isEmpty && searchResults.isEmpty {
+                chatsEmptyInline
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(threads) { t in
+                        Button {
+                            BPHaptics.selection()
+                            openThreadId = t.userId
+                        } label: {
+                            chatRow(t)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
+    /// Inline search / redeem field. One text input, two behaviours:
+    /// looks like a 6-char code → auto-redeem; otherwise → debounced
+    /// profile search. No sub-page, no modal, no "Ver todos".
+    private var inlineAddFriendRow: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(Color.white.opacity(0.5))
+            TextField("", text: $friendQuery,
+                      prompt: Text("Agregar gente — nombre o código")
+                        .foregroundColor(Color.white.opacity(0.42)))
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled(true)
+                .foregroundStyle(.white)
+                .font(.system(size: 14, weight: .semibold))
+                .submitLabel(.search)
+                .onSubmit { Task { await runSearchOrRedeem() } }
+                .onChange(of: friendQuery) { _, newVal in
+                    searchDebounceTask?.cancel()
+                    let snapshot = newVal
+                    searchDebounceTask = Task {
+                        try? await Task.sleep(nanoseconds: 350_000_000)
+                        guard !Task.isCancelled, snapshot == friendQuery else { return }
+                        await runSearchOrRedeem()
+                    }
+                }
+            if friendQuery.isEmpty == false {
+                Button {
+                    friendQuery = ""
+                    searchResults = []
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Color.white.opacity(0.4))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 14).padding(.vertical, 11)
+        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.1)))
+    }
+
+    private func searchResultRow(_ r: FriendSearchResult) -> some View {
+        let isFriend = r.relation == "friend"
+        let isOutgoing = r.relation == "outgoing"
+        let isIncoming = r.relation == "incoming"
+        let subtitle: String = isFriend ? "Ya son amigos" :
+                               isOutgoing ? "Solicitud enviada" :
+                               isIncoming ? "Te mandó solicitud" : "Toca para agregar"
+        let ctaLabel: String = isFriend ? "Chat" :
+                               isIncoming ? "Aceptar" :
+                               isOutgoing ? "Pendiente" : "Agregar"
+        return HStack(spacing: 12) {
+            ZStack {
+                Circle().fill(Color.bpAmber.opacity(0.18))
+                Text(String(r.name.prefix(1)).uppercased())
+                    .font(.system(size: 14, weight: .heavy))
+                    .foregroundStyle(Color.bpAmber)
+            }
+            .frame(width: 40, height: 40)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(r.name)
+                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                Text(subtitle)
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.white.opacity(0.55))
+            }
+            Spacer()
+            Button {
+                Task { await handleAddCta(r) }
+            } label: {
+                Text(ctaLabel)
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .foregroundStyle(isOutgoing ? Color.bpAmber : .black)
+                    .padding(.horizontal, 12).padding(.vertical, 7)
+                    .background(isOutgoing ? Color.clear : Color.bpAmber, in: Capsule())
+                    .overlay(Capsule().strokeBorder(isOutgoing ? Color.bpAmber : Color.clear))
+            }
+            .buttonStyle(.plain)
+            .disabled(isOutgoing)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
+    }
+
+    private func handleAddCta(_ r: FriendSearchResult) async {
+        BPHaptics.medium()
+        switch r.relation {
+        case "friend":
+            openThreadId = r.userId
+        case "incoming":
+            try? await RepositoryDependencies.friends.accept(userId: r.userId)
+            await loadAll(force: true)
+            friendQuery = ""; searchResults = []
+        case "outgoing":
+            return
+        default:
+            try? await RepositoryDependencies.friends.request(userId: r.userId)
+            await runSearchOrRedeem()  // refresh state so the row updates
+        }
+    }
+
+    private var chatsEmptyInline: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "sparkles")
+                .foregroundStyle(Color.bpAmber)
+            Text("Buscá un amigo arriba o pegá su código para empezar.")
+                .font(.system(size: 12))
+                .foregroundStyle(Color.white.opacity(0.6))
+            Spacer()
+        }
+        .padding(.horizontal, 14).padding(.vertical, 10)
+    }
+
+    private func runSearchOrRedeem() async {
+        let q = friendQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !q.isEmpty else { searchResults = []; return }
+        // Looks like a short code → try redeem path first (idempotent on server).
+        let compact = q.replacingOccurrences(of: " ", with: "")
+        if compact.count >= 5 && compact.count <= 8 && !compact.contains(" ") {
+            if let hit = try? await RepositoryDependencies.friends.redeem(code: compact) {
+                searchResults = [hit]
+                return
+            }
+        }
+        if q.count < 2 { searchResults = []; return }
+        searchResults = (try? await RepositoryDependencies.friends.search(query: q)) ?? []
+    }
+
+
+    /// Owner report Build 117 (2026-10-14): "los chats todavía mal" — if
+    /// the user has no threads yet, the section used to disappear entirely
+    /// and the owner read that as "chats broken". Show a visible empty
+    /// state with the next action (add a friend by code), same visual
+    /// language as a chat row so the slot is never empty.
+    // chatsEmptyState (Build 118) replaced by chatsEmptyInline (Build 121)
+    // since the add-friend flow is now inline via inlineAddFriendRow.
+
+    private func chatRow(_ t: FriendThreadSummary) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle().fill(Color.bpAmber.opacity(0.18))
+                if let u = t.avatarUrl.flatMap(URL.init(string:)) {
+                    CachedImage(url: u, targetSize: CGSize(width: 80, height: 80), priority: .standard) { img in
+                        img.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Text(String(t.name.prefix(1)))
+                            .font(.system(size: 14, weight: .heavy))
+                            .foregroundStyle(Color.bpAmber)
+                    }
+                    .clipShape(Circle())
+                } else {
+                    Text(String(t.name.prefix(1)))
+                        .font(.system(size: 14, weight: .heavy))
+                        .foregroundStyle(Color.bpAmber)
+                }
+            }
+            .frame(width: 40, height: 40)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(t.name)
+                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                if let last = t.lastMessageAt {
+                    Text(SocialV2View.relativeAgoString(from: last))
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.white.opacity(0.55))
+                }
+            }
+            Spacer()
+            if t.hasUnread {
+                Circle().fill(Color.bpAmber).frame(width: 8, height: 8)
+            }
+            Image(systemName: "chevron.right")
+                .font(.system(size: 11, weight: .heavy))
+                .foregroundStyle(Color.white.opacity(0.3))
+        }
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
+    }
+
+    static func relativeAgoString(from date: Date) -> String {
+        let f = RelativeDateTimeFormatter()
+        f.unitsStyle = .short
+        return f.localizedString(for: date, relativeTo: Date())
     }
 }
+
+private struct ThreadTarget: Identifiable, Hashable { let id: String }
 
 // MARK: - Sheet identifiables
 
@@ -571,13 +927,22 @@ private struct SocialV2Background: View {
             }
             .ignoresSafeArea()
 
+            // Build 95 feedback ("El difuminado de el color y los boxes se
+            // Pierden"): la viñeta cálida al 0.42 multiplicaba sobre un ojo
+            // al 0.55 y lavaba el stroke de las cards. Bajamos a 0.28 y
+            // apoyamos las cards sobre un velo negro suave que las separa
+            // del fondo sin matar la textura.
             RadialGradient(
-                colors: [.clear, Color(red: 0.27, green: 0.09, blue: 0).opacity(0.42)],
+                colors: [.clear, Color(red: 0.27, green: 0.09, blue: 0).opacity(0.28)],
                 center: UnitPoint(x: 0.5, y: 0.38),
                 startRadius: 180, endRadius: 720
             )
             .ignoresSafeArea()
             .blendMode(.multiply)
+
+            Color.black.opacity(0.15)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
 
             LinearGradient(
                 colors: [.clear, Color.black.opacity(0.9), Color.black],
@@ -782,7 +1147,7 @@ private struct SocialV2NowSkeleton: View {
         }
         .padding(14)
         .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.12)))
     }
 }
 

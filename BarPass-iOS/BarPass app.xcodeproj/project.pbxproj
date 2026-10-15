@@ -82,6 +82,7 @@
 		BEACE874440ECC8C5B1A6C8F /* SkipTheLineV2Container.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC7AF5F6BB2AC582B042C7 /* SkipTheLineV2Container.swift */; };
 		BEAC2CB367B2C22A0F89EA9F /* TripsListV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC6820EB8201D18522AC10 /* TripsListV2View.swift */; };
 		BEAC782F42D01BC15E3A429B /* SocialV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC0CE3B5A6D52C8A63F4EE /* SocialV2View.swift */; };
+		BEAC55ED912C214B71032D44 /* PendingFriendRequestsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACC14C2FC4B76E0C223ACD /* PendingFriendRequestsStore.swift */; };
 		BEAC6060455583632B7A814F /* ExploreV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC2A847466EDACCE557623 /* ExploreV2View.swift */; };
 		BEACF08D8071A8F9CD9E6E1C /* NightRecapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC6EE93615C0614A97FD42 /* NightRecapView.swift */; };
 		BEAC77F4E12A87625F419CCA /* VenuePulseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACD5F4410FD5B1CBD17E2C /* VenuePulseView.swift */; };
@@ -209,6 +210,8 @@
 		CB1F9606B527DA7A5AEA29A6 /* GoHomeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 457BF8CA0B0C5084EECB9173 /* GoHomeWidget.swift */; };
 		CC000001000000000000LG01 /* venue_logos.json in Resources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000LG01 /* venue_logos.json */; };
 		CC000001000000000000LG02 /* VenueLogos.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000LG02 /* VenueLogos.swift */; };
+		BEACAB1A454619ABBE4B9BBB /* VenueArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACF48DD638D1768B12A2D6 /* VenueArtwork.swift */; };
+		BEACA8BED1FB91CBA690D3E7 /* TonightRemyHero.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC3AF38F2693FB56B4F570 /* TonightRemyHero.swift */; };
 		CC000001000000000000ME01 /* venue_media.json in Resources */ = {isa = PBXBuildFile; fileRef = CC000002000000000000ME01 /* venue_media.json */; };
 		CD0446CD2FE22E4C96DB1EC9 /* VenueMediaRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3614CE84F4D7C527CA9C908A /* VenueMediaRepository.swift */; };
 		BB01STORYREPOBUILD000001 /* VenueStoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01STORYREPOFILEREF0001 /* VenueStoryRepository.swift */; };
@@ -249,6 +252,7 @@
 		FD87EDAD40F4189CC21E49A7 /* HomeAddressSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8BF3CAAE71351BE1BD33DA /* HomeAddressSettingsView.swift */; };
 		FF000002000000000000AA01 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA01 /* MainTabView.swift */; };
 		FF000002000000000000AA02 /* TonightView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA02 /* TonightView.swift */; };
+		BEAC2BC5D5A2EDEE3736AA2A /* TonightV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACB43322EB0920FF62C29A /* TonightV2View.swift */; };
 		FF000002000000000000AA03 /* VenueDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA03 /* VenueDetailView.swift */; };
 		BB02MENUVIEWBUILD0000001 /* VenueMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB02MENUVIEWFILEREF00001 /* VenueMenuView.swift */; };
 		FF000002000000000000AA04 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000AA04 /* ExploreView.swift */; };
@@ -307,6 +311,9 @@
 		WLT006000000000000RP01 /* OrderHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WLT005000000000000RP01 /* OrderHistoryView.swift */; };
 		WLT008000000000000RP01 /* OrderHistoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = WLT007000000000000RP01 /* OrderHistoryService.swift */; };
 		XPEN02000000000000RP01 /* PointsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = XPEN01000000000000RP01 /* PointsEngine.swift */; };
+		BEAC23759C48D265901FBF62 /* TripChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACEE13C69BF28A53DD71D7 /* TripChatRepository.swift */; };
+		BEAC766A700184FB610546A7 /* TripChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC19711B3963EEFD3C4D34 /* TripChatView.swift */; };
+		BEAC222AB7DA15AEA0D1CC06 /* MiamiEyeBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC31A7495BC8A4EF5B9D41 /* MiamiEyeBackground.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -480,6 +487,7 @@
 		BEAC7AF5F6BB2AC582B042C7 /* SkipTheLineV2Container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SkipTheLineV2Container.swift; path = BarPass/Features/PriorityEntry/SkipTheLineV2Container.swift; sourceTree = SOURCE_ROOT; };
 		BEAC6820EB8201D18522AC10 /* TripsListV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripsListV2View.swift; path = BarPass/Features/Trips/TripsListV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEAC0CE3B5A6D52C8A63F4EE /* SocialV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SocialV2View.swift; path = BarPass/Features/Social/SocialV2View.swift; sourceTree = SOURCE_ROOT; };
+		BEACC14C2FC4B76E0C223ACD /* PendingFriendRequestsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PendingFriendRequestsStore.swift; path = BarPass/Features/Social/PendingFriendRequestsStore.swift; sourceTree = SOURCE_ROOT; };
 		BEAC2A847466EDACCE557623 /* ExploreV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExploreV2View.swift; path = BarPass/Features/Explore/ExploreV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEAC6EE93615C0614A97FD42 /* NightRecapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightRecapView.swift; path = BarPass/Features/Recap/NightRecapView.swift; sourceTree = SOURCE_ROOT; };
 		BEACD5F4410FD5B1CBD17E2C /* VenuePulseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VenuePulseView.swift; path = BarPass/Features/Tonight/VenuePulseView.swift; sourceTree = SOURCE_ROOT; };
@@ -551,6 +559,8 @@
 		CA759652D778C1B0CD58E463 /* TableReservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableReservation.swift; sourceTree = "<group>"; };
 		CC000002000000000000LG01 /* venue_logos.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = venue_logos.json; sourceTree = "<group>"; };
 		CC000002000000000000LG02 /* VenueLogos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueLogos.swift; sourceTree = "<group>"; };
+		BEACF48DD638D1768B12A2D6 /* VenueArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueArtwork.swift; sourceTree = "<group>"; };
+		BEAC3AF38F2693FB56B4F570 /* TonightRemyHero.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightRemyHero.swift; sourceTree = "<group>"; };
 		CC000002000000000000ME01 /* venue_media.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = venue_media.json; sourceTree = "<group>"; };
 		CE8C91D8ECDD43B6AE34CEA4 /* BarPassLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BarPassLoadingView.swift; path = BarPass/Resources/BarPassLoadingView.swift; sourceTree = SOURCE_ROOT; };
 		D0A7686268D5679874C25E39 /* BarPassWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = BarPassWidget.entitlements; path = BarPassWidget/BarPassWidget.entitlements; sourceTree = SOURCE_ROOT; };
@@ -587,6 +597,7 @@
 		BB02STORYVIEWFILEREF0001 /* StoryViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StoryViewer.swift; path = BarPass/Features/Tonight/StoryViewer.swift; sourceTree = SOURCE_ROOT; };
 		FF000001000000000000AA01 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA02 /* TonightView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightView.swift; sourceTree = "<group>"; };
+		BEACB43322EB0920FF62C29A /* TonightV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TonightV2View.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA03 /* VenueDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueDetailView.swift; sourceTree = "<group>"; };
 		BB02MENUVIEWFILEREF00001 /* VenueMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VenueMenuView.swift; sourceTree = "<group>"; };
 		FF000001000000000000AA04 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
@@ -645,6 +656,9 @@
 		WLT005000000000000RP01 /* OrderHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrderHistoryView.swift; path = BarPass/Features/Profile/OrderHistoryView.swift; sourceTree = SOURCE_ROOT; };
 		WLT007000000000000RP01 /* OrderHistoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrderHistoryService.swift; path = BarPass/Core/Services/OrderHistoryService.swift; sourceTree = SOURCE_ROOT; };
 		XPEN01000000000000RP01 /* PointsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PointsEngine.swift; path = BarPass/Core/Services/PointsEngine.swift; sourceTree = SOURCE_ROOT; };
+		BEACEE13C69BF28A53DD71D7 /* TripChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripChatRepository.swift; path = BarPass/Repositories/TripChatRepository.swift; sourceTree = SOURCE_ROOT; };
+		BEAC19711B3963EEFD3C4D34 /* TripChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripChatView.swift; path = BarPass/Features/Trips/TripChatView.swift; sourceTree = SOURCE_ROOT; };
+		BEAC31A7495BC8A4EF5B9D41 /* MiamiEyeBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MiamiEyeBackground.swift; path = BarPass/Resources/MiamiEyeBackground.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -824,10 +838,12 @@
 				BEAC7AF5F6BB2AC582B042C7 /* SkipTheLineV2Container.swift */,
 				BEAC6820EB8201D18522AC10 /* TripsListV2View.swift */,
 				BEAC0CE3B5A6D52C8A63F4EE /* SocialV2View.swift */,
+				BEACC14C2FC4B76E0C223ACD /* PendingFriendRequestsStore.swift */,
 				BEAC2A847466EDACCE557623 /* ExploreV2View.swift */,
 				BEAC6EE93615C0614A97FD42 /* NightRecapView.swift */,
 				BEACD5F4410FD5B1CBD17E2C /* VenuePulseView.swift */,
 				BEACB9D8461132C0386C8E10 /* GroupNightView.swift */,
+				BEAC19711B3963EEFD3C4D34 /* TripChatView.swift */,
 				BEAC781DEAF882A181C8DB25 /* RemyLiveView.swift */,
 				BEAC38C3AD8DC79EC356045E /* OnboardingV2State.swift */,
 				BEAC6B6F478BD7669397C680 /* OnboardingV2Flow.swift */,
@@ -911,7 +927,9 @@
 				CC000002000000000000ME01 /* venue_media.json */,
 				CC000002000000000000LG01 /* venue_logos.json */,
 				CC000002000000000000LG02 /* VenueLogos.swift */,
+				BEACF48DD638D1768B12A2D6 /* VenueArtwork.swift */,
 				FF000001000000000000AA10 /* DesignSystem.swift */,
+				BEAC31A7495BC8A4EF5B9D41 /* MiamiEyeBackground.swift */,
 				PRIV00000000000000000001 /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
@@ -1137,6 +1155,8 @@
 			isa = PBXGroup;
 			children = (
 				FF000001000000000000AA02 /* TonightView.swift */,
+				BEACB43322EB0920FF62C29A /* TonightV2View.swift */,
+				BEAC3AF38F2693FB56B4F570 /* TonightRemyHero.swift */,
 				FF000001000000000000AA03 /* VenueDetailView.swift */,
 				BB02MENUVIEWFILEREF00001 /* VenueMenuView.swift */,
 			);
@@ -1370,6 +1390,8 @@
 				EE000002000000000000001A /* NativeAuthView.swift in Sources */,
 				FF000002000000000000AA01 /* MainTabView.swift in Sources */,
 				FF000002000000000000AA02 /* TonightView.swift in Sources */,
+				BEAC2BC5D5A2EDEE3736AA2A /* TonightV2View.swift in Sources */,
+				BEACA8BED1FB91CBA690D3E7 /* TonightRemyHero.swift in Sources */,
 				EF000002000000000000RP01 /* EventFlyerCard.swift in Sources */,
 				PYH002000000000000RP99 /* PromptYourNightHomeSection.swift in Sources */,
 				FF000002000000000000AA03 /* VenueDetailView.swift in Sources */,
@@ -1386,6 +1408,7 @@
 				AA0000010000000000000001 /* BarPassApp.swift in Sources */,
 				AA0000010000000000000002 /* AppState.swift in Sources */,
 				CC000001000000000000LG02 /* VenueLogos.swift in Sources */,
+				BEACAB1A454619ABBE4B9BBB /* VenueArtwork.swift in Sources */,
 				2A0BC0EA1346366A63326961 /* CartItem.swift in Sources */,
 				7B6B03398BDEC6245300D80C /* SkipLinePass.swift in Sources */,
 				CEF97FC6EA40560FF2D7D0EF /* SkipLinePassView.swift in Sources */,
@@ -1461,6 +1484,7 @@
 				PY000002000000000000RP01 /* PromptYourNightView.swift in Sources */,
 				NP000002000000000000RP01 /* NightPlanner.swift in Sources */,
 				FF000002000000000000AA10 /* DesignSystem.swift in Sources */,
+				BEAC222AB7DA15AEA0D1CC06 /* MiamiEyeBackground.swift in Sources */,
 				FF000002000000000000AA11 /* VenueRepository.swift in Sources */,
 				FF000002000000000000AA12 /* LocalVenueRepository.swift in Sources */,
 				FF000002000000000000AA13 /* RepositoryDependencies.swift in Sources */,
@@ -1547,10 +1571,13 @@
 				BEACE874440ECC8C5B1A6C8F /* SkipTheLineV2Container.swift in Sources */,
 				BEAC2CB367B2C22A0F89EA9F /* TripsListV2View.swift in Sources */,
 				BEAC782F42D01BC15E3A429B /* SocialV2View.swift in Sources */,
+				BEAC55ED912C214B71032D44 /* PendingFriendRequestsStore.swift in Sources */,
 				BEAC6060455583632B7A814F /* ExploreV2View.swift in Sources */,
 				BEACF08D8071A8F9CD9E6E1C /* NightRecapView.swift in Sources */,
 				BEAC77F4E12A87625F419CCA /* VenuePulseView.swift in Sources */,
 				BEAC7FD1C144EDAA6F0C5EBB /* GroupNightView.swift in Sources */,
+				BEAC766A700184FB610546A7 /* TripChatView.swift in Sources */,
+				BEAC23759C48D265901FBF62 /* TripChatRepository.swift in Sources */,
 				BEAC490E91A6939B0CD3CD9D /* RemyLiveView.swift in Sources */,
 				BEAC37FCACB3E59436914C19 /* OnboardingV2State.swift in Sources */,
 				BEACF82A9C6956AE73B8066C /* OnboardingV2Flow.swift in Sources */,
@@ -1668,7 +1695,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 94;
+				CURRENT_PROJECT_VERSION = 124;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1696,7 +1723,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 94;
+				CURRENT_PROJECT_VERSION = 124;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1826,7 +1853,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 94;
+				CURRENT_PROJECT_VERSION = 124;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1849,7 +1876,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 94;
+				CURRENT_PROJECT_VERSION = 124;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
