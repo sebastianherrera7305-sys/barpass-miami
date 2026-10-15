@@ -48,14 +48,20 @@ struct PlanChatMessage: Identifiable, Codable, Equatable {
     /// tappable "Build my plan" action under it. Only the real build step
     /// calls the AI; everything before this is instant, native chat.
     var offerBuild: Bool = false
+    /// Free hit today's message limit — renders a distinct "Upgrade to
+    /// Premium" button under this message instead of a suggestion chip
+    /// (tapping it opens `PlanUpgradeSheet`, not another chat turn). See
+    /// `PlanUsageService`.
+    var offerUpgrade: Bool = false
     /// Tappable quick-suggestion chips attached under this message — used
     /// on the opening greeting so the old separate "quick ideas" header
     /// block collapses into the chat itself instead of sitting above it.
     var suggestions: [String] = []
 
-    init(id: UUID = UUID(), role: String, text: String = "", plan: NightPlan? = nil, isThinking: Bool = false, isStreaming: Bool = false, offerBuild: Bool = false, suggestions: [String] = []) {
+    init(id: UUID = UUID(), role: String, text: String = "", plan: NightPlan? = nil, isThinking: Bool = false, isStreaming: Bool = false, offerBuild: Bool = false, offerUpgrade: Bool = false, suggestions: [String] = []) {
         self.id = id; self.role = role; self.text = text; self.plan = plan
         self.isThinking = isThinking; self.isStreaming = isStreaming; self.offerBuild = offerBuild
+        self.offerUpgrade = offerUpgrade
         self.suggestions = suggestions
     }
 }
@@ -99,6 +105,18 @@ struct PlanView: View {
     @State private var currentSessionId: UUID = UUID()
     @State private var showHistory = false
     @State private var showCleanupPrompt = false
+    /// Premium vs Free — checked once per screen visit (StoreKit's own
+    /// `Transaction.updates` keeps `PlanEntitlementService`'s cache current
+    /// for the rest of the session; this just mirrors it locally for the UI
+    /// to read synchronously). Drives both the usage gate and whether
+    /// `rememberedVibe` is ever sent (see `PlanPreferencesService`).
+    @State private var isPremium = false
+    /// A short line distilled from the user's last plan, Premium only —
+    /// loaded once when a screen visit starts a blank conversation, then
+    /// sent on every turn of that session so Remy has a sense of taste
+    /// before the user says a word this time.
+    @State private var rememberedVibe: String?
+    @State private var showUpgradeSheet = false
     @StateObject private var keyboard = KeyboardHeight()
     @ObservedObject private var chromeMetrics = BottomChromeMetrics.shared
     @ObservedObject private var checkInStore = CheckInStore.shared
@@ -296,7 +314,7 @@ struct PlanView: View {
                         VStack(alignment: .leading, spacing: 18) {
                             ForEach(messages) { message in
                                 PlanChatBubble(message: message, onSave: savePlan, onBuildPlan: sendToRemy, onSuggestion: send,
-                                               onOpenVenue: { chatVenue = $0 })
+                                               onOpenVenue: { chatVenue = $0 }, onUpgrade: { showUpgradeSheet = true })
                                     .id(message.id)
                                     .padding(.horizontal, 20)
                             }
@@ -369,6 +387,7 @@ struct PlanView: View {
         .fullScreenCover(item: $chatVenue) { venue in
             NavigationStack { VenueDetailView(venue: venue).appState(appState) }
         }
+        .sheet(isPresented: $showUpgradeSheet) { PlanUpgradeSheet() }
         .task {
             restoreMessages()
             await loadSavedPlans()
@@ -379,6 +398,8 @@ struct PlanView: View {
             // to show in the chat.
             userLocation = await locationService.requestOnce(.coarse)
             displayName = try? await RepositoryDependencies.displayName.getDisplayName()
+            isPremium = await PlanEntitlementService.shared.isPremium()
+            if isPremium { rememberedVibe = await PlanPreferencesService.shared.load() }
             greetIfNeeded()
         }
         .onDisappear { streamTask?.cancel() }
@@ -656,9 +677,33 @@ struct PlanView: View {
         if let userLocation {
             context.userLocation = (lat: userLocation.latitude, lng: userLocation.longitude)
         }
+        context.tier = isPremium ? "premium" : "free"
+        if isPremium { context.rememberedVibe = rememberedVibe }
 
         streamTask?.cancel()
         streamTask = Task {
+            // The actual, felt difference between Free and Premium beyond a
+            // higher usage cap (see PlanUsageService's doc comment) — this
+            // is the one call in the whole screen that must be gated before
+            // it ever reaches Remy, so a Free user who's out of turns never
+            // spends a real model call finding that out.
+            if !isPremium {
+                let signedIn = AuthService.shared.restoreSession() != nil
+                if await PlanUsageService.shared.currentState(isSignedIn: signedIn) == .limitReached {
+                    await MainActor.run {
+                        updateMessage(assistantId) {
+                            $0.isThinking = false
+                            $0.isStreaming = false
+                            $0.text = L10n.tSync("plan.usage.limitReached")
+                            $0.offerUpgrade = true
+                        }
+                        isSending = false
+                        persistMessages()
+                    }
+                    return
+                }
+            }
+
             var raw = ""
             do {
                 for try await event in APIClient.streamConciergeChat(messages: apiMessages, city: city, context: context) {
@@ -701,7 +746,22 @@ struct PlanView: View {
                         $0.isThinking = false
                         $0.isStreaming = false
                     }
-                    if plan != nil { BPAnalytics.track(.createPlan(method: "ai")) }
+                    if let plan {
+                        BPAnalytics.track(.createPlan(method: "ai"))
+                        // Premium-only memory (PlanPreferencesService's doc
+                        // comment) — a plan is the clearest taste signal a
+                        // turn can produce, so this is the moment to save it,
+                        // not every turn.
+                        if isPremium {
+                            let summary = "\(plan.title): \(plan.aiInsight)"
+                            rememberedVibe = summary
+                            Task { await PlanPreferencesService.shared.save(summary: summary) }
+                        }
+                    }
+                    if !isPremium {
+                        let signedIn = AuthService.shared.restoreSession() != nil
+                        Task { await PlanUsageService.shared.recordUsage(isSignedIn: signedIn) }
+                    }
                 }
             } catch {
                 await MainActor.run {
@@ -772,6 +832,7 @@ private struct PlanChatBubble: View {
     let onBuildPlan: () -> Void
     let onSuggestion: (String) -> Void
     var onOpenVenue: ((BarPassVenue) -> Void)? = nil
+    var onUpgrade: (() -> Void)? = nil
     @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var venueStore: VenueStore
     private let amber = Color(red: 0.92, green: 0.72, blue: 0.28)
@@ -839,6 +900,21 @@ private struct PlanChatBubble: View {
                 }
                 if let plan = message.plan {
                     NightPlanView(plan: plan, onSave: onSave)
+                }
+                if message.offerUpgrade, let onUpgrade {
+                    Button(action: onUpgrade) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "sparkles")
+                            Text(l10n.t("plan.usage.upgradeCTA"))
+                        }
+                        .font(.bpScaled(13, weight: .semibold))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(amber, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .bpAccessibility(label: l10n.t("plan.usage.upgradeCTA"), isButton: true)
                 }
                 if !message.suggestions.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {

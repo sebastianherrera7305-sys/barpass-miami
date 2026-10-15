@@ -395,6 +395,19 @@ Sign Out
 
 ---
 
+## Plan chat — Premium vs Free differentiation (2026-09-16)
+
+`Features/Plan/PlanView.swift` is a real streaming chat with "Remy" (`/api/concierge`, Groq/NVIDIA, multi-city, real user context) — this was rebuilt from scratch by the team independently of an earlier consolidation PR (#3, closed 2026-09-16 as superseded once this streaming version already shipped through several TestFlight builds). Until this change, Premium meant nothing beyond a StoreKit entitlement that nothing in the app actually checked — Free and Premium chatted identically. Two concrete, honest differentiators, symmetric across both generation paths:
+
+- **Stop count** — Premium gets 3-6 stops ("build the FULL night"), Free is capped at 2-3 ("keep it tight"). This is a prompt instruction (`concierge-prompt.ts`'s tier block) AND a hard server-side enforcement: `reply-stream.ts`'s `createReplyTransform({ tier })` trims any Free plan to `FREE_MAX_STOPS = 3` and recomputes `totalEstimate` from the kept stops, regardless of what the model actually wrote — so a model that ignores the instruction can never hand Free the full Premium-width itinerary. Unit-tested in `reply-stream.test.ts` ("Free vs Premium stop count").
+- **Cross-conversation memory, Premium only** — `Core/Services/PlanPreferencesService.swift` (new actor) saves a short line distilled from the user's last AI-generated plan (`"\(plan.title): \(plan.aiInsight)"`) to the `plan_preferences` table (`context: {summary: string}` jsonb) after every Premium plan-generating turn, and sends it back as `rememberedVibe` in `ConciergeContext` on every turn of a new conversation. Free never calls this at all — every new conversation starts blank, per 05_PREMIUM_AI_SPEC.md ("Start lightweight... Do not build a complicated memory system in V1").
+- **Real daily usage cap for Free** — `Core/Services/PlanUsageService.swift` (new actor), gated in `PlanView.sendToRemy()` *before* the stream starts (a Free user who's out of turns never spends a real model call finding that out). Signed-in users: `plan_usage` table + atomic RPCs `increment_plan_usage()`/`get_plan_usage()` (upsert, resets on UTC date rollover, no cron). Guests: UserDefaults, same daily reset logic, no server-side identity to key off of. The limit itself is `app_config.plan_free_daily_limit` (currently 10) — configurable from Supabase, not hardcoded. Hitting the limit shows a canned message + an "Upgrade to Premium" action (`PlanChatMessage.offerUpgrade`) that opens `Features/Plan/PlanUpgradeSheet.swift` (real StoreKit product fetch, same honest "Coming soon" fallback as `PlanEntitlementService`'s doc comment describes when no product is configured yet in App Store Connect).
+- **`Core/Services/PlanEntitlementService.swift`** (new) — the actual StoreKit 2 entitlement check; the ONLY place in the app that knows about entitlement. Everything above reads `PlanEntitlementService.shared.isPremium()`, which is real but currently always reports `false` — same App Store Connect product gap this doc has flagged for the whole Plan chat effort.
+
+**Not yet verified against production**: `barpass-v2.vercel.app` doesn't have this backend deploy yet — testing against it in the simulator exercises the OLD (undifferentiated) route until this is deployed. `npx vitest run` (172/172) and `npx tsc --noEmit` are clean locally, and the iOS build succeeded with a real end-to-end message round-trip against production (confirming the new `tier`/`rememberedVibe` fields on `ConciergeContext` don't break the request shape — Zod's default strip-unknown-keys means production today silently ignores them, exactly the safe/no-op behavior wanted until deploy).
+
+---
+
 ## Connected Tools
 
 - **Figma** — <EMAIL> (Starter)
@@ -406,4 +419,4 @@ Sign Out
 
 ---
 
-*Última actualización: 2026-09-01*
+*Última actualización: 2026-09-16*

@@ -74,6 +74,15 @@ export const conciergeChatRequestSchema = z.object({
       favoriteVenueIds: z.array(z.string().min(1).max(64)).max(30).optional(),
       /** Device location, when the app already has it (no new prompt is triggered for this). */
       userLocation: z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }).optional(),
+      /** Premium vs Free (2026-09-16) — the actual, felt difference beyond
+       * a higher daily message cap: Premium gets a longer, multi-stop
+       * night; Free is capped server-side regardless of what the model
+       * writes (see route.ts's FREE_MAX_STOPS). Absent means "free". */
+      tier: z.enum(["free", "premium"]).optional(),
+      /** Premium-only cross-conversation memory — a short line distilled
+       * from the user's last plan (iOS: PlanPreferencesService). Never
+       * sent by Free. Not PII, just taste ("rooftop sunset, late club"). */
+      rememberedVibe: z.string().max(200).optional(),
     })
     .optional(),
 });

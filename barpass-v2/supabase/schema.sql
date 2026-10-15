@@ -199,6 +199,114 @@ create policy "manage own plans"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- PLAN USAGE / FREE QUOTA (2026-09-16) ──────────────────────────
+-- One row per signed-in user, resets automatically when `usage_date` no
+-- longer matches "today" (UTC) — enforced in the RPCs below, not a cron
+-- job. Guests have no server-side identity, so their usage is tracked
+-- device-locally in UserDefaults instead (see PlanUsageService.swift);
+-- this table only ever holds signed-in users' counts.
+create table if not exists public.plan_usage (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  usage_date date not null default (now() at time zone 'utc')::date,
+  message_count int not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.plan_usage enable row level security;
+
+create policy "manage own plan usage"
+  on public.plan_usage for all
+  to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+-- Atomic read-and-increment — a plain client-side read-then-write would
+-- race under concurrent taps; this is one upsert statement.
+create or replace function public.increment_plan_usage()
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  today date := (now() at time zone 'utc')::date;
+  new_count int;
+begin
+  insert into public.plan_usage (user_id, usage_date, message_count, updated_at)
+  values (auth.uid(), today, 1, now())
+  on conflict (user_id) do update
+    set message_count = case when public.plan_usage.usage_date = today then public.plan_usage.message_count + 1 else 1 end,
+        usage_date = today,
+        updated_at = now()
+  returning message_count into new_count;
+  return new_count;
+end;
+$$;
+
+grant execute on function public.increment_plan_usage() to authenticated;
+
+-- Read-only — today's count without incrementing, 0 if there's no row yet
+-- or the stored row is from a previous day.
+create or replace function public.get_plan_usage()
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  today date := (now() at time zone 'utc')::date;
+  cnt int;
+begin
+  select message_count into cnt from public.plan_usage
+    where user_id = auth.uid() and usage_date = today;
+  return coalesce(cnt, 0);
+end;
+$$;
+
+grant execute on function public.get_plan_usage() to authenticated;
+
+-- APP CONFIG (2026-09-16) ────────────────────────────────────────
+-- Small key/value store for values that need to change without an app
+-- update — starts with just the Free daily Plan quota. Readable by
+-- anyone, including guests (anon key, no session) — nothing in here is
+-- user-specific or sensitive.
+create table if not exists public.app_config (
+  key text primary key,
+  value jsonb not null
+);
+
+alter table public.app_config enable row level security;
+
+create policy "anyone can read app config"
+  on public.app_config for select
+  using (true);
+
+insert into public.app_config (key, value)
+values ('plan_free_daily_limit', '10')
+on conflict (key) do nothing;
+
+-- PLAN PREFERENCES (2026-09-16) ──────────────────────────────────
+-- Lightweight cross-conversation memory — the actual, felt difference
+-- between Free and Premium beyond the usage cap. One row per user;
+-- `context` holds `{ "summary": "..." }`, a short line distilled from the
+-- user's last AI-generated plan (title + summary). Premium-only by
+-- product decision (PlanView only reads/writes this for entitled users,
+-- via PlanPreferencesService.swift) — Free always starts a new
+-- conversation blank.
+create table if not exists public.plan_preferences (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  context jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.plan_preferences enable row level security;
+
+create policy "manage own plan preferences"
+  on public.plan_preferences for all
+  to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
 -- Useful indexes ──────────────────────────────────────────────
 create index if not exists venues_neighborhood_idx on public.venues (neighborhood);
 create index if not exists venues_trending_idx on public.venues (is_trending) where is_trending;
