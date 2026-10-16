@@ -63,6 +63,12 @@ struct ProfileView: View {
     @State private var isSavingDisplayName = false
     @State private var displayNameSaveError: String?
 
+    // Build 1.1 — Posts tipo IG
+    @State private var myPosts: [UserPost] = []
+    @State private var myPostsCount: Int = 0
+    @State private var showPostComposer = false
+    @State private var selectedPost: UserPost?
+
     // Night Recap — entrada real (no DEBUG). Se consulta el mismo agregador
     // que arma la pantalla (`NightRecapStore.load()`) sobre la ventana
     // "anoche" (ayer 18:00 → hoy 06:00); si no hubo check-ins reales, la fila
@@ -147,6 +153,40 @@ struct ProfileView: View {
                         }
                     }
                     .padding(.top, 60)
+
+                    // Build 1.1 — contador de posts junto al nivel + botón +
+                    HStack(spacing: 24) {
+                        statInline(value: "\(myPostsCount)", label: "posts")
+                        statInline(value: "\(engine.checkinCount)", label: "check-ins")
+                        statInline(value: "\(engine.reviewCount)", label: "reviews")
+                        Spacer()
+                        Button {
+                            BPHaptics.medium()
+                            showPostComposer = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 16, weight: .heavy))
+                                .foregroundStyle(.black)
+                                .frame(width: 44, height: 44)
+                                .background(Color.bpAmber, in: Circle())
+                                .shadow(color: Color.bpAmber.opacity(0.4), radius: 10, y: 4)
+                        }
+                        .buttonStyle(.plain)
+                        .bpAccessibility(label: "Crear post", hint: "Publica una foto en tu perfil", isButton: true)
+                    }
+                    .padding(.horizontal, BPSpacing.lg)
+                    .padding(.top, 4)
+
+                    // Build 1.1 — grid de posts tipo IG. Vacío-state visible
+                    // (el owner pidió "no posts falsos ni próximamente") —
+                    // dice "Aún no hay posts" + hint para tocar +.
+                    PostGridSection(
+                        userId: AuthService.shared.restoreSession()?.user.id ?? "",
+                        posts: myPosts,
+                        isOwner: true,
+                        onTapPost: { post in selectedPost = post }
+                    )
+                    .padding(.horizontal, 2)
 
                     // Points card
                     VStack(spacing: 14) {
@@ -262,74 +302,12 @@ struct ProfileView: View {
                     // Perfil scrollea mucho, y algo que hay que buscar 30
                     // segundos se reporta como "we were unable to locate".
                     // La fila entera vive en LegalAndHelpView.swift.
-                    LegalAndHelpProfileRow()
-
-                    // Dirección de casa (botón "Ir a casa")
-                    Button {
-                        BPHaptics.light()
-                        showHomeAddress = true
-                    } label: {
-                        HStack(spacing: 12) {
-                            Text("🏠").font(.bpScaled(22))
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(l10n.t("profile.homeAddress.title"))
-                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
-                                Text(l10n.t("profile.homeAddress.subtitle"))
-                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.bpScaled(13, weight: .semibold))
-                                .foregroundStyle(Color.bpAmber)
-                        }
-                        .padding(16)
-                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
-                    }
-                    .buttonStyle(.plain)
-                    .bpAccessibility(label: l10n.t("profile.homeAddress.title"), hint: l10n.t("profile.homeAddress.hint"), isButton: true)
-                    .padding(.horizontal, BPSpacing.lg)
-                    .helpTarget("profile.homeAddress")
-                    .sheet(isPresented: $showHomeAddress) {
-                        HomeAddressSettingsView()
-                    }
-
-                    // City switcher — restores access to the one-time
-                    // CityPickerView so the user can switch Miami ↔ NY ↔
-                    // Chicago at any time instead of being stuck on their
-                    // first-launch choice.
-                    Button {
-                        BPHaptics.light()
-                        showCityChange = true
-                    } label: {
-                        HStack(spacing: 12) {
-                            Text("📍").font(.bpScaled(22))
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Ciudad")
-                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
-                                Text(currentCity ?? "Elige tu ciudad")
-                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.bpScaled(13, weight: .semibold))
-                                .foregroundStyle(Color.bpAmber)
-                        }
-                        .padding(16)
-                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, BPSpacing.lg)
-                    .sheet(isPresented: $showCityChange) {
-                        NavigationStack {
-                            CityPickerView {
-                                currentCity = SelectedCityStore.selectedCity
-                                showCityChange = false
-                            }
-                        }
-                        .presentationBackground(.black)
-                    }
+                    // Build 1.1: removidos del scroll los duplicados que
+                    // ahora viven en el ⚙ sheet exclusivamente — Legal,
+                    // Dirección de casa, Ciudad switcher. El owner pidió
+                    // "sin duplicados". Los handlers siguen cableados en
+                    // SettingsSheet → showHomeAddress / showCityChange y
+                    // esas sheets se montan abajo igual.
 
                     // "Tu última noche" — Night Recap entry point
                     //
@@ -489,139 +467,15 @@ struct ProfileView: View {
                     // built — AppearanceStore now always resolves to dark (see
                     // ThemeService.swift), so this control has nothing to do.
 
-                    // Autoplay — apagado real, no solo el X de la barra flotante.
-                    HStack {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(l10n.t("profile.autoplay.title"))
-                                .font(.bpScaled(15, weight: .bold))
-                                .foregroundStyle(Color.bpInk)
-                            Text(l10n.t("profile.autoplay.subtitle"))
-                                .font(.bpScaled(11))
-                                .foregroundStyle(Color.bpTextSecondary)
-                        }
-                        Spacer()
-                        Toggle("", isOn: $autoplay.enabled)
-                            .labelsHidden()
-                            .tint(Color.bpAmber)
-                            .onChange(of: autoplay.enabled) { _, on in
-                                BPHaptics.light()
-                                if !on { MusicNowPlayingObserver.shared.stop() }
-                            }
-                    }
-                    .padding(18)
-                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
-                    .padding(.horizontal, BPSpacing.lg)
-                    .bpAccessibility(label: l10n.t("profile.autoplay.title"), hint: autoplay.enabled ? l10n.t("profile.autoplay.on") : l10n.t("profile.autoplay.off"), isButton: true)
-                    .helpTarget("profile.autoplay")
+                    // Build 1.1 — removidos del scroll: Autoplay toggle,
+                    // City switcher, Universidad / Greek, sección Account
+                    // completa (email + Cerrar sesión + Eliminar cuenta).
+                    // Todos siguen accesibles desde el ⚙ gear → SettingsSheet.
+                    // Mantenemos el VStack Account como contenedor vacío para
+                    // no romper los debug buttons que viven adentro.
 
-                    // City
-                    Button {
-                        BPHaptics.medium()
-                        appState.showCityPicker = true
-                    } label: {
-                        let identity = CityIdentity.forCity(currentCity)
-                        HStack(spacing: 10) {
-                            CityMascotIcon(city: currentCity, size: 28)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(l10n.t("cityGate.title"))
-                                    .font(.bpScaled(15, weight: .bold))
-                                    .foregroundStyle(Color.bpInk)
-                                Text(currentCity.map { identity.nickname.isEmpty ? $0 : "\($0) · \(identity.nickname)" } ?? l10n.t("cityGate.change.hint"))
-                                    .font(.bpScaled(11))
-                                    .foregroundStyle(Color.bpTextSecondary)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.bpScaled(13, weight: .semibold))
-                                .foregroundStyle(Color.bpTextTertiary)
-                        }
-                        .padding(18)
-                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, BPSpacing.lg)
-                    .bpAccessibility(label: currentCity.map { "\(l10n.t("cityGate.title")): \($0)" } ?? l10n.t("cityGate.title"), hint: l10n.t("cityGate.change.hint"), isButton: true)
-                    .helpTarget("profile.city")
-                    .onReceive(NotificationCenter.default.publisher(for: .selectedCityChanged)) { note in
-                        currentCity = note.object as? String
-                    }
-
-                    // University / Greek Life affiliation (self-declared, optional)
-                    Button {
-                        BPHaptics.medium()
-                        showAffiliationPicker = true
-                    } label: {
-                        HStack(spacing: 10) {
-                            Image(systemName: "graduationcap.fill")
-                                .font(.bpScaled(20))
-                                .foregroundStyle(Color.bpAmber)
-                                .frame(width: 28)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(l10n.t("greek.profile.title"))
-                                    .font(.bpScaled(15, weight: .bold))
-                                    .foregroundStyle(Color.bpInk)
-                                Text(affiliationSubtitle)
-                                    .font(.bpScaled(11))
-                                    .foregroundStyle(Color.bpTextSecondary)
-                                    .lineLimit(1)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.bpScaled(13, weight: .semibold))
-                                .foregroundStyle(Color.bpTextTertiary)
-                        }
-                        .padding(18)
-                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.horizontal, BPSpacing.lg)
-                    .bpAccessibility(label: l10n.t("greek.profile.title"), hint: affiliationSubtitle, isButton: true)
-                    .helpTarget("profile.affiliation")
-
-                    // Account
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(l10n.t("profile.account"))
-                            .font(.bpScaled(16, weight: .bold))
-                            .foregroundStyle(Color.bpInk)
-
-                        if let session = AuthService.shared.restoreSession() {
-                            HStack(spacing: 10) {
-                                Image(systemName: "person.crop.circle.badge.checkmark")
-                                    .font(.bpScaled(18)).foregroundStyle(Color.bpGreen)
-                                Text(session.user.email ?? l10n.t("profile.account.activeSession"))
-                                    .font(.bpScaled(14)).foregroundStyle(Color.bpTextSecondary)
-                                    .lineLimit(1)
-                                Spacer()
-                            }
-                            Button {
-                                BPHaptics.medium()
-                                AuthService.shared.signOut()
-                                appState.resetUserState()
-                                appState.showNativeAuth = true
-                            } label: {
-                                Text(l10n.t("profile.account.signOut"))
-                                    .font(.bpScaled(14, weight: .bold))
-                                    .foregroundStyle(Color.bpDanger)
-                                    .frame(maxWidth: .infinity).padding(.vertical, 12)
-                                    .background(Color.bpDanger.opacity(0.1), in: Capsule())
-                            }
-                            .buttonStyle(.plain)
-                            .bpAccessibility(label: l10n.t("profile.account.signOut"), hint: l10n.t("profile.signOut.hint"), isButton: true)
-
-                            Button {
-                                BPHaptics.light()
-                                showDeleteAccount = true
-                            } label: {
-                                Text(l10n.t("profile.account.deleteAccount"))
-                                    .font(.bpScaled(13, weight: .semibold))
-                                    .foregroundStyle(Color.bpTextSecondary)
-                                    .frame(maxWidth: .infinity).padding(.vertical, 10)
-                            }
-                            .buttonStyle(.plain)
-                            .bpAccessibility(label: l10n.t("profile.account.deleteAccount"), hint: l10n.t("deleteAccount.hint"), isButton: true)
+                        if AuthService.shared.restoreSession() != nil {
 
                             // Debug previews — Tonight v17.1 screens 8-11, not yet
                             // wired to the main nav. Lets the owner see them in
@@ -776,6 +630,20 @@ struct ProfileView: View {
             .presentationBackground(.black)
             .preferredColorScheme(.dark)
         }
+        // Sheets re-cableados acá después de haber quitado las filas
+        // inline (Build 1.1) — los triggers ahora viven en SettingsSheet.
+        .sheet(isPresented: $showHomeAddress) {
+            HomeAddressSettingsView()
+        }
+        .sheet(isPresented: $showCityChange) {
+            NavigationStack {
+                CityPickerView {
+                    currentCity = SelectedCityStore.selectedCity
+                    showCityChange = false
+                }
+            }
+            .presentationBackground(.black)
+        }
         .navigationDestination(isPresented: $showPasses) { OrderHistoryView() }
         // The "Mis pases" Home Screen quick action lands on this tab and asks
         // for the history, so the shortcut ends where its label promises.
@@ -906,6 +774,20 @@ struct ProfileView: View {
         .task { displayName = (try? await RepositoryDependencies.displayName.getDisplayName()) ?? nil }
         .task { avatarConfig = (try? await RepositoryDependencies.avatar.getAvatarConfig()) ?? nil }
         .task { await probeNightRecap() }
+        .task { await loadMyPosts() }
+        .sheet(isPresented: $showPostComposer) {
+            PostComposerView { post in
+                myPosts.insert(post, at: 0)
+                myPostsCount += 1
+            }
+            .environmentObject(venueStore)
+        }
+        .sheet(item: $selectedPost) { post in
+            PostDetailView(post: post, isOwner: true) { deleted in
+                myPosts.removeAll { $0.id == deleted.id }
+                myPostsCount = max(0, myPostsCount - 1)
+            }
+        }
         .sheet(isPresented: $showNightRecap) {
             // Real-data entrada: `NightRecapView(data: ...)` rinde el payload
             // ya cargado. El CTA del propio recap llama a `onDismiss`, que
@@ -998,6 +880,18 @@ struct ProfileView: View {
     /// localmente para rendir la fila sólo cuando hay noche real que mostrar
     /// (≥ 1 check-in). Fallos de red o estado vacío → `nil` → fila oculta.
     /// Sin side effects fuera de `nightRecapData`.
+    /// Carga los posts propios para el grid del perfil + conteo.
+    /// RLS filtra server-side (ver user_posts_schema.sql): propio
+    /// siempre visible, el resto por amistad/privacidad.
+    private func loadMyPosts() async {
+        guard let userId = AuthService.shared.restoreSession()?.user.id else { return }
+        let repo: UserPostRepository = RepositoryDependencies.userPost
+        if let fetched = try? await repo.posts(forUser: userId, limit: 60) {
+            myPosts = fetched
+            myPostsCount = fetched.count
+        }
+    }
+
     private func probeNightRecap() async {
         let store = NightRecapStore(venueStore: venueStore)
         await store.load()
@@ -1027,6 +921,20 @@ struct ProfileView: View {
             .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.bpAmber.opacity(0.25)))
         }
         .buttonStyle(.plain)
+    }
+
+    /// Stat compacto para la fila header tipo IG (sin tarjeta, mono).
+    private func statInline(value: String, label: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(value)
+                .font(.system(size: 18, weight: .black, design: .rounded))
+                .foregroundStyle(Color.bpInk)
+                .contentTransition(.numericText())
+            Text(label)
+                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                .tracking(1.4)
+                .foregroundStyle(Color.bpTextSecondary)
+        }
     }
 
     private func statCard(value: String, label: String, icon: String) -> some View {
@@ -1178,6 +1086,7 @@ private struct SettingsSheet: View {
 
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var l10n = L10n.shared
+    @ObservedObject private var privacy = ProfilePrivacyStore.shared
 
     var body: some View {
         List {
@@ -1192,7 +1101,11 @@ private struct SettingsSheet: View {
                 themeRow
                 autoplayRow
             }
-            Section("Notificaciones y privacidad") {
+            Section(header: Text("Privacidad"),
+                    footer: Text("Si activás cuenta privada, solo tus amigos aceptados ven tus posts. Si no, cualquier usuario de BarPass puede verlos desde tu perfil.")) {
+                privacyRow
+            }
+            Section("Notificaciones") {
                 row("Notificaciones del sistema", icon: "bell.fill", onTap: openSystemSettings)
             }
             Section("Ayuda y legal") {
@@ -1272,6 +1185,30 @@ private struct SettingsSheet: View {
             Toggle("", isOn: $autoplayEnabled)
                 .labelsHidden()
                 .tint(Color.bpAmber)
+        }
+    }
+
+    /// Toggle "Cuenta privada". `nil` → disabled hasta que
+    /// ProfilePrivacyStore cargue el valor inicial del server.
+    private var privacyRow: some View {
+        HStack {
+            settingsRowLabel("Cuenta privada", icon: "lock.fill")
+            Spacer()
+            if let current = privacy.isPrivate {
+                Toggle("", isOn: Binding(
+                    get: { current },
+                    set: { newValue in
+                        BPHaptics.light()
+                        Task { await privacy.setPrivate(newValue) }
+                    }
+                ))
+                .labelsHidden()
+                .tint(Color.bpAmber)
+                .disabled(privacy.isSaving)
+            } else {
+                ProgressView().tint(Color.bpAmber)
+                    .task { await privacy.refresh() }
+            }
         }
     }
 

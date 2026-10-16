@@ -16,6 +16,13 @@ enum RepositoryDependencies {
     /// Votes on a trip's stops — "votan entre varios spots y gana uno".
     nonisolated(unsafe) static var tripStopVote: TripStopVoteRepository = SupabaseTripStopVoteRepository()
     nonisolated(unsafe) static var post: PostRepository = SupabasePostRepository()
+    /// Posts sociales tipo IG (foto + caption + venue opcional, friend-
+    /// visible por default pero público si profiles.is_private=false).
+    /// Backend: `public.posts` + bucket `user-posts` (ver
+    /// supabase/user_posts_schema.sql). Distinto de `post` arriba, que
+    /// sigue siendo reviews textuales (venue_posts, nunca aplicado en
+    /// prod — queda inerte por si lo revivimos).
+    nonisolated(unsafe) static var userPost: UserPostRepository = SupabaseUserPostRepository()
     nonisolated(unsafe) static var greekLife: GreekLifeRepository = SupabaseGreekLifeRepository()
     nonisolated(unsafe) static var profileAffiliation: ProfileAffiliationRepository = SupabaseProfileAffiliationRepository()
     nonisolated(unsafe) static var chapterChat: ChapterChatRepository = SupabaseChapterChatRepository()
@@ -67,6 +74,13 @@ enum RepositoryDependencies {
     /// 1:1 DMs between accepted friends — same encrypted-at-rest,
     /// RPC-only, rate-limited, reportable design as the chapter chat.
     nonisolated(unsafe) static var friendChat: FriendChatRepository = SupabaseFriendChatRepository()
+
+    /// Group chat scoped to one trip (barpass-v2/supabase/trip_chat_schema.sql).
+    /// Plain text, polled (not realtime), RLS'd to the trip's roster.
+    /// Until the migration runs on Supabase the RPC returns 404 and this
+    /// repository surfaces an empty backlog so the UI empty-states honestly
+    /// instead of showing a fabricated placeholder.
+    nonisolated(unsafe) static var tripChat: TripChatRepository = SupabaseTripChatRepository()
 
     /// Host-run nights (free RSVP tiers, waiting list, door). Writes go
     /// through barpass-v2's /api/host-events routes, not PostgREST — the RPCs
