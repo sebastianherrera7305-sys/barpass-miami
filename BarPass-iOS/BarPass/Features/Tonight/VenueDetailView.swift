@@ -938,9 +938,20 @@ struct VenueDetailView: View {
 
             Button {
                 BPAnalytics.track(.openMaps(venue: venue.name))
-                let coords = "\(venue.latitude),\(venue.longitude)"
-                guard let url = URL(string: "https://maps.apple.com/?ll=\(coords)&q=\(venue.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")") else { return }
-                UIApplication.shared.open(url)
+                // Route via MKMapItem.openInMaps — same code path as the
+                // "How to get there" linkButton (`openMaps()` below).
+                // The old `https://maps.apple.com/?ll=…&q=…` URL silently
+                // did nothing for venue names with characters outside
+                // `.urlQueryAllowed` (ampersand, slash, accented letters
+                // that round-trip as "/" in Maps' path parser) because
+                // `UIApplication.shared.open(url)` fails that URL without
+                // surfacing an error. MKMapItem takes the raw coordinate
+                // and never touches a URL string, so no encoding to go
+                // wrong. TestFlight Build 128: "Directions has an error".
+                let placemark = MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: venue.latitude, longitude: venue.longitude))
+                let mapItem = MKMapItem(placemark: placemark)
+                mapItem.name = venue.name
+                mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "mappin.circle.fill").font(.bpScaled(18))
@@ -980,9 +991,15 @@ struct VenueDetailView: View {
                     .background(.ultraThinMaterial, in: Circle())
                     .environment(\.colorScheme, .dark)
                     .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            // `.contentShape` INSIDE the label used to only widen the
+            // Image's own hit area; `.buttonStyle(.plain)` still shrank
+            // the Button's tap target to the chevron glyph itself (TestFlight
+            // Build 128: "la X de arriba a la izquierda no cierra"). Setting
+            // the contentShape on the Button itself makes the whole 44x44
+            // visible-and-invisible disc tappable.
+            .contentShape(Rectangle())
             .bpAccessibility(label: l10n.t("venueDetail.back"), hint: l10n.t("venueDetail.back.hint"), isButton: true)
             Spacer()
             Button {
@@ -998,9 +1015,9 @@ struct VenueDetailView: View {
                     .background(.ultraThinMaterial, in: Circle())
                     .environment(\.colorScheme, .dark)
                     .frame(minWidth: 44, minHeight: 44)
-                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .contentShape(Rectangle())
             .bpAccessibility(label: l10n.t("plan.share"), hint: l10n.t("venueDetail.share.hint"), isButton: true)
 
             HelpButton(route: .venueDetail)

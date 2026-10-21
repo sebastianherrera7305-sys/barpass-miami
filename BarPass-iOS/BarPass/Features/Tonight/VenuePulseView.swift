@@ -362,6 +362,10 @@ private struct VPulseNavBar: View {
                     .overlay(Circle().strokeBorder(Color.white.opacity(0.1)))
             }
             .buttonStyle(.plain)
+            // Sin esto, `.buttonStyle(.plain)` reducía el tap target al
+            // glifo del chevron (~16pt) y no al disco visible — el mismo
+            // bug que el navBar de VenueDetailView (TestFlight 128).
+            .contentShape(Rectangle())
 
             Spacer()
 
