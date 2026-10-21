@@ -232,7 +232,18 @@ private extension Trip {
         formatter.setLocalizedDateFormatFromTemplate("d MMM")
 
         let dateLabel = formatter.string(from: startDate).capitalized
-        let memberCount = max(1, memberIds.count + 1)   // + creator
+        // De-dupe pattern taken verbatim from GroupNightView.allMemberIds.
+        // `memberIds` already contains the creator (TripStore.create inserts
+        // at index 0, and the new server-side trigger
+        // trips_ensure_creator_in_members backs this up on insert), BUT this
+        // builds the list defensively — the old `memberIds.count + 1`
+        // double-counted the creator, so a solo trip read as "2 miembros"
+        // (TestFlight Build 128, "Miami baby" card). Flow this through a
+        // single `rosterIds` so avatars and the "N miembros" copy can
+        // never drift apart again.
+        var rosterIds: [String] = [creatorId]
+        rosterIds.append(contentsOf: memberIds.filter { $0 != creatorId })
+        let memberCount = max(1, rosterIds.count)
         let stopCount   = stops.count
 
         let sub = "\(dateLabel) · \(stopCount) parada\(stopCount == 1 ? "" : "s") · \(memberCount) miembro\(memberCount == 1 ? "" : "s")"
@@ -249,8 +260,7 @@ private extension Trip {
             routeStops.append(TripsListV2RouteStop(name: "+\(extraStops)", time: nil))
         }
 
-        let allMemberIds = ([creatorId] + memberIds).prefix(5)
-        let avatars = allMemberIds.map { id -> TripsListV2Avatar in
+        let avatars = rosterIds.prefix(5).map { id -> TripsListV2Avatar in
             TripsListV2Avatar(
                 color: TripsListV2Avatar.color(forSeed: id),
                 initial: String(id.prefix(1)).uppercased()
@@ -442,7 +452,12 @@ private extension Trip {
         formatter.locale = Locale(identifier: "es_ES")
         formatter.setLocalizedDateFormatFromTemplate("EEE")
         let dayLabel = formatter.string(from: startDate).capitalized
-        let people = max(1, memberIds.count + 1)
+        // Same off-by-one as `asV2CardModel` — `memberIds` already includes
+        // the creator, so no `+1`; the de-dupe handles rows that pre-date
+        // the server-side trigger.
+        var rosterIds: [String] = [creatorId]
+        rosterIds.append(contentsOf: memberIds.filter { $0 != creatorId })
+        let people = max(1, rosterIds.count)
         let stopsN = stops.count
         return TripsListV2PublicSection.Row(
             tripId: id,
@@ -595,24 +610,33 @@ private struct TripsListV2Header: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(Color.bpAmber)
-                        .frame(width: 6, height: 6)
-                        .overlay(
-                            Circle()
-                                .fill(Color.bpAmberBright)
-                                .frame(width: 3, height: 3)
-                        )
-                    Text("Trips · \(planCount) planes")
-                        .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                        .tracking(2.2)
-                        .foregroundStyle(Color.bpAmber)
+            // El ojo mascota vive centrado arriba del título — Juan pidió
+            // explícitamente "que salga para el medio" en el feedback de la
+            // Build 128 (antes estaba apretado contra la esquina derecha,
+            // detrás del safe area, y leía como un botón sin acción).
+            // Un ZStack centra el ojo sin afectar la línea "Trips · N planes",
+            // que sigue alineada a la izquierda como el resto del header.
+            ZStack {
+                HStack {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(Color.bpAmber)
+                            .frame(width: 6, height: 6)
+                            .overlay(
+                                Circle()
+                                    .fill(Color.bpAmberBright)
+                                    .frame(width: 3, height: 3)
+                            )
+                        Text("Trips · \(planCount) planes")
+                            .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                            .tracking(2.2)
+                            .foregroundStyle(Color.bpAmber)
+                    }
+                    Spacer()
                 }
-                Spacer()
                 TripsListV2Eye()
             }
+            .frame(maxWidth: .infinity)
 
             HStack(alignment: .firstTextBaseline, spacing: 10) {
                 Text("Tus")

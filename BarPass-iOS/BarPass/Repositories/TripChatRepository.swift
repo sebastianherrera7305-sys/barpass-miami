@@ -108,10 +108,19 @@ final actor SupabaseTripChatRepository: TripChatRepository {
         guard let http = response as? HTTPURLResponse else { throw TripChatError.unknown }
         guard 200..<300 ~= http.statusCode else {
             let bodyText = String(data: data, encoding: .utf8) ?? ""
-            // A 404 on the RPC name means the migration hasn't been run
-            // yet — surface that as "empty / can't send" rather than a
-            // generic error, so the chat card can degrade honestly.
-            if http.statusCode == 404 { throw TripChatError.notAMember }
+            // A 404 on the RPC name means the trip_chat_schema.sql migration
+            // hasn't been run yet in Supabase (Build 128 TestFlight bug A):
+            // mapping that to `.notAMember` had the client show
+            // "Ya no formas parte de este trip." on a trip the user had JUST
+            // created — the user IS a member, the backend just isn't live.
+            // For reads, return an empty backlog so the UI shows the honest
+            // empty state ("Nadie ha escrito todavía…"); for writes, surface
+            // a generic error (the composer stays usable and the user sees
+            // "Intenta de nuevo", not a lie about their membership).
+            if http.statusCode == 404 {
+                if name == "get_trip_messages" { return Data("[]".utf8) }
+                throw TripChatError.unknown
+            }
             throw TripChatError.from(responseBody: bodyText)
         }
         return data
