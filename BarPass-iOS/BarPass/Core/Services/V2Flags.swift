@@ -18,6 +18,11 @@ enum V2Flags {
         return UserDefaults.standard.bool(forKey: key)
     }
 
+    /// Tab 0 → TonightV2View in place of TonightView. Added so MainTabView
+    /// can route the first tab through the restored TonightV2View without a
+    /// compile error (the file was referenced in pbxproj since Build 124 but
+    /// only reappeared on disk in Build 129's restore commit).
+    static var tonightV2: Bool   { read("bp_v2_tonight_enabled",   default: true) }
     /// Tab 1 → ExploreV2View in place of ExploreView.
     /// Cabled to real VenueStore (pins projected into city bbox from
     /// lat/lng), real search (name/neighborhood/type, diacritic-insensitive),
