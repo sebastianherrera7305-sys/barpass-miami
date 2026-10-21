@@ -16,6 +16,22 @@ struct TonightView: View {
     /// empty row (never a visible error) since this is a bonus section on
     /// top of the app's own catalog, not something the Home feed depends on.
     @State private var liveEvents: [APIClient.LiveEvent] = []
+    /// Build 128 TestFlight: tester screenshot showed empty "Tonight, just
+    /// for you" / "Recommended for you" headers on launch with no cards
+    /// under them. Root cause was the per-section `if !X.isEmpty` guards
+    /// paired with the one global `if venueStore.isLoading { skeleton }`
+    /// branch — the moment `isLoading` cleared (fetch returned error OR
+    /// city filter emptied `venues` OR the 15s deadline fired), the
+    /// skeleton disappeared and the hide-when-empty guards took over
+    /// without surfacing that the catalog never actually arrived. 5s after
+    /// mount, if the catalog is still empty, we flip the Recommended rail
+    /// from a skeleton to a visible retry row so the user is never left
+    /// staring at an unexplained blank.
+    @State private var recommendedTimedOut = false
+    /// Fires exactly once per fresh mount of this view — resets if venues
+    /// come in late so the user doesn't see "stalled" after the real list
+    /// finally lands.
+    @State private var timeoutTask: Task<Void, Never>? = nil
 
     /// Mood Mode — browse by experience, not venue type. Each mood maps to
     /// keywords matched against type/vibes/tags/music (same approach as
@@ -320,11 +336,16 @@ struct TonightView: View {
 
                     vibeTags
 
-                    if venueStore.isLoading {
-                        skeletonContent
-                    } else if let tag = selectedTag {
+                    if let tag = selectedTag {
                         // Mood Mode: the selected experience takes over the feed.
-                        if moodVenues.isEmpty {
+                        // Nothing to show here until the catalog is in — the mood
+                        // filter runs over `venueStore.venues`, so an empty feed
+                        // while loading is a loading state, not a "no results"
+                        // outcome. Only call out the empty state once the catalog
+                        // actually landed.
+                        if venueStore.venues.isEmpty {
+                            skeletonSection(title: tag)
+                        } else if moodVenues.isEmpty {
                             VStack(spacing: 8) {
                                 Text("😴").font(.bpScaled(40))
                                 Text(l10n.t("home.mood.empty"))
@@ -344,12 +365,35 @@ struct TonightView: View {
                             section(title: l10n.t("home.favorites"), venues: favoriteVenues, style: .card)
                         }
 
+                        // "Tonight, just for you" (music match): hidden when
+                        // music isn't connected — the HypeWeekCard above owns
+                        // the connect-your-music CTA, no need to duplicate it
+                        // here. But if the user HAS connected music and the
+                        // catalog hasn't landed yet, show a skeleton under the
+                        // real header instead of letting it quietly pop in
+                        // late — same TestFlight bug class as Recommended.
                         if !musicMatchedVenues.isEmpty {
                             section(title: l10n.t("home.forYou"), venues: musicMatchedVenues, style: .hero)
+                        } else if venueStore.venues.isEmpty && MusicProfileStore.shared.passport != nil {
+                            skeletonSection(title: l10n.t("home.forYou"))
                         }
 
+                        // "Recommended for you" — the one rail that must always
+                        // resolve to SOMETHING visible on launch. Build 128
+                        // bug: the hide-when-empty guard here was invisible to
+                        // the user when the catalog fetch stalled, errored, or
+                        // the city filter emptied `venues`. Three honest states
+                        // now: cards (catalog is in), skeleton (still waiting),
+                        // retry row (5s elapsed or `loadError` is set) — no
+                        // silent collapse.
                         if !recommendedForYou.isEmpty {
                             section(title: l10n.t("home.recommended"), venues: recommendedForYou, style: .hero)
+                                .helpTarget("tonight.recommendedForYou")
+                        } else if recommendedTimedOut || venueStore.loadError != nil {
+                            recommendedRetryRow
+                                .helpTarget("tonight.recommendedForYou")
+                        } else {
+                            skeletonSection(title: l10n.t("home.recommended"))
                                 .helpTarget("tonight.recommendedForYou")
                         }
 
@@ -407,11 +451,50 @@ struct TonightView: View {
         .task {
             liveEvents = (try? await APIClient.getLiveEvents(city: venueStore.selectedCity ?? "Miami")) ?? []
         }
+        // Starts the 5s stall timer on mount; cancels and resets as soon as
+        // the catalog actually arrives. Separate from VenueStore's own 15s
+        // deadline (which only clears `isLoading`) — this one specifically
+        // flips the Recommended rail to a visible retry row so the user
+        // knows WHY the section hasn't filled, instead of staring at an
+        // unexplained blank for the full 15s.
+        .task {
+            armTimeoutIfNeeded()
+        }
+        .onChange(of: venueStore.venues.count) { _, newCount in
+            if newCount > 0 {
+                timeoutTask?.cancel()
+                timeoutTask = nil
+                recommendedTimedOut = false
+            } else {
+                armTimeoutIfNeeded()
+            }
+        }
     }
 
-    private var skeletonContent: some View {
+    /// Idempotent: an already-running timer isn't replaced, and a timer
+    /// that's already expired stays expired until venues actually land.
+    private func armTimeoutIfNeeded() {
+        guard timeoutTask == nil, !recommendedTimedOut else { return }
+        timeoutTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            guard !Task.isCancelled else { return }
+            if venueStore.venues.isEmpty {
+                recommendedTimedOut = true
+            }
+            timeoutTask = nil
+        }
+    }
+
+    /// A section header with the SAME visual contract as the real
+    /// `section(title:venues:style:)` row below — the shimmer rectangles
+    /// are 280×180 (HeroVenueCard's exact pinned size) so when the real
+    /// cards arrive they land in the same place the skeleton occupied,
+    /// no size pop. Reuses the project's existing `.shimmer()` modifier.
+    private func skeletonSection(title: String) -> some View {
         VStack(alignment: .leading, spacing: BPSpacing.md) {
-            ShimmerSkeleton(width: 200, height: 18)
+            Text(title)
+                .font(.bpHeadline())
+                .foregroundStyle(Color.bpInk)
                 .padding(.horizontal, BPSpacing.lg)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: BPSpacing.md) {
@@ -435,6 +518,44 @@ struct TonightView: View {
             }
         }
         .bpLoadingRegion(l10n.t("a11y.loading"))
+    }
+
+    /// Shown under the "Recommended for you" header after the 5s stall or
+    /// when `venueStore.loadError` is set. Prefers the real error message
+    /// over the generic string — same pattern as FindMyGroupStatus — but
+    /// never silent.
+    private var recommendedRetryRow: some View {
+        VStack(alignment: .leading, spacing: BPSpacing.md) {
+            Text(l10n.t("home.recommended"))
+                .font(.bpHeadline())
+                .foregroundStyle(Color.bpInk)
+                .padding(.horizontal, BPSpacing.lg)
+            HStack(alignment: .top, spacing: BPSpacing.sm) {
+                Image(systemName: venueStore.loadError != nil ? "exclamationmark.triangle.fill" : "wifi.exclamationmark")
+                    .font(.bpScaled(13, weight: .semibold))
+                Text(venueStore.loadError ?? l10n.t("home.loadStalled"))
+                    .font(.bpScaled(12))
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: BPSpacing.sm)
+                Button {
+                    BPHaptics.light()
+                    recommendedTimedOut = false
+                    armTimeoutIfNeeded()
+                    Task { await venueStore.loadVenues() }
+                } label: {
+                    Text(l10n.t("home.loadRetry"))
+                        .font(.bpScaled(12, weight: .bold))
+                        .foregroundStyle(Color.bpAmber)
+                }
+                .buttonStyle(.plain)
+                .bpAccessibility(label: l10n.t("home.loadRetry"), isButton: true)
+            }
+            .foregroundStyle(Color.bpTextSecondary)
+            .padding(BPSpacing.md)
+            .background(Color.bpInk.opacity(0.04), in: RoundedRectangle(cornerRadius: BPRadius.md))
+            .overlay(RoundedRectangle(cornerRadius: BPRadius.md).strokeBorder(Color.bpInk.opacity(0.08)))
+            .padding(.horizontal, BPSpacing.lg)
+        }
     }
 
     // MARK: - Header

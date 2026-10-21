@@ -862,6 +862,8 @@ final class L10n: ObservableObject {
             "home.trending": "🔥 Trending ahora",
             "home.happyHour": "🍹 Happy Hour activo",
             "home.openNow": "⚡ Abiertos ahora",
+            "home.loadStalled": "No pudimos cargar los lugares. Revisa tu conexión.",
+            "home.loadRetry": "Reintentar",
 
             "profile.wallet.hint": "Abre tu billetera BarPass para ver el saldo y cargar", "profile.wallet.balance": "Balance: $%.2f — toca para cargar",
             "profile.passes.title": "Mis pases y órdenes",
@@ -2426,6 +2428,8 @@ final class L10n: ObservableObject {
             "home.trending": "🔥 Trending now",
             "home.happyHour": "🍹 Happy Hour now",
             "home.openNow": "⚡ Open now",
+            "home.loadStalled": "We can't load tonight's venues. Check your connection?",
+            "home.loadRetry": "Retry",
 
             "profile.wallet.hint": "Opens your BarPass wallet to view balance and top up", "profile.wallet.balance": "Balance: $%.2f — tap to top up",
             "profile.passes.title": "My passes & orders",
@@ -3990,6 +3994,8 @@ final class L10n: ObservableObject {
             "home.trending": "🔥 Trending agora",
             "home.happyHour": "🍹 Happy Hour ativo",
             "home.openNow": "⚡ Abertos agora",
+            "home.loadStalled": "Não conseguimos carregar os lugares. Verifique sua conexão.",
+            "home.loadRetry": "Tentar de novo",
 
             "profile.wallet.hint": "Abre sua carteira BarPass para ver o saldo e recarregar", "profile.wallet.balance": "Saldo: $%.2f — toque para recarregar",
             "profile.passes.title": "Meus passes e pedidos",
