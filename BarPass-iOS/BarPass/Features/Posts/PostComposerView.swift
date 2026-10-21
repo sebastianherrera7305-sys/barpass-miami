@@ -32,6 +32,12 @@ struct PostComposerView: View {
     @State private var showVenuePicker = false
     @State private var isPublishing = false
     @State private var errorMessage: String?
+    /// Build 129 — one-time pre-permission explainer before the iOS
+    /// "Private Access to Photos" callout. Testers on Build 128 hit the
+    /// system UI with no context ("it never ask me", "It's not letting
+    /// me upload the pictures"); the gate turns the first open into a
+    /// short BarPass sheet, after that the picker opens directly.
+    @State private var requestOpenPicker = false
 
     private let repository: UserPostRepository = RepositoryDependencies.userPost
 
@@ -75,10 +81,15 @@ struct PostComposerView: View {
             .photosPicker(
                 isPresented: Binding(
                     get: { showsPicker },
-                    set: { if !$0 { pickerItem = nil } }
+                    set: { if !$0 { pickerItem = nil; showsPicker = false } }
                 ),
                 selection: $pickerItem,
                 matching: .images
+            )
+            .photoAccessGate(
+                requestOpen: $requestOpenPicker,
+                intent: .post,
+                showsPicker: $showsPicker
             )
             .sheet(isPresented: $showVenuePicker) {
                 PostVenuePickerView(selected: $selectedVenue)
@@ -107,7 +118,7 @@ struct PostComposerView: View {
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                 Button {
-                    showsPicker = true
+                    requestOpenPicker = true
                 } label: {
                     Image(systemName: "arrow.triangle.2.circlepath")
                         .font(.system(size: 14, weight: .heavy))
@@ -120,7 +131,7 @@ struct PostComposerView: View {
                 .frame(maxWidth: .infinity, maxHeight: 320, alignment: .topTrailing)
             } else {
                 Button {
-                    showsPicker = true
+                    requestOpenPicker = true
                 } label: {
                     VStack(spacing: 10) {
                         Image(systemName: "photo.badge.plus")

@@ -20,6 +20,10 @@ struct EditTripView: View {
     @State private var coverPickerItem: PhotosPickerItem?
     @State private var coverImage: UIImage?
     @State private var existingCoverPath: String?
+    /// Build 129 — pre-permission gate before the iOS "Private Access
+    /// to Photos" callout. See PhotoAccessExplainer.swift.
+    @State private var requestOpenCoverPicker = false
+    @State private var showsCoverPicker = false
 
     private let amber = Color.bpAmber
 
@@ -151,7 +155,9 @@ struct EditTripView: View {
         let pickLabel = l10n.t("tripCreate.coverImage.pick")
         let pickHint = l10n.t("tripCreate.coverImage.hint")
 
-        return PhotosPicker(selection: $coverPickerItem, matching: .images) {
+        return Button {
+            requestOpenCoverPicker = true
+        } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: BPRadius.lg)
                     .fill(Color.bpInk.opacity(0.06))
@@ -182,6 +188,12 @@ struct EditTripView: View {
             .clipped()
         }
         .buttonStyle(.plain)
+        .photosPicker(isPresented: $showsCoverPicker, selection: $coverPickerItem, matching: .images)
+        .photoAccessGate(
+            requestOpen: $requestOpenCoverPicker,
+            intent: .tripCover,
+            showsPicker: $showsCoverPicker
+        )
         .padding(.horizontal, BPSpacing.lg)
         .bpAccessibility(label: pickLabel, hint: pickHint, isButton: true)
         .onChange(of: coverPickerItem) { _, newItem in

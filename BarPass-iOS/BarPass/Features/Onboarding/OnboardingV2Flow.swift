@@ -690,12 +690,16 @@ private struct FlowRow: Layout {
     }
 }
 
-// MARK: - Screen 4 · Tu cara, tu avatar
-// Vision analysis on-device, three Remy variants to pick from, 14-trait fine
-// tune link. The Vision selfie flow isn't wired yet (requires AVCaptureSession
-// + VNFaceObservation + a dedicated SelfieCapture view); for now the screen
-// opens showing a "Sin foto" placeholder, and tapping "Tomar selfie" simulates
-// the three variants. Hooking the real camera is a one-file follow-up.
+// MARK: - Screen 4 · Crea tu avatar
+// Illustrated avatar flow — no camera, no photos. Shipped as Build 127
+// after Build 124's TestFlight comment ("it never ask me") on the old
+// "Tomar selfie" button that looked like it wanted a selfie but did
+// nothing. Build 129 note: if the AVCaptureSession + Vision selfie flow
+// is ever added back here, the camera/photos permission request MUST
+// go through PhotoAccessExplainerSheet (post composer) or an equivalent
+// pre-permission explainer — testers on Build 128 showed that popping
+// the system prompt cold reads as the app being broken, and that is
+// also the pattern Apple review rejects.
 
 @MainActor
 private struct OB4_FaceAvatar: View {

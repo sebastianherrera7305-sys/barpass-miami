@@ -37,13 +37,20 @@ struct PostingPickerButton<Label: View>: View {
     /// evento de analytics por llamada, y además así la respuesta al
     /// cerrar la hoja es sobre la misma cuenta que la abrió.
     @State private var pendingAccount: String?
+    /// Build 129 — una vez pasadas las reglas de contenido, hay que
+    /// pasar por el explainer de permisos de iOS antes de abrir el
+    /// picker. Testers en Build 128 vieron el callout de "Private
+    /// Access to Photos" sin contexto previo y leyeron la app como
+    /// bloqueada ("it never ask me"). El gate del explainer dispara
+    /// una sola vez por cuenta por intento.
+    @State private var requestOpenPicker = false
 
     var body: some View {
         Button {
             BPHaptics.light()
             let account = PostingRules.accountId()
             if PostingRules.hasAccepted(account) {
-                showPicker = true
+                requestOpenPicker = true
             } else {
                 pendingAccount = account
                 showRules = true
@@ -58,12 +65,23 @@ struct PostingPickerButton<Label: View>: View {
             selection: $selection,
             matching: .any(of: [.images, .videos])
         )
+        .photoAccessGate(
+            requestOpen: $requestOpenPicker,
+            intent: .venueMedia,
+            showsPicker: $showPicker
+        )
         // `onDismiss` relee la marca persistida en vez de recibir un
         // booleano de la hoja: así "aceptó" significa exactamente lo mismo
         // acá que en el próximo lanzamiento de la app, y arrastrar la hoja
         // hacia abajo no puede parecerse a aceptar.
         .sheet(isPresented: $showRules, onDismiss: {
-            if PostingRules.hasAccepted(pendingAccount) { showPicker = true }
+            if PostingRules.hasAccepted(pendingAccount) {
+                // Reglas aceptadas → ahora toca el explainer de permisos
+                // (que, a su vez, abre el picker). No saltamos directo al
+                // picker porque esa es exactamente la secuencia que Apple
+                // review rechaza: system prompt sin aviso en-app.
+                requestOpenPicker = true
+            }
             pendingAccount = nil
         }) {
             PostingRulesSheet(mode: .gate)

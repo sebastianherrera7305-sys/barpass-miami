@@ -59,15 +59,17 @@
 	<key>NSAppleMusicUsageDescription</key>
 	<string>BarPass uses your Apple Music to recommend venues and events that match your vibe. Your listening never leaves your phone.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>BarPass turns on your camera's flashlight for the Safety Beacon when a friend is looking for you, and later for profile photos and posts you choose to add.</string>
+	<string>BarPass turns on your camera's torch as a Safety Beacon when a friend in your group is looking for you inside the venue. The camera is not recorded. If BarPass ever offers to take a photo from inside the app, we'll ask again before opening the camera.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Use Face ID for quick and secure sign-in to BarPass.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>BarPass uses your location to show nearby venues and calculate distances.</string>
 	<key>NSNearbyInteractionUsageDescription</key>
 	<string>BarPass uses your iPhone's precision antenna to show you the distance and direction of the person in your group looking for you. Only while both of you have the app open, and only between you two.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>BarPass lets you pick a photo from your library to share on a venue's page, as a check-in moment, as a trip cover, or on your profile. Both full access and limited access work — BarPass only sees the photos you actually pick to upload.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>BarPass saves QR codes and venue passes to your photo library.</string>
+	<string>BarPass saves QR codes and venue passes to your photo library so you can show them at the door without opening the app.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
