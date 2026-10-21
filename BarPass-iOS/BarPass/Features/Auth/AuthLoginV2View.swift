@@ -93,7 +93,21 @@ struct AuthLoginV2View: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var showPassword: Bool = false
-    @State private var appleRawNonce: String = ""
+    /// Raw nonce holder — class-backed on purpose. Build 128 reported Apple
+    /// error 1000 reproducibly: the request-builder closure wrote the raw
+    /// nonce into a `@State String`, and the completion handler read it
+    /// back some seconds later across the Apple sheet's async round-trip.
+    /// Between those two points the container re-renders the view (it
+    /// passes `isLoading`/`errorMessage` as plain `var`s, so each flip
+    /// forces a fresh `AuthLoginV2View` struct), and the SwiftUI identity
+    /// bookkeeping that `@State` relies on can drop the value — the
+    /// completion handler then calls Supabase with an empty nonce and the
+    /// AS framework surfaces the mismatch as `.unknown` (1000) rather than
+    /// a Supabase-side error. A reference-type holder is immune to view
+    /// recomposition: the pointer lives through any number of struct
+    /// rebuilds, and the raw written in the request-builder is still there
+    /// when onCompletion fires.
+    @State private var appleNonce = AuthLoginV2AppleNonceHolder()
     @FocusState private var focused: Field?
 
     private enum Field {
@@ -385,13 +399,20 @@ struct AuthLoginV2View: View {
     // MARK: - Apple CTA (uses real SignInWithAppleButton for correctness)
 
     private var appleCTA: some View {
-        SignInWithAppleButton(.continue) { request in
+        // `.signIn`, not `.continue`: matches the known-working NativeAuthView
+        // path and the system "Sign in with Apple" affordance the login
+        // screen advertises in copy. The button-style distinction is purely
+        // the rendered label and does not change the auth payload, but
+        // staying on `.signIn` keeps both auth entry points on the same
+        // request shape — one fewer axis of divergence when a user reports
+        // "it worked on the old screen but not this one".
+        SignInWithAppleButton(.signIn) { request in
             request.requestedScopes = [.email, .fullName]
             // Supabase's Apple provider rejects a tokenised login without
             // a bound nonce; the request receives its SHA-256 and the
-            // raw copy stays on the view for the completion handler.
+            // raw copy stays on the holder for the completion handler.
             let raw = Self.randomNonce()
-            appleRawNonce = raw
+            appleNonce.raw = raw
             request.nonce = Self.sha256(raw)
         } onCompletion: { result in
             switch result {
@@ -404,7 +425,16 @@ struct AuthLoginV2View: View {
                     onAppleError?(AuthLoginV2AppleError.missingToken)
                     return
                 }
-                onAppleIdToken?(idToken, appleRawNonce)
+                // Belt-and-suspenders check — if the holder is somehow empty
+                // we would otherwise ship an empty-string nonce to Supabase,
+                // which rejects it as a nonce mismatch and the whole stack
+                // comes back as the generic AS error 1000.
+                let raw = appleNonce.raw
+                guard !raw.isEmpty else {
+                    onAppleError?(AuthLoginV2AppleError.missingNonce)
+                    return
+                }
+                onAppleIdToken?(idToken, raw)
             case .failure(let error):
                 let ns = error as NSError
                 // User cancelled the sheet — not a real error, don't toast.
@@ -612,11 +642,21 @@ private struct AuthLoginV2Mascot: View {
 
 enum AuthLoginV2AppleError: Error, LocalizedError {
     case missingToken
+    case missingNonce
     var errorDescription: String? {
         switch self {
         case .missingToken: return "Apple no devolvió un token. Intenta otra vez."
+        case .missingNonce: return "Se perdió la clave de seguridad. Intenta otra vez."
         }
     }
+}
+
+/// Class-backed holder so the raw Apple nonce survives view recomposition
+/// between the request-builder closure and the Apple-sheet completion
+/// handler (see `appleNonce` on `AuthLoginV2View` for the full note).
+@MainActor
+final class AuthLoginV2AppleNonceHolder {
+    var raw: String = ""
 }
 
 #if DEBUG
