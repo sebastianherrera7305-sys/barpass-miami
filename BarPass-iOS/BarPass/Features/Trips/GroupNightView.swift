@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // GroupNightView — "La noche del grupo" (artifact 294356f9, pantalla 9).
 //
@@ -62,6 +63,15 @@ struct GroupNightView: View {
     @State private var showJoinRequest: Stop? = nil
     @State private var ratingTarget: RatingTarget? = nil
     @State private var showRatePicker = false
+    /// Catalog venues resolved for the current and next stops by `refId` — the
+    /// only way to fill in real coordinates for the Uber deep link. Loaded
+    /// through `RepositoryDependencies.venue` because this view is opened as a
+    /// sheet and `VenueStore` isn't guaranteed to propagate through the sheet
+    /// boundary (TripsListView / TripsListV2View only re-pass tripStore and
+    /// appState into the sheet). The repo's own in-memory cache makes the
+    /// lookup essentially free after the first launch.
+    @State private var pickupVenue: BarPassVenue? = nil
+    @State private var dropoffVenue: BarPassVenue? = nil
 
     private struct RatingTarget: Identifiable { let id: String; let name: String }
 
@@ -175,6 +185,8 @@ struct GroupNightView: View {
                         stops: sortedStops,
                         currentStopIndex: currentStopIndex,
                         nextStop: nextStop,
+                        pickupVenue: pickupVenue,
+                        dropoffVenue: dropoffVenue,
                         isCompleted: currentTrip.status == .completed
                     )
 
@@ -214,6 +226,14 @@ struct GroupNightView: View {
         }
         .preferredColorScheme(.dark)
         .task { await loadMemberNames() }
+        // Re-resolve pickup/dropoff whenever the "current" or "next" stop
+        // changes — the trip can tick from one stop to the next while the
+        // sheet is open, and the Uber banner should follow. Keying both
+        // stop ids into the task id makes SwiftUI re-run exactly on those
+        // transitions (and never otherwise).
+        .task(id: "\(currentStop?.id ?? "nil")|\(nextStop?.id ?? "nil")") {
+            await loadRouteVenues()
+        }
         .sheet(item: $showJoinRequest) { stop in
             JoinRequestModal(tripId: currentTrip.id, stop: stop)
                 .environmentObject(store)
@@ -244,6 +264,23 @@ struct GroupNightView: View {
     private func loadMemberNames() async {
         guard let names = try? await RepositoryDependencies.tripMembers.names(tripId: currentTrip.id) else { return }
         memberNames = Dictionary(uniqueKeysWithValues: names.map { ($0.id, $0.displayName) })
+    }
+
+    /// Resolves the catalog venues behind `currentStop` and `nextStop` so the
+    /// Uber banner can hand off real coordinates for pickup and dropoff. Both
+    /// lookups run in parallel; a nil result just means we fall back to Uber
+    /// generic for that side (pickup=my_location, or no deep link at all).
+    private func loadRouteVenues() async {
+        async let pickup = resolveVenue(for: currentStop)
+        async let dropoff = resolveVenue(for: nextStop)
+        let (p, d) = await (pickup, dropoff)
+        pickupVenue = p
+        dropoffVenue = d
+    }
+
+    private func resolveVenue(for stop: Stop?) async -> BarPassVenue? {
+        guard let stop, stop.type == .venue, !stop.refId.isEmpty else { return nil }
+        return try? await RepositoryDependencies.venue.getVenue(id: stop.refId)
     }
 
     private func shareInvite() {
@@ -593,6 +630,12 @@ private struct GroupNightMapCard: View {
     let stops: [Stop]
     let currentStopIndex: Int?
     let nextStop: Stop?
+    /// Catalog venue behind the stop the group is currently on. Nil when the
+    /// user isn't on any stop (planning, between stops without timing, before
+    /// the first start, etc.) — the Uber deep link then uses `pickup=my_location`.
+    let pickupVenue: BarPassVenue?
+    /// Catalog venue behind `nextStop`. Nil → Uber opens generic.
+    let dropoffVenue: BarPassVenue?
     let isCompleted: Bool
 
     private struct PinLayout: Identifiable {
@@ -605,15 +648,24 @@ private struct GroupNightMapCard: View {
 
     /// Positions pins along a gentle S-curve so a 2-stop trip reads as two
     /// clearly separated points and a 5-stop one still has visual rhythm.
+    ///
+    /// The vertical range is deliberately tight (y ∈ [~0.18, ~0.60]) so no pin
+    /// — not even the trailing one on a 2-stop trip — collides with the Uber
+    /// banner that sits at the bottom (ribbon area is ~y 0.82 and up). TestFlight
+    /// Build 128 report "se ve cortada la imagen" (screenshot 12): the OLD
+    /// formula pushed the last pin to y ≈ 0.87, which clipped against the
+    /// ribbon capsule and the rounded-rect corner. Clamping the spread keeps
+    /// every pin label fully inside the card.
     private var layouts: [PinLayout] {
         guard !stops.isEmpty else { return [] }
         let count = CGFloat(stops.count)
         return stops.enumerated().map { idx, stop in
             let t = count == 1 ? 0.5 : CGFloat(idx) / (count - 1)
-            // Alternates below/above the diagonal to spread evenly.
-            let wave = sin(t * .pi * 1.4) * 0.18
+            // Alternates below/above the diagonal to spread evenly, but at a
+            // reduced amplitude so wave never pushes pins into the ribbon.
+            let wave = sin(t * .pi * 1.4) * 0.08
             let x = 0.18 + t * 0.64
-            let y = 0.30 + t * 0.40 - wave
+            let y = 0.22 + t * 0.34 - wave
             let state: GroupNightMapCard_PinState
             if isCompleted {
                 state = .done
@@ -700,25 +752,22 @@ private struct GroupNightMapCard: View {
                     }
                 }
 
-                // Ribbon inferior — hoy sólo tenemos "próxima parada" real;
-                // la frase "6 min caminando" del mockup pedía routing en
-                // vivo que todavía no hay.
+                // Ribbon inferior — ahora es la CTA "Uber al próximo venue"
+                // en lugar de un texto decorativo. TestFlight Build 128
+                // report "debería sugerir los uber ya pre casi ordenados":
+                // tapping this bar hands off to Uber with the pickup
+                // (current stop venue, if we're on one) and dropoff (next
+                // stop venue) already filled in. If we can't resolve the
+                // next venue's coordinates, we fall back to Uber generic so
+                // the button never dead-ends.
                 VStack {
                     Spacer()
                     if let next = nextStop {
-                        HStack(spacing: 6) {
-                            Image(systemName: "arrow.turn.up.right")
-                                .font(.system(size: 10, weight: .heavy))
-                            Text("Próxima parada: \(next.venueName)\(next.startTime.isEmpty ? "" : " · \(next.startTime)")")
-                                .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
-                                .tracking(0.4)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.75)
-                        }
-                        .foregroundStyle(Color.white.opacity(0.78))
-                        .padding(.horizontal, 10).padding(.vertical, 6)
-                        .background(Color.black.opacity(0.55), in: Capsule())
-                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
+                        GroupNightUberBanner(
+                            nextStopName: next.venueName,
+                            pickupVenue: pickupVenue,
+                            dropoffVenue: dropoffVenue
+                        )
                         .padding(10)
                     } else if !layouts.isEmpty {
                         HStack(spacing: 6) {
@@ -813,6 +862,105 @@ private struct MapPinView: View {
 }
 
 private enum GroupNightMapCard_PinState { case current, done, next }
+
+// MARK: - Uber banner — pre-fills pickup + dropoff from the trip's stops
+//
+// Replaces the old "Próxima parada: X" decorative ribbon with a real CTA.
+// The deep link follows Uber's documented universal-link shape:
+//
+//   uber://?action=setPickup
+//        &pickup[latitude]=…&pickup[longitude]=…&pickup[nickname]=…
+//        &dropoff[latitude]=…&dropoff[longitude]=…&dropoff[nickname]=…
+//
+// Fallbacks, each one cheaper than the next:
+//   1. Pickup venue unknown (no `currentStop`, or its refId isn't in the
+//      catalog) → `pickup=my_location`, which Uber reads as "wherever the
+//      phone is right now". Dropoff still carries the next venue's coords.
+//   2. Dropoff venue unknown → open the web form so Uber can still take
+//      the name as a search string (`dropoff[formatted_address]`).
+//   3. uber:// scheme not installed → mobile web (m.uber.com/ul/…) with the
+//      same parameters.
+//
+// `uber` is declared in LSApplicationQueriesSchemes (Info.plist), so
+// `canOpenURL(uber://)` returns the real installed-state answer.
+@MainActor
+private struct GroupNightUberBanner: View {
+    let nextStopName: String
+    let pickupVenue: BarPassVenue?
+    let dropoffVenue: BarPassVenue?
+
+    var body: some View {
+        Button(action: openUber) {
+            HStack(spacing: 10) {
+                Image(systemName: "car.fill")
+                    .font(.system(size: 13, weight: .heavy))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("UBER AL PRÓXIMO VENUE")
+                        .font(.system(size: 9, weight: .heavy, design: .monospaced))
+                        .tracking(1.6)
+                        .opacity(0.75)
+                    Text(nextStopName)
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                Spacer(minLength: 6)
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 11, weight: .heavy))
+                    .opacity(0.85)
+            }
+            .foregroundStyle(.black)
+            .padding(.horizontal, 12).padding(.vertical, 8)
+            .background(Color.bpAmber, in: Capsule())
+            .overlay(Capsule().strokeBorder(Color.bpAmberBright.opacity(0.5)))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Pedir Uber al próximo venue, \(nextStopName)")
+        .accessibilityHint("Abre Uber con el próximo venue como destino")
+    }
+
+    private func openUber() {
+        BPHaptics.light()
+        BPAnalytics.track(.openMaps(venue: nextStopName))
+
+        // Dropoff is the whole point of this banner — without a real dropoff
+        // we have nothing better than Uber generic, so send the user there.
+        guard let drop = dropoffVenue else {
+            let generic = URL(string: "uber://?action=setPickup")
+            if let generic, UIApplication.shared.canOpenURL(generic) {
+                UIApplication.shared.open(generic)
+            } else if let web = URL(string: "https://m.uber.com/ul/?action=setPickup") {
+                UIApplication.shared.open(web)
+            }
+            return
+        }
+
+        let dropNickname = drop.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        var deep = "uber://?action=setPickup"
+        var web  = "https://m.uber.com/ul/?action=setPickup"
+
+        if let pickup = pickupVenue {
+            let pickupNickname = pickup.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            let pickupParams = "&pickup[latitude]=\(pickup.latitude)&pickup[longitude]=\(pickup.longitude)&pickup[nickname]=\(pickupNickname)"
+            deep += pickupParams
+            web  += pickupParams
+        } else {
+            // User isn't checked in to a stop — let Uber find them with GPS.
+            deep += "&pickup=my_location"
+            web  += "&pickup=my_location"
+        }
+
+        let dropParams = "&dropoff[latitude]=\(drop.latitude)&dropoff[longitude]=\(drop.longitude)&dropoff[nickname]=\(dropNickname)"
+        deep += dropParams
+        web  += dropParams
+
+        if let deepURL = URL(string: deep), UIApplication.shared.canOpenURL(deepURL) {
+            UIApplication.shared.open(deepURL)
+        } else if let webURL = URL(string: web) {
+            UIApplication.shared.open(webURL)
+        }
+    }
+}
 
 // MARK: - Join requests card (solo organizer / co-organizer, si hay pendientes)
 
