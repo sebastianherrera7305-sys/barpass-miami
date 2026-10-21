@@ -20,6 +20,14 @@ enum AppleMusicPlaybackService {
     // not this TTL alone.
     private static let cacheTTL: TimeInterval = 60 * 60 * 24 * 7
 
+    /// Songs the owner wants to always surface first in the autoplay
+    /// queue, regardless of artist weighting. Resolved by title + artist
+    /// name match so a cover by a random artist with the same title does
+    /// NOT get picked up. These play before the artist-driven queue.
+    private static let pinnedTracks: [(title: String, artist: String)] = [
+        ("Adventure of a Lifetime", "Coldplay"),
+    ]
+
     /// Explicit product requirement: the algorithmic "most played" chart
     /// surfaced tracks the user didn't recognize. This is real, named
     /// house/dance artists — the four requested directly (Prospa, Hugel,
@@ -129,6 +137,25 @@ enum AppleMusicPlaybackService {
 
         var songs: [Song] = []
         var seenIDs = Set<MusicItemID>()
+
+        // Pinned tracks first — titulo + artista exactos. Si el catálogo no
+        // tiene esta combinación (región bloqueada o se retiró el track) se
+        // ignora en silencio; nunca bajamos a un cover con el mismo título.
+        for pin in pinnedTracks {
+            var request = MusicCatalogSearchRequest(term: "\(pin.title) \(pin.artist)", types: [Song.self])
+            request.limit = 10
+            guard let response = try? await request.response() else { continue }
+            let wantedTitle = pin.title.lowercased()
+            let wantedArtist = pin.artist.lowercased()
+            if let match = response.songs.first(where: { song in
+                song.title.lowercased() == wantedTitle &&
+                song.artistName.lowercased() == wantedArtist
+            }), !seenIDs.contains(match.id) {
+                seenIDs.insert(match.id)
+                songs.append(match)
+            }
+        }
+
         for artist in recognizedArtists {
             var request = MusicCatalogSearchRequest(term: artist, types: [Song.self])
             request.limit = 3
