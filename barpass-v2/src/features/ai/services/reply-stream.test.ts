@@ -102,6 +102,66 @@ describe("createReplyTransform — a block the client can't render is never show
   });
 });
 
+describe("createReplyTransform — the model drops the fence tag", () => {
+  // TestFlight build 84, 2026-10-08: "It's writhing in code". A plan whose
+  // fence carried no `json` tag was invisible to every parser downstream,
+  // so the object itself streamed into the chat bubble.
+  it("recognises a plan opened with a bare ``` fence", () => {
+    const { out, drops } = run("Aqui va tu noche:\n\n```\n" + plan() + "\n```");
+    expect(drops).toEqual([]);
+    expect(out).toMatch(PLAN_FENCE);
+    expect(out).toContain("Aqui va tu noche:");
+    expect(out).not.toMatch(/^[^`]*"stops"/);
+  });
+
+  it("recognises options opened with a bare ``` fence", () => {
+    const { out } = run('Cuando sales?\n\n```\n["Hoy", "Manana"]\n```');
+    const match = out.match(OPTIONS_FENCE);
+    expect(match).not.toBeNull();
+    expect(JSON.parse(match![1])).toEqual(["Hoy", "Manana"]);
+  });
+
+  it("recognises a plan written with no fence at all", () => {
+    const { out, drops } = run("Aqui va tu noche:\n\n" + plan());
+    expect(drops).toEqual([]);
+    expect(out).toMatch(PLAN_FENCE);
+    expect(out).toContain("Aqui va tu noche:");
+  });
+
+  it("never streams half an untagged object into the bubble", () => {
+    // Every chunk boundary, not just a lucky one: the bubble must never
+    // show a brace or a key while the object is still arriving.
+    for (const pieces of [1, 2, 3, 5, 9, 17, 40]) {
+      const t = createReplyTransform({ shortlist });
+      const reply = "Listo:\n\n```\n" + plan() + "\n```";
+      const size = Math.ceil(reply.length / pieces);
+      let seen = "";
+      for (let i = 0; i < reply.length; i += size) {
+        seen += t.push(reply.slice(i, i + size));
+        expect(seen).not.toContain('"stops"');
+        expect(seen).not.toContain("{");
+      }
+      expect(seen + t.flush()).toMatch(PLAN_FENCE);
+    }
+  });
+
+  it("drops an untagged object the stream ended in the middle of", () => {
+    const { out, drops } = run('Va:\n\n{"title":"Noche","stops":[{"venueId":"uuid-1"');
+    expect(out.trim()).toBe("Va:");
+    expect(drops[0]).toMatch(/unfenced plan object/);
+  });
+
+  it("leaves a brace that is ordinary prose alone", () => {
+    const { out } = run("Te paso el set: {drum and bass} toda la noche.");
+    expect(out).toContain("{drum and bass} toda la noche.");
+  });
+
+  it("leaves a code fence that is neither block alone", () => {
+    const { out } = run("Mira:\n```\nhola\n```");
+    expect(out).toContain("hola");
+  });
+});
+
 describe("createReplyTransform — quick replies", () => {
   it("promotes an inline Options array to a real fence", () => {
     // Measured in production 2026-09-13 for the prompt "plan something".
