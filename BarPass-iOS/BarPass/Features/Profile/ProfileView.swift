@@ -30,6 +30,12 @@ struct ProfileView: View {
     /// until the owner confirms the sheet behaves. Removing the inline
     /// duplicates lands in a follow-up build.
     @State private var showSettings = false
+    /// Build 129 — the long "Vistas previas v17.1" tray used to sit at the
+    /// bottom of the main Me scroll. Juan (TestFlight 128): the Me tab
+    /// should surface posts, not a tester-only tray. Previews stay reachable
+    /// but tucked behind the ⚙ gear → "Vistas previas (owner)" row; this
+    /// bool opens a dedicated sheet that lists all of them.
+    @State private var showDebugPreviews = false
     /// This screen used to show the l10n placeholder string "Tu Nombre" /
     /// "Your Name" unconditionally — never the real value, never editable.
     /// Every profile looked identical and unnamed; a chapter member roster
@@ -177,17 +183,6 @@ struct ProfileView: View {
                     .padding(.horizontal, BPSpacing.lg)
                     .padding(.top, 4)
 
-                    // Build 1.1 — grid de posts tipo IG. Vacío-state visible
-                    // (el owner pidió "no posts falsos ni próximamente") —
-                    // dice "Aún no hay posts" + hint para tocar +.
-                    PostGridSection(
-                        userId: AuthService.shared.restoreSession()?.user.id ?? "",
-                        posts: myPosts,
-                        isOwner: true,
-                        onTapPost: { post in selectedPost = post }
-                    )
-                    .padding(.horizontal, 2)
-
                     // Points card
                     VStack(spacing: 14) {
                         HStack {
@@ -239,76 +234,6 @@ struct ProfileView: View {
                     .padding(.horizontal, BPSpacing.lg)
                     .helpTarget("profile.pointsCard")
 
-                    // BarPass Wallet
-                    Button {
-                        BPHaptics.light()
-                        showTopUp = true
-                    } label: {
-                        HStack(spacing: 12) {
-                            Text("🪙").font(.bpScaled(22))
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(l10n.t("table.wallet.name"))
-                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
-                                Text(String(format: l10n.t("profile.wallet.balance"), appState.walletBalance))
-                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.bpScaled(13, weight: .semibold))
-                                .foregroundStyle(Color.bpAmber)
-                        }
-                        .padding(16)
-                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
-                    }
-                    .buttonStyle(.plain)
-                    .bpAccessibility(label: l10n.t("table.wallet.name"), hint: l10n.t("profile.wallet.hint"), isButton: true)
-                    .padding(.horizontal, BPSpacing.lg)
-                    .helpTarget("profile.wallet")
-
-                    // Mis pases (historial)
-                    NavigationLink {
-                        OrderHistoryView()
-                    } label: {
-                        HStack(spacing: 12) {
-                            Text("🎟️").font(.bpScaled(22))
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(l10n.t("profile.passes.title"))
-                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
-                                Text(l10n.t("profile.passes.subtitle"))
-                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.bpScaled(13, weight: .semibold))
-                                .foregroundStyle(Color.bpAmber)
-                        }
-                        .padding(16)
-                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
-                    }
-                    .buttonStyle(.plain)
-                    .bpAccessibility(label: l10n.t("profile.passes.title"), hint: l10n.t("profile.passes.hint"), isButton: true)
-                    .padding(.horizontal, BPSpacing.lg)
-                    .helpTarget("profile.passes")
-
-                    // Legal y ayuda — contacto, reglas de contenido, términos,
-                    // privacidad y cuentas bloqueadas.
-                    //
-                    // Va ARRIBA y no al pie junto a "Cerrar sesión", que es
-                    // donde la costumbre la pondría: es la sección que el
-                    // revisor de Apple entra a buscar (directriz 1.2 pide el
-                    // contacto publicado y alcanzable desde la app), este
-                    // Perfil scrollea mucho, y algo que hay que buscar 30
-                    // segundos se reporta como "we were unable to locate".
-                    // La fila entera vive en LegalAndHelpView.swift.
-                    // Build 1.1: removidos del scroll los duplicados que
-                    // ahora viven en el ⚙ sheet exclusivamente — Legal,
-                    // Dirección de casa, Ciudad switcher. El owner pidió
-                    // "sin duplicados". Los handlers siguen cableados en
-                    // SettingsSheet → showHomeAddress / showCityChange y
-                    // esas sheets se montan abajo igual.
-
                     // "Tu última noche" — Night Recap entry point
                     //
                     // Sólo aparece si el agregador real (`NightRecapStore.load()`)
@@ -316,211 +241,35 @@ struct ProfileView: View {
                     // (ayer 18:00 → hoy 06:00 en hora local). Noches sólo con
                     // órdenes, sin salidas registradas, o estados `.empty` /
                     // `.failed` / `.loading` → la fila no se dibuja. El debug tray
-                    // de más abajo sigue teniendo su propia entrada con `.mockup`.
+                    // (ahora en SettingsSheet) sigue teniendo su propia entrada
+                    // con `.mockup`.
                     if let recap = nightRecapData, recap.stops > 0 {
                         nightRecapRow(data: recap)
                     }
 
-                    // Juegos y misiones
-                    Button {
-                        BPHaptics.light()
-                        showGames = true
-                    } label: {
-                        HStack(spacing: 12) {
-                            Text("🎮").font(.bpScaled(22))
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(l10n.t("profile.games.title"))
-                                    .font(.bpScaled(15, weight: .bold)).foregroundStyle(Color.bpInk)
-                                Text(l10n.t("profile.games.subtitle"))
-                                    .font(.bpScaled(11)).foregroundStyle(Color.bpTextSecondary)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.bpScaled(13, weight: .semibold))
-                                .foregroundStyle(Color.bpAmber)
-                        }
-                        .padding(16)
-                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpAmber.opacity(0.2)))
-                    }
-                    .buttonStyle(.plain)
-                    .bpAccessibility(label: l10n.t("profile.games.title"), hint: l10n.t("profile.games.hint"), isButton: true)
-                    .padding(.horizontal, BPSpacing.lg)
-                    .helpTarget("profile.games")
-
-                    // Stats
-                    HStack(spacing: 12) {
-                        statCard(value: "\(checkins)", label: l10n.t("profile.checkins"), icon: "mappin.circle.fill")
-                        statCard(value: "\(engine.reviewCount)", label: l10n.t("profile.reviews"), icon: "star.fill")
-                        statCard(value: "\(engine.shareCount)", label: l10n.t("profile.invited"), icon: "person.2.fill")
-                    }
-                    .padding(.horizontal, BPSpacing.lg)
-
-                    // How to earn
-                    VStack(alignment: .leading, spacing: 14) {
-                        Text(l10n.t("profile.howToEarn"))
-                            .font(.bpScaled(16, weight: .bold))
-                            .foregroundStyle(Color.bpInk)
-
-                        VStack(spacing: 10) {
-                            earnRow(icon: "mappin.circle.fill", action: String(format: l10n.t("profile.earn.checkin"), engine.checkinCount), points: "+50 BPX")
-                            earnRow(icon: "camera.fill", action: String(format: l10n.t("profile.earn.review"), engine.reviewCount), points: "+75 BPX")
-                            earnRow(icon: "sparkles", action: String(format: l10n.t("profile.earn.trip"), engine.tripCount), points: "+100/200 BPX")
-                            earnRow(icon: "square.and.arrow.up", action: String(format: l10n.t("profile.earn.share"), engine.shareCount), points: "+25 BPX")
-                        }
-                    }
-                    .padding(18)
-                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
-                    .accessibilityElement(children: .ignore)
-                    .bpAccessibility(label: l10n.t("profile.howToEarn"), hint: l10n.t("profile.howToEarn.hint"))
-                    .padding(.horizontal, BPSpacing.lg)
-
-                    // Language selector
-                    VStack(alignment: .leading, spacing: 14) {
-                        Text(l10n.t("profile.language"))
-                            .font(.bpScaled(16, weight: .bold))
-                            .foregroundStyle(Color.bpInk)
-
-                        HStack(spacing: 10) {
-                            ForEach(AppLanguage.allCases) { lang in
-                                let on = l10n.language == lang
-                                Button {
-                                    BPHaptics.light()
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                                        l10n.language = lang
-                                    }
-                                } label: {
-                                    VStack(spacing: 4) {
-                                        Text(lang.flag).font(.bpScaled(22))
-                                        Text(lang.label)
-                                            .font(.system(size: 11, weight: on ? .bold : .regular))
-                                            .foregroundStyle(on ? Color.bpAmber : Color.bpTextSecondary)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .background(on ? Color.bpAmber.opacity(0.12) : Color.bpInk.opacity(0.04),
-                                                in: RoundedRectangle(cornerRadius: BPRadius.md))
-                                    .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
-                                        .strokeBorder(on ? Color.bpAmber.opacity(0.4) : Color.bpInk.opacity(0.07)))
-                                }
-                                .buttonStyle(.plain)
-                                .bpAccessibility(label: lang.label, hint: l10n.t("profile.language.hint"), isButton: true)
-                            }
-                        }
-                    }
-                    .padding(18)
-                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
-                    .padding(.horizontal, BPSpacing.lg)
-
-                    // Theme selector
-                    VStack(alignment: .leading, spacing: 14) {
-                        Text(l10n.t("profile.theme"))
-                            .font(.bpScaled(16, weight: .bold))
-                            .foregroundStyle(Color.bpInk)
-
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 10)], spacing: 10) {
-                            ForEach(BPTheme.allCases) { theme in
-                                let on = themeService.theme == theme
-                                Button {
-                                    BPHaptics.medium()
-                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                                        themeService.theme = theme
-                                    }
-                                } label: {
-                                    VStack(spacing: 6) {
-                                        HStack(spacing: 4) {
-                                            Circle().fill(theme.palette.0).frame(width: 14, height: 14)
-                                            Circle().fill(theme.palette.1).frame(width: 14, height: 14)
-                                        }
-                                        Text(theme.label)
-                                            .font(.system(size: 11, weight: on ? .bold : .regular))
-                                            .foregroundStyle(on ? theme.palette.0 : Color.bpTextSecondary)
-                                            .lineLimit(1).minimumScaleFactor(0.8)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .background(on ? theme.palette.0.opacity(0.12) : Color.bpInk.opacity(0.04),
-                                                in: RoundedRectangle(cornerRadius: BPRadius.md))
-                                    .overlay(RoundedRectangle(cornerRadius: BPRadius.md)
-                                        .strokeBorder(on ? theme.palette.0.opacity(0.45) : Color.bpInk.opacity(0.07)))
-                                }
-                                .buttonStyle(.plain)
-                                .bpAccessibility(label: theme.label, hint: l10n.t("profile.theme.hint"), isButton: true)
-                            }
-                        }
-                    }
-                    .padding(18)
-                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
-                    .padding(.horizontal, BPSpacing.lg)
-
-                    // Appearance selector removed 2026-08-28 — TestFlight feedback:
-                    // a tester picked "Claro" and the whole app broke ("pierde
-                    // todos los Features del Background"). Light mode was never
-                    // actually designed: BPBackgroundView's non-dark branch is a
-                    // flat Color.bpBackground fill with none of the psychedelic
-                    // city art, and every screen this session touched assumes
-                    // the dark palette. Rather than finish designing a real light
-                    // mode, the honest fix is to stop offering a mode that isn't
-                    // built — AppearanceStore now always resolves to dark (see
-                    // ThemeService.swift), so this control has nothing to do.
-
-                    // Build 1.1 — removidos del scroll: Autoplay toggle,
-                    // City switcher, Universidad / Greek, sección Account
-                    // completa (email + Cerrar sesión + Eliminar cuenta).
-                    // Todos siguen accesibles desde el ⚙ gear → SettingsSheet.
-                    // Mantenemos el VStack Account como contenedor vacío para
-                    // no romper los debug buttons que viven adentro.
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        if AuthService.shared.restoreSession() != nil {
-
-                            // Debug previews — Tonight v17.1 screens 8-11, not yet
-                            // wired to the main nav. Lets the owner see them in
-                            // TestFlight without replacing TripDetail / PlanView
-                            // / VenueDetail yet.
-                            VStack(spacing: 8) {
-                                Text("VISTAS PREVIAS v17.1")
-                                    .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
-                                    .tracking(2)
-                                    .foregroundStyle(Color.bpAmber)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.top, 14)
-                                debugButton("Remy en vivo") { showRemyLivePreview = true }
-                                // These three only have mockup initializers
-                                // (sample Trip / mockup venue / .mockup recap),
-                                // all fenced under #if DEBUG in their files —
-                                // so the buttons exist only in Debug builds.
-                                #if DEBUG
-                                debugButton("La noche del grupo") { showGroupNightPreview = true }
-                                debugButton("Venue con pulso") { showVenuePulsePreview = true }
-                                debugButton("Recap y racha") { showNightRecapPreview = true }
-                                #endif
-                                debugButton("Explore") { showExploreV2 = true }
-                                debugButton("Social") { showSocialV2 = true }
-                                debugButton("Trips (lista)") { showTripsListV2 = true }
-                                // The V2 Priority hub takes callbacks that
-                                // only the real presenter (RootView) wires;
-                                // calling it bare from the debug tray would
-                                // render fabricated "CLUB SPACE" defaults
-                                // and three dead cards. DEBUG-only.
-                                #if DEBUG
-                                debugButton("Priority Entry") { showPriorityEntryV2 = true }
-                                #endif
-                                debugButton("Skip the Line") { showSkipTheLineV2 = true }
-                                #if DEBUG
-                                debugButton("Pase activo") { showActivePassV2 = true }
-                                #endif
-                                debugButton("Carrito") { showCartV2 = true }
-                                debugButton("Cuenta abierta") { showOpenTabV2 = true }
-                                debugButton("Entrar (auth)") { showAuthLoginV2 = true }
-                                debugButton("Juegos y misiones") { showGamesMissionsV2 = true }
-                                debugButton("Encontrar a mi gente") { showFindMyPeopleV2 = true }
-                                debugButton("Tu señal") { showYourSignalV2 = true }
-                            }
-                        } else {
+                    // Build 129 — Posts grid es la SURFACE principal del tab.
+                    //
+                    // Juan, TestFlight Build 128: "lo de los post y el perfil y
+                    // todo debería estar acá". Antes el grid vivía arriba del
+                    // Points card y abajo colgaba toda una lista de filas
+                    // (Wallet, Mis pases, Juegos, Stats, Cómo ganar BPX, Idioma,
+                    // Tema, Account) — el perfil leía como un settings con una
+                    // tirita de posts. Ahora el header IG (avatar + nombre +
+                    // level badge + stats inline + Points card) queda ARRIBA,
+                    // el grid toma el resto del tab, y todas las filas
+                    // sueltas se mudaron detrás del ⚙ → SettingsSheet.
+                    if AuthService.shared.restoreSession() != nil {
+                        PostGridSection(
+                            userId: AuthService.shared.restoreSession()?.user.id ?? "",
+                            posts: myPosts,
+                            isOwner: true,
+                            onTapPost: { post in selectedPost = post }
+                        )
+                        .padding(.horizontal, 2)
+                    } else {
+                        // Guest state: lo único que queda inline además del
+                        // header. El resto de settings pide sesión igual.
+                        VStack(alignment: .leading, spacing: 12) {
                             HStack(spacing: 10) {
                                 Image(systemName: "person.crop.circle.badge.questionmark")
                                     .font(.bpScaled(18)).foregroundStyle(Color.bpTextSecondary)
@@ -541,11 +290,11 @@ struct ProfileView: View {
                             .buttonStyle(.plain)
                             .bpAccessibility(label: l10n.t("profile.account.signIn"), hint: "Entrar con tu cuenta para sincronizar", isButton: true)
                         }
+                        .padding(18)
+                        .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
+                        .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
+                        .padding(.horizontal, BPSpacing.lg)
                     }
-                    .padding(18)
-                    .background(Color.bpSurface, in: RoundedRectangle(cornerRadius: BPRadius.xl))
-                    .overlay(RoundedRectangle(cornerRadius: BPRadius.xl).strokeBorder(Color.bpInk.opacity(0.07)))
-                    .padding(.horizontal, BPSpacing.lg)
 
                     Spacer(minLength: 120)
                 }
@@ -613,10 +362,15 @@ struct ProfileView: View {
             NavigationStack {
                 SettingsSheet(
                     currentCity: currentCity,
+                    walletBalance: appState.walletBalance,
                     autoplayEnabled: $autoplay.enabled,
+                    onWallet: { showSettings = false; showTopUp = true },
+                    onPasses: { showSettings = false; showPasses = true },
+                    onGames: { showSettings = false; showGames = true },
                     onDirecciónCasa: { showSettings = false; showHomeAddress = true },
                     onCiudad: { showSettings = false; showCityChange = true },
                     onUniversidad: { showSettings = false; showAffiliationPicker = true },
+                    onPreviews: { showSettings = false; showDebugPreviews = true },
                     onEliminarCuenta: { showSettings = false; showDeleteAccount = true },
                     onCerrarSesion: {
                         BPHaptics.medium()
@@ -804,6 +558,14 @@ struct ProfileView: View {
                 avatarConfig = saved
             }
         }
+        // Build 129 — Vistas previas owner. Mismo set de botones que vivía
+        // antes al pie del Me, movido detrás del ⚙ para no comer la main
+        // surface del tab.
+        .sheet(isPresented: $showDebugPreviews) {
+            ownerPreviewsSheet
+                .presentationBackground(.black)
+                .preferredColorScheme(.dark)
+        }
         .onChange(of: engine.lastAward?.xp) { _, newValue in
             guard newValue != nil else { return }
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { showToast = true }
@@ -899,6 +661,59 @@ struct ProfileView: View {
             nightRecapData = data
         } else {
             nightRecapData = nil
+        }
+    }
+
+    /// Owner-only tray: the 16 "Vistas previas v17.1" buttons that used to
+    /// sit pinned at the bottom of the Me scroll. Each button closes this
+    /// sheet first so the preview itself comes up on a clean stack.
+    @ViewBuilder
+    private var ownerPreviewsSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 8) {
+                    Text("VISTAS PREVIAS v17.1")
+                        .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
+                        .tracking(2)
+                        .foregroundStyle(Color.bpAmber)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 14)
+                    debugButton("Remy en vivo") { showDebugPreviews = false; showRemyLivePreview = true }
+                    // Mockup-only initializers live under #if DEBUG in their files.
+                    #if DEBUG
+                    debugButton("La noche del grupo") { showDebugPreviews = false; showGroupNightPreview = true }
+                    debugButton("Venue con pulso") { showDebugPreviews = false; showVenuePulsePreview = true }
+                    debugButton("Recap y racha") { showDebugPreviews = false; showNightRecapPreview = true }
+                    #endif
+                    debugButton("Explore") { showDebugPreviews = false; showExploreV2 = true }
+                    debugButton("Social") { showDebugPreviews = false; showSocialV2 = true }
+                    debugButton("Trips (lista)") { showDebugPreviews = false; showTripsListV2 = true }
+                    #if DEBUG
+                    debugButton("Priority Entry") { showDebugPreviews = false; showPriorityEntryV2 = true }
+                    #endif
+                    debugButton("Skip the Line") { showDebugPreviews = false; showSkipTheLineV2 = true }
+                    #if DEBUG
+                    debugButton("Pase activo") { showDebugPreviews = false; showActivePassV2 = true }
+                    #endif
+                    debugButton("Carrito") { showDebugPreviews = false; showCartV2 = true }
+                    debugButton("Cuenta abierta") { showDebugPreviews = false; showOpenTabV2 = true }
+                    debugButton("Entrar (auth)") { showDebugPreviews = false; showAuthLoginV2 = true }
+                    debugButton("Juegos y misiones") { showDebugPreviews = false; showGamesMissionsV2 = true }
+                    debugButton("Encontrar a mi gente") { showDebugPreviews = false; showFindMyPeopleV2 = true }
+                    debugButton("Tu señal") { showDebugPreviews = false; showYourSignalV2 = true }
+                }
+                .padding(.horizontal, BPSpacing.lg)
+                .padding(.bottom, 40)
+            }
+            .background(Color.black.ignoresSafeArea())
+            .navigationTitle("Previews (owner)")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Listo") { showDebugPreviews = false }
+                        .foregroundStyle(Color.bpAmber)
+                }
+            }
         }
     }
 
@@ -1077,10 +892,15 @@ struct ProfileView: View {
 @MainActor
 private struct SettingsSheet: View {
     let currentCity: String?
+    let walletBalance: Double
     @Binding var autoplayEnabled: Bool
+    let onWallet: () -> Void
+    let onPasses: () -> Void
+    let onGames: () -> Void
     let onDirecciónCasa: () -> Void
     let onCiudad: () -> Void
     let onUniversidad: () -> Void
+    let onPreviews: () -> Void
     let onEliminarCuenta: () -> Void
     let onCerrarSesion: () -> Void
 
@@ -1090,6 +910,24 @@ private struct SettingsSheet: View {
 
     var body: some View {
         List {
+            // Build 129 — Wallet, Mis pases, Juegos ya no están en el main
+            // scroll del Me (Juan, TestFlight 128). Viven acá así siguen
+            // llegables en 1 tap desde el ⚙, pero el main surface del tab
+            // queda limpio para el posts grid.
+            Section("Pases y crédito") {
+                row(l10n.t("table.wallet.name"),
+                    icon: "wallet.pass.fill",
+                    subtitle: String(format: l10n.t("profile.wallet.balance"), walletBalance),
+                    onTap: onWallet)
+                row(l10n.t("profile.passes.title"),
+                    icon: "ticket.fill",
+                    subtitle: l10n.t("profile.passes.subtitle"),
+                    onTap: onPasses)
+                row(l10n.t("profile.games.title"),
+                    icon: "gamecontroller.fill",
+                    subtitle: l10n.t("profile.games.subtitle"),
+                    onTap: onGames)
+            }
             Section("Cuenta y perfil") {
                 row("Dirección de casa", icon: "house.fill", onTap: onDirecciónCasa)
                 row("Ciudad", icon: "mappin.and.ellipse",
@@ -1119,6 +957,13 @@ private struct SettingsSheet: View {
                 } label: {
                     settingsRowLabel("Legal y políticas", icon: "doc.text.fill")
                 }
+            }
+            // Owner-only tester tray. Was a 16-row block pinned to the
+            // bottom of the main Me scroll — moved behind this one row so
+            // the tab's main surface stays about the user, not the owner's
+            // in-progress V2 screens. The sheet itself lives in ProfileView.
+            Section("Previews (owner)") {
+                row("Vistas previas v17.1", icon: "sparkles", onTap: onPreviews)
             }
             Section("Sesión") {
                 Button(role: .destructive) {

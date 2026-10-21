@@ -433,10 +433,19 @@ struct MainTabView: View {
         let item = items[index]
 
         return Button {
+            // Build 129 — Juan, TestFlight 128: "the bottom needs to have
+            // they need to be answering more faster". The previous handler
+            // wrapped the state change in a `spring(response: 0.35,
+            // dampingFraction: 0.7)` — a 350ms springy animation gated the
+            // whole tab-content swap on every tap. Haptic fires first so
+            // the hand feels the tap land, THEN we hop state on a short
+            // easeOut so the pill still slides but the tab's root view
+            // appears effectively instantly (~120ms). Spring overshoot
+            // was the dominant perceptual delay here, not the view build.
             BPHaptics.light()
             let screenNames = ["Tonight", "Explore", "Social", "Trips", "Profile"]
             BPAnalytics.screen(screenNames[index])
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+            withAnimation(.easeOut(duration: 0.12)) {
                 selectedTab = index
             }
         } label: {
