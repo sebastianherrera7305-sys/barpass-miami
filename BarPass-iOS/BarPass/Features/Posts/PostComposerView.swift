@@ -269,10 +269,18 @@ struct PostComposerView: View {
 
 /// Picker reducido para elegir el venue a etiquetar — muestra la
 /// lista de VenueStore filtrada por la ciudad actual, con search bar.
+///
+/// Su PROPIO store, no un @EnvironmentObject. Esta pantalla se presenta
+/// como sheet DESDE OTRA sheet (`PostComposerView` → `.sheet { … }`), y
+/// cada uno de esos límites descarta el environment ambiente — leer un
+/// @EnvironmentObject ausente no es un opcional que llega nil, es un
+/// SIGTRAP inmediato. Misma familia de bugs que crasheó la build 76 en
+/// `HostEventCreateView:63` (ver nota en `HostEventVenuePicker`). El
+/// store cuesta una lectura de catálogo y no puede estar ausente.
 private struct PostVenuePickerView: View {
     @Binding var selected: BarPassVenue?
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var venueStore: VenueStore
+    @StateObject private var venueStore = VenueStore()
     @State private var query: String = ""
 
     private var filtered: [BarPassVenue] {
@@ -316,6 +324,7 @@ private struct PostVenuePickerView: View {
             .navigationTitle("Tagar venue")
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $query, prompt: "Buscar venue")
+            .task { await venueStore.loadVenues() }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancelar") { dismiss() }
