@@ -477,10 +477,18 @@ struct ProfileView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         if AuthService.shared.restoreSession() != nil {
 
-                            // Debug previews — Tonight v17.1 screens 8-11, not yet
-                            // wired to the main nav. Lets the owner see them in
-                            // TestFlight without replacing TripDetail / PlanView
-                            // / VenueDetail yet.
+                            // "VISTAS PREVIAS v17.1" + 15 debug buttons.
+                            // Owner report (TestFlight 2026-10-27, "sigue
+                            // ese menu viejo no lo quiero ver, para eso
+                            // creamos la ruedita arriba"): this was a
+                            // DEBUG tray for the owner to preview V2
+                            // screens in TestFlight, but half the buttons
+                            // leaked into Release because only three of
+                            // them were under `#if DEBUG`. Wrapped the
+                            // whole tray so Release ships without it —
+                            // everything the user actually uses is
+                            // reachable through the gear / tabs.
+                            #if DEBUG
                             VStack(spacing: 8) {
                                 Text(l10n.t("profile.v17Previews"))
                                     .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
@@ -489,30 +497,15 @@ struct ProfileView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.top, 14)
                                 debugButton("Remy en vivo") { showRemyLivePreview = true }
-                                // These three only have mockup initializers
-                                // (sample Trip / mockup venue / .mockup recap),
-                                // all fenced under #if DEBUG in their files —
-                                // so the buttons exist only in Debug builds.
-                                #if DEBUG
                                 debugButton("La noche del grupo") { showGroupNightPreview = true }
                                 debugButton("Venue con pulso") { showVenuePulsePreview = true }
                                 debugButton("Recap y racha") { showNightRecapPreview = true }
-                                #endif
                                 debugButton("Explore") { showExploreV2 = true }
                                 debugButton("Social") { showSocialV2 = true }
                                 debugButton("Trips (lista)") { showTripsListV2 = true }
-                                // The V2 Priority hub takes callbacks that
-                                // only the real presenter (RootView) wires;
-                                // calling it bare from the debug tray would
-                                // render fabricated "CLUB SPACE" defaults
-                                // and three dead cards. DEBUG-only.
-                                #if DEBUG
                                 debugButton("Priority Entry") { showPriorityEntryV2 = true }
-                                #endif
                                 debugButton("Skip the Line") { showSkipTheLineV2 = true }
-                                #if DEBUG
                                 debugButton("Pase activo") { showActivePassV2 = true }
-                                #endif
                                 debugButton("Carrito") { showCartV2 = true }
                                 debugButton("Cuenta abierta") { showOpenTabV2 = true }
                                 debugButton("Entrar (auth)") { showAuthLoginV2 = true }
@@ -520,6 +513,7 @@ struct ProfileView: View {
                                 debugButton("Encontrar a mi gente") { showFindMyPeopleV2 = true }
                                 debugButton("Tu señal") { showYourSignalV2 = true }
                             }
+                            #endif
                         } else {
                             HStack(spacing: 10) {
                                 Image(systemName: "person.crop.circle.badge.questionmark")

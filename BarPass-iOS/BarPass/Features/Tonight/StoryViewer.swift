@@ -23,6 +23,7 @@ struct StoryViewer: View {
     @State private var progress: Double = 0
     @State private var player: AVPlayer?
     @State private var isPaused = false
+    @State private var dragY: CGFloat = 0
 
     /// A photo gets a beat long enough to read the room and short enough
     /// that eight of them are still one night, not a slideshow.
@@ -66,6 +67,37 @@ struct StoryViewer: View {
             tapTargets
         }
         .statusBarHidden()
+        // Swipe-down to dismiss (TestFlight Build 131, 2026-10-27):
+        // "the only way to leave the stories is the X on the right side,
+        // we have to create other type of ways is a slide down or slide
+        // to the side something like that". Attaches here (not under
+        // tapTargets) so the drag competes at the root level and the
+        // tap-to-advance regions stay snappy.
+        .offset(y: max(0, dragY))
+        .opacity(1 - min(0.5, max(0, dragY) / 500))
+        .highPriorityGesture(
+            DragGesture(minimumDistance: 20)
+                .onChanged { v in
+                    // Only track downward drag; upward is a no-op so a
+                    // mis-swipe doesn't darken the view in the wrong
+                    // direction.
+                    dragY = max(0, v.translation.height)
+                    if dragY > 10 { isPaused = true; player?.pause() }
+                }
+                .onEnded { v in
+                    let dismissThreshold: CGFloat = 120
+                    let velocityDownFast: CGFloat = 800
+                    if dragY > dismissThreshold || v.predictedEndTranslation.height > velocityDownFast {
+                        onClose()
+                    } else {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                            dragY = 0
+                        }
+                        isPaused = false
+                        player?.play()
+                    }
+                }
+        )
         // El aviso de fallo va en la raíz del visor, no adentro del menú:
         // si la acción se deshace, la persona tiene que enterarse aunque el
         // menú ya se haya cerrado.
