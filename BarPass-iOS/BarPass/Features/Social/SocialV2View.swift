@@ -863,61 +863,66 @@ public struct SocialV2View: View {
         }
     }
 
+    /// Post card compacto estilo IG DMs. Owner report Build 138 (2026-10-27):
+    /// la versión anterior era card ancho con foto 1:1 full-width (~340pt),
+    /// un solo post ocupaba la mitad de la pantalla y tapaba stories + chats.
+    /// Esta versión es una fila horizontal: thumbnail 72×72, autor + venue +
+    /// caption al lado. Entran 4-5 posts donde antes entraba 1. Al tocar
+    /// cualquier parte abre el PostDetailView (que ya tiene la foto grande
+    /// 4:5 — es ahí donde la foto grande vive, no en el feed).
     private func postCard(_ post: UserPost) -> some View {
         let url = post.publicImageURL(baseURL: SupabaseRESTClient.baseURL)
         let venue = post.venueId.flatMap { id in venueStore.venues.first { $0.id == id } }
 
-        return VStack(alignment: .leading, spacing: 10) {
-            // Author strip
-            HStack(spacing: 10) {
-                Circle()
-                    .fill(Color.bpAmber.opacity(0.18))
-                    .frame(width: 32, height: 32)
-                    .overlay(
-                        Text(String((postAuthorNames[post.userId] ?? "·").prefix(1)).uppercased())
-                            .font(.system(size: 13, weight: .heavy, design: .rounded))
-                            .foregroundStyle(Color.bpAmber)
-                    )
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(postAuthorNames[post.userId] ?? "Alguien de BarPass")
-                        .font(.system(size: 13, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.white)
-                    if let v = venue {
-                        Text(v.name)
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.bpAmber)
-                            .lineLimit(1)
-                    }
-                }
-                Spacer()
-                Text(Self.relativeAgoString(from: post.createdAt))
-                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                    .tracking(1.0)
-                    .foregroundStyle(Color.white.opacity(0.45))
-            }
-
-            // Photo 1:1
-            CachedImage(url: url, targetSize: CGSize(width: 700, height: 700), priority: .standard) { img in
+        return HStack(alignment: .top, spacing: 12) {
+            // Thumbnail cuadrado — tamaño fijo para que fila ancha o
+            // nombres largos no empujen la foto fuera de proporción.
+            CachedImage(url: url, targetSize: CGSize(width: 220, height: 220), priority: .standard) { img in
                 img.resizable().aspectRatio(contentMode: .fill)
             } placeholder: {
                 Rectangle().fill(Color.white.opacity(0.06))
             }
-            .aspectRatio(1, contentMode: .fit)
+            .frame(width: 72, height: 72)
             .clipped()
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
 
-            // Caption (optional)
-            if !post.caption.isEmpty {
-                Text(post.caption)
-                    .font(.system(size: 13))
-                    .foregroundStyle(Color.white.opacity(0.85))
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text(postAuthorNames[post.userId] ?? "Alguien de BarPass")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                    Spacer(minLength: 4)
+                    Text(Self.relativeAgoString(from: post.createdAt))
+                        .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                        .tracking(0.8)
+                        .foregroundStyle(Color.white.opacity(0.4))
+                }
+                if let v = venue {
+                    HStack(spacing: 4) {
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.system(size: 9, weight: .heavy))
+                            .foregroundStyle(Color.bpAmber)
+                        Text(v.name)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Color.bpAmber)
+                            .lineLimit(1)
+                    }
+                }
+                if !post.caption.isEmpty {
+                    Text(post.caption)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.white.opacity(0.7))
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(14)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.08)))
+        .padding(12)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
+        .contentShape(RoundedRectangle(cornerRadius: 14))
         .onTapGesture {
             BPHaptics.selection()
             if let v = venue { selectedVenue = v }

@@ -68,6 +68,11 @@ final class AppState: ObservableObject {
     /// TonightView passes this down to PromptYourNightHomeSection, which
     /// focuses its text field on `true` and flips it back to `false`.
     @Published var focusPromptRequested    = false
+    /// Texto que se prellena en el campo de prompt del Tonight cuando
+    /// `focusPromptRequested` dispara. Usado por el Night Recap para
+    /// "Ver plan del viernes" (abre Tonight, enfoca el prompt y escribe
+    /// el pedido base automáticamente). Se consume y limpia al leerse.
+    @Published var pendingPromptText:      String? = nil
     /// Set by the "Mis pases" Home Screen quick action: Profile opens the
     /// pass history itself, so the shortcut lands where it says it lands
     /// instead of one tap short of it.

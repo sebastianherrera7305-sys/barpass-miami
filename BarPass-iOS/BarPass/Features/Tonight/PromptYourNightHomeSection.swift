@@ -19,6 +19,11 @@ struct PromptYourNightHomeSection: View {
     /// Focusing here, not higher up, keeps the keyboard-focus concern local
     /// to the field that actually owns it.
     @Binding var focusRequested: Bool
+    /// Texto que escribe otra pantalla en el campo cuando pide enfocar.
+    /// Usado por el Night Recap para "Ver plan del viernes" — abre
+    /// Tonight con el prompt pre-escrito, listo para enviar. Consumido
+    /// y seteado a nil para no re-escribir en subsecuentes focus.
+    var prefillText: Binding<String?> = .constant(nil)
 
     @StateObject private var tripStore = TripStore(repository: RepositoryDependencies.trip)
     @State private var savedNight = false
@@ -167,6 +172,10 @@ struct PromptYourNightHomeSection: View {
         .helpTarget("tonight.promptSearch")
         .onChange(of: focusRequested) { _, requested in
             guard requested else { return }
+            if let pending = prefillText.wrappedValue, !pending.isEmpty {
+                prompt = pending
+                prefillText.wrappedValue = nil
+            }
             promptFocused = true
             focusRequested = false
         }

@@ -798,27 +798,50 @@ struct NightRecapView: View {
                 .padding(.top, 8)
                 .fixedSize(horizontal: false, vertical: true)
 
-            // Pills
+            // Pills — owner reportó Build 136 "la de la bebida no deja mandar
+            // la respuesta". El tap SÍ envía (ver submitPrice → POST real),
+            // pero el feedback visual era muy sutil (una línea de texto chica
+            // debajo). Ahora: la pill elegida se infla, muestra ✓ cuando
+            // llega el 200, y pulsa en verde mientras envía.
             FlowRecapRow(spacing: 7) {
                 ForEach(Array(pricePills.enumerated()), id: \.offset) { idx, pill in
                     let isOn = (selectedPricePill == idx)
+                    let isDone = isOn && priceReport == .sent
+                    let isLoading = isOn && priceReport == .sending
                     Button {
                         submitPrice(index: idx, cents: pill.cents, venueId: venueId)
                     } label: {
-                        Text(pill.label)
-                            .font(.system(size: 12, weight: isOn ? .heavy : .semibold,
-                                          design: .rounded))
-                            .foregroundStyle(isOn ? Color.black : Color.white.opacity(0.78))
-                            .padding(.horizontal, 11).padding(.vertical, 6)
-                            .background(
-                                Capsule().fill(isOn ? Color.bpAmber : Color.white.opacity(0.07))
+                        HStack(spacing: 5) {
+                            if isDone {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 10, weight: .heavy))
+                            } else if isLoading {
+                                ProgressView()
+                                    .controlSize(.mini)
+                                    .tint(Color.black)
+                            }
+                            Text(pill.label)
+                                .font(.system(size: 12, weight: isOn ? .heavy : .semibold,
+                                              design: .rounded))
+                        }
+                        .foregroundStyle(isOn ? Color.black : Color.white.opacity(0.78))
+                        .padding(.horizontal, 12).padding(.vertical, 7)
+                        .background(
+                            Capsule().fill(
+                                isDone ? Color.bpGreen :
+                                isOn ? Color.bpAmber : Color.white.opacity(0.07)
                             )
-                            .overlay(
-                                Capsule().strokeBorder(
-                                    isOn ? Color.bpAmberBright : Color.white.opacity(0.14),
-                                    lineWidth: 1
-                                )
+                        )
+                        .overlay(
+                            Capsule().strokeBorder(
+                                isDone ? Color.bpGreen :
+                                isOn ? Color.bpAmberBright : Color.white.opacity(0.14),
+                                lineWidth: 1
                             )
+                        )
+                        .scaleEffect(isOn ? 1.08 : 1.0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isOn)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isDone)
                     }
                     .buttonStyle(.plain)
                     .disabled(priceReport == .sending || priceReport == .sent)
@@ -897,8 +920,34 @@ struct NightRecapView: View {
 
     // MARK: - CTA
 
+    /// Texto inicial que se escribe en el campo de prompt del Tonight
+    /// cuando el usuario toca "Ver el plan de el viernes" en el recap.
+    /// Pedido base + marco temporal — Remy ya conoce el histórico vía
+    /// SSE del Plan, así que no hace falta incluir venues específicos.
+    static func friPrefill() -> String {
+        let today = Calendar.current.component(.weekday, from: Date())
+        let when: String
+        switch today {
+        case 6, 7:  when = "esta noche"
+        case 1:     when = "el próximo viernes"
+        default:    when = "el viernes"
+        }
+        return "Armame un plan para \(when): salida con amigos, buena música, 3-4 paradas."
+    }
+
     private func ctaButton(data: NightRecapData) -> some View {
         Button {
+            // Owner report (Build 136, 2026-10-27 "lo de ver el plan del
+            // viernes, se supone que te debería armar uno directo. Y lo
+            // que menos hace es eso"). El botón sólo cerraba el sheet y
+            // dejaba al usuario viendo Profile — nunca abría un plan.
+            // Ahora prellena el prompt de Tonight con un pedido base
+            // orientado al próximo weekend, enfoca el campo, cambia a
+            // la pestaña Tonight y cierra el recap.
+            BPHaptics.success()
+            appState.pendingPromptText = Self.friPrefill()
+            appState.focusPromptRequested = true
+            appState.requestedTab = 0
             onDismiss()
         } label: {
             HStack(spacing: 10) {
