@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 // GroupNightView — "La noche del grupo" (artifact 294356f9, pantalla 9).
 //
@@ -53,6 +54,7 @@ struct GroupNightView: View {
 
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var store: TripStore
+    @EnvironmentObject private var venueStore: VenueStore
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var l10n = L10n.shared
 
@@ -147,6 +149,19 @@ struct GroupNightView: View {
     private var myRole: MemberRole { currentTrip.role(of: TripStore.currentUserId) }
     private var canManageMembers: Bool { myRole == .organizer || myRole == .coOrganizer }
 
+    /// Resolve each stop's refId → BarPassVenue coordinate so the map
+    /// renders real pins and a route polyline. Stops whose venue is not
+    /// in the loaded `VenueStore` get a nil placeholder; the map handles
+    /// mismatched counts by only drawing the pins/segments it has data
+    /// for (owner report Build 131: "en el map muestra todas las
+    /// opciones en vez de dar una ruta").
+    private var resolvedStopCoordinates: [CLLocationCoordinate2D?] {
+        sortedStops.map { stop in
+            guard let v = venueStore.venues.first(where: { $0.id == stop.refId }) else { return nil }
+            return CLLocationCoordinate2D(latitude: v.latitude, longitude: v.longitude)
+        }
+    }
+
     var body: some View {
         ZStack {
             GroupNightBackground()
@@ -176,6 +191,7 @@ struct GroupNightView: View {
 
                     GroupNightMapCard(
                         stops: sortedStops,
+                        stopCoordinates: resolvedStopCoordinates,
                         currentStopIndex: currentStopIndex,
                         nextStop: nextStop,
                         isCompleted: currentTrip.status == .completed
@@ -700,155 +716,147 @@ private struct GroupNightMembersStrip: View {
 private struct GroupNightMapCard: View {
     @ObservedObject private var l10n = L10n.shared
     let stops: [Stop]
+    let stopCoordinates: [CLLocationCoordinate2D?]
     let currentStopIndex: Int?
     let nextStop: Stop?
     let isCompleted: Bool
 
-    private struct PinLayout: Identifiable {
-        let id: String
-        let x: CGFloat
-        let y: CGFloat
-        let label: String
-        let state: GroupNightMapCard_PinState
+    /// (stop, coord, position-in-sequence) for stops with resolved coords.
+    /// Owner report (Build 131): "en el map muestra todas las opciones en
+    /// vez de dar una ruta". Rewrote to real MapKit — annotations are
+    /// numbered 1..N in itinerary order, a polyline draws the route in
+    /// amber, and the camera auto-fits the bbox of all resolved stops.
+    private var resolvedPins: [(stop: Stop, coord: CLLocationCoordinate2D, seq: Int)] {
+        var out: [(Stop, CLLocationCoordinate2D, Int)] = []
+        for (i, s) in stops.enumerated() {
+            guard i < stopCoordinates.count, let c = stopCoordinates[i] else { continue }
+            out.append((s, c, i))
+        }
+        return out
     }
 
-    /// Positions pins along a gentle S-curve so a 2-stop trip reads as two
-    /// clearly separated points and a 5-stop one still has visual rhythm.
-    private var layouts: [PinLayout] {
-        guard !stops.isEmpty else { return [] }
-        let count = CGFloat(stops.count)
-        return stops.enumerated().map { idx, stop in
-            let t = count == 1 ? 0.5 : CGFloat(idx) / (count - 1)
-            // Alternates below/above the diagonal to spread evenly.
-            let wave = sin(t * .pi * 1.4) * 0.18
-            let x = 0.18 + t * 0.64
-            let y = 0.30 + t * 0.40 - wave
-            let state: GroupNightMapCard_PinState
-            if isCompleted {
-                state = .done
-            } else if let i = currentStopIndex {
-                if idx < i { state = .done }
-                else if idx == i { state = .current }
-                else { state = .next }
-            } else {
-                // No "current" (todos futuros, planning o sin horas) — todos .next.
-                state = .next
-            }
-            let labelTime = stop.startTime.isEmpty ? "" : " · \(stop.startTime)"
-            return PinLayout(
-                id: stop.id,
-                x: x, y: y,
-                label: "\(stop.venueName)\(labelTime)",
-                state: state
-            )
+    private var routeCoords: [CLLocationCoordinate2D] { resolvedPins.map(\.coord) }
+
+    private var cameraBBox: MapCameraPosition {
+        guard !routeCoords.isEmpty else {
+            // Miami fallback — the catalogue is Miami-first.
+            return .region(MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: 25.76, longitude: -80.19),
+                span: MKCoordinateSpan(latitudeDelta: 0.08, longitudeDelta: 0.08)
+            ))
         }
+        let lats = routeCoords.map(\.latitude)
+        let lngs = routeCoords.map(\.longitude)
+        let minLat = lats.min() ?? 0, maxLat = lats.max() ?? 0
+        let minLng = lngs.min() ?? 0, maxLng = lngs.max() ?? 0
+        let center = CLLocationCoordinate2D(
+            latitude: (minLat + maxLat) / 2,
+            longitude: (minLng + maxLng) / 2
+        )
+        // Add 40% padding so pins don't crowd the edge.
+        let span = MKCoordinateSpan(
+            latitudeDelta: max(0.01, (maxLat - minLat) * 1.4),
+            longitudeDelta: max(0.01, (maxLng - minLng) * 1.4)
+        )
+        return .region(MKCoordinateRegion(center: center, span: span))
     }
 
     var body: some View {
-        GeometryReader { proxy in
-            ZStack {
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.11, green: 0.06, blue: 0.18),
-                        Color(red: 0.05, green: 0.03, blue: 0.09),
-                    ],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                )
-
-                // "Agua" simbólica — diagonal fría a la derecha.
-                Path { p in
-                    p.move(to: CGPoint(x: proxy.size.width * 0.72, y: 0))
-                    p.addLine(to: CGPoint(x: proxy.size.width, y: 0))
-                    p.addLine(to: CGPoint(x: proxy.size.width, y: proxy.size.height))
-                    p.addLine(to: CGPoint(x: proxy.size.width * 0.6, y: proxy.size.height))
-                    p.closeSubpath()
-                }
-                .fill(Color(red: 0.08, green: 0.18, blue: 0.26).opacity(0.6))
-
-                // Grid de calles simuladas.
-                Path { p in
-                    for i in stride(from: 0, through: 1, by: 0.2) {
-                        p.move(to: CGPoint(x: 0, y: proxy.size.height * CGFloat(i)))
-                        p.addLine(to: CGPoint(x: proxy.size.width, y: proxy.size.height * CGFloat(i)))
+        ZStack {
+            if resolvedPins.isEmpty {
+                emptyState
+            } else {
+                Map(initialPosition: cameraBBox) {
+                    // Route polyline — the actual order of visits, in amber.
+                    if routeCoords.count >= 2 {
+                        MapPolyline(coordinates: routeCoords)
+                            .stroke(Color.bpAmber,
+                                    style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round, dash: [6, 6]))
                     }
-                    for i in stride(from: 0, through: 1, by: 0.2) {
-                        p.move(to: CGPoint(x: proxy.size.width * CGFloat(i), y: 0))
-                        p.addLine(to: CGPoint(x: proxy.size.width * CGFloat(i), y: proxy.size.height))
-                    }
-                }
-                .stroke(Color.white.opacity(0.05), lineWidth: 0.6)
-
-                // Línea punteada uniendo los pins — el "recorrido" visible.
-                if layouts.count >= 2 {
-                    Path { p in
-                        for (idx, l) in layouts.enumerated() {
-                            let pt = CGPoint(x: proxy.size.width * l.x, y: proxy.size.height * l.y)
-                            if idx == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
+                    // Numbered pins, 1..N in itinerary order.
+                    ForEach(Array(resolvedPins.enumerated()), id: \.offset) { _, item in
+                        Annotation(item.stop.venueName, coordinate: item.coord) {
+                            numberedPin(index: item.seq, state: pinState(for: item.seq))
                         }
                     }
-                    .stroke(
-                        Color.bpAmber.opacity(0.35),
-                        style: StrokeStyle(lineWidth: 1.2, dash: [4, 4])
-                    )
                 }
+                .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
+                .allowsHitTesting(true)
+            }
 
-                if layouts.isEmpty {
-                    VStack(spacing: 6) {
-                        Image(systemName: "mappin.slash")
-                            .font(.system(size: 20, weight: .heavy))
-                            .foregroundStyle(Color.white.opacity(0.4))
-                        Text(l10n.t("group.noStopsYet"))
-                            .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                            .tracking(1.2)
-                            .foregroundStyle(Color.white.opacity(0.5))
+            // Bottom ribbon
+            VStack {
+                Spacer()
+                if let next = nextStop {
+                    HStack(spacing: 6) {
+                        Image(systemName: "arrow.turn.up.right")
+                            .font(.system(size: 10, weight: .heavy))
+                        Text(String(format: l10n.t("group.nextStopFmt"), next.startTime.isEmpty ? next.venueName : "\(next.venueName) · \(next.startTime)"))
+                            .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
+                            .tracking(0.4)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
                     }
-                } else {
-                    ForEach(layouts) { pin in
-                        MapPinView(label: pin.label, state: pin.state)
-                            .position(x: proxy.size.width * pin.x, y: proxy.size.height * pin.y)
-                    }
-                }
-
-                // Ribbon inferior — hoy sólo tenemos "próxima parada" real;
-                // la frase "6 min caminando" del mockup pedía routing en
-                // vivo que todavía no hay.
-                VStack {
-                    Spacer()
-                    if let next = nextStop {
-                        HStack(spacing: 6) {
-                            Image(systemName: "arrow.turn.up.right")
-                                .font(.system(size: 10, weight: .heavy))
-                            Text(String(format: l10n.t("group.nextStopFmt"), next.startTime.isEmpty ? next.venueName : "\(next.venueName) · \(next.startTime)"))
-                                .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
-                                .tracking(0.4)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.75)
-                        }
-                        .foregroundStyle(Color.white.opacity(0.78))
-                        .padding(.horizontal, 10).padding(.vertical, 6)
-                        .background(Color.black.opacity(0.55), in: Capsule())
-                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
-                        .padding(10)
-                    } else if !layouts.isEmpty {
-                        HStack(spacing: 6) {
-                            Image(systemName: "location.slash")
-                                .font(.system(size: 10, weight: .heavy))
-                            Text(l10n.t("group.liveLocationSoon"))
-                                .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
-                                .tracking(0.4)
-                        }
-                        .foregroundStyle(Color.white.opacity(0.5))
-                        .padding(.horizontal, 10).padding(.vertical, 6)
-                        .background(Color.black.opacity(0.55), in: Capsule())
-                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.1)))
-                        .padding(10)
-                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10).padding(.vertical, 6)
+                    .background(Color.black.opacity(0.75), in: Capsule())
+                    .overlay(Capsule().strokeBorder(Color.white.opacity(0.2)))
+                    .padding(10)
                 }
             }
+            .allowsHitTesting(false)
         }
-        .frame(height: 220)
+        .frame(height: 240)
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Color.white.opacity(0.08)))
+    }
+
+    private func pinState(for seq: Int) -> GroupNightMapCard_PinState {
+        if isCompleted { return .done }
+        if let i = currentStopIndex {
+            if seq < i { return .done }
+            if seq == i { return .current }
+            return .next
+        }
+        return .next
+    }
+
+    private func numberedPin(index: Int, state: GroupNightMapCard_PinState) -> some View {
+        let fill: Color = {
+            switch state {
+            case .done:    return Color.white.opacity(0.5)
+            case .current: return Color.bpAmberBright
+            case .next:    return Color.bpAmber
+            }
+        }()
+        return ZStack {
+            Circle().fill(fill)
+                .frame(width: 30, height: 30)
+                .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+                .shadow(color: fill.opacity(0.45), radius: 6)
+            Text("\(index + 1)")
+                .font(.system(size: 13, weight: .heavy, design: .rounded))
+                .foregroundStyle(.black)
+        }
+    }
+
+    private var emptyState: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color(red: 0.11, green: 0.06, blue: 0.18),
+                         Color(red: 0.05, green: 0.03, blue: 0.09)],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            )
+            VStack(spacing: 6) {
+                Image(systemName: "mappin.slash")
+                    .font(.system(size: 20, weight: .heavy))
+                    .foregroundStyle(Color.white.opacity(0.4))
+                Text(l10n.t("group.noStopsYet"))
+                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                    .tracking(1.2)
+                    .foregroundStyle(Color.white.opacity(0.5))
+            }
+        }
     }
 }
 
