@@ -80,6 +80,18 @@ private final class RemyLiveChat: ObservableObject {
     @Published private(set) var history: [APIClient.ConciergeChatTurn] = []
     private var streamTask: Task<Void, Never>?
 
+    /// Fase A del plan "modelo propio" (owner, 2026-10-27): cada vez que
+    /// la pantalla se abre, generamos una session_id nueva y cada turno
+    /// (user y assistant) se loguea a `remy_conversations` para el dataset
+    /// de fine-tune futuro. Fire-and-forget: nunca bloquea el chat.
+    private let sessionId = UUID()
+    private var turnIndex = 0
+
+    /// Contexto que viaja con cada turno — se setea al send() y se re-lee
+    /// al loguear el assistant turn para no re-pasarlo por el stream.
+    private var logCity: String? = nil
+    private var logCheckedInVenueId: String? = nil
+
     func reset() {
         streamTask?.cancel()
         currentReply = ""
@@ -98,7 +110,8 @@ private final class RemyLiveChat: ObservableObject {
         prompt: String,
         city: String?,
         context: APIClient.ConciergeContext,
-        venues: [BarPassVenue]
+        venues: [BarPassVenue],
+        checkedInVenueId: String? = nil
     ) {
         let clean = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !clean.isEmpty else { return }
@@ -108,6 +121,24 @@ private final class RemyLiveChat: ObservableObject {
 
         // Append user turn to history BEFORE sending so Remy sees it.
         history.append(APIClient.ConciergeChatTurn(role: "user", content: clean))
+
+        // --- Fase A: fire-and-forget logging del turno user ---------------
+        // Nunca `await` acá: si Supabase está caído, la respuesta de Remy
+        // no se traba. Si el `try?` falla, se pierde ese turno nomás.
+        logCity = city
+        logCheckedInVenueId = checkedInVenueId
+        let userTurnIndex = turnIndex
+        turnIndex += 1
+        Task { [sessionId] in
+            try? await RepositoryDependencies.remyConversation.logUserTurn(
+                sessionId: sessionId,
+                turnIndex: userTurnIndex,
+                content: clean,
+                city: city,
+                checkedInVenueId: checkedInVenueId
+            )
+        }
+        // ------------------------------------------------------------------
 
         // Snapshot message list to send — only non-empty turns, same shape
         // the V1 PlanView builds.
@@ -165,10 +196,45 @@ private final class RemyLiveChat: ObservableObject {
                 }
                 // Also commit the assistant turn to history (visible text,
                 // never the raw fence) so a follow-up turn carries context.
+                let visibleForHistory = finalText.isEmpty ? raw : finalText
                 await MainActor.run {
-                    let visibleForHistory = finalText.isEmpty ? raw : finalText
                     self?.history.append(APIClient.ConciergeChatTurn(role: "assistant", content: visibleForHistory))
                 }
+
+                // --- Fase A: fire-and-forget logging del turno assistant --
+                // Captura el plan serializado (si hubo) + venue_ids
+                // mencionados — eso después alimenta el fine-tune para que
+                // Remy aprenda qué cluster de venues sacar según el prompt.
+                let assistantTurnIndex = await MainActor.run { () -> Int in
+                    let idx = self?.turnIndex ?? 0
+                    self?.turnIndex = idx + 1
+                    return idx
+                }
+                let (logCity, logVenueId) = await MainActor.run {
+                    (self?.logCity, self?.logCheckedInVenueId)
+                }
+                let planData: Data?
+                if let plan = parsedPlan {
+                    planData = try? JSONEncoder().encode(plan)
+                } else {
+                    planData = nil
+                }
+                let mentionedIds = parsedPlan?.stops.compactMap { $0.venueId } ?? []
+                let sessionIdSnap = await MainActor.run { self?.sessionId ?? UUID() }
+                Task {
+                    try? await RepositoryDependencies.remyConversation.logAssistantTurn(
+                        sessionId: sessionIdSnap,
+                        turnIndex: assistantTurnIndex,
+                        content: visibleForHistory,
+                        city: logCity ?? nil,
+                        checkedInVenueId: logVenueId ?? nil,
+                        planJSON: planData,
+                        venueIdsMentioned: mentionedIds,
+                        model: nil,       // TODO: capturar X-BP-Model del response
+                        latencyMs: nil    // TODO: capturar latency del primer token
+                    )
+                }
+                // ----------------------------------------------------------
 
                 if parsedPlan != nil { BPAnalytics.track(.createPlan(method: "ai")) }
             } catch {
@@ -444,7 +510,8 @@ struct RemyLiveView: View {
                     prompt: kickoffPrompt,
                     city: venueStore.selectedCity,
                     context: buildContext(),
-                    venues: venueStore.venues
+                    venues: venueStore.venues,
+                    checkedInVenueId: checkedInVenue?.id
                 )
             }
         }

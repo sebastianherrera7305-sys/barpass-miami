@@ -90,6 +90,7 @@
 		BEAC7753276C6AE126A4705E /* PostDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC545A5B63DC503C7842F0 /* PostDetailView.swift */; };
 		BEAC75792F4C81D583282F59 /* UserPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACCF451448028A0A47A8CE /* UserPost.swift */; };
 		BEACC0051B0ECCA97EFCDB57 /* UserPostRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC63D7D795E2DE4E8133FC /* UserPostRepository.swift */; };
+		BEACC0061B0ECCA97EFCDB58 /* RemyConversationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC63D8D795E2DE4E8133FD /* RemyConversationRepository.swift */; };
 		BEAC438F242B5DF4930C6E31 /* ProfilePrivacyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC4DF9337E9727FA06A412 /* ProfilePrivacyStore.swift */; };
 		BEAC6060455583632B7A814F /* ExploreV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC2A847466EDACCE557623 /* ExploreV2View.swift */; };
 		BEACF08D8071A8F9CD9E6E1C /* NightRecapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC6EE93615C0614A97FD42 /* NightRecapView.swift */; };
@@ -505,6 +506,7 @@
 		BEAC545A5B63DC503C7842F0 /* PostDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PostDetailView.swift; path = BarPass/Features/Posts/PostDetailView.swift; sourceTree = SOURCE_ROOT; };
 		BEACCF451448028A0A47A8CE /* UserPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserPost.swift; path = BarPass/Models/UserPost.swift; sourceTree = SOURCE_ROOT; };
 		BEAC63D7D795E2DE4E8133FC /* UserPostRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserPostRepository.swift; path = BarPass/Repositories/UserPostRepository.swift; sourceTree = SOURCE_ROOT; };
+		BEAC63D8D795E2DE4E8133FD /* RemyConversationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RemyConversationRepository.swift; path = BarPass/Repositories/RemyConversationRepository.swift; sourceTree = SOURCE_ROOT; };
 		BEAC4DF9337E9727FA06A412 /* ProfilePrivacyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfilePrivacyStore.swift; path = BarPass/Features/Profile/ProfilePrivacyStore.swift; sourceTree = SOURCE_ROOT; };
 		BEAC2A847466EDACCE557623 /* ExploreV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExploreV2View.swift; path = BarPass/Features/Explore/ExploreV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEAC6EE93615C0614A97FD42 /* NightRecapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightRecapView.swift; path = BarPass/Features/Recap/NightRecapView.swift; sourceTree = SOURCE_ROOT; };
@@ -1613,6 +1615,7 @@
 				BEAC7753276C6AE126A4705E /* PostDetailView.swift in Sources */,
 				BEAC75792F4C81D583282F59 /* UserPost.swift in Sources */,
 				BEACC0051B0ECCA97EFCDB57 /* UserPostRepository.swift in Sources */,
+				BEACC0061B0ECCA97EFCDB58 /* RemyConversationRepository.swift in Sources */,
 				BEAC438F242B5DF4930C6E31 /* ProfilePrivacyStore.swift in Sources */,
 				BEAC6060455583632B7A814F /* ExploreV2View.swift in Sources */,
 				BEACF08D8071A8F9CD9E6E1C /* NightRecapView.swift in Sources */,

@@ -16,5 +16,11 @@
 	<true/>
 	<key>manageAppVersionAndBuildNumber</key>
 	<false/>
+	<!-- Automatic signing: deja que Xcode descargue/renueve el cert de
+	     Distribution contra el teamID. Sin esto, un cert vencido o faltante
+	     en el keychain tira "No signing certificate iOS Distribution found"
+	     aunque el archive sí haya firmado durante la compilación. -->
+	<key>signingStyle</key>
+	<string>automatic</string>
 </dict>
 </plist>

@@ -23,6 +23,9 @@ enum RepositoryDependencies {
     /// sigue siendo reviews textuales (venue_posts, nunca aplicado en
     /// prod — queda inerte por si lo revivimos).
     nonisolated(unsafe) static var userPost: UserPostRepository = SupabaseUserPostRepository()
+    /// Fase A del plan "modelo propio" — loguea cada turno de Remy a
+    /// `public.remy_conversations` para el dataset de fine-tune futuro.
+    nonisolated(unsafe) static var remyConversation: RemyConversationRepository = SupabaseRemyConversationRepository()
     nonisolated(unsafe) static var greekLife: GreekLifeRepository = SupabaseGreekLifeRepository()
     nonisolated(unsafe) static var profileAffiliation: ProfileAffiliationRepository = SupabaseProfileAffiliationRepository()
     nonisolated(unsafe) static var chapterChat: ChapterChatRepository = SupabaseChapterChatRepository()
