@@ -228,7 +228,7 @@ struct GroupNightView: View {
                     ratingTarget = RatingTarget(id: id, name: memberNames[id] ?? id)
                 }
             }
-            Button("Cancelar", role: .cancel) {}
+            Button(l10n.t("common.cancel"), role: .cancel) {}
         }
         .sheet(item: $ratingTarget) { target in
             RatingPrompt(
@@ -359,6 +359,7 @@ private struct GroupNightBackground: View {
 
 @MainActor
 private struct GroupNightHeader: View {
+    @ObservedObject private var l10n = L10n.shared
     let trip: Trip
     let onBack: () -> Void
     let onShareInvite: () -> Void
@@ -406,7 +407,7 @@ private struct GroupNightHeader: View {
                     HStack(spacing: 4) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 10, weight: .heavy))
-                        Text("INVITAR")
+                        Text(l10n.t("group.inviteCaps"))
                             .font(.system(size: 10, weight: .heavy, design: .monospaced))
                             .tracking(1.4)
                     }
@@ -590,6 +591,7 @@ private struct GroupNightMembersStrip: View {
 
 @MainActor
 private struct GroupNightMapCard: View {
+    @ObservedObject private var l10n = L10n.shared
     let stops: [Stop]
     let currentStopIndex: Int?
     let nextStop: Stop?
@@ -688,7 +690,7 @@ private struct GroupNightMapCard: View {
                         Image(systemName: "mappin.slash")
                             .font(.system(size: 20, weight: .heavy))
                             .foregroundStyle(Color.white.opacity(0.4))
-                        Text("Sin paradas todavía")
+                        Text(l10n.t("group.noStopsYet"))
                             .font(.system(size: 11, weight: .heavy, design: .monospaced))
                             .tracking(1.2)
                             .foregroundStyle(Color.white.opacity(0.5))
@@ -709,7 +711,7 @@ private struct GroupNightMapCard: View {
                         HStack(spacing: 6) {
                             Image(systemName: "arrow.turn.up.right")
                                 .font(.system(size: 10, weight: .heavy))
-                            Text("Próxima parada: \(next.venueName)\(next.startTime.isEmpty ? "" : " · \(next.startTime)")")
+                            Text(String(format: l10n.t("group.nextStopFmt"), next.startTime.isEmpty ? next.venueName : "\(next.venueName) · \(next.startTime)"))
                                 .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
                                 .tracking(0.4)
                                 .lineLimit(1)
@@ -724,7 +726,7 @@ private struct GroupNightMapCard: View {
                         HStack(spacing: 6) {
                             Image(systemName: "location.slash")
                                 .font(.system(size: 10, weight: .heavy))
-                            Text("Encender ubicación en vivo próximamente")
+                            Text(l10n.t("group.liveLocationSoon"))
                                 .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
                                 .tracking(0.4)
                         }
@@ -820,6 +822,7 @@ private enum GroupNightMapCard_PinState { case current, done, next }
 private struct GroupNightJoinRequestsCard: View {
     let stops: [Stop]
     let onTap: (Stop) -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     private var totalPending: Int {
         stops.reduce(0) { $0 + $1.pendingStopRequests.count }
@@ -828,7 +831,7 @@ private struct GroupNightJoinRequestsCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Pedidos de unirse")
+                Text(l10n.t("group.joinRequests"))
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(2.0)
                     .foregroundStyle(Color.bpAmber)
@@ -884,6 +887,7 @@ private struct GroupNightConfirmStopCard: View {
     let stop: Stop
     let userId: String
     let onConfirm: () -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     private var alreadyConfirmed: Bool { stop.joinedUserIds.contains(userId) }
 
@@ -907,7 +911,7 @@ private struct GroupNightConfirmStopCard: View {
             Spacer()
             if !alreadyConfirmed {
                 Button(action: onConfirm) {
-                    Text("Confirmar que voy")
+                    Text(l10n.t("group.confirmGoing"))
                         .font(.system(size: 12, weight: .heavy, design: .rounded))
                         .foregroundStyle(.black)
                         .padding(.horizontal, 14).padding(.vertical, 8)
@@ -926,15 +930,16 @@ private struct GroupNightConfirmStopCard: View {
 
 @MainActor
 private struct GroupNightChatCard: View {
+    @ObservedObject private var l10n = L10n.shared
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Chat del grupo")
+                Text(l10n.t("group.chatTitle"))
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(2.0)
                     .foregroundStyle(Color.white.opacity(0.6))
                 Spacer()
-                Text("próximamente")
+                Text(l10n.t("group.soon"))
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(Color.white.opacity(0.4))
             }
@@ -946,7 +951,7 @@ private struct GroupNightChatCard: View {
                 Text("El chat del trip llega pronto")
                     .font(.system(size: 12.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color.white.opacity(0.7))
-                Text("Mientras tanto, comparte el código de invitación por tu app de mensajes.")
+                Text(l10n.t("group.shareCodeFallback"))
                     .font(.system(size: 11))
                     .foregroundStyle(Color.white.opacity(0.5))
                     .multilineTextAlignment(.center)
@@ -966,6 +971,7 @@ private struct GroupNightChatCard: View {
 @MainActor
 private struct GroupNightRateNightCard: View {
     let onRate: () -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -979,17 +985,17 @@ private struct GroupNightRateNightCard: View {
                     .font(.system(size: 20, weight: .heavy))
                     .foregroundStyle(Color.bpAmber)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Calificar a tu grupo")
+                    Text(l10n.t("group.rateTitle"))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text("Las calificaciones son ciegas y solo cuentan tras varias noches.")
+                    Text(l10n.t("group.rateNote"))
                         .font(.system(size: 11))
                         .foregroundStyle(Color.white.opacity(0.6))
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
                 Button(action: onRate) {
-                    Text("Calificar")
+                    Text(l10n.t("group.rate"))
                         .font(.system(size: 12, weight: .heavy, design: .rounded))
                         .foregroundStyle(.black)
                         .padding(.horizontal, 14).padding(.vertical, 8)

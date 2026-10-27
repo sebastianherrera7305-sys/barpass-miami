@@ -91,4 +91,25 @@ enum V2Flags {
     /// Raised beacon detail → YourSignalV2View in place of BeaconBroadcastView.
     /// Real beacon rhythm + listener count; poll stops on background.
     static var yourSignalV2: Bool { read("bp_v2_yoursignal_enabled", default: true) }
+    /// Tab 0 → TonightV2View in place of TonightView.
+    /// v17.1 landing: editorial headline, active-check-in card or Remy
+    /// prompt, "MIS LLENOS AHORA" rail of favorites open now, "TRENDING
+    /// ESTA NOCHE" rail. Owner report Build 98 (2026-10-12): "el fondo en
+    /// movimiento pero todo el screen sigue siendo el viejo". This flag
+    /// swaps the content; MiamiEyeBackground already renders behind it.
+    static var tonightV2: Bool   { read("bp_v2_tonight_enabled",   default: true) }
+
+    /// Venue post composer. OFF by default (Build 123, 2026-10-14).
+    /// Supabase `venue_posts` table doesn't exist in prod — the migration
+    /// `barpass-v2/supabase/social_schema.sql` was written but never
+    /// applied, so every POST silently failed and left the user's post
+    /// cached locally with `pendingSync = true`. The audit on 2026-10-14
+    /// flagged this as data loss (new posts never leave the device).
+    /// This flag hides the compose buttons until the migration lands;
+    /// existing local posts stay readable and intact (never deleted).
+    /// Re-enable per-device with:
+    ///   defaults write com.sebastian.barpass bp_v2_venueposts_write_enabled -bool YES
+    static var venuePostsWriteEnabled: Bool {
+        read("bp_v2_venueposts_write_enabled", default: false)
+    }
 }

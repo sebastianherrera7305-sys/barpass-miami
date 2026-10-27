@@ -38,6 +38,7 @@ import SwiftUI
 public struct OpenTabV2View: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var venueStore: VenueStore
+    @ObservedObject private var l10n = L10n.shared
 
     // `venueId` activa el "open flow": aún no hay cuenta, pero sabemos a qué
     // local le vamos a abrir una (lo pasa VenuePulseView con `venue.id`). Si
@@ -151,7 +152,7 @@ public struct OpenTabV2View: View {
                         .padding(.top, 2)
                 }
 
-                Text("Consumos")
+                Text(l10n.t("opentab.title"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 16)
@@ -161,7 +162,7 @@ public struct OpenTabV2View: View {
                     .padding(.horizontal, 16)
 
                 if d.tab.isOpen {
-                    Text("Decides el tope cuando muestras el código · el bartender lo escanea para sumar consumos")
+                    Text(l10n.t("opentab.capHint"))
                         .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
                         .tracking(0.6)
                         .foregroundStyle(Color.white.opacity(0.42))
@@ -212,7 +213,7 @@ public struct OpenTabV2View: View {
                     tapHaptic()
                     Task { await retry() }
                 } label: {
-                    Text("Reintentar")
+                    Text(l10n.t("common.retry"))
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.black)
                         .padding(.horizontal, 18).padding(.vertical, 10)
@@ -236,10 +237,10 @@ public struct OpenTabV2View: View {
             VStack(spacing: 14) {
                 Spacer().frame(height: 40)
                 Text("🍸").font(.system(size: 40))
-                Text("Abre tu cuenta aquí")
+                Text(l10n.t("opentab.open.title"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("Comparte el código con el bartender para sumar consumos al toque, sin sacar la tarjeta cada vez.")
+                Text(l10n.t("opentab.open.desc"))
                     .font(.system(size: 13))
                     .foregroundStyle(Color.white.opacity(0.65))
                     .multilineTextAlignment(.center)
@@ -287,7 +288,7 @@ public struct OpenTabV2View: View {
             ProgressView()
                 .controlSize(.large)
                 .tint(Color.bpAmber)
-            Text("Abriendo cuenta…")
+            Text(l10n.t("opentab.opening"))
                 .font(.system(size: 13, weight: .heavy, design: .monospaced))
                 .tracking(1.4)
                 .foregroundStyle(Color.white.opacity(0.75))
@@ -301,10 +302,10 @@ public struct OpenTabV2View: View {
         VStack(spacing: 10) {
             Spacer()
             Text("🍸").font(.system(size: 40))
-            Text("Todavía no hay cuenta abierta")
+            Text(l10n.t("opentab.noneOpen.title"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("Abre una cuenta desde el venue para ver tus consumos en tiempo real.")
+            Text(l10n.t("opentab.noneOpen.desc"))
                 .font(.system(size: 13))
                 .foregroundStyle(Color.white.opacity(0.65))
                 .multilineTextAlignment(.center)
@@ -328,7 +329,7 @@ public struct OpenTabV2View: View {
                 tapHaptic()
                 dismiss()
             } label: {
-                Text("Cerrar")
+                Text(l10n.t("common.close"))
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .tracking(0.4)
                     .foregroundStyle(Color.bpAmber)
@@ -409,7 +410,7 @@ public struct OpenTabV2View: View {
                     .font(.system(size: 12))
                     .fixedSize(horizontal: false, vertical: true)
                 } else {
-                    Text("Solo tú por ahora · comparte el código para sumar gente")
+                    Text(l10n.t("opentab.solo"))
                         .font(.system(size: 12))
                         .foregroundStyle(Color.white.opacity(0.65))
                         .fixedSize(horizontal: false, vertical: true)
@@ -441,7 +442,7 @@ public struct OpenTabV2View: View {
                 tapHaptic()
                 showScanCode = true
             } label: {
-                Text("Mostrar código")
+                Text(l10n.t("opentab.showCode"))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.black)
                     .frame(maxWidth: .infinity, minHeight: 48)
@@ -464,7 +465,7 @@ public struct OpenTabV2View: View {
             .buttonStyle(.plain)
 
             HStack(spacing: 0) {
-                Text("Código para sumar gente · ")
+                Text(l10n.t("opentab.codeSharePrefix"))
                     .foregroundStyle(Color.white.opacity(0.55))
                 Text(joinCode)
                     .foregroundStyle(Color.bpAmberBright)
@@ -485,7 +486,7 @@ public struct OpenTabV2View: View {
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                     if isOpen {
-                        Text("Muéstrale el código al bartender para abrir el primero.")
+                        Text(l10n.t("opentab.bartenderFirstDrink"))
                             .font(.system(size: 11, design: .rounded))
                             .foregroundStyle(Color.white.opacity(0.55))
                             .multilineTextAlignment(.center)

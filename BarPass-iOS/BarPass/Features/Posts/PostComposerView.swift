@@ -57,7 +57,7 @@ struct PostComposerView: View {
                     .padding(.top, 12)
                 }
             }
-            .navigationTitle("Nuevo post")
+            .navigationTitle(l10n.t("post.compose.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -126,10 +126,10 @@ struct PostComposerView: View {
                         Image(systemName: "photo.badge.plus")
                             .font(.system(size: 44, weight: .light))
                             .foregroundStyle(Color.bpAmber)
-                        Text("Elegí una foto")
+                        Text(l10n.t("post.compose.pickPhoto"))
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundStyle(.white)
-                        Text("JPEG, PNG o HEIC — hasta 10 MB")
+                        Text(l10n.t("post.compose.photoHint"))
                             .font(.system(size: 11))
                             .foregroundStyle(Color.white.opacity(0.5))
                     }
@@ -147,14 +147,14 @@ struct PostComposerView: View {
 
     private var captionField: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Caption · opcional")
+            Text(l10n.t("post.compose.captionLabel"))
                 .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                 .tracking(1.8)
                 .foregroundStyle(Color.white.opacity(0.5))
             TextField(
                 "",
                 text: $caption,
-                prompt: Text("¿Qué está pasando?").foregroundStyle(Color.white.opacity(0.4)),
+                prompt: Text(l10n.t("post.compose.captionPrompt")).foregroundStyle(Color.white.opacity(0.4)),
                 axis: .vertical
             )
             .lineLimit(3...8)
@@ -273,6 +273,7 @@ private struct PostVenuePickerView: View {
     @Binding var selected: BarPassVenue?
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var venueStore: VenueStore
+    @ObservedObject private var l10n = L10n.shared
     @State private var query: String = ""
 
     private var filtered: [BarPassVenue] {
@@ -313,16 +314,16 @@ private struct PostVenuePickerView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(Color.black)
-            .navigationTitle("Tagar venue")
+            .navigationTitle(l10n.t("post.compose.tagVenue"))
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $query, prompt: "Buscar venue")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancelar") { dismiss() }
+                    Button(l10n.t("common.cancel")) { dismiss() }
                         .foregroundStyle(Color.bpAmber)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Sin venue") {
+                    Button(l10n.t("post.compose.noVenue")) {
                         selected = nil
                         dismiss()
                     }

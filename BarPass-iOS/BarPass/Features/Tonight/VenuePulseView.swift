@@ -350,6 +350,7 @@ private struct VPulseNavBar: View {
     /// Nil en el camino mockup (no hay venue que compartir) → el botón no
     /// se dibuja. Un control visible siempre hace algo real.
     let onShare: (() -> Void)?
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         HStack {
@@ -376,7 +377,7 @@ private struct VPulseNavBar: View {
 
             if let onShare {
                 Button(action: onShare) {
-                    Text("Compartir")
+                    Text(l10n.t("common.share"))
                         .font(.system(size: 11, weight: .heavy, design: .monospaced))
                         .tracking(1.4)
                         .foregroundStyle(Color.bpAmber)
@@ -402,6 +403,7 @@ private struct VPulseHeader: View {
     /// En el camino real = nil (no hay medidor de aforo); el column no se
     /// dibuja. En el preview mockup, viene el número literal del mockup.
     let fillPercent: Int?
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
@@ -447,7 +449,7 @@ private struct VPulseHeader: View {
                         .tracking(-1.2)
                         .foregroundStyle(Color.bpAmber)
                         .shadow(color: Color.bpAmber.opacity(0.4), radius: 10)
-                    Text("lleno")
+                    Text(l10n.t("venuepulse.full"))
                         .font(.system(size: 10, weight: .heavy, design: .monospaced))
                         .tracking(2)
                         .foregroundStyle(Color.white.opacity(0.55))
@@ -467,16 +469,17 @@ private struct VPulseOccupancyCard: View {
     private let hours: [String] = ["22", "23", "ahora", "01", "02", "03", "04"]
     private let fills: [CGFloat] = [0.28, 0.46, 0.78, 0.90, 1.0, 0.95, 0.58]
     private let nowIndex: Int = 2
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Cómo se llena hoy")
+                Text(l10n.t("venuepulse.howItFills"))
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(2)
                     .foregroundStyle(Color.white.opacity(0.65))
                 Spacer()
-                Text("pico 01:30–03:00")
+                Text(l10n.t("venuepulse.peak"))
                     .font(.system(size: 10, weight: .heavy, design: .monospaced))
                     .tracking(1.4)
                     .foregroundStyle(Color.bpAmber)
@@ -698,6 +701,7 @@ private struct VPulseFriendsCard: View {
 @MainActor
 private struct VPulseDrinksSection: View {
     let drinks: [PopularDrink]
+    @ObservedObject private var l10n = L10n.shared
 
     /// Hasta 6 tragos — V1 muestra la carta entera en un sheet aparte, acá
     /// mostramos lo que entra sin empujar la CTA fuera de pantalla.
@@ -705,7 +709,7 @@ private struct VPulseDrinksSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Qué pedir aquí")
+            Text(l10n.t("venuepulse.whatToOrder"))
                 .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                 .tracking(2)
                 .foregroundStyle(Color.white.opacity(0.65))
@@ -750,6 +754,7 @@ private struct VPulseDrinksSection: View {
 @MainActor
 private struct VPulseEventsSection: View {
     let events: [VenueEvent]
+    @ObservedObject private var l10n = L10n.shared
 
     /// Hasta 4 eventos próximos, ordenados por fecha — mismo criterio que V1.
     private var shown: [VenueEvent] {
@@ -758,7 +763,7 @@ private struct VPulseEventsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Esta noche y lo que viene")
+            Text(l10n.t("venuepulse.tonightAndNext"))
                 .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                 .tracking(2)
                 .foregroundStyle(Color.white.opacity(0.65))
@@ -809,8 +814,9 @@ private struct VPulseEventsSection: View {
 
 @MainActor
 private struct VPulseEmptyLine: View {
+    @ObservedObject private var l10n = L10n.shared
     var body: some View {
-        Text("Sin menú ni eventos cargados · toca el QR para pedir en barra")
+        Text(l10n.t("venuepulse.noMenu"))
             .font(.system(size: 12, weight: .semibold, design: .rounded))
             .foregroundStyle(Color.white.opacity(0.5))
             .multilineTextAlignment(.leading)
@@ -895,6 +901,7 @@ private struct VPulseVoiceCard: View {
 
 @MainActor
 private struct VPulseRemyTake: View {
+    @ObservedObject private var l10n = L10n.shared
     var body: some View {
         HStack(alignment: .top, spacing: 11) {
             ZStack {
@@ -907,7 +914,7 @@ private struct VPulseRemyTake: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Remy")
+                Text(l10n.t("brand.remy"))
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(1.6)
                     .foregroundStyle(Color.white.opacity(0.65))
@@ -916,7 +923,7 @@ private struct VPulseRemyTake: View {
                 // entras a las 00:45 sin fila." — copy neutro (sin voseo) por
                 // la regla de UI del proyecto. Literales sólo en DEBUG.
                 (
-                    Text("Entras en tu ").foregroundStyle(Color.white.opacity(0.85)) +
+                    Text(l10n.t("venuepulse.enterYour")).foregroundStyle(Color.white.opacity(0.85)) +
                     Text("$31").font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white) +
                     Text(" si pides 1 trago. Con Skip the Line entras ")
@@ -941,6 +948,7 @@ private struct VPulseRemyTake: View {
 private struct VPulseStickyCTA: View {
     let onOpenTab: () -> Void
     let onSkipLine: () -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     /// Precio del pase individual — la MISMA fuente que cobra
     /// `SkipLinePassView` (`PassOption.solo.price`), nunca un literal
@@ -956,7 +964,7 @@ private struct VPulseStickyCTA: View {
     var body: some View {
         HStack(spacing: 10) {
             Button(action: onOpenTab) {
-                Text("Abrir cuenta")
+                Text(l10n.t("venuepulse.openTab"))
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -968,7 +976,7 @@ private struct VPulseStickyCTA: View {
 
             Button(action: onSkipLine) {
                 HStack(spacing: 6) {
-                    Text("Skip the Line")
+                    Text(l10n.t("brand.skipTheLine"))
                     Text("·").foregroundStyle(.black.opacity(0.5))
                     Text(priceLabel)
                 }

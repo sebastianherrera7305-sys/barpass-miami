@@ -217,7 +217,7 @@ public struct ActivePassV2View: View {
 
     private var paidStamp: some View {
         VStack(spacing: 1) {
-            Text("pagado")
+            Text(l10n.t("activepass.paid"))
             Text(paidAtLabel)
         }
         .font(.system(size: 10, weight: .heavy, design: .monospaced))
@@ -247,7 +247,7 @@ public struct ActivePassV2View: View {
                 Text("✦")
                     .font(.system(size: 11, weight: .heavy))
                     .foregroundStyle(Color.bpAmberBright)
-                Text("Priority Entry")
+                Text(l10n.t("brand.priority"))
                     .font(.system(size: 10, weight: .heavy, design: .monospaced))
                     .tracking(2.0)
                     .foregroundStyle(Color.bpAmberBright)
@@ -255,11 +255,11 @@ public struct ActivePassV2View: View {
 
             HStack(alignment: .firstTextBaseline) {
                 (
-                    Text("Salta la ")
+                    Text(l10n.t("activepass.skip1"))
                         .font(.system(size: 32, weight: .black, design: .rounded))
                         .foregroundStyle(Color(red: 1.0, green: 0.97, blue: 0.90))
                     +
-                    Text("fila")
+                    Text(l10n.t("activepass.skip2"))
                         .font(.system(size: 33, design: .serif).italic())
                         .foregroundStyle(Color(red: 0.96, green: 0.85, blue: 0.48))
                 )
@@ -384,7 +384,7 @@ public struct ActivePassV2View: View {
                         Image(systemName: "applelogo")
                             .font(.system(size: 11, weight: .black))
                             .foregroundStyle(.white)
-                        Text("Pay")
+                        Text(l10n.t("common.pay"))
                             .font(.system(size: 13, weight: .black, design: .rounded))
                             .foregroundStyle(.white)
                     } else {
@@ -497,7 +497,7 @@ private struct ActivePassQRImage: View {
                 .interpolation(.none)
                 .resizable()
                 .scaledToFit()
-                .accessibilityLabel("Código QR del pase \(payload)")
+                .accessibilityLabel(String(format: L10n.shared.t("activepass.qrA11yFmt"), payload))
         } else {
             RoundedRectangle(cornerRadius: 4)
                 .fill(Color.black.opacity(0.2))

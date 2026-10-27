@@ -230,6 +230,7 @@ private struct AuthLoginV2ForgotSheet: View {
     let onSend: () async -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
     @State private var busy = false
 
     var body: some View {
@@ -255,7 +256,7 @@ private struct AuthLoginV2ForgotSheet: View {
                 .font(.system(size: 28))
                 .foregroundStyle(Color.bpAmber)
 
-            Text("¿Olvidaste tu contraseña?")
+            Text(l10n.t("auth.forgotPassword"))
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
 
@@ -286,7 +287,7 @@ private struct AuthLoginV2ForgotSheet: View {
             }
 
             HStack(spacing: 10) {
-                Button("Cancelar") {
+                Button(l10n.t("common.cancel")) {
                     dismiss()
                 }
                 .font(.system(size: 14, weight: .heavy, design: .rounded))
@@ -308,7 +309,7 @@ private struct AuthLoginV2ForgotSheet: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 13)
                     } else {
-                        Text("Mandar")
+                        Text(l10n.t("common.send"))
                             .font(.system(size: 14, weight: .heavy, design: .rounded))
                             .foregroundStyle(.black)
                             .frame(maxWidth: .infinity)
@@ -327,7 +328,7 @@ private struct AuthLoginV2ForgotSheet: View {
                 .font(.system(size: 44))
                 .foregroundStyle(Color.bpGreen)
 
-            Text("Revisa tu email")
+            Text(l10n.t("authV2.reset.title"))
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
 
@@ -336,7 +337,7 @@ private struct AuthLoginV2ForgotSheet: View {
                 .foregroundStyle(Color.white.opacity(0.6))
                 .multilineTextAlignment(.center)
 
-            Button("Listo") {
+            Button(l10n.t("common.done")) {
                 dismiss()
             }
             .font(.system(size: 14, weight: .heavy, design: .rounded))

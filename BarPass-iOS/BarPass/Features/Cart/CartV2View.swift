@@ -219,7 +219,7 @@ struct CartV2View: View {
             CartV2KV(label: l10n.t("cart.total"),
                      value: String(format: "$%.2f", cart.total), emphasized: true)
 
-            Text("Recoge en barra · muestra tu QR")
+            Text(l10n.t("cart.pickupBar"))
                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
                 .foregroundStyle(Color.white.opacity(0.55))
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -371,10 +371,10 @@ struct CartV2View: View {
                 if isProcessing {
                     ProgressView().tint(.white).scaleEffect(0.85)
                 } else {
-                    Text("Pagar con")
+                    Text(l10n.t("common.pay.with"))
                     Image(systemName: "applelogo")
                         .font(.system(size: 15, weight: .black))
-                    Text("Pay")
+                    Text(l10n.t("common.pay"))
                 }
             }
             .font(.system(size: 16, weight: .black, design: .rounded))
@@ -398,7 +398,7 @@ struct CartV2View: View {
     // MARK: - Footer
 
     private var footerLine: some View {
-        Text("Pago seguro · Stripe · 21+")
+        Text(l10n.t("cart.securePay21"))
             .font(.system(size: 11, weight: .semibold, design: .monospaced))
             .foregroundStyle(Color.white.opacity(0.45))
             .frame(maxWidth: .infinity)

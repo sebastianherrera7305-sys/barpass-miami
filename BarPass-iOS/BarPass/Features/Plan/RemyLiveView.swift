@@ -219,6 +219,7 @@ struct RemyLiveView: View {
     /// Preferimos degradar en vez de trapear como un @EnvironmentObject.
     @EnvironmentObject private var venueStore: VenueStore
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     @StateObject private var chat = RemyLiveChat()
     @ObservedObject private var checkInStore = CheckInStore.shared
@@ -449,7 +450,7 @@ struct RemyLiveView: View {
                         .tracking(0.4)
                         .foregroundStyle(Color.white.opacity(0.78))
                 } else {
-                    Text("sin check-in · pídele algo a Remy")
+                    Text(l10n.t("remy.noCheckin"))
                         .font(.system(size: 12, weight: .semibold, design: .monospaced))
                         .tracking(0.4)
                         .foregroundStyle(Color.white.opacity(0.6))
@@ -473,7 +474,7 @@ struct RemyLiveView: View {
                         .frame(width: 1, height: 12)
 
                     HStack(spacing: 4) {
-                        Text("Favoritos")
+                        Text(l10n.t("remy.favorites"))
                             .font(.system(size: 11, weight: .semibold, design: .monospaced))
                             .foregroundStyle(Color.white.opacity(0.65))
                         Text("\(favoriteCount)")
@@ -515,7 +516,7 @@ struct RemyLiveView: View {
                         // vive en errorRetryBanner, abajo, con un botón de
                         // "Reintentar". Si no hay reply ni estamos pensando,
                         // caemos al placeholder honesto.
-                        Text("Escribe abajo lo que quieras armar — Remy te responde con un plan concreto.")
+                        Text(l10n.t("remy.emptyIntro"))
                             .font(.system(size: 14))
                             .foregroundStyle(Color.white.opacity(0.72))
                             .italic()
@@ -812,7 +813,7 @@ struct RemyLiveView: View {
 
     private var hintChips: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Pídele cosas como")
+            Text(l10n.t("remy.askTitle"))
                 .font(.system(size: 10, weight: .heavy, design: .monospaced))
                 .tracking(2)
                 .foregroundStyle(Color.white.opacity(0.5))
@@ -855,7 +856,7 @@ struct RemyLiveView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 10, weight: .heavy))
-                            Text("Reintentar")
+                            Text(l10n.t("common.retry"))
                                 .font(.system(size: 12, weight: .heavy, design: .rounded))
                         }
                         .foregroundStyle(.black)
@@ -887,12 +888,12 @@ struct RemyLiveView: View {
     #if DEBUG
     private var memoryCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Remy recuerda · DEBUG")
+            Text(l10n.t("remy.debug.rememberTitle"))
                 .font(.system(size: 10, weight: .heavy, design: .monospaced))
                 .tracking(2)
                 .foregroundStyle(Color.white.opacity(0.55))
 
-            Text("Mockup legacy — queda visible en builds Debug para preview visual. En producción se esconde porque no hay repo real de hábitos del usuario.")
+            Text(l10n.t("remy.debug.mockupNote"))
                 .font(.system(size: 13))
                 .foregroundStyle(Color.white.opacity(0.72))
                 .fixedSize(horizontal: false, vertical: true)
@@ -911,10 +912,10 @@ struct RemyLiveView: View {
 
     private var debugFooter: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("DEBUG · \(APIClient.baseURL.absoluteString)/concierge")
+            Text(String(format: l10n.t("remy.debug.urlFmt"), APIClient.baseURL.absoluteString))
                 .font(.system(size: 9, weight: .semibold, design: .monospaced))
                 .foregroundStyle(Color.white.opacity(0.35))
-            Text("history \(chat.history.count) · streaming \(chat.isStreaming ? "yes" : "no") · plan \(chat.plan == nil ? "nil" : "\(chat.plan!.stops.count) stops")")
+            Text(String(format: l10n.t("remy.debug.stateFmt"), "\(chat.history.count)", chat.isStreaming ? "yes" : "no", chat.plan == nil ? "nil" : "\(chat.plan!.stops.count) stops"))
                 .font(.system(size: 9, weight: .semibold, design: .monospaced))
                 .foregroundStyle(Color.white.opacity(0.35))
         }
@@ -927,7 +928,7 @@ struct RemyLiveView: View {
         HStack(spacing: 10) {
             ZStack(alignment: .leading) {
                 if input.isEmpty {
-                    Text("Habla o escribe: \u{201C}algo más barato\u{201D}, \u{201C}estamos 6\u{201D}…")
+                    Text(l10n.t("remy.inputPlaceholder"))
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundStyle(Color.white.opacity(0.5))
                         .lineLimit(1)

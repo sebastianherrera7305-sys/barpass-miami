@@ -76,6 +76,7 @@ private final class SkipTheLineV2Model: ObservableObject {
 
 @MainActor
 public struct SkipTheLineV2View: View {
+    @ObservedObject private var l10n = L10n.shared
     private let venueName: String
     private let waitMinutes: Int
     private let walletBalanceCents: Int
@@ -145,18 +146,18 @@ public struct SkipTheLineV2View: View {
                 Text("★")
                     .font(.system(size: 9, weight: .heavy))
                     .foregroundStyle(Color.bpAmber)
-                Text("Priority Entry · \(venueName.uppercased())")
+                Text(String(format: l10n.t("priority.headerFmt"), venueName.uppercased()))
                     .font(.system(size: 10, weight: .heavy, design: .monospaced))
                     .tracking(1.8)
                     .foregroundStyle(Color.bpAmber)
             }
 
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text("Salta la")
+                Text(l10n.t("skipline.title1"))
                     .font(.system(size: 34, weight: .black, design: .rounded))
                     .tracking(-1)
                     .foregroundStyle(.white)
-                Text("fila")
+                Text(l10n.t("skipline.title2"))
                     .font(.system(size: 32, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
             }
@@ -183,7 +184,7 @@ public struct SkipTheLineV2View: View {
             // without a real hours source for the venue the honest version
             // is just "Elige tu pase". If the container ever passes real
             // hours, revive the second Text — guided by venueHours instead.
-            Text("Elige tu pase")
+            Text(l10n.t("skipline.choosePass"))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
 
@@ -214,7 +215,7 @@ public struct SkipTheLineV2View: View {
 
     private var totalRow: some View {
         HStack {
-            Text("Total")
+            Text(l10n.t("common.total"))
                 .font(.system(size: 13, weight: .heavy, design: .monospaced))
                 .tracking(1.4)
                 .foregroundStyle(Color.white.opacity(0.65))
@@ -240,11 +241,11 @@ public struct SkipTheLineV2View: View {
                 onPurchase("apple_pay", model.selected.rawValue, model.selected.priceCents)
             } label: {
                 HStack(spacing: 4) {
-                    Text("Pagar con")
+                    Text(l10n.t("common.pay.with"))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                     Image(systemName: "applelogo")
                         .font(.system(size: 15, weight: .heavy))
-                    Text("Pay")
+                    Text(l10n.t("common.pay"))
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                 }
                 .foregroundStyle(.white)
@@ -267,12 +268,12 @@ public struct SkipTheLineV2View: View {
                     Image(systemName: "wallet.pass.fill")
                         .font(.system(size: 14, weight: .heavy))
                         .foregroundStyle(Color.bpAmber)
-                    Text("BarPass Wallet")
+                    Text(l10n.t("brand.wallet.name"))
                         .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                     Text("·")
                         .foregroundStyle(Color.white.opacity(0.3))
-                    Text("Balance: \(walletLabel)")
+                    Text(String(format: l10n.t("wallet.balanceFmt"), walletLabel))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(Color.white.opacity(0.75))
                 }
@@ -327,7 +328,7 @@ public struct SkipTheLineV2View: View {
              // skip-the-line passes, so the mockup's "Cancelación gratis"
              // promise was dropped. "Pago seguro · Stripe" matches what
              // the real transaction flow does.
-            Text("Pago seguro · Stripe")
+            Text(l10n.t("common.securePay"))
                 .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
                 .tracking(0.6)
                 .foregroundStyle(Color.white.opacity(0.5))

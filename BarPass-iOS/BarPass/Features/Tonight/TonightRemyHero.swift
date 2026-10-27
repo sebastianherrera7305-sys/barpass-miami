@@ -28,8 +28,8 @@ struct TonightBrandHeader: View {
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 0) {
-                    Text("BAR").foregroundStyle(Color.bpInk)
-                    Text("PASS").foregroundStyle(Color.bpAmber)
+                    Text(l10n.t("brand.bar")).foregroundStyle(Color.bpInk)
+                    Text(l10n.t("brand.pass")).foregroundStyle(Color.bpAmber)
                         .overlay(alignment: .bottom) {
                             Rectangle().fill(Color.bpAmber).frame(height: 2).offset(y: 2)
                         }
@@ -391,7 +391,7 @@ struct RemyDeckCard: View {
                 if let reason {
                     HStack(alignment: .top, spacing: 8) {
                         RoundedRectangle(cornerRadius: 1).fill(Color.bpAmber).frame(width: 2, height: 16)
-                        (Text("Remy: ").foregroundColor(Color.bpAmber).bold() + Text(reason))
+                        (Text(l10n.t("brand.remyLabel")).foregroundColor(Color.bpAmber).bold() + Text(reason))
                             .font(.system(size: 11.5, weight: .medium))
                             .foregroundStyle(.white.opacity(0.85))
                             .lineLimit(2)

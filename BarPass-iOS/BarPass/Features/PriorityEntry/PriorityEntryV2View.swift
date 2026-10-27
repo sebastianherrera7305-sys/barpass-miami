@@ -58,6 +58,7 @@ public struct PriorityEntryV2View: View {
     public let onClose: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var l10n = L10n.shared
 
     public init(
         venueName: String = "CLUB SPACE",
@@ -186,7 +187,7 @@ public struct PriorityEntryV2View: View {
                 BPHaptics.light()
                 dismiss()
             } label: {
-                Text("Cerrar")
+                Text(l10n.t("common.close"))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.bpAmberBright)
             }
@@ -204,16 +205,16 @@ public struct PriorityEntryV2View: View {
                 Image(systemName: "sparkle")
                     .font(.system(size: 9, weight: .heavy))
                     .foregroundStyle(Color.bpAmberBright)
-                Text("Priority Entry · \(venueName.uppercased())")
+                Text(String(format: l10n.t("priority.headerFmt"), venueName.uppercased()))
                     .font(.system(size: 10, weight: .heavy, design: .monospaced))
                     .tracking(2.4)
                     .foregroundStyle(Color.bpAmberBright)
             }
 
             (
-                Text("Elige cómo ")
+                Text(l10n.t("priority.chooseHow1"))
                     .foregroundStyle(.white)
-                + Text("entrar")
+                + Text(l10n.t("priority.chooseHow2"))
                     .font(.system(size: 30, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
                 + Text(" esta noche")
@@ -227,7 +228,7 @@ public struct PriorityEntryV2View: View {
             // one today, so production passes nil and the row is absent.
             if let estimatedLineMinutes {
                 HStack(spacing: 5) {
-                    Text("Hoy · fila estimada")
+                    Text(l10n.t("priority.queueToday"))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(Color.white.opacity(0.6))
                     Text("\(estimatedLineMinutes) min")
@@ -242,7 +243,7 @@ public struct PriorityEntryV2View: View {
     // MARK: - Fine print + close
 
     private var finePrint: some View {
-        Text("Los depósitos se aplican al consumo total en el venue. Cancelación gratuita hasta 2h antes.")
+        Text(l10n.t("priority.depositsNote"))
             .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
             .tracking(0.2)
             .lineSpacing(2)
@@ -255,7 +256,7 @@ public struct PriorityEntryV2View: View {
             BPHaptics.light()
             if let onClose { onClose() } else { dismiss() }
         } label: {
-            Text("Cerrar")
+            Text(l10n.t("common.close"))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -284,6 +285,7 @@ private struct PriorityEntryV2OptionCard: View {
     let tag: String?
     let featured: Bool
     let action: () -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         Button(action: action) {
@@ -306,7 +308,7 @@ private struct PriorityEntryV2OptionCard: View {
                     Spacer(minLength: 8)
 
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text("Desde")
+                        Text(l10n.t("common.from"))
                             .font(.system(size: 9, weight: .heavy, design: .monospaced))
                             .tracking(1.6)
                             .foregroundStyle(Color.bpAmber)

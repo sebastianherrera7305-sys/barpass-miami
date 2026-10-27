@@ -92,6 +92,7 @@ struct SwipeCardData: Identifiable, Equatable {
 
 @MainActor
 struct OnboardingV2Flow: View {
+    @ObservedObject private var l10n = L10n.shared
     @EnvironmentObject private var appState: AppState
     @StateObject private var model = OnboardingV2Model()
 
@@ -117,7 +118,7 @@ struct OnboardingV2Flow: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Text("SOS")
+                        Text(l10n.t("onb.sos"))
                             .font(.system(size: 10, weight: .heavy, design: .monospaced))
                             .tracking(1.6)
                             .foregroundStyle(Color.bpAmber)
@@ -224,6 +225,7 @@ private struct OnboardingV2Background: View {
 
 @MainActor
 private struct OB1_Intro: View {
+    @ObservedObject private var l10n = L10n.shared
     @ObservedObject var model: OnboardingV2Model
     let onComplete: () -> Void
     @State private var bloom = false
@@ -235,7 +237,7 @@ private struct OB1_Intro: View {
                 Button {
                     model.advance()
                 } label: {
-                    Text("Saltar")
+                    Text(l10n.t("onb.skip"))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Color.white.opacity(0.7))
                         .padding(.horizontal, 14).padding(.vertical, 7)
@@ -251,9 +253,9 @@ private struct OB1_Intro: View {
                 // The wordmark — BAR (ink/white) + PASS (amber), the one
                 // the brand actually uses, with the amber underline under PASS.
                 HStack(spacing: 0) {
-                    Text("BAR")
+                    Text(l10n.t("brand.bar"))
                         .foregroundStyle(.white)
-                    Text("PASS")
+                    Text(l10n.t("brand.pass"))
                         .foregroundStyle(Color.bpAmber)
                         .overlay(alignment: .bottom) {
                             Rectangle().fill(Color.bpAmber)
@@ -281,7 +283,7 @@ private struct OB1_Intro: View {
 
             Spacer()
 
-            Text("MIAMI · DESDE 2026")
+            Text(l10n.t("onb.miami.since"))
                 .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
                 .tracking(3.5)
                 .foregroundStyle(Color.white.opacity(0.4))
@@ -302,13 +304,14 @@ private struct OB1_Intro: View {
 
 @MainActor
 private struct OB2_ValueFirst: View {
+    @ObservedObject private var l10n = L10n.shared
     @ObservedObject var model: OnboardingV2Model
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer().frame(height: 70)
 
-            Text("Miami · ahora mismo")
+            Text(l10n.t("onb.miami.now"))
                 .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                 .tracking(2.6)
                 .foregroundStyle(Color.bpAmber)
@@ -316,11 +319,11 @@ private struct OB2_ValueFirst: View {
 
             // Headline mezcla sans + serif italic — "Esta noche {está pasando}"
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("Esta noche")
+                Text(l10n.t("onb.tonight1"))
                     .font(.system(size: 42, weight: .black, design: .rounded))
                     .tracking(-1.2)
                     .foregroundStyle(.white)
-                Text("está pasando")
+                Text(l10n.t("onb.tonight2"))
                     .font(.system(size: 38, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
             }
@@ -339,13 +342,13 @@ private struct OB2_ValueFirst: View {
 
             // Remy's offer — the one bit of serif italic that reads as voice
             VStack(alignment: .leading, spacing: 10) {
-                Text("Remy · tu concierge")
+                Text(l10n.t("onb.remyConcierge"))
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(2.6)
                     .foregroundStyle(Color.white.opacity(0.55))
 
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("Dame")
+                    Text(l10n.t("onb.giveMe"))
                         .font(.system(size: 26, design: .serif).italic())
                         .foregroundStyle(.white)
                     Text("60 segundos")
@@ -363,7 +366,7 @@ private struct OB2_ValueFirst: View {
                 model.advance()
             } label: {
                 HStack {
-                    Text("Armar mi noche")
+                    Text(l10n.t("onb.makeNight"))
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(.black)
                     Spacer()
@@ -378,7 +381,7 @@ private struct OB2_ValueFirst: View {
             }
             .buttonStyle(.plain)
 
-            Text("Cuenta después · cuando tengas algo que guardar")
+            Text(l10n.t("onb.accountLater"))
                 .font(.system(size: 11, design: .monospaced))
                 .tracking(0.6)
                 .foregroundStyle(Color.white.opacity(0.5))
@@ -418,6 +421,7 @@ private struct PulseCard: View {
 
 @MainActor
 private struct OB3_SwipeTaste: View {
+    @ObservedObject private var l10n = L10n.shared
     @ObservedObject var model: OnboardingV2Model
     @State private var dragX: CGFloat = 0
 
@@ -426,18 +430,18 @@ private struct OB3_SwipeTaste: View {
             Spacer().frame(height: 70)
 
             HStack {
-                Text("Remy aprende · \(min(model.swipeIndex + 1, model.swipeOptions.count)) / \(model.swipeOptions.count)")
+                Text(String(format: l10n.t("onb.remyLearningFmt"), min(model.swipeIndex + 1, model.swipeOptions.count), model.swipeOptions.count))
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(2.0)
                     .foregroundStyle(Color.bpAmber)
                 Spacer()
-                Button("Saltar") { model.advance() }
+                Button(l10n.t("onb.skip")) { model.advance() }
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Color.white.opacity(0.6))
             }
             .padding(.horizontal, 24)
 
-            Text("¿Irías este fin?")
+            Text(l10n.t("onb.wouldGoWeekend"))
                 .font(.system(size: 32, weight: .black, design: .rounded))
                 .tracking(-0.8)
                 .foregroundStyle(.white)
@@ -466,7 +470,7 @@ private struct OB3_SwipeTaste: View {
                     }
                     .overlay(alignment: .topTrailing) {
                         if dragX > 30 {
-                            Text("IRÍA")
+                            Text(l10n.t("onb.wouldGo"))
                                 .font(.system(size: 36, weight: .black, design: .rounded))
                                 .foregroundStyle(Color.bpAmber)
                                 .padding(14)
@@ -512,7 +516,7 @@ private struct OB3_SwipeTaste: View {
                         if model.swipeIndex >= model.swipeOptions.count { model.advance() }
                     }
                 }
-                Text("desliza")
+                Text(l10n.t("onb.swipe"))
                     .font(.system(size: 11, weight: .heavy, design: .monospaced))
                     .tracking(2)
                     .foregroundStyle(Color.white.opacity(0.4))
@@ -699,6 +703,7 @@ private struct FlowRow: Layout {
 
 @MainActor
 private struct OB4_FaceAvatar: View {
+    @ObservedObject private var l10n = L10n.shared
     @ObservedObject var model: OnboardingV2Model
 
     // Build 127 — era "Tu cara, tu avatar" + CTA "Tomar selfie" grande
@@ -729,17 +734,17 @@ private struct OB4_FaceAvatar: View {
                 .padding(.horizontal, 24)
 
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("Crea tu")
+                Text(l10n.t("onb.createYour"))
                     .font(.system(size: 38, weight: .black, design: .rounded))
                     .tracking(-1)
                     .foregroundStyle(.white)
-                Text("avatar")
+                Text(l10n.t("onb.avatar"))
                     .font(.system(size: 34, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
             }
             .padding(.horizontal, 24).padding(.top, 8)
 
-            Text("Elegí piel, pelo, lentes y accesorio. Así te ven tus amigos en el mapa esta noche.")
+            Text(l10n.t("onb.avatarDesc"))
                 .font(.system(size: 14))
                 .foregroundStyle(Color.white.opacity(0.72))
                 .fixedSize(horizontal: false, vertical: true)
@@ -830,6 +835,7 @@ private struct OB4_FaceAvatar: View {
 
 @MainActor
 private struct OB5_FirstNight: View {
+    @ObservedObject private var l10n = L10n.shared
     @ObservedObject var model: OnboardingV2Model
 
     private struct Stop {
@@ -851,7 +857,7 @@ private struct OB5_FirstNight: View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer().frame(height: 70)
 
-            Text("Listo en 48 segundos")
+            Text(l10n.t("onb.ready48"))
                 .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                 .tracking(2.4)
                 .foregroundStyle(Color.bpAmber)
@@ -862,14 +868,14 @@ private struct OB5_FirstNight: View {
                     .font(.system(size: 38, weight: .black, design: .rounded))
                     .tracking(-1)
                     .foregroundStyle(.white)
-                Text("noche")
+                Text(l10n.t("onb.night"))
                     .font(.system(size: 36, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
             }
             .padding(.horizontal, 24).padding(.top, 8)
 
             HStack(spacing: 6) {
-                Text("Hoy")
+                Text(l10n.t("onb.today"))
                 Text("·").foregroundStyle(Color.white.opacity(0.3))
                 Text("$50")
                 Text("·").foregroundStyle(Color.white.opacity(0.3))
@@ -935,7 +941,7 @@ private struct OB5_FirstNight: View {
                                 .zIndex(Double(3 - i))
                         }
                     }
-                    Text("Mía, Jules y ")
+                    Text(l10n.t("onb.miaJules"))
                         .foregroundStyle(.white) +
                     Text("4 de tus contactos")
                         .foregroundStyle(Color.bpAmber) +
@@ -954,7 +960,7 @@ private struct OB5_FirstNight: View {
             VStack(spacing: 8) {
                 Button { model.advance() } label: {
                     HStack {
-                        Text("Guardar mi noche")
+                        Text(l10n.t("onb.saveMyNight"))
                             .font(.system(size: 16, weight: .heavy, design: .rounded))
                             .foregroundStyle(.black)
                         Spacer()
@@ -979,6 +985,7 @@ private struct OB5_FirstNight: View {
 
 @MainActor
 private struct OB6_SaveAccount: View {
+    @ObservedObject private var l10n = L10n.shared
     @ObservedObject var model: OnboardingV2Model
     let onComplete: () -> Void
 
@@ -986,14 +993,14 @@ private struct OB6_SaveAccount: View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer().frame(height: 70)
 
-            Text("NOCHE 1 DE TU RACHA")
+            Text(l10n.t("onb.nightStreak"))
                 .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                 .tracking(2.4)
                 .foregroundStyle(Color.bpAmber)
                 .padding(.horizontal, 24)
 
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("Guarda")
+                Text(l10n.t("onb.save"))
                     .font(.system(size: 44, weight: .black, design: .rounded))
                     .tracking(-1.2)
                     .foregroundStyle(.white)
@@ -1034,7 +1041,7 @@ private struct OB6_SaveAccount: View {
                 Button { model.advance() } label: {
                     HStack {
                         Image(systemName: "applelogo")
-                        Text("Continuar con Apple")
+                        Text(l10n.t("onb.continueApple"))
                     }
                     .font(.system(size: 16, weight: .heavy, design: .rounded))
                     .foregroundStyle(.black)
@@ -1047,7 +1054,7 @@ private struct OB6_SaveAccount: View {
                 Button { model.advance() } label: {
                     HStack {
                         Image(systemName: "phone.fill")
-                        Text("Continuar con mi número")
+                        Text(l10n.t("onb.continuePhone"))
                     }
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
@@ -1058,7 +1065,7 @@ private struct OB6_SaveAccount: View {
                 }
                 .buttonStyle(.plain)
 
-                Text("Sin contraseña · 1 toque · Términos y Privacidad")
+                Text(l10n.t("onb.noPassword"))
                     .font(.system(size: 10.5, design: .monospaced))
                     .foregroundStyle(Color.white.opacity(0.4))
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -1101,6 +1108,7 @@ private struct OB6_SaveAccount: View {
 
 @MainActor
 private struct OB7_Notifications: View {
+    @ObservedObject private var l10n = L10n.shared
     @ObservedObject var model: OnboardingV2Model
     let onComplete: () -> Void
 
@@ -1128,18 +1136,18 @@ private struct OB7_Notifications: View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer().frame(height: 70)
 
-            Text("Último paso")
+            Text(l10n.t("onb.lastStep"))
                 .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                 .tracking(2.4)
                 .foregroundStyle(Color.bpAmber)
                 .padding(.horizontal, 24)
 
             HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text("¿Te aviso cuando")
+                Text(l10n.t("onb.notifyWhen"))
                     .font(.system(size: 30, weight: .black, design: .rounded))
                     .tracking(-0.8)
                     .foregroundStyle(.white)
-                Text("importe")
+                Text(l10n.t("onb.matters"))
                     .font(.system(size: 32, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
                 Text("?")
@@ -1148,7 +1156,7 @@ private struct OB7_Notifications: View {
             }
             .padding(.horizontal, 24).padding(.top, 8)
 
-            Text("Solo esto. Nada de \"¡Volvé a la app!\".")
+            Text(l10n.t("onb.justThat"))
                 .font(.system(size: 13, design: .serif).italic())
                 .foregroundStyle(Color.white.opacity(0.72))
                 .padding(.horizontal, 24).padding(.top, 10)
@@ -1182,7 +1190,7 @@ private struct OB7_Notifications: View {
 
             // Preview card — what it will actually look like tonight
             VStack(alignment: .leading, spacing: 6) {
-                Text("ASÍ SE VE · ESTA NOCHE A LAS 00:40")
+                Text(l10n.t("onb.previewHeader"))
                     .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
                     .tracking(2)
                     .foregroundStyle(Color.white.opacity(0.5))
@@ -1194,8 +1202,8 @@ private struct OB7_Notifications: View {
                         Text("R").font(.system(size: 15, weight: .black, design: .rounded)).foregroundStyle(.black)
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Remy").font(.system(size: 11, weight: .heavy, design: .rounded))
-                        Text("Space va al 78%. Si salen ahora de Blackbird entran sin fila. ¿Pido el Uber?")
+                        Text(l10n.t("brand.remy")).font(.system(size: 11, weight: .heavy, design: .rounded))
+                        Text(l10n.t("onb.remy.preview"))
                             .font(.system(size: 12))
                             .foregroundStyle(.white)
                             .fixedSize(horizontal: false, vertical: true)
@@ -1211,7 +1219,7 @@ private struct OB7_Notifications: View {
 
             VStack(spacing: 8) {
                 Button { requestAndFinish() } label: {
-                    Text("Permitir avisos")
+                    Text(l10n.t("onb.allowNotifs"))
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
@@ -1221,7 +1229,7 @@ private struct OB7_Notifications: View {
                 .buttonStyle(.plain)
 
                 Button { onComplete() } label: {
-                    Text("Ahora no")
+                    Text(l10n.t("onb.notNow"))
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(Color.white.opacity(0.7))
                         .padding(.vertical, 10)

@@ -57,6 +57,7 @@ private let exploreV2MiamiFallbackRegion = MKCoordinateRegion(
 struct ExploreV2View: View {
     @EnvironmentObject private var venueStore: VenueStore
     @EnvironmentObject private var appState: AppState
+    @ObservedObject private var l10n = L10n.shared
     /// Same feed SocialV2 renders (RPC `get_friends_out_tonight`). Drives the
     /// friends strip; the mockup's "Mía, Jules y Dani" were literals.
     @ObservedObject private var tonight = FriendsTonightStore.shared
@@ -420,7 +421,7 @@ struct ExploreV2View: View {
                 Group {
                     if hasCity, let city {
                         (
-                            Text("Explora ")
+                            Text(l10n.t("exploreV2.header.prefix"))
                                 .font(.system(size: 30, weight: .black, design: .rounded))
                                 .foregroundStyle(.white)
                             + Text(city)
@@ -428,7 +429,7 @@ struct ExploreV2View: View {
                                 .foregroundStyle(Color.bpAmberBright)
                         )
                     } else {
-                        Text("Explora")
+                        Text(l10n.t("exploreV2.header"))
                             .font(.system(size: 30, weight: .black, design: .rounded))
                             .foregroundStyle(.white)
                     }
@@ -462,7 +463,7 @@ struct ExploreV2View: View {
             TextField(
                 "",
                 text: $searchText,
-                prompt: Text("Buscar venues…")
+                prompt: Text(l10n.t("exploreV2.search.placeholder"))
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.white.opacity(0.75))
             )
@@ -472,7 +473,7 @@ struct ExploreV2View: View {
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
             .submitLabel(.search)
-            .accessibilityLabel("Buscar venues")
+            .accessibilityLabel(l10n.t("common.searchVenues"))
 
             if !searchText.isEmpty {
                 Button {
@@ -484,7 +485,7 @@ struct ExploreV2View: View {
                         .foregroundStyle(Color.bpAmberBright)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Borrar búsqueda")
+                .accessibilityLabel(l10n.t("exploreV2.clearSearch"))
             }
 
             Text(venueCountLabel)
@@ -738,7 +739,7 @@ struct ExploreV2View: View {
                         .overlay(Circle().strokeBorder(Color.white.opacity(0.2), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Restablecer mapa")
+                .accessibilityLabel(l10n.t("exploreV2.resetMap"))
             }
             .padding(12)
         }
@@ -769,7 +770,7 @@ struct ExploreV2View: View {
             ProgressView()
                 .progressViewStyle(.circular)
                 .tint(Color.bpAmber)
-            Text("CARGANDO VENUES…")
+            Text(l10n.t("exploreV2.loading.caps"))
                 .font(.system(size: 10, weight: .heavy, design: .monospaced))
                 .tracking(2.4)
                 .foregroundStyle(Color.bpAmberBright.opacity(0.9))
@@ -777,7 +778,7 @@ struct ExploreV2View: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.opacity(0.35))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Cargando venues")
+        .accessibilityLabel(l10n.t("exploreV2.loadingA11y"))
     }
 
     private func mapErrorOverlay(message: String) -> some View {
@@ -793,7 +794,7 @@ struct ExploreV2View: View {
                 tap()
                 Task { await venueStore.loadVenues() }
             } label: {
-                Text("Reintentar")
+                Text(l10n.t("common.retry"))
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .foregroundStyle(.black)
                     .padding(.horizontal, 14)
@@ -841,7 +842,7 @@ struct ExploreV2View: View {
             ProgressView()
                 .progressViewStyle(.circular)
                 .tint(Color.bpAmber)
-            Text("Cargando venues…")
+            Text(l10n.t("exploreV2.loading"))
                 .font(.system(size: 13, weight: .heavy, design: .rounded))
                 .foregroundStyle(Color.white.opacity(0.75))
             Spacer(minLength: 0)
@@ -857,7 +858,7 @@ struct ExploreV2View: View {
                 .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
         )
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Cargando venues")
+        .accessibilityLabel(l10n.t("exploreV2.loadingA11y"))
     }
 
     private func calloutError(message: String) -> some View {
@@ -870,7 +871,7 @@ struct ExploreV2View: View {
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .lineLimit(1)
-                Text("Toca reintentar")
+                Text(l10n.t("exploreV2.tapRetry"))
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(1.0)
                     .foregroundStyle(Color.white.opacity(0.6))
@@ -881,7 +882,7 @@ struct ExploreV2View: View {
                 tap()
                 Task { await venueStore.loadVenues() }
             } label: {
-                Text("Reintentar")
+                Text(l10n.t("common.retry"))
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .foregroundStyle(.black)
                     .padding(.horizontal, 12)
@@ -995,7 +996,7 @@ struct ExploreV2View: View {
                 tap()
                 selectedVenue = venue
             } label: {
-                Text("Ver venue")
+                Text(l10n.t("exploreV2.viewVenue"))
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .foregroundStyle(.black)
                     .padding(.horizontal, 12)
@@ -1284,7 +1285,7 @@ private struct ExploreV2DistrictText: View {
             .background(
                 Capsule().fill(Color.black.opacity(0.45))
             )
-            .accessibilityLabel("Barrio \(text)")
+            .accessibilityLabel(String(format: L10n.shared.t("exploreV2.neighborhoodA11yFmt"), text))
     }
 }
 

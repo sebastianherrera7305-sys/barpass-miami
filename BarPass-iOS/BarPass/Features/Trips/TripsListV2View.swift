@@ -486,12 +486,13 @@ private extension TripsListV2Avatar {
 
 @MainActor
 private struct TripsListV2EmptyMyTrips: View {
+    @ObservedObject private var l10n = L10n.shared
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Todavía no tienes trips.")
+            Text(l10n.t("trips.empty.title"))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("Crea uno o únete con el código de un amigo.")
+            Text(l10n.t("trips.empty.desc"))
                 .font(.system(size: 12.5))
                 .foregroundStyle(Color.white.opacity(0.55))
         }
@@ -512,6 +513,7 @@ private struct TripsListV2EmptyMyTrips: View {
 private struct TripsListV2ErrorView: View {
     let message: String
     let onRetry: () -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -523,7 +525,7 @@ private struct TripsListV2ErrorView: View {
                 .foregroundStyle(Color.white.opacity(0.55))
                 .lineLimit(3)
             Button(action: { BPHaptics.selection(); onRetry() }) {
-                Text("Reintentar")
+                Text(l10n.t("common.retry"))
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color.bpAmber)
                     .padding(.horizontal, 14)
@@ -592,6 +594,7 @@ private struct TripsListV2Background: View {
 @MainActor
 private struct TripsListV2Header: View {
     let planCount: Int
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -605,7 +608,7 @@ private struct TripsListV2Header: View {
                                 .fill(Color.bpAmberBright)
                                 .frame(width: 3, height: 3)
                         )
-                    Text("Trips · \(planCount) planes")
+                    Text(String(format: l10n.t("trips.plansFmt"), planCount))
                         .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                         .tracking(2.2)
                         .foregroundStyle(Color.bpAmber)
@@ -615,11 +618,11 @@ private struct TripsListV2Header: View {
             }
 
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("Tus")
+                Text(l10n.t("trips.yours1"))
                     .font(.system(size: 42, weight: .black, design: .rounded))
                     .tracking(-1.2)
                     .foregroundStyle(.white)
-                Text("trips")
+                Text(l10n.t("trips.yours2"))
                     .font(.system(size: 40, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
             }
@@ -662,11 +665,12 @@ private struct TripsListV2Eye: View {
 private struct TripsListV2ActionRow: View {
     var onJoin: () -> Void = {}
     var onCreate: () -> Void = {}
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         HStack(spacing: 10) {
             Button(action: { BPHaptics.selection(); onJoin() }) {
-                Text("Unirme con código")
+                Text(l10n.t("trips.joinWithCode"))
                     .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -682,7 +686,7 @@ private struct TripsListV2ActionRow: View {
 
             Button(action: { BPHaptics.selection(); onCreate() }) {
                 HStack(spacing: 8) {
-                    Text("Crear trip nuevo")
+                    Text(l10n.t("trips.createNew"))
                         .font(.system(size: 13.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(.black)
                     Image(systemName: "arrow.right")
@@ -947,7 +951,7 @@ private struct TripsListV2CountdownChip: View {
             .padding(.vertical, 4)
             .background(Color.bpAmber.opacity(0.12), in: Capsule())
             .overlay(Capsule().strokeBorder(Color.bpAmber.opacity(0.28), lineWidth: 0.8))
-            .accessibilityLabel("Empieza \(label)")
+            .accessibilityLabel(String(format: L10n.shared.t("trips.startA11yFmt"), label))
     }
 }
 
@@ -976,7 +980,7 @@ private struct TripsListV2ProgressBar: View {
             .frame(height: 3)
 
             HStack(spacing: 6) {
-                Text("parada \(progress.stopIndex)/\(progress.total)")
+                Text(String(format: L10n.shared.t("trips.stopFmt"), progress.stopIndex, progress.total))
                     .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                     .tracking(1.0)
                     .foregroundStyle(Color.bpAmber)
@@ -990,7 +994,7 @@ private struct TripsListV2ProgressBar: View {
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Parada \(progress.stopIndex) de \(progress.total), hora actual \(progress.timeLabel)")
+        .accessibilityLabel(String(format: L10n.shared.t("trips.stopA11yFmt"), progress.stopIndex, progress.total, progress.timeLabel))
     }
 }
 
@@ -1142,6 +1146,7 @@ private struct TripsListV2AvatarStack: View {
 
 @MainActor
 private struct TripsListV2PublicSection: View {
+    @ObservedObject private var l10n = L10n.shared
     struct Row: Identifiable {
         let id = UUID()
         /// Backend id of the discoverable Trip this row represents.
@@ -1158,7 +1163,7 @@ private struct TripsListV2PublicSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                Text("Trips públicos para unirte")
+                Text(l10n.t("trips.publicToJoin"))
                     .font(.system(size: 11, weight: .heavy, design: .monospaced))
                     .tracking(2.2)
                     .textCase(.uppercase)
@@ -1195,6 +1200,7 @@ private struct TripsListV2PublicSection: View {
 private struct TripsListV2PublicRow: View {
     let row: TripsListV2PublicSection.Row
     var onJoin: () -> Void = {}
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         HStack(spacing: 12) {
@@ -1220,7 +1226,7 @@ private struct TripsListV2PublicRow: View {
             Spacer()
 
             Button(action: { BPHaptics.selection(); onJoin() }) {
-                Text("Unirme")
+                Text(l10n.t("common.join"))
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color.bpAmber)
             }

@@ -170,9 +170,9 @@ struct AuthLoginV2View: View {
                 .shadow(color: Color.black.opacity(0.6), radius: 10, y: 8)
 
             HStack(spacing: 0) {
-                Text("BAR")
+                Text(l10n.t("brand.bar"))
                     .foregroundStyle(.white)
-                Text("PASS")
+                Text(l10n.t("brand.pass"))
                     .foregroundStyle(Color.bpAmber)
                     .overlay(alignment: .bottom) {
                         Rectangle()
@@ -187,7 +187,7 @@ struct AuthLoginV2View: View {
             (
                 Text("La noche de Miami, ")
                     .foregroundStyle(Color.white.opacity(0.9))
-                + Text("sin fila.")
+                + Text(l10n.t("authV2.tagline.suffix"))
                     .font(.system(size: 17, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
             )
@@ -246,7 +246,7 @@ struct AuthLoginV2View: View {
                 TextField(
                     "",
                     text: $email,
-                    prompt: Text("Email").foregroundColor(Color.white.opacity(0.45))
+                    prompt: Text(l10n.t("auth.field.email")).foregroundColor(Color.white.opacity(0.45))
                 )
                 .focused($focused, equals: .email)
                 .keyboardType(.emailAddress)
@@ -279,13 +279,13 @@ struct AuthLoginV2View: View {
                         TextField(
                             "",
                             text: $password,
-                            prompt: Text("Contraseña").foregroundColor(Color.white.opacity(0.45))
+                            prompt: Text(l10n.t("auth.field.password")).foregroundColor(Color.white.opacity(0.45))
                         )
                     } else {
                         SecureField(
                             "",
                             text: $password,
-                            prompt: Text("Contraseña").foregroundColor(Color.white.opacity(0.45))
+                            prompt: Text(l10n.t("auth.field.password")).foregroundColor(Color.white.opacity(0.45))
                         )
                     }
                 }
@@ -327,7 +327,7 @@ struct AuthLoginV2View: View {
                     tap()
                     onForgotPassword?()
                 } label: {
-                    Text("¿Olvidaste tu contraseña?")
+                    Text(l10n.t("auth.forgotPassword"))
                         .font(.system(size: 12, weight: .semibold, design: .rounded))
                         .foregroundStyle(Color.white.opacity(0.6))
                 }
@@ -458,7 +458,7 @@ struct AuthLoginV2View: View {
                 tap()
                 onTerms?()
             } label: {
-                Text("TÉRMINOS")
+                Text(l10n.t("authV2.terms.caps"))
                     .foregroundStyle(Color.bpAmberBright)
             }
             .buttonStyle(.plain)
@@ -468,7 +468,7 @@ struct AuthLoginV2View: View {
                 tap()
                 onPrivacy?()
             } label: {
-                Text("POLÍTICA DE PRIVACIDAD")
+                Text(l10n.t("authV2.privacy.caps"))
                     .foregroundStyle(Color.bpAmberBright)
             }
             .buttonStyle(.plain)

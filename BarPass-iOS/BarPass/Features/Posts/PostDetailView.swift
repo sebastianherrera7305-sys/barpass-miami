@@ -67,9 +67,9 @@ struct PostDetailView: View {
                     }
                 }
             }
-            .alert("¿Borrar este post?", isPresented: $showDeleteConfirm) {
-                Button("Cancelar", role: .cancel) { }
-                Button("Borrar", role: .destructive) { performDelete() }
+            .alert(L10n.shared.t("post.detail.deleteConfirm"), isPresented: $showDeleteConfirm) {
+                Button(L10n.shared.t("common.cancel"), role: .cancel) { }
+                Button(L10n.shared.t("common.delete"), role: .destructive) { performDelete() }
             } message: {
                 Text("La foto se elimina del servidor y nadie más la verá.")
             }

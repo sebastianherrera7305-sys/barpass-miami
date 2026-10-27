@@ -457,6 +457,7 @@ final class NightRecapStore: ObservableObject {
 struct NightRecapView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var venueStore: VenueStore
+    @ObservedObject private var l10n = L10n.shared
 
     /// Si se pasa, la vista rinde esos datos tal cual (ruta debug / preview).
     /// Si es nil, se arma un `NightRecapStore` al vuelo contra Supabase.
@@ -561,7 +562,7 @@ struct NightRecapView: View {
             ProgressView()
                 .tint(Color.bpAmber)
                 .scaleEffect(1.2)
-            Text("Armando tu recap…")
+            Text(l10n.t("recap.loading"))
                 .font(.system(size: 11.5, weight: .heavy, design: .monospaced))
                 .tracking(1.8)
                 .foregroundStyle(Color.white.opacity(0.6))
@@ -728,7 +729,7 @@ struct NightRecapView: View {
 
     private func streakCardBody(data: NightRecapData) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Racha")
+            Text(l10n.t("recap.streak"))
                 .font(.system(size: 10, weight: .heavy, design: .monospaced))
                 .tracking(2.4)
                 .foregroundStyle(Color.white.opacity(0.65))
@@ -737,7 +738,7 @@ struct NightRecapView: View {
                     .font(.system(size: 42, weight: .black, design: .rounded))
                     .tracking(-1.4)
                     .foregroundStyle(Color.bpAmberBright)
-                Text("fines de semana")
+                Text(l10n.t("recap.weekends"))
                     .font(.system(size: 20, design: .serif).italic())
                     .foregroundStyle(.white)
                 Spacer(minLength: 0)
@@ -786,12 +787,12 @@ struct NightRecapView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Eyebrow. Sin promesa de XP: PointsEngine no tiene una XPAction
             // para reportar precio, así que no se anuncia ninguna.
-            Text("Una pregunta")
+            Text(l10n.t("recap.oneQuestion"))
                 .font(.system(size: 10, weight: .heavy, design: .monospaced))
                 .tracking(2.2)
                 .foregroundStyle(Color.white.opacity(0.6))
 
-            Text("¿Cuánto pagaste el trago en \(venueName)?")
+            Text(String(format: l10n.t("recap.priceAskFmt"), venueName))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
                 .padding(.top, 8)
@@ -958,6 +959,7 @@ struct NightRecapView: View {
 @MainActor
 private struct NightRecapEmptyView: View {
     let onDismiss: () -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -977,7 +979,7 @@ private struct NightRecapEmptyView: View {
 
             // Título
             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("Noche")
+                Text(l10n.t("recap.night"))
                     .font(.system(size: 44, weight: .black, design: .rounded))
                     .tracking(-1.4)
                     .foregroundStyle(.white)
@@ -989,7 +991,7 @@ private struct NightRecapEmptyView: View {
             .padding(.horizontal, 24)
             .padding(.top, 10)
 
-            Text("Anoche no te vimos en ningún venue registrado en BarPass. Si saliste y no hiciste check-in, no te la vamos a inventar — este espacio se llena solo cuando hay una noche real para recordar.")
+            Text(l10n.t("recap.empty"))
                 .font(.system(size: 13.5))
                 .foregroundStyle(Color.white.opacity(0.72))
                 .padding(.horizontal, 24)
@@ -999,7 +1001,7 @@ private struct NightRecapEmptyView: View {
             // CTA — abrir Remy / plan próximo
             Button(action: { BPHaptics.selection(); onDismiss() }) {
                 HStack(spacing: 10) {
-                    Text("Armar la próxima noche")
+                    Text(l10n.t("recap.planNext"))
                         .font(.system(size: 16, weight: .heavy, design: .rounded))
                         .foregroundStyle(.black)
                     Spacer()
@@ -1028,6 +1030,7 @@ private struct NightRecapEmptyView: View {
 private struct NightRecapErrorView: View {
     let message: String
     let onRetry: () -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -1040,7 +1043,7 @@ private struct NightRecapErrorView: View {
                 .foregroundStyle(Color.white.opacity(0.6))
                 .lineLimit(4)
             Button(action: { BPHaptics.selection(); onRetry() }) {
-                Text("Reintentar")
+                Text(l10n.t("common.retry"))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color.bpAmber)
                     .padding(.horizontal, 16)

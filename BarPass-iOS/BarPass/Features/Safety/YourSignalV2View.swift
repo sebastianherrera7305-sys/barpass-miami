@@ -175,7 +175,7 @@ struct YourSignalV2View: View {
                 .font(.system(size: 22, weight: .black, design: .rounded))
                 .foregroundStyle(Color.black.opacity(0.85))
                 .multilineTextAlignment(.center)
-            Text("Levanta la mano desde la pantalla anterior para encender tu faro.")
+            Text(l10n.t("yoursignal.needRaise"))
                 .font(.system(size: 13))
                 .foregroundStyle(Color.black.opacity(0.65))
                 .multilineTextAlignment(.center)
@@ -186,7 +186,7 @@ struct YourSignalV2View: View {
                 BPHaptics.light()
                 dismiss()
             } label: {
-                Text("Cerrar")
+                Text(l10n.t("common.close"))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.black)
                     .padding(.horizontal, 24).padding(.vertical, 12)
@@ -269,7 +269,7 @@ struct YourSignalV2View: View {
             bigAvatar
                 .frame(width: 112, height: 112)
 
-            Text("Levántalo por encima de la cabeza")
+            Text(l10n.t("yoursignal.raiseAbove"))
                 .font(.system(size: 22, weight: .black, design: .rounded))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Color.black.opacity(0.88))
@@ -360,7 +360,7 @@ struct YourSignalV2View: View {
                         Image(systemName: "flashlight.on.fill")
                             .font(.system(size: 10, weight: .heavy))
                             .foregroundStyle(Color.bpAmberBright)
-                        Text("linterna encendida")
+                        Text(l10n.t("yoursignal.flashlightOn"))
                             .font(.system(size: 10, weight: .heavy, design: .monospaced))
                             .tracking(1.4)
                             .foregroundStyle(Color.white.opacity(0.72))
@@ -384,7 +384,7 @@ struct YourSignalV2View: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            Text("Salir de esta pantalla · la señal sigue encendida")
+            Text(l10n.t("yoursignal.exitHint"))
                 .font(.system(size: 10, weight: .heavy, design: .monospaced))
                 .tracking(1.2)
                 .foregroundStyle(Color.white.opacity(0.6))
@@ -408,7 +408,7 @@ struct YourSignalV2View: View {
     }
 
     private var noAckYet: some View {
-        Text("Sin acuse de entrega no podemos saber quién lo vio. Mantén el teléfono en alto hasta que alguien conteste.")
+        Text(l10n.t("yoursignal.noAck"))
             .font(.system(size: 11, design: .serif).italic())
             .foregroundStyle(Color.white.opacity(0.6))
             .fixedSize(horizontal: false, vertical: true)
@@ -532,6 +532,7 @@ struct YourSignalV2View: View {
 private struct YourSignalAckRow: View {
     let name: String
     let tint: Color
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         HStack(spacing: 12) {
@@ -552,7 +553,7 @@ private struct YourSignalAckRow: View {
                 Text(name)
                     .font(.system(size: 14, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
-                Text("viene en camino")
+                Text(l10n.t("yoursignal.coming"))
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.white.opacity(0.6))
                     .lineLimit(1)

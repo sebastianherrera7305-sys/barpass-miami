@@ -120,14 +120,14 @@ struct PriorityEntryV2Container: View {
                 Image(systemName: "mappin.slash.circle")
                     .font(.system(size: 36))
                     .foregroundStyle(Color.white.opacity(0.6))
-                Text("Elige primero un venue")
+                Text(l10n.t("priority.chooseVenueFirst"))
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
-                Text("Priority Entry se abre sobre un venue — toca uno desde Tonight o Explore y vuelve.")
+                Text(l10n.t("priority.chooseVenueDesc"))
                     .font(.system(size: 13))
                     .foregroundStyle(Color.white.opacity(0.6))
                     .multilineTextAlignment(.center)
-                Button("Cerrar") { dismiss() }
+                Button(l10n.t("common.close")) { dismiss() }
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color.bpAmber)
                     .padding(.horizontal, 20)

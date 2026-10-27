@@ -482,7 +482,7 @@ struct ProfileView: View {
                             // TestFlight without replacing TripDetail / PlanView
                             // / VenueDetail yet.
                             VStack(spacing: 8) {
-                                Text("VISTAS PREVIAS v17.1")
+                                Text(l10n.t("profile.v17Previews"))
                                     .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
                                     .tracking(2)
                                     .foregroundStyle(Color.bpAmber)
@@ -829,7 +829,7 @@ struct ProfileView: View {
                         Image(systemName: "sparkle")
                             .font(.system(size: 9.5, weight: .heavy))
                             .foregroundStyle(Color.bpAmber)
-                        Text("ANOCHE")
+                        Text(l10n.t("profile.lastNight"))
                             .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                             .tracking(2.4)
                             .foregroundStyle(Color.bpAmber)
@@ -1101,7 +1101,7 @@ private struct SettingsSheet: View {
                 themeRow
                 autoplayRow
             }
-            Section(header: Text("Privacidad"),
+            Section(header: Text(l10n.t("settings.privacyHeader")),
                     footer: Text("Si activás cuenta privada, solo tus amigos aceptados ven tus posts. Si no, cualquier usuario de BarPass puede verlos desde tu perfil.")) {
                 privacyRow
             }
@@ -1112,25 +1112,25 @@ private struct SettingsSheet: View {
                 NavigationLink {
                     LegalAndHelpView()
                 } label: {
-                    settingsRowLabel("Ayuda y soporte", icon: "lifepreserver")
+                    settingsRowLabel(l10n.t("settings.helpSupport"), icon: "lifepreserver")
                 }
                 NavigationLink {
                     LegalAndHelpView()
                 } label: {
-                    settingsRowLabel("Legal y políticas", icon: "doc.text.fill")
+                    settingsRowLabel(l10n.t("settings.legal"), icon: "doc.text.fill")
                 }
             }
             Section("Sesión") {
                 Button(role: .destructive) {
                     onCerrarSesion()
                 } label: {
-                    settingsRowLabel("Cerrar sesión", icon: "arrow.backward.circle.fill")
+                    settingsRowLabel(l10n.t("settings.signOut"), icon: "arrow.backward.circle.fill")
                         .foregroundStyle(Color.bpDanger)
                 }
                 Button(role: .destructive) {
                     onEliminarCuenta()
                 } label: {
-                    settingsRowLabel("Eliminar cuenta", icon: "trash.fill")
+                    settingsRowLabel(l10n.t("settings.deleteAccount"), icon: "trash.fill")
                         .foregroundStyle(Color.bpDanger)
                 }
             }
@@ -1138,11 +1138,11 @@ private struct SettingsSheet: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(Color.black)
-        .navigationTitle("Ajustes")
+        .navigationTitle(l10n.t("settings.title"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Listo") { dismiss() }
+                Button(l10n.t("common.done")) { dismiss() }
                     .foregroundStyle(Color.bpAmber)
             }
         }
@@ -1152,12 +1152,12 @@ private struct SettingsSheet: View {
 
     private var languageRow: some View {
         HStack {
-            settingsRowLabel("Idioma", icon: "character.bubble.fill")
+            settingsRowLabel(l10n.t("settings.language"), icon: "character.bubble.fill")
             Spacer()
             Picker("", selection: $l10n.language) {
-                Text("Español").tag(AppLanguage.es)
-                Text("English").tag(AppLanguage.en)
-                Text("Português").tag(AppLanguage.pt)
+                Text(l10n.t("lang.es")).tag(AppLanguage.es)
+                Text(l10n.t("lang.en")).tag(AppLanguage.en)
+                Text(l10n.t("lang.pt")).tag(AppLanguage.pt)
             }
             .pickerStyle(.menu)
             .tint(Color.bpAmber)
@@ -1170,9 +1170,9 @@ private struct SettingsSheet: View {
     /// a broken toggle.
     private var themeRow: some View {
         HStack {
-            settingsRowLabel("Tema", icon: "paintbrush.fill")
+            settingsRowLabel(l10n.t("settings.theme"), icon: "paintbrush.fill")
             Spacer()
-            Text("Oscuro")
+            Text(l10n.t("settings.theme.dark"))
                 .font(.system(size: 14))
                 .foregroundStyle(Color.bpTextSecondary)
         }
@@ -1180,7 +1180,7 @@ private struct SettingsSheet: View {
 
     private var autoplayRow: some View {
         HStack {
-            settingsRowLabel("Autoplay", icon: "play.circle.fill")
+            settingsRowLabel(l10n.t("settings.autoplay"), icon: "play.circle.fill")
             Spacer()
             Toggle("", isOn: $autoplayEnabled)
                 .labelsHidden()
@@ -1192,7 +1192,7 @@ private struct SettingsSheet: View {
     /// ProfilePrivacyStore cargue el valor inicial del server.
     private var privacyRow: some View {
         HStack {
-            settingsRowLabel("Cuenta privada", icon: "lock.fill")
+            settingsRowLabel(l10n.t("settings.privateAccount"), icon: "lock.fill")
             Spacer()
             if let current = privacy.isPrivate {
                 Toggle("", isOn: Binding(

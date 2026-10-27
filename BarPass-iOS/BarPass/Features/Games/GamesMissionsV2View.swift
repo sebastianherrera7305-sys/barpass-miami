@@ -154,7 +154,7 @@ struct GamesMissionsV2View: View {
 
     private var navBar: some View {
         HStack {
-            Text("Juegos")
+            Text(l10n.t("games.title"))
                 .font(.system(size: 17, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
 
@@ -163,7 +163,7 @@ struct GamesMissionsV2View: View {
             Button {
                 dismiss()
             } label: {
-                Text("Cerrar")
+                Text(l10n.t("common.close"))
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.bpAmberBright)
             }
@@ -193,7 +193,7 @@ struct GamesMissionsV2View: View {
                 Text("Tu ")
                     .font(.system(size: 24, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
-                + Text("progreso")
+                + Text(l10n.t("games.progress"))
                     .font(.system(size: 24, design: .serif).italic())
                     .foregroundStyle(Color.bpAmberBright)
             )
@@ -319,7 +319,7 @@ struct GamesMissionsV2View: View {
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Misión de hoy")
+                Text(l10n.t("games.missionToday"))
                     .font(.system(size: 14.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 Spacer()
@@ -396,11 +396,11 @@ struct GamesMissionsV2View: View {
     private var allDoneCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Misión de hoy")
+                Text(l10n.t("games.missionToday"))
                     .font(.system(size: 14.5, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 Spacer()
-                Text("todo listo")
+                Text(l10n.t("games.allDone"))
                     .font(.system(size: 9.5, weight: .heavy, design: .monospaced))
                     .tracking(1.4)
                     .foregroundStyle(Color.bpGreen)
@@ -408,7 +408,7 @@ struct GamesMissionsV2View: View {
                     .background(Capsule().fill(Color.bpGreen.opacity(0.14)))
                     .overlay(Capsule().strokeBorder(Color.bpGreen.opacity(0.4), lineWidth: 1))
             }
-            Text("Terminaste las misiones de hoy. Mañana rotan nuevas.")
+            Text(l10n.t("games.doneTomorrowRotate"))
                 .font(.system(size: 13))
                 .foregroundStyle(Color.white.opacity(0.72))
                 .fixedSize(horizontal: false, vertical: true)

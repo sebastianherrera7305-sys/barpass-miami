@@ -270,13 +270,13 @@ struct FindMyPeopleV2View: View {
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text("Encontrar a mi gente")
+            Text(l10n.t("findmypeople.title"))
                 .font(.system(size: 22, weight: .black, design: .rounded))
                 .tracking(-0.5)
                 .foregroundStyle(.white)
             Spacer()
             Button(action: closeTapped) {
-                Text("Cerrar")
+                Text(l10n.t("common.close"))
                     .font(.system(size: 12, weight: .heavy, design: .monospaced))
                     .tracking(1.6)
                     .foregroundStyle(Color.white.opacity(0.7))
@@ -306,7 +306,7 @@ struct FindMyPeopleV2View: View {
 
     private var audienceCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("¿Quién te busca?")
+            Text(l10n.t("findmypeople.whosLooking"))
                 .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
                 .tracking(2.2)
                 .foregroundStyle(Color.bpAmber)
@@ -344,7 +344,7 @@ struct FindMyPeopleV2View: View {
                 .foregroundStyle(Color.white.opacity(0.45))
             ZStack(alignment: .leading) {
                 if whereNote.isEmpty {
-                    Text("¿Dónde estás? Ej: baño del fondo, afuera junto al food truck")
+                    Text(l10n.t("findmypeople.wherePrompt"))
                         .font(.system(size: 13))
                         .foregroundStyle(Color.white.opacity(0.4))
                         .lineLimit(1)
@@ -405,12 +405,12 @@ struct FindMyPeopleV2View: View {
                             .tint(.black)
                             .scaleEffect(1.2)
                     } else if mineBeacon != nil {
-                        Text("Señal")
+                        Text(l10n.t("findmypeople.beaconLabel"))
                             .font(.system(size: 18, weight: .black, design: .rounded))
-                        Text("encendida")
+                        Text(l10n.t("findmypeople.beaconOn"))
                             .font(.system(size: 18, weight: .black, design: .rounded))
                     } else {
-                        Text("Levantar")
+                        Text(l10n.t("findmypeople.raise"))
                             .font(.system(size: 18, weight: .black, design: .rounded))
                         Text("la mano")
                             .font(.system(size: 18, weight: .black, design: .rounded))
@@ -663,7 +663,7 @@ struct FindMyPeopleV2View: View {
             }
 
             if seekers.isEmpty {
-                Text("Nadie te está buscando ahora. Si te separas, toca \"Levantar la mano\".")
+                Text(l10n.t("findmypeople.noOne"))
                     .font(.system(size: 12, design: .serif).italic())
                     .foregroundStyle(Color.white.opacity(0.55))
                     .fixedSize(horizontal: false, vertical: true)

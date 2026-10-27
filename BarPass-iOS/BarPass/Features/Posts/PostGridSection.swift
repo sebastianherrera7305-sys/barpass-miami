@@ -61,7 +61,7 @@ struct PostGridSection: View {
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Color.white.opacity(0.5))
             if isOwner {
-                Text("Tocá + arriba para publicar")
+                Text(L10n.shared.t("post.grid.empty"))
                     .font(.system(size: 11))
                     .foregroundStyle(Color.white.opacity(0.3))
             }

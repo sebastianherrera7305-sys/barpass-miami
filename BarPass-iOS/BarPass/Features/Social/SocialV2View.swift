@@ -49,6 +49,7 @@ public struct SocialV2View: View {
     }
 
     @EnvironmentObject private var venueStore: VenueStore
+    @ObservedObject private var l10n = L10n.shared
     @ObservedObject private var tonight = FriendsTonightStore.shared
     @ObservedObject private var pulse = VenueStoryPulseStore.shared
     /// Solicitudes de amistad entrantes y salientes. Vive aparte de
@@ -119,7 +120,7 @@ public struct SocialV2View: View {
                     // caption) so Social IS the stories+chats page, not a
                     // container with them inside.
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        Text("Social")
+                        Text(l10n.t("socialV2.title"))
                             .font(.system(size: 28, weight: .black, design: .rounded))
                             .tracking(-0.6)
                             .foregroundStyle(.white)
@@ -272,11 +273,11 @@ public struct SocialV2View: View {
 
         return Group {
             if tonight.needsSharingOptIn {
-                Text("Comparte tu ubicación para ver a tu gente afuera.")
+                Text(l10n.t("socialV2.shareLocation"))
                     .font(.system(size: 13))
                     .foregroundStyle(Color.white.opacity(0.6))
             } else if count == 0 {
-                Text("Noche tranquila · nadie afuera por ahora")
+                Text(l10n.t("socialV2.quietNight"))
                     .font(.system(size: 13))
                     .foregroundStyle(Color.white.opacity(0.6))
             } else if let latest {
@@ -419,7 +420,7 @@ public struct SocialV2View: View {
 
     private var storiesSectionHeader: some View {
         HStack {
-            Text("Historias de esta noche")
+            Text(l10n.t("socialV2.stories.title"))
                 .font(.system(size: 16, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
             Spacer()
@@ -485,7 +486,7 @@ public struct SocialV2View: View {
                         .foregroundStyle(Color.bpAmber)
                         .lineLimit(1)
                     Spacer()
-                    Text("Ver detalle")
+                    Text(l10n.t("socialV2.viewDetail"))
                         .font(.system(size: 10, weight: .heavy, design: .monospaced))
                         .tracking(1.2)
                         .foregroundStyle(.black)
@@ -531,7 +532,7 @@ public struct SocialV2View: View {
             } label: {
                 HStack(spacing: 6) {
                     Text("\u{270B}")
-                    Text("Levantar la mano")
+                    Text(l10n.t("socialV2.raiseHand"))
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                 }
                 .foregroundStyle(.white)
@@ -549,7 +550,7 @@ public struct SocialV2View: View {
                 HStack(spacing: 6) {
                     Text("+")
                         .font(.system(size: 16, weight: .black, design: .rounded))
-                    Text("Armar algo")
+                    Text(l10n.t("socialV2.planSomething"))
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                 }
                 .foregroundStyle(.white)
@@ -671,7 +672,7 @@ public struct SocialV2View: View {
                 Rectangle()
                     .fill(Color.bpAmber)
                     .frame(width: 3, height: 14)
-                Text("Chats")
+                Text(l10n.t("socialV2.chats"))
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(.white)
                 Spacer()
@@ -713,7 +714,7 @@ public struct SocialV2View: View {
                 .font(.system(size: 13, weight: .heavy))
                 .foregroundStyle(Color.white.opacity(0.5))
             TextField("", text: $friendQuery,
-                      prompt: Text("Agregar gente — nombre o código")
+                      prompt: Text(l10n.t("socialV2.addPrompt"))
                         .foregroundColor(Color.white.opacity(0.42)))
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled(true)
@@ -813,7 +814,7 @@ public struct SocialV2View: View {
         HStack(spacing: 10) {
             Image(systemName: "sparkles")
                 .foregroundStyle(Color.bpAmber)
-            Text("Buscá un amigo arriba o pegá su código para empezar.")
+            Text(l10n.t("socialV2.friendsSearch"))
                 .font(.system(size: 12))
                 .foregroundStyle(Color.white.opacity(0.6))
             Spacer()
@@ -1075,12 +1076,13 @@ private struct SocialV2Divider: View {
 
 @MainActor
 private struct SocialV2EmptyNowCard: View {
+    @ObservedObject private var l10n = L10n.shared
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Noche tranquila")
+            Text(l10n.t("socialV2.quietHeader"))
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
-            Text("Nadie de tu gente está afuera por ahora. Levanta la mano para avisarles.")
+            Text(l10n.t("socialV2.quietDesc"))
                 .font(.system(size: 12.5))
                 .foregroundStyle(Color.white.opacity(0.55))
                 .fixedSize(horizontal: false, vertical: true)
@@ -1095,6 +1097,7 @@ private struct SocialV2EmptyNowCard: View {
 @MainActor
 private struct SocialV2SharingOffCard: View {
     let onOpenFriends: () -> Void
+    @ObservedObject private var l10n = L10n.shared
 
     var body: some View {
         Button(action: onOpenFriends) {
@@ -1103,7 +1106,7 @@ private struct SocialV2SharingOffCard: View {
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.bpAmber)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Comparte tu ubicación para ver a tu gente")
+                    Text(l10n.t("socialV2.shareToSee"))
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
