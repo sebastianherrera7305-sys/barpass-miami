@@ -420,4 +420,41 @@ extension BarPassVenue {
 }
 #endif
 
+// MARK: - Rooftop promotion (owner report 2026-10-13 "no muestra los roof tops")
+//
+// Google Places has no `primaryType=rooftop`, so every rooftop in the
+// catalogue landed as bar/lounge/restaurant and the Explore "Rooftops"
+// filter matched zero rows. Rather than re-fetch Google (costly) or wait
+// on a backfill job, iOS promotes known rooftop names at read time via a
+// name regex. Zero API cost, pure client-side classification, uses only
+// data already in Supabase.
+//
+// Any name containing "rooftop", "sky bar/lounge/deck", or "terrace" —
+// or whose vibes/tags include "rooftop" — reports `effectiveType = .rooftop`,
+// no matter what the stored `type` is. Callers filter on `effectiveType`
+// rather than `type` so new rooftops surface the moment the catalogue
+// learns their name, without a sweep.
+extension BarPassVenue {
+    private static let rooftopNameRegex = try? NSRegularExpression(
+        pattern: #"\broof\s*top\b|\brooftop\b|\bsky\s*(bar|lounge|deck|room)\b|\bterrace\b|\brooftop\b"#,
+        options: [.caseInsensitive]
+    )
+
+    /// Promotes to `.rooftop` when the stored `type` is bar/lounge/
+    /// restaurant but the name or tags clearly point at a rooftop.
+    /// Clubs and sports bars are not promoted — those are explicit
+    /// classifications and overriding them silently would hide them from
+    /// their native filter.
+    var effectiveType: VenueType {
+        if type == .rooftop { return .rooftop }
+        guard type == .bar || type == .lounge || type == .restaurant else { return type }
+        let haystack = (name + " " + vibes.joined(separator: " ") + " " + tags.joined(separator: " "))
+        let range = NSRange(haystack.startIndex..., in: haystack)
+        if Self.rooftopNameRegex?.firstMatch(in: haystack, range: range) != nil {
+            return .rooftop
+        }
+        return type
+    }
+}
+
 // MARK: - Design system tokens live in Resources/DesignSystem.swift

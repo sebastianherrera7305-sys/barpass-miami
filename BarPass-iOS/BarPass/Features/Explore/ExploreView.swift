@@ -67,7 +67,7 @@ struct ExploreView: View {
                 switch selectedLayer {
                 case "trending": return v.isTrending
                 case "happy_hour": return v.hasHappyHour
-                case "rooftop": return v.type == .rooftop
+                case "rooftop": return v.effectiveType == .rooftop
                 case "live": return v.musicGenres.contains(.live)
                 default: return true
                 }

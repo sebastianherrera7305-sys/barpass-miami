@@ -12,6 +12,15 @@ protocol UserPostRepository: Sendable {
     /// propio → siempre; ajeno → amigo-mutuo OR autor-no-privado.
     func posts(forUser userId: String, limit: Int) async throws -> [UserPost]
 
+    /// Social timeline feed: latest N posts across every author the viewer
+    /// can see. RLS does the visibility filter — a comprometed client that
+    /// asks for everything still only gets back the posts whose author is
+    /// (not private) OR (mutual friend) and no block between them. Used by
+    /// SocialV2View home to surface posts (owner report 2026-10-27 "los
+    /// posts no se postean" — they posted fine, they were just buried in
+    /// profile with no social surface).
+    func timeline(limit: Int) async throws -> [UserPost]
+
     /// Conteo del grid del perfil. Usa el helper RPC posts_count_for
     /// que respeta las mismas políticas de visibilidad.
     func count(forUser userId: String) async throws -> Int
@@ -70,6 +79,26 @@ final actor SupabaseUserPostRepository: UserPostRepository {
             queryItems: [
                 URLQueryItem(name: "select", value: "id,user_id,image_path,caption,venue_id,created_at"),
                 URLQueryItem(name: "user_id", value: "eq.\(userId)"),
+                URLQueryItem(name: "order",   value: "created_at.desc"),
+                URLQueryItem(name: "limit",   value: String(limit)),
+            ],
+            accessToken: session.accessToken
+        )
+        let data = try await SupabaseRESTClient.send(req)
+        return try SupabaseRESTClient.decoder.decode([UserPost].self, from: data)
+    }
+
+    func timeline(limit: Int = 30) async throws -> [UserPost] {
+        let session = try await SupabaseRESTClient.freshSession()
+        // No user_id filter — RLS trims to the viewer-visible subset
+        // (SELECT policy in user_posts_schema.sql line 160+): own posts
+        // always, others only when author is public or mutual friend and
+        // no block exists. One round trip, one query, all gated server-
+        // side; nothing to filter client-side.
+        let req = try SupabaseRESTClient.request(
+            "GET", path: "posts",
+            queryItems: [
+                URLQueryItem(name: "select", value: "id,user_id,image_path,caption,venue_id,created_at"),
                 URLQueryItem(name: "order",   value: "created_at.desc"),
                 URLQueryItem(name: "limit",   value: String(limit)),
             ],

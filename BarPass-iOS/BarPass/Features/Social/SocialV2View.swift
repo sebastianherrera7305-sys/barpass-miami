@@ -73,6 +73,8 @@ public struct SocialV2View: View {
     /// name + last-message time + unread dot. Tap pushes FriendChatView.
     @State private var threads: [FriendThreadSummary] = []
     @State private var openThreadId: String?
+    @State private var timelinePosts: [UserPost] = []
+    @State private var postAuthorNames: [String: String] = [:]
     /// Inline add-friend state (Build 121 fix: no more Friends sub-page).
     @State private var friendQuery: String = ""
     @State private var searchResults: [FriendSearchResult] = []
@@ -167,6 +169,17 @@ public struct SocialV2View: View {
                         .padding(.top, pendingReqs.incoming.isEmpty
                                  ? (cityStories.isEmpty ? 16 : 20)
                                  : 20)
+
+                    // Posts timeline — friends + public posts the viewer
+                    // can see (RLS gates it, iOS never filters). Owner
+                    // report (2026-10-27, "los posts no se postean"):
+                    // posts posted fine, but Social never surfaced them
+                    // — they only lived on the author's own profile.
+                    if !timelinePosts.isEmpty {
+                        postsInlineSection
+                            .padding(.horizontal, 24)
+                            .padding(.top, 20)
+                    }
 
                     Spacer().frame(height: embeddedInTabBar ? 40 : 100)
                 }
@@ -577,11 +590,13 @@ public struct SocialV2View: View {
         // incoming/outgoing en la tienda, para que la sección "Solicitudes"
         // y el badge del tab Social estén en sync.
         async let reqsRefresh: Void = pendingReqs.refresh()
+        async let fetchedPosts = (try? await RepositoryDependencies.userPost.timeline(limit: 10)) ?? []
         _ = await friendsRefresh
         _ = await reqsRefresh
         let nights = await fetchedEvents
         events = nights.filter { !$0.isCancelled }
         threads = await fetchedThreads
+        timelinePosts = await fetchedPosts
     }
 
     // MARK: - Solicitudes
@@ -820,6 +835,93 @@ public struct SocialV2View: View {
             Spacer()
         }
         .padding(.horizontal, 14).padding(.vertical, 10)
+    }
+
+    // MARK: - Posts timeline (friends + public)
+
+    /// Vertical IG-style feed of recent posts the viewer can see.
+    /// Visibility is gated server-side by the `posts` RLS: own always,
+    /// others only when author is public OR mutual friend AND not
+    /// blocked. One section header + up to 10 cards.
+    private var postsInlineSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Rectangle()
+                    .fill(Color.bpAmber)
+                    .frame(width: 3, height: 14)
+                Text(l10n.t("socialV2.postsHeader"))
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                Spacer()
+            }
+
+            VStack(spacing: 14) {
+                ForEach(timelinePosts) { post in
+                    postCard(post)
+                }
+            }
+        }
+    }
+
+    private func postCard(_ post: UserPost) -> some View {
+        let url = post.publicImageURL(baseURL: SupabaseRESTClient.baseURL)
+        let venue = post.venueId.flatMap { id in venueStore.venues.first { $0.id == id } }
+
+        return VStack(alignment: .leading, spacing: 10) {
+            // Author strip
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(Color.bpAmber.opacity(0.18))
+                    .frame(width: 32, height: 32)
+                    .overlay(
+                        Text(String((postAuthorNames[post.userId] ?? "·").prefix(1)).uppercased())
+                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color.bpAmber)
+                    )
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(postAuthorNames[post.userId] ?? "Alguien de BarPass")
+                        .font(.system(size: 13, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                    if let v = venue {
+                        Text(v.name)
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.bpAmber)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer()
+                Text(Self.relativeAgoString(from: post.createdAt))
+                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                    .tracking(1.0)
+                    .foregroundStyle(Color.white.opacity(0.45))
+            }
+
+            // Photo 1:1
+            CachedImage(url: url, targetSize: CGSize(width: 700, height: 700), priority: .standard) { img in
+                img.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Rectangle().fill(Color.white.opacity(0.06))
+            }
+            .aspectRatio(1, contentMode: .fit)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+            // Caption (optional)
+            if !post.caption.isEmpty {
+                Text(post.caption)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.white.opacity(0.85))
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(14)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.white.opacity(0.08)))
+        .onTapGesture {
+            BPHaptics.selection()
+            if let v = venue { selectedVenue = v }
+        }
     }
 
     private func runSearchOrRedeem() async {

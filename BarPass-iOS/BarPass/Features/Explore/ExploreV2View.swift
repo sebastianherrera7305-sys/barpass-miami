@@ -214,7 +214,7 @@ struct ExploreV2View: View {
         case .all:       return cityVenues
         case .trending:  return cityVenues.filter { $0.isTrending }
         case .happyHour: return cityVenues.filter { $0.hasHappyHour }
-        case .rooftops:  return cityVenues.filter { $0.type == .rooftop }
+        case .rooftops:  return cityVenues.filter { $0.effectiveType == .rooftop }
         case .liveMusic: return cityVenues.filter { $0.musicGenres.contains(.live) }
         }
     }

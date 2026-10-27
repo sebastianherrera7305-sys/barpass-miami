@@ -64,6 +64,7 @@ struct GroupNightView: View {
     @State private var showRatePicker = false
     @State private var showDeleteConfirm = false
     @State private var isDeleting = false
+    @State private var showReorderStops = false
 
     private struct RatingTarget: Identifiable { let id: String; let name: String }
 
@@ -180,6 +181,15 @@ struct GroupNightView: View {
                         isCompleted: currentTrip.status == .completed
                     )
 
+                    // Reorder stops (owner report 2026-10-27 "cada parada
+                    // del trip debería o el usuario poder organizarlo en
+                    // el orden que ellos quieren ir"). Only visible when
+                    // there is more than one stop AND the viewer can
+                    // manage members — passengers can't reshuffle.
+                    if canManageMembers && sortedStops.count > 1 {
+                        reorderStopsButton
+                    }
+
                     if canManageMembers, !pendingRequestStops.isEmpty {
                         GroupNightJoinRequestsCard(
                             stops: pendingRequestStops,
@@ -234,6 +244,20 @@ struct GroupNightView: View {
             }
         } message: {
             Text(l10n.t("tripDetail.deleteConfirmMsg"))
+        }
+        .sheet(isPresented: $showReorderStops) {
+            NavigationStack {
+                GroupNightReorderStopsSheet(
+                    stops: sortedStops,
+                    onSave: { newOrder in
+                        store.reorderStops(currentTrip.id, newStopIdOrder: newOrder)
+                        showReorderStops = false
+                    },
+                    onCancel: { showReorderStops = false }
+                )
+            }
+            .presentationBackground(.black)
+            .presentationDetents([.medium, .large])
         }
         .sheet(item: $showJoinRequest) { stop in
             JoinRequestModal(tripId: currentTrip.id, stop: stop)
@@ -296,6 +320,28 @@ struct GroupNightView: View {
         } else {
             showRatePicker = true
         }
+    }
+
+    // MARK: - Reorder stops (organizer / co-organizer only)
+
+    private var reorderStopsButton: some View {
+        Button {
+            BPHaptics.light()
+            showReorderStops = true
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "arrow.up.and.down.text.horizontal")
+                    .font(.system(size: 12, weight: .heavy))
+                Text(l10n.t("tripDetail.reorderStops"))
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+            }
+            .foregroundStyle(Color.bpAmberBright)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(Color.bpAmber.opacity(0.1), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpAmber.opacity(0.3)))
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Delete trip (organizer / co-organizer only)
@@ -1134,3 +1180,76 @@ extension Trip {
     }()
 }
 #endif
+
+// MARK: - Reorder stops sheet (drag-and-drop list)
+
+@MainActor
+private struct GroupNightReorderStopsSheet: View {
+    let stops: [Stop]
+    let onSave: ([String]) -> Void
+    let onCancel: () -> Void
+
+    @ObservedObject private var l10n = L10n.shared
+    @State private var items: [Stop]
+    @State private var editMode: EditMode = .active
+
+    init(stops: [Stop], onSave: @escaping ([String]) -> Void, onCancel: @escaping () -> Void) {
+        self.stops = stops
+        self.onSave = onSave
+        self.onCancel = onCancel
+        _items = State(initialValue: stops)
+    }
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(items) { stop in
+                    HStack(spacing: 12) {
+                        Image(systemName: "line.3.horizontal")
+                            .foregroundStyle(Color.bpAmber.opacity(0.6))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(stop.venueName)
+                                .font(.system(size: 14, weight: .heavy, design: .rounded))
+                                .foregroundStyle(.white)
+                            if !stop.startTime.isEmpty {
+                                Text(stop.startTime)
+                                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                                    .foregroundStyle(Color.bpAmberBright)
+                            }
+                        }
+                        Spacer()
+                    }
+                    .listRowBackground(Color.white.opacity(0.04))
+                }
+                .onMove { indices, newOffset in
+                    items.move(fromOffsets: indices, toOffset: newOffset)
+                    BPHaptics.light()
+                }
+            } header: {
+                Text(l10n.t("tripDetail.reorderStopsHint"))
+                    .textCase(nil)
+                    .foregroundStyle(Color.white.opacity(0.65))
+            }
+        }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.black)
+        .environment(\.editMode, $editMode)
+        .navigationTitle(l10n.t("tripDetail.reorderStops"))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button(l10n.t("common.cancel"), action: onCancel)
+                    .foregroundStyle(Color.white.opacity(0.7))
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button(l10n.t("host.common.save")) {
+                    onSave(items.map(\.id))
+                }
+                .fontWeight(.heavy)
+                .foregroundStyle(Color.bpAmber)
+                .disabled(items.map(\.id) == stops.map(\.id))
+            }
+        }
+    }
+}

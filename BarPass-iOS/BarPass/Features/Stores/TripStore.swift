@@ -205,6 +205,50 @@ final class TripStore: ObservableObject {
         }
     }
 
+    /// User-driven stop reorder. Owner report (TestFlight 2026-10-27,
+    /// "cada parada del trip debería o el usuario poder organizarlo en
+    /// el orden que ellos quieren ir"): until now the itinerary was auto-
+    /// sorted by resolved start time, so a user could not move stop #3
+    /// to the top. This reassigns the existing time slots in itinerary
+    /// order to the new stop sequence — the slots themselves stay the
+    /// same (22:00 / 23:30 / 01:00 are preserved), only *which* stop
+    /// occupies each slot changes. Stops without a startTime keep theirs
+    /// as-is; their order within untimed-stops is still honored by the
+    /// sorter's stable tiebreak on array position.
+    ///
+    /// `newStopIdOrder` is the full list of stop ids in the order the
+    /// user wants them to appear. Unknown ids are ignored, missing ones
+    /// are appended at the end to keep the trip from losing stops.
+    func reorderStops(_ tripId: String, newStopIdOrder: [String]) {
+        mutate(tripId) { t in
+            var byId: [String: Stop] = Dictionary(uniqueKeysWithValues: t.stops.map { ($0.id, $0) })
+            var reordered: [Stop] = []
+            for id in newStopIdOrder {
+                if let s = byId.removeValue(forKey: id) {
+                    reordered.append(s)
+                }
+            }
+            // Append any stops the caller forgot — never lose data.
+            reordered.append(contentsOf: byId.values)
+            // Re-assign existing time slots in itinerary order so the
+            // sorter (sortedStops) ends up matching the user's intent.
+            // Collect the ORIGINAL non-empty startTimes in itinerary
+            // order and hand them out to the new array in the same
+            // positions. Stops that had no startTime keep "".
+            let originalStartTimes = t.stops.map { $0.startTime }.filter { !$0.isEmpty }
+            var slotIdx = 0
+            for i in reordered.indices {
+                if slotIdx < originalStartTimes.count {
+                    reordered[i].startTime = originalStartTimes[slotIdx]
+                    slotIdx += 1
+                } else {
+                    reordered[i].startTime = ""
+                }
+            }
+            t.stops = reordered
+        }
+    }
+
     /// Basic edit — title/city/dates/visibility/cover. Doesn't touch stops;
     /// itinerary editing is a separate, larger feature not built yet.
     func updateBasicInfo(
