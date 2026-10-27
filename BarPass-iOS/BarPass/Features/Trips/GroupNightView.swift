@@ -62,6 +62,8 @@ struct GroupNightView: View {
     @State private var showJoinRequest: Stop? = nil
     @State private var ratingTarget: RatingTarget? = nil
     @State private var showRatePicker = false
+    @State private var showDeleteConfirm = false
+    @State private var isDeleting = false
 
     private struct RatingTarget: Identifiable { let id: String; let name: String }
 
@@ -206,6 +208,16 @@ struct GroupNightView: View {
                         GroupNightRateNightCard(onRate: openRatePrompt)
                             .padding(.top, 4)
                     }
+
+                    // Delete trip — only organizer/co-organizer. Owner report
+                    // (TestFlight 2026-10-27, "en la parte de los trips así
+                    // como se crea un trip también se debería poder
+                    // eliminar"): the V1 TripDetailView had this; the V2
+                    // GroupNightView never got the affordance.
+                    if canManageMembers {
+                        deleteTripButton
+                            .padding(.top, 18)
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 48)
@@ -214,6 +226,15 @@ struct GroupNightView: View {
         }
         .preferredColorScheme(.dark)
         .task { await loadMemberNames() }
+        .alert(l10n.t("tripDetail.deleteTrip"),
+               isPresented: $showDeleteConfirm) {
+            Button(l10n.t("common.cancel"), role: .cancel) {}
+            Button(l10n.t("common.delete"), role: .destructive) {
+                deleteTripConfirmed()
+            }
+        } message: {
+            Text(l10n.t("tripDetail.deleteConfirmMsg"))
+        }
         .sheet(item: $showJoinRequest) { stop in
             JoinRequestModal(tripId: currentTrip.id, stop: stop)
                 .environmentObject(store)
@@ -274,6 +295,46 @@ struct GroupNightView: View {
             ratingTarget = RatingTarget(id: only, name: memberNames[only] ?? only)
         } else {
             showRatePicker = true
+        }
+    }
+
+    // MARK: - Delete trip (organizer / co-organizer only)
+
+    private var deleteTripButton: some View {
+        Button {
+            BPHaptics.light()
+            showDeleteConfirm = true
+        } label: {
+            HStack(spacing: 8) {
+                if isDeleting {
+                    ProgressView().tint(Color.bpDanger).controlSize(.small)
+                } else {
+                    Image(systemName: "trash.fill")
+                        .font(.system(size: 13, weight: .heavy))
+                }
+                Text(l10n.t("tripDetail.deleteTrip"))
+                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+            }
+            .foregroundStyle(Color.bpDanger)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 13)
+            .background(Color.bpDanger.opacity(0.1), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.bpDanger.opacity(0.35)))
+        }
+        .buttonStyle(.plain)
+        .disabled(isDeleting)
+    }
+
+    private func deleteTripConfirmed() {
+        guard !isDeleting else { return }
+        isDeleting = true
+        BPHaptics.medium()
+        Task {
+            await store.delete(currentTrip)
+            await MainActor.run {
+                isDeleting = false
+                dismiss()
+            }
         }
     }
 }

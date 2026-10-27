@@ -72,11 +72,15 @@ struct PostComposerView: View {
                         .disabled(!canPublish || isPublishing)
                 }
             }
+            // Bug (TestFlight 2026-10-27, "cuando voy a agregar una foto no
+            // me deja agregarla"): the previous Binding read `showsPicker`
+            // but its setter never wrote the dismiss (`false`) back —
+            // only cleared `pickerItem`. After the first open the flag
+            // stayed `true` forever, so a second tap on "Elegí una foto"
+            // was a no-op (SwiftUI thought the picker was still presented).
+            // Pass `$showsPicker` directly so SwiftUI drives both edges.
             .photosPicker(
-                isPresented: Binding(
-                    get: { showsPicker },
-                    set: { if !$0 { pickerItem = nil } }
-                ),
+                isPresented: $showsPicker,
                 selection: $pickerItem,
                 matching: .images
             )
@@ -97,60 +101,97 @@ struct PostComposerView: View {
 
     // MARK: - Sub-views
 
+    /// 1:1 square preview area that matches an IG-style post. On empty
+    /// state the whole square is tappable (not just the center icon) so
+    /// the picker opens from anywhere; the dashed amber border reads as
+    /// a dropzone, not a disabled state. On loaded state the "replace"
+    /// control sits top-right over the photo with a glass circle so it
+    /// stays visible on bright or dark images.
     private var imagePreview: some View {
-        ZStack {
-            if let img = previewImage {
-                Image(uiImage: img)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity, maxHeight: 320)
-                    .clipped()
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                Button {
-                    showsPicker = true
-                } label: {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(.system(size: 14, weight: .heavy))
-                        .foregroundStyle(.white)
-                        .padding(10)
-                        .background(Color.black.opacity(0.7), in: Circle())
-                }
-                .buttonStyle(.plain)
-                .padding(10)
-                .frame(maxWidth: .infinity, maxHeight: 320, alignment: .topTrailing)
-            } else {
-                Button {
-                    showsPicker = true
-                } label: {
-                    VStack(spacing: 10) {
-                        Image(systemName: "photo.badge.plus")
-                            .font(.system(size: 44, weight: .light))
-                            .foregroundStyle(Color.bpAmber)
-                        Text(l10n.t("post.compose.pickPhoto"))
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(.white)
-                        Text(l10n.t("post.compose.photoHint"))
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.white.opacity(0.5))
+        GeometryReader { geo in
+            let side = geo.size.width
+            ZStack {
+                if let img = previewImage {
+                    Image(uiImage: img)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: side, height: side)
+                        .clipped()
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Button { showsPicker = true } label: {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .font(.system(size: 14, weight: .heavy))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 36, height: 36)
+                                    .background(.ultraThinMaterial, in: Circle())
+                                    .overlay(Circle().strokeBorder(Color.white.opacity(0.25)))
+                                    .shadow(color: .black.opacity(0.35), radius: 6, y: 2)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(12)
+                        }
+                        Spacer()
                     }
-                    .frame(maxWidth: .infinity, minHeight: 220)
-                    .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .strokeBorder(Color.bpAmber.opacity(0.3), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
-                    )
+                } else {
+                    Button { showsPicker = true } label: {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color.bpAmber.opacity(0.12), Color.bpAmber.opacity(0.03)],
+                                        startPoint: .topLeading, endPoint: .bottomTrailing
+                                    )
+                                )
+                            RoundedRectangle(cornerRadius: 20)
+                                .strokeBorder(Color.bpAmber.opacity(0.55),
+                                              style: StrokeStyle(lineWidth: 1.5, dash: [8, 5]))
+                            VStack(spacing: 14) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.bpAmber.opacity(0.18))
+                                        .frame(width: 68, height: 68)
+                                    Image(systemName: "photo.badge.plus.fill")
+                                        .font(.system(size: 32, weight: .semibold))
+                                        .foregroundStyle(Color.bpAmber)
+                                }
+                                VStack(spacing: 4) {
+                                    Text(l10n.t("post.compose.pickPhoto"))
+                                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                                        .foregroundStyle(.white)
+                                    Text(l10n.t("post.compose.photoHint"))
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(Color.white.opacity(0.55))
+                                }
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
+            .frame(width: side, height: side)
         }
+        .aspectRatio(1, contentMode: .fit)
     }
 
     private var captionField: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(l10n.t("post.compose.captionLabel"))
-                .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                .tracking(1.8)
-                .foregroundStyle(Color.white.opacity(0.5))
+            HStack {
+                Text(l10n.t("post.compose.captionLabel"))
+                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                    .tracking(1.8)
+                    .foregroundStyle(Color.white.opacity(0.55))
+                Spacer()
+                // Only show the counter when the user is getting close
+                // to the cap — the mid-counter was noise at 0/500.
+                if caption.count >= 400 {
+                    Text("\(caption.count) / 500")
+                        .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                        .foregroundStyle(caption.count >= 500 ? Color.bpDanger : Color.white.opacity(0.5))
+                }
+            }
             TextField(
                 "",
                 text: $caption,
@@ -158,19 +199,14 @@ struct PostComposerView: View {
                 axis: .vertical
             )
             .lineLimit(3...8)
-            .font(.system(size: 15))
+            .font(.system(size: 15, design: .rounded))
             .foregroundStyle(.white)
             .padding(14)
-            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.white.opacity(0.12)))
+            .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.14)))
             .onChange(of: caption) { _, new in
                 if new.count > 500 { caption = String(new.prefix(500)) }
             }
-
-            Text("\(caption.count) / 500")
-                .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.4))
-                .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
 
