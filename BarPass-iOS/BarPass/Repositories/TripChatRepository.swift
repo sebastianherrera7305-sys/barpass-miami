@@ -32,6 +32,12 @@ enum TripChatError: LocalizedError, Sendable {
     case rateLimited
     case tooLong
     case empty
+    /// Postgres 42501 — las RPCs existen pero authenticated no tiene grant
+    /// execute. Pasa cuando se corrió el schema de trip_chat sin la línea
+    /// `grant execute on function ... to authenticated`. Fix de un paste
+    /// de SQL en el editor de Supabase; el error acá sólo rotula el
+    /// problema para que no se confunda con un bug de código iOS.
+    case rpcMissingGrant
     case unknown
 
     static func from(responseBody: String) -> TripChatError {
@@ -40,6 +46,11 @@ enum TripChatError: LocalizedError, Sendable {
         if responseBody.contains("rate_limit")       { return .rateLimited }
         if responseBody.contains("message_too_long") { return .tooLong }
         if responseBody.contains("empty_message")    { return .empty }
+        // Postgres code + message patterns of a missing EXECUTE grant.
+        if responseBody.contains("\"42501\"") ||
+           responseBody.contains("permission denied for function") {
+            return .rpcMissingGrant
+        }
         return .unknown
     }
 
@@ -50,6 +61,7 @@ enum TripChatError: LocalizedError, Sendable {
         case .rateLimited:      return "Estás escribiendo muy rápido. Espera unos segundos."
         case .tooLong:          return "El mensaje supera el límite de 1000 caracteres."
         case .empty:            return "El mensaje está vacío."
+        case .rpcMissingGrant:  return "El chat de trip necesita permisos adicionales en el servidor. Avisale a soporte: faltan grants EXECUTE en los RPCs."
         case .unknown:          return "No se pudo cargar el chat. Intenta de nuevo."
         }
     }

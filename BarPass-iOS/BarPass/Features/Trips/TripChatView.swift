@@ -390,11 +390,16 @@ struct TripChatView: View {
 
     private func describe(_ error: Error) -> String {
         if let tripError = error as? TripChatError {
-            return tripError.errorDescription ?? "No se pudo cargar el chat. Intenta de nuevo."
+            return tripError.errorDescription ?? l10n.t("tripchat.loadError")
         }
         if let urlError = error as? URLError, urlError.code == .userAuthenticationRequired {
-            return "Inicia sesión para abrir el chat."
+            return l10n.t("tripchat.needSignin")
         }
-        return "No se pudo cargar el chat. Intenta de nuevo."
+        // Include the raw error detail — the owner (Build 139, 2026-10-27
+        // "Error no deja que la plataforma siga el processo") couldn't
+        // diagnose what was really wrong with just "intenta de nuevo";
+        // adding (…) with the underlying localizedDescription makes TF
+        // comments actionable instead of guesswork.
+        return "\(l10n.t("tripchat.loadError")) (\(error.localizedDescription))"
     }
 }
