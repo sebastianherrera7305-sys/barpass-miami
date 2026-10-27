@@ -132,10 +132,24 @@ struct GroupNightView: View {
 
     /// First stop whose start is still ahead of now. Nil for a completed
     /// trip and whenever the timeline has a hole.
+    ///
+    /// Fallback (owner report Build 136, 2026-10-27 — "la parte de Uber y
+    /// de manejar tampoco está"): un trip en estado `planning` cuya fecha
+    /// ya pasó (p.ej. creado el 14 Oct, hoy es 27 Oct) tenía TODAS las
+    /// paradas en el pasado y devolvía nil, escondiendo el ribbon. Para
+    /// trips planeando o activos, cuando no hay un `next` estricto en el
+    /// futuro, caemos al PRIMER stop por orden del itinerario — así los
+    /// botones siempre apuntan a algo real.
     private var nextStop: Stop? {
         guard currentTrip.status != .completed, let timeline else { return nil }
         let now = Date()
-        return timeline.first(where: { $0.start > now })?.stop
+        if let future = timeline.first(where: { $0.start > now })?.stop {
+            return future
+        }
+        // Trip en planeación cuya fecha ya pasó, o activo con todas las
+        // paradas iniciadas. Devolvemos la última del itinerario para que
+        // Uber/Manejar sigan abriendo con destino real.
+        return timeline.last?.stop
     }
 
     private var allMemberIds: [String] {
@@ -1442,36 +1456,36 @@ private struct GroupNightReorderStopsSheet: View {
         List {
             Section {
                 ForEach(items) { stop in
-                    HStack(spacing: 12) {
-                        Image(systemName: "line.3.horizontal")
-                            .foregroundStyle(Color.bpAmber.opacity(0.6))
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(stop.venueName)
-                                .font(.system(size: 14, weight: .heavy, design: .rounded))
-                                .foregroundStyle(.white)
-                            Button {
-                                editingStop = stop
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "clock")
-                                        .font(.system(size: 10, weight: .heavy))
-                                    Text(stop.startTime.isEmpty ? l10n.t("tripDetail.editStopTime") : stop.startTime)
-                                        .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                                }
-                                .foregroundStyle(Color.bpAmberBright)
+                    // Fila SIN icono fake a la izquierda — ese "line.3.horizontal"
+                    // que puse antes se veía como un handle pero no era
+                    // draggable, y SwiftUI pinta el handle real a la DERECHA
+                    // cuando editMode = .active. El owner (Build 136,
+                    // 2026-10-27) reportó "ni me deja reorganizar": era por
+                    // esta confusión visual + el fake tapaba parte del handle.
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(stop.venueName)
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                        Button {
+                            editingStop = stop
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "clock")
+                                    .font(.system(size: 10, weight: .heavy))
+                                Text(stop.startTime.isEmpty ? l10n.t("tripDetail.editStopTime") : stop.startTime)
+                                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
                             }
-                            .buttonStyle(.plain)
+                            .foregroundStyle(Color.bpAmberBright)
                         }
-                        Spacer()
+                        .buttonStyle(.plain)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 2)
                     .listRowBackground(Color.white.opacity(0.04))
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button(role: .destructive) {
                             BPHaptics.medium()
                             onDeleteStop(stop.id)
-                            // Local mirror so the row disappears right now
-                            // instead of waiting for the parent to re-feed
-                            // us a new `stops` prop.
                             items.removeAll { $0.id == stop.id }
                         } label: {
                             Label(l10n.t("tripDetail.deleteStop"), systemImage: "trash.fill")
@@ -1481,6 +1495,18 @@ private struct GroupNightReorderStopsSheet: View {
                 .onMove { indices, newOffset in
                     items.move(fromOffsets: indices, toOffset: newOffset)
                     BPHaptics.light()
+                }
+                // onDelete además de swipeActions: habilita el minus rojo
+                // nativo que iOS pinta a la izquierda cuando editMode es
+                // .active, para quien no descubre el swipe.
+                .onDelete { indices in
+                    for i in indices {
+                        guard items.indices.contains(i) else { continue }
+                        let stopId = items[i].id
+                        BPHaptics.medium()
+                        onDeleteStop(stopId)
+                    }
+                    items.remove(atOffsets: indices)
                 }
             } header: {
                 Text(l10n.t("tripDetail.reorderStopsHint"))
@@ -1495,17 +1521,24 @@ private struct GroupNightReorderStopsSheet: View {
         .navigationTitle(l10n.t("tripDetail.reorderStops"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
+            ToolbarItem(placement: .topBarLeading) {
                 Button(l10n.t("common.cancel"), action: onCancel)
                     .foregroundStyle(Color.white.opacity(0.7))
             }
-            ToolbarItem(placement: .confirmationAction) {
+            ToolbarItem(placement: .topBarTrailing) {
+                // Save siempre habilitado — el owner (Build 136, 2026-10-27)
+                // reportó que no funcionaba, y la mitad de los casos es un
+                // reorder-sin-cambio-de-posición (el usuario arrastra y
+                // suelta en el mismo lugar). Si no hay cambios reales,
+                // `onSave` es idempotente del lado de la store, así que
+                // dejarlo tapable no cuesta nada y evita el UX de "el
+                // botón se ve pero no reacciona".
                 Button(l10n.t("host.common.save")) {
+                    BPHaptics.success()
                     onSave(items.map(\.id))
                 }
                 .fontWeight(.heavy)
                 .foregroundStyle(Color.bpAmber)
-                .disabled(items.map(\.id) == stops.map(\.id))
             }
         }
         .sheet(item: $editingStop) { stop in
