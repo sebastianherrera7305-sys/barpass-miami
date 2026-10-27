@@ -947,8 +947,18 @@ struct VenueDetailView: View {
                     // Sin el botón del medio hay lugar de sobra, y un ícono
                     // solo no dice qué hace.
                     if !hasSkipLine {
+                        // Owner report 2026-10-27: "no sale la palabra
+                        // completa. Está cortada unas letras y las letras se
+                        // pasan para abajo". Con Dynamic Type grande o en
+                        // pantallas angostas, "Direcciones" / "Direções"
+                        // envolvía a dos líneas y se cortaba. Cap a una
+                        // línea con minimumScaleFactor para que encoja antes
+                        // de romperse en lugar de envolver.
                         Text(l10n.t("venueDetail.directions"))
                             .font(.bpScaled(14, weight: .bold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .foregroundStyle(Color.bpAmber)

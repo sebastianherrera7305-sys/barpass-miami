@@ -67,6 +67,13 @@ struct GroupNightView: View {
     @State private var showDeleteConfirm = false
     @State private var isDeleting = false
     @State private var showReorderStops = false
+    @State private var showChat = false
+
+    /// Catalog venues behind `currentStop` / `nextStop`, resolved async so the
+    /// Uber banner can hand off real pickup + dropoff coordinates. Nil = fall
+    /// back to `pickup=my_location` or Uber generic (see GroupNightUberBanner).
+    @State private var pickupVenue: BarPassVenue? = nil
+    @State private var dropoffVenue: BarPassVenue? = nil
 
     private struct RatingTarget: Identifiable { let id: String; let name: String }
 
@@ -194,7 +201,9 @@ struct GroupNightView: View {
                         stopCoordinates: resolvedStopCoordinates,
                         currentStopIndex: currentStopIndex,
                         nextStop: nextStop,
-                        isCompleted: currentTrip.status == .completed
+                        isCompleted: currentTrip.status == .completed,
+                        pickupVenue: pickupVenue,
+                        dropoffVenue: dropoffVenue
                     )
 
                     // Reorder stops (owner report 2026-10-27 "cada parada
@@ -223,10 +232,16 @@ struct GroupNightView: View {
                         )
                     }
 
-                    // ChatCard siempre visible — el objetivo del artifact es
-                    // que el grupo tenga un canal. Hasta que exista
-                    // `TripChatRepository`, muestra el empty state.
-                    GroupNightChatCard()
+                    // ChatCard siempre visible — ahora como CTA en vez de
+                    // placeholder. Owner report 2026-10-27:
+                    // "Rediseña el look de cómo se ve ese chat porque nada
+                    //  más los que la hacemos es fácil ver eso". El chat ya
+                    // existe (TripChatView + trip_messages en Supabase); lo
+                    // que faltaba era un punto de entrada visible.
+                    GroupNightChatCard(onOpen: {
+                        BPHaptics.light()
+                        showChat = true
+                    })
 
                     // Sólo con alguien a quien calificar: con cero "otros" el
                     // botón sería un no-op silencioso.
@@ -251,7 +266,12 @@ struct GroupNightView: View {
             .scrollIndicators(.hidden)
         }
         .preferredColorScheme(.dark)
-        .task { await loadMemberNames() }
+        .task {
+            await loadMemberNames()
+            await loadRouteVenues()
+        }
+        .onChange(of: currentStop?.id) { _, _ in Task { await loadRouteVenues() } }
+        .onChange(of: nextStop?.id)    { _, _ in Task { await loadRouteVenues() } }
         .alert(l10n.t("tripDetail.deleteTrip"),
                isPresented: $showDeleteConfirm) {
             Button(l10n.t("common.cancel"), role: .cancel) {}
@@ -269,11 +289,31 @@ struct GroupNightView: View {
                         store.reorderStops(currentTrip.id, newStopIdOrder: newOrder)
                         showReorderStops = false
                     },
-                    onCancel: { showReorderStops = false }
+                    onCancel: { showReorderStops = false },
+                    onDeleteStop: { stopId in
+                        store.removeStop(stopId, from: currentTrip.id)
+                    },
+                    onEditStopTime: { stopId, newStart in
+                        store.updateStopStartTime(stopId, in: currentTrip.id, startTime: newStart)
+                    }
                 )
             }
             .presentationBackground(.black)
             .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showChat) {
+            NavigationStack {
+                TripChatView(trip: currentTrip)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button(l10n.t("common.close")) { showChat = false }
+                                .foregroundStyle(Color.white.opacity(0.7))
+                        }
+                    }
+            }
+            .environmentObject(store)
+            .presentationBackground(.black)
+            .presentationDetents([.large])
         }
         .sheet(item: $showJoinRequest) { stop in
             JoinRequestModal(tripId: currentTrip.id, stop: stop)
@@ -305,6 +345,22 @@ struct GroupNightView: View {
     private func loadMemberNames() async {
         guard let names = try? await RepositoryDependencies.tripMembers.names(tripId: currentTrip.id) else { return }
         memberNames = Dictionary(uniqueKeysWithValues: names.map { ($0.id, $0.displayName) })
+    }
+
+    /// Pre-resolves the catalog venues behind `currentStop` and `nextStop` so
+    /// the route ribbon can hand off real coordinates to Uber or Apple Maps.
+    /// Nil = fall back to `pickup=my_location` (Uber) or omit origin (Maps).
+    private func loadRouteVenues() async {
+        async let pickup  = resolveVenue(for: currentStop)
+        async let dropoff = resolveVenue(for: nextStop)
+        let (p, d) = await (pickup, dropoff)
+        pickupVenue = p
+        dropoffVenue = d
+    }
+
+    private func resolveVenue(for stop: Stop?) async -> BarPassVenue? {
+        guard let stop, stop.type == .venue, !stop.refId.isEmpty else { return nil }
+        return try? await RepositoryDependencies.venue.getVenue(id: stop.refId)
     }
 
     private func shareInvite() {
@@ -720,6 +776,13 @@ private struct GroupNightMapCard: View {
     let currentStopIndex: Int?
     let nextStop: Stop?
     let isCompleted: Bool
+    /// Catalog venue behind the group's `currentStop`, when known. Powers the
+    /// `pickup[…]` fields of the Uber deep link; nil → `pickup=my_location`.
+    let pickupVenue: BarPassVenue?
+    /// Catalog venue behind `nextStop`, when known. Powers `dropoff[…]` on
+    /// both the Uber deep link and the Apple Maps directions URL. Nil → the
+    /// drive button hides and the Uber button opens Uber generic.
+    let dropoffVenue: BarPassVenue?
 
     /// (stop, coord, position-in-sequence) for stops with resolved coords.
     /// Owner report (Build 131): "en el map muestra todas las opciones en
@@ -784,31 +847,121 @@ private struct GroupNightMapCard: View {
                 .allowsHitTesting(true)
             }
 
-            // Bottom ribbon
+            // Bottom overlay — próxima parada + ribbon dual (Uber / Manejar).
+            // Owner report 2026-10-27:
+            //   • "Cómo pido el uber eliminaste la opción" — el ribbon pasivo
+            //     dejó de ofrecer la acción. Vuelve el Uber real con pickup
+            //     + dropoff pre-rellenados cuando los conocemos.
+            //   • "entre el uber y el preseleccionador de los bares para que
+            //     la gente o ordene uber o tenga la ubi directa para manejar"
+            //     — segundo botón que abre Apple Maps en modo manejo al
+            //     próximo venue, para quien va con auto.
             VStack {
                 Spacer()
                 if let next = nextStop {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.turn.up.right")
-                            .font(.system(size: 10, weight: .heavy))
-                        Text(String(format: l10n.t("group.nextStopFmt"), next.startTime.isEmpty ? next.venueName : "\(next.venueName) · \(next.startTime)"))
-                            .font(.system(size: 10.5, weight: .semibold, design: .monospaced))
-                            .tracking(0.4)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
+                    VStack(spacing: 6) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.turn.up.right")
+                                .font(.system(size: 9, weight: .heavy))
+                            Text(String(format: l10n.t("group.nextStopFmt"), next.startTime.isEmpty ? next.venueName : "\(next.venueName) · \(next.startTime)"))
+                                .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                                .tracking(0.4)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 9).padding(.vertical, 5)
+                        .background(Color.black.opacity(0.75), in: Capsule())
+                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.2)))
+
+                        HStack(spacing: 8) {
+                            GroupNightRouteButton(
+                                icon: "car.fill",
+                                label: l10n.t("group.uber"),
+                                hint: l10n.t("group.uberHint"),
+                                style: .primary
+                            ) { openUber(to: next) }
+
+                            if dropoffVenue != nil {
+                                GroupNightRouteButton(
+                                    icon: "steeringwheel",
+                                    label: l10n.t("group.drive"),
+                                    hint: l10n.t("group.driveHint"),
+                                    style: .secondary
+                                ) { openDriveDirections() }
+                            }
+                        }
                     }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10).padding(.vertical, 6)
-                    .background(Color.black.opacity(0.75), in: Capsule())
-                    .overlay(Capsule().strokeBorder(Color.white.opacity(0.2)))
                     .padding(10)
                 }
             }
-            .allowsHitTesting(false)
         }
         .frame(height: 240)
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .overlay(RoundedRectangle(cornerRadius: 18).strokeBorder(Color.white.opacity(0.08)))
+    }
+
+    /// Opens Uber with pre-filled pickup + dropoff when we know both venues.
+    /// Falls back to:
+    ///   • `pickup=my_location` when we have no `pickupVenue` (user isn't
+    ///     checked into a current stop yet, or that stop isn't in catalog)
+    ///   • Uber generic when we also have no `dropoffVenue`
+    ///   • `m.uber.com/ul/` when the `uber://` scheme isn't installed
+    /// `uber` is declared in LSApplicationQueriesSchemes so `canOpenURL`
+    /// answers truthfully.
+    private func openUber(to next: Stop) {
+        BPHaptics.light()
+        BPAnalytics.track(.openMaps(venue: next.venueName))
+
+        guard let drop = dropoffVenue else {
+            let generic = URL(string: "uber://?action=setPickup")
+            if let generic, UIApplication.shared.canOpenURL(generic) {
+                UIApplication.shared.open(generic)
+            } else if let web = URL(string: "https://m.uber.com/ul/?action=setPickup") {
+                UIApplication.shared.open(web)
+            }
+            return
+        }
+
+        let dropNickname = drop.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        var deep = "uber://?action=setPickup"
+        var web  = "https://m.uber.com/ul/?action=setPickup"
+
+        if let pickup = pickupVenue {
+            let pickupNickname = pickup.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            let pickupParams = "&pickup[latitude]=\(pickup.latitude)&pickup[longitude]=\(pickup.longitude)&pickup[nickname]=\(pickupNickname)"
+            deep += pickupParams
+            web  += pickupParams
+        } else {
+            deep += "&pickup=my_location"
+            web  += "&pickup=my_location"
+        }
+
+        let dropParams = "&dropoff[latitude]=\(drop.latitude)&dropoff[longitude]=\(drop.longitude)&dropoff[nickname]=\(dropNickname)"
+        deep += dropParams
+        web  += dropParams
+
+        if let deepURL = URL(string: deep), UIApplication.shared.canOpenURL(deepURL) {
+            UIApplication.shared.open(deepURL)
+        } else if let webURL = URL(string: web) {
+            UIApplication.shared.open(webURL)
+        }
+    }
+
+    /// Opens Apple Maps with driving directions from the user's current
+    /// location to the next venue's coordinates (owner report 2026-10-27:
+    /// "para la gente o ordene uber o tenga la ubi directa para manejar").
+    /// Button is only shown when `dropoffVenue != nil` so the deep link is
+    /// always meaningful — no "search by name" fallback that could land on
+    /// the wrong franchise. Apple Maps understands `dirflg=d` as "drive"
+    /// and `saddr=Current+Location` as "wherever the phone is".
+    private func openDriveDirections() {
+        guard let drop = dropoffVenue else { return }
+        BPHaptics.light()
+        BPAnalytics.track(.openMaps(venue: drop.name))
+        let name = drop.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "http://maps.apple.com/?daddr=\(drop.latitude),\(drop.longitude)&q=\(name)&dirflg=d"
+        if let url = URL(string: urlString) { UIApplication.shared.open(url) }
     }
 
     private func pinState(for seq: Int) -> GroupNightMapCard_PinState {
@@ -931,6 +1084,48 @@ private struct MapPinView: View {
 
 private enum GroupNightMapCard_PinState { case current, done, next }
 
+// MARK: - Route button (Uber / Manejar) usado en el ribbon del mapa.
+//
+// Un solo capsule tappable con icono + texto. Dos estilos: `.primary` (ámbar
+// relleno sobre negro) y `.secondary` (negro con borde claro) — así los dos
+// botones se leen al mismo tamaño sin pelearse por la atención.
+
+@MainActor
+private struct GroupNightRouteButton: View {
+    enum Style { case primary, secondary }
+    let icon: String
+    let label: String
+    let hint: String
+    let style: Style
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .heavy))
+                Text(label)
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+            .foregroundStyle(foreground)
+            .padding(.horizontal, 14).padding(.vertical, 8)
+            .background(background, in: Capsule())
+            .overlay(Capsule().strokeBorder(stroke, lineWidth: style == .primary ? 1 : 0.8))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityHint(hint)
+    }
+
+    private var foreground: Color { style == .primary ? .black : .white }
+    private var background: Color { style == .primary ? Color.bpAmber : Color.black.opacity(0.75) }
+    private var stroke: Color {
+        style == .primary ? Color.bpAmberBright.opacity(0.5) : Color.white.opacity(0.25)
+    }
+}
+
 // MARK: - Join requests card (solo organizer / co-organizer, si hay pendientes)
 
 @MainActor
@@ -1041,43 +1236,61 @@ private struct GroupNightConfirmStopCard: View {
     }
 }
 
-// MARK: - Chat card — empty state hasta que exista TripChatRepository
+// MARK: - Chat card — CTA grande que abre el TripChatView real.
+//
+// Owner report 2026-10-27: "Rediseña el look de cómo se ve ese chat porque
+// nada más los que la hacemos es fácil ver eso". El card anterior era un
+// placeholder "coming soon" que escondía que el chat ya existe; esta versión
+// es un botón ancho, con eyebrow + icono + CTA ámbar visible desde la primera
+// mirada.
 
 @MainActor
 private struct GroupNightChatCard: View {
+    let onOpen: () -> Void
     @ObservedObject private var l10n = L10n.shared
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(l10n.t("group.chatTitle"))
-                    .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
-                    .tracking(2.0)
-                    .foregroundStyle(Color.white.opacity(0.6))
-                Spacer()
-                Text(l10n.t("group.soon"))
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(Color.white.opacity(0.4))
-            }
 
-            VStack(spacing: 8) {
-                Image(systemName: "bubble.left.and.bubble.right")
-                    .font(.system(size: 22, weight: .heavy))
-                    .foregroundStyle(Color.white.opacity(0.35))
-                Text("El chat del trip llega pronto")
-                    .font(.system(size: 12.5, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color.white.opacity(0.7))
-                Text(l10n.t("group.shareCodeFallback"))
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.white.opacity(0.5))
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
+    var body: some View {
+        Button(action: onOpen) {
+            HStack(alignment: .center, spacing: 14) {
+                ZStack {
+                    Circle().fill(Color.bpAmber)
+                        .frame(width: 48, height: 48)
+                        .shadow(color: Color.bpAmber.opacity(0.4), radius: 10)
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .font(.system(size: 20, weight: .heavy))
+                        .foregroundStyle(.black)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(l10n.t("group.chatTitle"))
+                        .font(.system(size: 10.5, weight: .heavy, design: .monospaced))
+                        .tracking(2.0)
+                        .foregroundStyle(Color.bpAmber)
+                    Text(l10n.t("group.openChat"))
+                        .font(.system(size: 16, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    Text(l10n.t("group.openChatHint"))
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.white.opacity(0.55))
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 4)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .heavy))
+                    .foregroundStyle(Color.bpAmber)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
+            .padding(14)
+            .background(Color.bpAmber.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.bpAmber.opacity(0.3), lineWidth: 1))
         }
-        .padding(12)
-        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.white.opacity(0.08)))
+        .buttonStyle(.plain)
+        .accessibilityLabel(l10n.t("group.openChat"))
+        .accessibilityHint(l10n.t("group.openChatHint"))
     }
 }
 
@@ -1196,15 +1409,32 @@ private struct GroupNightReorderStopsSheet: View {
     let stops: [Stop]
     let onSave: ([String]) -> Void
     let onCancel: () -> Void
+    /// Delete-stop callback (owner report 2026-10-27, "También tiene que
+    /// tener para eliminar de el orden"). Called *immediately* so the store
+    /// mutation hits the network as soon as the user swipes to delete —
+    /// Save/Cancel on the sheet only governs the reorder, not the deletes.
+    let onDeleteStop: (String) -> Void
+    /// Edit-time callback (owner report 2026-10-27, "para cambiar los
+    /// Horarios"). Writes the new "h:mm a" string (or "" to clear) back
+    /// through the store. Also hits the network immediately so the organizer
+    /// can see the itinerary re-sort without closing the sheet.
+    let onEditStopTime: (_ stopId: String, _ newStart: String) -> Void
 
     @ObservedObject private var l10n = L10n.shared
     @State private var items: [Stop]
     @State private var editMode: EditMode = .active
+    @State private var editingStop: Stop? = nil
 
-    init(stops: [Stop], onSave: @escaping ([String]) -> Void, onCancel: @escaping () -> Void) {
+    init(stops: [Stop],
+         onSave: @escaping ([String]) -> Void,
+         onCancel: @escaping () -> Void,
+         onDeleteStop: @escaping (String) -> Void,
+         onEditStopTime: @escaping (_ stopId: String, _ newStart: String) -> Void) {
         self.stops = stops
         self.onSave = onSave
         self.onCancel = onCancel
+        self.onDeleteStop = onDeleteStop
+        self.onEditStopTime = onEditStopTime
         _items = State(initialValue: stops)
     }
 
@@ -1219,15 +1449,34 @@ private struct GroupNightReorderStopsSheet: View {
                             Text(stop.venueName)
                                 .font(.system(size: 14, weight: .heavy, design: .rounded))
                                 .foregroundStyle(.white)
-                            if !stop.startTime.isEmpty {
-                                Text(stop.startTime)
-                                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
-                                    .foregroundStyle(Color.bpAmberBright)
+                            Button {
+                                editingStop = stop
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "clock")
+                                        .font(.system(size: 10, weight: .heavy))
+                                    Text(stop.startTime.isEmpty ? l10n.t("tripDetail.editStopTime") : stop.startTime)
+                                        .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                                }
+                                .foregroundStyle(Color.bpAmberBright)
                             }
+                            .buttonStyle(.plain)
                         }
                         Spacer()
                     }
                     .listRowBackground(Color.white.opacity(0.04))
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button(role: .destructive) {
+                            BPHaptics.medium()
+                            onDeleteStop(stop.id)
+                            // Local mirror so the row disappears right now
+                            // instead of waiting for the parent to re-feed
+                            // us a new `stops` prop.
+                            items.removeAll { $0.id == stop.id }
+                        } label: {
+                            Label(l10n.t("tripDetail.deleteStop"), systemImage: "trash.fill")
+                        }
+                    }
                 }
                 .onMove { indices, newOffset in
                     items.move(fromOffsets: indices, toOffset: newOffset)
@@ -1259,5 +1508,105 @@ private struct GroupNightReorderStopsSheet: View {
                 .disabled(items.map(\.id) == stops.map(\.id))
             }
         }
+        .sheet(item: $editingStop) { stop in
+            StopTimeEditorSheet(
+                stop: stop,
+                onSave: { newStart in
+                    onEditStopTime(stop.id, newStart)
+                    // Mirror locally so the row updates right away.
+                    if let i = items.firstIndex(where: { $0.id == stop.id }) {
+                        items[i].startTime = newStart
+                    }
+                    editingStop = nil
+                },
+                onCancel: { editingStop = nil }
+            )
+            .presentationDetents([.height(320)])
+            .presentationBackground(.black)
+        }
+    }
+}
+
+// MARK: - Stop time editor — picker + save, para cambiar la hora de UNA parada.
+//
+// La hora se guarda como "h:mm a" (ej "10:30 PM") porque el resto del app
+// la lee así (`VenueTimeStatus.minutesSinceMidnight`, `Trip.stopsByDay`).
+// El picker nativo trabaja con `Date`; serializo con `DateFormatter` del
+// locale POSIX para no romperlo según el idioma del usuario.
+
+@MainActor
+private struct StopTimeEditorSheet: View {
+    let stop: Stop
+    let onSave: (String) -> Void
+    let onCancel: () -> Void
+
+    @ObservedObject private var l10n = L10n.shared
+    @State private var pickerDate: Date
+
+    private static let formatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "h:mm a"
+        return f
+    }()
+
+    init(stop: Stop, onSave: @escaping (String) -> Void, onCancel: @escaping () -> Void) {
+        self.stop = stop
+        self.onSave = onSave
+        self.onCancel = onCancel
+        let seed: Date = {
+            if let parsed = Self.formatter.date(from: stop.startTime) { return parsed }
+            // Default = 10:00 PM. Más razonable que "ahora" para una parada
+            // de noche que todavía no tiene hora.
+            var c = DateComponents(); c.hour = 22; c.minute = 0
+            return Calendar.current.date(from: c) ?? Date()
+        }()
+        _pickerDate = State(initialValue: seed)
+    }
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text(stop.venueName)
+                .font(.system(size: 18, weight: .heavy, design: .rounded))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .padding(.top, 24)
+
+            DatePicker("",
+                       selection: $pickerDate,
+                       displayedComponents: .hourAndMinute)
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+                .colorScheme(.dark)
+                .frame(maxWidth: .infinity)
+
+            Spacer(minLength: 0)
+
+            HStack(spacing: 10) {
+                Button(l10n.t("common.cancel"), action: onCancel)
+                    .font(.system(size: 14, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color.white.opacity(0.7))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.white.opacity(0.08), in: Capsule())
+
+                Button {
+                    onSave(Self.formatter.string(from: pickerDate))
+                } label: {
+                    Text(l10n.t("host.common.save"))
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.bpAmber, in: Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+        }
+        .frame(maxWidth: .infinity)
+        .background(Color.black.ignoresSafeArea())
     }
 }

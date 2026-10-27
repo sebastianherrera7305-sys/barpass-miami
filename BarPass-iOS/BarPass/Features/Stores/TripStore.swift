@@ -249,6 +249,27 @@ final class TripStore: ObservableObject {
         }
     }
 
+    /// Remove a stop from the trip (owner report 2026-10-27, "También tiene
+    /// que tener para eliminar de el orden"). Any user who was joined/pending
+    /// on that stop quietly loses that reference — the stop itself is gone.
+    func removeStop(_ stopId: String, from tripId: String) {
+        mutate(tripId) { t in
+            t.stops.removeAll { $0.id == stopId }
+        }
+    }
+
+    /// Change a single stop's start time (owner report 2026-10-27, "para
+    /// cambiar los Horarios"). Caller passes "h:mm a" (e.g. "10:30 PM") or ""
+    /// to clear it. Nothing else about the stop changes — the venue stays,
+    /// the joined members stay. The itinerary sorter re-reads startTime on
+    /// the next render so a time edit also reshuffles the order visually.
+    func updateStopStartTime(_ stopId: String, in tripId: String, startTime: String) {
+        mutate(tripId) { t in
+            guard let s = t.stops.firstIndex(where: { $0.id == stopId }) else { return }
+            t.stops[s].startTime = startTime
+        }
+    }
+
     /// Basic edit — title/city/dates/visibility/cover. Doesn't touch stops;
     /// itinerary editing is a separate, larger feature not built yet.
     func updateBasicInfo(
