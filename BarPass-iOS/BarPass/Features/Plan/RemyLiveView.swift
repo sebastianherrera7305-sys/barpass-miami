@@ -71,10 +71,13 @@ private final class RemyLiveChat: ObservableObject {
     @Published var plan: NightPlan? = nil
     @Published var errorMessage: String? = nil
 
-    /// Full turn-by-turn history enviada al endpoint. No se renderea entera —
-    /// el bubble sólo muestra `currentReply`. Lo guardamos para seguimiento
-    /// contextual: "y ahora?" → Remy sabe de qué habló antes.
-    private(set) var history: [APIClient.ConciergeChatTurn] = []
+    /// Full turn-by-turn history enviada al endpoint. Owner Build 136,
+    /// 2026-10-27: "quiero que utilicemos en el chat de Remy toda la pantalla
+    /// porque tenemos espacio, como también cuando mando un mensaje quiero
+    /// que se vea como si fuera un chat". A partir de Build 140 esto SE
+    /// RENDEREA en pantalla como un hilo de burbujas (chat tipo iMessage),
+    /// no sólo como payload del endpoint.
+    @Published private(set) var history: [APIClient.ConciergeChatTurn] = []
     private var streamTask: Task<Void, Never>?
 
     func reset() {
@@ -208,6 +211,36 @@ private final class RemyLiveChat: ObservableObject {
     }
 }
 
+// MARK: - Rockstar-style R logo (reusable)
+
+@MainActor
+private struct RemyRockstarR: View {
+    let size: CGFloat
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            RoundedRectangle(cornerRadius: size * 0.22)
+                .fill(Color.bpAmber)
+                .frame(width: size, height: size)
+                .overlay(
+                    RoundedRectangle(cornerRadius: size * 0.22)
+                        .strokeBorder(Color.bpAmberBright, lineWidth: size * 0.03)
+                )
+            Text("R")
+                .font(.system(size: size * 0.72, weight: .black, design: .serif))
+                .italic()
+                .foregroundStyle(.black)
+                .offset(x: -size * 0.03, y: size * 0.02)
+                .frame(width: size, height: size)
+            Image(systemName: "star.fill")
+                .font(.system(size: size * 0.22, weight: .black))
+                .foregroundStyle(.black)
+                .offset(x: -size * 0.08, y: size * 0.08)
+        }
+        .frame(width: size, height: size)
+    }
+}
+
 // MARK: - View
 
 @MainActor
@@ -246,9 +279,16 @@ struct RemyLiveView: View {
     /// Lee el venue real del CheckInStore y lo resuelve contra el catálogo
     /// — si no hay catálogo (ej. preview sin VenueStore) o no hay check-in,
     /// devolvemos nil y el chip se contrae en vez de inventar.
+    ///
+    /// Staleness guard (owner Build 136, 2026-10-27 "ahora me dice aquí que
+    /// estoy en Space y yo estoy en mi trabajo"): un check-in que lleva más
+    /// de 6h abierto es ruido — el usuario olvidó cerrarlo y se fue de ahí.
+    /// Mejor no afirmar "AHORA" que afirmar una ubicación equivocada.
     private var checkedInVenue: BarPassVenue? {
-        guard let id = checkInStore.activeCheckin?.venueId else { return nil }
-        return venueStore.venues.first { $0.id == id }
+        guard let active = checkInStore.activeCheckin,
+              Date().timeIntervalSince(active.checkedInAt) < 6 * 60 * 60
+        else { return nil }
+        return venueStore.venues.first { $0.id == active.venueId }
     }
 
     private var checkedInAtLabel: String? {
@@ -292,67 +332,83 @@ struct RemyLiveView: View {
                     .padding(.top, 14)
                 navBar
 
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 18) {
-                        contextStrip
-                            .padding(.horizontal, 20)
-                            .padding(.top, 14)
+                // Context strip compacto, siempre fijo arriba — así los
+                // chat bubbles ocupan el resto. Si no hay check-in fresco,
+                // la fila se contrae a una sola línea con la hora + favs.
+                compactContextStrip
+                    .padding(.horizontal, 20)
+                    .padding(.top, 6)
+                    .padding(.bottom, 2)
 
-                        remyProposalCard
-                            .padding(.horizontal, 20)
+                // CHAT THREAD a pantalla completa. Owner Build 136,
+                // 2026-10-27: "quiero que utilicemos en el chat de Remy
+                // toda la pantalla porque tenemos espacio, como también
+                // cuando mando un mensaje quiero que se vea como si fuera
+                // un chat". Antes era un único remyProposalCard con la
+                // última respuesta; ahora es un hilo tipo iMessage con
+                // burbujas user (derecha, oscura) y Remy (izquierda,
+                // amber tint + avatar). El plan de Remy se embebe inline
+                // después de la última burbuja de Remy, no en su propia
+                // sección separada que fragmentaba la conversación.
+                ScrollViewReader { proxy in
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 14) {
+                            // Historial completo turno por turno
+                            ForEach(Array(chat.history.enumerated()), id: \.offset) { idx, turn in
+                                chatBubble(turn: turn, index: idx)
+                                    .id("turn-\(idx)")
+                            }
 
-                        // Banner de error con botón de reintento. Antes el
-                        // error se mostraba sólo adentro de la burbuja amber
-                        // y sin acción — el usuario quedaba trancado.
-                        if let err = chat.errorMessage {
-                            errorRetryBanner(err)
-                                .padding(.horizontal, 20)
+                            // Burbuja en vivo de Remy mientras streamea /
+                            // está pensando (todavía no committed al history).
+                            if chat.isStreaming || chat.isThinking {
+                                remyStreamingBubble
+                                    .id("streaming")
+                            }
+
+                            // Plan embebido en la última burbuja de Remy —
+                            // sólo visible cuando ya hay un plan parseado
+                            // y no estamos stream-ando otro nuevo.
+                            if !chat.isStreaming && !timelineStops.isEmpty {
+                                planInlineBlock
+                                    .id("plan")
+                            }
+
+                            // Banner de error con reintento, debajo del hilo.
+                            if let err = chat.errorMessage {
+                                errorRetryBanner(err)
+                                    .id("error")
+                            }
+
+                            // Hint chips sólo en la primera pantalla
+                            // (sin history del usuario todavía).
+                            if !hasUserSent && chat.errorMessage == nil && chat.history.filter({ $0.role == "user" }).isEmpty {
+                                hintChips.padding(.top, 4)
+                            }
+
+                            #if DEBUG
+                            memoryCard
+                            debugFooter
+                            #endif
+
+                            Spacer(minLength: 20).id("bottom")
                         }
-
-                        // Chips semilla: 3 queries de ejemplo que SE ENVÍAN
-                        // al tocarlas (no sólo pre-rellenan el input), para
-                        // que el usuario vea una respuesta real al toque y
-                        // entienda qué puede pedir. Se esconden una vez que
-                        // el usuario ya mandó algo manualmente — a partir de
-                        // ahí es un hilo normal, no una pantalla de bienvenida.
-                        if !hasUserSent && chat.errorMessage == nil {
-                            hintChips
-                                .padding(.horizontal, 20)
-                        }
-
-                        if !timelineStops.isEmpty {
-                            sectionHeader(title: "Tu noche · en curso",
-                                          actionTitle: "Cambiar")
-                                .padding(.horizontal, 20)
-                                .padding(.top, 4)
-
-                            timeline
-                                .padding(.horizontal, 20)
-                        }
-
-                        #if DEBUG
-                        memoryCard
-                            .padding(.horizontal, 20)
-                            .padding(.top, 6)
-                        debugFooter
-                            .padding(.horizontal, 20)
-                            .padding(.top, 6)
-                        #endif
-
-                        Spacer(minLength: 20)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
+                        .padding(.bottom, 20)
                     }
-                    .padding(.bottom, 90)
+                    .scrollDismissesKeyboard(.interactively)
+                    .onChange(of: chat.currentReply) { _, _ in
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            proxy.scrollTo("bottom", anchor: .bottom)
+                        }
+                    }
+                    .onChange(of: chat.history.count) { _, _ in
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            proxy.scrollTo("bottom", anchor: .bottom)
+                        }
+                    }
                 }
-                // El TextField del inputBar es `axis: .vertical` con
-                // lineLimit(1...3): el Return del teclado agrega una línea
-                // en vez de enviar, así que la ÚNICA forma de bajar el
-                // teclado era tocar el botón amber. Si el usuario tipeaba
-                // y después quería leer la respuesta anterior scrolleando
-                // arriba, el teclado se quedaba pegado tapando media
-                // pantalla — reporte Build 76. `.interactively` hace que
-                // arrastrar la lista hacia abajo lo guarde, que es lo que
-                // el usuario intenta sin saberlo.
-                .scrollDismissesKeyboard(.interactively)
 
                 inputBar
             }
@@ -428,7 +484,159 @@ struct RemyLiveView: View {
         .padding(.top, 10)
     }
 
-    // MARK: - Context strip
+    // MARK: - Compact context strip (fijo arriba del chat)
+    //
+    // Owner Build 136, 2026-10-27 "la información que estás dando debajo del
+    // nombre del lugar me gusta, pero también tenemos que ser más realistas
+    // en las horas que demos". El `checkedInVenue` ahora exige check-in
+    // fresco (<6h); si está stale o no existe, la fila se contrae a sólo
+    // hora + favoritos — no inventa "estoy en X" como antes.
+
+    private var compactContextStrip: some View {
+        HStack(spacing: 10) {
+            if let v = checkedInVenue, let at = checkedInAtLabel {
+                HStack(spacing: 6) {
+                    Circle().fill(Color.bpGreen).frame(width: 7, height: 7)
+                        .overlay(Circle().fill(Color.bpGreen).blur(radius: 3).opacity(0.6))
+                    Text("\(v.name) · \(at)")
+                        .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                        .tracking(0.5)
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                }
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: "location.slash")
+                        .font(.system(size: 10, weight: .heavy))
+                        .foregroundStyle(Color.white.opacity(0.5))
+                    Text(l10n.t("remy.noCheckin"))
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(Color.white.opacity(0.6))
+                        .lineLimit(1)
+                }
+            }
+            Spacer(minLength: 6)
+            Text(timeOfDayLabel.uppercased())
+                .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                .tracking(1.4)
+                .foregroundStyle(Color.bpAmber)
+            if favoriteCount > 0 {
+                Rectangle().fill(Color.white.opacity(0.12)).frame(width: 1, height: 10)
+                HStack(spacing: 3) {
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 9, weight: .heavy))
+                        .foregroundStyle(Color.bpAmber)
+                    Text("\(favoriteCount)")
+                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .foregroundStyle(.white)
+                }
+            }
+        }
+        .padding(.horizontal, 12).padding(.vertical, 7)
+        .background(Color.white.opacity(0.03), in: Capsule())
+        .overlay(Capsule().strokeBorder(Color.white.opacity(0.08), lineWidth: 0.6))
+    }
+
+    // MARK: - Chat bubbles (hilo tipo iMessage)
+
+    @ViewBuilder
+    private func chatBubble(turn: APIClient.ConciergeChatTurn, index: Int) -> some View {
+        if turn.role == "user" {
+            userBubble(text: turn.content)
+        } else {
+            remyBubble(text: turn.content)
+        }
+    }
+
+    private func userBubble(text: String) -> some View {
+        HStack(alignment: .bottom, spacing: 0) {
+            Spacer(minLength: 40)
+            Text(text)
+                .font(.system(size: 14.5))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.white.opacity(0.12))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(Color.white.opacity(0.14), lineWidth: 0.8)
+                )
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func remyBubble(text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            remyAvatar
+            Text(text)
+                .font(.system(size: 14.5))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14).padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(Color.bpAmber.opacity(0.14))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(Color.bpAmber.opacity(0.35), lineWidth: 0.8)
+                )
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 40)
+        }
+    }
+
+    /// Burbuja activa durante el stream: muestra `currentReply` (los deltas
+    /// ya pasados por `maskUnrenderableCodeBlock`) o los dots de pensando.
+    private var remyStreamingBubble: some View {
+        HStack(alignment: .top, spacing: 10) {
+            remyAvatar
+            VStack(alignment: .leading, spacing: 6) {
+                if chat.isThinking && chat.currentReply.isEmpty {
+                    thinkingDots
+                } else {
+                    Text(chat.currentReply)
+                        .font(.system(size: 14.5))
+                        .foregroundStyle(.white)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color.bpAmber.opacity(0.14))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(Color.bpAmber.opacity(0.35), lineWidth: 0.8)
+            )
+            Spacer(minLength: 40)
+        }
+    }
+
+    /// Bloque inline con el plan parseado (stops numerados) — vive al pie
+    /// de la última respuesta de Remy, no en su propia sección separada.
+    /// Reusa el `timeline` renderer que ya existía.
+    private var planInlineBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Rectangle().fill(Color.bpAmber).frame(width: 3, height: 12)
+                Text("TU NOCHE · EN CURSO")
+                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                    .tracking(1.8)
+                    .foregroundStyle(Color.bpAmber)
+                Spacer()
+            }
+            timeline
+        }
+        .padding(.top, 4)
+        .padding(.leading, 46)   // alinea con el bubble de Remy (debajo del avatar)
+    }
+
+    // MARK: - Context strip (legacy — mantenido como fallback por si otra
+    // vista lo invoca; el body actual usa `compactContextStrip`).
 
     private var contextStrip: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -551,16 +759,15 @@ struct RemyLiveView: View {
         )
     }
 
-    private var remyAvatar: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.bpAmber)
-                .frame(width: 36, height: 36)
-            Text("R")
-                .font(.system(size: 20, weight: .black, design: .rounded))
-                .foregroundStyle(.black)
-        }
-    }
+    /// Logo R estilo Rockstar Games (owner Build 136, 2026-10-27 "la R de
+    /// Remy me gustaría que le dieras un estilo así como la de Rockstar
+    /// Games"). La R clásica de Rockstar es italic serif heavy sobre
+    /// fondo amarillo + la estrella característica arriba a la derecha.
+    /// Aproximamos con el font system en diseño serif + italic bold +
+    /// una estrella pequeña filled.
+    private var remyAvatar: some View { RemyRockstarR(size: 36) }
+
+    private var remyAvatarLarge: some View { RemyRockstarR(size: 48) }
 
     private var thinkingDots: some View {
         HStack(spacing: 6) {
