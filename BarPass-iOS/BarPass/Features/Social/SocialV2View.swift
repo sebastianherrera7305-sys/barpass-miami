@@ -916,6 +916,12 @@ public struct SocialV2View: View {
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                // Owner Build 141, 2026-10-28: "la gente debería darle un me
+                // gusta, compartir, repostear el post". Row de acciones
+                // tocables al pie — por ahora UI only, el backend
+                // (post_likes, post_reposts) viene en el próximo build.
+                postActionRow(post: post, venue: venue)
+                    .padding(.top, 2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -926,6 +932,65 @@ public struct SocialV2View: View {
         .onTapGesture {
             BPHaptics.selection()
             if let v = venue { selectedVenue = v }
+        }
+    }
+
+    /// Botones de interacción social abajo del post card — like, share,
+    /// repost. Hoy sin backend persistente (el conteo arranca en 0 y
+    /// mejora cliente-side al tocar); el próximo build lo cablea a
+    /// `public.post_likes` + `post_reposts` con RLS propia.
+    private func postActionRow(post: UserPost, venue: BarPassVenue?) -> some View {
+        HStack(spacing: 14) {
+            Button {
+                BPHaptics.light()
+                // TODO Build 143: PATCH /post_likes
+            } label: {
+                Image(systemName: "heart")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Color.white.opacity(0.65))
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                BPHaptics.light()
+                // TODO Build 143: POST /post_reposts
+            } label: {
+                Image(systemName: "arrow.2.squarepath")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Color.white.opacity(0.65))
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                BPHaptics.light()
+                sharePost(post: post, venue: venue)
+            } label: {
+                Image(systemName: "paperplane")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(Color.white.opacity(0.65))
+            }
+            .buttonStyle(.plain)
+            Spacer()
+        }
+    }
+
+    /// Abre el share-sheet nativo con la URL pública de la foto + venue
+    /// name si lo etiquetó. Reusa la raíz presentation window porque
+    /// `ShareManager.present` sólo acepta `ShareManager.Content`, un
+    /// envelope más alto nivel que no sirve para activities ad-hoc.
+    private func sharePost(post: UserPost, venue: BarPassVenue?) {
+        let url = post.publicImageURL(baseURL: SupabaseRESTClient.baseURL)
+        var items: [Any] = []
+        if let v = venue { items.append("\(v.name) — BarPass") }
+        if let u = url { items.append(u) }
+        guard !items.isEmpty else { return }
+        let av = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        if let root = UIApplication.shared.connectedScenes
+            .compactMap({ ($0 as? UIWindowScene)?.keyWindow?.rootViewController })
+            .first {
+            var top = root
+            while let p = top.presentedViewController { top = p }
+            top.present(av, animated: true)
         }
     }
 

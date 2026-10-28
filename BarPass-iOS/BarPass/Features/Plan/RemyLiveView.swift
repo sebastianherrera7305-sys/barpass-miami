@@ -149,6 +149,14 @@ private final class RemyLiveChat: ObservableObject {
         isThinking = true
         isStreaming = true
 
+        // Latency hasta el primer token — owner Build 140, 2026-10-28
+        // "calcula los tiempos de respuesta de lo que sea, quiero
+        // respuestas en menos de 3.5s". Capturamos aquí la salida del
+        // send() y lo cerramos al primer `.delta`. Se loguea con el
+        // assistant turn en `remy_conversations.latency_ms`.
+        let sendStartedAt = Date()
+        var firstTokenLatencyMs: Int? = nil
+
         streamTask = Task { [weak self] in
             var raw = ""
             do {
@@ -165,6 +173,9 @@ private final class RemyLiveChat: ObservableObject {
                             self?.currentReply = ""
                         }
                     case .delta(let piece):
+                        if firstTokenLatencyMs == nil {
+                            firstTokenLatencyMs = Int(Date().timeIntervalSince(sendStartedAt) * 1000)
+                        }
                         raw += piece
                         // Hide an in-progress ```json fence from the live
                         // bubble — same helper PlanView ships (private
@@ -230,8 +241,8 @@ private final class RemyLiveChat: ObservableObject {
                         checkedInVenueId: logVenueId ?? nil,
                         planJSON: planData,
                         venueIdsMentioned: mentionedIds,
-                        model: nil,       // TODO: capturar X-BP-Model del response
-                        latencyMs: nil    // TODO: capturar latency del primer token
+                        model: nil,       // TODO: capturar X-BP-Model del response SSE
+                        latencyMs: firstTokenLatencyMs
                     )
                 }
                 // ----------------------------------------------------------

@@ -323,6 +323,7 @@
 		BEAC23759C48D265901FBF62 /* TripChatRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEACEE13C69BF28A53DD71D7 /* TripChatRepository.swift */; };
 		BEAC766A700184FB610546A7 /* TripChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC19711B3963EEFD3C4D34 /* TripChatView.swift */; };
 		BEAC222AB7DA15AEA0D1CC06 /* MiamiEyeBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC31A7495BC8A4EF5B9D41 /* MiamiEyeBackground.swift */; };
+		BEAC222BB7DA15AEA0D1CC07 /* BrandFlashBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC31A8495BC8A4EF5B9D42 /* BrandFlashBackground.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -679,6 +680,7 @@
 		BEACEE13C69BF28A53DD71D7 /* TripChatRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripChatRepository.swift; path = BarPass/Repositories/TripChatRepository.swift; sourceTree = SOURCE_ROOT; };
 		BEAC19711B3963EEFD3C4D34 /* TripChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TripChatView.swift; path = BarPass/Features/Trips/TripChatView.swift; sourceTree = SOURCE_ROOT; };
 		BEAC31A7495BC8A4EF5B9D41 /* MiamiEyeBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MiamiEyeBackground.swift; path = BarPass/Resources/MiamiEyeBackground.swift; sourceTree = SOURCE_ROOT; };
+		BEAC31A8495BC8A4EF5B9D42 /* BrandFlashBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrandFlashBackground.swift; path = BarPass/Resources/BrandFlashBackground.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXVariantGroup section */
@@ -1522,6 +1524,7 @@
 				NP000002000000000000RP01 /* NightPlanner.swift in Sources */,
 				FF000002000000000000AA10 /* DesignSystem.swift in Sources */,
 				BEAC222AB7DA15AEA0D1CC06 /* MiamiEyeBackground.swift in Sources */,
+				BEAC222BB7DA15AEA0D1CC07 /* BrandFlashBackground.swift in Sources */,
 				FF000002000000000000AA11 /* VenueRepository.swift in Sources */,
 				FF000002000000000000AA12 /* LocalVenueRepository.swift in Sources */,
 				FF000002000000000000AA13 /* RepositoryDependencies.swift in Sources */,
@@ -1740,7 +1743,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 140;
+				CURRENT_PROJECT_VERSION = 142;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1768,7 +1771,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 140;
+				CURRENT_PROJECT_VERSION = 142;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1898,7 +1901,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 140;
+				CURRENT_PROJECT_VERSION = 142;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1921,7 +1924,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 140;
+				CURRENT_PROJECT_VERSION = 142;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;

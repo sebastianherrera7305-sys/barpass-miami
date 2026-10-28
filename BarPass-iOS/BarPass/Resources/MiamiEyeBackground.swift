@@ -140,6 +140,14 @@ struct MiamiEyeBackground: View {
         }
     }
 
+    /// Owner Build 141, 2026-10-28: "el ojo se ve mal porque se ve como si
+    /// fuera un cuadrado girando". Antes la imagen ocupaba un frame
+    /// cuadrado W×W (W = screen × 2.3) y al rotar, las esquinas del cuadrado
+    /// barrían — las esquinas del asset (que tiene un halo brillante que
+    /// llega al borde) hacían ver un cuadrado dando vueltas. Fix: `.mask`
+    /// con un gradiente radial que fade los bordes a 0 — el ojo rota pero
+    /// las esquinas del asset ya no son visibles, se ve el eye orgánico sin
+    /// shape rígida.
     private func sunburstImage(angle: Double, scale: Double) -> some View {
         GeometryReader { proxy in
             Image("CityArtMiami")
@@ -148,6 +156,14 @@ struct MiamiEyeBackground: View {
                 .frame(width: proxy.size.width * scale,
                        height: proxy.size.width * scale)
                 .rotationEffect(.degrees(angle))
+                .mask(
+                    RadialGradient(
+                        colors: [.white, .white, .white.opacity(0.4), .clear],
+                        center: .center,
+                        startRadius: proxy.size.width * 0.1,
+                        endRadius: proxy.size.width * scale * 0.5
+                    )
+                )
                 .position(x: proxy.size.width * 0.5,
                           y: proxy.size.height * CGFloat(anchorY))
                 .opacity(intensity)

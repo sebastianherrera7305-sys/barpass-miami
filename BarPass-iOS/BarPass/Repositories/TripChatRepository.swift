@@ -38,20 +38,24 @@ enum TripChatError: LocalizedError, Sendable {
     /// de SQL en el editor de Supabase; el error acá sólo rotula el
     /// problema para que no se confunda con un bug de código iOS.
     case rpcMissingGrant
-    case unknown
+    /// Catch-all — adjuntamos el body del server y el status HTTP para
+    /// poder diagnosticar sin volver a buildear. Owner (Build 140,
+    /// 2026-10-28): el chat seguía tirando el genérico "no se pudo
+    /// cargar" sin pistas; con el raw del server en pantalla, la próxima
+    /// TF screenshot es diagnosticable.
+    case unknown(httpStatus: Int?, body: String)
 
-    static func from(responseBody: String) -> TripChatError {
+    static func from(responseBody: String, httpStatus: Int? = nil) -> TripChatError {
         if responseBody.contains("not_authenticated") { return .notAuthenticated }
         if responseBody.contains("not_a_member")     { return .notAMember }
         if responseBody.contains("rate_limit")       { return .rateLimited }
         if responseBody.contains("message_too_long") { return .tooLong }
         if responseBody.contains("empty_message")    { return .empty }
-        // Postgres code + message patterns of a missing EXECUTE grant.
         if responseBody.contains("\"42501\"") ||
            responseBody.contains("permission denied for function") {
             return .rpcMissingGrant
         }
-        return .unknown
+        return .unknown(httpStatus: httpStatus, body: responseBody)
     }
 
     var errorDescription: String? {
@@ -62,7 +66,14 @@ enum TripChatError: LocalizedError, Sendable {
         case .tooLong:          return "El mensaje supera el límite de 1000 caracteres."
         case .empty:            return "El mensaje está vacío."
         case .rpcMissingGrant:  return "El chat de trip necesita permisos adicionales en el servidor. Avisale a soporte: faltan grants EXECUTE en los RPCs."
-        case .unknown:          return "No se pudo cargar el chat. Intenta de nuevo."
+        case .unknown(let status, let body):
+            // Trim el body a algo que entre en pantalla pero que todavía
+            // sea diagnosticable (status + primeros ~240 chars).
+            let short = String(body.prefix(240)).trimmingCharacters(in: .whitespacesAndNewlines)
+            if let status {
+                return "No se pudo cargar el chat (HTTP \(status)). \(short)"
+            }
+            return "No se pudo cargar el chat. \(short)"
         }
     }
 }
@@ -107,7 +118,9 @@ final actor SupabaseTripChatRepository: TripChatRepository {
         let data = try await callRPC("send_trip_message", rawBody: body)
         // RPC returns a one-row result set.
         let rows = try SupabaseRESTClient.decoder.decode([TripMessage].self, from: data)
-        guard let row = rows.first else { throw TripChatError.unknown }
+        guard let row = rows.first else {
+            throw TripChatError.unknown(httpStatus: 200, body: "RPC returned 0 rows")
+        }
         return row
     }
 
@@ -117,14 +130,13 @@ final actor SupabaseTripChatRepository: TripChatRepository {
             "POST", path: "rpc/\(name)", body: rawBody, accessToken: session.accessToken
         )
         let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse else { throw TripChatError.unknown }
+        guard let http = response as? HTTPURLResponse else {
+            throw TripChatError.unknown(httpStatus: nil, body: "no HTTP response")
+        }
         guard 200..<300 ~= http.statusCode else {
             let bodyText = String(data: data, encoding: .utf8) ?? ""
-            // A 404 on the RPC name means the migration hasn't been run
-            // yet — surface that as "empty / can't send" rather than a
-            // generic error, so the chat card can degrade honestly.
             if http.statusCode == 404 { throw TripChatError.notAMember }
-            throw TripChatError.from(responseBody: bodyText)
+            throw TripChatError.from(responseBody: bodyText, httpStatus: http.statusCode)
         }
         return data
     }

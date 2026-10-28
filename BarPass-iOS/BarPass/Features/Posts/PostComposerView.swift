@@ -38,10 +38,30 @@ struct PostComposerView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                // Owner Build 141, 2026-10-28: "las dos pantallas necesitan
+                // una esencia de nosotros". Antes era un fondo negro plano
+                // sin brand presence. BrandFlashBackground pinta bloques
+                // zine/flash (amber + coral + violet + bronze) con blur
+                // suave — da identidad sin usar el eye (que ya se usa en
+                // Tonight/Explore/etc.).
+                BrandFlashBackground(seed: 7, intensity: 0.55)
 
                 ScrollView {
-                    VStack(spacing: 20) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        // Hero display: "Nuevo / post." con remate serif
+                        // italic — el mismo lenguaje que el header de
+                        // Tonight / Profile ("Your / trips", "My / night").
+                        HStack(alignment: .firstTextBaseline, spacing: 6) {
+                            Text(l10n.t("post.compose.eyebrowKicker"))
+                                .font(.system(size: 24, weight: .black, design: .rounded))
+                                .foregroundStyle(.white)
+                            Text(l10n.t("post.compose.eyebrowTail"))
+                                .font(.system(size: 24, design: .serif).italic())
+                                .foregroundStyle(Color.bpAmberBright)
+                            Spacer()
+                        }
+                        .padding(.top, 6)
+
                         imagePreview
                         captionField
                         venueChip
@@ -57,7 +77,7 @@ struct PostComposerView: View {
                     .padding(.top, 12)
                 }
             }
-            .navigationTitle(l10n.t("post.compose.title"))
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
