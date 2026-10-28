@@ -37,7 +37,13 @@ import { checkRateLimit } from "@/lib/rate-limit";
  * be a product change, not a security fix.
  */
 const GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+// Owner 2026-10-28: llama-3.3-70b-versatile tiró 404 en Groq
+// ("does not exist or you do not have access to it") — Groq lo
+// decommissioned o lo movió al tier pago. llama-3.1-8b-instant está
+// disponible en TODO free tier, latencia ~0.3-0.5s, suficiente para
+// la mayoría de los turnos de Remy. Si queremos subir a 70B hay que
+// verificar acceso en console.groq.com → Model Catalog primero.
+const GROQ_MODEL = "llama-3.1-8b-instant";
 const NVIDIA_CHAT_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 /** Primary NVIDIA model. Measured 2026-09-06 against this account, 60-venue
  * prompt, 350-token reply: gpt-oss-20b at reasoning_effort "low" → 0.7s to
