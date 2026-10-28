@@ -1,5 +1,13 @@
 "use client";
 
+// Next.js 16 trata todo prerendering muy estricto — tira "Error prerendering"
+// cuando una página client-component intenta leer env vars de Supabase a
+// build time (ver Vercel log 2026-10-28). force-dynamic la opta out de
+// prerendering: se renderea en runtime, cuando NEXT_PUBLIC_SUPABASE_URL /
+// _ANON_KEY ya están disponibles via Vercel env. Esta página siempre fue
+// pensada como una queue viva de reports, nunca cacheada estáticamente.
+export const dynamic = "force-dynamic";
+
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { dismissReports, loadQueue, removeMedia } from "./actions";
