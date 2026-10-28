@@ -73,13 +73,24 @@ export async function POST(request: Request) {
   upstream.append("response_format", "text");
 
   const started = Date.now();
-  const r = await fetch(GROQ_TRANSCRIBE_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-    },
-    body: upstream,
-  });
+  let r: Response;
+  try {
+    r = await fetch(GROQ_TRANSCRIBE_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: upstream,
+      // maxDuration es 30s; cortamos antes para devolver un error limpio.
+      signal: AbortSignal.timeout(25_000),
+    });
+  } catch (err) {
+    console.error("Concierge voice upstream error", err);
+    return NextResponse.json(
+      { error: "transcribe_unreachable", detail: "No se pudo contactar al servicio de transcripción." },
+      { status: 502 },
+    );
+  }
 
   if (!r.ok) {
     const detail = await r.text().catch(() => "");
