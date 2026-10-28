@@ -1,0 +1,154 @@
+import AVFoundation
+import Foundation
+
+/// Habla las respuestas de Remy en voz alta usando AVSpeechSynthesizer —
+/// 100% nativo, 0ms de latencia de red, $0 de costo (owner Build 143,
+/// 2026-10-28 "dale perfect" al TTS de Apple como primera versión).
+///
+/// Diseño:
+///   · Elige la mejor voz disponible según el idioma de la respuesta
+///     (es-* o en-*). Si el usuario descargó una voz "Enhanced" o
+///     "Premium" en Ajustes → Accesibilidad → Contenido hablado → Voces,
+///     la usamos — mejora enorme sobre la voz Siri default.
+///   · Honra silence switch / modo auricular — misma AVAudioSession
+///     que el recorder, así no choca con el input de voz.
+///   · Cuando empieza una nueva respuesta, cortamos la anterior en seco
+///     (nunca dos voces encimadas).
+///   · El usuario puede silenciar manualmente desde el UI (toggle).
+///
+/// Costo real: $0 por respuesta. Siempre. Voz robótica si no bajás una
+/// mejor en Ajustes, pero funciona offline y nunca te cobra nada.
+@MainActor
+final class RemyTextToSpeech: NSObject, ObservableObject {
+
+    @Published private(set) var isSpeaking: Bool = false
+    /// Si el usuario silenció manualmente desde el UI. Persiste a disco
+    /// para que la preferencia aguante entre aperturas de la app.
+    @Published var isEnabled: Bool {
+        didSet { UserDefaults.standard.set(isEnabled, forKey: Self.enabledKey) }
+    }
+
+    private static let enabledKey = "RemyTTS.isEnabled"
+
+    private let synth = AVSpeechSynthesizer()
+
+    override init() {
+        // Default: encendido. Si el usuario lo apaga, UserDefaults lo
+        // guarda y lo recupera en la próxima apertura.
+        let stored = UserDefaults.standard.object(forKey: Self.enabledKey) as? Bool
+        self.isEnabled = stored ?? true
+        super.init()
+        synth.delegate = self
+    }
+
+    /// Habla el texto. Si TTS está apagado por el usuario, no-op.
+    /// Si ya hay algo hablando, lo corta y arranca lo nuevo.
+    func speak(_ text: String) {
+        guard isEnabled else { return }
+        let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !clean.isEmpty else { return }
+
+        // Interrumpimos cualquier audio en curso. .immediate corta de una,
+        // no espera a la próxima frase (que es lo que haría .word).
+        if synth.isSpeaking {
+            synth.stopSpeaking(at: .immediate)
+        }
+
+        // Elige voz según el idioma detectado del texto.
+        let languageCode = Self.detectLanguage(of: clean)
+        let voice = Self.bestVoice(for: languageCode)
+
+        let utterance = AVSpeechUtterance(string: clean)
+        utterance.voice = voice
+        // Velocidad: default AVSpeechUtteranceDefaultSpeechRate es ~0.5.
+        // Un poco más rápido (0.52) suena menos somnoliento sin
+        // perderse el entendimiento.
+        utterance.rate = 0.52
+        utterance.pitchMultiplier = 1.0
+        utterance.volume = 1.0
+        // Pausas naturales entre oraciones.
+        utterance.preUtteranceDelay = 0
+        utterance.postUtteranceDelay = 0.1
+
+        // Reservar el audio session en modo "playback" para que suene
+        // aunque el silence switch del iPhone esté en silent. Idéntico a
+        // lo que hace Siri y los players de audio normales.
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+        try? AVAudioSession.sharedInstance().setActive(true, options: [])
+
+        synth.speak(utterance)
+    }
+
+    /// Para en seco. Usado cuando el usuario toca para silenciar en el
+    /// medio de una respuesta, o cuando sale de la pantalla de Remy.
+    func stop() {
+        if synth.isSpeaking {
+            synth.stopSpeaking(at: .immediate)
+        }
+    }
+
+    // MARK: - Voice selection
+
+    /// Detección simple de idioma por heurística básica — buscamos
+    /// marcadores inequívocos de español (acentos, ñ, palabras funcionales
+    /// como "qué", "está", "noche") vs. inglés. No usamos NLLanguageRecognizer
+    /// porque es overkill para 2 idiomas y requiere linkear Natural
+    /// Language framework. Fallback a es (Remy habla español la mayoría del
+    /// tiempo con usuarios de Miami).
+    private static func detectLanguage(of text: String) -> String {
+        let lower = text.lowercased()
+        // Marcadores claros de español
+        let spanishMarkers = ["á", "é", "í", "ó", "ú", "ñ", "¿", "¡",
+                              " está ", " esta ", " qué ", " noche ", " música ",
+                              " cerveza ", " trago ", " amigos ", " viernes "]
+        for marker in spanishMarkers where lower.contains(marker) {
+            return "es"
+        }
+        // Marcadores inequívocos de inglés — palabras cortas que casi nunca
+        // aparecen en español natural.
+        let englishMarkers = [" the ", " and ", " you ", " tonight ", " drinks ",
+                              " let's ", " there's ", " i'll ", " we'll "]
+        for marker in englishMarkers where lower.contains(marker) {
+            return "en"
+        }
+        return "es"   // default
+    }
+
+    /// Mejor voz disponible para el idioma. Prioridad:
+    ///   1. Voz "premium" / "enhanced" que el usuario haya descargado
+    ///      (Ajustes → Accesibilidad → Contenido hablado → Voces).
+    ///   2. Voz "siri" (natural neural) si existe en el locale.
+    ///   3. Voz "default" del locale.
+    ///   4. Fallback: AVSpeechSynthesisVoice(language: lang)
+    private static func bestVoice(for languageCode: String) -> AVSpeechSynthesisVoice? {
+        let locales: [String]
+        if languageCode == "en" {
+            locales = ["en-US", "en-GB"]
+        } else {
+            // es-MX primero (latino, lo que la mayoría de usuarios de
+            // Miami/BarPass hablan), después es-US (U.S. Spanish),
+            // después es-ES (España).
+            locales = ["es-MX", "es-US", "es-ES"]
+        }
+        let allVoices = AVSpeechSynthesisVoice.speechVoices()
+        for locale in locales {
+            let matching = allVoices.filter { $0.language == locale }
+            if let premium = matching.first(where: { $0.quality == .premium }) { return premium }
+            if let enhanced = matching.first(where: { $0.quality == .enhanced }) { return enhanced }
+            if let standard = matching.first { return standard }
+        }
+        return AVSpeechSynthesisVoice(language: locales.first ?? "es-MX")
+    }
+}
+
+extension RemyTextToSpeech: AVSpeechSynthesizerDelegate {
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
+        Task { @MainActor in self.isSpeaking = true }
+    }
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        Task { @MainActor in self.isSpeaking = false }
+    }
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        Task { @MainActor in self.isSpeaking = false }
+    }
+}

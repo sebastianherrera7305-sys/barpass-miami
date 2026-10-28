@@ -333,8 +333,14 @@ struct RemyLiveView: View {
 
     @StateObject private var chat = RemyLiveChat()
     @StateObject private var voice = RemyVoiceRecorder()
+    @StateObject private var tts = RemyTextToSpeech()
     @ObservedObject private var checkInStore = CheckInStore.shared
     @ObservedObject private var favoritesStore = FavoritesStore.shared
+
+    /// Trackea de dónde vino el último turno del usuario — si fue por voz,
+    /// auto-habla la respuesta de Remy; si fue tipeado, se queda callada.
+    /// (El usuario puede forzar on/off desde el toggle del nav bar.)
+    @State private var lastSentViaVoice: Bool = false
 
     @State private var input: String = ""
     @FocusState private var inputFocused: Bool
@@ -491,6 +497,18 @@ struct RemyLiveView: View {
                 inputBar
             }
         }
+        // Orb full-screen cuando el mic está grabando o transcribiendo —
+        // owner Build 143/144, 2026-10-28: "me gustaría que haya cierta
+        // bolita o algo animado en el cual el usuario pueda ver que está
+        // interactuando con alguien o con algo que le está respondiendo,
+        // porque recuerda que es lo que necesitamos — para algo es un
+        // comando de voz". Overlay por encima del chat con un circle
+        // ámbar pulsante + contador o spinner, grande y obvio.
+        .overlay {
+            if voice.state == .recording || voice.state == .transcribing {
+                voiceListeningOrb
+            }
+        }
         .preferredColorScheme(.dark)
         .fullScreenCover(item: $openVenue) { venue in
             NavigationStack {
@@ -505,29 +523,28 @@ struct RemyLiveView: View {
             await checkInStore.load()
             BPAnalytics.track(.viewScreen("RemyLive"))
 
-            // Kickoff proactivo: Remy abre con una propuesta hecha, no con
-            // una burbuja italiana vacía. Si el usuario está checked-in,
-            // anclamos el prompt al venue real; si no, pedimos un plan
-            // abierto para la noche. Nunca mencionamos un venue inventado.
-            if !didKickoff {
-                didKickoff = true
-                let kickoffPrompt: String
-                if let v = checkedInVenue {
-                    kickoffPrompt = "Dame un plan desde \(v.name)."
-                } else {
-                    kickoffPrompt = "Arma un plan para esta noche."
-                }
-                lastPrompt = kickoffPrompt
-                chat.send(
-                    prompt: kickoffPrompt,
-                    city: venueStore.selectedCity,
-                    context: buildContext(),
-                    venues: venueStore.venues,
-                    checkedInVenueId: checkedInVenue?.id
-                )
-            }
+            // Owner Build 144, 2026-10-28: "no me gusta que Remy empieza a
+            // pensar antes de que tú le des una instrucción. Nosotros
+            // somos los que damos la instrucción, el cliente, y él
+            // acciona porque él es un bot". Kickoff removido — la
+            // pantalla abre vacía con los hint chips, y Remy sólo
+            // responde cuando VOS escribís o hablás primero. El estado
+            // `didKickoff` queda por si en el futuro queremos reactivar
+            // esto bajo un setting, pero por default: silencio.
         }
-        .onDisappear { chat.cancel() }
+        .onDisappear {
+            chat.cancel()
+            tts.stop()
+        }
+        // Owner Build 143, 2026-10-28 "dale perfect al TTS de Apple": cuando
+        // Remy termina de responder y el último turno vino por voz, habla
+        // la respuesta en voz alta. Si vino tipeado, se queda callada (vos
+        // leés). El toggle del nav bar override manual.
+        .onChange(of: chat.history.count) { _, _ in
+            guard lastSentViaVoice else { return }
+            guard let last = chat.history.last, last.role == "assistant" else { return }
+            tts.speak(last.content)
+        }
     }
 
     // MARK: - Nav bar ‹ REMY
@@ -553,11 +570,26 @@ struct RemyLiveView: View {
 
             Spacer()
 
-            // Contrapeso invisible del botón "‹" para que "REMY" quede
-            // centrado. El botón "Chats" se quitó: no había sheet detrás y
-            // el historial de PlanView es privado de esa vista.
-            Color.clear
-                .frame(width: 28, height: 28)
+            // Toggle de voz hablada — owner Build 143, 2026-10-28. Icon
+            // changes según `tts.isEnabled` + `tts.isSpeaking`. Tap para
+            // silenciar / activar; si está hablando, también corta la
+            // respuesta actual.
+            Button {
+                BPHaptics.light()
+                if tts.isSpeaking { tts.stop() }
+                tts.isEnabled.toggle()
+            } label: {
+                Image(systemName: tts.isEnabled
+                      ? (tts.isSpeaking ? "waveform.circle.fill" : "speaker.wave.2.fill")
+                      : "speaker.slash.fill")
+                    .font(.system(size: 15, weight: .heavy))
+                    .foregroundStyle(tts.isEnabled ? Color.bpAmber : Color.white.opacity(0.4))
+                    .frame(width: 28, height: 28)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: tts.isSpeaking)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: tts.isEnabled)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(tts.isEnabled ? "Silenciar voz de Remy" : "Activar voz de Remy")
         }
         .padding(.horizontal, 22)
         .padding(.top, 10)
@@ -1279,6 +1311,102 @@ struct RemyLiveView: View {
         input.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// Orb grande y pulsante que ocupa toda la pantalla cuando Remy está
+    /// escuchando (grabando) o procesando (transcribiendo). Feedback visual
+    /// pedido explícitamente por el owner — sin esto, un comando de voz se
+    /// siente roto porque no sabés si te escuchó.
+    @ViewBuilder
+    private var voiceListeningOrb: some View {
+        ZStack {
+            // Fondo semi-oscuro para enfocar el orb
+            Color.black.opacity(0.65).ignoresSafeArea()
+                .onTapGesture { Task { await handleMicTap() } }  // tap afuera = parar
+
+            VStack(spacing: 24) {
+                Spacer()
+
+                // Orb en sí: círculos concéntricos que respiran
+                TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: false)) { context in
+                    let t = context.date.timeIntervalSinceReferenceDate
+                    let pulse = sin(t * 2.0 * .pi / 1.6) * 0.5 + 0.5   // 0..1 en 1.6s
+                    let scale = 1.0 + pulse * 0.15
+                    let haloScale = 1.0 + pulse * 0.45
+                    ZStack {
+                        // halo exterior
+                        Circle()
+                            .fill(Color.bpAmber.opacity(0.15))
+                            .frame(width: 240, height: 240)
+                            .scaleEffect(haloScale)
+                            .blur(radius: 20)
+                        // halo medio
+                        Circle()
+                            .fill(Color.bpAmber.opacity(0.35))
+                            .frame(width: 180, height: 180)
+                            .scaleEffect(1.0 + pulse * 0.25)
+                            .blur(radius: 10)
+                        // centro
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    colors: [Color.bpAmberBright, Color.bpAmber],
+                                    center: .center, startRadius: 0, endRadius: 70
+                                )
+                            )
+                            .frame(width: 130, height: 130)
+                            .scaleEffect(scale)
+                            .shadow(color: Color.bpAmber.opacity(0.8), radius: 25)
+                        // icon
+                        Image(systemName: voice.state == .transcribing ? "waveform" : "mic.fill")
+                            .font(.system(size: 42, weight: .heavy))
+                            .foregroundStyle(.black)
+                            .scaleEffect(scale)
+                    }
+                }
+                .frame(height: 260)
+
+                // Texto estado
+                VStack(spacing: 6) {
+                    if voice.state == .recording {
+                        Text("Escuchando…")
+                            .font(.system(size: 18, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                        Text("\(voice.seconds)s · tocá para enviar")
+                            .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                            .tracking(0.5)
+                            .foregroundStyle(Color.white.opacity(0.6))
+                    } else {
+                        Text("Transcribiendo…")
+                            .font(.system(size: 18, weight: .heavy, design: .rounded))
+                            .foregroundStyle(.white)
+                        ProgressView().tint(Color.bpAmber).padding(.top, 4)
+                    }
+                }
+
+                Spacer()
+
+                // Botón cancel
+                if voice.state == .recording {
+                    Button {
+                        BPHaptics.light()
+                        voice.cancel()
+                    } label: {
+                        Text("Cancelar")
+                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                            .foregroundStyle(Color.white.opacity(0.8))
+                            .padding(.horizontal, 20).padding(.vertical, 10)
+                            .background(Color.white.opacity(0.1), in: Capsule())
+                            .overlay(Capsule().strokeBorder(Color.white.opacity(0.2)))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.bottom, 36)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .transition(.opacity)
+        .animation(.easeInOut(duration: 0.2), value: voice.state)
+    }
+
     /// Mic button: idle → tap para empezar a grabar; recording → tap para
     /// parar + transcribir + autoenvío; transcribing → spinner. Si el
     /// usuario denies el permiso del mic, el recorder marca state=.error
@@ -1328,33 +1456,47 @@ struct RemyLiveView: View {
     private func handleMicTap() async {
         switch voice.state {
         case .idle, .error:
+            // Haptic + log inmediato: owner reportó Build 143 que "cuando
+            // le das a hablar, no pasa nada" — la razón más probable es
+            // que la primera vez iOS muestra un diálogo de permiso del
+            // mic y mientras tanto no hay feedback visible. El estado del
+            // recorder empieza a flipar sólo DESPUÉS que el usuario
+            // responde al diálogo. La solución: feedback haptico fuerte
+            // apenas tocás + un orb grande (abajo) para que sepas que el
+            // tap fue registrado.
+            BPHaptics.medium()
             do { try await voice.startRecording() }
             catch { /* el recorder ya seteó state=.error */ }
         case .recording:
+            BPHaptics.light()
             let text = (try? await voice.stopAndTranscribe()) ?? ""
             let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !clean.isEmpty else { return }
             input = clean
-            // Auto-envío apenas llega el transcript — menos tap, más natural.
-            submit()
+            submit(fromVoice: true)
         case .transcribing:
             return
         }
     }
 
-    private func submit() {
+    private func submit(fromVoice: Bool = false) {
         let text = trimmedInput
         guard !text.isEmpty, !chat.isStreaming else { return }
         BPHaptics.selection()
         hasUserSent = true
         lastPrompt = text
+        // Flag se setea ANTES del chat.send para que cuando llegue la
+        // respuesta de Remy (vía onChange(history.count)), ya sepamos si
+        // auto-hablar o no.
+        lastSentViaVoice = fromVoice
         input = ""
         inputFocused = false
         chat.send(
             prompt: text,
             city: venueStore.selectedCity,
             context: buildContext(),
-            venues: venueStore.venues
+            venues: venueStore.venues,
+            checkedInVenueId: checkedInVenue?.id
         )
     }
 

@@ -92,6 +92,7 @@
 		BEACC0051B0ECCA97EFCDB57 /* UserPostRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC63D7D795E2DE4E8133FC /* UserPostRepository.swift */; };
 		BEACC0061B0ECCA97EFCDB58 /* RemyConversationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC63D8D795E2DE4E8133FD /* RemyConversationRepository.swift */; };
 		BEACC0071B0ECCA97EFCDB59 /* RemyVoiceRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC63D9D795E2DE4E8133FE /* RemyVoiceRecorder.swift */; };
+		BEACC0081B0ECCA97EFCDB5A /* RemyTextToSpeech.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC63DAD795E2DE4E8133FF /* RemyTextToSpeech.swift */; };
 		BEAC438F242B5DF4930C6E31 /* ProfilePrivacyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC4DF9337E9727FA06A412 /* ProfilePrivacyStore.swift */; };
 		BEAC6060455583632B7A814F /* ExploreV2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC2A847466EDACCE557623 /* ExploreV2View.swift */; };
 		BEACF08D8071A8F9CD9E6E1C /* NightRecapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEAC6EE93615C0614A97FD42 /* NightRecapView.swift */; };
@@ -510,6 +511,7 @@
 		BEAC63D7D795E2DE4E8133FC /* UserPostRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserPostRepository.swift; path = BarPass/Repositories/UserPostRepository.swift; sourceTree = SOURCE_ROOT; };
 		BEAC63D8D795E2DE4E8133FD /* RemyConversationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RemyConversationRepository.swift; path = BarPass/Repositories/RemyConversationRepository.swift; sourceTree = SOURCE_ROOT; };
 		BEAC63D9D795E2DE4E8133FE /* RemyVoiceRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RemyVoiceRecorder.swift; path = BarPass/Features/Plan/RemyVoiceRecorder.swift; sourceTree = SOURCE_ROOT; };
+		BEAC63DAD795E2DE4E8133FF /* RemyTextToSpeech.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RemyTextToSpeech.swift; path = BarPass/Features/Plan/RemyTextToSpeech.swift; sourceTree = SOURCE_ROOT; };
 		BEAC4DF9337E9727FA06A412 /* ProfilePrivacyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProfilePrivacyStore.swift; path = BarPass/Features/Profile/ProfilePrivacyStore.swift; sourceTree = SOURCE_ROOT; };
 		BEAC2A847466EDACCE557623 /* ExploreV2View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExploreV2View.swift; path = BarPass/Features/Explore/ExploreV2View.swift; sourceTree = SOURCE_ROOT; };
 		BEAC6EE93615C0614A97FD42 /* NightRecapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NightRecapView.swift; path = BarPass/Features/Recap/NightRecapView.swift; sourceTree = SOURCE_ROOT; };
@@ -1622,6 +1624,7 @@
 				BEACC0051B0ECCA97EFCDB57 /* UserPostRepository.swift in Sources */,
 				BEACC0061B0ECCA97EFCDB58 /* RemyConversationRepository.swift in Sources */,
 				BEACC0071B0ECCA97EFCDB59 /* RemyVoiceRecorder.swift in Sources */,
+				BEACC0081B0ECCA97EFCDB5A /* RemyTextToSpeech.swift in Sources */,
 				BEAC438F242B5DF4930C6E31 /* ProfilePrivacyStore.swift in Sources */,
 				BEAC6060455583632B7A814F /* ExploreV2View.swift in Sources */,
 				BEACF08D8071A8F9CD9E6E1C /* NightRecapView.swift in Sources */,
@@ -1746,7 +1749,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 143;
+				CURRENT_PROJECT_VERSION = 145;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1774,7 +1777,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPassWidget/BarPassWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 143;
+				CURRENT_PROJECT_VERSION = 145;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPassWidget/Info.plist;
@@ -1904,7 +1907,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 143;
+				CURRENT_PROJECT_VERSION = 145;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
@@ -1927,7 +1930,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_ENTITLEMENTS = BarPass/Resources/BarPass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 143;
+				CURRENT_PROJECT_VERSION = 145;
 				DEVELOPMENT_TEAM = 7JZ8VD5L6B;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BarPass/Resources/Info.plist;
