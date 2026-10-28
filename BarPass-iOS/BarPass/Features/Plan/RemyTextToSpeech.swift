@@ -28,6 +28,15 @@ final class RemyTextToSpeech: NSObject, ObservableObject {
         didSet { UserDefaults.standard.set(isEnabled, forKey: Self.enabledKey) }
     }
 
+    /// Callback que dispara CUANDO termina de hablar — el chat lo usa para
+    /// reabrir el mic automáticamente en modo conversación (owner Build
+    /// 145, 2026-10-28: "necesito que tenga respuesta y que me dé
+    /// resultados en el chat, no que me pida que hable y toque"). Sin
+    /// esto, cada turno de voz era un dictado separado; con esto, es una
+    /// conversación corrida: hablás → Remy responde → mic se abre solo
+    /// → hablás de nuevo.
+    var onSpeechComplete: (() -> Void)?
+
     private static let enabledKey = "RemyTTS.isEnabled"
 
     private let synth = AVSpeechSynthesizer()
@@ -146,7 +155,10 @@ extension RemyTextToSpeech: AVSpeechSynthesizerDelegate {
         Task { @MainActor in self.isSpeaking = true }
     }
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        Task { @MainActor in self.isSpeaking = false }
+        Task { @MainActor in
+            self.isSpeaking = false
+            self.onSpeechComplete?()
+        }
     }
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
         Task { @MainActor in self.isSpeaking = false }

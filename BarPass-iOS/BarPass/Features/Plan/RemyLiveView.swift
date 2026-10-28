@@ -532,9 +532,29 @@ struct RemyLiveView: View {
             // `didKickoff` queda por si en el futuro queremos reactivar
             // esto bajo un setting, pero por default: silencio.
         }
+        .onAppear {
+            // Owner Build 145, 2026-10-28: "necesito que tenga respuesta y
+            // que me dé resultados en el chat, no que me pida que hable y
+            // toque". Conversación continua: cuando Remy termina de
+            // hablar su respuesta (TTS didFinish), reabrimos el mic solo
+            // si el último turno vino por voz. Hands-free hasta que el
+            // usuario cambie a texto o apague el speaker.
+            tts.onSpeechComplete = { [weak voice] in
+                guard self.lastSentViaVoice, let voice else { return }
+                Task { @MainActor in
+                    // Esperá un beat para no cortar el "silencio" natural
+                    // entre lo que Remy dijo y el próximo turno — se
+                    // siente más humano que arrancar en seco.
+                    try? await Task.sleep(nanoseconds: 350_000_000)
+                    try? await voice.startRecording()
+                }
+            }
+        }
         .onDisappear {
             chat.cancel()
             tts.stop()
+            voice.cancel()
+            tts.onSpeechComplete = nil
         }
         // Owner Build 143, 2026-10-28 "dale perfect al TTS de Apple": cuando
         // Remy termina de responder y el último turno vino por voz, habla
