@@ -332,6 +332,7 @@ struct RemyLiveView: View {
     @ObservedObject private var l10n = L10n.shared
 
     @StateObject private var chat = RemyLiveChat()
+    @StateObject private var voice = RemyVoiceRecorder()
     @ObservedObject private var checkInStore = CheckInStore.shared
     @ObservedObject private var favoritesStore = FavoritesStore.shared
 
@@ -1230,10 +1231,12 @@ struct RemyLiveView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Botón de enviar — sólo cuando hay texto. El mic del mockup se
-            // quitó: sin Speech framework era un botón que únicamente
-            // vibraba. Reservamos el ancho para que el TextField no cambie
-            // de tamaño cuando aparece el botón.
+            // Botón: cuando hay texto, enviar. Cuando no hay texto, mic
+            // (owner Build 142, 2026-10-28 "estamos haciendo el agente en
+            // este chat de remy — agregá voz"). El mic muestra 3 estados:
+            //  · idle → círculo ámbar con icono mic
+            //  · recording → círculo rojo pulsante con contador de segundos
+            //  · transcribing → spinner ámbar
             ZStack {
                 if !trimmedInput.isEmpty {
                     Button {
@@ -1251,6 +1254,8 @@ struct RemyLiveView: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(chat.isStreaming)
+                } else {
+                    micButton
                 }
             }
             .frame(width: 38, height: 38)
@@ -1272,6 +1277,69 @@ struct RemyLiveView: View {
 
     private var trimmedInput: String {
         input.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Mic button: idle → tap para empezar a grabar; recording → tap para
+    /// parar + transcribir + autoenvío; transcribing → spinner. Si el
+    /// usuario denies el permiso del mic, el recorder marca state=.error
+    /// y la UI muestra un alert con el mensaje; no se traba.
+    @ViewBuilder
+    private var micButton: some View {
+        Button {
+            BPHaptics.light()
+            Task { await handleMicTap() }
+        } label: {
+            ZStack {
+                switch voice.state {
+                case .recording:
+                    Circle()
+                        .fill(Color.bpDanger)
+                        .frame(width: 38, height: 38)
+                        .overlay(
+                            Circle().stroke(Color.bpDanger.opacity(0.4), lineWidth: 4)
+                                .scaleEffect(1.3)
+                                .opacity(0.6)
+                        )
+                    Text("\(voice.seconds)")
+                        .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                        .foregroundStyle(.white)
+                case .transcribing:
+                    Circle()
+                        .fill(Color.bpAmber.opacity(0.3))
+                        .frame(width: 38, height: 38)
+                    ProgressView()
+                        .tint(Color.bpAmber)
+                        .controlSize(.small)
+                default:
+                    Circle()
+                        .fill(Color.bpAmber)
+                        .frame(width: 38, height: 38)
+                    Image(systemName: "mic.fill")
+                        .font(.system(size: 14, weight: .heavy))
+                        .foregroundStyle(.black)
+                }
+            }
+            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: voice.state)
+        }
+        .buttonStyle(.plain)
+        .disabled(chat.isStreaming)
+    }
+
+    private func handleMicTap() async {
+        switch voice.state {
+        case .idle, .error:
+            do { try await voice.startRecording() }
+            catch { /* el recorder ya seteó state=.error */ }
+        case .recording:
+            let text = (try? await voice.stopAndTranscribe()) ?? ""
+            let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !clean.isEmpty else { return }
+            input = clean
+            // Auto-envío apenas llega el transcript — menos tap, más natural.
+            submit()
+        case .transcribing:
+            return
+        }
     }
 
     private func submit() {

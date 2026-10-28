@@ -64,6 +64,8 @@
 	<string>Use Face ID for quick and secure sign-in to BarPass.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>BarPass uses your location to show nearby venues and calculate distances.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>BarPass lets you talk to Remy — your nightlife concierge — by voice. Your audio is sent to BarPass's speech-to-text and never stored.</string>
 	<key>NSNearbyInteractionUsageDescription</key>
 	<string>BarPass uses your iPhone's precision antenna to show you the distance and direction of the person in your group looking for you. Only while both of you have the app open, and only between you two.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
