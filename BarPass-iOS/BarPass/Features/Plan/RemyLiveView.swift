@@ -102,6 +102,15 @@ private final class RemyLiveChat: ObservableObject {
         history = []
     }
 
+    /// Setea un mensaje de error en el banner del chat sin disparar un
+    /// envío. Usado desde el UI para surface fallos de voz (permiso del
+    /// mic, audio silencioso, upload fallido) — owner Build 146,
+    /// 2026-10-28: "nada de lo que me mandaste funciona, no da respuesta,
+    /// no pasa nada" — el error silencioso era peor que el error visible.
+    func setError(_ message: String) {
+        errorMessage = message
+    }
+
     /// Envía una pregunta a Remy. Igual que PlanView.sendToRemy — stream
     /// token-por-token con `URLSession.bytes` detrás, parse de ```json al
     /// final para extraer el plan. Si una respuesta anterior está en vuelo,
@@ -556,14 +565,20 @@ struct RemyLiveView: View {
             voice.cancel()
             tts.onSpeechComplete = nil
         }
-        // Owner Build 143, 2026-10-28 "dale perfect al TTS de Apple": cuando
-        // Remy termina de responder y el último turno vino por voz, habla
-        // la respuesta en voz alta. Si vino tipeado, se queda callada (vos
-        // leés). El toggle del nav bar override manual.
+        // Owner Build 148, 2026-10-28 "necesito una voz inmediata": TTS
+        // streaming — habla las oraciones apenas la respuesta de Remy
+        // tiene puntuación, no después del stream completo. La primera
+        // oración puede sonar en <2s de que vos pares de hablar, en
+        // lugar de los 5-10s que tomaba esperar al final de la respuesta.
+        .onChange(of: chat.currentReply) { _, newText in
+            guard lastSentViaVoice, chat.isStreaming, !newText.isEmpty else { return }
+            tts.feedStreaming(newText)
+        }
+        // Cuando el stream termina (history committed), hablá el resto.
         .onChange(of: chat.history.count) { _, _ in
             guard lastSentViaVoice else { return }
             guard let last = chat.history.last, last.role == "assistant" else { return }
-            tts.speak(last.content)
+            tts.finishStreaming(last.content)
         }
     }
 
@@ -1476,24 +1491,31 @@ struct RemyLiveView: View {
     private func handleMicTap() async {
         switch voice.state {
         case .idle, .error:
-            // Haptic + log inmediato: owner reportó Build 143 que "cuando
-            // le das a hablar, no pasa nada" — la razón más probable es
-            // que la primera vez iOS muestra un diálogo de permiso del
-            // mic y mientras tanto no hay feedback visible. El estado del
-            // recorder empieza a flipar sólo DESPUÉS que el usuario
-            // responde al diálogo. La solución: feedback haptico fuerte
-            // apenas tocás + un orb grande (abajo) para que sepas que el
-            // tap fue registrado.
             BPHaptics.medium()
-            do { try await voice.startRecording() }
-            catch { /* el recorder ya seteó state=.error */ }
+            do {
+                try await voice.startRecording()
+            } catch {
+                // El recorder ya seteó state=.error con mensaje; mostramos
+                // ese mensaje en el banner del chat para que el usuario
+                // vea qué pasó (sin esto, Build 145 dejaba la pantalla
+                // "muerta" y el owner reportó "no pasa nada, no da
+                // respuesta").
+                chat.setError(voice.errorMessageOrNil ?? "No pude abrir el micrófono. Revisá los permisos.")
+            }
         case .recording:
             BPHaptics.light()
-            let text = (try? await voice.stopAndTranscribe()) ?? ""
-            let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !clean.isEmpty else { return }
-            input = clean
-            submit(fromVoice: true)
+            do {
+                let text = try await voice.stopAndTranscribe()
+                let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !clean.isEmpty else {
+                    chat.setError("No te escuché — probá acercar el iPhone y hablar más fuerte.")
+                    return
+                }
+                input = clean
+                submit(fromVoice: true)
+            } catch {
+                chat.setError("No pude transcribir el audio: \(error.localizedDescription)")
+            }
         case .transcribing:
             return
         }

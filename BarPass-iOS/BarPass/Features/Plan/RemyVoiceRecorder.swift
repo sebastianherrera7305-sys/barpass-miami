@@ -1,26 +1,22 @@
 import AVFoundation
 import Foundation
 
-/// Recorder + transcript para la entrada de voz del chat de Remy (owner
-/// Build 142, 2026-10-28: "estamos haciendo el agente en este chat de
-/// remy — agregá voz").
+/// Captura de voz para Remy — rollback al pipeline de Build 148 (owner
+/// Build 150/151, 2026-10-30 "crashea apenas le doy a voice"):
+/// SFSpeechRecognizer / AVAudioEngine daban NSException no capturables.
+/// AVAudioRecorder + upload a `/api/concierge/voice` (Whisper en Groq)
+/// NUNCA crasheó — el problema previo era audio silencioso en el teléfono
+/// del owner, probablemente por routing de mic a un BT device.
 ///
-/// Flujo:
-///   1. `startRecording()` — pide permiso de micrófono si hace falta, abre
-///      la sesión de audio, graba a /tmp/.../remy-voice.m4a (AAC 44.1kHz).
-///   2. `stopAndTranscribe()` — cierra la grabación, sube el .m4a al
-///      endpoint `/api/concierge/voice` (Whisper en Groq), devuelve el
-///      texto reconocido.
-///
-/// Diseño honesto:
-///   · Si el usuario niega el permiso del mic → tira `micDenied`; la UI
-///     tiene que mostrar "andá a Settings → BarPass → Mic" en vez de
-///     intentar grabar de nuevo en silencio.
-///   · El audio se graba localmente y se borra apenas se sube el request
-///     — no persiste en disco ni se mantiene en memoria.
-///   · La duración está capada en 60 segundos: Whisper acepta más pero
-///     este chat es para pedidos cortos ("algo más barato", "estamos 6"),
-///     no para dictados largos.
+/// Fixes nuevos vs Build 148:
+///   1. Fuerza el built-in mic (no BT) via `preferredInput` seleccionando
+///      `.builtInMic`. Si AirPods están conectados, iOS igual usa el mic
+///      del iPhone.
+///   2. Mide peak dB después de grabar. Si está muy bajo, muestra error
+///      claro con el nivel para diagnosticar.
+///   3. Session `.record` + `.measurement` (vs `.default`) — `.measurement`
+///      es el modo que Apple recomienda para capturar voz y disables
+///      cualquier procesamiento del DSP que podría atenuar la señal.
 @MainActor
 final class RemyVoiceRecorder: ObservableObject {
 
@@ -32,84 +28,86 @@ final class RemyVoiceRecorder: ObservableObject {
     }
 
     @Published private(set) var state: State = .idle
-    /// Elapsed de grabación en segundos — la UI lo usa para el contador.
     @Published private(set) var seconds: Int = 0
 
-    /// Tope de duración por grabación. Después de este tiempo, el recorder
-    /// se corta solo y transcribe lo que haya.
+    var errorMessageOrNil: String? {
+        if case .error(let msg) = state { return msg }
+        return nil
+    }
+
     private static let maxSeconds: Int = 60
 
     private var recorder: AVAudioRecorder?
-    private var timer: Timer?
     private var audioURL: URL?
+    private var timer: Timer?
 
-    /// Pide permiso de mic (si no fue dado) + arranca a grabar. Returns
-    /// true si la grabación empezó; false si el permiso fue negado.
     func startRecording() async throws {
         switch state {
-        case .idle, .error:
-            break   // permitido arrancar / re-arrancar tras error
-        case .recording, .transcribing:
-            return  // ya corriendo, ignorar tap duplicado
+        case .idle, .error: break
+        case .recording, .transcribing: return
         }
 
-        // Permiso: iOS 17+ usa AVAudioApplication; antes AVAudioSession.
-        let granted: Bool
+        // Permiso de micrófono
+        let micGranted: Bool
         if #available(iOS 17.0, *) {
             if AVAudioApplication.shared.recordPermission == .granted {
-                granted = true
+                micGranted = true
             } else if AVAudioApplication.shared.recordPermission == .denied {
-                granted = false
+                micGranted = false
             } else {
-                granted = await AVAudioApplication.requestRecordPermission()
+                micGranted = await AVAudioApplication.requestRecordPermission()
             }
         } else {
             let session = AVAudioSession.sharedInstance()
             if session.recordPermission == .granted {
-                granted = true
+                micGranted = true
             } else if session.recordPermission == .denied {
-                granted = false
+                micGranted = false
             } else {
-                granted = await withCheckedContinuation { cont in
-                    session.requestRecordPermission { ok in cont.resume(returning: ok) }
+                micGranted = await withCheckedContinuation { c in
+                    session.requestRecordPermission { ok in c.resume(returning: ok) }
                 }
             }
         }
-        guard granted else {
+        guard micGranted else {
             state = .error("Permití el micrófono en Ajustes → BarPass para hablarle a Remy.")
             throw VoiceError.micDenied
         }
 
-        // Sesión de audio en modo de grabación. `.playAndRecord` para que
-        // una respuesta hablada futura (TTS) no choque — hoy solo grabamos.
+        // Audio session en modo .record + .measurement (recomendado por
+        // Apple para capturar voz sin que el DSP la atenue).
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playAndRecord, mode: .spokenAudio, options: [.defaultToSpeaker, .allowBluetooth])
+        try session.setCategory(.record, mode: .measurement, options: [])
         try session.setActive(true, options: [])
 
-        // AAC a 44.1kHz mono — formato que Groq Whisper admite directo
-        // (.m4a), y chico (~250KB para 30s). Si en el futuro queremos
-        // menor tamaño, bajamos a 16kHz sin perder transcripción.
+        // Fuerza el built-in mic del iPhone — si hay AirPods / BT, iOS
+        // elegiría ESOS por default, y pueden estar silenciados por otra
+        // app (lo que generaba el "No te escuché" del Build 148).
+        if let builtIn = session.availableInputs?.first(where: { $0.portType == .builtInMic }) {
+            try? session.setPreferredInput(builtIn)
+        }
+
+        // Config del recorder: AAC 16kHz mono (óptimo para Whisper).
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("remy-voice-\(UUID().uuidString).m4a")
         let settings: [String: Any] = [
             AVFormatIDKey:              Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey:            44_100.0,
+            AVSampleRateKey:            16_000.0,
             AVNumberOfChannelsKey:      1,
             AVEncoderAudioQualityKey:   AVAudioQuality.medium.rawValue,
         ]
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("remy-voice-\(UUID().uuidString).m4a")
         let rec = try AVAudioRecorder(url: url, settings: settings)
+        rec.isMeteringEnabled = true
         rec.prepareToRecord()
         guard rec.record() else {
             state = .error("No se pudo iniciar la grabación. Reintentá.")
             throw VoiceError.couldNotStart
         }
-
         recorder = rec
         audioURL = url
         seconds = 0
         state = .recording
 
-        // Timer de contador + auto-cut a los 60 seg.
         let t = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 guard let self else { return }
@@ -123,24 +121,23 @@ final class RemyVoiceRecorder: ObservableObject {
         RunLoop.main.add(t, forMode: .common)
     }
 
-    /// Cierra la grabación, sube el audio al endpoint de voice y devuelve
-    /// el transcript. Si la grabación duró <0.4s se descarta — es casi
-    /// seguro un tap accidental.
     func stopAndTranscribe() async throws -> String {
-        guard case .recording = state, let rec = recorder, let url = audioURL else {
-            return ""
-        }
+        guard state == .recording, let rec = recorder, let url = audioURL else { return "" }
+
+        // Lee peak dB ANTES de parar — si está muy bajo, sabemos que el
+        // mic grabó silencio y damos un error claro.
+        rec.updateMeters()
+        let peakDb = rec.peakPower(forChannel: 0)
+
         rec.stop()
         timer?.invalidate(); timer = nil
         recorder = nil
         state = .transcribing
 
-        let duration = rec.currentTime  // segundos
+        let duration = rec.currentTime
         defer {
             try? FileManager.default.removeItem(at: url)
             audioURL = nil
-            // Devolvemos la sesión al modo default para no mantener la
-            // ruta de altavoz forzada después del upload.
             try? AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
         }
 
@@ -150,13 +147,28 @@ final class RemyVoiceRecorder: ObservableObject {
         }
 
         let data = try Data(contentsOf: url)
+
+        // Chequeo de peak dB — menor a -50dB significa silencio efectivo.
+        // (0 dB = max, -∞ = silencio total; -50 ya es casi inaudible)
+        if peakDb < -50 {
+            state = .error("El micrófono grabó silencio (peak \(String(format: "%.0f", peakDb)) dB). Si tenés AirPods conectados, desconectalos y reintentá.")
+            throw VoiceError.transcribeFailed("silent")
+        }
+
+        if data.count < 2_000 {
+            state = .error("Audio demasiado chico (\(data.count) bytes). Reintentá.")
+            throw VoiceError.transcribeFailed("tiny file")
+        }
+
         let text = try await uploadForTranscription(audio: data, filename: url.lastPathComponent)
         state = .idle
-        return text
+        let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if clean.isEmpty {
+            state = .error("No te escuché bien. Acercá el iPhone y hablá más fuerte.")
+        }
+        return clean
     }
 
-    /// Cancela sin transcribir — p.ej. el usuario largó el botón pronto
-    /// o cambió de pantalla. Borra el audio y vuelve a `.idle`.
     func cancel() {
         recorder?.stop()
         recorder = nil
@@ -170,17 +182,12 @@ final class RemyVoiceRecorder: ObservableObject {
         seconds = 0
     }
 
-    // MARK: - Upload
-
     private func uploadForTranscription(audio: Data, filename: String) async throws -> String {
-        // `APIClient.baseURL` ya termina en `/api`, así que el path acá
-        // es sólo `/concierge/voice` (sin repetir `/api/`).
         let endpoint = APIClient.baseURL.appendingPathComponent("concierge/voice")
         var req = URLRequest(url: endpoint)
         req.httpMethod = "POST"
         let boundary = "----BPFormBoundary\(UUID().uuidString)"
         req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        req.setValue("audio/mp4", forHTTPHeaderField: "Accept")
 
         var body = Data()
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -193,13 +200,13 @@ final class RemyVoiceRecorder: ObservableObject {
         let (data, resp) = try await URLSession.shared.data(for: req)
         guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
             let bodyText = String(data: data, encoding: .utf8) ?? ""
-            state = .error("No se pudo transcribir el audio. \(bodyText.prefix(140))")
+            state = .error("No se pudo transcribir. \(bodyText.prefix(140))")
             throw VoiceError.transcribeFailed(bodyText)
         }
 
         struct VoiceResponse: Decodable { let text: String }
         let decoded = try JSONDecoder().decode(VoiceResponse.self, from: data)
-        return decoded.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        return decoded.text
     }
 
     enum VoiceError: Error {

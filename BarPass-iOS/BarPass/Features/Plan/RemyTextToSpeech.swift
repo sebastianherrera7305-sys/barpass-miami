@@ -22,6 +22,13 @@ import Foundation
 final class RemyTextToSpeech: NSObject, ObservableObject {
 
     @Published private(set) var isSpeaking: Bool = false
+
+    /// Caracteres ya enviados a `speak()` en esta ráfaga — usado por el
+    /// modo streaming para no re-hablar lo mismo. Reset en `startStream()`.
+    private var charsSpokenInStream: Int = 0
+    /// Flag que indica si estamos en modo streaming (hablando como van
+    /// llegando chunks) vs modo one-shot (`speak(text)` hablando una vez).
+    private var isStreaming: Bool = false
     /// Si el usuario silenció manualmente desde el UI. Persiste a disco
     /// para que la preferencia aguante entre aperturas de la app.
     @Published var isEnabled: Bool {
@@ -94,6 +101,74 @@ final class RemyTextToSpeech: NSObject, ObservableObject {
         if synth.isSpeaking {
             synth.stopSpeaking(at: .immediate)
         }
+        isStreaming = false
+        charsSpokenInStream = 0
+    }
+
+    /// Owner Build 148, 2026-10-28 "necesito una voz inmediata": modo
+    /// streaming — llamalo cada vez que `chat.currentReply` crezca y
+    /// envía las oraciones nuevas a la cola de TTS apenas tenemos
+    /// puntuación. La primera oración puede sonar en <2s de que el
+    /// usuario parara de hablar, en vez de esperar los 5-10s de la
+    /// respuesta completa.
+    func feedStreaming(_ fullTextSoFar: String) {
+        guard isEnabled else { return }
+        if !isStreaming {
+            // Nueva ráfaga: resetear tracking y arrancar la sesión de audio.
+            isStreaming = true
+            charsSpokenInStream = 0
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+            try? AVAudioSession.sharedInstance().setActive(true, options: [])
+        }
+        guard fullTextSoFar.count > charsSpokenInStream else { return }
+
+        // El texto NUEVO desde la última llamada.
+        let newChunk = String(fullTextSoFar.suffix(fullTextSoFar.count - charsSpokenInStream))
+
+        // Buscamos oraciones completas (termina en . ! ? ; o nueva línea).
+        // Si no hay sentencia completa todavía, esperamos al próximo delta.
+        let terminators: Set<Character> = [".", "!", "?", ";", "\n"]
+        guard let lastSentenceEndIdx = newChunk.lastIndex(where: { terminators.contains($0) }) else {
+            return
+        }
+        let completePart = String(newChunk[newChunk.startIndex...lastSentenceEndIdx])
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !completePart.isEmpty else { return }
+
+        charsSpokenInStream += newChunk.distance(from: newChunk.startIndex, to: lastSentenceEndIdx) + 1
+
+        // Idioma + voz
+        let languageCode = Self.detectLanguage(of: completePart)
+        let voice = Self.bestVoice(for: languageCode)
+
+        let utterance = AVSpeechUtterance(string: completePart)
+        utterance.voice = voice
+        utterance.rate = 0.52
+        utterance.pitchMultiplier = 1.0
+        utterance.volume = 1.0
+        // Las sucesivas se encolan automáticamente — el delegate dispara
+        // `didFinish` cuando TODA la cola termina (no por utterance), así
+        // que `onSpeechComplete` espera al último chunk.
+        synth.speak(utterance)
+    }
+
+    /// Fin del stream — habla cualquier colita suelta y marca que el
+    /// próximo `feedStreaming` arranca una nueva ráfaga.
+    func finishStreaming(_ fullText: String) {
+        guard isStreaming else { return }
+        guard isEnabled else { isStreaming = false; return }
+        if fullText.count > charsSpokenInStream {
+            let tail = String(fullText.suffix(fullText.count - charsSpokenInStream))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if !tail.isEmpty {
+                let utterance = AVSpeechUtterance(string: tail)
+                utterance.voice = Self.bestVoice(for: Self.detectLanguage(of: tail))
+                utterance.rate = 0.52
+                synth.speak(utterance)
+                charsSpokenInStream = fullText.count
+            }
+        }
+        isStreaming = false
     }
 
     // MARK: - Voice selection
