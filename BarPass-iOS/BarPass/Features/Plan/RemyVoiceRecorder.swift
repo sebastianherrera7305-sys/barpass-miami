@@ -149,10 +149,19 @@ final class RemyVoiceRecorder: ObservableObject {
             return ""
         }
 
-        let data = try Data(contentsOf: url)
-        let text = try await uploadForTranscription(audio: data, filename: url.lastPathComponent)
-        state = .idle
-        return text
+        do {
+            let data = try Data(contentsOf: url)
+            let text = try await uploadForTranscription(audio: data, filename: url.lastPathComponent)
+            state = .idle
+            return text
+        } catch {
+            // Sin esto, un fallo de red/decode dejaba state en .transcribing
+            // para siempre y el botón del mic quedaba trabado.
+            if case .error = state {} else {
+                state = .error("No se pudo transcribir el audio. Reintentá.")
+            }
+            throw error
+        }
     }
 
     /// Cancela sin transcribir — p.ej. el usuario largó el botón pronto
