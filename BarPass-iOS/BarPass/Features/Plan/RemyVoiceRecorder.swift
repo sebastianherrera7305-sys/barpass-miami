@@ -149,10 +149,19 @@ final class RemyVoiceRecorder: ObservableObject {
             return ""
         }
 
-        let data = try Data(contentsOf: url)
-        let text = try await uploadForTranscription(audio: data, filename: url.lastPathComponent)
-        state = .idle
-        return text
+        do {
+            let data = try Data(contentsOf: url)
+            let text = try await uploadForTranscription(audio: data, filename: url.lastPathComponent)
+            state = .idle
+            return text
+        } catch {
+            // Sin esto un error de red (URLError, decode, lectura) dejaba
+            // el estado en .transcribing y el mic quedaba muerto.
+            if case .transcribing = state {
+                state = .error("No se pudo transcribir el audio. Reintentá.")
+            }
+            throw error
+        }
     }
 
     /// Cancela sin transcribir — p.ej. el usuario largó el botón pronto
@@ -180,7 +189,7 @@ final class RemyVoiceRecorder: ObservableObject {
         req.httpMethod = "POST"
         let boundary = "----BPFormBoundary\(UUID().uuidString)"
         req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        req.setValue("audio/mp4", forHTTPHeaderField: "Accept")
+        req.setValue("application/json", forHTTPHeaderField: "Accept")
 
         var body = Data()
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
