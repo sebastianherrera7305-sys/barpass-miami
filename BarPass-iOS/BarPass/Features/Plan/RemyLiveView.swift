@@ -1323,6 +1323,15 @@ struct RemyLiveView: View {
         }
         .buttonStyle(.plain)
         .disabled(chat.isStreaming)
+        .onAppear {
+            // Auto-corte a los 60s: mismo flujo que soltar el mic a mano.
+            voice.onAutoStop = { text in
+                let clean = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !clean.isEmpty else { return }
+                input = clean
+                submit()
+            }
+        }
     }
 
     private func handleMicTap() async {

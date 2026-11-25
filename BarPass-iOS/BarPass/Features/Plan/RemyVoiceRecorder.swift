@@ -39,6 +39,11 @@ final class RemyVoiceRecorder: ObservableObject {
     /// se corta solo y transcribe lo que haya.
     private static let maxSeconds: Int = 60
 
+    /// Se llama con el transcript cuando el tope de 60s corta la grabación
+    /// solo (nadie tocó el botón, así que no hay caller esperando el valor
+    /// de `stopAndTranscribe`). Sin esto el dictado entero se perdía.
+    var onAutoStop: ((String) -> Void)?
+
     private var recorder: AVAudioRecorder?
     private var timer: Timer?
     private var audioURL: URL?
@@ -115,7 +120,8 @@ final class RemyVoiceRecorder: ObservableObject {
                 guard let self else { return }
                 self.seconds += 1
                 if self.seconds >= Self.maxSeconds {
-                    _ = try? await self.stopAndTranscribe()
+                    let text = (try? await self.stopAndTranscribe()) ?? ""
+                    if !text.isEmpty { self.onAutoStop?(text) }
                 }
             }
         }
